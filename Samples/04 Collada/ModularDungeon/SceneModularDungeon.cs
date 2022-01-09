@@ -139,7 +139,6 @@ namespace Collada.ModularDungeon
 
                 pbLevels.Caption.Text = $"{value.Progress * 100f:0}%";
                 pbLevels.ProgressValue = value.Progress;
-                pbLevels.Visible = true;
 
                 return;
             }
@@ -360,6 +359,8 @@ namespace Collada.ModularDungeon
 
         private void LoadAssets()
         {
+            pbLevels.Visible = true;
+
             var tasks = new[]
             {
                 InitializeDebug(),
@@ -390,8 +391,6 @@ namespace Collada.ModularDungeon
                         AudioManager.Start();
 
                         ChangeToLevel(null);
-
-                        pbLevels.Hide(5000);
                     }
                     catch (AggregateException ex)
                     {
@@ -836,26 +835,33 @@ namespace Collada.ModularDungeon
         }
         private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)
         {
-            if (e.Items.Any())
+            if (!e.Items.Any())
             {
-                var obs = obstacles.Where(o => e.Items.Select(i => i.Item).Contains(o.Item)).ToList();
-                if (obs.Any())
-                {
-                    //Refresh affected obstacles (if any)
-                    obs.ForEach(o =>
-                    {
-                        var obb = OrientedBoundingBoxExtensions.FromPoints(
-                            o.Item.GetPoints(true),
-                            o.Item.Manipulator.FinalTransform);
-
-                        RemoveObstacle(o.Index);
-                        o.Index = AddObstacle(obb);
-                        o.Obstacle = obb;
-                    });
-
-                    PaintObstacles();
-                }
+                return;
             }
+
+            var obs = obstacles
+                .Where(o => e.Items.Select(i => i.Item).Contains(o.Item))
+                .ToList();
+
+            if (!obs.Any())
+            {
+                return;
+            }
+
+            //Refresh affected obstacles (if any)
+            obs.ForEach(o =>
+            {
+                var obb = OrientedBoundingBoxExtensions.FromPoints(
+                    o.Item.GetPoints(true),
+                    o.Item.Manipulator.FinalTransform);
+
+                RemoveObstacle(o.Index);
+                o.Index = AddObstacle(obb);
+                o.Obstacle = obb;
+            });
+
+            PaintObstacles();
         }
 
         private void UpdatePlayerInput()
@@ -924,6 +930,7 @@ namespace Collada.ModularDungeon
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
                 graphDrawer.Visible = !graphDrawer.Visible;
+                connectionDrawer.Visible = graphDrawer.Visible;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F2))
@@ -1453,7 +1460,7 @@ namespace Collada.ModularDungeon
 
                         levelInitialized = true;
 
-                        pbLevels.Visible = false;
+                        pbLevels.Hide(5000);
                     }
                     catch (Exception ex)
                     {
@@ -1738,8 +1745,6 @@ namespace Collada.ModularDungeon
                     var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
                     connectionDrawer.AddPrimitives(connectionColor, cirlinesT);
                 }
-
-                connectionDrawer.Visible = true;
             }
         }
 

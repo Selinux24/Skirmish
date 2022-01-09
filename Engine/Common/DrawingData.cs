@@ -548,25 +548,24 @@ namespace Engine.Common
                 return;
             }
 
-            var taskList = modelContent.Lights.Values
-                .Select(async l =>
+            List<ISceneLight> lights = new List<ISceneLight>();
+
+            await Task.Run(() =>
+            {
+                foreach (var l in modelContent.Lights.Values)
                 {
-                    await Task.Run(async () =>
+                    if (l.LightType == LightContentTypes.Point)
                     {
-                        if (l.LightType == LightContentTypes.Point)
-                        {
-                            drw.lights.Add(l.CreatePointLight());
-                        }
-                        else if (l.LightType == LightContentTypes.Spot)
-                        {
-                            drw.lights.Add(l.CreateSpotLight());
-                        }
+                        lights.Add(l.CreatePointLight());
+                    }
+                    else if (l.LightType == LightContentTypes.Spot)
+                    {
+                        lights.Add(l.CreateSpotLight());
+                    }
+                }
+            });
 
-                        await Task.CompletedTask;
-                    });
-                });
-
-            await Task.WhenAll(taskList);
+            drw.lights.AddRange(lights);
         }
         /// <summary>
         /// Lights collection

@@ -274,20 +274,25 @@ namespace Engine.Animation
             //Refresh the animation offset in the animation palette
             if (UpdateOffset(skinningData)) results |= AnimationPlanIntegrationResults.UpdatedOffset;
 
-            if (atPathEnd)
+            if (!atPathEnd)
             {
-                if (playing != CurrentPath.Playing && CurrentPathIndex >= animationPaths.Count - 1)
-                {
-                    //No paths to do
-                    results |= AnimationPlanIntegrationResults.EndPlan;
+                return results;
+            }
 
-                    AtEnd = true;
-                }
-                else
+            if (CurrentPathIndex >= animationPaths.Count - 1)
+            {
+                //No paths to do
+                if (playing != CurrentPath.Playing)
                 {
-                    //Moves to the next path
-                    if (UpdatePathIndex()) results |= AnimationPlanIntegrationResults.PathChanged;
+                    results |= AnimationPlanIntegrationResults.EndPlan;
                 }
+
+                AtEnd = true;
+            }
+            else
+            {
+                //Moves to the next path
+                if (UpdatePathIndex()) results |= AnimationPlanIntegrationResults.PathChanged;
             }
 
             return results;

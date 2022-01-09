@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -29,15 +30,15 @@ namespace Engine.Modular
         /// <summary>
         /// Asset models dictionary
         /// </summary>
-        private readonly Dictionary<string, ModelInstanced> assets = new Dictionary<string, ModelInstanced>();
+        private readonly ConcurrentDictionary<string, ModelInstanced> assets = new ConcurrentDictionary<string, ModelInstanced>();
         /// <summary>
         /// Object models dictionary
         /// </summary>
-        private readonly Dictionary<string, ModelInstanced> objects = new Dictionary<string, ModelInstanced>();
+        private readonly ConcurrentDictionary<string, ModelInstanced> objects = new ConcurrentDictionary<string, ModelInstanced>();
         /// <summary>
         /// Particle descriptors dictionary
         /// </summary>
-        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptors = new Dictionary<string, ParticleSystemDescription>();
+        private readonly ConcurrentDictionary<string, ParticleSystemDescription> particleDescriptors = new ConcurrentDictionary<string, ParticleSystemDescription>();
         /// <summary>
         /// Particle manager
         /// </summary>
@@ -53,11 +54,11 @@ namespace Engine.Modular
         /// <summary>
         /// Triggers list by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new Dictionary<ModelInstance, List<ModularSceneryTrigger>>();
+        private readonly ConcurrentDictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new ConcurrentDictionary<ModelInstance, List<ModularSceneryTrigger>>();
         /// <summary>
         /// Animations plan dictionary by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new Dictionary<ModelInstance, Dictionary<string, AnimationPlan>>();
+        private readonly ConcurrentDictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new ConcurrentDictionary<ModelInstance, Dictionary<string, AnimationPlan>>();
         /// <summary>
         /// Active trigger callbacks
         /// </summary>
@@ -439,37 +440,41 @@ namespace Engine.Modular
         /// </summary>
         private async Task InitializeParticles(IProgress<LoadResourceProgress> progress = null)
         {
-            if (Levels.ParticleSystems?.Any() == true)
+            if (Levels.ParticleSystems?.Any() != true)
             {
-                string modelId = $"{Name ?? nameof(ModularScenery)}.Particle Manager";
+                progress?.Report(new LoadResourceProgress { Progress = 1 });
 
-                particleManager = await Scene.AddComponentParticleManager(
-                    modelId,
-                    Name,
-                    ParticleManagerDescription.Default(),
-                    SceneObjectUsages.None,
-                    98);
+                return;
+            }
 
-                float total = Levels.ParticleSystems.Count();
-                int current = 0;
+            string modelId = $"{Name ?? nameof(ModularScenery)}.Particle Manager";
 
-                foreach (var item in Levels.ParticleSystems)
+            particleManager = await Scene.AddComponentParticleManager(
+                modelId,
+                Name,
+                ParticleManagerDescription.Default(),
+                SceneObjectUsages.None,
+                98);
+
+            float total = Levels.ParticleSystems.Count();
+            int current = 0;
+
+            foreach (var item in Levels.ParticleSystems)
+            {
+                try
                 {
-                    try
-                    {
-                        string contentPath = item.ContentPath ?? Description.Content.ContentFolder;
+                    string contentPath = item.ContentPath ?? Description.Content.ContentFolder;
 
-                        var pDesc = ParticleSystemDescription.Initialize(item, contentPath);
+                    var pDesc = ParticleSystemDescription.Initialize(item, contentPath);
 
-                        particleDescriptors.Add(item.Name, pDesc);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex.Message}", ex);
-                    }
-
-                    progress?.Report(new LoadResourceProgress { Progress = ++current / total });
+                    particleDescriptors.TryAdd(item.Name, pDesc);
                 }
+                catch (Exception ex)
+                {
+                    Logger.WriteError($"{nameof(ModularScenery)}. Error loading particle system {item.Name}: {ex.Message}", ex);
+                }
+
+                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
         }
         /// <summary>
@@ -507,7 +512,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                assets.Add(assetName, model);
+                assets.TryAdd(assetName, model);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
@@ -591,7 +596,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                objects.Add(assetName, model);
+                objects.TryAdd(assetName, model);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
@@ -615,45 +620,37 @@ namespace Engine.Modular
             }
 
             var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
-            ModelInstanced model = null;
 
-            try
-            {
-                model = await Scene.AddComponentModelInstanced(
-                    modelId,
-                    Name,
-                    new ModelInstancedDescription()
-                    {
-                        CastShadow = Description.CastShadow,
-                        UseAnisotropicFiltering = Description.UseAnisotropic,
-                        Instances = count,
-                        BlendMode = Description.BlendMode,
-                        Content = ContentDescription.FromContentData(modelContent),
-                    },
-                    usage);
-
-                model.Owner = this;
-
-                //Get the object list to process
-                var objList = level.Objects
-                    .Where(o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                    .ToArray();
-
-                //Positioning
-                var transforms = objList.Select(o => GeometryUtil.Transformation(o.Position, o.Rotation, o.Scale));
-                model.SetTransforms(transforms);
-
-                //Lights
-                for (int i = 0; i < model.InstanceCount; i++)
+            var model = await Scene.AddComponentModelInstanced(
+                modelId,
+                Name,
+                new ModelInstancedDescription()
                 {
-                    InitializeObjectLights(objList[i], model[i]);
+                    CastShadow = Description.CastShadow,
+                    UseAnisotropicFiltering = Description.UseAnisotropic,
+                    Instances = count,
+                    BlendMode = Description.BlendMode,
+                    Content = ContentDescription.FromContentData(modelContent),
+                },
+                usage);
 
-                    InitializeObjectAnimations(objList[i], model[i]);
-                }
-            }
-            catch (Exception ex)
+            model.Owner = this;
+
+            //Get the object list to process
+            var objList = level.Objects
+                .Where(o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                .ToArray();
+
+            //Positioning
+            var transforms = objList.Select(o => GeometryUtil.Transformation(o.Position, o.Rotation, o.Scale));
+            model.SetTransforms(transforms);
+
+            //Lights
+            for (int i = 0; i < model.InstanceCount; i++)
             {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {Name}: {ex.Message}", ex);
+                InitializeObjectLights(objList[i], model[i]);
+
+                InitializeObjectAnimations(objList[i], model[i]);
             }
 
             return model;
@@ -747,7 +744,7 @@ namespace Engine.Modular
 
             if (animationDict.Count > 0)
             {
-                animations.Add(instance, animationDict);
+                animations.TryAdd(instance, animationDict);
 
                 var defaultPlan = obj.AnimationPlans.FirstOrDefault(a => a.Default)?.Name ?? "default";
 
@@ -790,7 +787,7 @@ namespace Engine.Modular
 
             if (instanceTriggers.Count > 0)
             {
-                triggers.Add(instance, instanceTriggers);
+                triggers.TryAdd(instance, instanceTriggers);
             }
         }
         /// <summary>
@@ -800,39 +797,56 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private void InitializeEntities(Level level, IProgress<LoadResourceProgress> progress = null)
         {
+            if (level?.Objects?.Any() != true)
+            {
+                progress?.Report(new LoadResourceProgress { Progress = 1 });
+
+                return;
+            }
+
             float total = level.Objects.Count();
             int current = 0;
 
             foreach (var obj in level.Objects)
             {
-                ModelInstance instance;
-
-                if (string.IsNullOrEmpty(obj.AssetName))
+                try
                 {
-                    // Adding object with referenced geometry
-                    instance = FindAssetModelInstance(obj.LevelAssetId, obj.MapAssetId);
+                    ModelInstance instance;
+
+                    if (string.IsNullOrEmpty(obj.AssetName))
+                    {
+                        // Adding object with referenced geometry
+                        instance = FindAssetModelInstance(obj.LevelAssetId, obj.MapAssetId);
+                    }
+                    else
+                    {
+                        // Adding object with it's own geometry
+                        instance = FindObjectInstance(obj.AssetName, obj.Id);
+                    }
+
+                    if (instance != null)
+                    {
+                        //Find emitters
+                        var emitters = particleManager?.ParticleSystems
+                            .Where(p => p.Emitter.Instance == instance)
+                            .Select(p => p.Emitter)
+                            .ToArray();
+
+                        //Find first state
+                        var defaultState = obj.States?.FirstOrDefault()?.Name;
+
+                        entities.Add(new ModularSceneryItem(obj, instance, emitters, defaultState));
+                    }
+
+                    progress?.Report(new LoadResourceProgress { Progress = ++current / total });
                 }
-                else
+                catch (Exception ex)
                 {
-                    // Adding object with it's own geometry
-                    instance = FindObjectInstance(obj.AssetName, obj.Id);
+                    Logger.WriteError(this, $"{obj.Id}: {obj.AssetName}/{obj.LevelAssetId}.{obj.MapAssetId}");
+                    Logger.WriteError(this, ex.ToString(), ex);
+
+                    throw;
                 }
-
-                if (instance != null)
-                {
-                    //Find emitters
-                    var emitters = particleManager?.ParticleSystems
-                        .Where(p => p.Emitter.Instance == instance)
-                        .Select(p => p.Emitter)
-                        .ToArray();
-
-                    //Find first state
-                    var defaultState = obj.States?.FirstOrDefault()?.Name;
-
-                    entities.Add(new ModularSceneryItem(obj, instance, emitters, defaultState));
-                }
-
-                progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
         }
         /// <summary>
@@ -988,17 +1002,24 @@ namespace Engine.Modular
         /// </summary>
         private void UpdateTriggers()
         {
+            if (!activeCallbacks.Any())
+            {
+                return;
+            }
+
             activeCallbacks.ForEach(c =>
             {
-                if (!c.Waiting)
+                if (c.Waiting)
                 {
-                    TriggerEnd?.Invoke(this, new ModularSceneryTriggerEventArgs()
-                    {
-                        StarterTrigger = c.Trigger,
-                        StarterItem = c.Item,
-                        Items = c.Items,
-                    });
+                    return;
                 }
+
+                TriggerEnd?.Invoke(this, new ModularSceneryTriggerEventArgs()
+                {
+                    StarterTrigger = c.Trigger,
+                    StarterItem = c.Item,
+                    Items = c.Items,
+                });
             });
 
             activeCallbacks.RemoveAll(c => !c.Waiting);
@@ -1615,7 +1636,7 @@ namespace Engine.Modular
             /// </summary>
             /// <param name="assetConfiguration">Configuration</param>
             /// <param name="assets">Asset list</param>
-            public void Build(Persistence.AssetMap assetConfiguration, Dictionary<string, ModelInstanced> assets)
+            public void Build(Persistence.AssetMap assetConfiguration, ConcurrentDictionary<string, ModelInstanced> assets)
             {
                 //Fill per complex asset bounding boxes
                 Fill(assets);
@@ -1640,7 +1661,7 @@ namespace Engine.Modular
             /// Fills the full bounding volume of the assets in the map
             /// </summary>
             /// <param name="assets">Asset list</param>
-            private void Fill(Dictionary<string, ModelInstanced> assets)
+            private void Fill(ConcurrentDictionary<string, ModelInstanced> assets)
             {
                 for (int i = 0; i < assetMap.Count; i++)
                 {

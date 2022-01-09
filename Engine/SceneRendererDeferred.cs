@@ -219,6 +219,9 @@ namespace Engine
             //Shadow mapping
             DoShadowMapping(gameTime);
 
+            //Binds the result target
+            SetTarget(Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+
             var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
             bool anyDeferred = deferredEnabledComponents.Any();
             var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
@@ -264,12 +267,13 @@ namespace Engine
                 DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
             }
 
+            //Binds the result target
+            SetTarget(Targets.UI, true, Color.Transparent, true, true);
+
             //Render to screen deferred disabled components
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
-                //Binds the result target
-                SetTarget(Targets.UI, true, Color.Transparent, false, false);
                 //UI render
                 DoForward(uiComponents);
                 //UI post-processing

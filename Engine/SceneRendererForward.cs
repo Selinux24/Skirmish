@@ -78,22 +78,24 @@ namespace Engine
             //Shadow mapping
             DoShadowMapping(gameTime);
 
+            //Binds the result target
+            SetTarget(Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
             if (objectComponents.Any())
             {
-                //Binds the result target
-                SetTarget(Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
                 //Render objects
                 DoRender(Scene, objectComponents);
                 //Post-processing
                 DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
             }
 
+            //Binds the UI target
+            SetTarget(Targets.UI, true, Color.Transparent, true, true);
+
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
-                //Binds the UI target
-                SetTarget(Targets.UI, true, Color.Transparent, true, true);
                 //Render UI
                 DoRender(Scene, uiComponents);
                 //UI post-processing

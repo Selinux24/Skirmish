@@ -274,8 +274,10 @@ namespace Engine.Common
             sceneUITarget = new RenderTarget(scene.Game, targetFormat, false, 1);
             sceneResultsTarget = new RenderTarget(scene.Game, targetFormat, false, 1);
 
-            postProcessingTarget1 = new RenderTarget(scene.Game, targetFormat, false, 1);
-            postProcessingTarget2 = new RenderTarget(scene.Game, targetFormat, false, 1);
+            var ppFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
+
+            postProcessingTarget1 = new RenderTarget(scene.Game, ppFormat, false, 1);
+            postProcessingTarget2 = new RenderTarget(scene.Game, ppFormat, false, 1);
             processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.EffectPostProcess);
         }
         /// <summary>
@@ -1205,7 +1207,7 @@ namespace Engine.Common
 
             var graphics = Scene.Game.Graphics;
 
-            graphics.SetRasterizerDefault();
+            graphics.SetRasterizerCullNone();
             graphics.SetDepthStencilNone();
             graphics.SetBlendDefault();
 
@@ -1215,7 +1217,7 @@ namespace Engine.Common
                 TogglePostProcessingTargets();
 
                 //Use the next buffer as render target
-                BindPostProcessingTarget(true, Color.Transparent, true, true);
+                BindPostProcessingTarget(true, Color.Transparent, false, false);
 
                 processingDrawer.UpdateEffectParameters(Scene, gameTime.TotalSeconds, texture, postEffect.Effect, postEffect.Parameters);
                 processingDrawer.Bind();
@@ -1226,7 +1228,7 @@ namespace Engine.Common
             }
 
             //Set the result render target
-            SetTarget(target, true, Color.Transparent, true, true);
+            SetTarget(target, true, Color.Transparent, false, false);
 
             //Draw the result
             processingDrawer.UpdateEffectEmpty(Scene, texture);
@@ -1264,7 +1266,7 @@ namespace Engine.Common
         /// <param name="resultTarget">Result target</param>
         protected virtual void CombineTargets(Targets target1, Targets target2, Targets resultTarget)
         {
-            SetTarget(resultTarget, true, Color.Transparent, true, true);
+            SetTarget(resultTarget, true, Color.Transparent, false, false);
 
             var graphics = Scene.Game.Graphics;
 
@@ -1285,7 +1287,7 @@ namespace Engine.Common
         /// <param name="target">Target</param>
         protected virtual void DrawToScreen(Targets target)
         {
-            SetTarget(Targets.Screen, true, Color.Transparent, true, true);
+            SetTarget(Targets.Screen, true, Color.Transparent, false, false);
 
             var graphics = Scene.Game.Graphics;
 
