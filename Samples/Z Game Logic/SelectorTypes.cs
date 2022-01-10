@@ -1,7 +1,7 @@
 ﻿
 namespace GameLogic
 {
-    enum SelectorTypes
+    public enum SelectorTypes
     {
         Default,
         Goto,

@@ -84,7 +84,7 @@ namespace GameLogic
 
         private bool gameReady = false;
 
-        private SelectorTypes currentSelector = SelectorTypes.Default;
+        public SelectorTypes CurrentSelector { get; set; } = SelectorTypes.Default;
 
         #region Keys
 
@@ -608,7 +608,7 @@ namespace GameLogic
         }
         private void SetSelector(SelectorTypes selector)
         {
-            currentSelector = selector;
+            CurrentSelector = selector;
         }
         public override void GameGraphicsResized()
         {
@@ -893,8 +893,6 @@ namespace GameLogic
             {
                 //Run 3d actions
                 var passiveModel = soldierModels[passive];
-                var activeController = soldierControllers[active];
-
                 var activeModel = soldierModels[active];
 
                 Vector3 dir = Vector3.Normalize(activeModel.Manipulator.Position - passiveModel.Manipulator.Position);
