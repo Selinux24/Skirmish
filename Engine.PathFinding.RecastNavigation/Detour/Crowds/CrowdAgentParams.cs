@@ -11,6 +11,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         public float Radius { get; set; }
         /// <summary>
+        /// Slow down agent radius factor
+        /// </summary>
+        /// <remarks>Multiplied by Readius</remarks>
+        public float SlowDownRadiusFactor { get; set; } = 2;
+        /// <summary>
         /// Agent height.
         /// </summary>
         public float Height { get; set; }

@@ -372,11 +372,11 @@ namespace Engine.Animation
         /// <summary>
         /// Start
         /// </summary>
-        /// <param name="paths">Animation plan</param>
+        /// <param name="plan">Animation plan</param>
         /// <param name="time">At time</param>
-        public void Start(AnimationPlan paths, float time = 0)
+        public void Start(AnimationPlan plan, float time = 0)
         {
-            AppendPlan(paths);
+            AppendPlan(plan);
 
             Start(time);
         }

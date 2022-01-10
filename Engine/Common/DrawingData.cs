@@ -548,7 +548,7 @@ namespace Engine.Common
                 return;
             }
 
-            List<ISceneLight> lights = new List<ISceneLight>();
+            List<ISceneLight> modelLights = new List<ISceneLight>();
 
             await Task.Run(() =>
             {
@@ -556,16 +556,16 @@ namespace Engine.Common
                 {
                     if (l.LightType == LightContentTypes.Point)
                     {
-                        lights.Add(l.CreatePointLight());
+                        modelLights.Add(l.CreatePointLight());
                     }
                     else if (l.LightType == LightContentTypes.Spot)
                     {
-                        lights.Add(l.CreateSpotLight());
+                        modelLights.Add(l.CreateSpotLight());
                     }
                 }
             });
 
-            drw.lights.AddRange(lights);
+            drw.lights.AddRange(modelLights);
         }
         /// <summary>
         /// Lights collection

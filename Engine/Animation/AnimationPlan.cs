@@ -75,6 +75,47 @@ namespace Engine.Animation
         }
 
         /// <summary>
+        /// Creates a new animation plan with an unique clip
+        /// </summary>
+        /// <param name="clipName">Clip name</param>
+        /// <param name="timeDelta">Time delta</param>
+        /// <returns>Returns a new animation plan</returns>
+        public static AnimationPlan Create(string clipName, float timeDelta = 1f)
+        {
+            AnimationPath path = new AnimationPath();
+            path.Add(clipName, timeDelta);
+
+            return new AnimationPlan(path);
+        }
+        /// <summary>
+        /// Creates a new animation plan with an unique clip and n repeats
+        /// </summary>
+        /// <param name="clipName">Clip name</param>
+        /// <param name="repeats">Number of repeats</param>
+        /// <param name="timeDelta">Time delta</param>
+        /// <returns>Returns a new animation plan</returns>
+        public static AnimationPlan CreateRepeat(string clipName, int repeats, float timeDelta = 1f)
+        {
+            AnimationPath path = new AnimationPath();
+            path.AddRepeat(clipName, repeats, timeDelta);
+
+            return new AnimationPlan(path);
+        }
+        /// <summary>
+        /// Creates a new animation plan with an unique looping clip
+        /// </summary>
+        /// <param name="clipName">Clip name</param>
+        /// <param name="timeDelta">Time delta</param>
+        /// <returns>Returns a new animation plan</returns>
+        public static AnimationPlan CreateLoop(string clipName, float timeDelta = 1f)
+        {
+            AnimationPath path = new AnimationPath();
+            path.AddLoop(clipName, timeDelta);
+
+            return new AnimationPlan(path);
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public AnimationPlan() : base()

@@ -563,7 +563,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             if (!m_navquery.IsValidPolyRef(agentRef, m_filters[ag.Params.QueryFilterTypeIndex]))
             {
                 // Current location is not valid, try to reposition.
-                // TODO: this can snap agents, how to handle that?
+                // FIX: this can snap agents, how to handle that?
                 m_navquery.FindNearestPoly(
                     ag.NPos, m_agentPlacementHalfExtents, m_filters[ag.Params.QueryFilterTypeIndex],
                     out agentRef, out Vector3 nearest);
@@ -1124,7 +1124,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
 
                 // Calculate speed scale, which tells the agent to slowdown at the end of the path.
-                float slowDownRadius = ag.Params.Radius * 2; // TODO: make less hacky.
+                float slowDownRadius = ag.Params.Radius * ag.Params.SlowDownRadiusFactor;
                 float speedScale = GetDistanceToGoal(ag, slowDownRadius) / slowDownRadius;
 
                 ag.DesiredSpeed = ag.Params.MaxSpeed;

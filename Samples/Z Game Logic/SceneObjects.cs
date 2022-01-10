@@ -42,7 +42,20 @@ namespace GameLogic
         private readonly GridAgentType soldierAgent = null;
         private readonly Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
         private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
-        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private AnimationPlan soldierCrawl;
+        private AnimationPlan soldierWalk;
+        private AnimationPlan soldierRun;
+        private AnimationPlan soldierAssault;
+        private AnimationPlan soldierStand;
+        private AnimationPlan soldierDefendAssault;
+        private AnimationPlan soldierRandomFire;
+        private AnimationPlan soldierReload;
+        private AnimationPlan soldierUseItem;
+        private AnimationPlan soldierMoraleRestored;
+        private readonly float soldierCrawlSpeed = 1f;
+        private readonly float soldierWalkSpeed = 4.5f;
+        private readonly float soldierRunSpeed = 9f;
+        private readonly float soldierAssaultSpeed = 6f;
 
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private readonly Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
@@ -70,6 +83,8 @@ namespace GameLogic
         }
 
         private bool gameReady = false;
+
+        private SelectorTypes currentSelector = SelectorTypes.Default;
 
         #region Keys
 
@@ -519,15 +534,15 @@ namespace GameLogic
                 {
                     if (CurrentAction.Selector == Selectors.Goto)
                     {
-                        //TODO: Show goto selector
                         selectorDone = picked;
+                        SetSelector(SelectorTypes.Goto);
                     }
                     else if (CurrentAction.Selector == Selectors.Area)
                     {
-                        //TODO: Show area selector
                         area = new Area();
 
                         selectorDone = picked;
+                        SetSelector(SelectorTypes.Area);
                     }
                 }
 
@@ -591,6 +606,10 @@ namespace GameLogic
                 Communications(skirmishGame.CurrentSoldier);
             }
         }
+        private void SetSelector(SelectorTypes selector)
+        {
+            currentSelector = selector;
+        }
         public override void GameGraphicsResized()
         {
             UpdateLayout();
@@ -622,16 +641,16 @@ namespace GameLogic
 
         private void InitializeAnimations()
         {
-            AddAnimation("idle", "idle");
-            AddAnimation("stand", "stand");
-            AddAnimation("walk", "walk");
-            AddAnimation("run", "run");
-        }
-        private void AddAnimation(string clipName, string animationName)
-        {
-            AnimationPath p = new AnimationPath();
-            p.AddLoop(clipName);
-            animations.Add(animationName, new AnimationPlan(p));
+            soldierCrawl = AnimationPlan.CreateLoop("crawl");
+            soldierWalk = AnimationPlan.CreateLoop("walk");
+            soldierRun = AnimationPlan.CreateLoop("run");
+            soldierAssault = AnimationPlan.CreateLoop("assault");
+            soldierStand = AnimationPlan.CreateLoop("stand");
+            soldierDefendAssault = AnimationPlan.CreateLoop("defendAssault");
+            soldierRandomFire = AnimationPlan.CreateLoop("randomFire");
+            soldierReload = AnimationPlan.Create("reload");
+            soldierUseItem = AnimationPlan.Create("useItem");
+            soldierMoraleRestored = AnimationPlan.Create("moraleRestored");
         }
         private void InitializePositions()
         {
@@ -653,8 +672,7 @@ namespace GameLogic
                     var soldier = troops[instanceIndex++];
 
                     soldier.TextureIndex = teamIndex;
-                    soldier.AnimationController.Start(animations["stand"], soldierIndex);
-                    soldier.AnimationController.TimeDelta = 0.20f;
+                    soldier.AnimationController.Start(soldierStand, soldierIndex);
 
                     float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
                     float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
@@ -693,7 +711,7 @@ namespace GameLogic
             {
                 if (item.Value == instance)
                 {
-                    soldierModels[item.Key].AnimationController.AppendPlan(animations["stand"]);
+                    soldierModels[item.Key].AnimationController.ReplacePlan(soldierStand);
                 }
             }
         }
@@ -780,7 +798,6 @@ namespace GameLogic
                 {
                     foreach (var action in actions.Select(a => a.Action))
                     {
-                        //TODO: Need of standar method
                         if (action == Actions.FindCover)
                         {
                             Vector3 point = GetRandomPoint();
@@ -851,65 +868,21 @@ namespace GameLogic
         {
             if (ActionsManager.Move(active, active.CurrentMovingCapacity))
             {
-                var model = soldierModels[active];
-                var controller = soldierControllers[active];
-
-                //Run 3d actions
-                var path = SetPath(soldierAgent, model.Manipulator.Position, destination);
-                if (path != null)
-                {
-                    //Set move animation clip
-                    model.AnimationController.ReplacePlan(animations["walk"]);
-
-                    //Folow
-                    controller.Follow(path);
-                    controller.MaximumSpeed = 1.4f;
-
-                    GoToSoldier(active);
-                }
-
-                RefreshActions();
+                MoveToAction(active, destination, soldierWalkSpeed, soldierWalk);
             }
         }
         protected void Crawl(Soldier active, Vector3 destination)
         {
             if (ActionsManager.Crawl(active, active.CurrentMovingCapacity))
             {
-                //Run 3d actions
-                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
-                if (path != null)
-                {
-                    //TODO: Set crawl animation clip
-                    soldierControllers[active].Follow(path);
-
-                    GoToSoldier(active);
-                }
-
-                RefreshActions();
+                MoveToAction(active, destination, soldierCrawlSpeed, soldierCrawl);
             }
         }
         protected void Run(Soldier active, Vector3 destination)
         {
             if (ActionsManager.Run(active, active.CurrentMovingCapacity))
             {
-                var model = soldierModels[active];
-                var controller = soldierControllers[active];
-
-                //Run 3d actions
-                var path = SetPath(soldierAgent, model.Manipulator.Position, destination);
-                if (path != null)
-                {
-                    //Set move animation clip
-                    model.AnimationController.ReplacePlan(animations["run"]);
-
-                    //Folow
-                    controller.Follow(path);
-                    controller.MaximumSpeed = 4.0f;
-
-                    GoToSoldier(active);
-                }
-
-                RefreshActions();
+                MoveToAction(active, destination, soldierRunSpeed, soldierRun);
             }
         }
         protected void Assault(Soldier active, Soldier passive)
@@ -919,130 +892,84 @@ namespace GameLogic
             if (ActionsManager.Assault(active, passive, active.CurrentMovingCapacity))
             {
                 //Run 3d actions
-                Manipulator3D passiveMan = soldierModels[passive].Manipulator;
-                Manipulator3D activeMan = soldierModels[active].Manipulator;
+                var passiveModel = soldierModels[passive];
+                var activeController = soldierControllers[active];
 
-                Vector3 dir = Vector3.Normalize(activeMan.Position - passiveMan.Position);
-                Vector3 destination = passiveMan.Position + (dir * 3f);
+                var activeModel = soldierModels[active];
 
-                var path = SetPath(soldierAgent, activeMan.Position, destination);
-                if (path != null)
-                {
-                    //TODO: Set assault animation clip
-                    soldierControllers[active].Follow(path);
+                Vector3 dir = Vector3.Normalize(activeModel.Manipulator.Position - passiveModel.Manipulator.Position);
+                Vector3 destination = passiveModel.Manipulator.Position + (dir * 3f);
 
-                    GoToSoldier(active);
-                }
-
-                RefreshActions();
+                MoveToAction(active, destination, soldierAssaultSpeed, soldierAssault);
+                InPlaceAction(passive, soldierDefendAssault);
             }
         }
         protected void CoveringFire(Soldier active, Weapon weapon, Area area)
         {
             if (ActionsManager.CoveringFire(active, weapon, area, active.CurrentMovingCapacity))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set covering fire animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierRandomFire);
             }
         }
         protected void Reload(Soldier active, Weapon weapon)
         {
             if (ActionsManager.Reload(active, weapon, active.CurrentMovingCapacity))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set reload animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierReload);
             }
         }
         protected void Repair(Soldier active, Weapon weapon)
         {
             if (ActionsManager.Repair(active, weapon, active.CurrentMovingCapacity))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set repair animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierUseItem);
             }
         }
         protected void Inventory(Soldier active)
         {
             if (ActionsManager.Inventory(active, active.CurrentMovingCapacity))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set inventory animation clip
+                InPlaceAction(active, soldierUseItem);
 
-                //TODO: Show inventory screen
-
-                RefreshActions();
+                //Show inventory screen
+                ShowInventory(active);
             }
         }
         protected void UseMovementItem(Soldier active)
         {
             if (ActionsManager.UseMovementItem(active, active.CurrentItem, active.CurrentMovingCapacity))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set use item animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierUseItem);
             }
         }
         protected void Communications(Soldier active)
         {
             if (ActionsManager.Communications(active))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set use item animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierUseItem);
             }
         }
         protected void FindCover(Soldier active, Vector3 destination)
         {
             if (ActionsManager.FindCover(active))
             {
-                //Run 3d actions
-                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
-                if (path != null)
-                {
-                    //TODO: Set run animation clip
-                    soldierControllers[active].Follow(path);
-
-                    GoToSoldier(active);
-                }
-
-                RefreshActions();
+                MoveToAction(active, destination, soldierRunSpeed, soldierRun);
             }
         }
         protected void RunAway(Soldier active, Vector3 destination)
         {
             if (ActionsManager.RunAway(active))
             {
-                //Run 3d actions
-                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
-                if (path != null)
-                {
-                    //TODO: Set run animation clip
-                    soldierControllers[active].Follow(path);
-
-                    GoToSoldier(active);
-                }
-
-                RefreshActions();
+                MoveToAction(active, destination, soldierRunSpeed, soldierRun);
             }
         }
         protected void Shoot(Soldier active, Weapon weapon, Soldier passive)
         {
-            Manipulator3D passiveMan = soldierModels[passive].Manipulator;
-            Manipulator3D activeMan = soldierModels[active].Manipulator;
+            var passiveModel = soldierModels[passive];
+            var activeModel = soldierModels[active];
+
+            Manipulator3D passiveMan = passiveModel.Manipulator;
+            Manipulator3D activeMan = activeModel.Manipulator;
 
             float distance = Vector3.Distance(passiveMan.Position, activeMan.Position);
 
@@ -1050,7 +977,8 @@ namespace GameLogic
             {
                 //Run 3d actions
 
-                //TODO: Set shooting animation clip for active
+                //Set shooting animation clip for active
+                activeModel.AnimationController.ReplacePlan(soldierRandomFire);
 
                 if (passive.CurrentHealth == HealthStates.Disabled)
                 {
@@ -1070,44 +998,28 @@ namespace GameLogic
         {
             if (ActionsManager.SupressingFire(active, weapon, area, active.CurrentActionPoints))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set supressing fire animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierRandomFire);
             }
         }
         protected void Support(Soldier active)
         {
             if (ActionsManager.Support(active))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set support animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierReload);
             }
         }
         protected void UseShootingItem(Soldier active)
         {
             if (ActionsManager.UseShootingItem(active, active.CurrentItem, active.CurrentActionPoints))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set use item animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierUseItem);
             }
         }
         protected void FirstAid(Soldier active, Soldier passive)
         {
             if (ActionsManager.FirstAid(active, passive, active.CurrentActionPoints))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set support animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierUseItem);
             }
         }
         protected void LeaveCombat(Soldier active, Vector3 destination)
@@ -1117,51 +1029,61 @@ namespace GameLogic
                 Melee melee = skirmishGame.GetMelee(active);
                 melee.RemoveFighter(active);
 
-                //Run 3d actions
-                var path = SetPath(soldierAgent, soldierModels[active].Manipulator.Position, destination);
-                if (path != null)
-                {
-                    //Set run animation clip
-                    soldierControllers[active].Follow(path);
-
-                    GoToSoldier(active);
-                }
-
-                RefreshActions();
+                MoveToAction(active, destination, soldierRunSpeed, soldierRun);
             }
         }
         protected void UseMeleeItem(Soldier active)
         {
             if (ActionsManager.UseMeleeItem(active, active.CurrentItem))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set use item animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierUseItem);
             }
         }
         protected void TakeControl(Soldier active)
         {
             if (ActionsManager.TakeControl(active))
             {
-                //Run 3d actions
-
-                //TODO: Set take control animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierMoraleRestored);
             }
         }
         protected void UseMoraleItem(Soldier active)
         {
             if (ActionsManager.UseMoraleItem(active, active.CurrentItem))
             {
-                //Run 3d actions
-                //...
-                //TODO: Set use item animation clip
-
-                RefreshActions();
+                InPlaceAction(active, soldierUseItem);
             }
+        }
+
+        private void MoveToAction(Soldier active, Vector3 destination, float speed, AnimationPlan animation)
+        {
+            var model = soldierModels[active];
+            var controller = soldierControllers[active];
+
+            //Run 3d actions
+            var path = SetPath(soldierAgent, model.Manipulator.Position, destination);
+            if (path != null)
+            {
+                //Set animation clip
+                model.AnimationController.ReplacePlan(animation);
+
+                //Folow
+                controller.Follow(path);
+                controller.MaximumSpeed = speed;
+
+                GoToSoldier(active);
+            }
+
+            RefreshActions();
+        }
+        private void InPlaceAction(Soldier active, AnimationPlan animation)
+        {
+            //Run 3d actions
+            var activeModel = soldierModels[active];
+
+            //Set animation clip
+            activeModel.AnimationController.ReplacePlan(animation);
+
+            RefreshActions();
         }
 
         private IControllerPath SetPath(GridAgentType agentType, Vector3 origin, Vector3 destination)
@@ -1212,6 +1134,11 @@ namespace GameLogic
         private Vector3 GetRandomPoint()
         {
             return Vector3.Zero;
+        }
+
+        private void ShowInventory(Soldier active)
+        {
+
         }
     }
 }

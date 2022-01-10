@@ -26,92 +26,41 @@
         "name": "run",
         "from": 28,
         "to": 40
-      }
-    ],
-    "transitions": [
-      {
-        "clipFrom": "stand",
-        "clipTo": "idle1",
-        "startFrom": 0,
-        "startTo": 0
       },
       {
-        "clipFrom": "idle1",
-        "clipTo": "stand",
-        "startFrom": 0,
-        "startTo": 0
+        "name": "crawl",
+        "from": 17,
+        "to": 25
       },
       {
-        "clipFrom": "stand",
-        "clipTo": "idle2",
-        "startFrom": 0,
-        "startTo": 0
+        "name": "assault",
+        "from": 28,
+        "to": 40
       },
       {
-        "clipFrom": "idle2",
-        "clipTo": "stand",
-        "startFrom": 0,
-        "startTo": 0
+        "name": "defendAssault",
+        "from": 1,
+        "to": 5
       },
       {
-        "clipFrom": "idle1",
-        "clipTo": "walk",
-        "startFrom": 0,
-        "startTo": 0
+        "name": "randomFire",
+        "from": 1,
+        "to": 5
       },
       {
-        "clipFrom": "idle1",
-        "clipTo": "run",
-        "startFrom": 0,
-        "startTo": 0
+        "name": "reload",
+        "from": 1,
+        "to": 5
       },
       {
-        "clipFrom": "idle2",
-        "clipTo": "walk",
-        "startFrom": 0,
-        "startTo": 0
+        "name": "useItem",
+        "from": 1,
+        "to": 5
       },
       {
-        "clipFrom": "idle2",
-        "clipTo": "run",
-        "startFrom": 0,
-        "startTo": 0
-      },
-      {
-        "clipFrom": "walk",
-        "clipTo": "idle1",
-        "startFrom": 0,
-        "startTo": 0
-      },
-      {
-        "clipFrom": "walk",
-        "clipTo": "idle2",
-        "startFrom": 0,
-        "startTo": 0
-      },
-      {
-        "clipFrom": "walk",
-        "clipTo": "run",
-        "startFrom": 0,
-        "startTo": 0
-      },
-      {
-        "clipFrom": "run",
-        "clipTo": "idle1",
-        "startFrom": 0,
-        "startTo": 0
-      },
-      {
-        "clipFrom": "run",
-        "clipTo": "idle2",
-        "startFrom": 0,
-        "startTo": 0
-      },
-      {
-        "clipFrom": "run",
-        "clipTo": "walk",
-        "startFrom": 0,
-        "startTo": 0
+        "name": "moraleRestored",
+        "from": 1,
+        "to": 5
       }
     ]
   }

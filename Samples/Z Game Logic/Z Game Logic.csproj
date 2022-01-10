@@ -148,6 +148,7 @@
     <Compile Include="Rules\Weapon.cs" />
     <Compile Include="Rules\WeaponTypes.cs" />
     <Compile Include="SceneObjects.cs" />
+    <Compile Include="SelectorTypes.cs" />
     <Content Include="Resources3D\cursor.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
