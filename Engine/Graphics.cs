@@ -620,14 +620,14 @@ namespace Engine
 
             using (var backBuffer = Resource.FromSwapChain<Resource>(swapChain, 0))
             {
-                renderTargetView = new EngineRenderTargetView(new RenderTargetView1(device, backBuffer));
+                renderTargetView = new EngineRenderTargetView("DefaultRenderTarget", new RenderTargetView1(device, backBuffer));
             }
 
             #endregion
 
             #region Depth Stencil Buffer and View
 
-            CreateDepthStencil(DepthFormat, width, height, true, out depthStencilView);
+            depthStencilView = CreateDepthStencil("DefaultDepthStencil", DepthFormat, width, height, true);
 
             #endregion
 
@@ -808,7 +808,7 @@ namespace Engine
         /// Set render targets
         /// </summary>
         /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the target must be cleared</param>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="depthMap">Depth map</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
@@ -822,8 +822,8 @@ namespace Engine
             }
 
             var dsv = depthMap?.GetDepthStencil();
-            var rtv = renderTargets?.GetRenderTargets();
-            var rtvCount = renderTargets != null ? renderTargets.Count : 0;
+            var rtv = renderTargets?.GetRenderTargets()?.ToArray();
+            var rtvCount = renderTargets?.Count ?? 0;
 
             deviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
 
@@ -837,17 +837,7 @@ namespace Engine
                 }
             }
 
-            if ((clearDepth || clearStencil) && dsv != null)
-            {
-                DepthStencilClearFlags clearDSFlags = 0;
-                if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
-                if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
-
-                deviceContext.ClearDepthStencilView(
-                    dsv,
-                    clearDSFlags,
-                    1.0f, 0);
-            }
+            ClearDepthStencilBuffer(depthMap, clearDepth, clearStencil);
         }
 
         /// <summary>
@@ -1256,32 +1246,34 @@ namespace Engine
         /// <summary>
         /// Creates a new blend state
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="blendFactor">Blend factor</param>
         /// <param name="sampleMask">Sample mask</param>
         /// <returns>Returns a new blend state</returns>
-        internal EngineBlendState CreateBlendState(BlendStateDescription1 description, Color4? blendFactor, int sampleMask)
+        internal EngineBlendState CreateBlendState(string name, BlendStateDescription1 description, Color4? blendFactor, int sampleMask)
         {
-            return new EngineBlendState(new BlendState1(device, description), blendFactor, sampleMask);
+            return new EngineBlendState(name, new BlendState1(device, description), blendFactor, sampleMask);
         }
         /// <summary>
         /// Creates a new rasterizer state
         /// </summary>
         /// <param name="description">Description</param>
         /// <returns>Returns a new rasterizer state</returns>
-        internal EngineRasterizerState CreateRasterizerState(RasterizerStateDescription2 description)
+        internal EngineRasterizerState CreateRasterizerState(string name, RasterizerStateDescription2 description)
         {
-            return new EngineRasterizerState(new RasterizerState2(device, description));
+            return new EngineRasterizerState(name, new RasterizerState2(device, description));
         }
         /// <summary>
         /// Creates a new depth stencil state
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="description">Description</param>
         /// <param name="stencilRef">Stencil reference</param>
         /// <returns>Returns a new depth stencil state</returns>
-        internal EngineDepthStencilState CreateDepthStencilState(DepthStencilStateDescription description, int stencilRef)
+        internal EngineDepthStencilState CreateDepthStencilState(string name, DepthStencilStateDescription description, int stencilRef)
         {
-            return new EngineDepthStencilState(new DepthStencilState(device, description), stencilRef);
+            return new EngineDepthStencilState(name, new DepthStencilState(device, description), stencilRef);
         }
 
         /// <summary>
@@ -1401,7 +1393,10 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new Buffer(device, description);
+            return new Buffer(device, description)
+            {
+                DebugName = name,
+            };
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -1436,19 +1431,26 @@ namespace Engine
                     StructureByteStride = 0,
                 };
 
-                return new Buffer(device, dstr, description);
+                return new Buffer(device, dstr, description)
+                {
+                    DebugName = name,
+                };
             }
         }
 
         /// <summary>
         /// Creates a new Input Layout for a Shader
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="shaderBytecode">Byte code</param>
         /// <param name="elements">Input elements</param>
         /// <returns>Returns a new Input Layout</returns>
-        internal InputLayout CreateInputLayout(ShaderBytecode shaderBytecode, InputElement[] elements)
+        internal InputLayout CreateInputLayout(string name, ShaderBytecode shaderBytecode, InputElement[] elements)
         {
-            return new InputLayout(device, shaderBytecode, elements);
+            return new InputLayout(device, shaderBytecode, elements)
+            {
+                DebugName = name,
+            };
         }
 
         /// <summary>
@@ -2248,12 +2250,13 @@ namespace Engine
         /// <summary>
         /// Create depth stencil view
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="format">Format</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="useSamples">Use samples if available</param>
-        /// <param name="dsv">Resulting depth stencil view</param>
-        internal void CreateDepthStencil(Format format, int width, int height, bool useSamples, out EngineDepthStencilView dsv)
+        /// <returns>Returns a depth stencil view</returns>
+        internal EngineDepthStencilView CreateDepthStencil(string name, Format format, int width, int height, bool useSamples)
         {
             bool multiSampled = false;
             SampleDescription sampleDescription = new SampleDescription(1, 0);
@@ -2293,19 +2296,19 @@ namespace Engine
                     },
                 };
 
-                dsv = new EngineDepthStencilView(new DepthStencilView(device, texture, description));
+                return new EngineDepthStencilView(name, new DepthStencilView(device, texture, description));
             }
         }
         /// <summary>
         /// Creates a new render target and his texture
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="format">Format</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="useSamples">Use samples if available</param>
-        /// <param name="rtv">Render target</param>
-        /// <param name="srv">Texture</param>
-        internal void CreateRenderTargetTexture(Format format, int width, int height, bool useSamples, out EngineRenderTargetView rtv, out EngineShaderResourceView srv)
+        /// <returns>Returns a render target and its texture</returns>
+        internal (EngineRenderTargetView RenderTarget, EngineShaderResourceView ShaderResource) CreateRenderTargetTexture(string name, Format format, int width, int height, bool useSamples)
         {
             try
             {
@@ -2319,10 +2322,12 @@ namespace Engine
                     sampleDescription = CurrentSampleDescription;
                 }
 
-                CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription, out var rtv1, out var srv1);
+                var rt = CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription);
 
-                rtv = new EngineRenderTargetView(rtv1);
-                srv = new EngineShaderResourceView(srv1);
+                var rtv = new EngineRenderTargetView(name, rt.RenderTarget);
+                var srv = new EngineShaderResourceView(name, rt.ShaderResource);
+
+                return (rtv, srv);
             }
             catch (Exception ex)
             {
@@ -2332,14 +2337,14 @@ namespace Engine
         /// <summary>
         /// Creates a new multiple render target and his textures
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="format">Format</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Render target list size</param>
         /// <param name="useSamples">Use samples if available</param>
-        /// <param name="rtv">Render target</param>
-        /// <param name="srv">Textures</param>
-        internal void CreateRenderTargetTexture(Format format, int width, int height, int arraySize, bool useSamples, out EngineRenderTargetView rtv, out EngineShaderResourceView[] srv)
+        /// <returns>Returns a render target and its textures</returns>
+        internal (EngineRenderTargetView RenderTarget, IEnumerable<EngineShaderResourceView> ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
         {
             try
             {
@@ -2353,16 +2358,18 @@ namespace Engine
                     sampleDescription = CurrentSampleDescription;
                 }
 
-                rtv = new EngineRenderTargetView();
-                srv = new EngineShaderResourceView[arraySize];
+                var rtv = new EngineRenderTargetView(name);
+                var srv = new EngineShaderResourceView[arraySize];
 
                 for (int i = 0; i < arraySize; i++)
                 {
-                    CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription, out var rtv1, out var srv1);
+                    var rt = CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription);
 
-                    rtv.Add(rtv1);
-                    srv[i] = new EngineShaderResourceView(srv1);
+                    rtv.Add(rt.RenderTarget);
+                    srv[i] = new EngineShaderResourceView(name, rt.ShaderResource);
                 }
+
+                return (rtv, srv);
             }
             catch (Exception ex)
             {
@@ -2377,9 +2384,8 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="multiSampled">Create a multisampled texture</param>
         /// <param name="sampleDescription">Sample description</param>
-        /// <param name="rtv">Resulting render target view</param>
-        /// <param name="srv">Resulting shader resource view</param>
-        internal void CreateRenderTargetTexture(Format format, int width, int height, bool multiSampled, SampleDescription sampleDescription, out RenderTargetView1 rtv, out ShaderResourceView1 srv)
+        /// <returns>Returns a render target and its texture</returns>
+        internal (RenderTargetView1 RenderTarget, ShaderResourceView1 ShaderResource) CreateRenderTargetTexture(Format format, int width, int height, bool multiSampled, SampleDescription sampleDescription)
         {
             using (var texture = new Texture2D1(
                 device,
@@ -2423,18 +2429,20 @@ namespace Engine
                     srvDesc.Texture2D = new ShaderResourceViewDescription1.Texture2DResource1() { MipLevels = 1 };
                 }
 
-                rtv = new RenderTargetView1(device, texture, rtvDesc);
-                srv = new ShaderResourceView1(device, texture, srvDesc);
+                var rtv = new RenderTargetView1(device, texture, rtvDesc);
+                var srv = new ShaderResourceView1(device, texture, srvDesc);
+
+                return (rtv, srv);
             }
         }
         /// <summary>
         /// Creates a set of texture and depth stencil view for shadow mapping
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
-        /// <param name="dsv">Resulting Depth Stencil View</param>
-        /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateShadowMapTextures(int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
+        /// <returns>Returns the depth stencil buffer and its texture</returns>
+        internal (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2464,7 +2472,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                dsv = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2476,18 +2484,20 @@ namespace Engine
                         MostDetailedMip = 0
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+
+                return (dsv, srv);
             }
         }
         /// <summary>
         /// Creates a set of texture and depth stencil view for shadow mapping
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="mapCount">Per stencil view map count</param>
-        /// <param name="dsv">Resulting Depth Stencil View</param>
-        /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateShadowMapTextures(int width, int height, int mapCount, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
+        /// <returns>Returns the depth stencil buffer and its texture</returns>
+        internal (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height, int mapCount)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2519,7 +2529,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                dsv = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2531,19 +2541,21 @@ namespace Engine
                         MostDetailedMip = 0
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+
+                return (dsv, srv);
             }
         }
         /// <summary>
         /// Creates a set of texture and depth stencil view array for shadow mapping
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="mapCount">Per stencil view map count</param>
         /// <param name="arraySize">Array size</param>
-        /// <param name="dsv">Resulting Depth Stencil View array</param>
-        /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateShadowMapTextureArrays(int width, int height, int mapCount, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
+        /// <returns>Returns the depth stencil buffer list and its texture</returns>
+        internal (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateShadowMapTextureArrays(string name, int width, int height, int mapCount, int arraySize)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2563,7 +2575,7 @@ namespace Engine
 
             using (depthMap)
             {
-                dsv = new EngineDepthStencilView[arraySize];
+                var dsv = new EngineDepthStencilView[arraySize];
                 for (int i = 0; i < arraySize; i++)
                 {
                     var dsDescription = new DepthStencilViewDescription
@@ -2578,7 +2590,7 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
+                    dsv[i] = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
@@ -2594,17 +2606,19 @@ namespace Engine
                         PlaneSlice = 0,
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+
+                return (dsv, srv);
             }
         }
         /// <summary>
         /// Creates a cubic texture for shadow mapping
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="width">Face width</param>
         /// <param name="height">Face height</param>
-        /// <param name="dsv">Resulting Depth Stencil View</param>
-        /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateCubicShadowMapTextures(int width, int height, out EngineDepthStencilView dsv, out EngineShaderResourceView srv)
+        /// <returns>Returns the depth stencil buffer and its texture</returns>
+        internal (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextures(string name, int width, int height)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2637,7 +2651,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                dsv = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2649,18 +2663,20 @@ namespace Engine
                         MostDetailedMip = 0,
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+
+                return (dsv, srv);
             }
         }
         /// <summary>
         /// Creates a cubic texture array for shadow mapping
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="width">Face width</param>
         /// <param name="height">Face height</param>
         /// <param name="arraySize">Array size</param>
-        /// <param name="dsv">Resulting Depth Stencil View array</param>
-        /// <param name="srv">Resulting Shader Resource View</param>
-        internal void CreateCubicShadowMapTextureArrays(int width, int height, int arraySize, out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv)
+        /// <returns>Returns the depth stencil buffer list and its texture</returns>
+        internal (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextureArrays(string name, int width, int height, int arraySize)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2681,7 +2697,7 @@ namespace Engine
 
             using (depthMap)
             {
-                dsv = new EngineDepthStencilView[arraySize];
+                var dsv = new EngineDepthStencilView[arraySize];
                 for (int i = 0; i < arraySize; i++)
                 {
                     var dsDescription = new DepthStencilViewDescription
@@ -2696,7 +2712,7 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView(new DepthStencilView(device, depthMap, dsDescription));
+                    dsv[i] = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
@@ -2711,25 +2727,30 @@ namespace Engine
                         First2DArrayFace = 0,
                     },
                 };
-                srv = new EngineShaderResourceView(new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+
+                return (dsv, srv);
             }
         }
 
         /// <summary>
         /// Loads vertex shader from file
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="input">Input elements</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Retuns vertex shader description</returns>
         internal EngineVertexShader LoadVertexShader(
+            string name,
             string filename,
             string entryPoint,
             InputElement[] input,
             string profile)
         {
             return LoadVertexShader(
+                name,
                 File.ReadAllBytes(filename),
                 entryPoint,
                 input,
@@ -2738,6 +2759,7 @@ namespace Engine
         /// <summary>
         /// Loads vertex shader from file
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="input">Input elements</param>
@@ -2745,6 +2767,7 @@ namespace Engine
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Retuns vertex shader description</returns>
         internal EngineVertexShader LoadVertexShader(
+            string name,
             string filename,
             string entryPoint,
             InputElement[] input,
@@ -2752,6 +2775,7 @@ namespace Engine
             out string compilationErrors)
         {
             return LoadVertexShader(
+                name,
                 File.ReadAllBytes(filename),
                 entryPoint,
                 input,
@@ -2761,18 +2785,21 @@ namespace Engine
         /// <summary>
         /// Loads vertex shader from byte code
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="byteCode">Byte code</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="input">Input elements</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Retuns vertex shader description</returns>
         internal EngineVertexShader LoadVertexShader(
+            string name,
             byte[] byteCode,
             string entryPoint,
             InputElement[] input,
             string profile)
         {
             var res = LoadVertexShader(
+                name,
                 byteCode,
                 entryPoint,
                 input,
@@ -2789,6 +2816,7 @@ namespace Engine
         /// <summary>
         /// Loads vertex shader from byte code
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="byteCode">Byte code</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="input">Input elements</param>
@@ -2796,6 +2824,7 @@ namespace Engine
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Retuns vertex shader description</returns>
         internal EngineVertexShader LoadVertexShader(
+            string name,
             byte[] byteCode,
             string entryPoint,
             InputElement[] input,
@@ -2827,22 +2856,25 @@ namespace Engine
                     device,
                     cmpResult.Bytecode);
 
-                return new EngineVertexShader(vertexShader, layout);
+                return new EngineVertexShader(name, vertexShader, layout);
             }
         }
         /// <summary>
         /// Loads a pixel shader from file
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns pixel shader description</returns>
         internal EnginePixelShader LoadPixelShader(
+            string name,
             string filename,
             string entryPoint,
             string profile)
         {
             var res = LoadPixelShader(
+                name,
                 File.ReadAllBytes(filename),
                 entryPoint,
                 profile,
@@ -2858,19 +2890,21 @@ namespace Engine
         /// <summary>
         /// Loads a pixel shader from file
         /// </summary>
-        /// <param name="device">Graphics device</param>
+        /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns pixel shader description</returns>
         internal EnginePixelShader LoadPixelShader(
+            string name,
             string filename,
             string entryPoint,
             string profile,
             out string compilationErrors)
         {
             return LoadPixelShader(
+                name,
                 File.ReadAllBytes(filename),
                 entryPoint,
                 profile,
@@ -2879,16 +2913,19 @@ namespace Engine
         /// <summary>
         /// Loads a pixel shader from byte code
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="byteCode">Byte code</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns pixel shader description</returns>
         internal EnginePixelShader LoadPixelShader(
+            string name,
             byte[] byteCode,
             string entryPoint,
             string profile)
         {
             var res = LoadPixelShader(
+                name,
                 byteCode,
                 entryPoint,
                 profile,
@@ -2904,12 +2941,14 @@ namespace Engine
         /// <summary>
         /// Loads a pixel shader from byte code
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="byteCode">Byte code</param>
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns pixel shader description</returns>
         internal EnginePixelShader LoadPixelShader(
+            string name,
             byte[] byteCode,
             string entryPoint,
             string profile,
@@ -2932,7 +2971,7 @@ namespace Engine
                     compilationErrors = cmpResult.Message;
                 }
 
-                return new EnginePixelShader(new PixelShader(device, cmpResult.Bytecode));
+                return new EnginePixelShader(name, new PixelShader(device, cmpResult.Bytecode));
             }
         }
 
@@ -2998,11 +3037,12 @@ namespace Engine
         /// <summary>
         /// Creates a new Sampler state
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="description">Sampler description</param>
         /// <returns>Returns the new sampler state</returns>
-        internal EngineSamplerState CreateSamplerState(SamplerStateDescription description)
+        internal EngineSamplerState CreateSamplerState(string name, SamplerStateDescription description)
         {
-            return new EngineSamplerState(new SamplerState(device, description));
+            return new EngineSamplerState(name, new SamplerState(device, description));
         }
 
         /// <summary>

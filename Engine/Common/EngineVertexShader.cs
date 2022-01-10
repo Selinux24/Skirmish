@@ -19,14 +19,24 @@ namespace Engine.Common
         private InputLayout layout = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="shader">Vertex shader</param>
-        /// <param name="layout">Input layout</param>
-        internal EngineVertexShader(VertexShader shader, InputLayout layout)
+        /// <param name="name">Name</param>
+        /// <param name="vertexShader">Vertex shader</param>
+        /// <param name="inputLayout">Input layout</param>
+        internal EngineVertexShader(string name, VertexShader vertexShader, InputLayout inputLayout)
         {
-            this.shader = shader;
-            this.layout = layout;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A vertex shader name must be specified.");
+            shader = vertexShader ?? throw new ArgumentNullException(nameof(vertexShader), "A vertex shader must be specified.");
+            layout = inputLayout ?? throw new ArgumentNullException(nameof(inputLayout), "A input layout must be specified.");
+
+            shader.DebugName = name;
+            layout.DebugName = name;
         }
         /// <summary>
         /// Destructor

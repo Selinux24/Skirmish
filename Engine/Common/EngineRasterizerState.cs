@@ -12,7 +12,12 @@ namespace Engine.Common
         /// <summary>
         /// Internal rasterizer state
         /// </summary>
-        private RasterizerState2 rasterizerState = null;
+        private RasterizerState2 state = null;
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
 
         /// <summary>
         /// Creates a default rasterizer state
@@ -37,7 +42,7 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState(nameof(Default), desc);
         }
         /// <summary>
         /// Creates a wire frame rasterizer state
@@ -62,7 +67,7 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState(nameof(Wireframe), desc);
         }
         /// <summary>
         /// Creates a no cull rasterizer state
@@ -87,7 +92,7 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState(nameof(NoCull), desc);
         }
         /// <summary>
         /// Creates a cull front face rasterizer state
@@ -112,7 +117,7 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState(nameof(CullFrontFace), desc);
         }
         /// <summary>
         /// Creates a stencil pass rasterizer state
@@ -137,7 +142,7 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState(nameof(StencilPass), desc);
         }
         /// <summary>
         /// Creates a lighting pass rasterizer state
@@ -162,7 +167,7 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState(nameof(LightingPass), desc);
         }
         /// <summary>
         /// Creates a shadow mapping rasterizer state
@@ -187,16 +192,20 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState(nameof(ShadowMapping), desc);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="rasterizerState">Rasterizer state</param>
-        internal EngineRasterizerState(RasterizerState2 rasterizerState)
+        internal EngineRasterizerState(string name, RasterizerState2 rasterizerState)
         {
-            this.rasterizerState = rasterizerState;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A rasterizer state name must be specified.");
+            state = rasterizerState ?? throw new ArgumentNullException(nameof(rasterizerState), "A rasterizer state must be specified.");
+
+            state.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -222,8 +231,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                rasterizerState?.Dispose();
-                rasterizerState = null;
+                state?.Dispose();
+                state = null;
             }
         }
 
@@ -233,7 +242,7 @@ namespace Engine.Common
         /// <returns>Returns the internal rasterizer state</returns>
         internal RasterizerState2 GetRasterizerState()
         {
-            return rasterizerState;
+            return state;
         }
     }
 }

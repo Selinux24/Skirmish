@@ -803,7 +803,7 @@ namespace Engine.Common
 
                 inputLayouts.Add(
                     technique,
-                    game.Graphics.CreateInputLayout(signature, vertexBufferDescriptor.Input.ToArray()));
+                    game.Graphics.CreateInputLayout(descriptor.Id, signature, vertexBufferDescriptor.Input.ToArray()));
             }
 
             game.Graphics.IAInputLayout = inputLayouts[technique];

@@ -15,12 +15,21 @@ namespace Engine.Common
         private PixelShader shader = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="shader">Pixel shader</param>
-        internal EnginePixelShader(PixelShader shader)
+        /// <param name="name">Name</param>
+        /// <param name="pixelShader">Pixel shader</param>
+        internal EnginePixelShader(string name, PixelShader pixelShader)
         {
-            this.shader = shader;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A pixel shader name must be specified.");
+            shader = pixelShader ?? throw new ArgumentNullException(nameof(pixelShader), "A pixel shader must be specified.");
+
+            shader.DebugName = name;
         }
         /// <summary>
         /// Destructor

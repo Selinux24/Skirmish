@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Common
 {
@@ -13,8 +14,12 @@ namespace Engine.Common
         /// <summary>
         /// Render target list
         /// </summary>
-        private List<RenderTargetView1> rtv = new List<RenderTargetView1>();
+        private List<RenderTargetView1> rtvList = new List<RenderTargetView1>();
 
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
         /// <summary>
         /// Gets the render target count
         /// </summary>
@@ -22,24 +27,28 @@ namespace Engine.Common
         {
             get
             {
-                return rtv.Count;
+                return rtvList.Count;
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public EngineRenderTargetView()
+        /// <param name="name">Name</param>
+        public EngineRenderTargetView(string name)
         {
-
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A render target name must be specified.");
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="rtv">Render target view</param>
-        internal EngineRenderTargetView(RenderTargetView1 rtv)
+        /// <param name="name">Name</param>
+        /// <param name="renderTarget">Render target view</param>
+        internal EngineRenderTargetView(string name, RenderTargetView1 renderTarget)
         {
-            this.rtv.Add(rtv);
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A render target name must be specified.");
+
+            Add(renderTarget);
         }
         /// <summary>
         /// Destructor
@@ -65,24 +74,30 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                for (int i = 0; i < rtv?.Count; i++)
+                for (int i = 0; i < rtvList?.Count; i++)
                 {
-                    rtv[i]?.Dispose();
-                    rtv[i] = null;
+                    rtvList[i]?.Dispose();
+                    rtvList[i] = null;
                 }
 
-                rtv?.Clear();
-                rtv = null;
+                rtvList?.Clear();
+                rtvList = null;
             }
         }
 
         /// <summary>
         /// Adds a new Render Target to the collection
         /// </summary>
-        /// <param name="rtv">Render target view</param>
-        internal void Add(RenderTargetView1 rtv)
+        /// <param name="renderTarget">Render target view</param>
+        internal void Add(RenderTargetView1 renderTarget)
         {
-            this.rtv.Add(rtv);
+            if (renderTarget == null)
+            {
+                throw new ArgumentNullException(nameof(renderTarget), "A render target must be specified.");
+            }
+
+            renderTarget.DebugName = Name;
+            rtvList.Add(renderTarget);
         }
 
         /// <summary>
@@ -91,15 +106,15 @@ namespace Engine.Common
         /// <returns>Returns the internal render target</returns>
         internal RenderTargetView1 GetRenderTarget()
         {
-            return rtv[0];
+            return rtvList.FirstOrDefault();
         }
         /// <summary>
         /// Gets the render targets
         /// </summary>
         /// <returns>Returns the internal render target list</returns>
-        internal RenderTargetView1[] GetRenderTargets()
+        internal IEnumerable<RenderTargetView1> GetRenderTargets()
         {
-            return rtv.ToArray();
+            return rtvList.ToArray();
         }
     }
 }

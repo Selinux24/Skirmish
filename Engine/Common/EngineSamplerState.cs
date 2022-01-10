@@ -10,9 +10,14 @@ namespace Engine.Common
     public class EngineSamplerState : IDisposable
     {
         /// <summary>
-        /// Internal blend state
+        /// Internal sampler state
         /// </summary>
-        private SamplerState samplerState = null;
+        private SamplerState state = null;
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
 
         /// <summary>
         /// Creates a point sampler state
@@ -24,7 +29,7 @@ namespace Engine.Common
             var desc = SamplerStateDescription.Default();
             desc.Filter = Filter.MinMagMipPoint;
 
-            return graphics.CreateSamplerState(desc);
+            return graphics.CreateSamplerState(nameof(Point), desc);
         }
         /// <summary>
         /// Creates a linear sampler state
@@ -38,7 +43,7 @@ namespace Engine.Common
             desc.AddressU = TextureAddressMode.Wrap;
             desc.AddressV = TextureAddressMode.Wrap;
 
-            return graphics.CreateSamplerState(desc);
+            return graphics.CreateSamplerState(nameof(Linear), desc);
         }
         /// <summary>
         /// Creates a anisotropic sampler state
@@ -54,16 +59,20 @@ namespace Engine.Common
             desc.AddressU = TextureAddressMode.Wrap;
             desc.AddressV = TextureAddressMode.Wrap;
 
-            return graphics.CreateSamplerState(desc);
+            return graphics.CreateSamplerState(nameof(Anisotropic), desc);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="samplerState">Sampler state</param>
-        internal EngineSamplerState(SamplerState samplerState)
+        internal EngineSamplerState(string name, SamplerState samplerState)
         {
-            this.samplerState = samplerState;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A sampler state name must be specified.");
+            state = samplerState ?? throw new ArgumentNullException(nameof(samplerState), "A sampler state must be specified.");
+
+            state.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -89,8 +98,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                samplerState?.Dispose();
-                samplerState = null;
+                state?.Dispose();
+                state = null;
             }
         }
 
@@ -100,7 +109,7 @@ namespace Engine.Common
         /// <returns>Returns the internal sampler state</returns>
         internal SamplerState GetSamplerState()
         {
-            return samplerState;
+            return state;
         }
     }
 }

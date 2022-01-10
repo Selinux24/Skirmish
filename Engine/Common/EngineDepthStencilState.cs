@@ -15,6 +15,10 @@ namespace Engine.Common
         private DepthStencilState state = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
         /// Stencil reference
         /// </summary>
         public int StencilRef { get; set; } = 0;
@@ -53,7 +57,7 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(WRzBufferEnabled), desc, 0);
         }
         /// <summary>
         /// Creates a Z-buffer disabled for write depth-stencil state
@@ -89,7 +93,7 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(WRzBufferDisabled), desc, 0);
         }
         /// <summary>
         /// Creates a Z-buffer enabled for read depth-stencil state
@@ -105,7 +109,7 @@ namespace Engine.Common
                 DepthComparison = Comparison.Less,
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(RDzBufferEnabled), desc, 0);
         }
         /// <summary>
         /// Creates a Z-buffer disabled for read depth-stencil state
@@ -121,7 +125,7 @@ namespace Engine.Common
                 DepthComparison = Comparison.Never,
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(RDzBufferDisabled), desc, 0);
         }
         /// <summary>
         /// Creates a No depth, no stencil state
@@ -141,7 +145,7 @@ namespace Engine.Common
                 StencilWriteMask = 0xFF,
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(None), desc, 0);
         }
         /// <summary>
         /// Creates a depth state for shadow mapping
@@ -177,7 +181,7 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(ShadowMapping), desc, 0);
         }
         /// <summary>
         /// Creates a Depth-stencil state for volume marking
@@ -214,7 +218,7 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(VolumeMarking), desc, 0);
         }
         /// <summary>
         /// Creates a Depth-stencil state for volume drawing
@@ -251,17 +255,20 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState(nameof(VolumeDrawing), desc, 0);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="state">Depth stencil state state</param>
-        internal EngineDepthStencilState(DepthStencilState state, int stencilRef)
+        internal EngineDepthStencilState(string name, DepthStencilState stencilState, int stencilRef)
         {
-            this.state = state;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A stencil state name must be specified.");
+            state = stencilState ?? throw new ArgumentNullException(nameof(stencilState), "A stencil state must be specified.");
             StencilRef = stencilRef;
+
+            state.DebugName = name;
         }
         /// <summary>
         /// Destructor

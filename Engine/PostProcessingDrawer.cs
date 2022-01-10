@@ -161,7 +161,7 @@ namespace Engine
 
             if (!layouts.ContainsKey(effectTechnique))
             {
-                var layout = graphics.CreateInputLayout(effectTechnique.GetSignature(), VertexPositionTexture.Input(BufferSlot));
+                var layout = graphics.CreateInputLayout($"{nameof(PostProcessingEffects)}.{effect}", effectTechnique.GetSignature(), VertexPositionTexture.Input(BufferSlot));
 
                 layouts.Add(effectTechnique, layout);
 

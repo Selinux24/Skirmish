@@ -12,6 +12,10 @@ namespace Engine.Common
     public class EngineBuffer<T> : IDisposable where T : struct, IVertexData
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
         /// Buffer
         /// </summary>
         public Buffer VertexBuffer { get; set; }
@@ -33,12 +37,14 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic flag</param>
         public EngineBuffer(Graphics graphics, string name, IEnumerable<T> data, bool dynamic)
         {
+            Name = name;
             VertexBuffer = graphics.CreateVertexBuffer(name, data, dynamic);
-
             VertexBufferBinding = new[]
             {
                 new VertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
             };
+
+            VertexBuffer.DebugName = name;
         }
         /// <summary>
         /// Destructor

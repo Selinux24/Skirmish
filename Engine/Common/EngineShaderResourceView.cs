@@ -17,19 +17,28 @@ namespace Engine.Common
         private ShaderResourceView1 srv = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        public EngineShaderResourceView()
+        /// <param name="name">Name</param>
+        public EngineShaderResourceView(string name)
         {
-
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A shader resource name must be specified.");
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="srv">Shader resource view</param>
-        public EngineShaderResourceView(ShaderResourceView1 srv)
+        /// <param name="name">Name</param>
+        /// <param name="view">Shader resource view</param>
+        public EngineShaderResourceView(string name, ShaderResourceView1 view)
         {
-            this.srv = srv;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A shader resource name must be specified.");
+
+            SetResource(view);
         }
         /// <summary>
         /// Destructor
@@ -75,7 +84,9 @@ namespace Engine.Common
         /// <param name="view">Resource view</param>
         internal void SetResource(ShaderResourceView1 view)
         {
-            srv = view;
+            srv = view ?? throw new ArgumentNullException(nameof(view), "A shader resource must be specified.");
+
+            srv.DebugName = Name;
         }
 
         /// <summary>

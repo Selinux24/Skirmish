@@ -88,11 +88,11 @@ namespace Engine
 
             if (RotateDecals)
             {
-                buffer.AddInputLayout(scene.Game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultDecals.Decal.GetSignature(), VertexDecal.Input(BufferSlot)));
+                buffer.AddInputLayout(scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.Decal", DrawerPool.EffectDefaultDecals.Decal.GetSignature(), VertexDecal.Input(BufferSlot)));
             }
             else
             {
-                buffer.AddInputLayout(scene.Game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultDecals.DecalRotated.GetSignature(), VertexDecal.Input(BufferSlot)));
+                buffer.AddInputLayout(scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.DecalRotated", DrawerPool.EffectDefaultDecals.DecalRotated.GetSignature(), VertexDecal.Input(BufferSlot)));
             }
         }
         /// <summary>

@@ -1,7 +1,6 @@
 ﻿
 namespace Engine
 {
-    using Engine.Common;
     using Engine.Effects;
 
     /// <summary>
@@ -43,17 +42,14 @@ namespace Engine
         /// <param name="size">Map size</param>
         /// <param name="mapCount">Map count</param>
         /// <param name="cascades">Cascade far clip distances</param>
-        public ShadowMapCascade(Scene scene, int size, int mapCount, int arraySize, float[] cascades) : base(scene, size, size, cascades.Length)
+        public ShadowMapCascade(Scene scene, string name, int size, int mapCount, int arraySize, float[] cascades) : base(scene, name, size, size, cascades.Length)
         {
             Size = size;
 
-            scene.Game.Graphics.CreateShadowMapTextureArrays(
-                size, size, mapCount, arraySize,
-                out EngineDepthStencilView[] dsv,
-                out EngineShaderResourceView srv);
+            var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateShadowMapTextureArrays(name, size, size, mapCount, arraySize);
 
-            DepthMap = dsv;
-            Texture = srv;
+            DepthMap = DepthStencils;
+            Texture = ShaderResource;
 
             MatrixSet = new ShadowMapCascadeSet(size, 1, cascades);
         }

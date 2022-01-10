@@ -109,8 +109,8 @@ namespace Engine
             particles = new VertexCpuParticle[MaxConcurrentParticles];
 
             buffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, particles, true);
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            buffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.RotationDraw", DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            buffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.NonRotationDraw", DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
 
             TimeToEnd = Emitter.Duration + parameters.MaxDuration;
         }

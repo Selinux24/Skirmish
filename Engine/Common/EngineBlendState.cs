@@ -13,8 +13,12 @@ namespace Engine.Common
         /// <summary>
         /// Internal blend state
         /// </summary>
-        private BlendState1 blendState = null;
+        private BlendState1 state = null;
 
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
         /// <summary>
         /// Blend factor
         /// </summary>
@@ -48,7 +52,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(Default), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates an alpha enabled blend state
@@ -74,7 +78,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(AlphaBlend), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates an alpha enabled conservative blend state
@@ -100,7 +104,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.SourceAlpha;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(AlphaConservativeBlend), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates a transparent enabled blend state
@@ -127,7 +131,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(Transparent), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates a transparent enabled conservative blend state
@@ -154,7 +158,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.SourceAlpha;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.InverseSourceAlpha;
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(TransparentConservative), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates an additive blend state
@@ -180,7 +184,7 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.Zero;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(Additive), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates a deferred composer blend state
@@ -217,7 +221,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(DeferredComposer), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates a deferred composer transparent enabled blend state
@@ -255,7 +259,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(DeferredComposerTransparent), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates a deferred composer alpha enabled blend state
@@ -293,7 +297,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(DeferredComposerAlpha), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates a deferred composer additive enabled blend state
@@ -333,7 +337,7 @@ namespace Engine.Common
                 desc.RenderTarget[i].DestinationAlphaBlend = BlendOption.Zero;
             }
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(DeferredComposerAdditive), desc, Color.Transparent, -1);
         }
         /// <summary>
         /// Creates a deferred lighting blend state
@@ -357,20 +361,24 @@ namespace Engine.Common
             desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
             desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.One;
 
-            return graphics.CreateBlendState(desc, Color.Transparent, -1);
+            return graphics.CreateBlendState(nameof(DeferredLighting), desc, Color.Transparent, -1);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="blendState">Blend state</param>
         /// <param name="blendFactor">Blend factor</param>
         /// <param name="sampleMask">Sample mask</param>
-        internal EngineBlendState(BlendState1 blendState, Color4? blendFactor, int sampleMask)
+        internal EngineBlendState(string name, BlendState1 blendState, Color4? blendFactor, int sampleMask)
         {
-            this.blendState = blendState;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A blend state name must be specified.");
+            state = blendState ?? throw new ArgumentNullException(nameof(blendState), "A blend state must be specified.");
             BlendFactor = blendFactor;
             SampleMask = sampleMask;
+
+            state.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -396,8 +404,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                blendState?.Dispose();
-                blendState = null;
+                state?.Dispose();
+                state = null;
             }
         }
 
@@ -407,7 +415,7 @@ namespace Engine.Common
         /// <returns>Returns the internal blend state</returns>
         internal BlendState1 GetBlendState()
         {
-            return blendState;
+            return state;
         }
     }
 }

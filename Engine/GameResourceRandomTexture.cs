@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Engine resource view
         /// </summary>
-        public EngineShaderResourceView ResourceView { get; private set; } = new EngineShaderResourceView();
+        public EngineShaderResourceView ResourceView { get; private set; } = new EngineShaderResourceView("Random Texture");
         /// <summary>
         /// Size
         /// </summary>

@@ -73,7 +73,7 @@ namespace Engine
         /// <summary>
         /// Geometry map
         /// </summary>
-        protected EngineShaderResourceView[] GeometryMap
+        protected IEnumerable<EngineShaderResourceView> GeometryMap
         {
             get
             {
@@ -83,7 +83,7 @@ namespace Engine
         /// <summary>
         /// Light map
         /// </summary>
-        protected EngineShaderResourceView[] LightMap
+        protected IEnumerable<EngineShaderResourceView> LightMap
         {
             get
             {
@@ -106,8 +106,8 @@ namespace Engine
 
             UpdateRectangleAndView();
 
-            geometryBuffer = new RenderTarget(scene.Game, Format.R32G32B32A32_Float, false, 3);
-            lightBuffer = new RenderTarget(scene.Game, Format.R32G32B32A32_Float, false, 1);
+            geometryBuffer = new RenderTarget(scene.Game, "GeometryBuffer", Format.R32G32B32A32_Float, false, 3);
+            lightBuffer = new RenderTarget(scene.Game, "LightBuffer", Format.R32G32B32A32_Float, false, 1);
 
             blendDeferredComposer = EngineBlendState.DeferredComposer(scene.Game.Graphics, 3);
             blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(scene.Game.Graphics, 3);
@@ -164,11 +164,11 @@ namespace Engine
         /// <inheritdoc/>
         public override EngineShaderResourceView GetResource(SceneRendererResults result)
         {
-            if (result == SceneRendererResults.LightMap) return LightMap[0];
+            if (result == SceneRendererResults.LightMap) return LightMap.FirstOrDefault();
 
-            var colorMap = GeometryMap?.Length > 0 ? GeometryMap[0] : null;
-            var normalMap = GeometryMap?.Length > 1 ? GeometryMap[1] : null;
-            var depthMap = GeometryMap?.Length > 2 ? GeometryMap[2] : null;
+            var colorMap = GeometryMap.ElementAtOrDefault(0);
+            var normalMap = GeometryMap.ElementAtOrDefault(1);
+            var depthMap = GeometryMap.ElementAtOrDefault(2);
 
             if (result == SceneRendererResults.ColorMap) return colorMap;
             if (result == SceneRendererResults.NormalMap) return normalMap;
@@ -506,9 +506,9 @@ namespace Engine
             effect.UpdatePerFrame(
                 ViewProjection,
                 context.EyePosition,
-                GeometryMap[0],
-                GeometryMap[1],
-                GeometryMap[2]);
+                GeometryMap.ElementAtOrDefault(0),
+                GeometryMap.ElementAtOrDefault(1),
+                GeometryMap.ElementAtOrDefault(2));
 
             graphics.SetDepthStencilRDZDisabled();
             SetBlendDeferredLighting();
@@ -628,8 +628,8 @@ namespace Engine
 
                 effect.UpdateComposer(
                     ViewProjection,
-                    GeometryMap[2],
-                    LightMap[0],
+                    GeometryMap.ElementAtOrDefault(2),
+                    LightMap.ElementAtOrDefault(0),
                     context);
 
                 lightDrawer.BindResult(graphics);

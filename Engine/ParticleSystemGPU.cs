@@ -160,9 +160,9 @@ namespace Engine
             streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
 
             var effect = DrawerPool.EffectDefaultGPUParticles;
-            streamOutInputLayout = game.Graphics.CreateInputLayout(effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            rotatingInputLayout = game.Graphics.CreateInputLayout(effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            streamOutInputLayout = game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.ParticleStreamOut", effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            rotatingInputLayout = game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.RotationDraw", effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            nonRotatingInputLayout = game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.NonRotationDraw", effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Destructor

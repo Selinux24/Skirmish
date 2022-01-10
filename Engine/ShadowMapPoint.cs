@@ -2,7 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
     using Engine.Effects;
 
     /// <summary>
@@ -48,17 +47,16 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        public ShadowMapPoint(Scene scene, int width, int height, int arraySize) : base(scene, width, height, 6)
+        public ShadowMapPoint(Scene scene, string name, int width, int height, int arraySize) : base(scene, name, width, height, 6)
         {
-            scene.Game.Graphics.CreateCubicShadowMapTextureArrays(
-                width, height, arraySize,
-                out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
+            var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateCubicShadowMapTextureArrays(name, width, height, arraySize);
 
-            DepthMap = dsv;
-            Texture = srv;
+            DepthMap = DepthStencils;
+            Texture = ShaderResource;
         }
 
         /// <inheritdoc/>

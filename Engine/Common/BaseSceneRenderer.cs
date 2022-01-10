@@ -225,6 +225,7 @@ namespace Engine.Common
             // Directional shadow mapper
             ShadowMapperDirectional = new ShadowMapCascade(
                 scene,
+                "Directional Shadow Mapper",
                 DirectionalShadowMapSize,
                 MaxDirectionalCascadeShadowMaps, MaxDirectionalShadowMaps,
                 scene.GameEnvironment.CascadeShadowMapsDistances)
@@ -235,6 +236,7 @@ namespace Engine.Common
             // Point shadow mapper
             ShadowMapperPoint = new ShadowMapPoint(
                 scene,
+                "Point Shadow Mapper",
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows)
             {
@@ -244,6 +246,7 @@ namespace Engine.Common
             // Spot shadow mapper
             ShadowMapperSpot = new ShadowMapSpot(
                 scene,
+                "Spot Shadow Mapper",
                 SpotShadowMapSize, SpotShadowMapSize,
                 MaxSpotShadows)
             {
@@ -270,14 +273,12 @@ namespace Engine.Common
 
             var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
 
-            sceneObjectsTarget = new RenderTarget(scene.Game, targetFormat, false, 1);
-            sceneUITarget = new RenderTarget(scene.Game, targetFormat, false, 1);
-            sceneResultsTarget = new RenderTarget(scene.Game, targetFormat, false, 1);
+            sceneObjectsTarget = new RenderTarget(scene.Game, "SceneObjectsTarget", targetFormat, false, 1);
+            sceneUITarget = new RenderTarget(scene.Game, "SceneUITarget", targetFormat, false, 1);
+            sceneResultsTarget = new RenderTarget(scene.Game, "SceneResultsTarget", targetFormat, false, 1);
 
-            var ppFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
-
-            postProcessingTarget1 = new RenderTarget(scene.Game, ppFormat, false, 1);
-            postProcessingTarget2 = new RenderTarget(scene.Game, ppFormat, false, 1);
+            postProcessingTarget1 = new RenderTarget(scene.Game, "PostProcessingTarget1", targetFormat, false, 1);
+            postProcessingTarget2 = new RenderTarget(scene.Game, "PostProcessingTarget2", targetFormat, false, 1);
             processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.EffectPostProcess);
         }
         /// <summary>

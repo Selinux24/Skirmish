@@ -12,6 +12,10 @@ namespace Engine.Common
         /// Effect variable
         /// </summary>
         private readonly EffectShaderResourceVariable variable = null;
+        /// <summary>
+        /// Shader resource
+        /// </summary>
+        private EngineShaderResourceView resource = null;
 
         /// <summary>
         /// Constructor
@@ -38,12 +42,21 @@ namespace Engine.Common
         public EngineShaderResourceView GetResource()
         {
             var srv = variable.GetResource()?.QueryInterface<ShaderResourceView1>();
-            if (srv != null)
+            if (srv == null)
             {
-                return new EngineShaderResourceView(srv);
+                return null;
             }
 
-            return null;
+            if (resource == null)
+            {
+                resource = new EngineShaderResourceView(variable.Description.Name, srv);
+            }
+            else
+            {
+                resource.SetResource(srv);
+            }
+
+            return resource;
         }
     }
 }

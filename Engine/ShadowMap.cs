@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -22,8 +24,12 @@ namespace Engine
         /// <summary>
         /// Depth map
         /// </summary>
-        protected EngineDepthStencilView[] DepthMap { get; set; }
+        protected IEnumerable<EngineDepthStencilView> DepthMap { get; set; }
 
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; protected set; }
         /// <summary>
         /// Cube deph map texture
         /// </summary>
@@ -52,9 +58,10 @@ namespace Engine
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        protected ShadowMap(Scene scene, int width, int height, int arraySize)
+        protected ShadowMap(Scene scene, string name, int width, int height, int arraySize)
         {
             Scene = scene;
+            Name = name;
 
             Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
 
@@ -84,10 +91,12 @@ namespace Engine
         {
             if (disposing)
             {
-                for (int i = 0; i < DepthMap?.Length; i++)
+                if (DepthMap?.Any() == true)
                 {
-                    DepthMap[i]?.Dispose();
-                    DepthMap[i] = null;
+                    for (int i = 0; i < DepthMap.Count(); i++)
+                    {
+                        DepthMap.ElementAt(i)?.Dispose();
+                    }
                 }
                 DepthMap = null;
 
@@ -124,7 +133,7 @@ namespace Engine
             //Set shadow map depth map without render target
             graphics.SetRenderTargets(
                 null, false, Color.Transparent,
-                DepthMap[index], true, false,
+                DepthMap.ElementAtOrDefault(index), true, false,
                 true);
         }
     }

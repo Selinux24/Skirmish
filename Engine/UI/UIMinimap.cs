@@ -69,11 +69,13 @@ namespace Engine.UI
 
             viewport = new Viewport(0, 0, description.Width, description.Height);
 
-            Game.Graphics.CreateRenderTargetTexture(
+            var rt = Game.Graphics.CreateRenderTargetTexture(
+                $"RenderTexture_{name}",
                 Format.R8G8B8A8_UNorm,
-                description.Width, description.Height, false,
-                out renderTarget,
-                out renderTexture);
+                description.Width, description.Height, false);
+
+            renderTarget = rt.RenderTarget;
+            renderTexture = rt.ShaderResource;
 
             InitializeContext();
         }

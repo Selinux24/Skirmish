@@ -12,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Engine resource view
         /// </summary>
-        public EngineShaderResourceView ResourceView { get; private set; } = new EngineShaderResourceView();
+        public EngineShaderResourceView ResourceView { get; private set; } = new EngineShaderResourceView("Value Array");
         /// <summary>
         /// Size
         /// </summary>

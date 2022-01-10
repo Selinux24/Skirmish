@@ -1,5 +1,7 @@
 ﻿using SharpDX.DXGI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -16,6 +18,10 @@ namespace Engine
         protected Game Game { get; private set; }
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
         /// Render target format
         /// </summary>
         public Format RenderTargetFormat { get; protected set; }
@@ -30,7 +36,7 @@ namespace Engine
         /// <summary>
         /// Buffer textures
         /// </summary>
-        public EngineShaderResourceView[] Textures { get; protected set; }
+        public IEnumerable<EngineShaderResourceView> Textures { get; protected set; }
         /// <summary>
         /// Render targets
         /// </summary>
@@ -40,12 +46,14 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="name">Name</param>
         /// <param name="format">Format</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <param name="count">Buffer count</param>
-        public RenderTarget(Game game, Format format, bool useSamples, int count)
+        public RenderTarget(Game game, string name, Format format, bool useSamples, int count)
         {
             Game = game;
+            Name = name;
             RenderTargetFormat = format;
             UseSamples = useSamples;
             BufferCount = count;
@@ -97,14 +105,13 @@ namespace Engine
             int width = Game.Form.RenderWidth;
             int height = Game.Form.RenderHeight;
 
-            Game.Graphics.CreateRenderTargetTexture(
+            var rt = Game.Graphics.CreateRenderTargetTexture(
+                Name,
                 RenderTargetFormat,
-                width, height, BufferCount, UseSamples,
-                out EngineRenderTargetView targets,
-                out EngineShaderResourceView[] textures);
+                width, height, BufferCount, UseSamples);
 
-            Targets = targets;
-            Textures = textures;
+            Targets = rt.RenderTarget;
+            Textures = rt.ShaderResources;
         }
         /// <summary>
         /// Disposes all targets and depth buffer
@@ -114,10 +121,12 @@ namespace Engine
             Targets?.Dispose();
             Targets = null;
 
-            for (int i = 0; i < Textures?.Length; i++)
+            if (Textures?.Any() == true)
             {
-                Textures[i]?.Dispose();
-                Textures[i] = null;
+                for (int i = 0; i < Textures.Count(); i++)
+                {
+                    Textures.ElementAt(i)?.Dispose();
+                }
             }
             Textures = null;
         }
