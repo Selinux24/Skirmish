@@ -300,7 +300,7 @@ namespace Engine
         {
             List<Line3D> resultList = new List<Line3D>();
 
-            var verts = cylinder.GetVertices(segments);
+            var verts = cylinder.GetVertices(segments).ToArray();
 
             for (int i = 0; i < segments; i++)
             {

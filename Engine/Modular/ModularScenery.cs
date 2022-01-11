@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,15 +29,15 @@ namespace Engine.Modular
         /// <summary>
         /// Asset models dictionary
         /// </summary>
-        private readonly ConcurrentDictionary<string, ModelInstanced> assets = new ConcurrentDictionary<string, ModelInstanced>();
+        private readonly Dictionary<string, ModelInstanced> assets = new Dictionary<string, ModelInstanced>();
         /// <summary>
         /// Object models dictionary
         /// </summary>
-        private readonly ConcurrentDictionary<string, ModelInstanced> objects = new ConcurrentDictionary<string, ModelInstanced>();
+        private readonly Dictionary<string, ModelInstanced> objects = new Dictionary<string, ModelInstanced>();
         /// <summary>
         /// Particle descriptors dictionary
         /// </summary>
-        private readonly ConcurrentDictionary<string, ParticleSystemDescription> particleDescriptors = new ConcurrentDictionary<string, ParticleSystemDescription>();
+        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptors = new Dictionary<string, ParticleSystemDescription>();
         /// <summary>
         /// Particle manager
         /// </summary>
@@ -54,11 +53,11 @@ namespace Engine.Modular
         /// <summary>
         /// Triggers list by instance
         /// </summary>
-        private readonly ConcurrentDictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new ConcurrentDictionary<ModelInstance, List<ModularSceneryTrigger>>();
+        private readonly Dictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new Dictionary<ModelInstance, List<ModularSceneryTrigger>>();
         /// <summary>
         /// Animations plan dictionary by instance
         /// </summary>
-        private readonly ConcurrentDictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new ConcurrentDictionary<ModelInstance, Dictionary<string, AnimationPlan>>();
+        private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new Dictionary<ModelInstance, Dictionary<string, AnimationPlan>>();
         /// <summary>
         /// Active trigger callbacks
         /// </summary>
@@ -467,7 +466,7 @@ namespace Engine.Modular
 
                     var pDesc = ParticleSystemDescription.Initialize(item, contentPath);
 
-                    particleDescriptors.TryAdd(item.Name, pDesc);
+                    particleDescriptors.Add(item.Name, pDesc);
                 }
                 catch (Exception ex)
                 {
@@ -512,7 +511,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                assets.TryAdd(assetName, model);
+                assets.Add(assetName, model);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
@@ -526,17 +525,17 @@ namespace Engine.Modular
         /// <param name="modelContent">Model content</param>
         private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent)
         {
-            var masks = GetMasksForAsset(Levels, assetName);
-            var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-            var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
-
-            var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
-            ModelInstanced model = null;
+            var assetId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
 
             try
             {
-                model = await Scene.AddComponentModelInstanced(
-                    modelId,
+                var masks = GetMasksForAsset(Levels, assetName);
+                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+                var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+
+
+                var model = await Scene.AddComponentModelInstanced(
+                    assetId,
                     Name,
                     new ModelInstancedDescription()
                     {
@@ -550,13 +549,15 @@ namespace Engine.Modular
                     usage);
 
                 model.Owner = this;
+
+                return model;
             }
             catch (Exception ex)
             {
-                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {Name}: {ex.Message}", ex);
-            }
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading asset {assetId}: {ex.Message}", ex);
 
-            return model;
+                throw;
+            }
         }
         /// <summary>
         /// Initialize all objects into asset dictionary 
@@ -596,7 +597,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                objects.TryAdd(assetName, model);
+                objects.Add(assetName, model);
 
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
@@ -611,49 +612,58 @@ namespace Engine.Modular
         /// <param name="modelContent">Model content</param>
         private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, Level level, ContentData modelContent)
         {
-            var masks = GetMasksForAsset(Levels, assetName);
-            var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-            SceneObjectUsages usage = SceneObjectUsages.None;
-            if (pathFinding)
-            {
-                usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
-            }
-
             var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
 
-            var model = await Scene.AddComponentModelInstanced(
-                modelId,
-                Name,
-                new ModelInstancedDescription()
-                {
-                    CastShadow = Description.CastShadow,
-                    UseAnisotropicFiltering = Description.UseAnisotropic,
-                    Instances = count,
-                    BlendMode = Description.BlendMode,
-                    Content = ContentDescription.FromContentData(modelContent),
-                },
-                usage);
-
-            model.Owner = this;
-
-            //Get the object list to process
-            var objList = level.Objects
-                .Where(o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
-                .ToArray();
-
-            //Positioning
-            var transforms = objList.Select(o => GeometryUtil.Transformation(o.Position, o.Rotation, o.Scale));
-            model.SetTransforms(transforms);
-
-            //Lights
-            for (int i = 0; i < model.InstanceCount; i++)
+            try
             {
-                InitializeObjectLights(objList[i], model[i]);
+                var masks = GetMasksForAsset(Levels, assetName);
+                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+                SceneObjectUsages usage = SceneObjectUsages.None;
+                if (pathFinding)
+                {
+                    usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                }
 
-                InitializeObjectAnimations(objList[i], model[i]);
+                var model = await Scene.AddComponentModelInstanced(
+                    modelId,
+                    Name,
+                    new ModelInstancedDescription()
+                    {
+                        CastShadow = Description.CastShadow,
+                        UseAnisotropicFiltering = Description.UseAnisotropic,
+                        Instances = count,
+                        BlendMode = Description.BlendMode,
+                        Content = ContentDescription.FromContentData(modelContent),
+                    },
+                    usage);
+
+                model.Owner = this;
+
+                //Get the object list to process
+                var objList = level.Objects
+                    .Where(o => string.Equals(o.AssetName, assetName, StringComparison.OrdinalIgnoreCase))
+                    .ToArray();
+
+                //Positioning
+                var transforms = objList.Select(o => GeometryUtil.Transformation(o.Position, o.Rotation, o.Scale));
+                model.SetTransforms(transforms);
+
+                //Lights
+                for (int i = 0; i < model.InstanceCount; i++)
+                {
+                    InitializeObjectLights(objList[i], model[i]);
+
+                    InitializeObjectAnimations(objList[i], model[i]);
+                }
+
+                return model;
             }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"{nameof(ModularScenery)}. Error loading object {modelId}: {ex.Message}", ex);
 
-            return model;
+                throw;
+            }
         }
         /// <summary>
         /// Initialize lights attached to the specified object
@@ -744,7 +754,7 @@ namespace Engine.Modular
 
             if (animationDict.Count > 0)
             {
-                animations.TryAdd(instance, animationDict);
+                animations.Add(instance, animationDict);
 
                 var defaultPlan = obj.AnimationPlans.FirstOrDefault(a => a.Default)?.Name ?? "default";
 
@@ -787,7 +797,7 @@ namespace Engine.Modular
 
             if (instanceTriggers.Count > 0)
             {
-                triggers.TryAdd(instance, instanceTriggers);
+                triggers.Add(instance, instanceTriggers);
             }
         }
         /// <summary>
@@ -1636,7 +1646,7 @@ namespace Engine.Modular
             /// </summary>
             /// <param name="assetConfiguration">Configuration</param>
             /// <param name="assets">Asset list</param>
-            public void Build(Persistence.AssetMap assetConfiguration, ConcurrentDictionary<string, ModelInstanced> assets)
+            public void Build(Persistence.AssetMap assetConfiguration, Dictionary<string, ModelInstanced> assets)
             {
                 //Fill per complex asset bounding boxes
                 Fill(assets);
@@ -1661,7 +1671,7 @@ namespace Engine.Modular
             /// Fills the full bounding volume of the assets in the map
             /// </summary>
             /// <param name="assets">Asset list</param>
-            private void Fill(ConcurrentDictionary<string, ModelInstanced> assets)
+            private void Fill(Dictionary<string, ModelInstanced> assets)
             {
                 for (int i = 0; i < assetMap.Count; i++)
                 {

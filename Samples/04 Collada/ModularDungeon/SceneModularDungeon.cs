@@ -396,7 +396,7 @@ namespace Collada.ModularDungeon
                     {
                         Logger.WriteError(this, ex);
 
-                        string[] exceptions = ex.Flatten().InnerExceptions
+                        var exceptions = ex.Flatten().InnerExceptions
                             .Select(e => e.Message)
                             .ToArray();
 
@@ -1460,7 +1460,7 @@ namespace Collada.ModularDungeon
 
                         levelInitialized = true;
 
-                        pbLevels.Hide(5000);
+                        pbLevels.Hide(1000);
                     }
                     catch (Exception ex)
                     {

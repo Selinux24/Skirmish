@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -8,7 +9,7 @@ namespace Engine.Content
     /// <summary>
     /// Image content
     /// </summary>
-    public class ImageContent
+    public class ImageContent : IEquatable<ImageContent>
     {
         /// <summary>
         /// Image data in stream
@@ -225,6 +226,41 @@ namespace Engine.Content
             };
         }
 
+        /// <inheritdoc/>
+        public static bool operator !=(ImageContent left, ImageContent right)
+        {
+            return !(left == right);
+        }
+        /// <inheritdoc/>
+        public static bool operator ==(ImageContent left, ImageContent right)
+        {
+            return
+                Helper.ListIsEqual(left.Streams, right.Streams) &&
+                Helper.ListIsEqual(left.Paths, right.Paths) &&
+                left.IsCubic == right.IsCubic &&
+                left.CropRectangle == right.CropRectangle &&
+                Helper.ListIsEqual(left.Faces, right.Faces);
+        }
+        /// <inheritdoc/>
+        public bool Equals(ImageContent other)
+        {
+            return this == other;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj is ImageContent content)
+            {
+                return this == content;
+            }
+
+            return false;
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
         /// <inheritdoc/>
         public override string ToString()
         {

@@ -184,6 +184,19 @@ namespace Engine.Content
         }
 
         /// <summary>
+        /// Imports material texture data to image dictionary
+        /// </summary>
+        /// <param name="material">Material content</param>
+        /// <remarks>Replaces texture path with assigned name</remarks>
+        public void ImportImage(ref IMaterialContent material)
+        {
+            material.AmbientTexture = ImportImage(material.AmbientTexture);
+            material.DiffuseTexture = ImportImage(material.DiffuseTexture);
+            material.EmissiveTexture = ImportImage(material.EmissiveTexture);
+            material.NormalMapTexture = ImportImage(material.NormalMapTexture);
+            material.SpecularTexture = ImportImage(material.SpecularTexture);
+        }
+        /// <summary>
         /// Gets next image name
         /// </summary>
         /// <returns>Returns next image name</returns>
@@ -192,56 +205,29 @@ namespace Engine.Content
             return string.Format("_image_{0}_", Images.Count + 1);
         }
         /// <summary>
-        /// Imports material texture data to image dictionary
+        /// Imports a texture
         /// </summary>
-        /// <param name="material">Material content</param>
-        /// <remarks>Replaces texture path with assigned name</remarks>
-        public void ImportImage(ref IMaterialContent material)
+        /// <param name="textureName">Texture name</param>
+        /// <returns>Returns the assigned texture name in the content data instance</returns>
+        private string ImportImage(string textureName)
         {
-            if (!string.IsNullOrEmpty(material.AmbientTexture))
+            if (string.IsNullOrEmpty(textureName))
+            {
+                return textureName;
+            }
+
+            var content = ImageContent.Texture(textureName);
+            var img = Images.Where(v => v.Value == content);
+            if (!img.Any())
             {
                 string imageName = NextImageName();
 
-                Images.Add(imageName, ImageContent.Texture(material.AmbientTexture));
+                Images.Add(imageName, ImageContent.Texture(textureName));
 
-                material.AmbientTexture = imageName;
+                return imageName;
             }
 
-            if (!string.IsNullOrEmpty(material.DiffuseTexture))
-            {
-                string imageName = NextImageName();
-
-                Images.Add(imageName, ImageContent.Texture(material.DiffuseTexture));
-
-                material.DiffuseTexture = imageName;
-            }
-
-            if (!string.IsNullOrEmpty(material.EmissiveTexture))
-            {
-                string imageName = NextImageName();
-
-                Images.Add(imageName, ImageContent.Texture(material.EmissiveTexture));
-
-                material.EmissiveTexture = imageName;
-            }
-
-            if (!string.IsNullOrEmpty(material.NormalMapTexture))
-            {
-                string imageName = NextImageName();
-
-                Images.Add(imageName, ImageContent.Texture(material.NormalMapTexture));
-
-                material.NormalMapTexture = imageName;
-            }
-
-            if (!string.IsNullOrEmpty(material.SpecularTexture))
-            {
-                string imageName = NextImageName();
-
-                Images.Add(imageName, ImageContent.Texture(material.SpecularTexture));
-
-                material.SpecularTexture = imageName;
-            }
+            return img.First().Key;
         }
         /// <summary>
         /// Adds a submesh to mesh by mesh and material names

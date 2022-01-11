@@ -30,26 +30,6 @@ namespace Engine
                 || a.Min.Y > b.Max.Y || a.Max.Y < b.Min.Y
                 || a.Min.Z > b.Max.Z || a.Max.Z < b.Min.Z);
         }
-        /// <summary>
-        /// Compares two <see cref="BoundingBoxInt"/> instances for equality.
-        /// </summary>
-        /// <param name="left">A bounding box.</param>
-        /// <param name="right">Another bounding box.</param>
-        /// <returns>A value indicating whether the two bounding boxes are equal.</returns>
-        public static bool operator ==(BoundingBoxInt left, BoundingBoxInt right)
-        {
-            return left.Equals(right);
-        }
-        /// <summary>
-        /// Compares two <see cref="BoundingBoxInt"/> instances for inequality.
-        /// </summary>
-        /// <param name="left">A bounding box.</param>
-        /// <param name="right">Another bounding box.</param>
-        /// <returns>A value indicating whether the two bounding boxes are not equal.</returns>
-        public static bool operator !=(BoundingBoxInt left, BoundingBoxInt right)
-        {
-            return !(left == right);
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BoundingBoxInt"/> struct.
@@ -62,43 +42,43 @@ namespace Engine
             Max = max;
         }
 
-        /// <summary>
-        /// Compares another <see cref="BoundingBoxInt"/> instance with this instance for equality.
-        /// </summary>
-        /// <param name="other">A bounding box.</param>
-        /// <returns>A value indicating whether the bounding box is equal to this instance.</returns>
+        /// <inheritdoc/>
+        public static bool operator ==(BoundingBoxInt left, BoundingBoxInt right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(BoundingBoxInt left, BoundingBoxInt right)
+        {
+            return !(left == right);
+        }
+        /// <inheritdoc/>
         public bool Equals(BoundingBoxInt other)
         {
-            return Min == other.Min && Max == other.Max;
+            return
+                Min == other.Min &&
+                Max == other.Max;
         }
-        /// <summary>
-        /// Compares another object with this instance for equality.
-        /// </summary>
-        /// <param name="obj">An object.</param>
-        /// <returns>A value indicating whether the object is equal to this instance.</returns>
+        /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            BoundingBoxInt? b = obj as BoundingBoxInt?;
-            if (b.HasValue)
-                return this.Equals(b.Value);
+            var objV = obj as BoundingBoxInt?;
+            if (objV != null)
+            {
+                return Equals(objV);
+            }
 
             return false;
         }
-        /// <summary>
-        /// Calculates a hash code unique to the contents of this instance.
-        /// </summary>
-        /// <returns>A hash code.</returns>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return Min.GetHashCode() ^ Max.GetHashCode();
         }
-        /// <summary>
-        /// Creates a human-readable string with the contents of this instance.
-        /// </summary>
-        /// <returns>A human-readable string.</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return "[" + Min.ToString() + ", " + Max.ToString() + "]";
+            return $"[{Min}, {Max}]";
         }
     }
 }

@@ -414,7 +414,7 @@ namespace Engine
 
             if (topology == Topology.TriangleList)
             {
-                var verts = cylinder.GetVertices(segments);
+                var verts = cylinder.GetVertices(segments).ToArray();
 
                 for (int i = 0; i < segments - 2; i++)
                 {
