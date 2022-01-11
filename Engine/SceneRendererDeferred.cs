@@ -235,7 +235,7 @@ namespace Engine
                     DoDeferred(deferredEnabledComponents);
 
                     //Binds the result target
-                    SetTarget(Targets.Objects, true, Color.Transparent, false, false);
+                    SetTarget(Targets.Objects, false, Color.Transparent);
 
                     #region Final composition
 #if DEBUG
@@ -251,11 +251,6 @@ namespace Engine
 #endif
                     #endregion
                 }
-                else
-                {
-                    //Binds the result target
-                    SetTarget(Targets.Objects, true, Color.Transparent, true, true);
-                }
 
                 if (anyForward)
                 {
@@ -268,7 +263,7 @@ namespace Engine
             }
 
             //Binds the result target
-            SetTarget(Targets.UI, true, Color.Transparent, true, true);
+            SetTarget(Targets.UI, true, Color.Transparent);
 
             //Render to screen deferred disabled components
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
@@ -455,7 +450,7 @@ namespace Engine
 
             //Set g-buffer render targets
             graphics.SetRenderTargets(
-                geometryBuffer.Targets, true, Color.Black,
+                geometryBuffer.Targets, true, Color.Transparent,
                 graphics.DefaultDepthStencil, true, true,
                 true);
         }
@@ -471,8 +466,7 @@ namespace Engine
 
             //Set light buffer to draw lights
             graphics.SetRenderTargets(
-                lightBuffer.Targets, true, Color.Black,
-                graphics.DefaultDepthStencil, false, false,
+                lightBuffer.Targets, true, Color.Transparent,
                 false);
         }
 

@@ -634,7 +634,7 @@ namespace Engine
             #region Set Defaults
 
             SetDefaultViewport();
-            SetDefaultRenderTarget(true, Color4.Black, true, true);
+            SetDefaultRenderTarget(true, Color.Transparent, true, true);
 
             SetDepthStencilWRZEnabled();
             SetRasterizerDefault();
@@ -737,6 +737,18 @@ namespace Engine
         {
             SetViewport(Viewport);
         }
+
+        /// <summary>
+        /// Sets default render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Render target clear color</param>
+        public void SetDefaultRenderTarget(bool clearRT, Color4 clearRTColor)
+        {
+            SetRenderTargets(
+                renderTargetView, clearRT, clearRTColor,
+                false);
+        }
         /// <summary>
         /// Sets default render target
         /// </summary>
@@ -789,6 +801,47 @@ namespace Engine
             deviceContext.Rasterizer.SetViewports(rawVpArray);
         }
 
+        /// <summary>
+        /// Set render targets
+        /// </summary>
+        /// <param name="renderTargets">Render targets</param>
+        /// <param name="clearRT">Indicates whether the target must be cleared</param>
+        /// <param name="clearRTColor">Render target clear color</param>
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor)
+        {
+            SetRenderTargets(
+                renderTargets, clearRT, clearRTColor,
+                false);
+        }
+        /// <summary>
+        /// Set render targets
+        /// </summary>
+        /// <param name="renderTargets">Render targets</param>
+        /// <param name="clearRT">Indicates whether the target must be cleared</param>
+        /// <param name="clearRTColor">Render target clear color</param>
+        /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool freeOMResources)
+        {
+            if (freeOMResources)
+            {
+                ClearShaderResources();
+            }
+
+            var rtv = renderTargets?.GetRenderTargets()?.ToArray();
+            var rtvCount = renderTargets?.Count ?? 0;
+
+            deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv);
+
+            if (clearRT && rtv != null && rtvCount > 0)
+            {
+                for (int i = 0; i < rtvCount; i++)
+                {
+                    deviceContext.ClearRenderTargetView(
+                        rtv[i],
+                        clearRTColor);
+                }
+            }
+        }
         /// <summary>
         /// Set render targets
         /// </summary>

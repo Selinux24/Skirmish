@@ -91,7 +91,7 @@ namespace Engine
             }
 
             //Binds the UI target
-            SetTarget(Targets.UI, true, Color.Transparent, true, true);
+            SetTarget(Targets.UI, true, Color.Transparent);
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())

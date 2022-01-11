@@ -168,7 +168,6 @@ namespace Engine.UI
 
             graphics.SetRenderTargets(
                 renderTarget, true, BackColor,
-                null, false, false,
                 false);
 
             foreach (var item in Drawables)
@@ -177,7 +176,7 @@ namespace Engine.UI
             }
 
             graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget(false, Color4.Black, false, false);
+            graphics.SetDefaultRenderTarget(false, Color.Transparent);
 
             minimapBox.Texture = renderTexture;
             minimapBox.Draw(context);

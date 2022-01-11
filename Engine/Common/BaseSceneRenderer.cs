@@ -1080,24 +1080,24 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        protected virtual void SetTarget(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        protected virtual void SetTarget(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth = false, bool clearStencil = false)
         {
             switch (target)
             {
                 case Targets.Screen:
-                    BindDefaultTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    BindDefaultTarget(clearRT, clearRTColor);
                     break;
                 case Targets.Objects:
                     BindObjectsTarget(clearRT, clearRTColor, clearDepth, clearStencil);
                     break;
                 case Targets.UI:
-                    BindUITarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    BindUITarget(clearRT, clearRTColor);
                     break;
                 case Targets.Result:
-                    BindResultsTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    BindResultsTarget(clearRT, clearRTColor);
                     break;
                 default:
-                    BindDefaultTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    BindDefaultTarget(clearRT, clearRTColor);
                     break;
             }
         }
@@ -1108,12 +1108,12 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindDefaultTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindDefaultTarget(bool clearRT, Color4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
             //Restore backbuffer as render target and clear it
-            graphics.SetDefaultRenderTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetDefaultRenderTarget(clearRT, clearRTColor);
             graphics.SetDefaultViewport();
         }
         /// <summary>
@@ -1137,11 +1137,11 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindUITarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindUITarget(bool clearRT, Color4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
-            graphics.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
             graphics.SetDefaultViewport();
         }
         /// <summary>
@@ -1151,11 +1151,11 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindResultsTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindResultsTarget(bool clearRT, Color4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
-            graphics.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
             graphics.SetDefaultViewport();
         }
         /// <summary>
@@ -1165,11 +1165,11 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindPostProcessingTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindPostProcessingTarget(bool clearRT, Color4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
-            graphics.SetRenderTargets(postProcessingTarget1.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetRenderTargets(postProcessingTarget1.Targets, clearRT, clearRTColor);
 
             //Set local viewport
             var viewport = Scene.Game.Form.GetViewport();
@@ -1212,16 +1212,17 @@ namespace Engine.Common
             graphics.SetDepthStencilNone();
             graphics.SetBlendDefault();
 
+            processingDrawer.Bind();
+
             foreach (var postEffect in effects)
             {
                 //Toggles post-processing buffers
                 TogglePostProcessingTargets();
 
                 //Use the next buffer as render target
-                BindPostProcessingTarget(true, Color.Transparent, false, false);
+                BindPostProcessingTarget(false, Color.Transparent);
 
                 processingDrawer.UpdateEffectParameters(Scene, gameTime.TotalSeconds, texture, postEffect.Effect, postEffect.Parameters);
-                processingDrawer.Bind();
                 processingDrawer.Draw();
 
                 //Gets the source texture
@@ -1229,11 +1230,10 @@ namespace Engine.Common
             }
 
             //Set the result render target
-            SetTarget(target, true, Color.Transparent, false, false);
+            SetTarget(target, false, Color.Transparent);
 
             //Draw the result
             processingDrawer.UpdateEffectEmpty(Scene, texture);
-            processingDrawer.Bind();
             processingDrawer.Draw();
 
             return true;
@@ -1267,7 +1267,7 @@ namespace Engine.Common
         /// <param name="resultTarget">Result target</param>
         protected virtual void CombineTargets(Targets target1, Targets target2, Targets resultTarget)
         {
-            SetTarget(resultTarget, true, Color.Transparent, false, false);
+            SetTarget(resultTarget, false, Color.Transparent);
 
             var graphics = Scene.Game.Graphics;
 
@@ -1288,7 +1288,7 @@ namespace Engine.Common
         /// <param name="target">Target</param>
         protected virtual void DrawToScreen(Targets target)
         {
-            SetTarget(Targets.Screen, true, Color.Transparent, false, false);
+            SetTarget(Targets.Screen, false, Color.Transparent);
 
             var graphics = Scene.Game.Graphics;
 

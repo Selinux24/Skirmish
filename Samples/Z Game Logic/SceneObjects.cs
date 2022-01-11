@@ -1136,7 +1136,7 @@ namespace GameLogic
 
         private void ShowInventory(Soldier active)
         {
-
+            throw new NotImplementedException();
         }
     }
 }
