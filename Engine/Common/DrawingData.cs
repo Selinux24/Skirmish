@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -36,15 +35,15 @@ namespace Engine.Common
         /// <summary>
         /// Materials dictionary
         /// </summary>
-        public ConcurrentDictionary<string, IMeshMaterial> Materials { get; private set; } = new ConcurrentDictionary<string, IMeshMaterial>();
+        public Dictionary<string, IMeshMaterial> Materials { get; private set; } = new Dictionary<string, IMeshMaterial>();
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public ConcurrentDictionary<string, EngineShaderResourceView> Textures { get; private set; } = new ConcurrentDictionary<string, EngineShaderResourceView>();
+        public Dictionary<string, EngineShaderResourceView> Textures { get; private set; } = new Dictionary<string, EngineShaderResourceView>();
         /// <summary>
         /// Meshes
         /// </summary>
-        public ConcurrentDictionary<string, ConcurrentDictionary<string, Mesh>> Meshes { get; private set; } = new ConcurrentDictionary<string, ConcurrentDictionary<string, Mesh>>();
+        public Dictionary<string, Dictionary<string, Mesh>> Meshes { get; private set; } = new Dictionary<string, Dictionary<string, Mesh>>();
         /// <summary>
         /// Volume mesh
         /// </summary>
@@ -110,9 +109,9 @@ namespace Engine.Common
                 return;
             }
 
-            var taskList = modelContent.Images.Select(images =>
+            await Task.Run(() =>
             {
-                return Task.Run(() =>
+                foreach (var images in modelContent.Images)
                 {
                     var info = images.Value;
 
@@ -122,21 +121,11 @@ namespace Engine.Common
                         Logger.WriteWarning(nameof(DrawingData), $"Texture cannot be requested: {info}");
                     }
 
-                    if (!Helper.Retry(() => drw.Textures.TryAdd(images.Key, view), 5))
-                    {
-                        Logger.WriteWarning(nameof(DrawingData), $"Error adding texture {images.Key} to the texture dictionary.");
-                    }
+                    drw.Textures.Add(images.Key, view);
 
-                    return info.Count;
-                });
+                    if (info.Count > textureCount) textureCount = info.Count;
+                }
             });
-            var taskResults = await Task.WhenAll(taskList);
-
-            foreach (var result in taskResults)
-            {
-                //Set the maximum texture index in the model
-                if (result > textureCount) textureCount = result;
-            }
         }
         /// <summary>
         /// Initialize materials
@@ -150,22 +139,17 @@ namespace Engine.Common
                 return;
             }
 
-            var taskList = modelContent.Materials.Select(mat =>
+            await Task.Run(() =>
             {
-                return Task.Run(() =>
+                foreach (var mat in modelContent.Materials)
                 {
                     var matName = mat.Key;
                     var matContent = mat.Value;
 
                     var meshMaterial = matContent.CreateMeshMaterial(drw.Textures);
-
-                    if (!Helper.Retry(() => drw.Materials.TryAdd(matName, meshMaterial), 5))
-                    {
-                        Logger.WriteWarning(nameof(DrawingData), $"Error adding material {matName} to the material dictionary.");
-                    }
-                });
+                    drw.Materials.Add(matName, meshMaterial);
+                }
             });
-            await Task.WhenAll(taskList);
         }
         /// <summary>
         /// Initilize geometry
@@ -180,37 +164,15 @@ namespace Engine.Common
                 return;
             }
 
-            var taskList = modelContent.Geometry
-                .Select(mesh =>
-                {
-                    //Get the mesh geometry
-                    var submeshes = modelContent.Geometry[mesh.Key];
-
-                    //Get the mesh skinning info
-                    var skinningInfo = ReadSkinningData(description, modelContent, mesh.Key);
-
-                    return InitializeGeometryMesh(drw, description, skinningInfo, mesh.Key, submeshes);
-                })
-                .ToList();
-
-            List<Exception> ex = new List<Exception>();
-
-            while (taskList.Any())
+            foreach (var mesh in modelContent.Geometry)
             {
-                var t = await Task.WhenAny(taskList);
+                //Get the mesh geometry
+                var submeshes = modelContent.Geometry[mesh.Key];
 
-                taskList.Remove(t);
+                //Get the mesh skinning info
+                var skinningInfo = ReadSkinningData(description, modelContent, mesh.Key);
 
-                bool completedOk = t.Status == TaskStatus.RanToCompletion;
-                if (!completedOk)
-                {
-                    ex.Add(t.Exception);
-                }
-            }
-
-            if (ex.Any())
-            {
-                throw new AggregateException(ex);
+                await InitializeGeometryMesh(drw, description, skinningInfo, mesh.Key, submeshes);
             }
         }
         /// <summary>
@@ -258,20 +220,16 @@ namespace Engine.Common
 
                 if (!drw.Meshes.ContainsKey(meshName))
                 {
-                    var dict = new ConcurrentDictionary<string, Mesh>();
-                    dict.TryAdd(materialName, nMesh);
-
-                    if (!Helper.Retry(() => drw.Meshes.TryAdd(meshName, dict), 10))
+                    var dict = new Dictionary<string, Mesh>
                     {
-                        Logger.WriteWarning(nameof(DrawingData), $"Error adding new mesh {meshName} to the mesh dictionary.");
-                    }
+                        { materialName, nMesh }
+                    };
+
+                    drw.Meshes.Add(meshName, dict);
                 }
                 else
                 {
-                    if (!Helper.Retry(() => drw.Meshes[meshName].TryAdd(materialName, nMesh), 10))
-                    {
-                        Logger.WriteWarning(nameof(DrawingData), $"Error adding a {meshName} submesh to the mesh dictionary.");
-                    }
+                    drw.Meshes[meshName].Add(materialName, nMesh);
                 }
             }
         }
@@ -341,7 +299,7 @@ namespace Engine.Common
         /// <param name="materials">Material dictionary</param>
         /// <param name="material">Material name</param>
         /// <returns>Returns the vertex type</returns>
-        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, ConcurrentDictionary<string, IMeshMaterial> materials, string material)
+        private static VertexTypes GetVertexType(VertexTypes vertexType, bool isSkinned, bool loadNormalMaps, Dictionary<string, IMeshMaterial> materials, string material)
         {
             var res = vertexType;
             if (isSkinned)
@@ -566,13 +524,6 @@ namespace Engine.Common
             });
 
             drw.lights.AddRange(modelLights);
-        }
-        /// <summary>
-        /// Lights collection
-        /// </summary>
-        public IEnumerable<ISceneLight> GetLights()
-        {
-            return lights.Select(l => l.Clone()).ToArray();
         }
 
         /// <summary>
@@ -805,6 +756,14 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Gets a copy of the lights collection
+        /// </summary>
+        public IEnumerable<ISceneLight> GetLights()
+        {
+            return lights.Select(l => l.Clone()).ToArray();
+        }
+
+        /// <summary>
         /// Skinning information
         /// </summary>
         struct SkinningInfo
@@ -822,6 +781,7 @@ namespace Engine.Common
             /// </summary>
             public IEnumerable<string> BoneNames;
         }
+
         /// <summary>
         /// Mesh information
         /// </summary>
