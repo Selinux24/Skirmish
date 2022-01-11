@@ -164,15 +164,15 @@ namespace Engine.Common
                 return;
             }
 
-            foreach (var mesh in modelContent.Geometry)
+            foreach (var meshName in modelContent.Geometry.Keys)
             {
                 //Get the mesh geometry
-                var submeshes = modelContent.Geometry[mesh.Key];
+                var submeshes = modelContent.Geometry[meshName];
 
                 //Get the mesh skinning info
-                var skinningInfo = ReadSkinningData(description, modelContent, mesh.Key);
+                var skinningInfo = ReadSkinningData(description, modelContent, meshName);
 
-                await InitializeGeometryMesh(drw, description, skinningInfo, mesh.Key, submeshes);
+                await InitializeGeometryMesh(drw, description, skinningInfo, meshName, submeshes);
             }
         }
         /// <summary>
@@ -195,28 +195,22 @@ namespace Engine.Common
             drw.volumeMesh.AddRange(volumeTriangles);
 
             //Extract meshes
-            var taskList = submeshes
-                .Where(g => !g.Value.IsVolume)
-                .Select(material =>
-                {
-                    var geometry = material.Value;
-
-                    //Get vertex type
-                    var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.Materials, material.Key);
-
-                    return CreateMesh(meshName, geometry, vertexType, description.Constraint, skinningInfo);
-                });
-            var taskResults = await Task.WhenAll(taskList);
-
-            foreach (var result in taskResults)
+            var subMeshList = submeshes.Where(g => !g.Value.IsVolume).ToArray();
+            foreach (var subMesh in subMeshList)
             {
-                if (!result.Any())
+                var geometry = subMesh.Value;
+
+                //Get vertex type
+                var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.Materials, subMesh.Key);
+
+                var meshInfo = await CreateMesh(meshName, geometry, vertexType, description.Constraint, skinningInfo);
+                if (!meshInfo.Any())
                 {
                     continue;
                 }
 
-                var nMesh = result.First().Mesh;
-                var materialName = result.First().MaterialName;
+                var nMesh = meshInfo.First().Mesh;
+                var materialName = meshInfo.First().MaterialName;
 
                 if (!drw.Meshes.ContainsKey(meshName))
                 {

@@ -49,7 +49,7 @@ namespace Engine.Common
 
             if (resource == null)
             {
-                resource = new EngineShaderResourceView(variable.Description.Name, srv);
+                resource = new EngineShaderResourceView(variable.Description.Name ?? nameof(EngineEffectVariableTexture), srv);
             }
             else
             {
