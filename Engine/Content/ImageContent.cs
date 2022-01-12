@@ -9,7 +9,7 @@ namespace Engine.Content
     /// <summary>
     /// Image content
     /// </summary>
-    public class ImageContent : IEquatable<ImageContent>
+    public sealed class ImageContent : IEquatable<ImageContent>
     {
         /// <summary>
         /// Image data in stream
@@ -259,7 +259,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            return base.GetHashCode();
+            return
+                Streams?.GetHashCode() ?? 0 ^
+                Paths?.GetHashCode() ?? 0 ^
+                IsCubic.GetHashCode() ^
+                CropRectangle.GetHashCode() ^
+                Faces?.GetHashCode() ?? 0;
         }
         /// <inheritdoc/>
         public override string ToString()
