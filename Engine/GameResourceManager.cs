@@ -259,14 +259,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, ImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView CreateGlobalResource(string name, IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
-            GameResourceImageContent resource = new GameResourceImageContent()
-            {
-                ImageContent = imageContent,
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var resource = new GameResourceImageContent(imageContent, mipAutogen, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -282,12 +277,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, string path, bool mipAutogen = true, bool dynamic = false)
         {
-            GameResourceImageContent resource = new GameResourceImageContent()
-            {
-                ImageContent = new ImageContent() { Path = path },
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var resource = new GameResourceImageContent(new FileImageContent(path), mipAutogen, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -303,12 +293,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
-            GameResourceImageContent resource = new GameResourceImageContent()
-            {
-                ImageContent = new ImageContent() { Stream = stream },
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var resource = new GameResourceImageContent(new MemoryImageContent(stream), mipAutogen, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -388,7 +373,7 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(ImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView RequestResource(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
             var existingResource = TryGetResource(imageContent, out string resourceKey);
             if (existingResource != null)
@@ -401,12 +386,7 @@ namespace Engine
                 return requestedResources[resourceKey].ResourceView;
             }
 
-            var request = new GameResourceImageContent
-            {
-                ImageContent = imageContent,
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var request = new GameResourceImageContent(imageContent, mipAutogen, dynamic);
 
             if (!requestedResources.TryAdd(resourceKey, request))
             {
@@ -424,7 +404,7 @@ namespace Engine
         /// <returns>Returns the engine shader resource view</returns>
         public EngineShaderResourceView RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
         {
-            return RequestResource(new ImageContent { Path = path }, mipAutogen, dynamic);
+            return RequestResource(new FileImageContent(path), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -435,7 +415,7 @@ namespace Engine
         /// <returns>Returns the engine shader resource view</returns>
         public EngineShaderResourceView RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
-            return RequestResource(new ImageContent { Stream = stream }, mipAutogen, dynamic);
+            return RequestResource(new MemoryImageContent(stream), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -519,156 +499,14 @@ namespace Engine
         /// <param name="imageContent">Image content</param>
         /// <param name="key">Resource key</param>
         /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResource(ImageContent imageContent, out string key)
+        private EngineShaderResourceView TryGetResource(IImageContent imageContent, out string key)
         {
-            if (imageContent.IsCubic)
-            {
-                return TryGetResourceCubic(imageContent, out key);
-            }
-            else if (imageContent.IsArray)
-            {
-                return TryGetResourceArray(imageContent, out key);
-            }
-            else
-            {
-                return TryGetResourceDefault(imageContent, out key);
-            }
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResourceDefault(ImageContent imageContent, out string key)
-        {
-            key = null;
-
-            if (!string.IsNullOrWhiteSpace(imageContent.Path))
-            {
-                return TryGet(imageContent.Path, out key);
-            }
-            else if (imageContent.Stream != null)
-            {
-                return TryGet(imageContent.Stream, out key);
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResourceArray(ImageContent imageContent, out string key)
-        {
-            key = null;
-
-            if (imageContent.Paths.Any())
-            {
-                return TryGet(imageContent.Paths, out key);
-            }
-            else if (imageContent.Streams.Any())
-            {
-                return TryGet(imageContent.Streams, out key);
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResourceCubic(ImageContent imageContent, out string key)
-        {
-            key = null;
-
-            if (imageContent.IsArray)
-            {
-                if (imageContent.Paths.Any())
-                {
-                    return TryGet(imageContent.Paths, out key);
-                }
-                else if (imageContent.Streams.Any())
-                {
-                    return TryGet(imageContent.Streams, out key);
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrWhiteSpace(imageContent.Path))
-                {
-                    return TryGet(imageContent.Path, out key);
-                }
-                else if (imageContent.Stream != null)
-                {
-                    return TryGet(imageContent.Stream, out key);
-                }
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="path">Path to file</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(string path, out string key)
-        {
-            key = path;
-            if (!resources.ContainsKey(key))
+            key = imageContent?.GetResourceKey();
+            if (key == null)
             {
                 return null;
             }
 
-            return resources[key];
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="stream">Memory stream</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(MemoryStream stream, out string key)
-        {
-            key = stream.GetMd5Sum();
-            if (!resources.ContainsKey(key))
-            {
-                stream.Position = 0;
-                return null;
-            }
-
-            return resources[key];
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="paths">Path list</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(IEnumerable<string> paths, out string key)
-        {
-            key = paths.GetMd5Sum();
-            if (!resources.ContainsKey(key))
-            {
-                return null;
-            }
-
-            return resources[key];
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="streams">Stream list</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(IEnumerable<MemoryStream> streams, out string key)
-        {
-            key = streams.GetMd5Sum();
             if (!resources.ContainsKey(key))
             {
                 return null;

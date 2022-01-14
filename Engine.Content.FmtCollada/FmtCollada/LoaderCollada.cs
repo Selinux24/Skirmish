@@ -266,11 +266,11 @@ namespace Engine.Content.FmtCollada
             {
                 if (image.Data != null)
                 {
-                    modelContent.Images[image.Id] = ImageContent.Texture(new MemoryStream((byte[])image.Data));
+                    modelContent.Images[image.Id] = new MemoryImageContent(new MemoryStream((byte[])image.Data));
                 }
                 else if (!string.IsNullOrEmpty(image.InitFrom))
                 {
-                    modelContent.Images[image.Id] = ImageContent.Texture(contentFolder, Uri.UnescapeDataString(image.InitFrom));
+                    modelContent.Images[image.Id] = new FileArrayImageContent(contentFolder, Uri.UnescapeDataString(image.InitFrom));
                 }
             }
         }

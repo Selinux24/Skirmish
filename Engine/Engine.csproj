@@ -138,6 +138,12 @@
     <Compile Include="BasicManipulatorControllerState.cs" />
     <Compile Include="Common\BaseSceneObjectState.cs" />
     <Compile Include="Common\ManipulatorControllerState.cs" />
+    <Compile Include="Content\FileArrayImageContent.cs" />
+    <Compile Include="Content\FileCubicImageContent.cs" />
+    <Compile Include="Content\IImageContent.cs" />
+    <Compile Include="Content\MemoryArrayImageContent.cs" />
+    <Compile Include="Content\MemoryCubicImageContent.cs" />
+    <Compile Include="Content\MemoryImageContent.cs" />
     <Compile Include="Content\Persistence\AnimationFile.cs" />
     <Compile Include="Animation\AnimationPath.cs" />
     <Compile Include="Animation\AnimationPathItem.cs" />
@@ -619,7 +625,7 @@
     <Compile Include="Content\ContentManager.cs" />
     <Compile Include="Content\ControllerContent.cs" />
     <Compile Include="Content\MaterialPhongContent.cs" />
-    <Compile Include="Content\ImageContent.cs" />
+    <Compile Include="Content\FileImageContent.cs" />
     <Compile Include="Content\MeshContent.cs" />
     <Compile Include="Content\ContentData.cs" />
     <Compile Include="Content\SkinningContent.cs" />

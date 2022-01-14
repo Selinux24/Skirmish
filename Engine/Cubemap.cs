@@ -240,7 +240,7 @@ namespace Engine
         /// <param name="faces">Texture faces</param>
         protected void InitializeTextureCubic(string textureFileName, Rectangle[] faces = null)
         {
-            var image = ImageContent.Cubic(textureFileName, faces);
+            var image = new FileCubicImageContent(textureFileName, faces);
 
             texture = Game.ResourceManager.RequestResource(image);
         }
@@ -250,7 +250,7 @@ namespace Engine
         /// <param name="textureFileNames">Texture file names</param>
         protected void InitializeTextureArray(string[] textureFileNames)
         {
-            var image = ImageContent.Array(textureFileNames);
+            var image = new FileArrayImageContent(textureFileNames);
 
             texture = Game.ResourceManager.RequestResource(image);
         }

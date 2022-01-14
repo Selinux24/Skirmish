@@ -79,7 +79,7 @@ namespace Engine
             MaxDecalCount = description.MaxDecalCount;
             RotateDecals = description.RotateDecals;
 
-            var imgContent = ImageContent.Texture(description.TextureName);
+            var imgContent = new FileArrayImageContent(description.TextureName);
             Texture = scene.Game.ResourceManager.RequestResource(imgContent);
             TextureCount = (uint)imgContent.Count;
 

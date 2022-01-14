@@ -729,13 +729,13 @@ namespace Engine
 
             if (textureCount > 0)
             {
-                var image = ImageContent.Array(contentPath, channel.VegetationTextures);
+                var image = new FileArrayImageContent(contentPath, channel.VegetationTextures);
                 foliageTextures = Game.ResourceManager.RequestResource(image);
             }
 
             if (normalMapCount > 0)
             {
-                var image = ImageContent.Array(contentPath, channel.VegetationNormalMaps);
+                var image = new FileArrayImageContent(contentPath, channel.VegetationNormalMaps);
                 foliageNormalMaps = Game.ResourceManager.RequestResource(image);
             }
 

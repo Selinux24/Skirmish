@@ -2032,7 +2032,7 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTexture(string filename, Rectangle rectangle, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTexture(string name, string filename, Rectangle rectangle, bool mipAutogen, bool dynamic)
         {
             try
             {
@@ -2040,7 +2040,7 @@ namespace Engine
 
                 using (var resource = TextureData.ReadTexture(filename, rectangle))
                 {
-                    return CreateResource(resource, mipAutogen, dynamic);
+                    return new EngineShaderResourceView(name, CreateResource(resource, mipAutogen, dynamic));
                 }
             }
             catch (Exception ex)
@@ -2056,7 +2056,7 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTexture(MemoryStream stream, Rectangle rectangle, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTexture(string name, MemoryStream stream, Rectangle rectangle, bool mipAutogen, bool dynamic)
         {
             try
             {
@@ -2064,7 +2064,7 @@ namespace Engine
 
                 using (var resource = TextureData.ReadTexture(stream, rectangle))
                 {
-                    return CreateResource(resource, mipAutogen, dynamic);
+                    return new EngineShaderResourceView(name, CreateResource(resource, mipAutogen, dynamic));
                 }
             }
             catch (Exception ex)
@@ -2080,13 +2080,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureArray(string filename, IEnumerable<Rectangle> rectangles, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, string filename, IEnumerable<Rectangle> rectangles, bool mipAutogen, bool dynamic)
         {
             try
             {
                 var textureList = TextureData.ReadTextureArray(filename, rectangles);
 
-                return CreateResource(textureList, mipAutogen, dynamic);
+                return new EngineShaderResourceView(name, CreateResource(textureList, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -2101,13 +2101,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureArray(MemoryStream stream, IEnumerable<Rectangle> rectangles, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, MemoryStream stream, IEnumerable<Rectangle> rectangles, bool mipAutogen, bool dynamic)
         {
             try
             {
                 var textureList = TextureData.ReadTextureArray(stream, rectangles);
 
-                return CreateResource(textureList, mipAutogen, dynamic);
+                return new EngineShaderResourceView(name, CreateResource(textureList, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -2122,13 +2122,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureArray(IEnumerable<string> filenames, Rectangle rectangle, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<string> filenames, Rectangle rectangle, bool mipAutogen, bool dynamic)
         {
             try
             {
                 var textureList = TextureData.ReadTextureArray(filenames, rectangle);
 
-                return CreateResource(textureList, mipAutogen, dynamic);
+                return new EngineShaderResourceView(name, CreateResource(textureList, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -2143,13 +2143,13 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureArray(IEnumerable<MemoryStream> streams, Rectangle rectangle, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<MemoryStream> streams, Rectangle rectangle, bool mipAutogen, bool dynamic)
         {
             try
             {
                 var textureList = TextureData.ReadTextureArray(streams, rectangle);
 
-                return CreateResource(textureList, mipAutogen, dynamic);
+                return new EngineShaderResourceView(name, CreateResource(textureList, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -2164,7 +2164,7 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureCubic(string filename, IEnumerable<Rectangle> faces, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureCubic(string name, string filename, IEnumerable<Rectangle> faces, bool mipAutogen, bool dynamic)
         {
             try
             {
@@ -2174,13 +2174,13 @@ namespace Engine
                 {
                     var resources = TextureData.ReadTextureCubic(filename, faces);
 
-                    return CreateResourceCubic(resources, mipAutogen, dynamic);
+                    return new EngineShaderResourceView(name, CreateResourceCubic(resources, mipAutogen, dynamic));
                 }
                 else
                 {
                     var resource = TextureData.ReadTexture(filename, Rectangle.Empty);
 
-                    return CreateResourceCubic(resource, mipAutogen, dynamic);
+                    return new EngineShaderResourceView(name, CreateResourceCubic(resource, mipAutogen, dynamic));
                 }
             }
             catch (Exception ex)
@@ -2196,7 +2196,7 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns the resource view</returns>
-        internal ShaderResourceView1 LoadTextureCubic(MemoryStream stream, IEnumerable<Rectangle> faces, bool mipAutogen, bool dynamic)
+        public EngineShaderResourceView LoadTextureCubic(string name, MemoryStream stream, IEnumerable<Rectangle> faces, bool mipAutogen, bool dynamic)
         {
             try
             {
@@ -2206,13 +2206,13 @@ namespace Engine
                 {
                     var resources = TextureData.ReadTextureCubic(stream, faces);
 
-                    return CreateResourceCubic(resources, mipAutogen, dynamic);
+                    return new EngineShaderResourceView(name, CreateResourceCubic(resources, mipAutogen, dynamic));
                 }
                 else
                 {
                     var resource = TextureData.ReadTexture(stream, Rectangle.Empty);
 
-                    return CreateResourceCubic(resource, mipAutogen, dynamic);
+                    return new EngineShaderResourceView(name, CreateResourceCubic(resource, mipAutogen, dynamic));
                 }
             }
             catch (Exception ex)
@@ -2229,7 +2229,7 @@ namespace Engine
         /// <param name="seed">Random seed</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created texture</returns>
-        internal ShaderResourceView1 CreateRandomTexture(int size, float min, float max, int seed = 0, bool dynamic = true)
+        public EngineShaderResourceView CreateRandomTexture(string name, int size, float min, float max, int seed = 0, bool dynamic = true)
         {
             try
             {
@@ -2243,7 +2243,7 @@ namespace Engine
                     randomValues.Add(rnd.NextVector4(new Vector4(min), new Vector4(max)));
                 }
 
-                return CreateTexture1D(size, randomValues, dynamic);
+                return new EngineShaderResourceView(name, CreateTexture1D(size, randomValues, dynamic));
             }
             catch (Exception ex)
             {
@@ -2309,7 +2309,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a depth stencil view</returns>
-        internal EngineDepthStencilView CreateDepthStencil(string name, Format format, int width, int height, bool useSamples)
+        public EngineDepthStencilView CreateDepthStencil(string name, Format format, int width, int height, bool useSamples)
         {
             bool multiSampled = false;
             SampleDescription sampleDescription = new SampleDescription(1, 0);
@@ -2361,7 +2361,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a render target and its texture</returns>
-        internal (EngineRenderTargetView RenderTarget, EngineShaderResourceView ShaderResource) CreateRenderTargetTexture(string name, Format format, int width, int height, bool useSamples)
+        public (EngineRenderTargetView RenderTarget, EngineShaderResourceView ShaderResource) CreateRenderTargetTexture(string name, Format format, int width, int height, bool useSamples)
         {
             try
             {
@@ -2397,7 +2397,7 @@ namespace Engine
         /// <param name="arraySize">Render target list size</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a render target and its textures</returns>
-        internal (EngineRenderTargetView RenderTarget, IEnumerable<EngineShaderResourceView> ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
+        public (EngineRenderTargetView RenderTarget, IEnumerable<EngineShaderResourceView> ShaderResources) CreateRenderTargetTexture(string name, Format format, int width, int height, int arraySize, bool useSamples)
         {
             try
             {
@@ -2438,7 +2438,7 @@ namespace Engine
         /// <param name="multiSampled">Create a multisampled texture</param>
         /// <param name="sampleDescription">Sample description</param>
         /// <returns>Returns a render target and its texture</returns>
-        internal (RenderTargetView1 RenderTarget, ShaderResourceView1 ShaderResource) CreateRenderTargetTexture(Format format, int width, int height, bool multiSampled, SampleDescription sampleDescription)
+        private (RenderTargetView1 RenderTarget, ShaderResourceView1 ShaderResource) CreateRenderTargetTexture(Format format, int width, int height, bool multiSampled, SampleDescription sampleDescription)
         {
             using (var texture = new Texture2D1(
                 device,
@@ -2495,7 +2495,7 @@ namespace Engine
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <returns>Returns the depth stencil buffer and its texture</returns>
-        internal (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height)
+        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2550,7 +2550,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="mapCount">Per stencil view map count</param>
         /// <returns>Returns the depth stencil buffer and its texture</returns>
-        internal (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height, int mapCount)
+        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateShadowMapTextures(string name, int width, int height, int mapCount)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2608,7 +2608,7 @@ namespace Engine
         /// <param name="mapCount">Per stencil view map count</param>
         /// <param name="arraySize">Array size</param>
         /// <returns>Returns the depth stencil buffer list and its texture</returns>
-        internal (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateShadowMapTextureArrays(string name, int width, int height, int mapCount, int arraySize)
+        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateShadowMapTextureArrays(string name, int width, int height, int mapCount, int arraySize)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2671,7 +2671,7 @@ namespace Engine
         /// <param name="width">Face width</param>
         /// <param name="height">Face height</param>
         /// <returns>Returns the depth stencil buffer and its texture</returns>
-        internal (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextures(string name, int width, int height)
+        public (EngineDepthStencilView DepthStencil, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextures(string name, int width, int height)
         {
             var depthMap = new Texture2D1(
                 device,
@@ -2729,7 +2729,7 @@ namespace Engine
         /// <param name="height">Face height</param>
         /// <param name="arraySize">Array size</param>
         /// <returns>Returns the depth stencil buffer list and its texture</returns>
-        internal (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextureArrays(string name, int width, int height, int arraySize)
+        public (IEnumerable<EngineDepthStencilView> DepthStencils, EngineShaderResourceView ShaderResource) CreateCubicShadowMapTextureArrays(string name, int width, int height, int arraySize)
         {
             var depthMap = new Texture2D1(
                 device,

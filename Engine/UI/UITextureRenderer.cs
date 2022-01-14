@@ -98,7 +98,7 @@ namespace Engine.UI
                 return null;
             }
 
-            var image = ImageContent.Array(contentPath, textures);
+            var image = new FileArrayImageContent(contentPath, textures);
             return Game.ResourceManager.RequestResource(image);
         }
 

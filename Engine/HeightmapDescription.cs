@@ -137,7 +137,7 @@ namespace Engine
 
                     material.DiffuseTexture = diffuseTexureName;
 
-                    var diffuseImage = ImageContent.Array(Textures.ContentPath, Textures.TexturesLR);
+                    var diffuseImage = new FileArrayImageContent(Textures.ContentPath, Textures.TexturesLR);
 
                     modelContent.Images.Add(diffuseTexureName, diffuseImage);
                 }
@@ -148,7 +148,7 @@ namespace Engine
 
                     material.NormalMapTexture = nmapTexureName;
 
-                    var nmapImage = ImageContent.Array(Textures.ContentPath, Textures.NormalMaps);
+                    var nmapImage = new FileArrayImageContent(Textures.ContentPath, Textures.NormalMaps);
 
                     modelContent.Images.Add(nmapTexureName, nmapImage);
                 }

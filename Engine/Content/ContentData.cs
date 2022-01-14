@@ -32,7 +32,7 @@ namespace Engine.Content
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public Dictionary<string, ImageContent> Images { get; private set; } = new Dictionary<string, ImageContent>();
+        public Dictionary<string, IImageContent> Images { get; private set; } = new Dictionary<string, IImageContent>();
         /// <summary>
         /// Material dictionary
         /// </summary>
@@ -216,13 +216,13 @@ namespace Engine.Content
                 return textureName;
             }
 
-            var content = ImageContent.Texture(textureName);
-            var img = Images.Where(v => v.Value == content);
+            var content = new FileArrayImageContent(textureName);
+            var img = Images.Where(v => v.Value.Equals(content));
             if (!img.Any())
             {
                 string imageName = NextImageName();
 
-                Images.Add(imageName, ImageContent.Texture(textureName));
+                Images.Add(imageName, content);
 
                 return imageName;
             }

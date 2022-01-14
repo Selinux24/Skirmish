@@ -224,7 +224,7 @@ namespace Engine.Content.FmtObj
                 string path = Path.Combine(contentFolder, texture);
                 if (File.Exists(path))
                 {
-                    m.Images.Add(texture, new ImageContent() { Path = path });
+                    m.Images.Add(texture, new FileArrayImageContent(path));
                 }
             }
         }

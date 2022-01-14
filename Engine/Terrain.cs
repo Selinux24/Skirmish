@@ -920,13 +920,13 @@ namespace Engine
         {
             string tContentPath = Path.Combine(baseContentPath, description.ContentPath);
 
-            var normalMapTextures = ImageContent.Array(tContentPath, description.NormalMaps);
+            var normalMapTextures = new FileArrayImageContent(tContentPath, description.NormalMaps);
             terrainNormalMaps = Game.ResourceManager.RequestResource(normalMapTextures);
 
             if (description.UseSlopes)
             {
-                var texturesLR = ImageContent.Array(tContentPath, description.TexturesLR);
-                var texturesHR = ImageContent.Array(tContentPath, description.TexturesHR);
+                var texturesLR = new FileArrayImageContent(tContentPath, description.TexturesLR);
+                var texturesHR = new FileArrayImageContent(tContentPath, description.TexturesHR);
 
                 terrainTexturesLR = Game.ResourceManager.RequestResource(texturesLR);
                 terrainTexturesHR = Game.ResourceManager.RequestResource(texturesHR);
@@ -934,8 +934,8 @@ namespace Engine
 
             if (description.UseAlphaMapping)
             {
-                var colors = ImageContent.Array(tContentPath, description.ColorTextures);
-                var aMap = ImageContent.Texture(tContentPath, description.AlphaMap);
+                var colors = new FileArrayImageContent(tContentPath, description.ColorTextures);
+                var aMap = new FileArrayImageContent(tContentPath, description.AlphaMap);
 
                 colorTextures = Game.ResourceManager.RequestResource(colors);
                 alphaMap = Game.ResourceManager.RequestResource(aMap);

@@ -39,8 +39,9 @@ namespace Engine
         /// <param name="game">Game</param>
         public void Create(Game game)
         {
-            var srv = game.Graphics.CreateRandomTexture(Size, Min, Max, Seed, Dynamic);
-            ResourceView.SetResource(srv);
+            var resource = game.Graphics.CreateRandomTexture(ResourceView.Name, Size, Min, Max, Seed, Dynamic).GetResource();
+
+            ResourceView.SetResource(resource);
         }
     }
 }

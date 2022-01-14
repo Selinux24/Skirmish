@@ -174,7 +174,7 @@ namespace Engine.UI
         /// <param name="textures">Texture names</param>
         private void InitializeTexture(string contentPath, string[] textures)
         {
-            var image = ImageContent.Array(contentPath, textures);
+            var image = new FileArrayImageContent(contentPath, textures);
             spriteTexture = Game.ResourceManager.RequestResource(image);
         }
 
