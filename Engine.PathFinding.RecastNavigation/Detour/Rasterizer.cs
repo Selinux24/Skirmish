@@ -114,15 +114,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (zp1.Count < 3) continue;
 
                 // find the horizontal bounds in the row
-                float minX = zp1[0].X;
-                float maxX = zp1[0].X;
-                for (int i = 1; i < zp1.Count; i++)
-                {
-                    minX = Math.Min(minX, zp1[i].X);
-                    maxX = Math.Max(maxX, zp1[i].X);
-                }
-                int x0 = (int)((minX - b.Minimum.X) * ics);
-                int x1 = (int)((maxX - b.Minimum.X) * ics);
+                var (MinX, MaxX) = CalculateSpanMinMaxX(zp1, b);
+                int x0 = (int)(MinX * ics);
+                int x1 = (int)(MaxX * ics);
                 x0 = MathUtil.Clamp(x0, 0, w - 1);
                 x1 = MathUtil.Clamp(x1, 0, w - 1);
 
@@ -137,21 +131,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     if (xp1.Count < 3) continue;
 
                     // Calculate min and max of the span.
-                    float minY = xp1[0].Y;
-                    float maxY = xp1[0].Y;
-                    for (int i = 1; i < xp1.Count; ++i)
-                    {
-                        minY = Math.Min(minY, xp1[i].Y);
-                        maxY = Math.Max(maxY, xp1[i].Y);
-                    }
-                    minY -= b.Minimum.Y;
-                    maxY -= b.Minimum.Y;
+                    var (MinY, MaxY) = CalculateSpanMinMaxY(xp1, b);
+                    float minY = MinY;
+                    float maxY = MaxY;
                     // Skip the span if it is outside the heightfield bbox
-                    if (maxY < 0.0f) continue;
-                    if (minY > by) continue;
+                    if (SpanOutsideBBox(minY, maxY, by))
+                    {
+                        continue;
+                    }
                     // Clamp the span to the heightfield bbox.
-                    if (minY < 0.0f) minY = 0;
-                    if (maxY > by) maxY = by;
+                    SpanClamp(ref minY, ref maxY, by);
 
                     // Snap the span to the heightfield height grid.
                     int ismin = MathUtil.Clamp((int)Math.Floor(minY * ich), 0, Span.SpanMaxHeight);
@@ -162,6 +151,46 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             return true;
+        }
+        private static bool SpanOutsideBBox(float min, float max, float size)
+        {
+            if (max < 0.0f) return true;
+            if (min > size) return true;
+
+            return false;
+        }
+        private static void SpanClamp(ref float min, ref float max, float size)
+        {
+            if (min < 0.0f) min = 0;
+            if (max > size) max = size;
+        }
+        private static (float MinX, float MaxX) CalculateSpanMinMaxX(IEnumerable<Vector3> spanVertices, BoundingBox bbox)
+        {
+            float minX = spanVertices.First().X;
+            float maxX = spanVertices.First().X;
+            for (int i = 1; i < spanVertices.Count(); i++)
+            {
+                minX = Math.Min(minX, spanVertices.ElementAt(i).X);
+                maxX = Math.Max(maxX, spanVertices.ElementAt(i).X);
+            }
+            minX -= bbox.Minimum.X;
+            maxX -= bbox.Minimum.X;
+
+            return (minX, maxX);
+        }
+        private static (float MinY, float MaxY) CalculateSpanMinMaxY(IEnumerable<Vector3> spanVertices, BoundingBox bbox)
+        {
+            float minY = spanVertices.First().Y;
+            float maxY = spanVertices.First().Y;
+            for (int i = 1; i < spanVertices.Count(); ++i)
+            {
+                minY = Math.Min(minY, spanVertices.ElementAt(i).Y);
+                maxY = Math.Max(maxY, spanVertices.ElementAt(i).Y);
+            }
+            minY -= bbox.Minimum.Y;
+            maxY -= bbox.Minimum.Y;
+
+            return (minY, maxY);
         }
         private static void DividePoly(List<Vector3> inPoly, List<Vector3> outPoly1, List<Vector3> outPoly2, float x, int axis)
         {

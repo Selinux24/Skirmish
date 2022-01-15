@@ -197,33 +197,43 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
                 }
-                float t = n / d;
-                if (d < 0)
+
+                if (!EvaluateSegment(j, n, d, ref tmin, ref tmax, ref segMin, ref segMax))
                 {
-                    // segment S is entering across this edge
-                    if (t > tmin)
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        private static bool EvaluateSegment(int index, float n, float d, ref float tmin, ref float tmax, ref int segMin, ref int segMax)
+        {
+            float t = n / d;
+            if (d < 0)
+            {
+                // segment S is entering across this edge
+                if (t > tmin)
+                {
+                    tmin = t;
+                    segMin = index;
+                    // S enters after leaving polygon
+                    if (tmin > tmax)
                     {
-                        tmin = t;
-                        segMin = j;
-                        // S enters after leaving polygon
-                        if (tmin > tmax)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
-                else
+            }
+            else
+            {
+                // segment S is leaving across this edge
+                if (t < tmax)
                 {
-                    // segment S is leaving across this edge
-                    if (t < tmax)
+                    tmax = t;
+                    segMax = index;
+                    // S leaves before entering polygon
+                    if (tmax < tmin)
                     {
-                        tmax = t;
-                        segMax = j;
-                        // S leaves before entering polygon
-                        if (tmax < tmin)
-                        {
-                            return false;
-                        }
+                        return false;
                     }
                 }
             }
