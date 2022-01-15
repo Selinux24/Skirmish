@@ -4,7 +4,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// <summary>
     /// Configuration parameters for a crowd agent.
     /// </summary>
-    public class CrowdAgentParams
+    public class CrowdAgentParameters
     {
         /// <summary>
         /// Agent radius.

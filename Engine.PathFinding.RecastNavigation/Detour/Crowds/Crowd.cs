@@ -308,7 +308,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="pos">The requested position of the agent.</param>
         /// <param name="param">The configutation of the agent.</param>
         /// <returns>The new agent.</returns>
-        public CrowdAgent AddAgent(Vector3 pos, CrowdAgentParams param)
+        public CrowdAgent AddAgent(Vector3 pos, CrowdAgentParameters param)
         {
             // Find nearest position on navmesh and place the agent there.
             Status status = m_navquery.FindNearestPoly(

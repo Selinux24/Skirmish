@@ -110,7 +110,7 @@ P: Change Partition Type (SHIFT reverse).
 T: Toggle using Tile Cache.
 F5: Saves the graph to a file.
 F6: Loads the graph from a file.
-Left Mouse: Update current tile (SHIFT remove).
+Left Mouse: Update current tile (SHIFT remove, CTRL add).
 Middle Mouse: Finds random point around circle (5 units).
 Space: Finds random over navmesh";
             help.Visible = false;
@@ -415,22 +415,32 @@ Space: Finds random over navmesh";
             }
         }
 
-        private void ToggleTile(Vector3 tilePosition)
+        private bool ToggleTile(Vector3 tilePosition)
         {
-            graphDrawer.Clear();
+            bool remove = Game.Input.ShiftPressed;
+            bool create = Game.Input.ControlPressed;
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            if (!Game.Input.ShiftPressed)
+            try
             {
-                NavigationGraph.CreateAt(tilePosition);
+                if (create)
+                {
+                    return NavigationGraph.CreateAt(tilePosition);
+                }
+
+                if (remove)
+                {
+                    return NavigationGraph.RemoveAt(tilePosition);
+                }
+
+                return NavigationGraph.UpdateAt(tilePosition);
             }
-            else
+            finally
             {
-                NavigationGraph.RemoveAt(tilePosition);
+                sw.Stop();
+                lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
             }
-            sw.Stop();
-            lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
         }
 
         public override void GameGraphicsResized()

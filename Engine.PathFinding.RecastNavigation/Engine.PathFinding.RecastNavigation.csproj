@@ -169,7 +169,7 @@
     <Compile Include="Detour\Crowds\CrowdAgent.cs" />
     <Compile Include="Detour\Crowds\CrowdAgentAnimation.cs" />
     <Compile Include="Detour\Crowds\CrowdAgentDebugInfo.cs" />
-    <Compile Include="Detour\Crowds\CrowdAgentParams.cs" />
+    <Compile Include="Detour\Crowds\CrowdAgentParameters.cs" />
     <Compile Include="Detour\Crowds\CrowdAgentState.cs" />
     <Compile Include="Detour\Crowds\CrowdNeighbour.cs" />
     <Compile Include="Detour\Crowds\MoveRequestState.cs" />

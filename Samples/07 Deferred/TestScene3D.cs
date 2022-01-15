@@ -1122,7 +1122,7 @@ namespace Deferred
 
             crowd = graph.AddCrowd(settings);
 
-            var par = new CrowdAgentParams()
+            var par = new CrowdAgentParameters()
             {
                 Radius = tankAgentType.Radius,
                 Height = tankAgentType.Height,

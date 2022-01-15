@@ -665,7 +665,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 foreach (var tile in tiles)
                 {
-                    TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
+                    TileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA, false);
                 }
 
                 TileCache.BuildTilesAt(x, y);

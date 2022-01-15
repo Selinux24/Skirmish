@@ -56,47 +56,47 @@ namespace Engine.PathFinding
         /// Creates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>
-        void CreateAt(Vector3 position);
+        bool CreateAt(Vector3 position);
         /// <summary>
         /// Creates the graph at specified box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        void CreateAt(BoundingBox bbox);
+        bool CreateAt(BoundingBox bbox);
         /// <summary>
         /// Creates the graph at specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
-        void CreateAt(IEnumerable<Vector3> positions);
+        bool CreateAt(IEnumerable<Vector3> positions);
         /// <summary>
         /// Updates the graph at specified position
         /// </summary>
         /// <param name="position">Position</param>
-        void UpdateAt(Vector3 position);
+        bool UpdateAt(Vector3 position);
         /// <summary>
         /// Updates the graph at specified box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        void UpdateAt(BoundingBox bbox);
+        bool UpdateAt(BoundingBox bbox);
         /// <summary>
         /// Updates the graph at specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
-        void UpdateAt(IEnumerable<Vector3> positions);
+        bool UpdateAt(IEnumerable<Vector3> positions);
         /// <summary>
         /// Removes the graph node at specified position
         /// </summary>
         /// <param name="position">Position</param>
-        void RemoveAt(Vector3 position);
+        bool RemoveAt(Vector3 position);
         /// <summary>
         /// Removes the graph node at specified box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        void RemoveAt(BoundingBox bbox);
+        bool RemoveAt(BoundingBox bbox);
         /// <summary>
         /// Removes the graph node at specified position list
         /// </summary>
         /// <param name="positions">Position list</param>
-        void RemoveAt(IEnumerable<Vector3> positions);
+        bool RemoveAt(IEnumerable<Vector3> positions);
 
         /// <summary>
         /// Adds a cylinder obstacle

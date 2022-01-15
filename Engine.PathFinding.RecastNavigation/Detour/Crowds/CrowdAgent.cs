@@ -63,7 +63,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// The agent's configuration parameters.
         /// </summary>
-        public CrowdAgentParams Params { get; set; } = new CrowdAgentParams();
+        public CrowdAgentParameters Params { get; set; } = new CrowdAgentParameters();
 
         /// <summary>
         /// The local path corridor corners for the agent.
