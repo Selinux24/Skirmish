@@ -718,7 +718,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="hp">Height patch</param>
         /// <param name="outVerts">Resulting vertices</param>
         /// <param name="outTris">Resulting triangle indices</param>
-        public void BuildPolyDetail(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, out Vector3[] outVerts, out Int3[] outTris)
+        public void BuildPolyDetail(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, out IEnumerable<Vector3> outVerts, out IEnumerable<Int3> outTris)
         {
             float sampleDist = param.SampleDist;
             float sampleMaxError = param.SampleMaxError;

@@ -415,7 +415,7 @@ Space: Finds random over navmesh";
             }
         }
 
-        private bool ToggleTile(Vector3 tilePosition)
+        private void ToggleTile(Vector3 tilePosition)
         {
             bool remove = Game.Input.ShiftPressed;
             bool create = Game.Input.ControlPressed;
@@ -426,15 +426,17 @@ Space: Finds random over navmesh";
             {
                 if (create)
                 {
-                    return NavigationGraph.CreateAt(tilePosition);
+                    NavigationGraph.CreateAt(tilePosition);
+                    return;
                 }
 
                 if (remove)
                 {
-                    return NavigationGraph.RemoveAt(tilePosition);
+                    NavigationGraph.RemoveAt(tilePosition);
+                    return;
                 }
 
-                return NavigationGraph.UpdateAt(tilePosition);
+                NavigationGraph.UpdateAt(tilePosition);
             }
             finally
             {
