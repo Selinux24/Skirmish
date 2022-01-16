@@ -988,7 +988,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     verts.Add(bestpt);
 
                     // Create new triangulation. Full rebuild.
-                    DelaunayHull.Build(verts, hull.Take(nhull), out var dTris, out var dEdges);
+                    var dhull = DelaunayHull.Build(verts, hull.Take(nhull));
+                    var dTris = dhull.GetTris();
+                    var dEdges = dhull.GetEdges();
+
                     edges.Clear();
                     edges.AddRange(dEdges);
                     tris.Clear();
