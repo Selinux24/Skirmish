@@ -84,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     indices[j] = j;
                 }
 
-                int ntris = RecastUtils.Triangulate(cont.Vertices, ref indices, out Int3[] tris);
+                int ntris = RecastUtils.Triangulate(cont.Vertices, ref indices, out var tris);
                 if (ntris <= 0)
                 {
                     // Bad triangulation, should not happen.
@@ -96,7 +96,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int j = 0; j < cont.NVertices; ++j)
                 {
                     var v = cont.Vertices[j];
-                    indices[j] = mesh.AddVertex(v.X, v.Y, v.Z, firstVert, nextVert);
+                    indices[j] = mesh.AddVertex(v.X, v.Y, v.Z, ref firstVert, ref nextVert);
                     if ((v.W & ContourSet.RC_BORDER_VERTEX) != 0)
                     {
                         // This vertex should be removed.
@@ -109,7 +109,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 IndexedPolygon[] polys = new IndexedPolygon[maxVertsPerCont];
                 for (int j = 0; j < ntris; ++j)
                 {
-                    var t = tris[j];
+                    var t = tris.ElementAt(j);
                     if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                     {
                         polys[npolys] = new IndexedPolygon(DetourUtils.DT_VERTS_PER_POLYGON);
@@ -327,7 +327,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 for (int j = 0; j < pmesh.NVerts; ++j)
                 {
                     var v = pmesh.Verts[j];
-                    vremap[j] = res.AddVertex(v.X + ox, v.Y, v.Z + oz, firstVert, nextVert);
+                    vremap[j] = res.AddVertex(v.X + ox, v.Y, v.Z + oz, ref firstVert, ref nextVert);
                 }
 
                 for (int j = 0; j < pmesh.NPolys; ++j)
@@ -469,7 +469,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="firstVert">First vertex</param>
         /// <param name="nextVert">Next vertex</param>
         /// <returns>Returns the added index</returns>
-        private int AddVertex(int x, int y, int z, int[] firstVert, int[] nextVert)
+        private int AddVertex(int x, int y, int z, ref int[] firstVert, ref int[] nextVert)
         {
             int bucket = ComputeVertexHash(x, 0, z);
             int i = firstVert[bucket];
@@ -759,7 +759,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Triangulate the hole.
-            int ntris = RecastUtils.Triangulate(tverts, ref thole, out Int3[] tris);
+            int ntris = RecastUtils.Triangulate(tverts, ref thole, out var tris);
             if (ntris < 0)
             {
                 Logger.WriteWarning(this, "removeVertex: triangulate() returned bad results.");
@@ -775,7 +775,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int npolys = 0;
             for (int j = 0; j < ntris; ++j)
             {
-                var t = tris[j];
+                var t = tris.ElementAt(j);
                 if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                 {
                     polys[npolys] = new IndexedPolygon();

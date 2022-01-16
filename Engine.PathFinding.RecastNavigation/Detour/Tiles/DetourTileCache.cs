@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 {
@@ -411,7 +412,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     indices[j] = j;
                 }
 
-                int ntris = RecastUtils.Triangulate(cont.Verts, ref indices, out Int3[] tris);
+                int ntris = RecastUtils.Triangulate(cont.Verts, ref indices, out var tris);
                 if (ntris <= 0)
                 {
                     Logger.WriteWarning(nameof(DetourTileCache), $"Polygon contour triangulation error: Index {i} - {cont}");
@@ -436,7 +437,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 IndexedPolygon[] polys = new IndexedPolygon[maxVertsPerCont];
                 for (int j = 0; j < ntris; ++j)
                 {
-                    var t = tris[j];
+                    var t = tris.ElementAt(j);
                     if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                     {
                         polys[npolys] = new IndexedPolygon(DetourUtils.DT_VERTS_PER_POLYGON);
@@ -1479,7 +1480,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             }
 
             // Triangulate the hole.
-            int ntris = RecastUtils.Triangulate(tverts, ref thole, out Int3[] tris);
+            int ntris = RecastUtils.Triangulate(tverts, ref thole, out var tris);
             if (ntris < 0)
             {
                 Logger.WriteWarning(nameof(DetourTileCache), "Hole triangulation error");
@@ -1501,7 +1502,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             int npolys = 0;
             for (int j = 0; j < ntris; ++j)
             {
-                var t = tris[j];
+                var t = tris.ElementAt(j);
                 if (t.X != t.Y && t.X != t.Z && t.Y != t.Z)
                 {
                     polys[npolys][0] = hole[t.X];
