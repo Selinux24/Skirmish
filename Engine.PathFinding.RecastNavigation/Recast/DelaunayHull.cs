@@ -13,10 +13,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         public static DelaunayHull Build(IEnumerable<Vector3> pts, IEnumerable<int> hull)
         {
-            int nhull = hull.Count();
-            int maxEdges = pts.Count() * 10;
-            DelaunayHull dhull = new DelaunayHull(maxEdges);
+            int max = pts.Count() * 10;
+            DelaunayHull dhull = new DelaunayHull(max);
 
+            int nhull = hull.Count();
             for (int i = 0, j = nhull - 1; i < nhull; j = i++)
             {
                 dhull.AddEdge(hull.ElementAt(j), hull.ElementAt(i), (int)EdgeValues.EV_HULL, (int)EdgeValues.EV_UNDEF);
@@ -240,62 +240,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private int FindBestPointOnLeft(int s, int t, IEnumerable<Vector3> pts)
         {
-            int pt = pts.Count();
-            Vector3 c = new Vector3();
-            float r = -1;
-            for (int u = 0; u < pts.Count(); ++u)
-            {
-                if (u == s || u == t)
-                {
-                    continue;
-                }
-
-                if (RecastUtils.VCross2(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u)) > float.Epsilon)
-                {
-                    if (r < 0)
-                    {
-                        // The circle is not updated yet, do it now.
-                        pt = u;
-                        CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
-                        continue;
-                    }
-                    float d = Vector2.Distance(c.XZ(), pts.ElementAt(u).XZ());
-                    float tol = 0.001f;
-                    if (d > r * (1 + tol))
-                    {
-                        // Outside current circumcircle, skip.
-                    }
-                    else if (d < r * (1 - tol))
-                    {
-                        // Inside safe circumcircle, update circle.
-                        pt = u;
-                        CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
-                    }
-                    else
-                    {
-                        // Inside epsilon circum circle, do extra tests to make sure the edge is valid.
-                        // s-u and t-u cannot overlap with s-pt nor t-pt if they exists.
-                        if (OverlapEdges(s, u, pts))
-                        {
-                            continue;
-                        }
-                        if (OverlapEdges(t, u, pts))
-                        {
-                            continue;
-                        }
-                        // Edge is valid.
-                        pt = u;
-                        CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
-                    }
-                }
-            }
-
-            return pt;
+            return FindBestPointOnCircleFromPoint(s, t, pts.Count(), pts);
         }
         private int FindBestPointOnCircleFromPoint(int s, int t, int point, IEnumerable<Vector3> pts)
         {
             int pt = point;
-            Vector3 c = new Vector3();
+            Vector3 c = Vector3.Zero;
             float r = -1;
             for (int u = 0; u < pts.Count(); ++u)
             {
@@ -322,29 +272,31 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (d > r * (1 + tol))
                 {
                     // Outside current circumcircle, skip.
+                    continue;
                 }
-                else if (d < r * (1 - tol))
+
+                if (d < r * (1 - tol))
                 {
                     // Inside safe circumcircle, update circle.
                     pt = u;
                     CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
+                    continue;
                 }
-                else
+
+                // Inside epsilon circum circle, do extra tests to make sure the edge is valid.
+                // s-u and t-u cannot overlap with s-pt nor t-pt if they exists.
+                if (OverlapEdges(s, u, pts))
                 {
-                    // Inside epsilon circum circle, do extra tests to make sure the edge is valid.
-                    // s-u and t-u cannot overlap with s-pt nor t-pt if they exists.
-                    if (OverlapEdges(s, u, pts))
-                    {
-                        continue;
-                    }
-                    if (OverlapEdges(t, u, pts))
-                    {
-                        continue;
-                    }
-                    // Edge is valid.
-                    pt = u;
-                    CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
+                    continue;
                 }
+                if (OverlapEdges(t, u, pts))
+                {
+                    continue;
+                }
+
+                // Edge is valid.
+                pt = u;
+                CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
             }
 
             return pt;
