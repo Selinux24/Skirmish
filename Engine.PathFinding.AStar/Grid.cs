@@ -253,7 +253,7 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public void Update(GameTime gameTime)
         {
-
+            //Updates the internal state
         }
         /// <summary>
         /// Fires the updated event
