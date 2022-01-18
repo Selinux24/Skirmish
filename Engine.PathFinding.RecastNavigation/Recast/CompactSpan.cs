@@ -46,8 +46,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public void SetCon(int dir, int i)
         {
             int shift = dir * 6;
-            int con = this.Con;
-            this.Con = (con & ~(0x3f << shift)) | ((i & 0x3f) << shift);
+            int con = Con;
+            Con = (con & ~(0x3f << shift)) | ((i & 0x3f) << shift);
         }
         /// <summary>
         /// Gets the connection index in the specified direction
@@ -57,7 +57,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public int GetCon(int dir)
         {
             int shift = dir * 6;
-            return (this.Con >> shift) & 0x3f;
+            return (Con >> shift) & 0x3f;
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Lower Extent {0}; Region {1}; Connection {2}; Height {3};", this.Y, this.Reg, this.Con, this.H);
+            return $"Lower Extent {Y}; Region {Reg}; Connection {Con}; Height {H};";
         }
     }
 }

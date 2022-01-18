@@ -146,6 +146,7 @@
     <Compile Include="GraphItem.cs" />
     <Compile Include="Recast\BuildPolyDetailParams.cs" />
     <Compile Include="Recast\DelaunayHull.cs" />
+    <Compile Include="Recast\HeightfieldLayerData.cs" />
     <Compile Include="Recast\PolyMeshTriangleIndices.cs" />
     <Compile Include="Recast\BuildContoursFlagTypes.cs" />
     <Compile Include="BuildModes.cs" />
