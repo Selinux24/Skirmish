@@ -14,6 +14,10 @@ namespace Engine.UI
         /// Bar sprite
         /// </summary>
         private readonly Sprite spriteBar = null;
+        /// <summary>
+        /// Base color
+        /// </summary>
+        private Color4 baseColor;
 
         /// <summary>
         /// Scroll mode
@@ -46,12 +50,14 @@ namespace Engine.UI
         {
             get
             {
-                return spriteBar.Color1;
+                return baseColor;
             }
             set
             {
-                spriteBar.Color1 = value;
-                spriteBar.Color3 = value;
+                baseColor = value;
+
+                spriteBar.Color1 = baseColor;
+                spriteBar.Color3 = baseColor;
             }
         }
 

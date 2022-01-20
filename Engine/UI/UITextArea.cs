@@ -47,6 +47,10 @@ namespace Engine.UI
         /// Current scrolls bar picked control
         /// </summary>
         private IUIControl currentPickedControl = null;
+        /// <summary>
+        /// Alpha component
+        /// </summary>
+        private float alpha;
 
         /// <summary>
         /// Gets or sets the control text
@@ -181,13 +185,15 @@ namespace Engine.UI
         {
             get
             {
-                return base.Alpha;
+                return alpha;
             }
             set
             {
-                base.Alpha = value;
+                alpha = value;
 
-                textDrawer.Alpha = value;
+                base.Alpha = alpha;
+
+                textDrawer.Alpha = alpha;
             }
         }
         /// <inheritdoc/>

@@ -14,6 +14,14 @@ namespace Engine.UI
         /// Progress sprite
         /// </summary>
         private readonly Sprite spriteProgress = null;
+        /// <summary>
+        /// Base color
+        /// </summary>
+        private Color4 baseColor;
+        /// <summary>
+        /// Alpha component
+        /// </summary>
+        private float alpha;
 
         /// <summary>
         /// Gets the caption
@@ -42,11 +50,13 @@ namespace Engine.UI
         {
             get
             {
-                return spriteProgress.Color1;
+                return baseColor;
             }
             set
             {
-                spriteProgress.Color1 = value;
+                baseColor = value;
+
+                spriteProgress.Color1 = baseColor;
             }
         }
         /// <inheritdoc/>
@@ -54,15 +64,17 @@ namespace Engine.UI
         {
             get
             {
-                return base.Alpha;
+                return alpha;
             }
             set
             {
-                base.Alpha = value;
+                alpha = value;
+
+                base.Alpha = alpha;
 
                 if (Caption != null)
                 {
-                    Caption.Alpha = value;
+                    Caption.Alpha = alpha;
                 }
             }
         }
