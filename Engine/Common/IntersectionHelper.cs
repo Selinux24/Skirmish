@@ -62,7 +62,7 @@ namespace Engine.Common
             }
             else if (two is IntersectionVolumeMesh twoMesh)
             {
-                return one.Contains(twoMesh) != ContainmentType.Disjoint;
+                return one.Contains((Triangle[])twoMesh) != ContainmentType.Disjoint;
             }
 
             return false;

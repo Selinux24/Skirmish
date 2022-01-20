@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -21,9 +22,9 @@ namespace Engine
         /// <summary>
         /// Gets if the current volume contains the bounding sphere
         /// </summary>
-        /// <param name="sph">Bounding sphere</param>
+        /// <param name="sphere">Bounding sphere</param>
         /// <returns>Returns the containment type</returns>
-        ContainmentType Contains(BoundingSphere sph);
+        ContainmentType Contains(BoundingSphere sphere);
         /// <summary>
         /// Gets if the current volume contains the bounding frustum
         /// </summary>
@@ -35,6 +36,6 @@ namespace Engine
         /// </summary>
         /// <param name="mesh">Mesh</param>
         /// <returns>Returns the containment type</returns>
-        ContainmentType Contains(Triangle[] mesh);
+        ContainmentType Contains(IEnumerable<Triangle> mesh);
     }
 }

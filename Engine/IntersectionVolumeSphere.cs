@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -7,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Sphere intersection volume
     /// </summary>
-    public class IntersectionVolumeSphere : IIntersectionVolume
+    public struct IntersectionVolumeSphere : IIntersectionVolume
     {
         /// <summary>
         /// Bounding sphere
@@ -22,12 +23,12 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="sph">Sphere</param>
-        public IntersectionVolumeSphere(BoundingSphere sph)
+        /// <param name="sphere">Sphere</param>
+        public IntersectionVolumeSphere(BoundingSphere sphere)
         {
-            this.sphere = sph;
+            this.sphere = sphere;
 
-            this.Position = sphere.Center;
+            Position = sphere.Center;
         }
         /// <summary>
         /// Constructor
@@ -36,9 +37,9 @@ namespace Engine
         /// <param name="radius">Sphere radius</param>
         public IntersectionVolumeSphere(Vector3 center, float radius)
         {
-            this.sphere = new BoundingSphere(center, radius);
+            sphere = new BoundingSphere(center, radius);
 
-            this.Position = sphere.Center;
+            Position = sphere.Center;
         }
 
         /// <summary>
@@ -46,9 +47,9 @@ namespace Engine
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(BoundingSphere sph)
+        public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Intersection.SphereContainsSphere(this.sphere, sph);
+            return Intersection.SphereContainsSphere(this.sphere, sphere);
         }
         /// <summary>
         /// Gets if the current volume contains the bounding sphere
@@ -57,7 +58,7 @@ namespace Engine
         /// <returns>Returns the containment type</returns>
         public ContainmentType Contains(BoundingBox bbox)
         {
-            return Intersection.SphereContainsBox(this.sphere, bbox);
+            return Intersection.SphereContainsBox(sphere, bbox);
         }
         /// <summary>
         /// Gets if the current volume contains the bounding frustum
@@ -66,16 +67,16 @@ namespace Engine
         /// <returns>Returns the containment type</returns>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
-            return Intersection.SphereContainsFrustum(this.sphere, frustum);
+            return Intersection.SphereContainsFrustum(sphere, frustum);
         }
         /// <summary>
         /// Gets if the current volume contains the mesh
         /// </summary>
         /// <param name="mesh">Mesh</param>
         /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(Triangle[] mesh)
+        public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
-            return Intersection.SphereContainsMesh(this.sphere, mesh);
+            return Intersection.SphereContainsMesh(sphere, mesh);
         }
 
         /// <summary>

@@ -1077,6 +1077,36 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Determines whether a Triangle mesh contains a BoundingSphere.
+        /// </summary>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="sphere">Sphere</param>
+        /// <returns>Returns the type of containment the two objects have between them</returns>
+        public static ContainmentType MeshContainsSphere(IEnumerable<Triangle> mesh, BoundingSphere sphere)
+        {
+            return SphereContainsMesh(sphere, mesh);
+        }
+        /// <summary>
+        /// Determines whether a Triangle mesh contains a BoundingBox.
+        /// </summary>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="box">Axis aligned box</param>
+        /// <returns>Returns the type of containment the two objects have between them</returns>
+        public static ContainmentType MeshContainsBox(IEnumerable<Triangle> mesh, BoundingBox box)
+        {
+            return BoxContainsMesh(box, mesh);
+        }
+        /// <summary>
+        /// Determines whether a Triangle mesh contains a BoundingFrustum.
+        /// </summary>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="frustum">Frustum</param>
+        /// <returns>Returns the type of containment the two objects have between them</returns>
+        public static ContainmentType MeshContainsFrustum(IEnumerable<Triangle> mesh, BoundingFrustum frustum)
+        {
+            return FrustumContainsMesh(frustum, mesh);
+        }
+        /// <summary>
         /// Determines whether a Triangle mesh contains a Triangle mesh.
         /// </summary>
         /// <param name="mesh1">Triangle mesh one</param>

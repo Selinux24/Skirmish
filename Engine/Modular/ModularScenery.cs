@@ -1587,13 +1587,13 @@ namespace Engine.Modular
             /// <summary>
             /// Gets if the current volume contains the bounding sphere
             /// </summary>
-            /// <param name="sph">Bounding sphere</param>
+            /// <param name="sphere">Bounding sphere</param>
             /// <returns>Returns the containment type</returns>
-            public ContainmentType Contains(BoundingSphere sph)
+            public ContainmentType Contains(BoundingSphere sphere)
             {
                 for (int i = 0; i < visibleBoxes.Count; i++)
                 {
-                    var res = Intersection.BoxContainsSphere(visibleBoxes[i], sph);
+                    var res = Intersection.BoxContainsSphere(visibleBoxes[i], sphere);
 
                     if (res != ContainmentType.Disjoint) return res;
                 }
@@ -1621,7 +1621,7 @@ namespace Engine.Modular
             /// </summary>
             /// <param name="mesh">Mesh</param>
             /// <returns>Returns the containment type</returns>
-            public ContainmentType Contains(Triangle[] mesh)
+            public ContainmentType Contains(IEnumerable<Triangle> mesh)
             {
                 for (int i = 0; i < visibleBoxes.Count; i++)
                 {

@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -7,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Frustum intersection volume
     /// </summary>
-    public class IntersectionVolumeFrustum : IIntersectionVolume
+    public struct IntersectionVolumeFrustum : IIntersectionVolume
     {
         /// <summary>
         /// Internal volume
@@ -31,7 +32,8 @@ namespace Engine
         {
             this.frustum = frustum;
 
-            this.Position = frustum.GetCameraParams().Position;
+            Position = frustum.GetCameraParams().Position;
+            Radius = frustum.GetCameraParams().ZFar;
         }
         /// <summary>
         /// Constructor
@@ -39,10 +41,10 @@ namespace Engine
         /// <param name="viewProj">Camera view * projection matrix</param>
         public IntersectionVolumeFrustum(Matrix viewProj)
         {
-            this.frustum = new BoundingFrustum(viewProj);
+            frustum = new BoundingFrustum(viewProj);
 
-            this.Position = frustum.GetCameraParams().Position;
-            this.Radius = frustum.GetCameraParams().ZFar;
+            Position = frustum.GetCameraParams().Position;
+            Radius = frustum.GetCameraParams().ZFar;
         }
 
         /// <summary>
@@ -50,9 +52,9 @@ namespace Engine
         /// </summary>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(BoundingSphere sph)
+        public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Intersection.FrustumContainsSphere(this.frustum, sph);
+            return Intersection.FrustumContainsSphere(frustum, sphere);
         }
         /// <summary>
         /// Gets if the current volume contains the bounding sphere
@@ -61,7 +63,7 @@ namespace Engine
         /// <returns>Returns the containment type</returns>
         public ContainmentType Contains(BoundingBox bbox)
         {
-            return Intersection.FrustumContainsBox(this.frustum, bbox);
+            return Intersection.FrustumContainsBox(frustum, bbox);
         }
         /// <summary>
         /// Gets if the current volume contains the bounding frustum
@@ -77,9 +79,9 @@ namespace Engine
         /// </summary>
         /// <param name="mesh">Mesh</param>
         /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(Triangle[] mesh)
+        public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
-            return ContainmentType.Disjoint;
+            return Intersection.FrustumContainsMesh(frustum, mesh);
         }
 
         /// <summary>

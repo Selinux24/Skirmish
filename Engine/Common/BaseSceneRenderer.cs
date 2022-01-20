@@ -374,15 +374,30 @@ namespace Engine.Common
             Scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             //Update active components
-            var updatables = Scene.GetComponents<IUpdatable>()
-                .Where(c => c.Active)
-                .ToList();
+            var updatables = Scene
+                .GetComponents<IUpdatable>()
+                .Where(c => c.Active);
+
             if (updatables.Any())
             {
-                updatables.ForEach(EarlyUpdateCall);
-                updatables.ForEach(UpdateCall);
-                updatables.ForEach(LateUpdateCall);
+                int degreeOfParalelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75 * 2.0);
+
+                updatables
+                    .AsParallel()
+                    .WithDegreeOfParallelism(degreeOfParalelism)
+                    .ForAll(EarlyUpdateCall);
+
+                updatables
+                    .AsParallel()
+                    .WithDegreeOfParallelism(degreeOfParalelism)
+                    .ForAll(UpdateCall);
+
+                updatables
+                    .AsParallel()
+                    .WithDegreeOfParallelism(degreeOfParalelism)
+                    .ForAll(LateUpdateCall);
             }
+
             Updated = true;
         }
         /// <summary>
