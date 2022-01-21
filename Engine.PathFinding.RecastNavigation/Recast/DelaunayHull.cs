@@ -7,6 +7,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 {
     class DelaunayHull
     {
+        private const float Tolerance = 0.001f;
+
         private readonly int maxEdges;
         private readonly List<Int4> edges = new List<Int4>();
         private int faces;
@@ -259,47 +261,50 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                if (r < 0)
+                if (PointOnCircleFromPoint(s, t, u, pts, c, r))
                 {
-                    // The circle is not updated yet, do it now.
+                    //Circle valid. Update
                     pt = u;
                     CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
-                    continue;
                 }
-
-                float d = Vector2.Distance(c.XZ(), pts.ElementAt(u).XZ());
-                float tol = 0.001f;
-                if (d > r * (1 + tol))
-                {
-                    // Outside current circumcircle, skip.
-                    continue;
-                }
-
-                if (d < r * (1 - tol))
-                {
-                    // Inside safe circumcircle, update circle.
-                    pt = u;
-                    CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
-                    continue;
-                }
-
-                // Inside epsilon circum circle, do extra tests to make sure the edge is valid.
-                // s-u and t-u cannot overlap with s-pt nor t-pt if they exists.
-                if (OverlapEdges(s, u, pts))
-                {
-                    continue;
-                }
-                if (OverlapEdges(t, u, pts))
-                {
-                    continue;
-                }
-
-                // Edge is valid.
-                pt = u;
-                CircumCircle(pts.ElementAt(s), pts.ElementAt(t), pts.ElementAt(u), out c, out r);
             }
 
             return pt;
+        }
+        private bool PointOnCircleFromPoint(int s, int t, int u, IEnumerable<Vector3> pts, Vector3 c, float r)
+        {
+            if (r < 0)
+            {
+                // The circle is not updated yet, do it now.
+                return true;
+            }
+
+            float d = Vector2.Distance(c.XZ(), pts.ElementAt(u).XZ());
+            if (d > r * (1 + Tolerance))
+            {
+                // Outside current circumcircle, skip.
+                return false;
+            }
+
+            if (d < r * (1 - Tolerance))
+            {
+                // Inside safe circumcircle, update circle.
+                return true;
+            }
+
+            // Inside epsilon circum circle, do extra tests to make sure the edge is valid.
+            // s-u and t-u cannot overlap with s-pt nor t-pt if they exists.
+            if (OverlapEdges(s, u, pts))
+            {
+                return false;
+            }
+            if (OverlapEdges(t, u, pts))
+            {
+                return false;
+            }
+
+            // Edge is valid.
+            return true;
         }
         private bool OverlapEdges(int s, int t, IEnumerable<Vector3> pts)
         {

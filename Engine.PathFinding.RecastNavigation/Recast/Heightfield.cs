@@ -267,15 +267,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="walkableClimb">Walkable climb</param>
         public void FilterLedgeSpans(int walkableHeight, int walkableClimb)
         {
-            int w = Width;
-            int h = Height;
-
             // Mark border spans.
-            for (int y = 0; y < h; ++y)
+            for (int y = 0; y < Height; ++y)
             {
-                for (int x = 0; x < w; ++x)
+                for (int x = 0; x < Width; ++x)
                 {
-                    for (Span s = Spans[x + y * w]; s != null; s = s.next)
+                    for (Span s = Spans[x + y * Width]; s != null; s = s.next)
                     {
                         // Skip non walkable spans.
                         if (s.area == AreaTypes.RC_NULL_AREA)
@@ -283,76 +280,92 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                             continue;
                         }
 
-                        int bot = s.smax;
-                        int top = s.next != null ? s.next.smin : int.MaxValue;
-
-                        // Find neighbours minimum height.
-                        int minh = int.MaxValue;
-
-                        // Min and max height of accessible neighbours.
-                        int asmin = s.smax;
-                        int asmax = s.smax;
-
-                        for (int dir = 0; dir < 4; ++dir)
-                        {
-                            // Skip neighbours which are out of bounds.
-                            int dx = x + RecastUtils.GetDirOffsetX(dir);
-                            int dy = y + RecastUtils.GetDirOffsetY(dir);
-                            if (dx < 0 || dy < 0 || dx >= w || dy >= h)
-                            {
-                                minh = Math.Min(minh, -walkableClimb - bot);
-                                continue;
-                            }
-
-                            // From minus infinity to the first span.
-                            var ns = Spans[dx + dy * w];
-                            int nbot = -walkableClimb;
-                            int ntop = ns != null ? ns.smin : int.MaxValue;
-
-                            // Skip neightbour if the gap between the spans is too small.
-                            if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-                            {
-                                minh = Math.Min(minh, nbot - bot);
-                            }
-
-                            // Rest of the spans.
-                            ns = Spans[dx + dy * w];
-                            while (ns != null)
-                            {
-                                nbot = ns.smax;
-                                ntop = ns.next != null ? ns.next.smin : int.MaxValue;
-
-                                // Skip neightbour if the gap between the spans is too small.
-                                if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
-                                {
-                                    minh = Math.Min(minh, nbot - bot);
-
-                                    // Find min/max accessible neighbour height. 
-                                    if (Math.Abs(nbot - bot) <= walkableClimb)
-                                    {
-                                        if (nbot < asmin) asmin = nbot;
-                                        if (nbot > asmax) asmax = nbot;
-                                    }
-
-                                }
-
-                                ns = ns.next;
-                            }
-                        }
-
-                        if (minh < -walkableClimb)
-                        {
-                            // The current span is close to a ledge if the drop to any neighbour span is less than the walkableClimb.
-                            s.area = AreaTypes.RC_NULL_AREA;
-                        }
-                        else if ((asmax - asmin) > walkableClimb)
-                        {
-                            // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
-                            s.area = AreaTypes.RC_NULL_AREA;
-                        }
+                        FilterLedgeSpan(s, x, y, Width, Height, walkableHeight, walkableClimb);
                     }
                 }
             }
+        }
+        private void FilterLedgeSpan(Span span, int x, int y, int width, int height, int walkableHeight, int walkableClimb)
+        {
+            // Find neighbours minimum height.
+            int minh = int.MaxValue;
+
+            // Min and max height of accessible neighbours.
+            int asmin = span.smax;
+            int asmax = span.smax;
+
+            for (int dir = 0; dir < 4; ++dir)
+            {
+                // Skip neighbours which are out of bounds.
+                int dx = x + RecastUtils.GetDirOffsetX(dir);
+                int dy = y + RecastUtils.GetDirOffsetY(dir);
+                if (dx < 0 || dy < 0 || dx >= width || dy >= height)
+                {
+                    minh = Math.Min(minh, -walkableClimb - span.smax);
+                    continue;
+                }
+
+                var ns = Spans[dx + dy * width];
+                var (MinHeight, AsMin, AsMax) = FindMinimumHeight(ns, span, walkableHeight, walkableClimb, minh, asmin, asmax);
+                minh = MinHeight;
+                asmin = AsMin;
+                asmax = AsMax;
+            }
+
+            if (minh < -walkableClimb)
+            {
+                // The current span is close to a ledge if the drop to any neighbour span is less than the walkableClimb.
+                span.area = AreaTypes.RC_NULL_AREA;
+            }
+            else if ((asmax - asmin) > walkableClimb)
+            {
+                // If the difference between all neighbours is too large, we are at steep slope, mark the span as ledge.
+                span.area = AreaTypes.RC_NULL_AREA;
+            }
+        }
+        private (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
+        {
+            int minh = minHeight;
+            int asmin = minimumAccessibleNeigbor;
+            int asmax = maximumAccessibleNeigbor;
+
+            int bot = span.smax;
+            int top = span.next != null ? span.next.smin : int.MaxValue;
+
+            // From minus infinity to the first span.
+            int nbot = -walkableClimb;
+            int ntop = nSpan != null ? nSpan.smin : int.MaxValue;
+
+            // Skip neightbour if the gap between the spans is too small.
+            if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
+            {
+                minh = Math.Min(minh, nbot - bot);
+            }
+
+            var ns = nSpan;
+            while (ns != null)
+            {
+                nbot = ns.smax;
+                ntop = ns.next != null ? ns.next.smin : int.MaxValue;
+
+                // Skip neightbour if the gap between the spans is too small.
+                if (Math.Min(top, ntop) - Math.Max(bot, nbot) > walkableHeight)
+                {
+                    minh = Math.Min(minh, nbot - bot);
+
+                    // Find min/max accessible neighbour height. 
+                    if (Math.Abs(nbot - bot) <= walkableClimb)
+                    {
+                        if (nbot < asmin) asmin = nbot;
+                        if (nbot > asmax) asmax = nbot;
+                    }
+
+                }
+
+                ns = ns.next;
+            }
+
+            return (minh, asmin, asmax);
         }
         /// <summary>
         /// Filters the low-height spans
