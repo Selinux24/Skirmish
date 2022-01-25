@@ -20,10 +20,9 @@ namespace Heightmap
 #endif
 
 #if DEBUG
-                var screen = EngineForm.ScreenSize * 0.8f;
-                using (Game cl = new Game("8 Heightmap", false, screen.X, screen.Y, true, 0, 0))
+                using (Game cl = new Game("8 Heightmap", EngineForm.ScreenSize * 0.8f))
 #else
-                using (Game cl = new Game("8 Heightmap", true, 0, 0, true, 0, 4))
+                using (Game cl = new Game("8 Heightmap"))
 #endif
                 {
 #if DEBUG

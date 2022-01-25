@@ -21,10 +21,9 @@ namespace Collada
 #endif
 
 #if DEBUG
-                var screen = EngineForm.ScreenSize * 0.8f;
-                using (Game cl = new Game("4 Collada", false, screen.X, screen.Y, true, 0, 0))
+                using (Game cl = new Game("4 Collada", EngineForm.ScreenSize * 0.8f, true, 0, 0))
 #else
-                using (Game cl = new Game("4 Collada", true, 0, 0, true, 0, 0))
+                using (Game cl = new Game("4 Collada"))
 #endif
                 {
                     GameResourceManager.RegisterLoader<LoaderObj>();

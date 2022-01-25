@@ -1,4 +1,5 @@
-﻿using SharpDX.DXGI;
+﻿using SharpDX;
+using SharpDX.DXGI;
 using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
@@ -200,12 +201,88 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="name">Name, for the game form</param>
-        /// <param name="screenWidth">Window width</param>
-        /// <param name="screenHeight">Window height</param>
-        /// <param name="fullScreen">Full screen window</param>
+        public Game(string name) :
+            this(name, true, 0, 0, true, 0, 0)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0)
+        public Game(string name, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, true, 0, 0, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenWidth">Window width</param>
+        /// <param name="screenHeight">Window height</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, int screenWidth, int screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, screenWidth, screenHeight, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenWidth">Window width</param>
+        /// <param name="screenHeight">Window height</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, float screenWidth, float screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, (int)screenWidth, (int)screenHeight, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenSize">Window size</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, Vector2Int screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, screenSize.X, screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenSize">Window size</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, Vector2 screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, (int)screenSize.X, (int)screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="fullScreen">Full screen window</param>
+        /// <param name="screenWidth">Window width</param>
+        /// <param name="screenHeight">Window height</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        private Game(string name, bool fullScreen, int screenWidth, int screenHeight, bool vsyncEnabled, int refreshRate, int multiSampling)
         {
             Name = name;
 
@@ -221,15 +298,17 @@ namespace Engine
 
             #region Form
 
+            bool isFullScreen = fullScreen;
             if (screenWidth == 0 || screenHeight == 0)
             {
                 var mode = GetDesktopMode();
 
+                isFullScreen = true;
                 screenWidth = mode.DesktopCoordinates.Right - mode.DesktopCoordinates.Left;
                 screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
             }
 
-            Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
+            Form = new EngineForm(name, screenWidth, screenHeight, isFullScreen);
 
             Form.UserResized += (sender, eventArgs) =>
             {
@@ -246,20 +325,6 @@ namespace Engine
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
             DrawerPool.Initialize(Graphics);
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="name">Name, for the game form</param>
-        /// <param name="screenWidth">Window width</param>
-        /// <param name="screenHeight">Window height</param>
-        /// <param name="fullScreen">Full screen window</param>
-        /// <param name="refreshRate">Refresh rate</param>
-        /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, bool fullScreen = true, float screenWidth = 0, float screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
-            this(name, fullScreen, (int)screenWidth, (int)screenHeight, vsyncEnabled, refreshRate, multiSampling)
-        {
-
         }
         /// <summary>
         /// Destructor

@@ -22,10 +22,9 @@ namespace Terrain
 #endif
 
 #if DEBUG
-                var screen = EngineForm.ScreenSize * 0.8f;
-                using (Game cl = new Game("6 Terrain", false, screen.X, screen.Y, true, 0, 0))
+                using (Game cl = new Game("6 Terrain", EngineForm.ScreenSize * 0.8f))
 #else
-                using (Game cl = new Game("6 Terrain", true, 0, 0, true, 0, 4))
+                using (Game cl = new Game("6 Terrain"))
 #endif
                 {
 #if DEBUG

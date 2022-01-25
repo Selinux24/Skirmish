@@ -20,10 +20,9 @@ namespace Instancing
 #endif
 
 #if DEBUG
-                var screen = EngineForm.ScreenSize * 0.8f;
-                using (Game cl = new Game("10 Instancing", false, screen.X, screen.Y, true, 0, 0))
+                using (Game cl = new Game("10 Instancing", EngineForm.ScreenSize * 0.8f))
 #else
-                using (Game cl = new Game("10 Instancing", true, 0, 0, true, 0, 0))
+                using (Game cl = new Game("10 Instancing"))
 #endif
                 {
 #if DEBUG

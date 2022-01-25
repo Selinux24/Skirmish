@@ -81,30 +81,29 @@ namespace Engine
             : base(name)
         {
             base.IsFullscreen = fullScreen;
-            this.AllowUserResizing = !fullScreen;
+            AllowUserResizing = !fullScreen;
 
-            this.Size = new System.Drawing.Size(screenWidth, screenHeight);
+            Size = new System.Drawing.Size(screenWidth, screenHeight);
 
-            this.UpdateSizes(fullScreen);
+            UpdateSizes(fullScreen);
 
-            this.InitializeComponent();
+            InitializeComponent();
 
-            this.initialized = true;
+            initialized = true;
         }
         /// <summary>
         /// Initialize component
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
+            SuspendLayout();
 
-            this.Icon = Resources.engine;
-            this.Name = "EngineForm";
-            this.Text = "Engine Form";
-            this.KeyPreview = true;
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.EngineFormKeyDown);
-            this.ResumeLayout(false);
-
+            Icon = Resources.engine;
+            Name = "EngineForm";
+            Text = "Engine Form";
+            KeyPreview = true;
+            KeyDown += new KeyEventHandler(EngineFormKeyDown);
+            ResumeLayout(false);
         }
         /// <summary>
         /// Invalidation override
@@ -114,9 +113,9 @@ namespace Engine
         {
             base.OnInvalidated(e);
 
-            if (this.initialized)
+            if (initialized)
             {
-                this.UpdateSizes(this.IsFullscreen);
+                UpdateSizes(IsFullscreen);
             }
         }
         /// <summary>
@@ -127,17 +126,17 @@ namespace Engine
         {
             if (fullScreen)
             {
-                this.RenderWidth = this.Size.Width;
-                this.RenderHeight = this.Size.Height;
+                RenderWidth = Size.Width;
+                RenderHeight = Size.Height;
             }
             else
             {
-                this.RenderWidth = this.ClientSize.Width;
-                this.RenderHeight = this.ClientSize.Height;
+                RenderWidth = ClientSize.Width;
+                RenderHeight = ClientSize.Height;
             }
 
-            this.RenderCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
-            this.ScreenCenter = new Point(this.Location.X + this.RenderCenter.X, this.Location.Y + this.RenderCenter.Y);
+            RenderCenter = new Point(RenderWidth / 2, RenderHeight / 2);
+            ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
         }
 
         /// <summary>
