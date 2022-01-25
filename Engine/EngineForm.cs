@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 using SharpDX.Windows;
+using System;
 using System.Windows.Forms;
 
 namespace Engine
 {
     using Engine.Properties;
-    using System;
 
     /// <summary>
     /// Engine render form
@@ -16,7 +16,10 @@ namespace Engine
         /// Intialization internal flag
         /// </summary>
         private readonly bool initialized = false;
-        private FormWindowState previousState = FormWindowState.Normal;
+        /// <summary>
+        /// Previous window state
+        /// </summary>
+        private FormWindowState lastWindowState = FormWindowState.Normal;
 
         /// <summary>
         /// Render width
@@ -45,8 +48,34 @@ namespace Engine
         /// </summary>
         public Point ScreenCenter { get; private set; }
         /// <summary>
-        /// Gets or sets a value indicationg whether the current engine form is in fullscreen
+        /// The form is manually resizing
         /// </summary>
+        public bool Resizing { get; private set; }
+        /// <summary>
+        /// The form's size just changed
+        /// </summary>
+        public bool SizeUpdated { get; private set; }
+        /// <summary>
+        /// The form's mode just changed
+        /// </summary>
+        public bool FormModeUpdated
+        {
+            get
+            {
+                return lastWindowState != WindowState;
+            }
+        }
+        /// <summary>
+        /// The form is minimized
+        /// </summary>
+        public bool IsMinimized
+        {
+            get
+            {
+                return WindowState == FormWindowState.Minimized;
+            }
+        }
+        /// <inheritdoc/>
         public new bool IsFullscreen
         {
             get
@@ -94,33 +123,6 @@ namespace Engine
             initialized = true;
         }
         /// <summary>
-        /// Initialize component
-        /// </summary>
-        private void InitializeComponent()
-        {
-            SuspendLayout();
-
-            Icon = Resources.engine;
-            Name = "EngineForm";
-            Text = "Engine Form";
-            KeyPreview = true;
-            KeyDown += new KeyEventHandler(EngineFormKeyDown);
-            ResumeLayout(false);
-        }
-        /// <summary>
-        /// Invalidation override
-        /// </summary>
-        /// <param name="e">Event arguments</param>
-        protected override void OnInvalidated(InvalidateEventArgs e)
-        {
-            base.OnInvalidated(e);
-
-            if (initialized)
-            {
-                UpdateSizes(IsFullscreen);
-            }
-        }
-        /// <summary>
         /// Update form sizes
         /// </summary>
         /// <param name="fullScreen">Indicates whether the form is windowed or full screen</param>
@@ -161,45 +163,63 @@ namespace Engine
                 ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
             }
         }
-        public bool Resizing { get; private set; }
-        public bool SizeUpdated { get; private set; }
-        public bool FormModeUpdated
+        /// <summary>
+        /// Initialize component
+        /// </summary>
+        private void InitializeComponent()
         {
-            get
-            {
-                return previousState != WindowState;
-            }
-        }
-        public bool IsMinimized
-        {
-            get
-            {
-                return WindowState == FormWindowState.Minimized;
-            }
+            SuspendLayout();
+
+            Icon = Resources.engine;
+            Name = "EngineForm";
+            Text = "Engine Form";
+            KeyPreview = true;
+
+            ResumeLayout(false);
         }
 
+        /// <inheritdoc/>
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.KeyData == System.Windows.Forms.Keys.F10)
+            {
+                // Do what you want with the F10 key
+                e.SuppressKeyPress = true;
+            }
+
+            base.OnKeyDown(e);
+        }
+        /// <inheritdoc/>
+        protected override void OnInvalidated(InvalidateEventArgs e)
+        {
+            base.OnInvalidated(e);
+
+            if (initialized)
+            {
+                UpdateSizes(IsFullscreen);
+            }
+        }
+        /// <inheritdoc/>
         protected override void OnResizeBegin(EventArgs e)
         {
             base.OnResizeBegin(e);
 
             Resizing = true;
         }
+        /// <inheritdoc/>
         protected override void OnResizeEnd(EventArgs e)
         {
             base.OnResizeEnd(e);
 
             Resizing = false;
         }
+        /// <inheritdoc/>
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
 
-            if (previousState != WindowState)
-            {
-                previousState = WindowState;
-            }
+            lastWindowState = WindowState;
         }
-
 
         /// <summary>
         /// Gets the render viewport
@@ -240,18 +260,6 @@ namespace Engine
             screenSpace.Y *= -1f;
 
             return screenSpace;
-        }
-
-        /// <summary>
-        /// Invalidates control keys
-        /// </summary>
-        private void EngineFormKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.KeyData == System.Windows.Forms.Keys.F10)
-            {
-                // Do what you want with the F10 key
-                e.SuppressKeyPress = true;
-            }
         }
     }
 }
