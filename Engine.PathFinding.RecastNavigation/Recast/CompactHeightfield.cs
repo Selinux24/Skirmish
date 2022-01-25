@@ -2091,7 +2091,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int regionId = 1;
             int level = (MaxDistance + 1) & ~1;
 
-            // TODO: Figure better formula, expandIters defines how much the 
+            // Figure better formula, expandIters defines how much the 
             // watershed "overflows" and simplifies the regions. Tying it to
             // agent radius was usually good indication how greedy it could be.
             //	const int expandIters = 4 + walkableRadius * 2

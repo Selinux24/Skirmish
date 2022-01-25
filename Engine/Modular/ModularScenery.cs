@@ -1557,9 +1557,7 @@ namespace Engine.Modular
             /// </summary>
             private readonly List<BoundingBox> visibleBoxes = new List<BoundingBox>();
 
-            /// <summary>
-            /// Position
-            /// </summary>
+            /// <inheritdoc/>
             public Vector3 Position
             {
                 get
@@ -1568,11 +1566,7 @@ namespace Engine.Modular
                 }
             }
 
-            /// <summary>
-            /// Gets if the current volume contains the bounding box
-            /// </summary>
-            /// <param name="bbox">Bounding box</param>
-            /// <returns>Returns the containment type</returns>
+            /// <inheritdoc/>
             public ContainmentType Contains(BoundingBox bbox)
             {
                 for (int i = 0; i < visibleBoxes.Count; i++)
@@ -1584,11 +1578,7 @@ namespace Engine.Modular
 
                 return ContainmentType.Disjoint;
             }
-            /// <summary>
-            /// Gets if the current volume contains the bounding sphere
-            /// </summary>
-            /// <param name="sphere">Bounding sphere</param>
-            /// <returns>Returns the containment type</returns>
+            /// <inheritdoc/>
             public ContainmentType Contains(BoundingSphere sphere)
             {
                 for (int i = 0; i < visibleBoxes.Count; i++)
@@ -1600,11 +1590,7 @@ namespace Engine.Modular
 
                 return ContainmentType.Disjoint;
             }
-            /// <summary>
-            /// Gets if the current volume contains the bounding frustum
-            /// </summary>
-            /// <param name="frustum">Bounding frustum</param>
-            /// <returns>Returns the containment type</returns>
+            /// <inheritdoc/>
             public ContainmentType Contains(BoundingFrustum frustum)
             {
                 for (int i = 0; i < visibleBoxes.Count; i++)
@@ -1616,11 +1602,7 @@ namespace Engine.Modular
 
                 return ContainmentType.Disjoint;
             }
-            /// <summary>
-            /// Gets if the current volume contains the mesh
-            /// </summary>
-            /// <param name="mesh">Mesh</param>
-            /// <returns>Returns the containment type</returns>
+            /// <inheritdoc/>
             public ContainmentType Contains(IEnumerable<Triangle> mesh)
             {
                 for (int i = 0; i < visibleBoxes.Count; i++)

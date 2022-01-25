@@ -335,6 +335,9 @@ namespace Engine.Common
         /// </summary>
         public virtual void Resize()
         {
+            sceneObjectsTarget?.Resize();
+            sceneUITarget?.Resize();
+            sceneResultsTarget?.Resize();
             postProcessingTarget1?.Resize();
             postProcessingTarget2?.Resize();
             processingDrawer?.Resize();

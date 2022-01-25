@@ -15,9 +15,7 @@ namespace Engine
         /// </summary>
         private readonly BoundingBox bbox;
 
-        /// <summary>
-        /// Gets the center of the box
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Position { get; private set; }
 
         /// <summary>
@@ -40,38 +38,22 @@ namespace Engine
             Position = bbox.GetCenter();
         }
 
-        /// <summary>
-        /// Gets if the current volume contains the bounding box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingSphere sphere)
         {
             return Intersection.BoxContainsSphere(bbox, sphere);
         }
-        /// <summary>
-        /// Gets if the current volume contains the bounding sphere
-        /// </summary>
-        /// <param name="sph">Bounding sphere</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingBox bbox)
         {
             return Intersection.BoxContainsBox(this.bbox, bbox);
         }
-        /// <summary>
-        /// Gets if the current volume contains the bounding frustum
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
             return Intersection.BoxContainsFrustum(bbox, frustum);
         }
-        /// <summary>
-        /// Gets if the current volume contains the mesh
-        /// </summary>
-        /// <param name="mesh">Mesh</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
             return Intersection.BoxContainsMesh(bbox, mesh);

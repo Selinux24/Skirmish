@@ -731,11 +731,11 @@ namespace GameLogic
         }
         protected void LoadGame()
         {
-            //TODO: Load game from file
+            throw new NotImplementedException();
         }
         protected void SaveGame()
         {
-            //TODO: Save game to file
+            throw new NotImplementedException();
         }
 
         protected void NextSoldier(bool selectIdle)

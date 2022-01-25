@@ -30,6 +30,10 @@ namespace Engine
         /// Application exiting flag
         /// </summary>
         private bool exiting = false;
+        /// <summary>
+        /// Game paused
+        /// </summary>
+        private bool paused = false;
 
         /// <summary>
         /// Name
@@ -301,12 +305,52 @@ namespace Engine
 
             Form = new EngineForm(name, screenWidth, screenHeight, isFullScreen);
 
-            Form.UserResized += (sender, eventArgs) =>
+            Form.ResizeBegin += (sender, e) =>
             {
-                if (Graphics != null)
+                paused = true;
+                GameTime.Pause();
+            };
+            Form.ResizeEnd += (sender, e) =>
+            {
+                paused = false;
+                GameTime.Start();
+                if (Form.SizeUpdated)
                 {
-                    Graphics.PrepareDevice(Form.RenderWidth, Form.RenderHeight, true);
+                    OnResize();
                 }
+            };
+            Form.Activated += (sender, e) =>
+            {
+                paused = false;
+                GameTime.Start();
+            };
+            Form.Deactivate += (sender, e) =>
+            {
+                paused = true;
+                GameTime.Pause();
+            };
+            Form.Resize += (sender, e) =>
+            {
+                if (Form.Resizing)
+                {
+                    return;
+                }
+
+                if (!Form.FormModeUpdated)
+                {
+                    return;
+                }
+
+                if (Form.IsMinimized)
+                {
+                    paused = true;
+                    GameTime.Pause();
+                    return;
+                }
+
+                paused = false;
+                GameTime.Start();
+                OnResize();
             };
 
             #endregion
@@ -386,6 +430,14 @@ namespace Engine
             Logger.WriteInformation(this, "**************************************************************************");
 
             RenderLoop.Run(Form, Frame);
+        }
+
+        /// <summary>
+        /// On render form resize
+        /// </summary>
+        private void OnResize()
+        {
+            Graphics?.PrepareDevice(Form.RenderWidth, Form.RenderHeight, true);
         }
 
         /// <summary>
@@ -714,6 +766,11 @@ namespace Engine
                 //Exit form
                 Form.Close();
 
+                return;
+            }
+
+            if (paused)
+            {
                 return;
             }
 

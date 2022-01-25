@@ -15,9 +15,7 @@ namespace Engine
         /// </summary>
         private readonly BoundingFrustum frustum;
 
-        /// <summary>
-        /// Gets the view position
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 Position { get; private set; }
         /// <summary>
         /// Radius
@@ -47,38 +45,22 @@ namespace Engine
             Radius = frustum.GetCameraParams().ZFar;
         }
 
-        /// <summary>
-        /// Gets if the current volume contains the bounding box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingSphere sphere)
         {
             return Intersection.FrustumContainsSphere(frustum, sphere);
         }
-        /// <summary>
-        /// Gets if the current volume contains the bounding sphere
-        /// </summary>
-        /// <param name="sph">Bounding sphere</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingBox bbox)
         {
             return Intersection.FrustumContainsBox(frustum, bbox);
         }
-        /// <summary>
-        /// Gets if the current volume contains the bounding frustum
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
             return Intersection.FrustumContainsFrustum(this.frustum, frustum);
         }
-        /// <summary>
-        /// Gets if the current volume contains the mesh
-        /// </summary>
-        /// <param name="mesh">Mesh</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
             return Intersection.FrustumContainsMesh(frustum, mesh);

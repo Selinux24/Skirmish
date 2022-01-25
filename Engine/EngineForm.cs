@@ -5,6 +5,7 @@ using System.Windows.Forms;
 namespace Engine
 {
     using Engine.Properties;
+    using System;
 
     /// <summary>
     /// Engine render form
@@ -15,6 +16,7 @@ namespace Engine
         /// Intialization internal flag
         /// </summary>
         private readonly bool initialized = false;
+        private FormWindowState previousState = FormWindowState.Normal;
 
         /// <summary>
         /// Render width
@@ -124,20 +126,80 @@ namespace Engine
         /// <param name="fullScreen">Indicates whether the form is windowed or full screen</param>
         private void UpdateSizes(bool fullScreen)
         {
+            SizeUpdated = false;
+
             if (fullScreen)
             {
-                RenderWidth = Size.Width;
-                RenderHeight = Size.Height;
+                if (RenderWidth != Size.Width)
+                {
+                    RenderWidth = Size.Width;
+                    SizeUpdated = true;
+                }
+                if (RenderHeight != Size.Height)
+                {
+                    RenderHeight = Size.Height;
+                    SizeUpdated = true;
+                }
             }
             else
             {
-                RenderWidth = ClientSize.Width;
-                RenderHeight = ClientSize.Height;
+                if (RenderWidth != ClientSize.Width)
+                {
+                    RenderWidth = ClientSize.Width;
+                    SizeUpdated = true;
+                }
+                if (RenderHeight != ClientSize.Height)
+                {
+                    RenderHeight = ClientSize.Height;
+                    SizeUpdated = true;
+                }
             }
 
-            RenderCenter = new Point(RenderWidth / 2, RenderHeight / 2);
-            ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
+            if (SizeUpdated)
+            {
+                RenderCenter = new Point(RenderWidth / 2, RenderHeight / 2);
+                ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
+            }
         }
+        public bool Resizing { get; private set; }
+        public bool SizeUpdated { get; private set; }
+        public bool FormModeUpdated
+        {
+            get
+            {
+                return previousState != WindowState;
+            }
+        }
+        public bool IsMinimized
+        {
+            get
+            {
+                return WindowState == FormWindowState.Minimized;
+            }
+        }
+
+        protected override void OnResizeBegin(EventArgs e)
+        {
+            base.OnResizeBegin(e);
+
+            Resizing = true;
+        }
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+
+            Resizing = false;
+        }
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            if (previousState != WindowState)
+            {
+                previousState = WindowState;
+            }
+        }
+
 
         /// <summary>
         /// Gets the render viewport
