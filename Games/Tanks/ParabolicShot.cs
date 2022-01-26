@@ -2,7 +2,7 @@
 using SharpDX;
 using System;
 
-namespace SceneTest.SceneTanksGame
+namespace Tanks
 {
     /// <summary>
     /// Paralbolic shot helper

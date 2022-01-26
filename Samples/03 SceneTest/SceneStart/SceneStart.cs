@@ -23,7 +23,6 @@ namespace SceneTest.SceneStart
         private UIButton sceneLightsButton = null;
         private UIButton sceneCascadedShadowsButton = null;
         private UIButton sceneTestButton = null;
-        private UIButton sceneTanksGameButton = null;
         private UIButton exitButton = null;
         private UIPanel buttonPanel = null;
         private UIButton optsButton = null;
@@ -116,7 +115,6 @@ namespace SceneTest.SceneStart
             sceneLightsButton = new UIButton("ButtonLights", "ButtonLights", this, startButtonDesc);
             sceneCascadedShadowsButton = new UIButton("ButtonCascadedShadows", "ButtonCascadedShadows", this, startButtonDesc);
             sceneTestButton = new UIButton("ButtonTest", "ButtonTest", this, startButtonDesc);
-            sceneTanksGameButton = new UIButton("ButtonTanksGame", "ButtonTanksGame", this, startButtonDesc);
 
             var sceneButtons = new[]
             {
@@ -126,7 +124,6 @@ namespace SceneTest.SceneStart
                 sceneLightsButton,
                 sceneCascadedShadowsButton,
                 sceneTestButton,
-                sceneTanksGameButton,
             };
 
             for (int i = 0; i < sceneButtons.Length; i++)
@@ -257,7 +254,6 @@ namespace SceneTest.SceneStart
             sceneLightsButton.Caption.Text = $"{Color.Red}L{Color.Gold}ights";
             sceneCascadedShadowsButton.Caption.Text = $"{Color.Red}C{Color.Gold}ascaded";
             sceneTestButton.Caption.Text = $"{Color.Red}T{Color.Gold}est";
-            sceneTanksGameButton.Caption.Text = $"{Color.Gold}Tanks {Color.Red}G{Color.Gold}ame";
 
             exitButton.Caption.Text = $"{Color.Red}E{Color.Gold}xit";
 
@@ -384,10 +380,6 @@ namespace SceneTest.SceneStart
             else if (sender == sceneTestButton)
             {
                 Game.SetScene<SceneTest.SceneTest>();
-            }
-            else if (sender == sceneTanksGameButton)
-            {
-                Game.SetScene<SceneTanksGame.SceneTanksGame>();
             }
         }
         private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)

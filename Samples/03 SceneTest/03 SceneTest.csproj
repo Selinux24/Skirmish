@@ -140,10 +140,6 @@
     <Compile Include="SceneLights\SceneLights.cs" />
     <Compile Include="SceneMaterials\SceneMaterials.cs" />
     <Compile Include="SceneStart\SceneStart.cs" />
-    <Compile Include="SceneTanksGame\IShot.cs" />
-    <Compile Include="SceneTanksGame\ParabolicShot.cs" />
-    <Compile Include="SceneTanksGame\PlayerStatus.cs" />
-    <Compile Include="SceneTanksGame\SceneTanksGame.cs" />
     <Compile Include="SceneWater\SceneWater.cs" />
     <Compile Include="SceneStencilPass\SceneStencilPass.cs" />
     <Compile Include="SceneTest\SceneTest.cs" />
@@ -259,111 +255,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Arrow.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\explosion_vehicle_small_close_01.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\explosion_vehicle_small_distant_01.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_grate_large_01.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_grate_large_02.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_grate_large_03.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_grate_large_04.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_pipe_large_01.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_pipe_large_02.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_pipe_large_03.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\metal_pipe_large_04.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\tank_engine.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Audio\cannon-shooting.wav">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Compass.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Crater.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Dot.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Dot_w.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\GameIcon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Landscape.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Leopard\Leopard.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Leopard\Leopard_0.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Leopard\Leopard_1.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Leopard\Leopard_2.bmp">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Move.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Particles\explosion.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Particles\fire.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Particles\fire.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Particles\floor.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Particles\smoke.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Pitch.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Tank.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Terrain\Diffuse.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Terrain\Normal.jpg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Turn.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Wind.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Buildings\Obelisk\specular.dds">
@@ -525,12 +416,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Trees\tree_3.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\LeagueSpartan-Bold.otf">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneTanksGame\Leopard\Leopard.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStart\SkyPlane.json">

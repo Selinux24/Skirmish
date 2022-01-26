@@ -115,7 +115,7 @@ namespace Engine.UI
                 ColorPressed = Color4.White,
             };
         }
-     
+
         /// <summary>
         /// Gets the default two state button description
         /// </summary>
@@ -265,7 +265,7 @@ namespace Engine.UI
                 ColorPressed = Color4.White,
             };
         }
-        
+
         /// <summary>
         /// Gets the default button description from a font family name
         /// </summary>
@@ -293,7 +293,7 @@ namespace Engine.UI
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
-        
+
         /// <summary>
         /// Gets the default button description from a font file
         /// </summary>
@@ -321,7 +321,7 @@ namespace Engine.UI
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
-        
+
         /// <summary>
         /// Gets the default button description from a font map 
         /// </summary>
@@ -334,7 +334,7 @@ namespace Engine.UI
                 Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };
         }
-        
+
         /// <summary>
         /// Gets the default two state button description from a font family name
         /// </summary>
@@ -364,7 +364,7 @@ namespace Engine.UI
                 Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
             };
         }
-        
+
         /// <summary>
         /// Gets the default two state button description from a font file
         /// </summary>
@@ -394,7 +394,7 @@ namespace Engine.UI
                 Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
-        
+
         /// <summary>
         /// Gets the default two state button description from a font map 
         /// </summary>

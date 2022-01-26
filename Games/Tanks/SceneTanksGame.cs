@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace SceneTest.SceneTanksGame
+namespace Tanks
 {
     /// <summary>
     /// Tanks game scene
@@ -20,7 +20,7 @@ namespace SceneTest.SceneTanksGame
     class SceneTanksGame : Scene
     {
         const int layerUIModal = LayerUIEffects + 3;
-        const string fontFilename = "SceneTanksGame/LeagueSpartan-Bold.otf";
+        const string fontFilename = "Resources/LeagueSpartan-Bold.otf";
 
         private bool gameReady = false;
 
@@ -135,7 +135,7 @@ namespace SceneTest.SceneTanksGame
 
         public override Task Initialize()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
+            GameEnvironment.Background = Color.Black;
 
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -164,14 +164,18 @@ namespace SceneTest.SceneTanksGame
                     fadePanel.BaseColor = Color.Black;
                     fadePanel.Visible = true;
 
+                    await Task.Delay(1000);
+
                     loadingText.Text = "Please wait...";
                     loadingText.Visible = true;
                     loadingText.TweenAlphaBounce(1, 0, 1000, ScaleFuncs.CubicEaseInOut);
 
+                    await Task.Delay(2000);
+
                     loadingBar.ProgressValue = 0;
                     loadingBar.Visible = true;
 
-                    await LoadUI();
+                    _ = Task.Run(LoadUI);
                 });
         }
         private async Task InitializeLoadingUI()
@@ -188,8 +192,8 @@ namespace SceneTest.SceneTanksGame
             loadingText.Visible = false;
 
             loadingBar = await this.AddComponentUIProgressBar("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
-            loadingBar.ProgressColor = Color.Yellow;
-            loadingBar.BaseColor = Color.CornflowerBlue;
+            loadingBar.ProgressColor = Color.CornflowerBlue;
+            loadingBar.BaseColor = Color.Yellow;
             loadingBar.Caption.TextForeColor = Color.Black;
             loadingBar.Caption.Text = "0%";
             loadingBar.Visible = false;
@@ -228,6 +232,8 @@ namespace SceneTest.SceneTanksGame
                         await Task.Delay(1500);
 
                         await ShowMessage("Ready!", 2000);
+
+                        SetOnGameEffects();
 
                         fadePanel.ClearTween();
                         fadePanel.Hide(2000);
@@ -280,7 +286,9 @@ namespace SceneTest.SceneTanksGame
 
             var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
 
-            var descButton = UIButtonDescription.DefaultTwoStateButton(font, Color.DarkGray * 0.6666f, Color.DarkGray * 0.7777f);
+            Color4 releasedColor = new Color4((Color.DarkGray * 0.6666f).ToColor3(), 1f);
+            Color4 pressedColor = new Color4((Color.DarkGray * 0.7777f).ToColor3(), 1f);
+            var descButton = UIButtonDescription.DefaultTwoStateButton(font, releasedColor, pressedColor);
             descButton.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButton.TextVerticalAlign = TextVerticalAlign.Middle;
 
@@ -319,8 +327,8 @@ namespace SceneTest.SceneTanksGame
             player1Points.Visible = false;
 
             player1Life = await this.AddComponentUIProgressBar("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
-            player1Life.ProgressColor = player1Status.Color;
-            player1Life.BaseColor = Color.Black;
+            player1Life.ProgressColor = Color.DarkRed;
+            player1Life.BaseColor = player1Status.Color;
             player1Life.Caption.TextForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
@@ -340,8 +348,8 @@ namespace SceneTest.SceneTanksGame
             player2Points.Visible = false;
 
             player2Life = await this.AddComponentUIProgressBar("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
-            player2Life.ProgressColor = player2Status.Color;
-            player2Life.BaseColor = Color.Black;
+            player2Life.ProgressColor = Color.DarkRed;
+            player2Life.BaseColor = player2Status.Color;
             player2Life.Caption.TextForeColor = Color.White;
             player2Life.Caption.Text = "0%";
             player2Life.Visible = false;
@@ -355,12 +363,12 @@ namespace SceneTest.SceneTanksGame
             turnText.GrowControlWithText = false;
             turnText.Visible = false;
 
-            gameIcon = await this.AddComponentSprite("GameIcon", "GameIcon", SpriteDescription.Default("SceneTanksGame/GameIcon.png"), SceneObjectUsages.UI);
+            gameIcon = await this.AddComponentSprite("GameIcon", "GameIcon", SpriteDescription.Default("Resources/GameIcon.png"), SceneObjectUsages.UI);
             gameIcon.BaseColor = Color.Yellow;
             gameIcon.Visible = false;
             gameIcon.TweenRotateBounce(-0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
-            playerTurnMarker = await this.AddComponentSprite("PlayerTurnMarker", "PlayerTurnMarker", SpriteDescription.Default("SceneTanksGame/Arrow.png"), SceneObjectUsages.UI);
+            playerTurnMarker = await this.AddComponentSprite("PlayerTurnMarker", "PlayerTurnMarker", SpriteDescription.Default("Resources/Arrow.png"), SceneObjectUsages.UI);
             playerTurnMarker.BaseColor = Color.Turquoise;
             playerTurnMarker.Visible = false;
             playerTurnMarker.TweenScaleBounce(1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
@@ -374,15 +382,15 @@ namespace SceneTest.SceneTanksGame
             keyHelp = await this.AddComponentUIPanel("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color4.Black * 0.3333f), layerPanel);
             keyHelp.Visible = false;
 
-            keyRotate = await this.AddComponentSprite("KeyRotate", "KeyRotate", SpriteDescription.Default("SceneTanksGame/Turn.png"), SceneObjectUsages.UI, layerSprites);
+            keyRotate = await this.AddComponentSprite("KeyRotate", "KeyRotate", SpriteDescription.Default("Resources/Turn.png"), SceneObjectUsages.UI, layerSprites);
             keyRotate.BaseColor = Color.Turquoise;
             keyRotate.Visible = false;
 
-            keyMove = await this.AddComponentSprite("KeyMove", "KeyMove", SpriteDescription.Default("SceneTanksGame/Move.png"), SceneObjectUsages.UI, layerSprites);
+            keyMove = await this.AddComponentSprite("KeyMove", "KeyMove", SpriteDescription.Default("Resources/Move.png"), SceneObjectUsages.UI, layerSprites);
             keyMove.BaseColor = Color.Turquoise;
             keyMove.Visible = false;
 
-            KeyPitch = await this.AddComponentSprite("KeyPitch", "KeyPitch", SpriteDescription.Default("SceneTanksGame/Pitch.png"), SceneObjectUsages.UI, layerSprites);
+            KeyPitch = await this.AddComponentSprite("KeyPitch", "KeyPitch", SpriteDescription.Default("Resources/Pitch.png"), SceneObjectUsages.UI, layerSprites);
             KeyPitch.BaseColor = Color.Turquoise;
             KeyPitch.Visible = false;
 
@@ -438,15 +446,15 @@ namespace SceneTest.SceneTanksGame
             int layerIcons = layerPanel + 1;
             int layerMarkers = layerIcons + 1;
 
-            miniMapBackground = await this.AddComponentSprite("MiniMapBackground", "MiniMapBackground", SpriteDescription.Default("SceneTanksGame/Compass.png"), SceneObjectUsages.UI, layerPanel);
-            miniMapBackground.Alpha = 0.5f;
+            miniMapBackground = await this.AddComponentSprite("MiniMapBackground", "MiniMapBackground", SpriteDescription.Default("Resources/Compass.png"), SceneObjectUsages.UI, layerPanel);
+            miniMapBackground.Alpha = 0.85f;
             miniMapBackground.Visible = false;
 
-            miniMapTank1 = await this.AddComponentSprite("MiniMapTank1", "MiniMapTank1", SpriteDescription.Default("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerIcons);
+            miniMapTank1 = await this.AddComponentSprite("MiniMapTank1", "MiniMapTank1", SpriteDescription.Default("Resources/Tank.png"), SceneObjectUsages.UI, layerIcons);
             miniMapTank1.BaseColor = Color.Blue;
             miniMapTank1.Visible = false;
 
-            miniMapTank2 = await this.AddComponentSprite("MiniMapTank2", "MiniMapTank2", SpriteDescription.Default("SceneTanksGame/Tank.png"), SceneObjectUsages.UI, layerIcons);
+            miniMapTank2 = await this.AddComponentSprite("MiniMapTank2", "MiniMapTank2", SpriteDescription.Default("Resources/Tank.png"), SceneObjectUsages.UI, layerIcons);
             miniMapTank2.BaseColor = Color.Red;
             miniMapTank2.Visible = false;
 
@@ -457,7 +465,7 @@ namespace SceneTest.SceneTanksGame
             windVelocity.BaseColor = new Color4(0, 0, 0, 0.5f);
             windVelocity.Visible = false;
 
-            windDirectionArrow = await this.AddComponentSprite("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("SceneTanksGame/Wind.png"), SceneObjectUsages.UI, layerMarkers);
+            windDirectionArrow = await this.AddComponentSprite("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("Resources/Wind.png"), SceneObjectUsages.UI, layerMarkers);
             windDirectionArrow.BaseColor = Color.Green;
             windDirectionArrow.Visible = false;
         }
@@ -466,7 +474,7 @@ namespace SceneTest.SceneTanksGame
             trajectoryMarkerPool = new Sprite[5];
             for (int i = 0; i < trajectoryMarkerPool.Length; i++)
             {
-                var trajectoryMarker = await this.AddComponentSprite($"TrajectoryMarker_{i}", $"TrajectoryMarker_{i}", SpriteDescription.Default("SceneTanksGame/Dot_w.png"), SceneObjectUsages.UI);
+                var trajectoryMarker = await this.AddComponentSprite($"TrajectoryMarker_{i}", $"TrajectoryMarker_{i}", SpriteDescription.Default("Resources/Dot_w.png"), SceneObjectUsages.UI);
                 trajectoryMarker.Width = 50;
                 trajectoryMarker.Height = 50;
                 trajectoryMarker.BaseColor = Color.Transparent;
@@ -650,7 +658,7 @@ namespace SceneTest.SceneTanksGame
             {
                 CastShadow = true,
                 Optimize = false,
-                Content = ContentDescription.FromFile("SceneTanksGame/Leopard", "Leopard.json"),
+                Content = ContentDescription.FromFile("Resources/Leopard", "Leopard.json"),
                 Instances = 2,
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
@@ -686,7 +694,7 @@ namespace SceneTest.SceneTanksGame
 
             var textures = new HeightmapTexturesDescription
             {
-                ContentPath = "SceneTanksGame/terrain",
+                ContentPath = "Resources/terrain",
                 TexturesLR = new[] { "Diffuse.jpg" },
                 NormalMaps = new[] { "Normal.jpg" },
                 Scale = 0.2f,
@@ -723,7 +731,7 @@ namespace SceneTest.SceneTanksGame
             };
 
             var material = MaterialBlinnPhongContent.Default;
-            material.DiffuseTexture = "SceneTanksGame/Landscape.png";
+            material.DiffuseTexture = "Resources/Landscape.png";
 
             var content = new ModelDescription
             {
@@ -752,12 +760,12 @@ namespace SceneTest.SceneTanksGame
         {
             particleManager = await this.AddComponentParticleManager("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("SceneTanksGame/particles", "smoke.png", 5);
-            var pFire = ParticleSystemDescription.InitializeFire("SceneTanksGame/particles", "fire.png", 5);
-            var pDust = ParticleSystemDescription.InitializeDust("SceneTanksGame/particles", "smoke.png", 5);
-            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("SceneTanksGame/particles", "smoke.png", 5);
-            var pExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "fire.png", 5);
-            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("SceneTanksGame/particles", "smoke.png", 5);
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume("Resources/particles", "smoke.png", 5);
+            var pFire = ParticleSystemDescription.InitializeFire("Resources/particles", "fire.png", 5);
+            var pDust = ParticleSystemDescription.InitializeDust("Resources/particles", "smoke.png", 5);
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("Resources/particles", "smoke.png", 5);
+            var pExplosion = ParticleSystemDescription.InitializeExplosion("Resources/particles", "fire.png", 5);
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Resources/particles", "smoke.png", 5);
 
             particleDescriptions.Add("Plume", pPlume);
             particleDescriptions.Add("Fire", pFire);
@@ -768,7 +776,7 @@ namespace SceneTest.SceneTanksGame
         }
         private async Task InitializeDecalDrawer()
         {
-            var desc = DecalDrawerDescription.DefaultRotate(@"SceneTanksGame/Crater.png", 100);
+            var desc = DecalDrawerDescription.DefaultRotate(@"Resources/Crater.png", 100);
 
             decalDrawer = await this.AddComponentDecalDrawer("Craters", "Craters", desc);
             decalDrawer.TintColor = new Color(223, 194, 179);
@@ -784,17 +792,17 @@ namespace SceneTest.SceneTanksGame
             impactEffects = new[] { "Impact1", "Impact2", "Impact3", "Impact4" };
             damageEffects = new[] { "Damage1", "Damage2", "Damage3", "Damage4" };
 
-            AudioManager.LoadSound("Tank", "SceneTanksGame/Audio", "tank_engine.wav");
-            AudioManager.LoadSound("TankDestroyed", "SceneTanksGame/Audio", "explosion_vehicle_small_close_01.wav");
-            AudioManager.LoadSound("TankShooting", "SceneTanksGame/Audio", "cannon-shooting.wav");
-            AudioManager.LoadSound(impactEffects[0], "SceneTanksGame/Audio", "metal_grate_large_01.wav");
-            AudioManager.LoadSound(impactEffects[1], "SceneTanksGame/Audio", "metal_grate_large_02.wav");
-            AudioManager.LoadSound(impactEffects[2], "SceneTanksGame/Audio", "metal_grate_large_03.wav");
-            AudioManager.LoadSound(impactEffects[3], "SceneTanksGame/Audio", "metal_grate_large_04.wav");
-            AudioManager.LoadSound(damageEffects[0], "SceneTanksGame/Audio", "metal_pipe_large_01.wav");
-            AudioManager.LoadSound(damageEffects[1], "SceneTanksGame/Audio", "metal_pipe_large_02.wav");
-            AudioManager.LoadSound(damageEffects[2], "SceneTanksGame/Audio", "metal_pipe_large_03.wav");
-            AudioManager.LoadSound(damageEffects[3], "SceneTanksGame/Audio", "metal_pipe_large_04.wav");
+            AudioManager.LoadSound("Tank", "Resources/Audio", "tank_engine.wav");
+            AudioManager.LoadSound("TankDestroyed", "Resources/Audio", "explosion_vehicle_small_close_01.wav");
+            AudioManager.LoadSound("TankShooting", "Resources/Audio", "cannon-shooting.wav");
+            AudioManager.LoadSound(impactEffects[0], "Resources/Audio", "metal_grate_large_01.wav");
+            AudioManager.LoadSound(impactEffects[1], "Resources/Audio", "metal_grate_large_02.wav");
+            AudioManager.LoadSound(impactEffects[2], "Resources/Audio", "metal_grate_large_03.wav");
+            AudioManager.LoadSound(impactEffects[3], "Resources/Audio", "metal_grate_large_04.wav");
+            AudioManager.LoadSound(damageEffects[0], "Resources/Audio", "metal_pipe_large_01.wav");
+            AudioManager.LoadSound(damageEffects[1], "Resources/Audio", "metal_pipe_large_02.wav");
+            AudioManager.LoadSound(damageEffects[2], "Resources/Audio", "metal_pipe_large_03.wav");
+            AudioManager.LoadSound(damageEffects[3], "Resources/Audio", "metal_pipe_large_04.wav");
 
             AudioManager.AddEffectParams(
                 tankMoveEffect,
@@ -1092,7 +1100,7 @@ You will lost all the game progress.",
                         CloseDialog,
                         () =>
                         {
-                            Game.SetScene<SceneStart.SceneStart>();
+                            Game.Exit();
                         });
                 }
             }
@@ -1184,7 +1192,7 @@ You will lost all the game progress.",
         {
             if (Game.Input.KeyJustReleased(Keys.Space))
             {
-                Game.SetScene<SceneStart.SceneStart>();
+                Game.Exit();
             }
         }
         private void UpdateInputFree(GameTime gameTime)
@@ -1731,8 +1739,7 @@ You will lost all the game progress.",
             dialog.Show(500);
             fadePanel.TweenAlpha(0, 0.5f, 500, ScaleFuncs.Linear);
 
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Grayscale, null);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
+            SetOnModalEffects();
 
             Game.VisibleMouse = true;
         }
@@ -1741,7 +1748,7 @@ You will lost all the game progress.",
             dialog.Hide(500);
             fadePanel.TweenAlpha(0.5f, 0f, 500, ScaleFuncs.Linear);
 
-            Renderer.ClearPostProcessingEffects();
+            SetOnGameEffects();
 
             Game.VisibleMouse = false;
 
@@ -1751,6 +1758,17 @@ You will lost all the game progress.",
 
                 dialogActive = false;
             });
+        }
+        private void SetOnGameEffects()
+        {
+            Renderer.ClearPostProcessingEffects();
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.RomBinDaHouse);
+        }
+        private void SetOnModalEffects()
+        {
+            Renderer.ClearPostProcessingEffects();
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Grayscale, null);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
         }
     }
 }

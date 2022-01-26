@@ -1,7 +1,7 @@
 ﻿using Engine;
 using SharpDX;
 
-namespace SceneTest.SceneTanksGame
+namespace Tanks
 {
     /// <summary>
     /// Shot interface
