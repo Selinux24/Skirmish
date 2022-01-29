@@ -344,7 +344,7 @@ namespace Terrain.Rts
                 {
                     Count = MaxGridDrawer
                 },
-                SceneObjectUsages.Default,
+                SceneObjectUsages.None,
                 LayerEffects);
             terrainGraphDrawer.Visible = false;
 
@@ -359,7 +359,7 @@ namespace Terrain.Rts
                 {
                     Count = MaxPickingTest
                 },
-                SceneObjectUsages.Default,
+                SceneObjectUsages.None,
                 LayerEffects);
             terrainPointDrawer.Visible = false;
 
@@ -374,7 +374,7 @@ namespace Terrain.Rts
                 {
                     Count = 20000
                 },
-                SceneObjectUsages.Default,
+                SceneObjectUsages.None,
                 LayerEffects);
             curveLineDrawer.Visible = false;
 
@@ -389,7 +389,7 @@ namespace Terrain.Rts
                 {
                     Count = 1000
                 },
-                SceneObjectUsages.Default,
+                SceneObjectUsages.None,
                 LayerEffects);
             movingObjLineDrawer.Visible = false;
 
@@ -404,7 +404,7 @@ namespace Terrain.Rts
                 {
                     Count = 20000
                 },
-                SceneObjectUsages.Default,
+                SceneObjectUsages.None,
                 LayerEffects);
             staticObjLineDrawer.Visible = false;
 
@@ -419,7 +419,7 @@ namespace Terrain.Rts
                 {
                     Count = 10000
                 },
-                SceneObjectUsages.Default,
+                SceneObjectUsages.None,
                 LayerEffects);
             terrainLineDrawer.Visible = false;
 

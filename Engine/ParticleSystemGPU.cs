@@ -124,22 +124,22 @@ namespace Engine
         /// <returns></returns>
         public static async Task<ParticleSystemGpu> Create(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            var parameters = new ParticleSystemParams(description) * emitter.Scale;
+            var pParameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
             var texture = await game.ResourceManager.RequestResource(imgContent);
             var textureCount = (uint)imgContent.Count;
 
-            emitter.UpdateBounds(parameters);
+            emitter.UpdateBounds(pParameters);
             int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
-            float timeToEnd = emitter.Duration + parameters.MaxDuration;
+            float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
             ParticleSystemGpu res = new ParticleSystemGpu
             {
                 Game = game,
                 Name = name,
 
-                parameters = parameters,
+                parameters = pParameters,
 
                 Texture = texture,
                 TextureCount = textureCount,

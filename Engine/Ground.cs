@@ -29,7 +29,7 @@ namespace Engine
         /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        public Ground(Scene scene, string id, string name)
+        protected Ground(Scene scene, string id, string name)
             : base(scene, id, name)
         {
 

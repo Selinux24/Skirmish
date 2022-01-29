@@ -753,7 +753,7 @@ namespace Tanks
             };
             content.DepthEnabled = false;
 
-            projectile = await AddComponent<Model, ModelDescription>("Projectile", "Projectile", content, SceneObjectUsages.Default, LayerDefault + 1);
+            projectile = await AddComponent<Model, ModelDescription>("Projectile", "Projectile", content, SceneObjectUsages.None, LayerDefault + 1);
             projectile.Visible = false;
         }
         private async Task InitializeParticleManager()

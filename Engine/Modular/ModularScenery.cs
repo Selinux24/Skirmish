@@ -380,12 +380,12 @@ namespace Engine.Modular
             }
 
             //Find the level
-            var levels = this.levels.Levels
+            var levelList = levels.Levels
                 .Where(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
-            if (levels.Any())
+            if (levelList.Any())
             {
                 //Load the level
-                await LoadLevel(levels.First(), progress);
+                await LoadLevel(levelList.First(), progress);
             }
         }
         /// <summary>
@@ -610,7 +610,7 @@ namespace Engine.Modular
             {
                 var masks = GetMasksForAsset(levels, assetName);
                 var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-                SceneObjectUsages usage = SceneObjectUsages.Default;
+                SceneObjectUsages usage = SceneObjectUsages.None;
                 if (pathFinding)
                 {
                     usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;

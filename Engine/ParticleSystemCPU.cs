@@ -95,36 +95,36 @@ namespace Engine
         /// <returns></returns>
         public static async Task<ParticleSystemCpu> Create(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            var parameters = new ParticleSystemParams(description) * emitter.Scale;
+            var pParameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
             var texture = await game.ResourceManager.RequestResource(imgContent);
             var textureCount = (uint)imgContent.Count;
 
-            emitter.UpdateBounds(parameters);
+            emitter.UpdateBounds(pParameters);
             int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
-            var particles = new VertexCpuParticle[maxConcurrentParticles];
-            float timeToEnd = emitter.Duration + parameters.MaxDuration;
+            var vParticles = new VertexCpuParticle[maxConcurrentParticles];
+            float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
-            var buffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, particles, true);
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.RotationDraw", DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.NonRotationDraw", DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            var pBuffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, true);
+            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.RotationDraw", DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.NonRotationDraw", DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
 
             return new ParticleSystemCpu
             {
                 Game = game,
                 Name = name,
 
-                parameters = parameters,
+                parameters = pParameters,
 
                 Texture = texture,
                 TextureCount = textureCount,
 
                 Emitter = emitter,
                 MaxConcurrentParticles = maxConcurrentParticles,
-                particles = particles,
+                particles = vParticles,
 
-                buffer = buffer,
+                buffer = pBuffer,
 
                 TimeToEnd = timeToEnd
             };

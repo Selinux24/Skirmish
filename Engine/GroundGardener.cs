@@ -874,7 +874,7 @@ namespace Engine
         /// </remarks>
         private async Task<IEnumerable<FoliagePatch>> FindAssigned(BoundingBox bbox)
         {
-            List<FoliagePatch> toAssign = new List<FoliagePatch>();
+            List<FoliagePatch> toAssignList = new List<FoliagePatch>();
 
             List<Task> plantTaskList = new List<Task>();
 
@@ -896,14 +896,14 @@ namespace Engine
                     }
                     else if (fPatch.HasData && !foliageBuffers.Any(b => b.CurrentPatch == fPatch))
                     {
-                        toAssign.Add(fPatch);
+                        toAssignList.Add(fPatch);
                     }
                 }
             }
 
             await ExecutePlantTasks(plantTaskList);
 
-            return toAssign;
+            return toAssignList;
         }
         /// <summary>
         /// Initializes node patches

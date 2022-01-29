@@ -13,19 +13,6 @@ namespace Engine.UI
     /// </summary>
     public abstract class UIControl<T> : Drawable<T>, IUIControl, IScreenFitted where T : UIControlDescription
     {
-        /// <summary>
-        /// Next update order
-        /// </summary>
-        private static int UpdateOrderSeed = 0;
-        /// <summary>
-        /// Gets the next order
-        /// </summary>
-        /// <returns>Returns the next order</returns>
-        private static int GetNextUpdateOrder()
-        {
-            return ++UpdateOrderSeed;
-        }
-
         /// <inheritdoc/>
         public event MouseEventHandler MouseOver;
         /// <inheritdoc/>
@@ -540,7 +527,7 @@ namespace Engine.UI
         /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        public UIControl(Scene scene, string id, string name)
+        protected UIControl(Scene scene, string id, string name)
             : base(scene, id, name)
         {
 
@@ -563,7 +550,7 @@ namespace Engine.UI
         {
             await base.InitializeAssets(description);
 
-            updateOrder = GetNextUpdateOrder();
+            updateOrder = UIControlHelper.GetNextUpdateOrder();
 
             Manipulator = new Manipulator2D(Game);
 
@@ -1220,6 +1207,25 @@ namespace Engine.UI
             Scene.ClearFocus();
 
             FireLostFocusEvent();
+        }
+    }
+
+    /// <summary>
+    /// UIControl helper
+    /// </summary>
+    static class UIControlHelper
+    {
+        /// <summary>
+        /// Next update order
+        /// </summary>
+        private static int UpdateOrderSeed = 0;
+        /// <summary>
+        /// Gets the next order
+        /// </summary>
+        /// <returns>Returns the next order</returns>
+        public static int GetNextUpdateOrder()
+        {
+            return ++UpdateOrderSeed;
         }
     }
 }

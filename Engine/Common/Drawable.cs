@@ -36,7 +36,7 @@ namespace Engine.Common
         /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        public Drawable(Scene scene, string id, string name) :
+        protected Drawable(Scene scene, string id, string name) :
             base(scene, id, name)
         {
 
@@ -71,7 +71,7 @@ namespace Engine.Common
             DeferredEnabled = description.DeferredEnabled;
             DepthEnabled = description.DepthEnabled;
             BlendMode = description.BlendMode;
-            Usage = SceneObjectUsages.Default;
+            Usage = SceneObjectUsages.None;
             Layer = 0;
             InstanceCount = 1;
         }

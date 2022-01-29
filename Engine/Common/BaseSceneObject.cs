@@ -6,6 +6,7 @@ namespace Engine.Common
     /// <summary>
     /// Base scene object class
     /// </summary>
+    /// <typeparam name="T">Description type</typeparam>
     public abstract class BaseSceneObject<T> : ISceneObject where T : SceneObjectDescription
     {
         /// <summary>
@@ -37,7 +38,7 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        public BaseSceneObject(Scene scene, string id, string name)
+        protected BaseSceneObject(Scene scene, string id, string name)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -54,6 +55,7 @@ namespace Engine.Common
         /// <summary>
         /// Initializes internal assets
         /// </summary>
+        /// <param name="description">Scene object description</param>
         public virtual async Task InitializeAssets(T description)
         {
             Description = description ?? throw new ArgumentNullException(nameof(description), "The description must be specified");
