@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Lens flare
     /// </summary>
-    public class LensFlare : Drawable
+    public sealed class LensFlare : Drawable<LensFlareDescription>
     {
         /// <summary>
         /// Glow sprote
@@ -28,56 +28,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public LensFlare(string id, string name, Scene scene, LensFlareDescription description)
-            : base(id, name, scene, description)
+        public LensFlare(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            glowSprite = new Sprite(
-                $"{id}.Glow",
-                $"{name}.Glow",
-                scene,
-                new SpriteDescription()
-                {
-                    ContentPath = description.ContentPath,
-                    Height = 100,
-                    Width = 100,
-                    Textures = new string[] { description.GlowTexture },
-                    BlendMode = description.BlendMode,
-                });
 
-            if (description.Flares != null && description.Flares.Length > 0)
-            {
-                flares = new Flare[description.Flares.Length];
-
-                for (int i = 0; i < description.Flares.Length; i++)
-                {
-                    var flareDesc = description.Flares[i];
-
-                    SpriteDescription sprDesc = new SpriteDescription()
-                    {
-                        ContentPath = description.ContentPath,
-                        Height = 100,
-                        Width = 100,
-                        Textures = new string[] { flareDesc.Texture },
-                        BlendMode = description.BlendMode,
-                    };
-
-                    flares[i] = new Flare()
-                    {
-                        FlareSprite = new Sprite(
-                            $"{id}.Flare_{i}",
-                            $"{name}.Flare_{i}",
-                            scene,
-                            sprDesc),
-                        Distance = flareDesc.Distance,
-                        Scale = flareDesc.Scale,
-                        Color = flareDesc.Color,
-                    };
-                }
-            }
         }
         /// <summary>
         /// Destructor
@@ -92,11 +49,8 @@ namespace Engine
         {
             if (disposing)
             {
-                if (glowSprite != null)
-                {
-                    glowSprite.Dispose();
-                    glowSprite = null;
-                }
+                glowSprite?.Dispose();
+                glowSprite = null;
 
                 if (flares != null)
                 {
@@ -107,6 +61,55 @@ namespace Engine
                     }
 
                     flares = null;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(LensFlareDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            var gl = await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Glow",
+                $"{Name}.Glow",
+                new SpriteDescription()
+                {
+                    ContentPath = Description.ContentPath,
+                    Height = 100,
+                    Width = 100,
+                    Textures = new string[] { Description.GlowTexture },
+                    BlendMode = Description.BlendMode,
+                });
+            glowSprite = gl;
+
+            if (Description.Flares != null && Description.Flares.Length > 0)
+            {
+                flares = new Flare[Description.Flares.Length];
+
+                for (int i = 0; i < Description.Flares.Length; i++)
+                {
+                    var flareDesc = Description.Flares[i];
+
+                    SpriteDescription sprDesc = new SpriteDescription()
+                    {
+                        ContentPath = Description.ContentPath,
+                        Height = 100,
+                        Width = 100,
+                        Textures = new string[] { flareDesc.Texture },
+                        BlendMode = Description.BlendMode,
+                    };
+
+                    flares[i] = new Flare()
+                    {
+                        FlareSprite = await Scene.CreateComponent<Sprite, SpriteDescription>(
+                            $"{Id}.Flare_{i}",
+                            $"{Name}.Flare_{i}",
+                            sprDesc),
+                        Distance = flareDesc.Distance,
+                        Scale = flareDesc.Scale,
+                        Color = flareDesc.Color,
+                    };
                 }
             }
         }
@@ -253,36 +256,6 @@ namespace Engine
                     flares[i].FlareSprite.Draw(context);
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Lens flare extensions
-    /// </summary>
-    public static class LensFlareExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<LensFlare> AddComponentLensFlare(this Scene scene, string id, string name, LensFlareDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
-        {
-            LensFlare component = null;
-
-            await Task.Run(() =>
-            {
-                component = new LensFlare(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

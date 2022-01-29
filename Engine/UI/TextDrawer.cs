@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
@@ -10,7 +11,7 @@ namespace Engine.UI
     /// <summary>
     /// Text drawer
     /// </summary>
-    class TextDrawer : Drawable, IScreenFitted
+    class TextDrawer : Drawable<TextDrawerDescription>, IScreenFitted
     {
         /// <summary>
         /// Maximum text length
@@ -20,11 +21,11 @@ namespace Engine.UI
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor vertexBuffer = null;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor indexBuffer = null;
+        private BufferDescriptor indexBuffer = null;
         /// <summary>
         /// Index count
         /// </summary>
@@ -49,11 +50,11 @@ namespace Engine.UI
         /// <summary>
         /// Font map
         /// </summary>
-        private readonly FontMap fontMap = null;
+        private FontMap fontMap = null;
         /// <summary>
         /// Base line threshold
         /// </summary>
-        private readonly float baseLineThr = 0;
+        private float baseLineThr = 0;
         /// <summary>
         /// Text
         /// </summary>
@@ -67,10 +68,6 @@ namespace Engine.UI
         /// </summary>
         private Color4 shadowColor;
 
-        /// <summary>
-        /// Parent control
-        /// </summary>
-        private readonly IUIControl parent = null;
         /// <summary>
         /// Horizontal align
         /// </summary>
@@ -96,7 +93,7 @@ namespace Engine.UI
         /// <summary>
         /// Font name
         /// </summary>
-        public readonly string Font = null;
+        public string Font = null;
         /// <summary>
         /// Gets or sets text to draw
         /// </summary>
@@ -246,55 +243,21 @@ namespace Engine.UI
         /// </summary>
         /// <remarks>Defines an area outside wich all text is clipped</remarks>
         public Rectangle? ClippingRectangle { get; set; } = null;
+        /// <summary>
+        /// Parent control
+        /// </summary>
+        public IUIControl Parent { get; set; } = null;
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="parent">Parent control</param>
-        /// <param name="description">Text description</param>
-        public TextDrawer(string id, string name, Scene scene, IUIControl parent, TextDrawerDescription description)
-            : base(id, name, scene, description)
+        public TextDrawer(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            this.parent = parent;
 
-            Manipulator = new Manipulator2D(Game);
-            ShadowManipulator = new Manipulator2D(Game);
-
-            Font = $"{description.FontFamily} {description.FontSize}";
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
-
-            var generator = FontMapKeycodeGenerator.DefaultWithCustom(description.CustomKeycodes);
-
-            if (!string.IsNullOrWhiteSpace(description.FontFileName) && !string.IsNullOrWhiteSpace(description.ContentPath))
-            {
-                fontMap = FontMap.FromFile(Game, description.ContentPath, generator, description.FontFileName, description.FontSize, description.Style);
-            }
-            else if (description.FontMapping != null)
-            {
-                fontMap = FontMap.FromMap(Game, description.ContentPath, description.FontMapping);
-            }
-            else if (!string.IsNullOrWhiteSpace(description.FontFamily))
-            {
-                fontMap = FontMap.FromFamily(Game, generator, description.FontFamily, description.FontSize, description.Style);
-            }
-
-            VertexFont[] verts = new VertexFont[MAXTEXTLENGTH * 4];
-            uint[] idx = new uint[MAXTEXTLENGTH * 6];
-
-            vertexBuffer = BufferManager.AddVertexData(name, true, verts);
-            indexBuffer = BufferManager.AddIndexData(name, true, idx);
-
-            UseTextureColor = description.UseTextureColor;
-            FineSampling = description.FineSampling;
-
-            if (description.LineAdjust)
-            {
-                baseLineThr = GetLineHeight() * 0.1666f; // --> 0.3333f * 0.5f
-            }
         }
         /// <summary>
         /// Destructor
@@ -312,6 +275,48 @@ namespace Engine.UI
                 //Remove data from buffer manager
                 BufferManager?.RemoveVertexData(vertexBuffer);
                 BufferManager?.RemoveIndexData(indexBuffer);
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(TextDrawerDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Manipulator = new Manipulator2D(Game);
+            ShadowManipulator = new Manipulator2D(Game);
+
+            Font = $"{Description.FontFamily} {Description.FontSize}";
+
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
+
+            var generator = FontMapKeycodeGenerator.DefaultWithCustom(Description.CustomKeycodes);
+
+            if (!string.IsNullOrWhiteSpace(Description.FontFileName) && !string.IsNullOrWhiteSpace(Description.ContentPath))
+            {
+                fontMap = await FontMap.FromFile(Game, Description.ContentPath, generator, Description.FontFileName, Description.FontSize, Description.Style);
+            }
+            else if (Description.FontMapping != null)
+            {
+                fontMap = await FontMap.FromMap(Game, Description.ContentPath, Description.FontMapping);
+            }
+            else if (!string.IsNullOrWhiteSpace(Description.FontFamily))
+            {
+                fontMap = await FontMap.FromFamily(Game, generator, Description.FontFamily, Description.FontSize, Description.Style);
+            }
+
+            VertexFont[] verts = new VertexFont[MAXTEXTLENGTH * 4];
+            uint[] idx = new uint[MAXTEXTLENGTH * 6];
+
+            vertexBuffer = BufferManager.AddVertexData(Name, true, verts);
+            indexBuffer = BufferManager.AddIndexData(Name, true, idx);
+
+            UseTextureColor = Description.UseTextureColor;
+            FineSampling = Description.FineSampling;
+
+            if (Description.LineAdjust)
+            {
+                baseLineThr = GetLineHeight() * 0.1666f; // --> 0.3333f * 0.5f
             }
         }
 
@@ -334,15 +339,15 @@ namespace Engine.UI
 
             var renderArea = GetRenderArea();
 
-            Vector2 sca = Vector2.One * (parent?.AbsoluteScale ?? 1f);
-            float rot = parent?.AbsoluteRotation ?? 0f;
+            Vector2 sca = Vector2.One * (Parent?.AbsoluteScale ?? 1f);
+            float rot = Parent?.AbsoluteRotation ?? 0f;
             Vector2 pos = renderArea.Center;
             pos.Y += baseLineThr;
 
             // Apply scroll if any
             pos = ApplyScroll(pos, renderArea);
 
-            Vector2? parentPos = parent?.GetTransformationPivot();
+            Vector2? parentPos = Parent?.GetTransformationPivot();
 
             // Calculate new transforms
             Manipulator.SetScale(sca);
@@ -366,7 +371,7 @@ namespace Engine.UI
         /// <returns>Returns the transformed position</returns>
         private Vector2 ApplyScroll(Vector2 pos, RectangleF renderArea)
         {
-            if (parent is IScrollable ta)
+            if (Parent is IScrollable ta)
             {
                 if (ta.Scroll == ScrollModes.None)
                 {
@@ -563,7 +568,7 @@ namespace Engine.UI
         /// <returns>Returns the render area</returns>
         private RectangleF GetRenderArea()
         {
-            return parent?.GetRenderArea(true) ?? Game.Form.RenderRectangle;
+            return Parent?.GetRenderArea(true) ?? Game.Form.RenderRectangle;
         }
 
         /// <summary>

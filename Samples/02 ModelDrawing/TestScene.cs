@@ -82,17 +82,17 @@ namespace ModelDrawing
             var text1Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
             var text2Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
 
-            text = await this.AddComponentUITextArea("ui1", "Text", textDesc, LayerUI);
-            statistics = await this.AddComponentUITextArea("ui2", "Statistics", statisticsDesc, LayerUI);
-            text1 = await this.AddComponentUITextArea("ui3", "Text1", text1Desc, LayerUI);
-            text2 = await this.AddComponentUITextArea("ui4", "Text2", text2Desc, LayerUI);
+            text = await AddComponentUI<UITextArea, UITextAreaDescription>("ui1", "Text", textDesc);
+            statistics = await AddComponentUI<UITextArea, UITextAreaDescription>("ui2", "Statistics", statisticsDesc);
+            text1 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Text1", text1Desc);
+            text2 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui4", "Text2", text2Desc);
 
             var backPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            backPanel = await this.AddComponentSprite("ui5", "Backpanel", backPanelDesc, SceneObjectUsages.UI, LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("ui5", "Backpanel", backPanelDesc, LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
             consoleDesc.StartsVisible = false;
-            console = await this.AddComponentUIConsole("ui6", "Console", consoleDesc, LayerUI + 1);
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui6", "Console", consoleDesc, LayerUI + 1);
         }
         private async Task InitializeFloor()
         {
@@ -122,7 +122,7 @@ namespace ModelDrawing
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            await this.AddComponentModel("Floor", "Floor", desc, SceneObjectUsages.Ground);
+            await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeModels()
         {
@@ -140,7 +140,10 @@ namespace ModelDrawing
             pDescriptions.Add("Explosion", pExplosion);
             pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>(
+                "ParticleManager",
+                "ParticleManager",
+                ParticleManagerDescription.Default());
         }
         private async Task InitializeParticleVolumeDrawer()
         {
@@ -149,7 +152,10 @@ namespace ModelDrawing
                 Count = 20000,
                 DepthEnabled = true,
             };
-            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer("DebugParticleDrawer", "DebugParticleDrawer", desc, SceneObjectUsages.None, LayerEffects);
+            pManagerLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DebugParticleDrawer",
+                "DebugParticleDrawer",
+                desc);
         }
 
         public override void Update(GameTime gameTime)
@@ -253,7 +259,7 @@ namespace ModelDrawing
             }
             if (Game.Input.KeyJustPressed(Keys.D7))
             {
-                AddSmokePlumeSystemWithWind(Vector3.Normalize(new Vector3(1, 0, 1)), 20f);
+                _ = AddSmokePlumeSystemWithWind(Vector3.Normalize(new Vector3(1, 0, 1)), 20f);
             }
 
             if (Game.Input.KeyJustPressed(Keys.P))
@@ -315,8 +321,8 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Explosion"], emitter1);
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["SmokeExplosion"], emitter2);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Explosion"], emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["SmokeExplosion"], emitter2);
         }
         private void AddProjectileTrailSystem()
         {
@@ -329,7 +335,7 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Projectile"], emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Projectile"], emitter);
         }
         private void AddDustSystem()
         {
@@ -342,7 +348,7 @@ namespace ModelDrawing
                 MaximumDistance = 250f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Dust"], emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Dust"], emitter);
         }
         private void AddSmokePlumeSystem()
         {
@@ -371,8 +377,8 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter1);
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter2);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter2);
         }
         private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
@@ -419,13 +425,13 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter11);
-            pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Fire"], emitter12);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter11);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Fire"], emitter12);
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter21);
-            pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Plume"], emitter22);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter21);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Plume"], emitter22);
         }
-        private void AddSmokePlumeSystemWithWind(Vector3 wind, float force)
+        private async Task AddSmokePlumeSystemWithWind(Vector3 wind, float force)
         {
             var emitter = new ParticleEmitter()
             {
@@ -436,7 +442,7 @@ namespace ModelDrawing
                 MaximumDistance = 1000f,
             };
 
-            var pSystem = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter);
+            var pSystem = await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter);
 
             var parameters = pSystem.GetParameters();
 

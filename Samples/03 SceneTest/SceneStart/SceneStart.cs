@@ -67,7 +67,8 @@ namespace SceneTest.SceneStart
         private async Task InitializeCursor()
         {
             var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
-            await this.AddComponentUICursor("Cursor", "Cursor", cursorDesc);
+
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
         }
         private async Task InitializeBackground()
         {
@@ -75,7 +76,8 @@ namespace SceneTest.SceneStart
             {
                 Content = ContentDescription.FromFile("SceneStart", "SkyPlane.json"),
             };
-            backGround = await this.AddComponentModel("Background", "Background", backGroundDesc, SceneObjectUsages.None);
+
+            backGround = await AddComponent<Model, ModelDescription>("Background", "Background", backGroundDesc);
         }
         private async Task InitializeTitle()
         {
@@ -88,12 +90,12 @@ namespace SceneTest.SceneStart
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            title = await this.AddComponentUITextArea("Title", "Title", titleDesc);
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
             title.GrowControlWithText = false;
         }
         private async Task InitializeButtonPanel()
         {
-            buttonPanel = await this.AddComponentUIPanel("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
+            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
             buttonPanel.SetGridLayout(GridLayout.FixedRows(1));
             buttonPanel.Spacing = 20;
             buttonPanel.EventsEnabled = true;
@@ -109,12 +111,12 @@ namespace SceneTest.SceneStart
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            sceneMaterialsButton = new UIButton("ButtonMaterials", "ButtonMaterials", this, startButtonDesc);
-            sceneWaterButton = new UIButton("ButtonWater", "ButtonWater", this, startButtonDesc);
-            sceneStencilPassButton = new UIButton("ButtonStencilPass", "ButtonStencilPass", this, startButtonDesc);
-            sceneLightsButton = new UIButton("ButtonLights", "ButtonLights", this, startButtonDesc);
-            sceneCascadedShadowsButton = new UIButton("ButtonCascadedShadows", "ButtonCascadedShadows", this, startButtonDesc);
-            sceneTestButton = new UIButton("ButtonTest", "ButtonTest", this, startButtonDesc);
+            sceneMaterialsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonMaterials", "ButtonMaterials", startButtonDesc);
+            sceneWaterButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonWater", "ButtonWater", startButtonDesc);
+            sceneStencilPassButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonStencilPass", "ButtonStencilPass", startButtonDesc);
+            sceneLightsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonLights", "ButtonLights", startButtonDesc);
+            sceneCascadedShadowsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonCascadedShadows", "ButtonCascadedShadows", startButtonDesc);
+            sceneTestButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonTest", "ButtonTest", startButtonDesc);
 
             var sceneButtons = new[]
             {
@@ -141,7 +143,7 @@ namespace SceneTest.SceneStart
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            exitButton = new UIButton("ButtonExit", "ButtonExit", this, exitButtonDesc);
+            exitButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc);
             exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
@@ -151,13 +153,12 @@ namespace SceneTest.SceneStart
         }
         private async Task InitializeOptionsButton()
         {
-            optsButton = await this.AddComponentUIButton("ButtonOptions", "ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
+            optsButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonOptions", "ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
             optsButton.MouseClick += OptsButtonClick;
 
-            var optsBackground = new Sprite("ButtonOptions.Background", "ButtonOptions.Background", this, SpriteDescription.Default(Color.White))
-            {
-                EventsEnabled = false
-            };
+            var optsBackground = await CreateComponent<Sprite, SpriteDescription>("ButtonOptions.Background", "ButtonOptions.Background", SpriteDescription.Default(Color.White));
+            optsBackground.EventsEnabled = false;
+
             optsButton.InsertChild(0, optsBackground);
         }
         private async Task InitializeTabPanel()
@@ -168,12 +169,12 @@ namespace SceneTest.SceneStart
             tabDesc.TabCaptions = new[] { "But 1", "But 2", "But 3" };
             tabDesc.TabButtonsSpacing = new Spacing() { Horizontal = 5f };
 
-            tabsPanel = await this.AddComponentUITabPanel("TabPanel", "TabPanel", tabDesc, LayerUI + 1);
+            tabsPanel = await AddComponentUI<UITabPanel, UITabPanelDescription>("TabPanel", "TabPanel", tabDesc, LayerUI + 1);
             tabsPanel.Visible = false;
             tabsPanel.TabClick += TabsPanelTabClick;
 
             var pan1Desc = UIPanelDescription.Default(@"SceneStart/TanksGame.png");
-            tabsPanel.SetTabPanel(1, pan1Desc);
+            await tabsPanel.SetTabPanel(1, pan1Desc);
 
             var p = GridLayout.FixedRows(1);
             tabsPanel.TabPanels[0].SetGridLayout(p);
@@ -183,7 +184,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 5; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel($"TabPanel.Level1_{i}", $"TabPanel.Level1_{i}", this, panDesc);
+                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level1_{i}", $"TabPanel.Level1_{i}", panDesc);
                 tabsPanel.TabPanels[0].AddChild(pan, false);
             }
 
@@ -195,7 +196,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 2; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel($"TabPanel.Level2_{i}", $"TabPanel.Level2_{i}", this, panDesc);
+                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level2_{i}", $"TabPanel.Level2_{i}", panDesc);
                 lastPan.AddChild(pan, false);
             }
 
@@ -207,7 +208,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 4; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel($"TabPanel.Level3_{i}", $"TabPanel.Level3_{i}", this, panDesc);
+                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level3_{i}", $"TabPanel.Level3_{i}", panDesc);
                 lastPan2.AddChild(pan, false);
             }
 

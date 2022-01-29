@@ -53,7 +53,7 @@ namespace Engine.Content
             this.path = p.First();
             this.faces = faces ?? throw new ArgumentNullException(nameof(faces), "A cube face list must be specified.");
 
-            if (faces.Count() != 6)
+            if (faces.Any() && faces.Count() != 6)
             {
                 throw new ArgumentOutOfRangeException(nameof(faces), $"A list o 6 faces must be specified.");
             }
@@ -80,7 +80,7 @@ namespace Engine.Content
             path = p.First();
             this.faces = faces ?? throw new ArgumentNullException(nameof(faces), "A cube face list must be specified.");
 
-            if (faces.Count() != 6)
+            if (faces.Any() && faces.Count() != 6)
             {
                 throw new ArgumentOutOfRangeException(nameof(faces), $"A list o 6 faces must be specified.");
             }

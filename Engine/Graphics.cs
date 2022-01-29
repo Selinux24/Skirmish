@@ -3121,18 +3121,20 @@ namespace Engine
         internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            if (data?.Any() == true)
+            if (data?.Any() != true)
             {
-                deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-                using (stream)
-                {
-                    stream.Position = Marshal.SizeOf(default(T)) * offset;
-                    stream.WriteRange(data.ToArray());
-                }
-                deviceContext.UnmapSubresource(buffer, 0);
-
-                Counters.BufferWrites++;
+                return;
             }
+
+            deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            using (stream)
+            {
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+                stream.WriteRange(data.ToArray());
+            }
+            deviceContext.UnmapSubresource(buffer, 0);
+
+            Counters.BufferWrites++;
         }
         /// <summary>
         /// Writes data into buffer
@@ -3157,18 +3159,20 @@ namespace Engine
         internal void WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            if (data?.Any() == true)
+            if (data?.Any() != true)
             {
-                deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
-                using (stream)
-                {
-                    stream.Position = Marshal.SizeOf(default(T)) * offset;
-                    stream.WriteRange(data.ToArray());
-                }
-                deviceContext.UnmapSubresource(buffer, 0);
-
-                Counters.BufferWrites++;
+                return;
             }
+
+            deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+            using (stream)
+            {
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+                stream.WriteRange(data.ToArray());
+            }
+            deviceContext.UnmapSubresource(buffer, 0);
+
+            Counters.BufferWrites++;
         }
 
         /// <summary>
@@ -3179,7 +3183,7 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        internal T[] ReadBuffer<T>(Buffer buffer, int length)
+        internal IEnumerable<T> ReadBuffer<T>(Buffer buffer, int length)
             where T : struct
         {
             return ReadBuffer<T>(buffer, 0, length);
@@ -3193,7 +3197,7 @@ namespace Engine
         /// <param name="offset">Offset to read</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        internal T[] ReadBuffer<T>(Buffer buffer, long offset, int length)
+        internal IEnumerable<T> ReadBuffer<T>(Buffer buffer, long offset, int length)
             where T : struct
         {
             Counters.BufferReads++;

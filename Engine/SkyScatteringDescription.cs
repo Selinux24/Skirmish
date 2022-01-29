@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Sky scattering description
     /// </summary>
-    public class SkyScatteringDescription : SceneDrawableDescription
+    public class SkyScatteringDescription : SceneObjectDescription
     {
         /// <summary>
         /// Rayleigh scattering constant.
@@ -47,9 +47,13 @@ namespace Engine
         /// <summary>
         /// Gets the default sky scattering description
         /// </summary>
-        public static SkyScatteringDescription Default()
+        /// <param name="resolution">Resolution</param>
+        public static SkyScatteringDescription Default(SkyScatteringResolutions resolution = SkyScatteringResolutions.Low)
         {
-            return new SkyScatteringDescription();
+            return new SkyScatteringDescription()
+            {
+                Resolution = resolution,
+            };
         }
 
         /// <summary>

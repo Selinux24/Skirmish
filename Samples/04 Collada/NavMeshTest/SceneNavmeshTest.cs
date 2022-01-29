@@ -97,13 +97,13 @@ namespace Collada.NavmeshTest
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = "Navigation Mesh Test Scene";
 
-            debug = await this.AddComponentUITextArea("Debug", "Debug", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Green });
+            debug = await AddComponentUI<UITextArea, UITextAreaDescription>("Debug", "Debug", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Green });
             debug.Text = null;
 
-            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).
@@ -116,7 +116,7 @@ Space: Finds random over navmesh";
             help.Visible = false;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("Backpanel", "Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
         }
         private void InitializeLights()
         {
@@ -142,17 +142,15 @@ Space: Finds random over navmesh";
         }
         private async Task InitializeNavmesh()
         {
-            inputGeometry = await this.AddComponentModel(
-                "NavMesh",
-                "NavMesh",
-                new ModelDescription()
-                {
-                    TextureIndex = 0,
-                    CastShadow = true,
-                    UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json"),
-                },
-                SceneObjectUsages.Ground);
+            var desc = new ModelDescription()
+            {
+                TextureIndex = 0,
+                CastShadow = true,
+                UseAnisotropicFiltering = true,
+                Content = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json"),
+            };
+
+            inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
             SetGround(inputGeometry, true);
 
@@ -183,13 +181,13 @@ Space: Finds random over navmesh";
             {
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
+            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
+            volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
         }
 
         public override async Task UpdateNavigationGraph()

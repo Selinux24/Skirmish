@@ -13,16 +13,16 @@ namespace Engine
     /// <summary>
     /// Instaced model
     /// </summary>
-    public class ModelInstanced : BaseModel, IComposed, IHasGameState
+    public class ModelInstanced : BaseModel<ModelInstancedDescription>, IComposed, IHasGameState
     {
         /// <summary>
         /// Instancing data per instance
         /// </summary>
-        private readonly VertexInstancingData[] instancingData = null;
+        private VertexInstancingData[] instancingData = null;
         /// <summary>
         /// Model instance list
         /// </summary>
-        private readonly ModelInstance[] instances = null;
+        private ModelInstance[] instances = null;
         /// <summary>
         /// Temporal instance listo for rendering
         /// </summary>
@@ -34,7 +34,7 @@ namespace Engine
         /// <summary>
         /// Independant transforms flag
         /// </summary>
-        private readonly bool hasIndependantTransforms = false;
+        private bool hasIndependantTransforms = false;
 
         /// <summary>
         /// Gets manipulator per instance list
@@ -74,26 +74,33 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public ModelInstanced(string id, string name, Scene scene, ModelInstancedDescription description)
-            : base(id, name, scene, description)
+        public ModelInstanced(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            if (description.Instances <= 0)
+
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(ModelInstancedDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.Instances <= 0)
             {
-                throw new ArgumentException($"Instances parameter must be more than 0: {description.Instances}");
+                throw new ArgumentException($"Instances parameter must be more than 0: {Description.Instances}");
             }
 
-            InstanceCount = description.Instances;
+            InstanceCount = Description.Instances;
 
-            instances = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, description));
+            instances = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, Description));
             instancingData = new VertexInstancingData[InstanceCount];
 
             MaximumCount = -1;
 
-            hasIndependantTransforms = (description.TransformDependences?.Any() == true);
+            hasIndependantTransforms = (Description.TransformDependences?.Any() == true);
         }
 
         /// <inheritdoc/>
@@ -360,6 +367,7 @@ namespace Engine
 
             return count;
         }
+
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
@@ -635,36 +643,6 @@ namespace Engine
                 var instanceState = modelInstancedState.Instances.ElementAt(i);
                 instances[i].SetState(instanceState);
             }
-        }
-    }
-
-    /// <summary>
-    /// Instanced model extensions
-    /// </summary>
-    public static class ModelInstancedExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, string id, string name, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
-        {
-            ModelInstanced component = null;
-
-            await Task.Run(() =>
-            {
-                component = new ModelInstanced(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

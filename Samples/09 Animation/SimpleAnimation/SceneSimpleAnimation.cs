@@ -144,21 +144,21 @@ namespace Animation.SimpleAnimation
             var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
             var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
-            animText = await this.AddComponentUITextArea("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
-            messages = await this.AddComponentUITextArea("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            animText = await AddComponentUI<UITextArea, UITextAreaDescription>("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
 
             title.Text = "Animation test";
             runtime.Text = "";
             animText.Text = "";
             messages.Text = "";
 
-            backPanel = await this.AddComponentSprite("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
-            console = await this.AddComponentUIConsole("Console", "Console", consoleDesc, LayerUI + 1);
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -196,11 +196,11 @@ namespace Animation.SimpleAnimation
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", "Floor", desc);
+            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeLadder()
         {
-            var ladder = await this.AddComponentModelInstanced(
+            var ladder = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Ladder",
                 "Ladder",
                 new ModelInstancedDescription()
@@ -238,7 +238,7 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeLadder2()
         {
-            var ladder = await this.AddComponentModelInstanced(
+            var ladder = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Ladder2",
                 "Ladder2",
                 new ModelInstancedDescription()
@@ -249,7 +249,7 @@ namespace Animation.SimpleAnimation
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_2.json"),
                 });
 
-            var ladder2 = await this.AddComponentModelInstanced(
+            var ladder2 = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Ladder22",
                 "Ladder22",
                 new ModelInstancedDescription()
@@ -297,7 +297,7 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeSoldier()
         {
-            var soldier = await this.AddComponentModelInstanced(
+            var soldier = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Soldier",
                 "Soldier",
                 new ModelInstancedDescription()
@@ -342,7 +342,7 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeRat()
         {
-            var rat = await this.AddComponentModelInstanced(
+            var rat = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Rat",
                 "Rat",
                 new ModelInstancedDescription()
@@ -368,7 +368,7 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeDoors()
         {
-            var doors = await this.AddComponentModelInstanced(
+            var doors = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Doors",
                 "Doors",
                 new ModelInstancedDescription()
@@ -379,7 +379,7 @@ namespace Animation.SimpleAnimation
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Doors.json"),
                 });
 
-            var walls = await this.AddComponentModelInstanced(
+            var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "DoorWalls",
                 "DoorWalls",
                 new ModelInstancedDescription()
@@ -422,7 +422,7 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeJails()
         {
-            var walls = await this.AddComponentModelInstanced(
+            var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Walls",
                 "Walls",
                 new ModelInstancedDescription()
@@ -437,7 +437,7 @@ namespace Animation.SimpleAnimation
             walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             walls[0].Manipulator.SetScale(2.5f);
 
-            var doors = await this.AddComponentModelInstanced(
+            var doors = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "Jails",
                 "Jails",
                 new ModelInstancedDescription()
@@ -476,8 +476,15 @@ namespace Animation.SimpleAnimation
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", "DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", "DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "DebugItemTris", 
+                "DebugItemTris", 
+                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+
+            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DebugItemLines", 
+                "DebugItemLines", 
+                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
         }
 
         private void InitializeEnvironment()

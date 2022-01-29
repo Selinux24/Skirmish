@@ -180,10 +180,10 @@ namespace Tanks
         }
         private async Task InitializeLoadingUI()
         {
-            fadePanel = await this.AddComponentUIPanel("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
+            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
             fadePanel.Visible = false;
 
-            loadingText = await this.AddComponentUITextArea("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
+            loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
             loadingText.TextForeColor = Color.Yellow;
             loadingText.TextShadowColor = Color.Orange;
             loadingText.TextHorizontalAlign = TextHorizontalAlign.Center;
@@ -191,7 +191,7 @@ namespace Tanks
             loadingText.GrowControlWithText = false;
             loadingText.Visible = false;
 
-            loadingBar = await this.AddComponentUIProgressBar("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
+            loadingBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
             loadingBar.ProgressColor = Color.CornflowerBlue;
             loadingBar.BaseColor = Color.Yellow;
             loadingBar.Caption.TextForeColor = Color.Black;
@@ -263,7 +263,7 @@ namespace Tanks
         }
         private async Task InitializeUIGameMessages()
         {
-            gameMessage = await this.AddComponentUITextArea("GameMessage", "GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, FontMapStyles.Regular, false), LayerUIEffects + 1);
+            gameMessage = await AddComponentUI<UITextArea, UITextAreaDescription>("GameMessage", "GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, FontMapStyles.Regular, false), LayerUIEffects + 1);
             gameMessage.TextForeColor = Color.Yellow;
             gameMessage.TextShadowColor = Color.Yellow * 0.5f;
             gameMessage.TextHorizontalAlign = TextHorizontalAlign.Center;
@@ -271,7 +271,7 @@ namespace Tanks
             gameMessage.GrowControlWithText = false;
             gameMessage.Visible = false;
 
-            gameKeyHelp = await this.AddComponentUITextArea("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true), LayerUIEffects + 1);
+            gameKeyHelp = await AddComponentUI<UITextArea, UITextAreaDescription>("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true), LayerUIEffects + 1);
             gameKeyHelp.TextForeColor = Color.Yellow;
             gameKeyHelp.Text = "Press space to exit";
             gameKeyHelp.TextHorizontalAlign = TextHorizontalAlign.Center;
@@ -282,7 +282,7 @@ namespace Tanks
         private async Task InitializeUIModalDialog()
         {
             var descPan = UIPanelDescription.Default(Color.DarkGreen);
-            dialog = await this.AddComponentUIPanel("Modal Dialog", "Modal Dialog", descPan, layerUIModal);
+            dialog = await AddComponentUI<UIPanel, UIPanelDescription>("Modal Dialog", "Modal Dialog", descPan, layerUIModal);
 
             var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
 
@@ -292,17 +292,17 @@ namespace Tanks
             descButton.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButton.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            dialogAccept = new UIButton("DialogAccept", "DialogAccept", this, descButton);
+            dialogAccept = await CreateComponent<UIButton, UIButtonDescription>("DialogAccept", "DialogAccept", descButton);
             dialogAccept.Caption.Text = "Ok";
 
-            dialogCancel = new UIButton("DialogCancel", "DialogCancel", this, descButton);
+            dialogCancel = await CreateComponent<UIButton, UIButtonDescription>("DialogCancel", "DialogCancel", descButton);
             dialogCancel.Caption.Text = "Cancel";
 
             var descText = UITextAreaDescription.DefaultFromFile(fontFilename, 28);
             descText.TextHorizontalAlign = TextHorizontalAlign.Center;
             descText.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            dialogText = new UITextArea("DialogText", "DialogText", this, descText);
+            dialogText = await CreateComponent<UITextArea, UITextAreaDescription>("DialogText", "DialogText", descText);
 
             dialog.AddChild(dialogText);
             dialog.AddChild(dialogCancel, false);
@@ -312,42 +312,42 @@ namespace Tanks
         }
         private async Task InitializeUIPlayers()
         {
-            player1Name = await this.AddComponentUITextArea("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
+            player1Name = await AddComponentUI<UITextArea, UITextAreaDescription>("Player1Name", "Player1Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
             player1Name.TextForeColor = player1Status.Color;
             player1Name.TextShadowColor = player1Status.Color * 0.5f;
             player1Name.GrowControlWithText = false;
             player1Name.TextHorizontalAlign = TextHorizontalAlign.Left;
             player1Name.Visible = false;
 
-            player1Points = await this.AddComponentUITextArea("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
+            player1Points = await AddComponentUI<UITextArea, UITextAreaDescription>("Player1Points", "Player1Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player1Points.TextForeColor = player1Status.Color;
             player1Points.TextShadowColor = player1Status.Color * 0.5f;
             player1Points.GrowControlWithText = false;
             player1Points.TextHorizontalAlign = TextHorizontalAlign.Center;
             player1Points.Visible = false;
 
-            player1Life = await this.AddComponentUIProgressBar("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
+            player1Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player1Life", "Player1Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
             player1Life.ProgressColor = Color.DarkRed;
             player1Life.BaseColor = player1Status.Color;
             player1Life.Caption.TextForeColor = Color.White;
             player1Life.Caption.Text = "0%";
             player1Life.Visible = false;
 
-            player2Name = await this.AddComponentUITextArea("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
+            player2Name = await AddComponentUI<UITextArea, UITextAreaDescription>("Player2Name", "Player2Name", UITextAreaDescription.DefaultFromFile(fontFilename, 20, true));
             player2Name.TextForeColor = player2Status.Color;
             player2Name.TextShadowColor = player2Status.Color * 0.5f;
             player2Name.GrowControlWithText = false;
             player2Name.TextHorizontalAlign = TextHorizontalAlign.Right;
             player2Name.Visible = false;
 
-            player2Points = await this.AddComponentUITextArea("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
+            player2Points = await AddComponentUI<UITextArea, UITextAreaDescription>("Player2Points", "Player2Points", UITextAreaDescription.DefaultFromFile(fontFilename, 25, true));
             player2Points.TextForeColor = player2Status.Color;
             player2Points.TextShadowColor = player2Status.Color * 0.5f;
             player2Points.GrowControlWithText = false;
             player2Points.TextHorizontalAlign = TextHorizontalAlign.Center;
             player2Points.Visible = false;
 
-            player2Life = await this.AddComponentUIProgressBar("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
+            player2Life = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Player2Life", "Player2Life", UIProgressBarDescription.DefaultFromFile(fontFilename, 10, true));
             player2Life.ProgressColor = Color.DarkRed;
             player2Life.BaseColor = player2Status.Color;
             player2Life.Caption.TextForeColor = Color.White;
@@ -356,19 +356,19 @@ namespace Tanks
         }
         private async Task InitializeUITurn()
         {
-            turnText = await this.AddComponentUITextArea("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true));
+            turnText = await AddComponentUI<UITextArea, UITextAreaDescription>("TurnText", "TurnText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true));
             turnText.TextForeColor = Color.Yellow;
             turnText.TextShadowColor = Color.Yellow * 0.5f;
             turnText.TextHorizontalAlign = TextHorizontalAlign.Center;
             turnText.GrowControlWithText = false;
             turnText.Visible = false;
 
-            gameIcon = await this.AddComponentSprite("GameIcon", "GameIcon", SpriteDescription.Default("Resources/GameIcon.png"), SceneObjectUsages.UI);
+            gameIcon = await AddComponentUI<Sprite, SpriteDescription>("GameIcon", "GameIcon", SpriteDescription.Default("Resources/GameIcon.png"));
             gameIcon.BaseColor = Color.Yellow;
             gameIcon.Visible = false;
             gameIcon.TweenRotateBounce(-0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
-            playerTurnMarker = await this.AddComponentSprite("PlayerTurnMarker", "PlayerTurnMarker", SpriteDescription.Default("Resources/Arrow.png"), SceneObjectUsages.UI);
+            playerTurnMarker = await AddComponentUI<Sprite, SpriteDescription>("PlayerTurnMarker", "PlayerTurnMarker", SpriteDescription.Default("Resources/Arrow.png"));
             playerTurnMarker.BaseColor = Color.Turquoise;
             playerTurnMarker.Visible = false;
             playerTurnMarker.TweenScaleBounce(1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
@@ -379,60 +379,60 @@ namespace Tanks
             int layerSprites = layerPanel + 1;
             int layerKeys = layerSprites + 1;
 
-            keyHelp = await this.AddComponentUIPanel("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color4.Black * 0.3333f), layerPanel);
+            keyHelp = await AddComponentUI<UIPanel, UIPanelDescription>("KeyHelp", "KeyHelp", UIPanelDescription.Default(Color4.Black * 0.3333f), layerPanel);
             keyHelp.Visible = false;
 
-            keyRotate = await this.AddComponentSprite("KeyRotate", "KeyRotate", SpriteDescription.Default("Resources/Turn.png"), SceneObjectUsages.UI, layerSprites);
+            keyRotate = await AddComponentUI<Sprite, SpriteDescription>("KeyRotate", "KeyRotate", SpriteDescription.Default("Resources/Turn.png"), layerSprites);
             keyRotate.BaseColor = Color.Turquoise;
             keyRotate.Visible = false;
 
-            keyMove = await this.AddComponentSprite("KeyMove", "KeyMove", SpriteDescription.Default("Resources/Move.png"), SceneObjectUsages.UI, layerSprites);
+            keyMove = await AddComponentUI<Sprite, SpriteDescription>("KeyMove", "KeyMove", SpriteDescription.Default("Resources/Move.png"), layerSprites);
             keyMove.BaseColor = Color.Turquoise;
             keyMove.Visible = false;
 
-            KeyPitch = await this.AddComponentSprite("KeyPitch", "KeyPitch", SpriteDescription.Default("Resources/Pitch.png"), SceneObjectUsages.UI, layerSprites);
+            KeyPitch = await AddComponentUI<Sprite, SpriteDescription>("KeyPitch", "KeyPitch", SpriteDescription.Default("Resources/Pitch.png"), layerSprites);
             KeyPitch.BaseColor = Color.Turquoise;
             KeyPitch.Visible = false;
 
-            keyRotateLeftText = await this.AddComponentUITextArea("KeyRotateLeftText", "KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
+            keyRotateLeftText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyRotateLeftText", "KeyRotateLeftText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyRotateLeftText.TextForeColor = Color.Yellow;
             keyRotateLeftText.Text = "A";
             keyRotateLeftText.Visible = false;
 
-            keyRotateRightText = await this.AddComponentUITextArea("KeyRotateRightText", "KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
+            keyRotateRightText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyRotateRightText", "KeyRotateRightText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyRotateRightText.TextForeColor = Color.Yellow;
             keyRotateRightText.Text = "D";
             keyRotateRightText.Visible = false;
 
-            keyMoveForwardText = await this.AddComponentUITextArea("KeyMoveForwardText", "KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
+            keyMoveForwardText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyMoveForwardText", "KeyMoveForwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyMoveForwardText.TextForeColor = Color.Yellow;
             keyMoveForwardText.Text = "W";
             keyMoveForwardText.Visible = false;
 
-            keyMoveBackwardText = await this.AddComponentUITextArea("KeyMoveBackwardText", "KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
+            keyMoveBackwardText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyMoveBackwardText", "KeyMoveBackwardText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyMoveBackwardText.TextForeColor = Color.Yellow;
             keyMoveBackwardText.Text = "S";
             keyMoveBackwardText.Visible = false;
 
-            keyPitchUpText = await this.AddComponentUITextArea("KeyPitchUpText", "KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
+            keyPitchUpText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyPitchUpText", "KeyPitchUpText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyPitchUpText.TextForeColor = Color.Yellow;
             keyPitchUpText.Text = "Q";
             keyPitchUpText.Visible = false;
 
-            keyPitchDownText = await this.AddComponentUITextArea("KeyPitchDownText", "KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
+            keyPitchDownText = await AddComponentUI<UITextArea, UITextAreaDescription>("KeyPitchDownText", "KeyPitchDownText", UITextAreaDescription.DefaultFromFile(fontFilename, 15, FontMapStyles.Regular, true), layerKeys);
             keyPitchDownText.TextForeColor = Color.Yellow;
             keyPitchDownText.Text = "Z";
             keyPitchDownText.Visible = false;
         }
         private async Task InitializeUIFire()
         {
-            pbFire = await this.AddComponentUIProgressBar("PbFire", "PbFire", UIProgressBarDescription.Default());
+            pbFire = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("PbFire", "PbFire", UIProgressBarDescription.Default());
             pbFire.Anchor = Anchors.HorizontalCenter;
             pbFire.ProgressColor = Color.Yellow;
             pbFire.BaseColor = new Color4(0, 0, 0, 0.5f);
             pbFire.Visible = false;
 
-            fireKeyText = await this.AddComponentUITextArea("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
+            fireKeyText = await AddComponentUI<UITextArea, UITextAreaDescription>("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
             fireKeyText.TextForeColor = Color.Yellow;
             fireKeyText.Text = "Press space to fire!";
             fireKeyText.TextHorizontalAlign = TextHorizontalAlign.Center;
@@ -446,26 +446,26 @@ namespace Tanks
             int layerIcons = layerPanel + 1;
             int layerMarkers = layerIcons + 1;
 
-            miniMapBackground = await this.AddComponentSprite("MiniMapBackground", "MiniMapBackground", SpriteDescription.Default("Resources/Compass.png"), SceneObjectUsages.UI, layerPanel);
+            miniMapBackground = await AddComponentUI<Sprite, SpriteDescription>("MiniMapBackground", "MiniMapBackground", SpriteDescription.Default("Resources/Compass.png"), layerPanel);
             miniMapBackground.Alpha = 0.85f;
             miniMapBackground.Visible = false;
 
-            miniMapTank1 = await this.AddComponentSprite("MiniMapTank1", "MiniMapTank1", SpriteDescription.Default("Resources/Tank.png"), SceneObjectUsages.UI, layerIcons);
+            miniMapTank1 = await AddComponentUI<Sprite, SpriteDescription>("MiniMapTank1", "MiniMapTank1", SpriteDescription.Default("Resources/Tank.png"), layerIcons);
             miniMapTank1.BaseColor = Color.Blue;
             miniMapTank1.Visible = false;
 
-            miniMapTank2 = await this.AddComponentSprite("MiniMapTank2", "MiniMapTank2", SpriteDescription.Default("Resources/Tank.png"), SceneObjectUsages.UI, layerIcons);
+            miniMapTank2 = await AddComponentUI<Sprite, SpriteDescription>("MiniMapTank2", "MiniMapTank2", SpriteDescription.Default("Resources/Tank.png"), layerIcons);
             miniMapTank2.BaseColor = Color.Red;
             miniMapTank2.Visible = false;
 
-            windVelocity = await this.AddComponentUIProgressBar("WindVelocity", "WindVelocity", UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerMarkers);
+            windVelocity = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("WindVelocity", "WindVelocity", UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerMarkers);
             windVelocity.Caption.Text = "Wind velocity";
             windVelocity.Caption.TextForeColor = Color.Yellow * 0.85f;
             windVelocity.ProgressColor = Color.DeepSkyBlue;
             windVelocity.BaseColor = new Color4(0, 0, 0, 0.5f);
             windVelocity.Visible = false;
 
-            windDirectionArrow = await this.AddComponentSprite("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("Resources/Wind.png"), SceneObjectUsages.UI, layerMarkers);
+            windDirectionArrow = await AddComponentUI<Sprite, SpriteDescription>("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("Resources/Wind.png"), layerMarkers);
             windDirectionArrow.BaseColor = Color.Green;
             windDirectionArrow.Visible = false;
         }
@@ -474,7 +474,7 @@ namespace Tanks
             trajectoryMarkerPool = new Sprite[5];
             for (int i = 0; i < trajectoryMarkerPool.Length; i++)
             {
-                var trajectoryMarker = await this.AddComponentSprite($"TrajectoryMarker_{i}", $"TrajectoryMarker_{i}", SpriteDescription.Default("Resources/Dot_w.png"), SceneObjectUsages.UI);
+                var trajectoryMarker = await AddComponentUI<Sprite, SpriteDescription>($"TrajectoryMarker_{i}", $"TrajectoryMarker_{i}", SpriteDescription.Default("Resources/Dot_w.png"));
                 trajectoryMarker.Width = 50;
                 trajectoryMarker.Height = 50;
                 trajectoryMarker.BaseColor = Color.Transparent;
@@ -664,7 +664,7 @@ namespace Tanks
                 TransformDependences = new[] { 1, 2, -1 },
             };
 
-            tanks = await this.AddComponentModelInstanced("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
+            tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
             tanks.Visible = false;
 
             tankHeight = tanks[0].GetBoundingBox().Height * 0.5f;
@@ -702,7 +702,7 @@ namespace Tanks
             GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
 
-            terrain = await this.AddComponentScenery("Terrain", "Terrain", groundDesc);
+            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", groundDesc);
             terrain.Visible = false;
 
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
@@ -738,7 +738,7 @@ namespace Tanks
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            landScape = await this.AddComponentModel("Landscape", "Landscape", content, SceneObjectUsages.None, LayerDefault);
+            landScape = await AddComponent<Model, ModelDescription>("Landscape", "Landscape", content);
             landScape.Visible = false;
         }
         private async Task InitializeModelProjectile()
@@ -753,12 +753,12 @@ namespace Tanks
             };
             content.DepthEnabled = false;
 
-            projectile = await this.AddComponentModel("Projectile", "Projectile", content, SceneObjectUsages.None, LayerDefault + 1);
+            projectile = await AddComponent<Model, ModelDescription>("Projectile", "Projectile", content, SceneObjectUsages.Default, LayerDefault + 1);
             projectile.Visible = false;
         }
         private async Task InitializeParticleManager()
         {
-            particleManager = await this.AddComponentParticleManager("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
+            particleManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
             var pPlume = ParticleSystemDescription.InitializeSmokePlume("Resources/particles", "smoke.png", 5);
             var pFire = ParticleSystemDescription.InitializeFire("Resources/particles", "fire.png", 5);
@@ -778,7 +778,7 @@ namespace Tanks
         {
             var desc = DecalDrawerDescription.DefaultRotate(@"Resources/Crater.png", 100);
 
-            decalDrawer = await this.AddComponentDecalDrawer("Craters", "Craters", desc);
+            decalDrawer = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Craters", "Craters", desc);
             decalDrawer.TintColor = new Color(223, 194, 179);
         }
         private async Task InitializeAudio()
@@ -1052,7 +1052,7 @@ namespace Tanks
 
             if (shooting && shot != null)
             {
-                IntegrateShot(gameTime);
+                _ = IntegrateShot(gameTime);
 
                 return;
             }
@@ -1421,7 +1421,7 @@ You will lost all the game progress.",
 
             PlayEffectShooting(Shooter);
         }
-        private void IntegrateShot(GameTime gameTime)
+        private async Task IntegrateShot(GameTime gameTime)
         {
             // Set projectile position
             Vector3 shotPos = shot.Integrate(gameTime, Vector3.Zero, Vector3.Zero);
@@ -1434,7 +1434,7 @@ You will lost all the game progress.",
             // Test collision with target
             if (Target.Intersects(projVolume, out var targetImpact))
             {
-                ResolveShot(true, targetImpact.Position, targetImpact.Item.Normal);
+                await ResolveShot(true, targetImpact.Position, targetImpact.Item.Normal);
 
                 return;
             }
@@ -1443,7 +1443,7 @@ You will lost all the game progress.",
             var terrainBox = terrain.GetBoundingBox();
             if (projVolume.Center.Y + projVolume.Radius < terrainBox.Minimum.Y)
             {
-                ResolveShot(false, null, null);
+                await ResolveShot(false, null, null);
 
                 return;
             }
@@ -1451,10 +1451,10 @@ You will lost all the game progress.",
             // Test full collision with terrain mesh
             if (terrain.Intersects(projVolume, out var terrainImpact))
             {
-                ResolveShot(false, terrainImpact.Position, terrainImpact.Item.Normal);
+                await ResolveShot(false, terrainImpact.Position, terrainImpact.Item.Normal);
             }
         }
-        private void ResolveShot(bool impact, Vector3? impactPosition, Vector3? impactNormal)
+        private async Task ResolveShot(bool impact, Vector3? impactPosition, Vector3? impactNormal)
         {
             shot = null;
             shooting = false;
@@ -1474,7 +1474,7 @@ You will lost all the game progress.",
                 if (impactPosition.HasValue)
                 {
                     //Add damage effects to tank
-                    AddExplosionSystem(impactPosition.Value);
+                    await AddExplosionSystem(impactPosition.Value);
                     PlayEffectDamage(Target);
                     PlayEffectImpact(Target);
                 }
@@ -1483,28 +1483,28 @@ You will lost all the game progress.",
                 {
                     //Tank destroyed
 
-                    Task.Run(async () =>
+                    await Task.Run(async () =>
                     {
                         Vector3 min = Vector3.One * -5f;
                         Vector3 max = Vector3.One * +5f;
 
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
                         PlayEffectDestroyed(Target);
 
                         await Task.Delay(500);
 
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
 
                         await Task.Delay(500);
 
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
 
                         await Task.Delay(3000);
 
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
-                        AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
+                        await AddExplosionSystem(Target.Manipulator.Position + Helper.RandomGenerator.NextVector3(min, max));
                         PlayEffectDestroyed(Target);
                     });
                 }
@@ -1514,13 +1514,13 @@ You will lost all the game progress.",
                 //Ground impact
                 if (impactPosition.HasValue)
                 {
-                    AddSmokePlumeSystem(impactPosition.Value);
+                    await AddSmokePlumeSystem(impactPosition.Value);
                     AddCrater(impactPosition.Value, impactNormal.Value);
                     PlayEffectDestroyed(impactPosition.Value);
                 }
             }
 
-            Task.Run(async () =>
+            await Task.Run(async () =>
             {
                 dialogActive = true;
 
@@ -1585,7 +1585,7 @@ You will lost all the game progress.",
             }
         }
 
-        private void AddExplosionSystem(Vector3 position)
+        private async Task AddExplosionSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;
             float duration = 0.5f;
@@ -1610,10 +1610,10 @@ You will lost all the game progress.",
                 MaximumDistance = 1000f,
             };
 
-            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Explosion"], emitter1);
-            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["SmokeExplosion"], emitter2);
+            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Explosion"], emitter1);
+            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["SmokeExplosion"], emitter2);
         }
-        private void AddSmokePlumeSystem(Vector3 position)
+        private async Task AddSmokePlumeSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;
             float duration = Helper.RandomGenerator.NextFloat(10, 30);
@@ -1639,8 +1639,8 @@ You will lost all the game progress.",
                 MaximumDistance = 5000f,
             };
 
-            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Fire"], emitter1);
-            particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Plume"], emitter2);
+            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Fire"], emitter1);
+            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Plume"], emitter2);
         }
         private void AddCrater(Vector3 position, Vector3 normal)
         {

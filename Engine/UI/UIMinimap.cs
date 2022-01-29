@@ -10,12 +10,12 @@ namespace Engine.UI
     /// <summary>
     /// Minimap
     /// </summary>
-    public class UIMinimap : Drawable, IScreenFitted
+    public sealed class UIMinimap : Drawable<UIMinimapDescription>, IScreenFitted
     {
         /// <summary>
         /// Viewport to match the minimap texture size
         /// </summary>
-        private readonly Viewport viewport;
+        private Viewport viewport;
         /// <summary>
         /// Surface to draw
         /// </summary>
@@ -35,7 +35,7 @@ namespace Engine.UI
         /// <summary>
         /// Minimap rendered area
         /// </summary>
-        private readonly BoundingBox minimapArea;
+        private BoundingBox minimapArea;
 
         /// <summary>
         /// Reference to the objects that we render in the minimap
@@ -49,35 +49,13 @@ namespace Engine.UI
         /// <summary>
         /// Contructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Minimap description</param>
-        public UIMinimap(string id, string name, Scene scene, UIMinimapDescription description)
-            : base(id, name, scene, description)
+        public UIMinimap(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            Drawables = description.Drawables;
-            BackColor = description.BackColor;
 
-            minimapArea = description.MinimapArea;
-
-            minimapBox = new UITextureRenderer(
-                $"{id}.TextureRenderer",
-                $"{name}.TextureRenderer",
-                scene,
-                UITextureRendererDescription.Default(description.Left, description.Top, description.Width, description.Height));
-
-            viewport = new Viewport(0, 0, description.Width, description.Height);
-
-            var rt = Game.Graphics.CreateRenderTargetTexture(
-                $"RenderTexture_{name}",
-                Format.R8G8B8A8_UNorm,
-                description.Width, description.Height, false);
-
-            renderTarget = rt.RenderTarget;
-            renderTexture = rt.ShaderResource;
-
-            InitializeContext();
         }
         /// <summary>
         /// Destructor
@@ -101,6 +79,40 @@ namespace Engine.UI
                 minimapBox?.Dispose();
                 minimapBox = null;
             }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIMinimapDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Drawables = Description.Drawables;
+            BackColor = Description.BackColor;
+
+            minimapArea = Description.MinimapArea;
+
+            viewport = new Viewport(0, 0, Description.Width, Description.Height);
+
+            minimapBox = await CreateRenderer();
+
+            var rt = Game.Graphics.CreateRenderTargetTexture(
+                $"RenderTexture_{Name}",
+                Format.R8G8B8A8_UNorm,
+                Description.Width, Description.Height, false);
+
+            renderTarget = rt.RenderTarget;
+            renderTexture = rt.ShaderResource;
+
+            InitializeContext();
+        }
+        private async Task<UITextureRenderer> CreateRenderer()
+        {
+            var desc = UITextureRendererDescription.Default(Description.Left, Description.Top, Description.Width, Description.Height);
+
+            return await Scene.CreateComponent<UITextureRenderer, UITextureRendererDescription>(
+                $"{Id}.TextureRenderer",
+                $"{Name}.TextureRenderer",
+                desc);
         }
 
         /// <summary>
@@ -180,12 +192,14 @@ namespace Engine.UI
 
             minimapBox.Texture = renderTexture;
             minimapBox.Draw(context);
+
+            base.Draw(context);
         }
 
         /// <summary>
         /// Resize
         /// </summary>
-        public virtual void Resize()
+        public void Resize()
         {
             minimapBox.Resize();
         }
@@ -196,35 +210,6 @@ namespace Engine.UI
             drawContext.Lights.Cull(volume, drawContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             return base.Cull(volume, out distance);
-        }
-    }
-
-    /// <summary>
-    /// Minimap extensions
-    /// </summary>
-    public static class UIMinimapExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIMinimap> AddComponentUIMinimap(this Scene scene, string id, string name, UIMinimapDescription description, int layer = Scene.LayerUI)
-        {
-            UIMinimap component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIMinimap(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
         }
     }
 }

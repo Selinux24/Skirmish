@@ -15,7 +15,7 @@ namespace Engine
     /// <summary>
     /// Terrain class
     /// </summary>
-    public class Terrain : Ground, IUseMaterials
+    public sealed class Terrain : Ground<GroundDescription>, IUseMaterials
     {
         #region Helper classes
 
@@ -86,32 +86,35 @@ namespace Engine
             private QuadTreeNode<VertexData> lastNode = null;
 
             /// <summary>
-            /// Constructor
+            /// Creates a new grid
             /// </summary>
             /// <param name="game">Game instance</param>
             /// <param name="mapName">Map name</param>
             /// <param name="vertices">Vertices to map</param>
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
-            public MapGrid(Game game, string mapName, IEnumerable<VertexData> vertices, int trianglesPerNode)
+            public static async Task<MapGrid> Create(Game game, string mapName, IEnumerable<VertexData> vertices, int trianglesPerNode)
             {
-                Game = game;
+                MapGrid res = new MapGrid
+                {
+                    Game = game
+                };
 
                 //Populate collections
-                for (int i = 0; i < NodesHigh.Length; i++)
+                for (int i = 0; i < res.NodesHigh.Length; i++)
                 {
-                    NodesHigh[i] = new MapGridNode();
+                    res.NodesHigh[i] = new MapGridNode();
                 }
-                for (int i = 0; i < NodesMedium.Length; i++)
+                for (int i = 0; i < res.NodesMedium.Length; i++)
                 {
-                    NodesMedium[i] = new MapGridNode();
+                    res.NodesMedium[i] = new MapGridNode();
                 }
-                for (int i = 0; i < NodesLow.Length; i++)
+                for (int i = 0; i < res.NodesLow.Length; i++)
                 {
-                    NodesLow[i] = new MapGridNode();
+                    res.NodesLow[i] = new MapGridNode();
                 }
-                for (int i = 0; i < NodesMinimum.Length; i++)
+                for (int i = 0; i < res.NodesMinimum.Length; i++)
                 {
-                    NodesMinimum[i] = new MapGridNode();
+                    res.NodesMinimum[i] = new MapGridNode();
                 }
 
                 var lodList = new[]
@@ -143,20 +146,22 @@ namespace Engine
                     {
                         var id = new MapGridShapeId() { LevelOfDetail = lod, Shape = shape };
 
-                        dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, game.BufferManager));
+                        res.dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, game.BufferManager));
                     }
                 }
 
-                drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
+                res.drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
 
                 //Populate nodes dictionary
-                var nodes = drawingQuadTree.GetLeafNodes();
+                var nodes = res.drawingQuadTree.GetLeafNodes();
                 foreach (var node in nodes)
                 {
-                    var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null).GetAwaiter().GetResult();
+                    var data = await VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
 
-                    dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
+                    res.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
                 }
+
+                return res;
             }
             /// <summary>
             /// Destructor
@@ -630,7 +635,7 @@ namespace Engine
         /// <summary>
         /// Heightmap texture resolution
         /// </summary>
-        private readonly float textureResolution;
+        private float textureResolution;
         /// <summary>
         /// Terrain material
         /// </summary>
@@ -639,15 +644,15 @@ namespace Engine
         /// <summary>
         /// Gets or sets whether use alpha mapping or not
         /// </summary>
-        private readonly bool useAlphaMap;
+        private bool useAlphaMap;
         /// <summary>
         /// Gets or sets whether use slope texturing or not
         /// </summary>
-        private readonly bool useSlopes;
+        private bool useSlopes;
         /// <summary>
         /// Lerping proportion between alhpa mapping and slope texturing
         /// </summary>
-        private readonly float proportion;
+        private float proportion;
         /// <summary>
         /// Terrain low res textures
         /// </summary>
@@ -671,74 +676,22 @@ namespace Engine
         /// <summary>
         /// Use anisotropic
         /// </summary>
-        private readonly bool useAnisotropic = false;
+        private bool useAnisotropic = false;
         /// <summary>
         /// Slope ranges
         /// </summary>
-        private readonly Vector2 slopeRanges = Vector2.Zero;
+        private Vector2 slopeRanges = Vector2.Zero;
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Terrain description</param>
-        public Terrain(string id, string name, Scene scene, GroundDescription description)
-            : base(id, name, scene, description)
+        public Terrain(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            useAnisotropic = description.UseAnisotropic;
 
-            if (description.Heightmap == null)
-            {
-                throw new EngineException($"Terrain initialization error. Heightmap description not found.");
-            }
-
-            // Read heightmap
-            heightMap = HeightMap.FromDescription(description.Heightmap);
-            float heightMapCellSize = description.Heightmap.CellSize;
-            float heightMapHeight = description.Heightmap.MaximumHeight;
-            Curve heightMapCurve = description.Heightmap.HeightCurve;
-            float uvScale = 1;
-            Vector2 uvDisplacement = Vector2.Zero;
-
-            if (description.Heightmap.Textures != null)
-            {
-                // Read texture data
-                uvScale = description.Heightmap.Textures.Scale;
-                uvDisplacement = description.Heightmap.Textures.Displacement;
-                useAlphaMap = description.Heightmap.Textures.UseAlphaMapping;
-                useSlopes = description.Heightmap.Textures.UseSlopes;
-                proportion = description.Heightmap.Textures.Proportion;
-                textureResolution = description.Heightmap.Textures.Resolution;
-                slopeRanges = description.Heightmap.Textures.SlopeRanges;
-
-                ReadHeightmapTextures(description.Heightmap.ContentPath, description.Heightmap.Textures);
-            }
-
-            // Read material
-            terrainMaterial = MeshMaterial.DefaultBlinnPhong;
-
-            // Get vertices and indices from heightmap
-            var (Vertices, Indices) = heightMap.BuildGeometry(
-                heightMapCellSize,
-                heightMapHeight,
-                heightMapCurve,
-                uvScale,
-                uvDisplacement).GetAwaiter().GetResult();
-
-            // Compute triangles for ray - mesh picking
-            var tris = Triangle.ComputeTriangleList(
-                Topology.TriangleList,
-                Vertices.Select(v => v.Position.Value).ToArray(),
-                Indices.ToArray());
-
-            // Initialize quadtree for ray picking
-            groundPickingQuadtree = description.ReadQuadTree(tris);
-
-            //Initialize map
-            int trianglesPerNode = heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
-            mapGrid = new MapGrid(Game, $"Terrain.{Name}", Vertices, trianglesPerNode);
         }
         /// <summary>
         /// Destructor
@@ -770,6 +723,65 @@ namespace Engine
                 alphaMap?.Dispose();
                 alphaMap = null;
             }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(GroundDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.Heightmap == null)
+            {
+                throw new EngineException($"Terrain initialization error. Heightmap description not found.");
+            }
+
+            useAnisotropic = Description.UseAnisotropic;
+
+            // Read heightmap
+            heightMap = HeightMap.FromDescription(Description.Heightmap);
+            float heightMapCellSize = Description.Heightmap.CellSize;
+            float heightMapHeight = Description.Heightmap.MaximumHeight;
+            Curve heightMapCurve = Description.Heightmap.HeightCurve;
+            float uvScale = 1;
+            Vector2 uvDisplacement = Vector2.Zero;
+
+            if (Description.Heightmap.Textures != null)
+            {
+                // Read texture data
+                uvScale = Description.Heightmap.Textures.Scale;
+                uvDisplacement = Description.Heightmap.Textures.Displacement;
+                useAlphaMap = Description.Heightmap.Textures.UseAlphaMapping;
+                useSlopes = Description.Heightmap.Textures.UseSlopes;
+                proportion = Description.Heightmap.Textures.Proportion;
+                textureResolution = Description.Heightmap.Textures.Resolution;
+                slopeRanges = Description.Heightmap.Textures.SlopeRanges;
+
+                await ReadHeightmapTextures(Description.Heightmap.ContentPath, Description.Heightmap.Textures);
+            }
+
+            // Read material
+            terrainMaterial = MeshMaterial.DefaultBlinnPhong;
+
+            // Get vertices and indices from heightmap
+            var (Vertices, Indices) = await heightMap.BuildGeometry(
+                heightMapCellSize,
+                heightMapHeight,
+                heightMapCurve,
+                uvScale,
+                uvDisplacement);
+
+            // Compute triangles for ray - mesh picking
+            var tris = Triangle.ComputeTriangleList(
+                Topology.TriangleList,
+                Vertices.Select(v => v.Position.Value).ToArray(),
+                Indices.ToArray());
+
+            // Initialize quadtree for ray picking
+            GroundPickingQuadtree = Description.ReadQuadTree(tris);
+
+            //Initialize map
+            int trianglesPerNode = heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
+            mapGrid = await MapGrid.Create(Game, $"Terrain.{Name}", Vertices, trianglesPerNode);
         }
 
         /// <inheritdoc/>
@@ -916,20 +928,20 @@ namespace Engine
         /// </summary>
         /// <param name="baseContentPath">Base content path</param>
         /// <param name="description">Textures description</param>
-        private void ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
+        private async Task ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
         {
             string tContentPath = Path.Combine(baseContentPath, description.ContentPath);
 
             var normalMapTextures = new FileArrayImageContent(tContentPath, description.NormalMaps);
-            terrainNormalMaps = Game.ResourceManager.RequestResource(normalMapTextures);
+            terrainNormalMaps = await Game.ResourceManager.RequestResource(normalMapTextures);
 
             if (description.UseSlopes)
             {
                 var texturesLR = new FileArrayImageContent(tContentPath, description.TexturesLR);
                 var texturesHR = new FileArrayImageContent(tContentPath, description.TexturesHR);
 
-                terrainTexturesLR = Game.ResourceManager.RequestResource(texturesLR);
-                terrainTexturesHR = Game.ResourceManager.RequestResource(texturesHR);
+                terrainTexturesLR = await Game.ResourceManager.RequestResource(texturesLR);
+                terrainTexturesHR = await Game.ResourceManager.RequestResource(texturesHR);
             }
 
             if (description.UseAlphaMapping)
@@ -937,8 +949,8 @@ namespace Engine
                 var colors = new FileArrayImageContent(tContentPath, description.ColorTextures);
                 var aMap = new FileArrayImageContent(tContentPath, description.AlphaMap);
 
-                colorTextures = Game.ResourceManager.RequestResource(colors);
-                alphaMap = Game.ResourceManager.RequestResource(aMap);
+                colorTextures = await Game.ResourceManager.RequestResource(colors);
+                alphaMap = await Game.ResourceManager.RequestResource(aMap);
             }
         }
 
@@ -963,36 +975,6 @@ namespace Engine
             terrainMaterial = material;
 
             Scene.UpdateMaterialPalette();
-        }
-    }
-
-    /// <summary>
-    /// Terrain extensions
-    /// </summary>
-    public static class TerrainExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<Terrain> AddComponentTerrain(this Scene scene, string id, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
-        {
-            Terrain component = null;
-
-            await Task.Run(() =>
-            {
-                component = new Terrain(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

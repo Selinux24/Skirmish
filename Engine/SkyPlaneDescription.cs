@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Sky plane description
     /// </summary>
-    public class SkyPlaneDescription : SceneDrawableDescription
+    public class SkyPlaneDescription : SceneObjectDescription
     {
         /// <summary>
         /// Content path

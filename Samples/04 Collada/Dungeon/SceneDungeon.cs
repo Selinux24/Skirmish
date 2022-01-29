@@ -142,21 +142,21 @@ namespace Collada.Dungeon
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = "Collada Dungeon Scene";
 
-            fps = await this.AddComponentUITextArea("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             fps.Text = null;
 
-            picks = await this.AddComponentUITextArea("Picks", "Picks", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            picks = await AddComponentUI<UITextArea, UITextAreaDescription>("Picks", "Picks", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             picks.Text = null;
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("Backpanel", "Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
         }
         private async Task InitializeDungeon()
         {
-            dungeon = await this.AddComponentScenery("Dungeon", "Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.json", 2));
+            dungeon = await AddComponentGround<Scenery, GroundDescription>("Dungeon", "Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.json", 2));
         }
 
         private void InitializeCamera()

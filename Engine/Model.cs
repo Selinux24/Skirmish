@@ -13,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Basic Model
     /// </summary>
-    public class Model : BaseModel, ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts<ModelPart>
+    public class Model : BaseModel<ModelDescription>, ITransformable3D, IRayPickable<Triangle>, IIntersectable, ICullable, IHasGameState, IModelHasParts<ModelPart>
     {
         /// <summary>
         /// Level of detail
@@ -100,18 +100,25 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public Model(string id, string name, Scene scene, ModelDescription description)
-            : base(id, name, scene, description)
+        public Model(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            TextureIndex = description.TextureIndex;
 
-            if (description.TransformDependences?.Any() == true)
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(ModelDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            TextureIndex = Description.TextureIndex;
+
+            if (Description.TransformDependences?.Any() == true)
             {
-                AddModelParts(description.TransformNames, description.TransformDependences);
+                AddModelParts(Description.TransformNames, Description.TransformDependences);
             }
             else
             {
@@ -681,36 +688,6 @@ namespace Engine
             Manipulator?.SetState(modelState.Manipulator);
             AnimationController?.SetState(modelState.AnimationController);
             TextureIndex = modelState.TextureIndex;
-        }
-    }
-
-    /// <summary>
-    /// Model extensions
-    /// </summary>
-    public static class ModelExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<Model> AddComponentModel(this Scene scene, string id, string name, ModelDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
-        {
-            Model component = null;
-
-            await Task.Run(() =>
-            {
-                component = new Model(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

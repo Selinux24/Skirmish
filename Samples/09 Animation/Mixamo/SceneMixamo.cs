@@ -65,19 +65,19 @@ namespace Animation.Mixamo
             var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
             var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            runtime = await this.AddComponentUITextArea("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
-            messages = await this.AddComponentUITextArea("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
 
             title.Text = "Smooth Transitions";
             runtime.Text = "";
             messages.Text = "";
 
-            backPanel = await this.AddComponentSprite("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
-            console = await this.AddComponentUIConsole("Console", "Console", consoleDesc, LayerUI + 1);
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -116,7 +116,7 @@ namespace Animation.Mixamo
                 Instances = 9,
             };
 
-            var floor = await this.AddComponentModelInstanced("Floor", "Floor", desc);
+            var floor = await AddComponent<ModelInstanced, ModelInstancedDescription>("Floor", "Floor", desc);
 
             int i = 0;
             for (int x = -1; x < 2; x++)
@@ -131,7 +131,7 @@ namespace Animation.Mixamo
         }
         private async Task InitializeModel()
         {
-            var model = await this.AddComponentModel(
+            var model = await AddComponent<Model, ModelDescription>(
                 "TestModel",
                 "TestModel",
                 new ModelDescription()

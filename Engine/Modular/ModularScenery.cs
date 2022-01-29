@@ -15,7 +15,7 @@ namespace Engine.Modular
     /// <summary>
     /// Terrain model
     /// </summary>
-    public class ModularScenery : Ground
+    public sealed class ModularScenery : Ground<ModularSceneryDescription>
     {
         /// <summary>
         /// Objects auto identifier counter
@@ -62,15 +62,14 @@ namespace Engine.Modular
         /// Active trigger callbacks
         /// </summary>
         private readonly List<TriggerCallback> activeCallbacks = new List<TriggerCallback>();
-
         /// <summary>
         /// Gets the assets description
         /// </summary>
-        protected AssetMap AssetMap { get; set; }
+        private AssetMap assetMap;
         /// <summary>
         /// Gets the level list
         /// </summary>
-        protected LevelMap Levels { get; set; }
+        private LevelMap levels;
 
         /// <summary>
         /// First level
@@ -79,23 +78,13 @@ namespace Engine.Modular
         {
             get
             {
-                return Levels.Levels.FirstOrDefault();
+                return levels.Levels.FirstOrDefault();
             }
         }
         /// <summary>
         /// Current level
         /// </summary>
         public Level CurrentLevel { get; set; }
-        /// <summary>
-        /// Gets the description
-        /// </summary>
-        public new ModularSceneryDescription Description
-        {
-            get
-            {
-                return base.Description as ModularSceneryDescription;
-            }
-        }
 
         /// <summary>
         /// Trigger starts it's execution event
@@ -340,38 +329,42 @@ namespace Engine.Modular
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Scenery description</param>
-        public ModularScenery(string id, string name, Scene scene, ModularSceneryDescription description)
-            : base(id, name, scene, description)
+        public ModularScenery(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            if (description.AssetsConfiguration != null)
-            {
-                AssetMap = description.AssetsConfiguration;
-            }
-            else if (!string.IsNullOrWhiteSpace(description.AssetsConfigurationFile))
-            {
-                AssetMap = SerializationHelper.DeserializeFromFile<AssetMap>(Path.Combine(description.Content.ContentFolder ?? "", description.AssetsConfigurationFile));
-            }
 
-            if (description.Levels != null)
-            {
-                Levels = description.Levels;
-            }
-            else if (!string.IsNullOrWhiteSpace(description.LevelsFile))
-            {
-                Levels = SerializationHelper.DeserializeFromFile<LevelMap>(Path.Combine(description.Content.ContentFolder ?? "", description.LevelsFile));
-            }
         }
-        /// <summary>
-        /// Resource dispose
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
 
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(ModularSceneryDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.AssetsConfiguration != null)
+            {
+                assetMap = Description.AssetsConfiguration;
+            }
+            else if (!string.IsNullOrWhiteSpace(Description.AssetsConfigurationFile))
+            {
+                assetMap = SerializationHelper.DeserializeFromFile<AssetMap>(Path.Combine(Description.Content.ContentFolder ?? "", Description.AssetsConfigurationFile));
+            }
+
+            if (Description.Levels != null)
+            {
+                levels = Description.Levels;
+            }
+            else if (!string.IsNullOrWhiteSpace(Description.LevelsFile))
+            {
+                levels = SerializationHelper.DeserializeFromFile<LevelMap>(Path.Combine(Description.Content.ContentFolder ?? "", Description.LevelsFile));
+            }
         }
 
         /// <summary>
@@ -387,7 +380,7 @@ namespace Engine.Modular
             }
 
             //Find the level
-            var levels = Levels.Levels
+            var levels = this.levels.Levels
                 .Where(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
             if (levels.Any())
             {
@@ -401,7 +394,7 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         public async Task LoadFirstLevel(IProgress<LoadResourceProgress> progress = null)
         {
-            await LoadLevel(Levels.Levels.FirstOrDefault(), progress);
+            await LoadLevel(levels.Levels.FirstOrDefault(), progress);
         }
         /// <summary>
         /// Loads a level
@@ -439,7 +432,7 @@ namespace Engine.Modular
         /// </summary>
         private async Task InitializeParticles(IProgress<LoadResourceProgress> progress = null)
         {
-            if (Levels.ParticleSystems?.Any() != true)
+            if (levels.ParticleSystems?.Any() != true)
             {
                 progress?.Report(new LoadResourceProgress { Progress = 1 });
 
@@ -448,17 +441,16 @@ namespace Engine.Modular
 
             string modelId = $"{Name ?? nameof(ModularScenery)}.Particle Manager";
 
-            particleManager = await Scene.AddComponentParticleManager(
+            particleManager = await Scene.AddComponentEffect<ParticleManager, ParticleManagerDescription>(
                 modelId,
                 Name,
                 ParticleManagerDescription.Default(),
-                SceneObjectUsages.None,
                 98);
 
-            float total = Levels.ParticleSystems.Count();
+            float total = levels.ParticleSystems.Count();
             int current = 0;
 
-            foreach (var item in Levels.ParticleSystems)
+            foreach (var item in levels.ParticleSystems)
             {
                 try
                 {
@@ -485,7 +477,7 @@ namespace Engine.Modular
         private async Task InitializeAssets(Level level, ContentData content, IProgress<LoadResourceProgress> progress = null)
         {
             // Get instance count for all single geometries from Map
-            var instances = GetMapInstanceCounters(level, AssetMap.Assets);
+            var instances = GetMapInstanceCounters(level, assetMap.Assets);
 
             float total = instances.Keys.Count;
             int current = 0;
@@ -529,12 +521,12 @@ namespace Engine.Modular
 
             try
             {
-                var masks = GetMasksForAsset(Levels, assetName);
+                var masks = GetMasksForAsset(levels, assetName);
                 var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
                 var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
 
 
-                var model = await Scene.AddComponentModelInstanced(
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
                     assetId,
                     Name,
                     new ModelInstancedDescription()
@@ -616,15 +608,15 @@ namespace Engine.Modular
 
             try
             {
-                var masks = GetMasksForAsset(Levels, assetName);
+                var masks = GetMasksForAsset(levels, assetName);
                 var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-                SceneObjectUsages usage = SceneObjectUsages.None;
+                SceneObjectUsages usage = SceneObjectUsages.Default;
                 if (pathFinding)
                 {
                     usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
                 }
 
-                var model = await Scene.AddComponentModelInstanced(
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
                     modelId,
                     Name,
                     new ModelInstancedDescription()
@@ -651,7 +643,7 @@ namespace Engine.Modular
                 //Lights
                 for (int i = 0; i < model.InstanceCount; i++)
                 {
-                    InitializeObjectLights(objList[i], model[i]);
+                    await InitializeObjectLights(objList[i], model[i]);
 
                     InitializeObjectAnimations(objList[i], model[i]);
                 }
@@ -670,7 +662,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="obj">Object</param>
         /// <param name="instance">Model instance</param>
-        private void InitializeObjectLights(ObjectReference obj, ModelInstance instance)
+        private async Task InitializeObjectLights(ObjectReference obj, ModelInstance instance)
         {
             if (!obj.LoadLights)
             {
@@ -716,7 +708,7 @@ namespace Engine.Modular
                     Instance = instance,
                 };
 
-                particleManager.AddParticleSystem(
+                await particleManager.AddParticleSystem(
                     ParticleSystemTypes.CPU,
                     particleDescriptors[obj.ParticleLight.Name],
                     emitter);
@@ -876,7 +868,7 @@ namespace Engine.Modular
             // Paser map for instance positioning
             foreach (var item in level.Map)
             {
-                var assetIndex = Array.FindIndex(AssetMap.Assets.ToArray(), a => a.Name == item.AssetName);
+                var assetIndex = Array.FindIndex(assetMap.Assets.ToArray(), a => a.Name == item.AssetName);
                 if (assetIndex < 0)
                 {
                     throw new EngineException($"Modular Scenery asset not found: {item.AssetName}");
@@ -894,7 +886,7 @@ namespace Engine.Modular
                 progress?.Report(new LoadResourceProgress { Progress = ++current / total });
             }
 
-            assetMapIntersections.Build(AssetMap, assets);
+            assetMapIntersections.Build(assetMap, assets);
         }
         /// <summary>
         /// Parses the specified asset reference
@@ -916,7 +908,7 @@ namespace Engine.Modular
             };
             assetMapIntersections.Add(aMap);
 
-            var asset = AssetMap.Assets.ElementAt(assetIndex);
+            var asset = assetMap.Assets.ElementAt(assetIndex);
             var assetTransforms = GetInstanceTransforms(asset);
 
             foreach (var basicAsset in assetTransforms.Keys)
@@ -938,7 +930,7 @@ namespace Engine.Modular
                 {
                     var basicTrn = t;
 
-                    if (AssetMap.MaintainTextureDirection)
+                    if (assetMap.MaintainTextureDirection)
                     {
                         var maintain =
                             basicAssetType == ModularSceneryAssetTypes.Floor ||
@@ -964,11 +956,11 @@ namespace Engine.Modular
         private ModelInstance FindAssetModelInstance(string levelAssetId, string mapAssetId)
         {
             // Find the assetName by object asset_id
-            var res = FindAssetReference(CurrentLevel, AssetMap.Assets, levelAssetId, mapAssetId);
+            var res = FindAssetReference(CurrentLevel, assetMap.Assets, levelAssetId, mapAssetId);
             if (res != null)
             {
                 // Look for all geometry references
-                int index = GetMapInstanceIndex(CurrentLevel, AssetMap.Assets, res.AssetName, levelAssetId, mapAssetId);
+                int index = GetMapInstanceIndex(CurrentLevel, assetMap.Assets, res.AssetName, levelAssetId, mapAssetId);
                 if (index >= 0)
                 {
                     return assets[res.AssetName][index];
@@ -994,10 +986,7 @@ namespace Engine.Modular
             return null;
         }
 
-        /// <summary>
-        /// Objects updating
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             assetMapIntersections?.Update(context.CameraVolume);
@@ -1035,11 +1024,7 @@ namespace Engine.Modular
             activeCallbacks.RemoveAll(c => !c.Waiting);
         }
 
-        /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
+        /// <inheritdoc/>
         public override BoundingSphere GetBoundingSphere(bool refresh = false)
         {
             var res = new BoundingSphere();
@@ -1071,11 +1056,7 @@ namespace Engine.Modular
 
             return res;
         }
-        /// <summary>
-        /// Gets bounding box
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
+        /// <inheritdoc/>
         public override BoundingBox GetBoundingBox(bool refresh = false)
         {
             var res = new BoundingBox();
@@ -1108,11 +1089,7 @@ namespace Engine.Modular
             return res;
         }
 
-        /// <summary>
-        /// Gets the ground volume
-        /// </summary>
-        /// <param name="full"></param>
-        /// <returns>Returns all the triangles of the ground</returns>
+        /// <inheritdoc/>
         public override IEnumerable<Triangle> GetVolume(bool full)
         {
             List<Triangle> triangles = new List<Triangle>();
@@ -1941,36 +1918,6 @@ namespace Engine.Modular
             /// Use of path finding
             /// </summary>
             public bool PathFinding { get; set; }
-        }
-    }
-
-    /// <summary>
-    /// Modular scenery extensions
-    /// </summary>
-    public static class ModularSceneryExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<ModularScenery> AddComponentModularScenery(this Scene scene, string id, string name, ModularSceneryDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
-        {
-            ModularScenery component = null;
-
-            await Task.Run(() =>
-            {
-                component = new ModularScenery(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

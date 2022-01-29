@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Decal description
     /// </summary>
-    public class DecalDrawerDescription : SceneDrawableDescription
+    public class DecalDrawerDescription : SceneObjectDescription
     {
         /// <summary>
         /// Default decal drawer description

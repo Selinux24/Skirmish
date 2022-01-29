@@ -455,7 +455,7 @@ namespace Engine.Common
         {
             var opaques = components.Where(c =>
             {
-                if (!(c is Drawable)) return false;
+                if (!(c is IDrawable)) return false;
 
                 if (!c.BlendMode.HasFlag(BlendModes.Opaque)) return false;
 
@@ -520,7 +520,7 @@ namespace Engine.Common
         {
             var transparents = components.Where(c =>
             {
-                if (!(c is Drawable)) return false;
+                if (!(c is IDrawable)) return false;
 
                 if (!c.BlendMode.HasFlag(BlendModes.Alpha) && !c.BlendMode.HasFlag(BlendModes.Transparent)) return false;
 
@@ -1021,7 +1021,7 @@ namespace Engine.Common
         /// <returns>Returns true if the object is not culled</returns>
         private bool IsVisible(IDrawable c, int cullIndex)
         {
-            if (!(c is Drawable)) return false;
+            if (!(c is IDrawable)) return false;
 
             if (c is ICullable cull)
             {

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
@@ -10,7 +11,7 @@ namespace Engine.UI
     /// <summary>
     /// User interface control
     /// </summary>
-    public abstract class UIControl : Drawable, IUIControl, IScreenFitted
+    public abstract class UIControl<T> : Drawable<T>, IUIControl, IScreenFitted where T : UIControlDescription
     {
         /// <summary>
         /// Next update order
@@ -49,7 +50,7 @@ namespace Engine.UI
         /// <summary>
         /// Update order value
         /// </summary>
-        private readonly int updateOrder;
+        private int updateOrder;
         /// <summary>
         /// Children collection
         /// </summary>
@@ -536,13 +537,32 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Button description</param>
-        protected UIControl(string id, string name, Scene scene, UIControlDescription description)
-            : base(id, name, scene, description)
+        public UIControl(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
+
+        }
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                children
+                    .OfType<IDisposable>()
+                    .ToList()
+                    .ForEach(c => c.Dispose());
+                children.Clear();
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
+        {
+            await base.InitializeAssets(description);
+
             updateOrder = GetNextUpdateOrder();
 
             Manipulator = new Manipulator2D(Game);
@@ -573,18 +593,6 @@ namespace Engine.UI
             EventsEnabled = description.EventsEnabled;
 
             UpdateInternals = true;
-        }
-        /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                children
-                    .OfType<IDisposable>()
-                    .ToList()
-                    .ForEach(c => c.Dispose());
-                children.Clear();
-            }
         }
 
         /// <inheritdoc/>

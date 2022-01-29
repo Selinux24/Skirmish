@@ -16,7 +16,7 @@ namespace Engine
     /// <summary>
     /// Terrain model
     /// </summary>
-    public class Scenery : Ground, IUseMaterials
+    public sealed class Scenery : Ground<GroundDescription>, IUseMaterials
     {
         #region Helper Classes
 
@@ -298,7 +298,7 @@ namespace Engine
         /// <summary>
         /// Model content
         /// </summary>
-        private readonly ContentData content;
+        private ContentData content;
         /// <summary>
         /// Scenery patch list
         /// </summary>
@@ -321,26 +321,18 @@ namespace Engine
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public IEnumerable<SceneLight> Lights { get; protected set; }
+        public IEnumerable<SceneLight> Lights { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Terrain description</param>
-        public Scenery(string id, string name, Scene scene, GroundDescription description)
-            : base(id, name, scene, description)
+        public Scenery(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            // Generate model content
-            content = description.ReadModelContent().GetAwaiter().GetResult();
 
-            // Generate quadtree
-            groundPickingQuadtree = description.ReadQuadTree(content.GetTriangles());
-
-            // Retrieve lights from content
-            Lights = content.GetLights().ToArray();
         }
         /// <summary>
         /// Destructor
@@ -365,6 +357,22 @@ namespace Engine
             }
         }
 
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(GroundDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            // Generate model content
+            content = await Description.ReadModelContent();
+
+            // Generate quadtree
+            GroundPickingQuadtree = Description.ReadQuadTree(content.GetTriangles());
+
+            // Retrieve lights from content
+            Lights = content.GetLights().ToArray();
+
+            await IntializePatches();
+        }
         /// <summary>
         /// Initializes internal patch collection
         /// </summary>
@@ -375,7 +383,7 @@ namespace Engine
             watch.Start();
 
             // Generate initial patches
-            var nodes = groundPickingQuadtree.GetLeafNodes();
+            var nodes = GroundPickingQuadtree.GetLeafNodes();
             if (!nodes.Any())
             {
                 return;
@@ -413,7 +421,7 @@ namespace Engine
                 return true;
             }
 
-            visibleNodes = groundPickingQuadtree.GetNodesInVolume(volume).ToArray();
+            visibleNodes = GroundPickingQuadtree.GetNodesInVolume(volume).ToArray();
             if (!visibleNodes.Any())
             {
                 return true;
@@ -594,7 +602,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public virtual IEnumerable<IMeshMaterial> GetMaterials()
+        public IEnumerable<IMeshMaterial> GetMaterials()
         {
             return patchDictionary.Values.SelectMany(v => v?.GetMaterials() ?? Enumerable.Empty<IMeshMaterial>()).ToArray();
         }
@@ -629,38 +637,6 @@ namespace Engine
             {
                 Scene.UpdateMaterialPalette();
             }
-        }
-    }
-
-    /// <summary>
-    /// Scenery extensions
-    /// </summary>
-    public static class SceneryExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<Scenery> AddComponentScenery(this Scene scene, string id, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.Ground, int layer = Scene.LayerDefault)
-        {
-            Scenery component = null;
-
-            await Task.Run(async () =>
-            {
-                component = new Scenery(id, name, scene, description);
-
-                await component.IntializePatches();
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

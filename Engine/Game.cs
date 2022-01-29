@@ -313,7 +313,7 @@ namespace Engine
             Form.ResizeEnd += (sender, e) =>
             {
                 paused = false;
-                GameTime.Start();
+                GameTime.Resume();
                 if (Form.SizeUpdated)
                 {
                     OnResize();
@@ -322,7 +322,7 @@ namespace Engine
             Form.Activated += (sender, e) =>
             {
                 paused = false;
-                GameTime.Start();
+                GameTime.Resume();
             };
             Form.Deactivate += (sender, e) =>
             {
@@ -336,11 +336,6 @@ namespace Engine
                     return;
                 }
 
-                if (!Form.FormModeUpdated)
-                {
-                    return;
-                }
-
                 if (Form.IsMinimized)
                 {
                     paused = true;
@@ -349,7 +344,13 @@ namespace Engine
                 }
 
                 paused = false;
-                GameTime.Start();
+                GameTime.Resume();
+
+                if (!Form.FormModeUpdated)
+                {
+                    return;
+                }
+
                 OnResize();
             };
 

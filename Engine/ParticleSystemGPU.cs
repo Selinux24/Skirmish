@@ -8,6 +8,7 @@ namespace Engine
     using Engine.Content;
     using Engine.Effects;
     using SharpDX.Direct3D11;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Particle system
@@ -34,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Buffer binding for emitter buffer
         /// </summary>
-        private readonly VertexBufferBinding[] emitterBinding;
+        private VertexBufferBinding[] emitterBinding;
         /// <summary>
         /// Buffer binding for drawing buffer
         /// </summary>
@@ -58,7 +59,7 @@ namespace Engine
         /// <summary>
         /// Vertex input stride
         /// </summary>
-        private readonly int inputStride;
+        private int inputStride;
         /// <summary>
         /// First run flag
         /// </summary>
@@ -114,55 +115,52 @@ namespace Engine
         }
 
         /// <summary>
-        /// Contructor
+        /// Creates a new CPU particle system
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Particle system description</param>
-        /// <param name="emitter">Emitter</param>
-        public ParticleSystemGpu(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        /// <param name="game"></param>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        /// <param name="emitter"></param>
+        /// <returns></returns>
+        public static async Task<ParticleSystemGpu> Create(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            Game = game;
-            Name = name;
-
-            parameters = new ParticleSystemParams(description) * emitter.Scale;
+            var parameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
-            Texture = game.ResourceManager.RequestResource(imgContent);
-            TextureCount = (uint)imgContent.Count;
+            var texture = await game.ResourceManager.RequestResource(imgContent);
+            var textureCount = (uint)imgContent.Count;
 
-            Emitter = emitter;
-            Emitter.UpdateBounds(parameters);
-            MaxConcurrentParticles = Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            emitter.UpdateBounds(parameters);
+            int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            float timeToEnd = emitter.Duration + parameters.MaxDuration;
 
-            TimeToEnd = Emitter.Duration + parameters.MaxDuration;
-
-            var data = Helper.CreateArray(1, new VertexGpuParticle()
+            ParticleSystemGpu res = new ParticleSystemGpu
             {
-                Position = Emitter.Position,
-                Velocity = Emitter.Velocity,
-                RandomValues = new Vector4(),
-                MaxAge = 0,
+                Game = game,
+                Name = name,
 
-                Type = 0,
-                EmissionTime = Emitter.Duration,
-            });
+                parameters = parameters,
 
-            int size = GetBufferSize();
+                Texture = texture,
+                TextureCount = textureCount,
 
-            emittersBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
-            drawingBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            streamOutBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            inputStride = default(VertexGpuParticle).GetStride();
+                Emitter = emitter,
+                MaxConcurrentParticles = maxConcurrentParticles,
 
-            emitterBinding = new[] { new VertexBufferBinding(emittersBuffer, inputStride, 0) };
-            drawingBinding = new[] { new VertexBufferBinding(drawingBuffer, inputStride, 0) };
-            streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
+                TimeToEnd = timeToEnd
+            };
 
-            var effect = DrawerPool.EffectDefaultGPUParticles;
-            streamOutInputLayout = game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.ParticleStreamOut", effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            rotatingInputLayout = game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.RotationDraw", effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            nonRotatingInputLayout = game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.NonRotationDraw", effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            res.InitializeBuffers();
+
+            return res;
+        }
+
+        /// <summary>
+        /// Contructor
+        /// </summary>
+        protected ParticleSystemGpu()
+        {
+
         }
         /// <summary>
         /// Destructor
@@ -231,6 +229,35 @@ namespace Engine
             int size = (int)(MaxConcurrentParticles * (Emitter.Duration == 0 ? 60 : Emitter.Duration));
 
             return Math.Min(size, 5000);
+        }
+        protected void InitializeBuffers()
+        {
+            var data = Helper.CreateArray(1, new VertexGpuParticle()
+            {
+                Position = Emitter.Position,
+                Velocity = Emitter.Velocity,
+                RandomValues = new Vector4(),
+                MaxAge = 0,
+
+                Type = 0,
+                EmissionTime = Emitter.Duration,
+            });
+
+            int size = GetBufferSize();
+
+            emittersBuffer = Game.Graphics.CreateBuffer<VertexGpuParticle>(Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
+            drawingBuffer = Game.Graphics.CreateBuffer<VertexGpuParticle>(Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            streamOutBuffer = Game.Graphics.CreateBuffer<VertexGpuParticle>(Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
+            inputStride = default(VertexGpuParticle).GetStride();
+
+            emitterBinding = new[] { new VertexBufferBinding(emittersBuffer, inputStride, 0) };
+            drawingBinding = new[] { new VertexBufferBinding(drawingBuffer, inputStride, 0) };
+            streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
+
+            var effect = DrawerPool.EffectDefaultGPUParticles;
+            streamOutInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.ParticleStreamOut", effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            rotatingInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.RotationDraw", effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            nonRotatingInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.NonRotationDraw", effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
         }
 
         /// <summary>

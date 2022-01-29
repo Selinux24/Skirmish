@@ -10,6 +10,7 @@ namespace Engine.Common
     {
         private long startRawTime;
         private long lastRawTime;
+        private long acumPausedRawTime;
         private int pauseCount;
         private long pauseStartTime;
         private long timePaused;
@@ -22,6 +23,10 @@ namespace Engine.Common
             Reset();
         }
 
+        /// <summary>
+        /// Gets the total adjusted time since the previous call to <see cref="Tick"/> taking into account <see cref="Pause"/> time.
+        /// </summary>
+        public TimeSpan TotalAdjustedTime { get; private set; }
         /// <summary>
         /// Gets the total time elapsed since the last reset or when this timer was created.
         /// </summary>
@@ -65,7 +70,19 @@ namespace Engine.Common
             if (pauseCount <= 0)
             {
                 timePaused += Stopwatch.GetTimestamp() - pauseStartTime;
+                acumPausedRawTime += timePaused;
                 pauseStartTime = 0L;
+            }
+        }
+        /// <summary>
+        /// Pauses this instance.
+        /// </summary>
+        public void Pause()
+        {
+            pauseCount++;
+            if (pauseCount == 1)
+            {
+                pauseStartTime = Stopwatch.GetTimestamp();
             }
         }
         /// <summary>
@@ -79,13 +96,17 @@ namespace Engine.Common
             // Don't tick when this instance is paused.
             if (IsPaused)
             {
+                ElapsedTime = TimeSpan.Zero;
+                ElapsedAdjustedTime = TimeSpan.Zero;
+
                 return;
             }
 
             var rawTime = Stopwatch.GetTimestamp();
-            TotalTime = ConvertRawToTimestamp(rawTime - startRawTime);
-            ElapsedTime = ConvertRawToTimestamp(rawTime - lastRawTime);
-            ElapsedAdjustedTime = ConvertRawToTimestamp(rawTime - (lastRawTime + timePaused));
+            TotalTime = ConvertRawToTimestamp(rawTime - startRawTime - acumPausedRawTime);
+            ElapsedTime = ConvertRawToTimestamp(rawTime - lastRawTime - acumPausedRawTime);
+            TotalAdjustedTime = ConvertRawToTimestamp(rawTime - startRawTime + timePaused);
+            ElapsedAdjustedTime = ConvertRawToTimestamp(rawTime - lastRawTime + timePaused);
 
             if (ElapsedAdjustedTime < TimeSpan.Zero)
             {
@@ -95,17 +116,6 @@ namespace Engine.Common
             timePaused = 0;
             lastRawTime = rawTime;
         }
-        /// <summary>
-        /// Pauses this instance.
-        /// </summary>
-        public void Pause()
-        {
-            pauseCount++;
-            if (pauseCount == 1)
-            {
-                pauseStartTime = Stopwatch.GetTimestamp();
-            }
-        }
 
         /// <summary>
         /// Converts a <see cref="Stopwatch" /> raw time to a <see cref="TimeSpan" />.
@@ -114,7 +124,7 @@ namespace Engine.Common
         /// <returns>The <see cref="TimeSpan" />.</returns>
         private static TimeSpan ConvertRawToTimestamp(long delta)
         {
-            return TimeSpan.FromTicks((delta * 10000000) / Stopwatch.Frequency);
+            return TimeSpan.FromTicks(delta * 10000000 / Stopwatch.Frequency);
         }
     }
 }

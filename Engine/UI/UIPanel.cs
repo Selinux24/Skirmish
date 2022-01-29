@@ -8,12 +8,12 @@ namespace Engine.UI
     /// <summary>
     /// User interface panel
     /// </summary>
-    public class UIPanel : UIControl, IScrollable
+    public sealed class UIPanel : UIControl<UIPanelDescription>, IScrollable
     {
         /// <summary>
         /// Background
         /// </summary>
-        private readonly Sprite background;
+        private Sprite background;
         /// <summary>
         /// Grid layout
         /// </summary>
@@ -99,25 +99,34 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public UIPanel(string id, string name, Scene scene, UIPanelDescription description) :
-            base(id, name, scene, description)
+        public UIPanel(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            if (description.Background != null)
-            {
-                background = new Sprite(
-                    $"{id}.Background",
-                    $"{name}.Background",
-                    scene,
-                    description.Background);
 
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIPanelDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.Background != null)
+            {
+                background = await CreateBackground();
                 AddChild(background);
             }
 
-            SetGridLayout(description.GridLayout);
+            SetGridLayout(Description.GridLayout);
+        }
+        private async Task<Sprite> CreateBackground()
+        {
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Background",
+                $"{Name}.Background",
+                Description.Background);
         }
 
         /// <inheritdoc/>
@@ -208,35 +217,6 @@ namespace Engine.UI
             }
 
             return rect;
-        }
-    }
-
-    /// <summary>
-    /// UI Panel extensions
-    /// </summary>
-    public static class UIPanelExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIPanel> AddComponentUIPanel(this Scene scene, string id, string name, UIPanelDescription description, int layer = Scene.LayerUI)
-        {
-            UIPanel component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIPanel(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
         }
     }
 }

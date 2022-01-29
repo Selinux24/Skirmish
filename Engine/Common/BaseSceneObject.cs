@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
     /// <summary>
     /// Base scene object class
     /// </summary>
-    public abstract class BaseSceneObject : ISceneObject
+    public abstract class BaseSceneObject<T> : ISceneObject where T : SceneObjectDescription
     {
         /// <summary>
         /// Game instance
@@ -27,7 +28,7 @@ namespace Engine.Common
         /// <summary>
         /// Object description
         /// </summary>
-        public virtual SceneDrawableDescription Description { get; protected set; }
+        public virtual T Description { get; protected set; }
 
         /// <summary>
         /// Constructor
@@ -36,7 +37,7 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
         /// <param name="description">Description</param>
-        protected BaseSceneObject(string id, string name, Scene scene, SceneDrawableDescription description)
+        public BaseSceneObject(Scene scene, string id, string name)
         {
             if (string.IsNullOrWhiteSpace(id))
             {
@@ -44,17 +45,27 @@ namespace Engine.Common
             }
 
             Id = id;
-            Name = name;
+            Name = name ?? $"_noname_{id}";
             Scene = scene ?? throw new ArgumentNullException(nameof(scene), "The scene must be specified");
             Game = scene.Game;
+            Active = false;
+        }
+
+        /// <summary>
+        /// Initializes internal assets
+        /// </summary>
+        public virtual async Task InitializeAssets(T description)
+        {
             Description = description ?? throw new ArgumentNullException(nameof(description), "The description must be specified");
             Active = description.StartsActive;
+
+            await Task.CompletedTask;
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Id: {Id}; Name: {Name ?? base.ToString()}";
+            return $"Id: {Id}; {Name ?? base.ToString()}";
         }
     }
 }

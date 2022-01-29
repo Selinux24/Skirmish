@@ -4,17 +4,16 @@ namespace Engine.Common
     /// <summary>
     /// Updatable object
     /// </summary>
-    public abstract class Updatable : BaseSceneObject, IUpdatable
+    public abstract class Updatable<T> : BaseSceneObject<T>, IUpdatable where T : SceneObjectDescription
     {
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        protected Updatable(string id, string name, Scene scene, SceneDrawableDescription description) :
-            base(id, name, scene, description)
+        protected Updatable(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
 
         }

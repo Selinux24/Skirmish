@@ -7,16 +7,16 @@ namespace Engine.UI
     /// <summary>
     /// Sprite button
     /// </summary>
-    public class UIButton : UIControl
+    public sealed class UIButton : UIControl<UIButtonDescription>
     {
         /// <summary>
         /// Pressed sprite button
         /// </summary>
-        private readonly Sprite buttonPressed = null;
+        private Sprite buttonPressed = null;
         /// <summary>
         /// Release sprite button
         /// </summary>
-        private readonly Sprite buttonReleased = null;
+        private Sprite buttonReleased = null;
         /// <summary>
         /// Button state
         /// </summary>
@@ -25,11 +25,11 @@ namespace Engine.UI
         /// <summary>
         /// Gets the caption
         /// </summary>
-        public UITextArea Caption { get; } = null;
+        public UITextArea Caption { get; private set; } = null;
         /// <summary>
         /// Gets whether this buttons is a two-state button or not
         /// </summary>
-        public bool TwoStateButton { get; }
+        public bool TwoStateButton { get; private set; }
         /// <summary>
         /// Gets or sets the button state
         /// </summary>
@@ -53,76 +53,89 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Button description</param>
-        public UIButton(string id, string name, Scene scene, UIButtonDescription description)
-            : base(id, name, scene, description)
+        public UIButton(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            TwoStateButton = description.TwoStateButton;
 
-            var spriteDesc = new SpriteDescription()
-            {
-                BaseColor = description.ColorReleased,
-                EventsEnabled = false,
-            };
+        }
 
-            if (!string.IsNullOrEmpty(description.TextureReleased))
-            {
-                spriteDesc.Textures = new[] { description.TextureReleased };
-                spriteDesc.UVMap = description.TextureReleasedUVMap;
-            }
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIButtonDescription description)
+        {
+            await base.InitializeAssets(description);
 
-            buttonReleased = new Sprite(
-                $"{id}.ReleasedButton",
-                $"{name}.ReleasedButton",
-                scene,
-                spriteDesc);
+            TwoStateButton = Description.TwoStateButton;
 
+            buttonReleased = await CreateButtonReleased();
             AddChild(buttonReleased);
 
-            if (description.TwoStateButton)
+            if (Description.TwoStateButton)
             {
-                var spriteDesc2 = new SpriteDescription()
-                {
-                    BaseColor = description.ColorPressed,
-                    EventsEnabled = false,
-                };
-
-                if (!string.IsNullOrEmpty(description.TexturePressed))
-                {
-                    spriteDesc2.Textures = new[] { description.TexturePressed };
-                    spriteDesc2.UVMap = description.TexturePressedUVMap;
-                }
-
-                buttonPressed = new Sprite(
-                    $"{id}.PressedButton",
-                    $"{name}.PressedButton",
-                    scene,
-                    spriteDesc2);
-
+                buttonPressed = await CreateButtonPressed();
                 AddChild(buttonPressed);
             }
 
-            Caption = new UITextArea(
-                $"{id}.Caption",
-                $"{name}.Caption",
-                scene,
+            Caption = await CreateCaption();
+            AddChild(Caption);
+        }
+        private async Task<Sprite> CreateButtonReleased()
+        {
+            var spriteDesc = new SpriteDescription()
+            {
+                BaseColor = Description.ColorReleased,
+                EventsEnabled = false,
+            };
+
+            if (!string.IsNullOrEmpty(Description.TextureReleased))
+            {
+                spriteDesc.Textures = new[] { Description.TextureReleased };
+                spriteDesc.UVMap = Description.TextureReleasedUVMap;
+            }
+
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.ReleasedButton",
+                $"{Name}.ReleasedButton",
+                spriteDesc);
+        }
+        private async Task<Sprite> CreateButtonPressed()
+        {
+            var spriteDesc = new SpriteDescription()
+            {
+                BaseColor = Description.ColorPressed,
+                EventsEnabled = false,
+            };
+
+            if (!string.IsNullOrEmpty(Description.TexturePressed))
+            {
+                spriteDesc.Textures = new[] { Description.TexturePressed };
+                spriteDesc.UVMap = Description.TexturePressedUVMap;
+            }
+
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.PressedButton",
+                $"{Name}.PressedButton",
+                spriteDesc);
+        }
+        private async Task<UITextArea> CreateCaption()
+        {
+            return await Scene.CreateComponent<UITextArea, UITextAreaDescription>(
+                $"{Id}.Caption",
+                $"{Name}.Caption",
                 new UITextAreaDescription
                 {
-                    Font = description.Font,
-                    Text = description.Text,
-                    TextForeColor = description.TextForeColor,
-                    TextShadowColor = description.TextShadowColor,
-                    TextShadowDelta = description.TextShadowDelta,
-                    TextHorizontalAlign = description.TextHorizontalAlign,
-                    TextVerticalAlign = description.TextVerticalAlign,
+                    Font = Description.Font,
+                    Text = Description.Text,
+                    TextForeColor = Description.TextForeColor,
+                    TextShadowColor = Description.TextShadowColor,
+                    TextShadowDelta = Description.TextShadowDelta,
+                    TextHorizontalAlign = Description.TextHorizontalAlign,
+                    TextVerticalAlign = Description.TextVerticalAlign,
 
                     EventsEnabled = false,
                 });
-
-            AddChild(Caption);
         }
 
         /// <inheritdoc/>
@@ -162,34 +175,5 @@ namespace Engine.UI
         /// Released
         /// </summary>
         Released,
-    }
-
-    /// <summary>
-    /// UIButton extensions
-    /// </summary>
-    public static class SpriteButtonExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIButton> AddComponentUIButton(this Scene scene, string id, string name, UIButtonDescription description, int layer = Scene.LayerUI)
-        {
-            UIButton component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIButton(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
-        }
     }
 }

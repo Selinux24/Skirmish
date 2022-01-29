@@ -13,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Decal drawer class
     /// </summary>
-    public class DecalDrawer : Drawable
+    public sealed class DecalDrawer : Drawable<DecalDrawerDescription>
     {
         /// <summary>
         /// Assigned buffer slot
@@ -23,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Decal list
         /// </summary>
-        private readonly VertexDecal[] decals;
+        private VertexDecal[] decals;
         /// <summary>
         /// Vertex buffer
         /// </summary>
@@ -69,31 +69,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Decal description</param>
-        public DecalDrawer(string id, string name, Scene scene, DecalDrawerDescription description) :
-            base(id, name, scene, description)
+        public DecalDrawer(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            MaxDecalCount = description.MaxDecalCount;
-            RotateDecals = description.RotateDecals;
 
-            var imgContent = new FileArrayImageContent(description.TextureName);
-            Texture = scene.Game.ResourceManager.RequestResource(imgContent);
-            TextureCount = (uint)imgContent.Count;
-
-            decals = new VertexDecal[MaxDecalCount];
-            buffer = new EngineBuffer<VertexDecal>(scene.Game.Graphics, Name, decals, true);
-
-            if (RotateDecals)
-            {
-                buffer.AddInputLayout(scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.Decal", DrawerPool.EffectDefaultDecals.Decal.GetSignature(), VertexDecal.Input(BufferSlot)));
-            }
-            else
-            {
-                buffer.AddInputLayout(scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.DecalRotated", DrawerPool.EffectDefaultDecals.DecalRotated.GetSignature(), VertexDecal.Input(BufferSlot)));
-            }
         }
         /// <summary>
         /// Destructor
@@ -110,6 +92,31 @@ namespace Engine
             {
                 buffer?.Dispose();
                 buffer = null;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(DecalDrawerDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            MaxDecalCount = Description.MaxDecalCount;
+            RotateDecals = Description.RotateDecals;
+
+            var imgContent = new FileArrayImageContent(Description.TextureName);
+            Texture = await Scene.Game.ResourceManager.RequestResource(imgContent);
+            TextureCount = (uint)imgContent.Count;
+
+            decals = new VertexDecal[MaxDecalCount];
+            buffer = new EngineBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, true);
+
+            if (RotateDecals)
+            {
+                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.Decal", DrawerPool.EffectDefaultDecals.Decal.GetSignature(), VertexDecal.Input(BufferSlot)));
+            }
+            else
+            {
+                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.DecalRotated", DrawerPool.EffectDefaultDecals.DecalRotated.GetSignature(), VertexDecal.Input(BufferSlot)));
             }
         }
 
@@ -253,36 +260,6 @@ namespace Engine
         public override string ToString()
         {
             return $"{nameof(DecalDrawer)}. ActiveDecals: {ActiveDecals}";
-        }
-    }
-
-    /// <summary>
-    /// Decal drawer extensions
-    /// </summary>
-    public static class DecalExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<DecalDrawer> AddComponentDecalDrawer(this Scene scene, string id, string name, DecalDrawerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
-        {
-            DecalDrawer component = null;
-
-            await Task.Run(() =>
-            {
-                component = new DecalDrawer(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

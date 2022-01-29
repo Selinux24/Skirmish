@@ -1,6 +1,8 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -11,7 +13,7 @@ namespace Engine
     /// <summary>
     /// Cube-map drawer
     /// </summary>
-    public class Cubemap : Drawable, IHasGameState
+    public class Cubemap<T> : Drawable<T>, IHasGameState where T : CubemapDescription
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -32,7 +34,7 @@ namespace Engine
         /// <summary>
         /// Texture cubic
         /// </summary>
-        private readonly bool textureCubic;
+        private bool textureCubic;
 
         /// <summary>
         /// Manipulator
@@ -71,27 +73,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public Cubemap(string id, string name, Scene scene, CubemapDescription description)
-            : base(id, name, scene, description)
+        public Cubemap(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            Manipulator = new Manipulator3D();
 
-            textureCubic = description.IsCubic;
-
-            InitializeBuffers(name, description.Geometry, description.ReverseFaces);
-
-            if (textureCubic)
-            {
-                InitializeTextureCubic(description.CubicTexture, description.Faces);
-            }
-            else
-            {
-                InitializeTextureArray(description.PlainTextures);
-            }
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -105,12 +93,82 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
+        {
+            await base.InitializeAssets(description);
+
+            Manipulator = new Manipulator3D();
+            textureCubic = Description.IsCubic;
+
+            InitializeBuffers(Name, Description.Geometry, Description.ReverseFaces);
+
+            if (textureCubic)
+            {
+                await InitializeTextureCubic(Description.CubicTexture, Description.Faces);
+            }
+            else
+            {
+                await InitializeTextureArray(Description.PlainTextures);
+            }
+        }
+        /// <summary>
+        /// Initialize buffers
+        /// </summary>
+        /// <param name="name">Buffer name</param>
+        /// <param name="geometry">Geometry to use</param>
+        /// <param name="reverse">Reverse faces</param>
+        protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometry geometry, bool reverse)
+        {
+            GeometryDescriptor geom;
+            if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Hemispheric) geom = GeometryUtil.CreateHemispheric(1, 10, 10);
+            else throw new ArgumentException("Bad geometry enum type", nameof(geometry));
+
+            if (textureCubic)
+            {
+                var vertices = VertexPosition.Generate(geom.Vertices);
+                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            }
+            else
+            {
+                var vertices = VertexPositionTexture.Generate(geom.Vertices, geom.Uvs);
+                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            }
+
+            var indices = reverse ? GeometryUtil.ChangeCoordinate(geom.Indices) : geom.Indices;
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
+        }
+        /// <summary>
+        /// Initialize cubic texture
+        /// </summary>
+        /// <param name="textureFileName">Texture file name</param>
+        /// <param name="faces">Texture faces</param>
+        protected async Task InitializeTextureCubic(string textureFileName, Rectangle[] faces = null)
+        {
+            var image = new FileCubicImageContent(textureFileName, faces);
+
+            texture = await Game.ResourceManager.RequestResource(image);
+        }
+        /// <summary>
+        /// Initialize texture array
+        /// </summary>
+        /// <param name="textureFileNames">Texture file names</param>
+        protected async Task InitializeTextureArray(IEnumerable<string> textureFileNames)
+        {
+            var image = new FileArrayImageContent(textureFileNames);
+
+            texture = await Game.ResourceManager.RequestResource(image);
+        }
+
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             Manipulator.Update(context.GameTime);
 
             local = Manipulator.LocalTransform;
         }
+        
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
@@ -203,56 +261,6 @@ namespace Engine
         public void SetTexture(EngineShaderResourceView texture)
         {
             this.texture = texture;
-        }
-
-        /// <summary>
-        /// Initialize buffers
-        /// </summary>
-        /// <param name="name">Buffer name</param>
-        /// <param name="geometry">Geometry to use</param>
-        /// <param name="reverse">Reverse faces</param>
-        protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometry geometry, bool reverse)
-        {
-            GeometryDescriptor geom;
-            if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(1, 10, 10);
-            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(1, 10, 10);
-            else if (geometry == CubemapDescription.CubeMapGeometry.Hemispheric) geom = GeometryUtil.CreateHemispheric(1, 10, 10);
-            else throw new ArgumentException("Bad geometry enum type");
-
-            if (textureCubic)
-            {
-                var vertices = VertexPosition.Generate(geom.Vertices);
-                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
-            }
-            else
-            {
-                var vertices = VertexPositionTexture.Generate(geom.Vertices, geom.Uvs);
-                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
-            }
-
-            var indices = reverse ? GeometryUtil.ChangeCoordinate(geom.Indices) : geom.Indices;
-            indexBuffer = BufferManager.AddIndexData(name, false, indices);
-        }
-        /// <summary>
-        /// Initialize cubic texture
-        /// </summary>
-        /// <param name="textureFileName">Texture file name</param>
-        /// <param name="faces">Texture faces</param>
-        protected void InitializeTextureCubic(string textureFileName, Rectangle[] faces = null)
-        {
-            var image = new FileCubicImageContent(textureFileName, faces);
-
-            texture = Game.ResourceManager.RequestResource(image);
-        }
-        /// <summary>
-        /// Initialize texture array
-        /// </summary>
-        /// <param name="textureFileNames">Texture file names</param>
-        protected void InitializeTextureArray(string[] textureFileNames)
-        {
-            var image = new FileArrayImageContent(textureFileNames);
-
-            texture = Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>

@@ -11,24 +11,24 @@ namespace Engine
     /// <summary>
     /// Sky plane
     /// </summary>
-    public class SkyPlane : Drawable
+    public sealed class SkyPlane : Drawable<SkyPlaneDescription>
     {
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor vertexBuffer = null;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor indexBuffer = null;
+        private BufferDescriptor indexBuffer = null;
         /// <summary>
         /// Sky texture 1
         /// </summary>
-        private readonly EngineShaderResourceView skyTexture1 = null;
+        private EngineShaderResourceView skyTexture1 = null;
         /// <summary>
         /// Sky texture 2
         /// </summary>
-        private readonly EngineShaderResourceView skyTexture2 = null;
+        private EngineShaderResourceView skyTexture2 = null;
         /// <summary>
         /// Brightness
         /// </summary>
@@ -48,7 +48,7 @@ namespace Engine
         /// <summary>
         /// Plane mode
         /// </summary>
-        private readonly SkyPlaneModes skyMode;
+        private SkyPlaneModes skyMode;
         /// <summary>
         /// Traslation direction
         /// </summary>
@@ -144,43 +144,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Sky plane description class</param>
-        public SkyPlane(string id, string name, Scene scene, SkyPlaneDescription description)
-            : base(id, name, scene, description)
+        public SkyPlane(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            var img1 = new FileArrayImageContent(description.ContentPath, description.Texture1Name);
-            skyTexture1 = Game.ResourceManager.RequestResource(img1);
 
-            var img2 = new FileArrayImageContent(description.ContentPath, description.Texture2Name);
-            skyTexture2 = Game.ResourceManager.RequestResource(img2);
-
-            skyMode = description.SkyMode;
-            rotation = Matrix.Identity;
-
-            MaxBrightness = description.MaxBrightness;
-            MinBrightness = description.MinBrightness;
-            FadingDistance = description.FadingDistance;
-            Velocity = description.Velocity;
-            PerturbationScale = description.PerturbationScale;
-            Direction = description.Direction;
-            CloudsBaseColor = description.CloudBaseColor;
-
-            //Create sky plane
-            var cPlane = GeometryUtil.CreateCurvePlane(
-                description.Size,
-                description.Repeat,
-                description.PlaneWidth,
-                description.PlaneTop,
-                description.PlaneBottom);
-
-            var vertices = VertexPositionTexture.Generate(cPlane.Vertices, cPlane.Uvs);
-            var indices = cPlane.Indices;
-
-            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
-            indexBuffer = BufferManager.AddIndexData(name, false, indices);
         }
         /// <summary>
         /// Destructor
@@ -190,9 +160,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Resource releasing
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -203,18 +171,52 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Updating context</param>
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(SkyPlaneDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            var img1 = new FileArrayImageContent(Description.ContentPath, Description.Texture1Name);
+            skyTexture1 = await Game.ResourceManager.RequestResource(img1);
+
+            var img2 = new FileArrayImageContent(Description.ContentPath, Description.Texture2Name);
+            skyTexture2 = await Game.ResourceManager.RequestResource(img2);
+
+            skyMode = Description.SkyMode;
+            rotation = Matrix.Identity;
+
+            MaxBrightness = Description.MaxBrightness;
+            MinBrightness = Description.MinBrightness;
+            FadingDistance = Description.FadingDistance;
+            Velocity = Description.Velocity;
+            PerturbationScale = Description.PerturbationScale;
+            Direction = Description.Direction;
+            CloudsBaseColor = Description.CloudBaseColor;
+
+            //Create sky plane
+            var cPlane = GeometryUtil.CreateCurvePlane(
+                Description.Size,
+                Description.Repeat,
+                Description.PlaneWidth,
+                Description.PlaneTop,
+                Description.PlaneBottom);
+
+            var vertices = VertexPositionTexture.Generate(cPlane.Vertices, cPlane.Uvs);
+            var indices = cPlane.Indices;
+
+            vertexBuffer = BufferManager.AddVertexData(Name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(Name, false, indices);
+        }
+
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            float delta = context.GameTime.ElapsedSeconds * Velocity * 0.001f;
+            float delta = context.GameTime.TotalSeconds * Velocity * 0.001f;
 
-            firstLayerTranslation += FirstLayerTranslation * delta;
-            secondLayerTranslation += SecondLayerTranslation * delta;
+            firstLayerTranslation = FirstLayerTranslation * delta;
+            secondLayerTranslation = SecondLayerTranslation * delta;
 
-            translation += delta;
+            translation = delta;
             translation %= 1f;
 
             if (context.Lights.KeyLight != null)
@@ -224,10 +226,7 @@ namespace Engine
 
             color = (CloudsBaseColor + context.Lights.SunColor) * 0.5f;
         }
-        /// <summary>
-        /// Draws content
-        /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -288,36 +287,6 @@ namespace Engine
                     indexBuffer.BufferOffset,
                     vertexBuffer.BufferOffset);
             }
-        }
-    }
-
-    /// <summary>
-    /// Sky plane extensions
-    /// </summary>
-    public static class SkyPlaneExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<SkyPlane> AddComponentSkyPlane(this Scene scene, string id, string name, SkyPlaneDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerSky)
-        {
-            SkyPlane component = null;
-
-            await Task.Run(() =>
-            {
-                component = new SkyPlane(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

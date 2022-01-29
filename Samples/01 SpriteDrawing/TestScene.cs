@@ -52,7 +52,12 @@ namespace SpriteDrawing
         private async Task LoadUserInterface()
         {
             await LoadResourcesAsync(
-                new[] { InitializeConsole(), InitializeBackground(), InitializeProgressbar() },
+                new[]
+                {
+                    InitializeConsole(),
+                    InitializeBackground(),
+                    InitializeProgressbar()
+                },
                 async (res) =>
                 {
                     if (!res.Completed)
@@ -71,12 +76,12 @@ namespace SpriteDrawing
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
 
-            textDebug = await this.AddComponentUITextArea("textDebug", "textDebug", desc, LayerUI);
+            textDebug = await AddComponentUI<UITextArea, UITextAreaDescription>("textDebug", "textDebug", desc);
         }
         private async Task InitializeBackground()
         {
             var desc = SpriteDescription.Background("background.jpg");
-            await this.AddComponentSprite("Background", "Background", desc, SceneObjectUsages.UI, layerUIBackground);
+            await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, layerUIBackground);
         }
         private async Task InitializeProgressbar()
         {
@@ -88,7 +93,7 @@ namespace SpriteDrawing
             desc.Width = Game.Form.RenderWidth - 200;
             desc.Height = 15;
 
-            progressBar = await this.AddComponentUIProgressBar("ProgressBar", "ProgressBar", desc, LayerUI);
+            progressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ProgressBar", "ProgressBar", desc);
         }
 
         private async Task LoadControls()
@@ -122,7 +127,7 @@ namespace SpriteDrawing
             float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = SpriteDescription.Default("smiley.png", size, size);
-            spriteSmiley = await this.AddComponentSprite("SmileySprite", "SmileySprite", desc, SceneObjectUsages.UI, layerUIObjects);
+            spriteSmiley = await AddComponentUI<Sprite, SpriteDescription>("SmileySprite", "SmileySprite", desc, layerUIObjects);
             spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
@@ -143,7 +148,7 @@ namespace SpriteDrawing
                     BaseColor = new Color(176, 77, 45),
                 },
             };
-            staticPan = await this.AddComponentUIPanel("StaticPanel", "StaticPanel", desc, LayerUI);
+            staticPan = await AddComponentUI<UIPanel, UIPanelDescription>("StaticPanel", "StaticPanel", desc);
 
             var descText = new UITextAreaDescription()
             {
@@ -159,7 +164,7 @@ namespace SpriteDrawing
                 TextShadowColor = new Color4(0, 0, 0, 0.2f),
                 TextShadowDelta = new Vector2(8, 5),
             };
-            textArea = new UITextArea("StaticPanel.Text", "StaticPanel.Text", this, descText);
+            textArea = await CreateComponent<UITextArea, UITextAreaDescription>("StaticPanel.Text", "StaticPanel.Text", descText);
 
             staticPan.AddChild(textArea);
             staticPan.Visible = false;
@@ -183,7 +188,7 @@ namespace SpriteDrawing
 
                 EventsEnabled = true,
             };
-            dynamicPan = await this.AddComponentUIPanel("DynamicPanel", "DynamicPanel", descPan, layerUIDialogs);
+            dynamicPan = await AddComponentUI<UIPanel, UIPanelDescription>("DynamicPanel", "DynamicPanel", descPan, layerUIDialogs);
 
             float w0 = 0.0f;
             float w1 = 0.324634656f;
@@ -203,7 +208,7 @@ namespace SpriteDrawing
             descButClose.TextVerticalAlign = TextVerticalAlign.Middle;
             descButClose.Text = "X";
 
-            var butClose = new UIButton("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", this, descButClose);
+            var butClose = await CreateComponent<UIButton, UIButtonDescription>("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", descButClose);
             butClose.MouseDoubleClick += ButDoubleClose_Click;
 
             var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
@@ -218,7 +223,7 @@ namespace SpriteDrawing
             descText.TextHorizontalAlign = TextHorizontalAlign.Center;
             descText.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            var textMapped = new UITextArea("DynamicPanel.MaraText", "DynamicPanel.MaraText", this, descText);
+            var textMapped = await CreateComponent<UITextArea, UITextAreaDescription>("DynamicPanel.MaraText", "DynamicPanel.MaraText", descText);
 
             dynamicPan.AddChild(textMapped);
             dynamicPan.AddChild(butClose, false);
@@ -236,13 +241,13 @@ namespace SpriteDrawing
             descButClose.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButClose.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            butTest2 = await this.AddComponentUIButton("ButtonTest2", "ButtonTest2", descButClose, LayerUI);
+            butTest2 = await AddComponentUI<UIButton, UIButtonDescription>("ButtonTest2", "ButtonTest2", descButClose);
             butTest2.MouseClick += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
             butTest2.Visible = false;
 
-            butTest1 = await this.AddComponentUIButton("ButtonTest1", "ButtonTest1", descButClose, LayerUI);
+            butTest1 = await AddComponentUI<UIButton, UIButtonDescription>("ButtonTest1", "ButtonTest1", descButClose);
             butTest1.MouseClick += ButTest1_Click;
             butTest1.MouseEnter += ButTest_MouseEnter;
             butTest1.MouseLeave += ButTest_MouseLeave;
@@ -256,7 +261,7 @@ namespace SpriteDrawing
             panelDesc.Width = 500;
             panelDesc.Height = 300;
 
-            var panel = await this.AddComponentUIPanel("scrollPanel", "Panel", panelDesc, LayerUI + 5);
+            var panel = await AddComponentUI<UIPanel, UIPanelDescription>("scrollPanel", "Panel", panelDesc, LayerUI + 5);
 
             var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
@@ -267,10 +272,8 @@ namespace SpriteDrawing
             areaDesc.ScrollbarMarkerColor = Color.LightGray;
             areaDesc.Padding = new Padding(5, 1, 1, 25);
 
-            scrollTextArea = new UITextArea("scrollText", "scrollText", this, areaDesc)
-            {
-                Text = Properties.Resources.Lorem
-            };
+            scrollTextArea = await CreateComponent<UITextArea, UITextAreaDescription>("scrollText", "scrollText", areaDesc);
+            scrollTextArea.Text = Properties.Resources.Lorem;
 
             panel.AddChild(scrollTextArea);
         }
@@ -290,7 +293,7 @@ namespace SpriteDrawing
         {
             base.Update(gameTime);
 
-            UpdateDebugInfo();
+            UpdateDebugInfo(gameTime);
 
             if (!gameReady)
             {
@@ -301,7 +304,7 @@ namespace SpriteDrawing
             UpdateLorem(gameTime);
             UpdateSprite(gameTime);
         }
-        private void UpdateDebugInfo()
+        private void UpdateDebugInfo(GameTime gameTime)
         {
             if (textDebug == null)
             {
@@ -311,7 +314,8 @@ namespace SpriteDrawing
             var mousePos = Cursor.ScreenPosition;
             var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
 
-            textDebug.Text = $@"PanPressed: {dynamicPan?.PressedState ?? MouseButtons.None}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
+            textDebug.Text = $@"GameTime paused {paused}|{gameTime.Paused}: Elapsed -> {gameTime.ElapsedTime}  Total -> {gameTime.TotalTime}
+PanPressed: {dynamicPan?.PressedState ?? MouseButtons.None}; PanRect: {dynamicPan?.AbsoluteRectangle}; 
 ButPressed: {but?.PressedState ?? MouseButtons.None}; ButRect: {but?.AbsoluteRectangle}; 
 MousePos: {mousePos}; InputMousePos: {Game.Input.MousePosition}; 
 FormCenter: {Game.Form.RenderCenter} ScreenCenter: {Game.Form.ScreenCenter}
@@ -319,6 +323,8 @@ TopMostControl: {TopMostControl} {TopMostControl?.Width},{TopMostControl?.Height
 FocusedControl: {FocusedControl} {FocusedControl?.Width},{FocusedControl?.Height} - {FocusedControl?.GetRenderArea(true)}
 Progress: {(int)(progressValue * 100f)}%";
         }
+
+        bool paused = false;
         private void UpdateInput(GameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.Escape))
@@ -329,6 +335,20 @@ Progress: {(int)(progressValue * 100f)}%";
             if (Game.Input.KeyJustReleased(Keys.Home))
             {
                 spriteSmiley.Anchor = Anchors.Center;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Space))
+            {
+                paused = !paused;
+
+                if (!paused)
+                {
+                    gameTime.Resume();
+                }
+                else
+                {
+                    gameTime.Pause();
+                }
             }
 
             if (Game.Input.MouseWheelDelta != 0 && scrollTextArea.IsMouseOver)

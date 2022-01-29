@@ -9,20 +9,20 @@ namespace Engine.UI
     /// <summary>
     /// Text area
     /// </summary>
-    public class UITextArea : UIControl, IScrollable
+    public sealed class UITextArea : UIControl<UITextAreaDescription>, IScrollable
     {
         /// <summary>
         /// Button text drawer
         /// </summary>
-        private readonly TextDrawer textDrawer = null;
+        private TextDrawer textDrawer = null;
         /// <summary>
         /// Vertical scroll bar
         /// </summary>
-        private readonly UIScrollBar sbVertical = null;
+        private UIScrollBar sbVertical = null;
         /// <summary>
         /// Horizontal scroll bar
         /// </summary>
-        private readonly UIScrollBar sbHorizontal = null;
+        private UIScrollBar sbHorizontal = null;
         /// <summary>
         /// Grow control with text value
         /// </summary>
@@ -193,7 +193,10 @@ namespace Engine.UI
 
                 base.Alpha = alpha;
 
-                textDrawer.Alpha = alpha;
+                if (textDrawer != null)
+                {
+                    textDrawer.Alpha = alpha;
+                }
             }
         }
         /// <inheritdoc/>
@@ -260,86 +263,87 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public UITextArea(string id, string name, Scene scene, UITextAreaDescription description) :
-            base(id, name, scene, description)
+        public UITextArea(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            growControlWithText = description.GrowControlWithText;
-            Scroll = description.Scroll;
-            ScrollbarSize = description.ScrollbarSize;
-            ScrollVerticalAlign = description.ScrollVerticalAlign;
-            ScrollHorizontalAlign = description.ScrollHorizontalAlign;
 
-            textDrawer = new TextDrawer(
-                $"{id}.TextDrawer",
-                $"{name}.TextDrawer",
-                scene,
-                this,
-                description.Font)
-            {
-                Text = description.Text,
-                ForeColor = description.TextForeColor,
-                ShadowColor = description.TextShadowColor,
-                ShadowDelta = description.TextShadowDelta,
-                HorizontalAlign = description.TextHorizontalAlign,
-                VerticalAlign = description.TextVerticalAlign,
-            };
-
-            if (Scroll.HasFlag(ScrollModes.Vertical))
-            {
-                var sbDescription = UIScrollBarDescription.Default(ScrollModes.Vertical);
-                sbDescription.BaseColor = description.ScrollbarBaseColor;
-                sbDescription.MarkerColor = description.ScrollbarMarkerColor;
-                sbDescription.MarkerSize = description.ScrollbarMarkerSize;
-
-                sbVertical = AddScroll(id, name, scene, sbDescription);
-            }
-
-            if (Scroll.HasFlag(ScrollModes.Horizontal))
-            {
-                var sbDescription = UIScrollBarDescription.Default(ScrollModes.Horizontal);
-                sbDescription.BaseColor = description.ScrollbarBaseColor;
-                sbDescription.MarkerColor = description.ScrollbarMarkerColor;
-                sbDescription.MarkerSize = description.ScrollbarMarkerSize;
-
-                sbHorizontal = AddScroll(id, name, scene, sbDescription);
-            }
-
-            GrowControl();
-        }
-        /// <summary>
-        /// Adds a scroll controller to the control
-        /// </summary>
-        /// <param name="id">Parent id</param>
-        /// <param name="name">Parent name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        private UIScrollBar AddScroll(string id, string name, Scene scene, UIScrollBarDescription description)
-        {
-            var sb = new UIScrollBar($"{id}.Scroll.{description.ScrollMode}", $"{name}.Scroll.{description.ScrollMode}", scene, description)
-            {
-                EventsEnabled = true
-            };
-
-            sb.MouseJustPressed += PbJustPressed;
-            sb.MouseJustReleased += PbJustReleased;
-
-            AddChild(sb, false);
-
-            return sb;
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                textDrawer.Dispose();
+                textDrawer?.Dispose();
+                textDrawer = null;
             }
 
             base.Dispose(disposing);
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UITextAreaDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            growControlWithText = Description.GrowControlWithText;
+            Scroll = Description.Scroll;
+            ScrollbarSize = Description.ScrollbarSize;
+            ScrollVerticalAlign = Description.ScrollVerticalAlign;
+            ScrollHorizontalAlign = Description.ScrollHorizontalAlign;
+
+            textDrawer = await CreateTextDrawer();
+            textDrawer.Parent = this;
+
+            if (Scroll.HasFlag(ScrollModes.Vertical))
+            {
+                sbVertical = await CreateScrollBar(ScrollModes.Vertical);
+                AddChild(sbVertical, false);
+            }
+
+            if (Scroll.HasFlag(ScrollModes.Horizontal))
+            {
+                sbHorizontal = await CreateScrollBar(ScrollModes.Horizontal);
+                AddChild(sbHorizontal, false);
+            }
+
+            GrowControl();
+        }
+        private async Task<TextDrawer> CreateTextDrawer()
+        {
+            var td = await Scene.CreateComponent<TextDrawer, TextDrawerDescription>(
+                $"{Id}.TextDrawer",
+                $"{Name}.TextDrawer",
+                Description.Font);
+
+            td.Text = Description.Text;
+            td.ForeColor = Description.TextForeColor;
+            td.ShadowColor = Description.TextShadowColor;
+            td.ShadowDelta = Description.TextShadowDelta;
+            td.HorizontalAlign = Description.TextHorizontalAlign;
+            td.VerticalAlign = Description.TextVerticalAlign;
+
+            return td;
+        }
+        private async Task<UIScrollBar> CreateScrollBar(ScrollModes scrollMode)
+        {
+            var desc = UIScrollBarDescription.Default(scrollMode);
+            desc.BaseColor = Description.ScrollbarBaseColor;
+            desc.MarkerColor = Description.ScrollbarMarkerColor;
+            desc.MarkerSize = Description.ScrollbarMarkerSize;
+            desc.EventsEnabled = true;
+
+            var sb = await Scene.CreateComponent<UIScrollBar, UIScrollBarDescription>(
+                $"{Id}.Scroll.{desc.ScrollMode}",
+                $"{Name}.Scroll.{desc.ScrollMode}",
+                desc);
+
+            sb.MouseJustPressed += PbJustPressed;
+            sb.MouseJustReleased += PbJustReleased;
+
+            return sb;
         }
 
         /// <inheritdoc/>
@@ -560,35 +564,6 @@ namespace Engine.UI
             //Set sizes if grow control with text or sizes not setted
             if (GrowControlWithText || Width == 0) Width = size.X;
             if (GrowControlWithText || Height == 0) Height = size.Y == 0 ? minHeight : size.Y;
-        }
-    }
-
-    /// <summary>
-    /// UITextArea extensions
-    /// </summary>
-    public static class UITextAreaExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UITextArea> AddComponentUITextArea(this Scene scene, string id, string name, UITextAreaDescription description, int layer = Scene.LayerUI)
-        {
-            UITextArea component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UITextArea(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
         }
     }
 }

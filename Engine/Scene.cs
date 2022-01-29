@@ -702,6 +702,161 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates a component
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> CreateComponent<TObj, TDescription>(string id, string name, TDescription description)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            var component = (TObj)Activator.CreateInstance(typeof(TObj), new object[] { this, id, name });
+
+            await component.InitializeAssets(description);
+
+            return component;
+        }
+
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        private async Task<TObj> AddComponentInternal<TObj, TDescription>(string id, string name, TDescription description, SceneObjectUsages usage = SceneObjectUsages.Default, int layer = LayerDefault)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            var component = await CreateComponent<TObj, TDescription>(id, name, description);
+
+            AddComponent(component, usage, layer);
+
+            return component;
+        }
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponent<TObj, TDescription>(string id, string name, TDescription description, SceneObjectUsages usage = SceneObjectUsages.Default, int layer = LayerDefault)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            return await AddComponentInternal<TObj, TDescription>(id, name, description, usage, layer);
+        }
+        /// <summary>
+        /// Adds an agent component to the scene
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponentAgent<TObj, TDescription>(string id, string name, TDescription description, int layer = LayerDefault)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            return await AddComponentInternal<TObj, TDescription>(id, name, description, SceneObjectUsages.Agent, layer);
+        }
+        /// <summary>
+        /// Adds a component to the scene's sky
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponentSky<TObj, TDescription>(string id, string name, TDescription description, int layer = LayerSky)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            return await AddComponentInternal<TObj, TDescription>(id, name, description, SceneObjectUsages.Default, layer);
+        }
+        /// <summary>
+        /// Adds a component to the scene's ground
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponentGround<TObj, TDescription>(string id, string name, TDescription description, int layer = LayerDefault)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            return await AddComponentInternal<TObj, TDescription>(id, name, description, SceneObjectUsages.Ground, layer);
+        }
+        /// <summary>
+        /// Adds a cursor component to the scene's user interface
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponentCursor<TObj, TDescription>(string id, string name, TDescription description, int layer = LayerCursor)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            return await AddComponentInternal<TObj, TDescription>(id, name, description, SceneObjectUsages.UI, layer);
+        }
+        /// <summary>
+        /// Adds a component to the scene's user interface
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponentUI<TObj, TDescription>(string id, string name, TDescription description, int layer = LayerUI)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            return await AddComponentInternal<TObj, TDescription>(id, name, description, SceneObjectUsages.UI, layer);
+        }
+        /// <summary>
+        /// Adds a component to the scene's effects
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <typeparam name="TDescription">Component description type</typeparam>
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Description</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponentEffect<TObj, TDescription>(string id, string name, TDescription description, int layer = LayerEffects)
+            where TObj : BaseSceneObject<TDescription>
+            where TDescription : SceneObjectDescription
+        {
+            return await AddComponentInternal<TObj, TDescription>(id, name, description, SceneObjectUsages.Default, layer);
+        }
+
+        /// <summary>
         /// Adds component to collection
         /// </summary>
         /// <typeparam name="T">Component type</typeparam>
@@ -709,7 +864,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="layer">Processing layer</param>
         /// <returns>Returns the added component</returns>
-        public void AddComponent(ISceneObject component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
+        public void AddComponent(ISceneObject component, SceneObjectUsages usage = SceneObjectUsages.Default, int layer = LayerDefault)
         {
             Monitor.Enter(internalComponents);
 
@@ -1053,9 +1208,9 @@ namespace Engine
 
             var cmpList = GetComponents<IDrawable>();
 
-            if (usage != SceneObjectUsages.None)
+            if (usage != SceneObjectUsages.Default)
             {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.Default);
             }
 
             var coarse = PickCoarse(ref ray, maxDistance, cmpList)
@@ -1084,7 +1239,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickNearest<T>(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
         {
-            return PickNearest(ray, rayPickingParams, SceneObjectUsages.None, out result);
+            return PickNearest(ray, rayPickingParams, SceneObjectUsages.Default, out result);
         }
         /// <summary>
         /// Gets nearest picking position of giving ray
@@ -1104,9 +1259,9 @@ namespace Engine
 
             var cmpList = GetComponents<IDrawable>();
 
-            if (usage != SceneObjectUsages.None)
+            if (usage != SceneObjectUsages.Default)
             {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.Default);
             }
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
@@ -1157,7 +1312,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickFirst<T>(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
         {
-            return PickFirst(ray, rayPickingParams, SceneObjectUsages.None, out result);
+            return PickFirst(ray, rayPickingParams, SceneObjectUsages.Default, out result);
         }
         /// <summary>
         /// Gets first picking position of giving ray
@@ -1177,9 +1332,9 @@ namespace Engine
 
             IEnumerable<IDrawable> cmpList = GetComponents<IDrawable>();
 
-            if (usage != SceneObjectUsages.None)
+            if (usage != SceneObjectUsages.Default)
             {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.Default);
             }
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList)
@@ -1223,7 +1378,7 @@ namespace Engine
         /// <returns>Returns true if ground position found</returns>
         public bool PickAll<T>(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
-            return PickAll(ray, rayPickingParams, SceneObjectUsages.None, out results);
+            return PickAll(ray, rayPickingParams, SceneObjectUsages.Default, out results);
         }
         /// <summary>
         /// Gets all picking position of giving ray
@@ -1240,9 +1395,9 @@ namespace Engine
 
             IEnumerable<IDrawable> cmpList = GetComponents<IDrawable>();
 
-            if (usage != SceneObjectUsages.None)
+            if (usage != SceneObjectUsages.Default)
             {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
+                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.Default);
             }
 
             var coarse = PickCoarse(ref ray, float.MaxValue, cmpList)
@@ -1411,7 +1566,7 @@ namespace Engine
         /// <returns>Returns the scene volume</returns>
         public IIntersectionVolume GetSceneVolume()
         {
-            var ground = GetComponents<Ground>().FirstOrDefault(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
+            var ground = GetComponents<Ground<GroundDescription>>().FirstOrDefault(c => c.Usage.HasFlag(SceneObjectUsages.Ground));
 
             return ground?.GetCullingVolume();
         }

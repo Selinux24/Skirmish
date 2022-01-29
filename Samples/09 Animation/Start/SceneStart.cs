@@ -46,7 +46,7 @@ namespace Animation.Start
         private async Task InitializeCursor()
         {
             var cursorDesc = UICursorDescription.Default("start/resources/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
-            await this.AddComponentUICursor("Cursor", "Cursor", cursorDesc);
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
         }
         private async Task InitializeBackground()
         {
@@ -54,13 +54,13 @@ namespace Animation.Start
             {
                 Content = ContentDescription.FromFile("start/resources", "SkyPlane.json"),
             };
-            backGround = await this.AddComponentModel("Background", "Background", backGroundDesc, SceneObjectUsages.UI);
+            backGround = await AddComponentUI<Model, ModelDescription>("Background", "Background", backGroundDesc);
         }
         private async Task InitializeTitle()
         {
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, true);
 
-            title = await this.AddComponentUITextArea("Title", "Title", UITextAreaDescription.Default(titleFont));
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", UITextAreaDescription.Default(titleFont));
             title.GrowControlWithText = false;
             title.Text = "Animation";
             title.TextForeColor = Color.Gold;
@@ -71,7 +71,7 @@ namespace Animation.Start
         }
         private async Task InitializeMainPanel()
         {
-            mainPanel = await this.AddComponentUIPanel("MainPanel", "MainPanel", UIPanelDescription.Default(Color.Transparent));
+            mainPanel = await AddComponentUI<UIPanel, UIPanelDescription>("MainPanel", "MainPanel", UIPanelDescription.Default(Color.Transparent));
             mainPanel.Spacing = 10;
             mainPanel.Padding = 15;
             mainPanel.SetGridLayout(GridLayout.FixedRows(2));
@@ -90,7 +90,7 @@ namespace Animation.Start
 
             var emptyDesc = SpriteDescription.Default("start/resources/empty.png");
 
-            var panSimpleAnimation = AddButtonPanel(buttonDesc, "Simple Animation", (sender, args) =>
+            var panSimpleAnimation = await AddButtonPanel(buttonDesc, "Simple Animation", (sender, args) =>
             {
                 if (!args.Buttons.HasFlag(MouseButtons.Left))
                 {
@@ -99,7 +99,7 @@ namespace Animation.Start
 
                 Game.SetScene<SimpleAnimation.SceneSimpleAnimation>();
             });
-            var panAnimationParts = AddButtonPanel(buttonDesc, "Animation Parts", (sender, args) =>
+            var panAnimationParts = await AddButtonPanel(buttonDesc, "Animation Parts", (sender, args) =>
             {
                 if (!args.Buttons.HasFlag(MouseButtons.Left))
                 {
@@ -108,7 +108,7 @@ namespace Animation.Start
 
                 Game.SetScene<AnimationParts.SceneAnimationParts>();
             });
-            var panSmoothTransitions = AddButtonPanel(buttonDesc, "Smooth Transitions", (sender, args) =>
+            var panSmoothTransitions = await AddButtonPanel(buttonDesc, "Smooth Transitions", (sender, args) =>
             {
                 if (!args.Buttons.HasFlag(MouseButtons.Left))
                 {
@@ -117,7 +117,7 @@ namespace Animation.Start
 
                 Game.SetScene<SmoothTransitions.SceneSmoothTransitions>();
             });
-            var panMixamo = AddButtonPanel(buttonDesc, "Mixamo Models", (sender, args) =>
+            var panMixamo = await AddButtonPanel(buttonDesc, "Mixamo Models", (sender, args) =>
             {
                 if (!args.Buttons.HasFlag(MouseButtons.Left))
                 {
@@ -126,23 +126,23 @@ namespace Animation.Start
 
                 Game.SetScene<Mixamo.SceneMixamo>();
             });
-            var panExit = AddButtonPanel(exitDesc, "Exit", (sender, args) => { Game.Exit(); });
+            var panExit = await AddButtonPanel(exitDesc, "Exit", (sender, args) => { Game.Exit(); });
 
-            mainPanel.AddChild(new Sprite("Empty1", "Empty", this, emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty1", "Empty", emptyDesc), false);
             mainPanel.AddChild(panSimpleAnimation, false);
-            mainPanel.AddChild(new Sprite("Empty3", "Empty", this, emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty3", "Empty", emptyDesc), false);
             mainPanel.AddChild(panMixamo, false);
 
             mainPanel.AddChild(panSmoothTransitions, false);
-            mainPanel.AddChild(new Sprite("Empty4", "Empty", this, emptyDesc), false);
+            mainPanel.AddChild(await CreateComponent<Sprite, SpriteDescription>("Empty4", "Empty", emptyDesc), false);
             mainPanel.AddChild(panAnimationParts, false);
             mainPanel.AddChild(panExit, false);
         }
-        private UIPanel AddButtonPanel(UIButtonDescription desc, string text, MouseEventHandler buttonJustReleased)
+        private async Task<UIPanel> AddButtonPanel(UIButtonDescription desc, string text, MouseEventHandler buttonJustReleased)
         {
-            var panel = new UIPanel($"MainPanel.Panel.{text}", $"MainPanel.Panel.{text}", this, UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
+            var panel = await CreateComponent<UIPanel, UIPanelDescription>($"MainPanel.Panel.{text}", $"MainPanel.Panel.{text}", UIPanelDescription.Default(new Color4(1, 1, 1, 0.25f)));
 
-            var button = new UIButton($"MainPanel.Button.{text}", $"MainPanel.Button.{text}", this, desc);
+            var button = await CreateComponent<UIButton, UIButtonDescription>($"MainPanel.Button.{text}", $"MainPanel.Button.{text}", desc);
             button.Caption.Text = text;
             button.MouseClick += buttonJustReleased;
             panel.AddChild(button);

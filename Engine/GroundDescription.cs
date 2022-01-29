@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Ground description
     /// </summary>
-    public class GroundDescription : SceneDrawableDescription
+    public class GroundDescription : SceneObjectDescription
     {
         /// <summary>
         /// Gets a ground description from data

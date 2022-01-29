@@ -586,6 +586,11 @@ namespace Engine.Common
         /// <param name="descriptor">Buffer descriptor</param>
         public void RemoveVertexData(BufferDescriptor descriptor)
         {
+            if (descriptor == null)
+            {
+                return;
+            }
+
             BufferDescriptorRequestVertices request = new BufferDescriptorRequestVertices
             {
                 Id = descriptor.Id,
@@ -601,6 +606,11 @@ namespace Engine.Common
         /// <param name="descriptor">Buffer descriptor</param>
         public void RemoveInstancingData(BufferDescriptor descriptor)
         {
+            if (descriptor == null)
+            {
+                return;
+            }
+
             BufferDescriptorRequestInstancing request = new BufferDescriptorRequestInstancing
             {
                 Id = descriptor.Id,
@@ -616,6 +626,11 @@ namespace Engine.Common
         /// <param name="descriptor">Buffer descriptor</param>
         public void RemoveIndexData(BufferDescriptor descriptor)
         {
+            if (descriptor == null)
+            {
+                return;
+            }
+
             BufferDescriptorRequestIndices request = new BufferDescriptorRequestIndices
             {
                 Id = descriptor.Id,

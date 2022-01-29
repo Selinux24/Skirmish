@@ -6,6 +6,7 @@ using System.Drawing.Text;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.UI
 {
@@ -196,7 +197,7 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap FromFile(Game game, string contentPath, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
+        public static async Task<FontMap> FromFile(Game game, string contentPath, FontMapKeycodeGenerator generator, string fontFileName, float size, FontMapStyles style)
         {
             var fileNames = ContentManager.FindPaths(contentPath, fontFileName);
             if (!fileNames.Any())
@@ -212,7 +213,7 @@ namespace Engine.UI
 
                 using (FontFamily family = new FontFamily(collection.Families[0].Name, collection))
                 {
-                    return FromFamily(game, generator, family, size, style);
+                    return await FromFamily(game, generator, family, size, style);
                 }
             }
         }
@@ -223,7 +224,7 @@ namespace Engine.UI
         /// <param name="contentPath">Content path</param>
         /// <param name="fontMapping">Font mapping</param>
         /// <returns>Returns the created font map</returns>
-        public static FontMap FromMap(Game game, string contentPath, FontMapping fontMapping)
+        public static async Task<FontMap> FromMap(Game game, string contentPath, FontMapping fontMapping)
         {
             string fontName = Path.Combine(contentPath, fontMapping.ImageFile);
 
@@ -235,7 +236,7 @@ namespace Engine.UI
                     FontName = fontName,
                 };
 
-                fMap.Texture = game.ResourceManager.RequestResource(fontName, false);
+                fMap.Texture = await game.ResourceManager.RequestResource(fontName, false);
 
                 string fontMapName = Path.Combine(contentPath, fontMapping.MapFile);
 
@@ -288,7 +289,7 @@ namespace Engine.UI
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
         /// <remarks>The font family must exists in the FontFamily.Families collection</remarks>
-        public static FontMap FromFamily(Game game, FontMapKeycodeGenerator generator, string fontFamily, float size, FontMapStyles style)
+        public static async Task<FontMap> FromFamily(Game game, FontMapKeycodeGenerator generator, string fontFamily, float size, FontMapStyles style)
         {
             string[] fonts = ParseFontFamilies(fontFamily);
             if (!fonts.Any())
@@ -312,7 +313,7 @@ namespace Engine.UI
 
             using (FontFamily family = new FontFamily(font))
             {
-                return FromFamily(game, generator, family, size, style);
+                return await FromFamily(game, generator, family, size, style);
             }
         }
         /// <summary>
@@ -324,97 +325,99 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="style">Style</param>
         /// <returns>Returns the created font map</returns>
-        private static FontMap FromFamily(Game game, FontMapKeycodeGenerator generator, FontFamily family, float size, FontMapStyles style)
+        private static async Task<FontMap> FromFamily(Game game, FontMapKeycodeGenerator generator, FontFamily family, float size, FontMapStyles style)
         {
             var fMap = FontMapCache.Get(family, size, style);
-            if (fMap == null)
+            if (fMap != null)
             {
-                //Calc the destination texture width and height
-                MeasureMap(generator, family, size, style, out int width, out int height);
+                return fMap;
+            }
 
-                fMap = new FontMap()
+            //Calc the destination texture width and height
+            MeasureMap(generator, family, size, style, out int width, out int height);
+
+            fMap = new FontMap()
+            {
+                FontName = family.Name,
+                FontSize = size,
+                FontStyle = style,
+            };
+
+            using (var bmp = new Bitmap(width, height))
+            using (var gra = System.Drawing.Graphics.FromImage(bmp))
+            using (var fmt = StringFormat.GenericDefault)
+            using (var fnt = new Font(family, size, (FontStyle)style, GraphicsUnit.Pixel))
+            {
+                gra.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
+
+                gra.FillRegion(
+                    Brushes.Transparent,
+                    new Region(new System.Drawing.RectangleF(0, 0, width, height)));
+
+                float left = 0f;
+                float top = 0f;
+                int charSeparationPixels = (int)(size * charSeparationThr);
+
+                foreach (char c in generator.Keys)
                 {
-                    FontName = family.Name,
-                    FontSize = size,
-                    FontStyle = style,
-                };
+                    var s = gra.MeasureString(
+                        c.ToString(),
+                        fnt,
+                        int.MaxValue,
+                        fmt);
 
-                using (var bmp = new Bitmap(width, height))
-                using (var gra = System.Drawing.Graphics.FromImage(bmp))
-                using (var fmt = StringFormat.GenericDefault)
-                using (var fnt = new Font(family, size, (FontStyle)style, GraphicsUnit.Pixel))
-                {
-                    gra.TextRenderingHint = TextRenderingHint.AntiAliasGridFit;
-
-                    gra.FillRegion(
-                        Brushes.Transparent,
-                        new Region(new System.Drawing.RectangleF(0, 0, width, height)));
-
-                    float left = 0f;
-                    float top = 0f;
-                    int charSeparationPixels = (int)(size * charSeparationThr);
-
-                    foreach (char c in generator.Keys)
+                    if (left + s.Width >= width)
                     {
-                        var s = gra.MeasureString(
-                            c.ToString(),
-                            fnt,
-                            int.MaxValue,
-                            fmt);
-
-                        if (left + s.Width >= width)
-                        {
-                            //Next texture line with lineSeparationPixels
-                            left = 0;
-                            top += (int)s.Height + lineSeparationPixels;
-                        }
-
-                        gra.DrawString(
-                            c.ToString(),
-                            fnt,
-                            Brushes.White,
-                            left,
-                            top,
-                            fmt);
-
-                        var chr = new FontMapChar()
-                        {
-                            X = left,
-                            Y = top,
-                            Width = s.Width,
-                            Height = s.Height,
-                        };
-
-                        fMap.map.Add(c, chr);
-
-                        left += (int)s.Width + charSeparationPixels;
+                        //Next texture line with lineSeparationPixels
+                        left = 0;
+                        top += (int)s.Height + lineSeparationPixels;
                     }
 
-                    fMap.GetSpaceSize(out float wsWidth, out float wsHeight);
+                    gra.DrawString(
+                        c.ToString(),
+                        fnt,
+                        Brushes.White,
+                        left,
+                        top,
+                        fmt);
 
-                    //Adds the white space
-                    var wsChr = new FontMapChar()
+                    var chr = new FontMapChar()
                     {
                         X = left,
                         Y = top,
-                        Width = wsWidth,
-                        Height = wsHeight,
+                        Width = s.Width,
+                        Height = s.Height,
                     };
 
-                    fMap.map.Add(' ', wsChr);
+                    fMap.map.Add(c, chr);
 
-                    fMap.TextureWidth = bmp.Width;
-                    fMap.TextureHeight = bmp.Height;
-
-                    //Generate the texture
-                    fMap.bitmapStream = new MemoryStream();
-                    bmp.Save(fMap.bitmapStream, ImageFormat.Png);
-                    fMap.Texture = game.ResourceManager.RequestResource(fMap.bitmapStream, false);
+                    left += (int)s.Width + charSeparationPixels;
                 }
 
-                //Add map to the font cache
-                FontMapCache.Add(fMap);
+                fMap.GetSpaceSize(out float wsWidth, out float wsHeight);
+
+                //Adds the white space
+                var wsChr = new FontMapChar()
+                {
+                    X = left,
+                    Y = top,
+                    Width = wsWidth,
+                    Height = wsHeight,
+                };
+
+                fMap.map.Add(' ', wsChr);
+
+                fMap.TextureWidth = bmp.Width;
+                fMap.TextureHeight = bmp.Height;
+
+                //Generate the texture
+                fMap.bitmapStream = new MemoryStream();
+                bmp.Save(fMap.bitmapStream, ImageFormat.Png);
+                fMap.Texture = await game.ResourceManager.RequestResource(fMap.bitmapStream, false);
             }
+
+            //Add map to the font cache
+            FontMapCache.Add(fMap);
 
             return fMap;
         }

@@ -8,12 +8,12 @@ namespace Engine.UI
     /// <summary>
     /// Sprite scroll bar
     /// </summary>
-    public class UIScrollBar : UIControl
+    public sealed class UIScrollBar : UIControl<UIScrollBarDescription>
     {
         /// <summary>
         /// Bar sprite
         /// </summary>
-        private readonly Sprite spriteBar = null;
+        private Sprite spriteBar = null;
         /// <summary>
         /// Base color
         /// </summary>
@@ -64,31 +64,42 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Scroll bar description</param>
-        public UIScrollBar(string id, string name, Scene scene, UIScrollBarDescription description)
-            : base(id, name, scene, description)
+        public UIScrollBar(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            ScrollMode = description.ScrollMode;
-            MarkerSize = description.MarkerSize;
+
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIScrollBarDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            ScrollMode = Description.ScrollMode;
+            MarkerSize = Description.MarkerSize;
             MarkerPosition = 0;
 
-            spriteBar = new Sprite(
-                $"{id}.Scroll",
-                $"{name}.Scroll",
-                scene,
-                new SpriteDescription()
-                {
-                    Color1 = description.BaseColor,
-                    Color2 = description.MarkerColor,
-                    Color3 = description.BaseColor,
-                    DrawDirection = description.ScrollMode == ScrollModes.Vertical ? SpriteDrawDirections.Vertical : SpriteDrawDirections.Horizontal,
-                    EventsEnabled = false,
-                });
-
+            spriteBar = await CreateScrollSprite();
             AddChild(spriteBar, true);
+        }
+        private async Task<Sprite> CreateScrollSprite()
+        {
+            var desc = new SpriteDescription()
+            {
+                Color1 = Description.BaseColor,
+                Color2 = Description.MarkerColor,
+                Color3 = Description.BaseColor,
+                DrawDirection = Description.ScrollMode == ScrollModes.Vertical ? SpriteDrawDirections.Vertical : SpriteDrawDirections.Horizontal,
+                EventsEnabled = false,
+            };
+
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Scroll",
+                $"{Name}.Scroll",
+                desc);
         }
 
         /// <inheritdoc/>
@@ -107,35 +118,6 @@ namespace Engine.UI
             float size = MarkerSize / ctrlSize;
 
             spriteBar.SetPercentage(p, p + size);
-        }
-    }
-
-    /// <summary>
-    /// Scroll bar extensions
-    /// </summary>
-    public static class UIScrollBarExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIScrollBar> AddComponentUIScrollBar(this Scene scene, string id, string name, UIScrollBarDescription description, int layer = Scene.LayerUI)
-        {
-            UIScrollBar component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIScrollBar(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
         }
     }
 }

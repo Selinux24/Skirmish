@@ -163,13 +163,13 @@ namespace Deferred
         private async Task InitializeCursor()
         {
             var cursorDesc = UICursorDescription.Default("target.png", 15, 15, true);
-            await this.AddComponentUICursor("Cursor", "Cursor", cursorDesc);
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
         }
         private async Task InitializeSkydom()
         {
             var desc = SkydomDescription.Sphere(@"Resources/sunset.dds", far);
 
-            await this.AddComponentSkydom("Sky", "Sky", desc);
+            await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
         }
         private async Task InitializeHelicopters()
         {
@@ -179,7 +179,7 @@ namespace Deferred
                 TextureIndex = 2,
                 Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
-            helicopter = await this.AddComponentModel("Helicopter", "Helicopter", desc1);
+            helicopter = await AddComponent<Model, ModelDescription>("Helicopter", "Helicopter", desc1);
             Lights.AddRange(helicopter.Lights);
 
             var desc2 = new ModelInstancedDescription()
@@ -188,7 +188,7 @@ namespace Deferred
                 Instances = 2,
                 Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
-            helicopters = await this.AddComponentModelInstanced("Bunch of Helicopters", "Bunch of Helicopters", desc2);
+            helicopters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of Helicopters", "Bunch of Helicopters", desc2);
             for (int i = 0; i < helicopters.InstanceCount; i++)
             {
                 Lights.AddRange(helicopters[i].Lights);
@@ -204,7 +204,7 @@ namespace Deferred
                 Content = ContentDescription.FromFile("Resources", "leopard.json"),
                 Instances = 5,
             };
-            var tanks = await this.AddComponentModelInstanced("Tanks", "Tanks", desc);
+            var tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", desc);
 
             tanks[0].Manipulator.SetScale(0.2f, true);
             var tankbbox = tanks[0].GetBoundingBox();
@@ -245,7 +245,7 @@ namespace Deferred
         }
         private async Task InitializeTerrain()
         {
-            terrain = await this.AddComponentScenery("Terrain", "Terrain", GroundDescription.FromFile("Resources", "terrain.json", 2));
+            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", GroundDescription.FromFile("Resources", "terrain.json", 2));
         }
         private async Task InitializeGardener()
         {
@@ -262,7 +262,7 @@ namespace Deferred
                     MaxSize = Vector2.One * 0.25f,
                 }
             };
-            await this.AddComponentGroundGardener("Vegetation", "Vegetation", desc);
+            await this.AddComponentEffect<GroundGardener, GroundGardenerDescription>("Vegetation", "Vegetation", desc);
         }
         private async Task InitializeTrees()
         {
@@ -273,7 +273,7 @@ namespace Deferred
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("resources/trees", "birch_a.json"),
             };
-            tree = await this.AddComponentModel("Lonely tree", "Lonely tree", desc1);
+            tree = await AddComponent<Model, ModelDescription>("Lonely tree", "Lonely tree", desc1);
 
             var desc2 = new ModelInstancedDescription()
             {
@@ -283,7 +283,7 @@ namespace Deferred
                 Instances = 10,
                 Content = ContentDescription.FromFile("resources/trees", "birch_b.json"),
             };
-            trees = await this.AddComponentModelInstanced("Bunch of trees", "Bunch of trees", desc2);
+            trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of trees", "Bunch of trees", desc2);
         }
         private async Task InitializeUI()
         {
@@ -299,14 +299,14 @@ namespace Deferred
             var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
             var dStats = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Red };
 
-            title = await this.AddComponentUITextArea("Title", "Title", dTitle);
-            load = await this.AddComponentUITextArea("Load", "Load", dLoad);
-            help = await this.AddComponentUITextArea("Help", "Help", dHelp);
-            statistics = await this.AddComponentUITextArea("Statistics", "Statistics", dStats);
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", dTitle);
+            load = await AddComponentUI<UITextArea, UITextAreaDescription>("Load", "Load", dLoad);
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelp);
+            statistics = await AddComponentUI<UITextArea, UITextAreaDescription>("Statistics", "Statistics", dStats);
 
-            upperPanel = await this.AddComponentSprite("Upperpanel", "Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, LayerUI - 1);
+            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBuferDrawer", "DebugBuferDrawer", UITextureRendererDescription.Default());
+            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBuferDrawer", "DebugBuferDrawer", UITextureRendererDescription.Default());
             bufferDrawer.Visible = false;
         }
         private async Task InitializeDebug()
@@ -315,14 +315,14 @@ namespace Deferred
             {
                 Count = 1000,
             };
-            lineDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc, SceneObjectUsages.None, LayerEffects);
+            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
             lineDrawer.Visible = false;
 
             var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Count = MaxGridDrawer,
             };
-            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc, SceneObjectUsages.None, LayerEffects);
+            terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
             terrainGraphDrawer.Visible = false;
 
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -330,14 +330,14 @@ namespace Deferred
                 DepthEnabled = true,
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc, SceneObjectUsages.None, LayerEffects);
+            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc, SceneObjectUsages.None, LayerEffects);
+            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
             volumesDrawer.Visible = false;
         }
 

@@ -8,8 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// User interface sprite cursor
     /// </summary>
-    public class UICursor : Sprite
+    public sealed class UICursor : UIControl<UICursorDescription>
     {
+        /// <summary>
+        /// Sprite
+        /// </summary>
+        private Sprite cursorSprite;
+
         /// <summary>
         /// Current cursor position
         /// </summary>
@@ -26,16 +31,33 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Sprite description</param>
-        public UICursor(string id, string name, Scene scene, UICursorDescription description)
-            : base(id, name, scene, description)
+        public UICursor(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            Centered = description.Centered;
-            Delta = description.Delta;
+
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UICursorDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Centered = Description.Centered;
+            Delta = Description.Delta;
             EventsEnabled = false;
+
+            cursorSprite = await CreateSprite();
+            AddChild(cursorSprite, false);
+        }
+        private async Task<Sprite> CreateSprite()
+        {
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Sprite",
+                $"{Name}.Sprite",
+                Description);
         }
 
         /// <inheritdoc/>
@@ -54,43 +76,14 @@ namespace Engine.UI
 
             if (Game.Input.LockMouse)
             {
-                SetPosition(Game.Form.RenderCenter + centerDelta + Delta);
+                cursorSprite.SetPosition(Game.Form.RenderCenter + centerDelta + Delta);
             }
             else
             {
-                SetPosition(CursorPosition + centerDelta + Delta);
+                cursorSprite.SetPosition(CursorPosition + centerDelta + Delta);
             }
 
             base.Update(context);
-        }
-    }
-
-    /// <summary>
-    /// Cursor extensions
-    /// </summary>
-    public static class CursorExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UICursor> AddComponentUICursor(this Scene scene, string id, string name, UICursorDescription description, int layer = Scene.LayerCursor)
-        {
-            UICursor component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UICursor(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
         }
     }
 }

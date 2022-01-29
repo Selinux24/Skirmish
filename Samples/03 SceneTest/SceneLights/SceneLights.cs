@@ -109,7 +109,7 @@ namespace SceneTest.SceneLights
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", "Floor", desc);
+            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
@@ -121,7 +121,7 @@ namespace SceneTest.SceneLights
                 Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
             };
 
-            buildingObelisks = await this.AddComponentModelInstanced("Obelisk", "Obelisk", desc);
+            buildingObelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
         }
         private async Task InitializeTree()
         {
@@ -133,7 +133,7 @@ namespace SceneTest.SceneLights
                 Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
             };
 
-            await this.AddComponentModel("Tree", "Tree", desc);
+            await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);
         }
         private async Task InitializeEmitter()
         {
@@ -153,7 +153,7 @@ namespace SceneTest.SceneLights
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lightEmitters = await this.AddComponentModelInstanced("Emitter", "Emitter", desc);
+            lightEmitters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Emitter", "Emitter", desc);
         }
         private async Task InitializeLanterns()
         {
@@ -183,7 +183,7 @@ namespace SceneTest.SceneLights
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lanterns = await this.AddComponentModelInstanced("Lanterns", "Lanterns", desc);
+            lanterns = await AddComponent<ModelInstanced, ModelInstancedDescription>("Lanterns", "Lanterns", desc);
         }
         private async Task InitializeLights()
         {
@@ -210,7 +210,8 @@ namespace SceneTest.SceneLights
                 DepthEnabled = true,
                 Count = 5000
             };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsVolumeDrawer", "DebugLightsVolumeDrawer", desc);
+
+            lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsVolumeDrawer", "DebugLightsVolumeDrawer", desc);
         }
         private async Task InitializeBufferDrawer()
         {
@@ -219,7 +220,7 @@ namespace SceneTest.SceneLights
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBufferDrawer", "DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), LayerEffects);
+            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBufferDrawer", "DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), LayerEffects);
             bufferDrawer.Visible = false;
         }
 

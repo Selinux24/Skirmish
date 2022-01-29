@@ -70,14 +70,14 @@ namespace Animation.AnimationParts
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
 
             title.Text = "Model Parts Test";
 
-            backPanel = await this.AddComponentUIPanel("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+            backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
-            console = await this.AddComponentUIConsole("Console", "Console", consoleDesc, LayerUI + 1);
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
@@ -104,7 +104,7 @@ namespace Animation.AnimationParts
                 },
             };
 
-            tank = await this.AddComponentModel("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
+            tank = await AddComponentAgent<Model, ModelDescription>("Tanks", "Tanks", tDesc);
             tank.Manipulator.SetScale(0.5f);
         }
         private async Task InitializeFloor()
@@ -140,14 +140,20 @@ namespace Animation.AnimationParts
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", "Floor", desc);
+            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", "DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
+            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "DebugItemTris", 
+                "DebugItemTris", 
+                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
             itemTris.Visible = false;
 
-            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", "DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
+            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DebugItemLines", 
+                "DebugItemLines", 
+                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
             itemLines.Visible = false;
         }
 

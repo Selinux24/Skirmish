@@ -71,20 +71,23 @@ namespace SceneTest.SceneWater
                     new LensFlareDescription.Flare( 2.0f, 6.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare("Flares", "Flares", lfDesc, SceneObjectUsages.None);
+
+            await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
         }
         private async Task InitializeSky()
         {
-            await this.AddComponentSkyScattering("Sky", "Sky", new SkyScatteringDescription()
+            var desc = new SkyScatteringDescription()
             {
                 Resolution = SkyScatteringResolutions.High
-            });
+            };
+
+            await AddComponentSky<SkyScattering, SkyScatteringDescription>("Sky", "Sky", desc);
         }
         private async Task InitializeWater()
         {
-            var wDesc = WaterDescription.CreateOcean(terrainSize, 0f);
+            var desc = WaterDescription.CreateOcean(terrainSize, 0f);
 
-            await this.AddComponentWater("Water", "Water", wDesc);
+            await AddComponentEffect<Water, WaterDescription>("Water", "Water", desc);
         }
         private async Task InitializeSeaBottom()
         {
@@ -116,11 +119,11 @@ namespace SceneTest.SceneWater
                 NormalMaps = new[] { "Normal.jpg" },
                 Scale = 0.0333f,
             };
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            var groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.99f, 0);
 
-            await this.AddComponentScenery("SeaBottom", "Sea Bottom", groundDesc);
+            await AddComponentGround<Scenery, GroundDescription>("SeaBottom", "Sea Bottom", groundDesc);
         }
 
         public override void Update(GameTime gameTime)

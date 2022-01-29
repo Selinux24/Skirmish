@@ -11,7 +11,7 @@ namespace Engine.UI
     /// <summary>
     /// Tab Panel
     /// </summary>
-    public class UITabPanel : UIControl
+    public sealed class UITabPanel : UIControl<UITabPanelDescription>
     {
         /// <summary>
         /// Button list
@@ -258,7 +258,6 @@ namespace Engine.UI
                 return tabPanels.ToArray();
             }
         }
-
         /// <inheritdoc/>
         public override bool Visible
         {
@@ -299,64 +298,46 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public UITabPanel(string id, string name, Scene scene, UITabPanelDescription description) :
-            base(id, name, scene, description)
+        public UITabPanel(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            tabButtonsAreaSize = description.TabButtonsAreaSize;
-            tabButtonsPadding = description.TabButtonsPadding;
-            tabButtonsSpacing = description.TabButtonsSpacing;
-            tabPanelsPadding = description.TabPanelsPadding;
 
-            tabButtonPadding = description.TabButtonPadding;
-            tabPanelPadding = description.TabPanelPadding;
-            tabPanelSpacing = description.TabPanelSpacing;
+        }
 
-            if (description.Background != null)
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UITabPanelDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            tabButtonsAreaSize = Description.TabButtonsAreaSize;
+            tabButtonsPadding = Description.TabButtonsPadding;
+            tabButtonsSpacing = Description.TabButtonsSpacing;
+            tabPanelsPadding = Description.TabPanelsPadding;
+
+            tabButtonPadding = Description.TabButtonPadding;
+            tabPanelPadding = Description.TabPanelPadding;
+            tabPanelSpacing = Description.TabPanelSpacing;
+
+            if (Description.Background != null)
             {
-                Background = new Sprite(
-                    $"{id}.Background",
-                    $"{name}.Background",
-                    scene,
-                    description.Background);
-
+                Background = await CreateBackground();
                 AddChild(Background);
             }
 
-            if (description.Tabs > 0)
+            if (Description.Tabs > 0)
             {
-                var buttonDesc = description.ButtonDescription ?? UIButtonDescription.Default(description.BaseColor);
-                var panelDesc = description.PanelDescription ?? UIPanelDescription.Default(description.BaseColor);
+                var buttonDesc = Description.ButtonDescription ?? UIButtonDescription.Default(Description.BaseColor);
+                var panelDesc = Description.PanelDescription ?? UIPanelDescription.Default(Description.BaseColor);
 
-                for (int i = 0; i < description.Tabs; i++)
+                for (int i = 0; i < Description.Tabs; i++)
                 {
-                    var button = new UIButton(
-                        $"{id}.Button_{i}",
-                        $"{name}.Button_{i}",
-                        scene,
-                        buttonDesc);
-                    button.Caption.Text = description.TabCaptions?.ElementAtOrDefault(i) ?? $"Button_{i}";
-                    button.Caption.Padding = tabButtonPadding;
-                    button.MousePressed += Button_Pressed;
-                    button.MouseJustPressed += Button_JustPressed;
-                    button.MouseJustReleased += Button_JustReleased;
-                    button.MouseClick += Button_Click;
-
+                    var button = await CreateButton(buttonDesc, i);
                     tabButtons.Add(button);
 
-                    var panel = new UIPanel(
-                        $"{id}.Panel_{i}",
-                        $"{name}.Panel_{i}",
-                        scene,
-                        panelDesc)
-                    {
-                        Padding = tabPanelPadding,
-                        Spacing = tabPanelSpacing
-                    };
-
+                    var panel = await CreatePanel(panelDesc, i);
                     tabPanels.Add(panel);
 
                     AddChild(button, false);
@@ -365,6 +346,41 @@ namespace Engine.UI
 
                 SetSelectedTab(0);
             }
+        }
+        private async Task<Sprite> CreateBackground()
+        {
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Background",
+                $"{Name}.Background",
+                Description.Background);
+        }
+        private async Task<UIButton> CreateButton(UIButtonDescription buttonDesc, int i)
+        {
+            var button = await Scene.CreateComponent<UIButton, UIButtonDescription>(
+                $"{Id}.Button_{i}",
+                $"{Name}.Button_{i}",
+                buttonDesc);
+
+            button.Caption.Text = Description.TabCaptions?.ElementAtOrDefault(i) ?? $"Button_{i}";
+            button.Caption.Padding = tabButtonPadding;
+            button.MousePressed += Button_Pressed;
+            button.MouseJustPressed += Button_JustPressed;
+            button.MouseJustReleased += Button_JustReleased;
+            button.MouseClick += Button_Click;
+
+            return button;
+        }
+        private async Task<UIPanel> CreatePanel(UIPanelDescription panelDesc, int i)
+        {
+            var panel = await Scene.CreateComponent<UIPanel, UIPanelDescription>(
+                $"{Id}.Panel_{i}",
+                $"{Name}.Panel_{i}",
+                panelDesc);
+
+            panel.Padding = tabPanelPadding;
+            panel.Spacing = tabPanelSpacing;
+
+            return panel;
         }
 
         /// <inheritdoc/>
@@ -447,12 +463,11 @@ namespace Engine.UI
         /// </summary>
         /// <param name="index">Tab index</param>
         /// <param name="buttonDescription">Button description</param>
-        public void SetTabButton(int index, UIButtonDescription buttonDescription)
+        public async Task SetTabButton(int index, UIButtonDescription buttonDescription)
         {
-            UIButton button = new UIButton(
+            var button = await Scene.CreateComponent<UIButton, UIButtonDescription>(
                 $"{Id}.Button_{index}",
                 $"{Name}.Button_{index}",
-                Scene,
                 buttonDescription);
 
             var oldButton = tabButtons[index];
@@ -468,12 +483,11 @@ namespace Engine.UI
         /// </summary>
         /// <param name="index">Tab index</param>
         /// <param name="panelDescription">Panel description</param>
-        public void SetTabPanel(int index, UIPanelDescription panelDescription)
+        public async Task SetTabPanel(int index, UIPanelDescription panelDescription)
         {
-            UIPanel panel = new UIPanel(
+            UIPanel panel = await Scene.CreateComponent<UIPanel, UIPanelDescription>(
                 $"{Id}.Panel_{index}",
                 $"{Name}.Panel_{index}",
-                Scene,
                 panelDescription);
 
             var oldPanel = tabPanels[index];
@@ -547,7 +561,7 @@ namespace Engine.UI
         /// <summary>
         /// Fires on pressed event
         /// </summary>
-        protected void FireTabPressedEvent(int index)
+        private void FireTabPressedEvent(int index)
         {
             TabPressed?.Invoke(
                 this,
@@ -561,7 +575,7 @@ namespace Engine.UI
         /// <summary>
         /// Fires on just pressed event
         /// </summary>
-        protected void FireTabJustPressedEvent(int index)
+        private void FireTabJustPressedEvent(int index)
         {
             TabJustPressed?.Invoke(
                 this,
@@ -575,7 +589,7 @@ namespace Engine.UI
         /// <summary>
         /// Fires on just released event
         /// </summary>
-        protected void FireTabJustReleasedEvent(int index)
+        private void FireTabJustReleasedEvent(int index)
         {
             TabJustReleased?.Invoke(
                 this,
@@ -589,7 +603,7 @@ namespace Engine.UI
         /// <summary>
         /// Fires on click event
         /// </summary>
-        protected void FireTabClickEvent(int index)
+        private void FireTabClickEvent(int index)
         {
             TabClick?.Invoke(
                 this,
@@ -624,34 +638,5 @@ namespace Engine.UI
         /// Tab panel
         /// </summary>
         public UIPanel TabPanel { get; set; }
-    }
-
-    /// <summary>
-    /// UI Tab Panel extensions
-    /// </summary>
-    public static class UITabPanelExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UITabPanel> AddComponentUITabPanel(this Scene scene, string id, string name, UITabPanelDescription description, int layer = Scene.LayerUI)
-        {
-            UITabPanel component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UITabPanel(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
-        }
     }
 }

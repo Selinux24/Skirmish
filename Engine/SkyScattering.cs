@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Scattered sky
     /// </summary>
-    public class SkyScattering : Drawable
+    public sealed class SkyScattering : Drawable<SkyScatteringDescription>
     {
         /// <summary>
         /// Vernier scale
@@ -224,32 +224,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Sky scattering description class</param>
-        public SkyScattering(string id, string name, Scene scene, SkyScatteringDescription description)
-            : base(id, name, scene, description)
+        public SkyScattering(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            PlanetRadius = description.PlanetRadius;
-            PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
 
-            RayleighScattering = description.RayleighScattering;
-            RayleighScaleDepth = description.RayleighScaleDepth;
-            MieScattering = description.MieScattering;
-            MiePhaseAssymetry = description.MiePhaseAssymetry;
-            MieScaleDepth = description.MieScaleDepth;
-
-            WaveLength = description.WaveLength;
-            Brightness = description.Brightness;
-            HDRExposure = description.HDRExposure;
-            Resolution = description.Resolution;
-
-            sphereInnerRadius = 1.0f;
-            sphereOuterRadius = sphereInnerRadius * 1.025f;
-            CalcScale();
-
-            InitializeBuffers(name);
         }
         /// <summary>
         /// Destructor
@@ -268,6 +249,46 @@ namespace Engine
                 BufferManager?.RemoveVertexData(vertexBuffer);
                 BufferManager?.RemoveIndexData(indexBuffer);
             }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(SkyScatteringDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            PlanetRadius = Description.PlanetRadius;
+            PlanetAtmosphereRadius = Description.PlanetAtmosphereRadius;
+
+            RayleighScattering = Description.RayleighScattering;
+            RayleighScaleDepth = Description.RayleighScaleDepth;
+            MieScattering = Description.MieScattering;
+            MiePhaseAssymetry = Description.MiePhaseAssymetry;
+            MieScaleDepth = Description.MieScaleDepth;
+
+            WaveLength = Description.WaveLength;
+            Brightness = Description.Brightness;
+            HDRExposure = Description.HDRExposure;
+            Resolution = Description.Resolution;
+
+            sphereInnerRadius = 1.0f;
+            sphereOuterRadius = sphereInnerRadius * 1.025f;
+            CalcScale();
+
+            InitializeBuffers(Name);
+        }
+        /// <summary>
+        /// Initialize buffers
+        /// </summary>
+        /// <param name="name">Buffer name</param>
+        private void InitializeBuffers(string name)
+        {
+            var sphere = GeometryUtil.CreateSphere(1, 10, 75);
+
+            var vertices = VertexPosition.Generate(sphere.Vertices);
+            var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);
+
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
         }
 
         /// <inheritdoc/>
@@ -368,20 +389,6 @@ namespace Engine
             return technique;
         }
 
-        /// <summary>
-        /// Initialize buffers
-        /// </summary>
-        /// <param name="name">Buffer name</param>
-        private void InitializeBuffers(string name)
-        {
-            var sphere = GeometryUtil.CreateSphere(1, 10, 75);
-
-            var vertices = VertexPosition.Generate(sphere.Vertices);
-            var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);
-
-            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
-            indexBuffer = BufferManager.AddIndexData(name, false, indices);
-        }
         /// <summary>
         /// Calc current scattering scale from sphere radius values
         /// </summary>
@@ -506,36 +513,6 @@ namespace Engine
             expColor.Normalize();
 
             outColor = new Color4(expColor, 1f);
-        }
-    }
-
-    /// <summary>
-    /// Sky scattering extensions
-    /// </summary>
-    public static class SkyScatteringExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, string id, string name, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerSky)
-        {
-            SkyScattering component = null;
-
-            await Task.Run(() =>
-            {
-                component = new SkyScattering(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

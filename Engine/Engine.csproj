@@ -183,6 +183,7 @@
     <Compile Include="Common\BufferManagerIndices.cs" />
     <Compile Include="Common\BufferManagerInstances.cs" />
     <Compile Include="Common\GeometryHelper.cs" />
+    <Compile Include="Effects\EffectShadowFoliageState.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
@@ -449,7 +450,7 @@
     <Compile Include="PickingResult.cs" />
     <Compile Include="SceneCullManager.cs" />
     <Compile Include="SceneLightHemispheric.cs" />
-    <Compile Include="SceneDrawableDescription.cs" />
+    <Compile Include="SceneObjectDescription.cs" />
     <Compile Include="SceneObjectUsages.cs" />
     <Compile Include="SceneRendererDeferredLights.cs" />
     <Compile Include="Modular\ModularScenery.cs" />

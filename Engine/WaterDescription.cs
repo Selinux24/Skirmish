@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Water description
     /// </summary>
-    public class WaterDescription : SceneDrawableDescription
+    public class WaterDescription : SceneObjectDescription
     {
         /// <summary>
         /// Creates a default water description

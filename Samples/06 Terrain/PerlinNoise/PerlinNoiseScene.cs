@@ -134,28 +134,28 @@ namespace Terrain.PerlinNoise
 
             var defaultButton = UIButtonDescription.DefaultTwoStateButton(defaultFont16, bColor1, bColor2);
 
-            backGround = await this.AddComponentUIPanel("backGround", "backGround", UIPanelDescription.Screen(this, pBackground));
-            btnExit = await this.AddComponentUIButton("btnExit", "Exit", defaultButton);
+            backGround = await AddComponentUI<UIPanel, UIPanelDescription>("backGround", "backGround", UIPanelDescription.Screen(this, pBackground));
+            btnExit = await AddComponentUI<UIButton, UIButtonDescription>("btnExit", "Exit", defaultButton);
 
-            txtScale = await this.AddComponentUITextArea("txtScale", "Scale", defaultText16);
-            txtLacunarity = await this.AddComponentUITextArea("txtLacunarity", "Lacunarity", defaultText16);
-            txtPersistance = await this.AddComponentUITextArea("txtPersistance", "Persistance", defaultText16);
-            txtOctaves = await this.AddComponentUITextArea("txtOctaves", "Octaves", defaultText16);
-            txtHelpOffset = await this.AddComponentUITextArea("txtHelpOffset", "HelpOffset", defaultText12);
-            txtOffset = await this.AddComponentUITextArea("txtOffset", "Offset", defaultText14);
-            txtHelpSeed = await this.AddComponentUITextArea("txtHelpSeed", "HelpSeed", defaultText12);
-            txtSeed = await this.AddComponentUITextArea("txtSeed", "Seed", defaultText14);
+            txtScale = await AddComponentUI<UITextArea, UITextAreaDescription>("txtScale", "Scale", defaultText16);
+            txtLacunarity = await AddComponentUI<UITextArea, UITextAreaDescription>("txtLacunarity", "Lacunarity", defaultText16);
+            txtPersistance = await AddComponentUI<UITextArea, UITextAreaDescription>("txtPersistance", "Persistance", defaultText16);
+            txtOctaves = await AddComponentUI<UITextArea, UITextAreaDescription>("txtOctaves", "Octaves", defaultText16);
+            txtHelpOffset = await AddComponentUI<UITextArea, UITextAreaDescription>("txtHelpOffset", "HelpOffset", defaultText12);
+            txtOffset = await AddComponentUI<UITextArea, UITextAreaDescription>("txtOffset", "Offset", defaultText14);
+            txtHelpSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtHelpSeed", "HelpSeed", defaultText12);
+            txtSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtSeed", "Seed", defaultText14);
 
             var pbFont = TextDrawerDescription.FromFamily(fontFamily, 12);
 
             var pbDescription = UIProgressBarDescription.Default(pbFont);
 
-            pbScale = await this.AddComponentUIProgressBar("pbScale", "Scale", pbDescription);
-            pbLacunarity = await this.AddComponentUIProgressBar("pbLacunarity", "Lacunarity", pbDescription);
-            pbPersistance = await this.AddComponentUIProgressBar("pbPersistance", "Persistance", pbDescription);
-            pbOctaves = await this.AddComponentUIProgressBar("pbOctaves", "Octaves", pbDescription);
+            pbScale = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbScale", "Scale", pbDescription);
+            pbLacunarity = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbLacunarity", "Lacunarity", pbDescription);
+            pbPersistance = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbPersistance", "Persistance", pbDescription);
+            pbOctaves = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbOctaves", "Octaves", pbDescription);
 
-            btnSave = await this.AddComponentUIButton("btnSave", "Save", defaultButton);
+            btnSave = await AddComponentUI<UIButton, UIButtonDescription>("btnSave", "Save", defaultButton);
 
             btnExit.MouseClick += BtnExitClick;
 
@@ -199,9 +199,9 @@ namespace Terrain.PerlinNoise
         }
         public async Task InitializeTextureRenderer()
         {
-            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
+            texture = await Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
 
-            perlinRenderer = await this.AddComponentUITextureRenderer("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
+            perlinRenderer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
         }
 

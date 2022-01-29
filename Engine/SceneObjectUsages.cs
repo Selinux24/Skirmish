@@ -9,9 +9,9 @@ namespace Engine
     public enum SceneObjectUsages
     {
         /// <summary>
-        /// None
+        /// Default
         /// </summary>
-        None = 0,
+        Default = 0,
         /// <summary>
         /// Full triangle list for path finding
         /// </summary>

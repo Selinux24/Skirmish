@@ -8,12 +8,16 @@ namespace Engine.UI
     /// <summary>
     /// Text box
     /// </summary>
-    public class UITextBox : UITextArea
+    public sealed class UITextBox : UIControl<UITextBoxDescription>
     {
         /// <summary>
         /// Focus flag
         /// </summary>
         private bool hasFocus = false;
+        /// <summary>
+        /// Text area
+        /// </summary>
+        private UITextArea textArea = null;
 
         /// <summary>
         /// Cursor character
@@ -35,32 +39,57 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public UITextBox(string id, string name, Scene scene, UITextBoxDescription description) :
-            base(id, name, scene, description)
+        public UITextBox(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            GrowControlWithText = false;
 
-            if (description.Background != null)
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UITextBoxDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Cursor = Description.Cursor;
+            TabSpaces = Description.TabSpaces;
+            Size = Description.Size;
+            MultiLine = Description.MultiLine;
+
+            if (Description.Background != null)
             {
-                var background = new Sprite(
-                    $"{id}.Background",
-                    $"{name}.Background",
-                    scene,
-                    description.Background);
-
+                var background = await CreateBackground();
                 AddChild(background);
+
+                textArea = await CreateText();
+                background.AddChild(textArea);
             }
+            else
+            {
+                textArea = await CreateText();
+                AddChild(textArea);
+            }
+        }
+        private async Task<Sprite> CreateBackground()
+        {
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Background",
+                $"{Name}.Background",
+                Description.Background);
+        }
+        private async Task<UITextArea> CreateText()
+        {
+            var text = await Scene.CreateComponent<UITextArea, UITextAreaDescription>(
+                $"{Id}.Text",
+                $"{Name}.Text",
+                Description);
 
-            EventsEnabled = true;
+            text.EventsEnabled = true;
+            text.GrowControlWithText = false;
 
-            Cursor = description.Cursor;
-            TabSpaces = description.TabSpaces;
-            Size = description.Size;
-            MultiLine = description.MultiLine;
+            return text;
         }
 
         /// <inheritdoc/>
@@ -70,17 +99,17 @@ namespace Engine.UI
 
             if (!hasFocus)
             {
-                if (Text?.EndsWith(Cursor.ToString()) == true)
+                if (textArea.Text?.EndsWith(Cursor.ToString()) == true)
                 {
-                    Text = Text.Remove(Text.Length - 1);
+                    textArea.Text = textArea.Text.Remove(textArea.Text.Length - 1);
                 }
 
                 return;
             }
 
-            if (Text?.EndsWith(Cursor.ToString()) == false)
+            if (textArea.Text?.EndsWith(Cursor.ToString()) == false)
             {
-                Text += Cursor.ToString();
+                textArea.Text += Cursor.ToString();
             }
 
             if (Game.Input.KeyJustReleased(Keys.Escape))
@@ -130,7 +159,7 @@ namespace Engine.UI
                 return true;
             }
 
-            int textSize = (Text?.Length ?? 0) - 1;
+            int textSize = (textArea.Text?.Length ?? 0) - 1;
 
             return textSize < Size;
         }
@@ -143,16 +172,16 @@ namespace Engine.UI
         /// <returns>Returns the updated text</returns>
         private void SetText(string newText)
         {
-            string currText = Text;
+            string currText = textArea.Text;
 
             if (string.IsNullOrEmpty(currText))
             {
-                Text = newText;
+                textArea.Text = newText;
 
                 return;
             }
 
-            Text = currText.Insert(currText.Length - 1, newText);
+            textArea.Text = currText.Insert(currText.Length - 1, newText);
         }
         /// <summary>
         /// Does the back operation. Removes the last character
@@ -162,7 +191,7 @@ namespace Engine.UI
         /// <returns>Returns the updated text</returns>
         private void DoBack()
         {
-            string currText = Text;
+            string currText = textArea.Text;
             string cursor = Cursor.ToString();
 
             if (string.IsNullOrEmpty(currText))
@@ -180,13 +209,13 @@ namespace Engine.UI
             if (currText.EndsWith(Environment.NewLine + cursor))
             {
                 //Removes the new line string
-                Text = currText.Remove(currText.Length - 3, 2);
+                textArea.Text = currText.Remove(currText.Length - 3, 2);
 
                 return;
             }
 
             //Removes the last character
-            Text = currText.Remove(currText.Length - 2, 1);
+            textArea.Text = currText.Remove(currText.Length - 2, 1);
         }
         /// <summary>
         /// Does the enter operation. Adds a new line
@@ -226,35 +255,6 @@ namespace Engine.UI
             base.FireLostFocusEvent();
 
             hasFocus = false;
-        }
-    }
-
-    /// <summary>
-    /// UITextArea extensions
-    /// </summary>
-    public static class UITextBoxExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UITextBox> AddComponentUITextBox(this Scene scene, string id, string name, UITextBoxDescription description, int layer = Scene.LayerUI)
-        {
-            UITextBox component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UITextBox(id, name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, layer);
-            });
-
-            return component;
         }
     }
 }

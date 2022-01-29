@@ -29,7 +29,7 @@ namespace Engine
         /// <summary>
         /// Model
         /// </summary>
-        private readonly BaseModel model = null;
+        private readonly BaseModel<ModelInstancedDescription> model = null;
         /// <summary>
         /// Level of detail
         /// </summary>
@@ -113,7 +113,7 @@ namespace Engine
         /// </summary>
         /// <param name="model">Model</param>
         /// <param name="description">Description</param>
-        public ModelInstance(BaseModel model, ModelInstancedDescription description)
+        public ModelInstance(BaseModel<ModelInstancedDescription> model, ModelInstancedDescription description)
         {
             Id = GetNextInstanceId();
             this.model = model;

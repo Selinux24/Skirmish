@@ -189,7 +189,7 @@ namespace Skybox
 
             var cursorDesc = UICursorDescription.Default("target.png", 16, 16, true, Color.Purple);
 
-            await this.AddComponentUICursor("Cursor", "Cursor", cursorDesc);
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
 
             #endregion
 
@@ -200,9 +200,9 @@ namespace Skybox
             defaultFont18.LineAdjust = true;
             defaultFont12.LineAdjust = true;
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            help = await this.AddComponentUITextArea("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
-            fps = await this.AddComponentUITextArea("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
 
             title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -213,7 +213,7 @@ namespace Skybox
             fps.Text = "";
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("Backpanel", "Backpanel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
             #endregion
         }
@@ -223,7 +223,7 @@ namespace Skybox
             int faceSize = 512;
             var skydomDesc = SkydomDescription.Sphere(fileName, faceSize, Camera.FarPlaneDistance);
 
-            await this.AddComponentSkydom("Skydom", "Skydom", skydomDesc);
+            await AddComponentSky<Skydom, SkydomDescription>("Skydom", "Skydom", skydomDesc);
         }
         private async Task InitializeLakeBottom()
         {
@@ -259,7 +259,7 @@ namespace Skybox
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
 
-            await this.AddComponentScenery("Lage Bottom", "Lage Bottom", groundDesc);
+            await AddComponentGround<Scenery, GroundDescription>("Lage Bottom", "Lage Bottom", groundDesc);
         }
         private async Task InitializeTorchs()
         {
@@ -270,7 +270,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources", "torch.json"),
             };
 
-            torchs = await this.AddComponentModelInstanced("Torchs", "Torchs", torchDesc);
+            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", torchDesc);
 
             AttachToGround(torchs, true);
         }
@@ -283,7 +283,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
             };
 
-            obelisks = await this.AddComponentModelInstanced("Obelisks", "Obelisks", obeliskDesc, SceneObjectUsages.Ground);
+            obelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisks", "Obelisks", obeliskDesc, SceneObjectUsages.Ground);
         }
         private async Task InitializeFountain()
         {
@@ -293,7 +293,7 @@ namespace Skybox
                 Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
             };
 
-            fountain = await this.AddComponentModel("Fountain", "Fountain", fountainDesc, SceneObjectUsages.Ground);
+            fountain = await AddComponentGround<Model, ModelDescription>("Fountain", "Fountain", fountainDesc);
 
             AttachToGround(fountain, true);
         }
@@ -301,7 +301,7 @@ namespace Skybox
         {
             var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.json");
 
-            ruins = await this.AddComponentScenery("Ruins", "Ruins", ruinsDesc, SceneObjectUsages.Ground);
+            ruins = await AddComponentGround<Scenery, GroundDescription>("Ruins", "Ruins", ruinsDesc);
 
             SetGround(ruins, true);
         }
@@ -311,7 +311,7 @@ namespace Skybox
             waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
             waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
 
-            await this.AddComponentWater("Water", "Water", waterDesc);
+            await AddComponentEffect<Water, WaterDescription>("Water", "Water", waterDesc);
         }
         private async Task InitializeEmitter()
         {
@@ -328,13 +328,13 @@ namespace Skybox
                 Content = ContentDescription.FromContentData(sphere, mat),
             };
 
-            movingFire = await this.AddComponentModel("Emitter", "Emitter", mFireDesc);
+            movingFire = await AddComponent<Model, ModelDescription>("Emitter", "Emitter", mFireDesc);
         }
         private async Task InitializeParticles()
         {
             var pManagerDesc = ParticleManagerDescription.Default();
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", "ParticleManager", pManagerDesc);
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", pManagerDesc);
 
             movingFireEmitter = new ParticleEmitter()
             {
@@ -343,7 +343,7 @@ namespace Skybox
                 MaximumDistance = GameEnvironment.LODDistanceLow,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
+            await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
         }
         private async Task InitializeDecalEmitter()
         {
@@ -354,15 +354,14 @@ namespace Skybox
                 MaxDecalCount = 1000,
                 RotateDecals = true,
             };
-
-            decalEmitter = await this.AddComponentDecalDrawer("Bullets", "Bullets", desc);
+            decalEmitter = await AddComponent<DecalDrawer, DecalDrawerDescription>("Bullets", "Bullets", desc);
         }
         private async Task InitializeDebug()
         {
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
 
@@ -421,8 +420,8 @@ namespace Skybox
 
                 Lights.Add(torchLights[i]);
 
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.2f, MaximumDistance = GameEnvironment.LODDistanceLow });
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.2f, MaximumDistance = GameEnvironment.LODDistanceLow });
             });
 
             Parallel.For(0, obeliskPositions.Length, (i, loopState) =>

@@ -11,7 +11,7 @@ namespace Engine.UI
     /// <summary>
     /// Sprite drawer
     /// </summary>
-    public class Sprite : UIControl
+    public sealed class Sprite : UIControl<SpriteDescription>
     {
         /// <summary>
         /// View * projection matrix
@@ -95,32 +95,13 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public Sprite(string id, string name, Scene scene, SpriteDescription description)
-            : base(id, name, scene, description)
+        public Sprite(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            Color1 = description.Color1;
-            Color2 = description.Color2;
-            Color3 = description.Color3;
-            Color4 = description.Color4;
-            Percentage1 = description.Percentage1;
-            Percentage2 = description.Percentage2;
-            Percentage3 = description.Percentage3;
-            DrawDirection = (int)description.DrawDirection;
-            Textured = description.Textures?.Any() == true;
-            TextureIndex = description.TextureIndex;
 
-            InitializeBuffers(name, Textured, description.UVMap);
-
-            if (Textured)
-            {
-                InitializeTexture(description.ContentPath, description.Textures);
-            }
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -135,6 +116,31 @@ namespace Engine.UI
             base.Dispose(disposing);
         }
 
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(SpriteDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Color1 = Description.Color1;
+            Color2 = Description.Color2;
+            Color3 = Description.Color3;
+            Color4 = Description.Color4;
+            Percentage1 = Description.Percentage1;
+            Percentage2 = Description.Percentage2;
+            Percentage3 = Description.Percentage3;
+            DrawDirection = (int)Description.DrawDirection;
+            Textured = Description.Textures?.Any() == true;
+            TextureIndex = Description.TextureIndex;
+
+            InitializeBuffers(Name, Textured, Description.UVMap);
+
+            if (Textured)
+            {
+                await InitializeTexture(Description.ContentPath, Description.Textures);
+            }
+
+            viewProjection = Game.Form.GetOrthoProjectionMatrix();
+        }
         /// <summary>
         /// Initialize buffers
         /// </summary>
@@ -172,10 +178,10 @@ namespace Engine.UI
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        private void InitializeTexture(string contentPath, string[] textures)
+        private async Task InitializeTexture(string contentPath, string[] textures)
         {
             var image = new FileArrayImageContent(contentPath, textures);
-            spriteTexture = Game.ResourceManager.RequestResource(image);
+            spriteTexture = await Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>
@@ -205,6 +211,8 @@ namespace Engine.UI
             {
                 Draw();
             }
+
+            base.Draw(context);
         }
         /// <summary>
         /// Default sprite draw
@@ -312,36 +320,6 @@ namespace Engine.UI
             Percentage1 = percent1;
             Percentage2 = percent2;
             Percentage3 = percent3;
-        }
-    }
-
-    /// <summary>
-    /// Sprite extensions
-    /// </summary>
-    public static class SpriteExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<Sprite> AddComponentSprite(this Scene scene, string id, string name, SpriteDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerDefault)
-        {
-            Sprite component = null;
-
-            await Task.Run(() =>
-            {
-                component = new Sprite(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
         }
     }
 }

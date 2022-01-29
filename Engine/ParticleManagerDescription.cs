@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Particle manager description
     /// </summary>
-    public class ParticleManagerDescription : SceneDrawableDescription
+    public class ParticleManagerDescription : SceneObjectDescription
     {
         /// <summary>
         /// Gets the default particle manager descriptor

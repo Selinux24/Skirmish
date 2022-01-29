@@ -222,10 +222,10 @@ namespace Terrain.Rts
             var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12);
             var defaultFont10 = TextDrawerDescription.FromFamily(fontFamily, 10);
 
-            title = await this.AddComponentUITextArea("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
-            stats = await this.AddComponentUITextArea("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
-            counters1 = await this.AddComponentUITextArea("Counters1", "Counters1", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
-            counters2 = await this.AddComponentUITextArea("Counters2", "Counters2", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            stats = await AddComponentUI<UITextArea, UITextAreaDescription>("Stats", "Stats", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            counters1 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters1", "Counters1", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
+            counters2 = await AddComponentUI<UITextArea, UITextAreaDescription>("Counters2", "Counters2", new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.GreenYellow });
 
             title.Text = "Terrain collision and trajectories test";
             stats.Text = "";
@@ -233,7 +233,7 @@ namespace Terrain.Rts
             counters2.Text = "";
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
-            panel = await this.AddComponentSprite("Back Pannel", "Back Pannel", spDesc, SceneObjectUsages.UI, LayerUI - 1);
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Back Pannel", "Back Pannel", spDesc, LayerUI - 1);
 
             var spbDesc = new UIProgressBarDescription()
             {
@@ -243,9 +243,9 @@ namespace Terrain.Rts
                 ProgressColor = Color.Green,
             };
 
-            hProgressBar = await this.AddComponentUIProgressBar("HelicopterProgressBar", "HelicopterProgressBar", spbDesc, LayerEffects);
-            t1ProgressBar = await this.AddComponentUIProgressBar("Tank1ProgressBar", "Tank1ProgressBar", spbDesc, LayerEffects);
-            t2ProgressBar = await this.AddComponentUIProgressBar("Tank2ProgressBar", "Tank2ProgressBar", spbDesc, LayerEffects);
+            hProgressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("HelicopterProgressBar", "HelicopterProgressBar", spbDesc, LayerEffects);
+            t1ProgressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Tank1ProgressBar", "Tank1ProgressBar", spbDesc, LayerEffects);
+            t2ProgressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("Tank2ProgressBar", "Tank2ProgressBar", spbDesc, LayerEffects);
 
             hProgressBar.Top = 120;
             t1ProgressBar.Top = 120;
@@ -266,10 +266,10 @@ namespace Terrain.Rts
                 DepthEnabled = false,
                 Content = ContentDescription.FromFile("Rts/resources/cursor", "cursor.json"),
             };
-            cursor3D = await this.AddComponentModel("Cursor3D", "Cursor3D", c3DDesc, SceneObjectUsages.UI, LayerEffects);
+            cursor3D = await AddComponentCursor<Model, ModelDescription>("Cursor3D", "Cursor3D", c3DDesc);
 
             var c2DDesc = UICursorDescription.Default("Rts/resources/Cursor/target.png", 16, 16, true, Color.Red);
-            cursor2D = await this.AddComponentUICursor("Cursor2D", "Cursor2D", c2DDesc);
+            cursor2D = await AddComponentCursor<UICursor, UICursorDescription>("Cursor2D", "Cursor2D", c2DDesc);
             cursor2D.BaseColor = Color.Red;
             cursor2D.Visible = false;
 
@@ -308,16 +308,14 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer(
+            lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "++DEBUG++ Lights",
                 "++DEBUG++ Lights",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     DepthEnabled = true,
                     Count = 5000,
-                },
-                SceneObjectUsages.None,
-                LayerEffects);
+                });
             lightsVolumeDrawer.Visible = false;
 
             #region DEBUG Shadow Map
@@ -329,24 +327,24 @@ namespace Terrain.Rts
 
             var smDesc = UITextureRendererDescription.Default(smLeft, smTop, width, height);
             smDesc.DeferredEnabled = false;
-            shadowMapDrawer = await this.AddComponentUITextureRenderer("++DEBUG++ Shadow Map", "++DEBUG++ Shadow Map", smDesc);
+            shadowMapDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("++DEBUG++ Shadow Map", "++DEBUG++ Shadow Map", smDesc);
             shadowMapDrawer.Channels = ColorChannels.Red;
             shadowMapDrawer.Visible = false;
 
-            debugTex = Game.ResourceManager.RequestResource(@"Rts/resources/uvtest.png");
+            debugTex = await Game.ResourceManager.RequestResource(@"Rts/resources/uvtest.png");
 
             #endregion
 
             #region DEBUG Path finding Graph
 
-            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer(
+            terrainGraphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
                 "++DEBUG++ Path finding Graph",
                 "++DEBUG++ Path finding Graph",
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
                     Count = MaxGridDrawer
                 },
-                SceneObjectUsages.None,
+                SceneObjectUsages.Default,
                 LayerEffects);
             terrainGraphDrawer.Visible = false;
 
@@ -354,14 +352,14 @@ namespace Terrain.Rts
 
             #region DEBUG Picking test
 
-            terrainPointDrawer = await this.AddComponentPrimitiveListDrawer(
+            terrainPointDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "++DEBUG++ Picking test",
                 "++DEBUG++ Picking test",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Count = MaxPickingTest
                 },
-                SceneObjectUsages.None,
+                SceneObjectUsages.Default,
                 LayerEffects);
             terrainPointDrawer.Visible = false;
 
@@ -369,14 +367,14 @@ namespace Terrain.Rts
 
             #region DEBUG Trajectory
 
-            curveLineDrawer = await this.AddComponentPrimitiveListDrawer(
+            curveLineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "++DEBUG++ Trajectory",
                 "++DEBUG++ Trajectory",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Count = 20000
                 },
-                SceneObjectUsages.None,
+                SceneObjectUsages.Default,
                 LayerEffects);
             curveLineDrawer.Visible = false;
 
@@ -384,14 +382,14 @@ namespace Terrain.Rts
 
             #region DEBUG Helicopter manipulator
 
-            movingObjLineDrawer = await this.AddComponentPrimitiveListDrawer(
+            movingObjLineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "++DEBUG++ Helicopter manipulator",
                 "++DEBUG++ Helicopter manipulator",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Count = 1000
                 },
-                SceneObjectUsages.None,
+                SceneObjectUsages.Default,
                 LayerEffects);
             movingObjLineDrawer.Visible = false;
 
@@ -399,14 +397,14 @@ namespace Terrain.Rts
 
             #region DEBUG static volumes
 
-            staticObjLineDrawer = await this.AddComponentPrimitiveListDrawer(
+            staticObjLineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "++DEBUG++ Static Volumes",
                 "++DEBUG++ Static Volumes",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Count = 20000
                 },
-                SceneObjectUsages.None,
+                SceneObjectUsages.Default,
                 LayerEffects);
             staticObjLineDrawer.Visible = false;
 
@@ -414,14 +412,14 @@ namespace Terrain.Rts
 
             #region DEBUG Ground position test
 
-            terrainLineDrawer = await this.AddComponentPrimitiveListDrawer(
+            terrainLineDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "++DEBUG++ Ground position test",
                 "++DEBUG++ Ground position test",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
                     Count = 10000
                 },
-                SceneObjectUsages.None,
+                SceneObjectUsages.Default,
                 LayerEffects);
             terrainLineDrawer.Visible = false;
 
@@ -459,7 +457,7 @@ namespace Terrain.Rts
                     new LensFlareDescription.Flare( 2.0f, 1.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare("Flares", "Flares", lfDesc);
+            await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
 
             sw.Stop();
             return new TaskResult()
@@ -479,7 +477,7 @@ namespace Terrain.Rts
                 TextureIndex = 0,
                 Content = ContentDescription.FromFile("Rts/resources/Helicopter", "M24.json"),
             };
-            helicopter = await this.AddComponentModel("Helicopter", "Helicopter", hDesc, SceneObjectUsages.Agent);
+            helicopter = await AddComponentAgent<Model, ModelDescription>("Helicopter", "Helicopter", hDesc);
             helicopter.Visible = false;
             helicopter.Manipulator.SetScale(0.15f);
             helicopter.Manipulator.UpdateInternals(true);
@@ -506,8 +504,8 @@ namespace Terrain.Rts
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
                 TransformDependences = new[] { 1, 2, -1 },
             };
-            tankP1 = await this.AddComponentModel("Tank1", "Tank1", tDesc, SceneObjectUsages.Agent);
-            tankP2 = await this.AddComponentModel("Tank2", "Tank2", tDesc, SceneObjectUsages.Agent);
+            tankP1 = await AddComponentAgent<Model, ModelDescription>("Tank1", "Tank1", tDesc);
+            tankP2 = await AddComponentAgent<Model, ModelDescription>("Tank2", "Tank2", tDesc);
 
             tankP1.Visible = false;
             tankP2.Visible = false;
@@ -553,7 +551,7 @@ namespace Terrain.Rts
                 CastShadow = true,
                 Content = ContentDescription.FromFile("Rts/resources/Heliport", "Heliport.json"),
             };
-            heliport = await this.AddComponentModel("Heliport", "Heliport", hpDesc);
+            heliport = await AddComponent<Model, ModelDescription>("Heliport", "Heliport", hpDesc);
             heliport.Visible = false;
             AttachToGround(heliport, true);
 
@@ -576,7 +574,7 @@ namespace Terrain.Rts
                 CastShadow = true,
                 Content = ContentDescription.FromFile("Rts/resources/Garage", "Garage.json"),
             };
-            garage = await this.AddComponentModel("Garage", "Garage", gDesc);
+            garage = await AddComponent<Model, ModelDescription>("Garage", "Garage", gDesc);
             garage.Visible = false;
             AttachToGround(garage, true);
 
@@ -599,7 +597,7 @@ namespace Terrain.Rts
                 CastShadow = true,
                 Content = ContentDescription.FromFile("Rts/resources/Buildings", "Building_1.json"),
             };
-            building = await this.AddComponentModel("Buildings", "Buildings", gDesc);
+            building = await AddComponent<Model, ModelDescription>("Buildings", "Buildings", gDesc);
             building.Visible = false;
             AttachToGround(building, true);
 
@@ -623,7 +621,7 @@ namespace Terrain.Rts
                 Instances = 4,
                 Content = ContentDescription.FromFile("Rts/resources/Obelisk", "Obelisk.json"),
             };
-            obelisk = await this.AddComponentModelInstanced("Obelisk", "Obelisk", oDesc);
+            obelisk = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", oDesc);
             obelisk.Visible = false;
             AttachToGround(obelisk, true);
 
@@ -645,7 +643,7 @@ namespace Terrain.Rts
                 Instances = 250,
                 Content = ContentDescription.FromFile("Rts/resources/Rocks", "boulder.json"),
             };
-            rocks = await this.AddComponentModelInstanced("Rocks", "Rocks", rDesc);
+            rocks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Rocks", "Rocks", rDesc);
             rocks.Visible = false;
             AttachToGround(rocks, false);
 
@@ -675,8 +673,8 @@ namespace Terrain.Rts
                 Instances = 100,
                 Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_b.json"),
             };
-            tree1 = await this.AddComponentModelInstanced("birch_a", "birch_a", t1Desc);
-            tree2 = await this.AddComponentModelInstanced("birch_b", "birch_b", t2Desc);
+            tree1 = await AddComponent<ModelInstanced, ModelInstancedDescription>("birch_a", "birch_a", t1Desc);
+            tree2 = await AddComponent<ModelInstanced, ModelInstancedDescription>("birch_b", "birch_b", t2Desc);
             tree1.Visible = false;
             tree2.Visible = false;
 
@@ -697,7 +695,8 @@ namespace Terrain.Rts
 
             string fileName = @"Rts/resources/Skydom/sunset.dds";
 
-            await this.AddComponentSkydom("Skydom", "Skydom", SkydomDescription.Sphere(fileName, Camera.FarPlaneDistance));
+            var skydomDesc = SkydomDescription.Sphere(fileName, Camera.FarPlaneDistance);
+            await AddComponentSky<Skydom, SkydomDescription>("Skydom", "Skydom", skydomDesc);
 
             sw.Stop();
             return new TaskResult()
@@ -711,7 +710,7 @@ namespace Terrain.Rts
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            await this.AddComponentSkyPlane("Clouds", "Clouds", new SkyPlaneDescription()
+            await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", new SkyPlaneDescription()
             {
                 ContentPath = "Rts/resources/clouds",
                 Texture1Name = "perturb001.dds",
@@ -737,7 +736,7 @@ namespace Terrain.Rts
             sw.Restart();
 
             var terrainDescription = GroundDescription.FromFile("Rts/resources/Terrain", "two_levels.json", 1);
-            terrain = await this.AddComponentScenery("Terrain", "Terrain", terrainDescription);
+            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDescription);
             SetGround(terrain, true);
 
             sw.Stop();
@@ -769,7 +768,7 @@ namespace Terrain.Rts
                     Count = 4,
                 }
             };
-            gardener = await this.AddComponentGroundGardener("Grass", "Grass", grDesc);
+            gardener = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", grDesc);
 
             sw.Stop();
             return new TaskResult()
@@ -790,7 +789,7 @@ namespace Terrain.Rts
             pExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "fire.png");
             pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "smoke.png");
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
 
             sw.Stop();
             return new TaskResult()
@@ -2147,7 +2146,7 @@ namespace Terrain.Rts
                 MaximumDistance = 100f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pExplosion, emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pExplosion, emitter1);
         }
         private void AddExplosionSystem(AIAgent agent)
         {
@@ -2172,8 +2171,8 @@ namespace Terrain.Rts
                 MaximumDistance = 100f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pExplosion, emitter1);
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pSmokeExplosion, emitter2);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pExplosion, emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pSmokeExplosion, emitter2);
         }
         private void AddSmokePlumeSystem(AIAgent agent, bool unique)
         {
@@ -2205,7 +2204,7 @@ namespace Terrain.Rts
                     MaximumDistance = 100f,
                 };
 
-                pManager.AddParticleSystem(plumeFireSystemName, ParticleSystemTypes.CPU, pFire, emitter1);
+                _ = pManager.AddParticleSystem(plumeFireSystemName, ParticleSystemTypes.CPU, pFire, emitter1);
             }
             else
             {
@@ -2223,7 +2222,7 @@ namespace Terrain.Rts
                     MaximumDistance = 500f,
                 };
 
-                pManager.AddParticleSystem(plumeSmokeSystemName, ParticleSystemTypes.CPU, pPlume, emitter2);
+                _ = pManager.AddParticleSystem(plumeSmokeSystemName, ParticleSystemTypes.CPU, pPlume, emitter2);
             }
             else
             {
@@ -2254,7 +2253,7 @@ namespace Terrain.Rts
                     MaximumDistance = 500f,
                 };
 
-                pManager.AddParticleSystem(smokeSystemName, ParticleSystemTypes.CPU, pPlume, emitter);
+                _ = pManager.AddParticleSystem(smokeSystemName, ParticleSystemTypes.CPU, pPlume, emitter);
             }
             else
             {
@@ -2270,7 +2269,7 @@ namespace Terrain.Rts
                 MaximumDistance = 250f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDust, emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDust, emitter);
         }
         private void AddProjectileTrailSystem(AIAgent agent, AIAgent target, float speed)
         {
@@ -2282,7 +2281,7 @@ namespace Terrain.Rts
                 MaximumDistance = 100f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pProjectile, emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pProjectile, emitter);
         }
 
         private void DEBUGPickingPosition(Vector3 position)

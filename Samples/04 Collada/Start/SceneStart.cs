@@ -106,7 +106,8 @@ namespace Collada.Start
             {
                 Content = ContentDescription.FromFile(resourcesFolder, "SkyPlane.json"),
             };
-            backGround = await this.AddComponentModel("Background", "Background", backGroundDesc, SceneObjectUsages.UI);
+
+            backGround = await AddComponentUI<Model, ModelDescription>("Background", "Background", backGroundDesc);
         }
         private async Task InitializeAudio()
         {
@@ -172,7 +173,7 @@ namespace Collada.Start
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
-            await this.AddComponentUICursor("Cursor", "Cursor", UICursorDescription.Default(Path.Combine(resourcesFolder, "pointer.png"), 36, 36), layerCursor);
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", UICursorDescription.Default(Path.Combine(resourcesFolder, "pointer.png"), 36, 36), layerCursor);
         }
         private async Task InitializeControls()
         {
@@ -184,7 +185,7 @@ namespace Collada.Start
             titleDesc.TextShadowColor = new Color4(Color.Brown.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
 
-            title = await this.AddComponentUITextArea("Title", "Title", titleDesc, layerHUD);
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc, layerHUD);
 
             // Font description
             var buttonFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, mediumControlsFont), 16);
@@ -199,10 +200,10 @@ namespace Collada.Start
             buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             buttonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            sceneDungeonWallButton = await this.AddComponentUIButton("ButtonDungeonWall", "ButtonDungeonWall", buttonDesc, layerHUD);
-            sceneNavMeshTestButton = await this.AddComponentUIButton("ButtonNavMeshTest", "ButtonNavMeshTest", buttonDesc, layerHUD);
-            sceneDungeonButton = await this.AddComponentUIButton("ButtonDungeon", "ButtonDungeon", buttonDesc, layerHUD);
-            sceneModularDungeonButton = await this.AddComponentUIButton("ButtonModularDungeon", "ButtonModularDungeon", buttonDesc, layerHUD);
+            sceneDungeonWallButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonDungeonWall", "ButtonDungeonWall", buttonDesc, layerHUD);
+            sceneNavMeshTestButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonNavMeshTest", "ButtonNavMeshTest", buttonDesc, layerHUD);
+            sceneDungeonButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonDungeon", "ButtonDungeon", buttonDesc, layerHUD);
+            sceneModularDungeonButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonModularDungeon", "ButtonModularDungeon", buttonDesc, layerHUD);
 
             // Exit button
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
@@ -214,7 +215,7 @@ namespace Collada.Start
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            exitButton = await this.AddComponentUIButton("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
+            exitButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
 
             // Description text
             var tooltipFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, largeControlsFont), 12);
@@ -224,7 +225,7 @@ namespace Collada.Start
             tooltipDesc.Width = 250;
             tooltipDesc.EventsEnabled = false;
 
-            description = await this.AddComponentUITextArea("Tooltip", "Tooltip", tooltipDesc, layerHUD);
+            description = await AddComponentUI<UITextArea, UITextAreaDescription>("Tooltip", "Tooltip", tooltipDesc, layerHUD);
         }
         private async Task InitializeModularDungeonTabs()
         {
@@ -262,7 +263,7 @@ namespace Collada.Start
             desc.TabPanelsPadding = new Padding() { Bottom = 5, Left = 5, Right = 5, Top = 0 };
             desc.TabPanelPadding = 2;
 
-            modularDungeonTabs = await this.AddComponentUITabPanel("ModularDungeonTabs", "ModularDungeonTabs", desc, layerHUD + 1);
+            modularDungeonTabs = await AddComponentUI<UITabPanel, UITabPanelDescription>("ModularDungeonTabs", "ModularDungeonTabs", desc, layerHUD + 1);
             modularDungeonTabs.Visible = false;
 
             for (int i = 0; i < mapFiles.Length; i++)
@@ -275,7 +276,7 @@ namespace Collada.Start
                 buttonDesc.TextForeColor = Color.DarkGray;
                 buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Right;
                 buttonDesc.TextVerticalAlign = TextVerticalAlign.Bottom;
-                var button = new UIButton($"ModularDungeonTabs.Button_{i}", $"ModularDungeonTabs.Button_{i}", this, buttonDesc);
+                var button = await CreateComponent<UIButton, UIButtonDescription>($"ModularDungeonTabs.Button_{i}", $"ModularDungeonTabs.Button_{i}", buttonDesc);
                 button.MouseClick += (s, o) =>
                 {
                     if (o.Buttons.HasFlag(MouseButtons.Left))
@@ -292,7 +293,7 @@ namespace Collada.Start
             buttonBasicDesc.TextForeColor = Color.Gold;
             buttonBasicDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             buttonBasicDesc.TextVerticalAlign = TextVerticalAlign.Middle;
-            var buttonBasic = new UIButton("ModularDungeonTabs.ButtonBasicDungeon", "ModularDungeonTabs.ButtonBasicDungeon", this, buttonBasicDesc);
+            var buttonBasic = await CreateComponent<UIButton, UIButtonDescription>("ModularDungeonTabs.ButtonBasicDungeon", "ModularDungeonTabs.ButtonBasicDungeon", buttonBasicDesc);
             buttonBasic.MouseClick += (s, o) =>
             {
                 if (o.Buttons.HasFlag(MouseButtons.Left))

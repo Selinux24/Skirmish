@@ -79,7 +79,7 @@ namespace Engine.Common
             }
 
             //Images
-            await InitializeTextures(res, game, modelContent, description.TextureCount);
+            await InitializeTextures(res, game, modelContent);
 
             //Materials
             await InitializeMaterials(res, modelContent);
@@ -101,31 +101,25 @@ namespace Engine.Common
         /// <param name="drw">Drawing data</param>
         /// <param name="game">Game</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="textureCount">Texture count</param>
-        private static async Task InitializeTextures(DrawingData drw, Game game, ContentData modelContent, int textureCount)
+        private static async Task InitializeTextures(DrawingData drw, Game game, ContentData modelContent)
         {
             if (modelContent.Images?.Any() != true)
             {
                 return;
             }
 
-            await Task.Run(() =>
+            foreach (var images in modelContent.Images)
             {
-                foreach (var images in modelContent.Images)
+                var info = images.Value;
+
+                var view = await game.ResourceManager.RequestResource(info);
+                if (view == null)
                 {
-                    var info = images.Value;
-
-                    var view = game.ResourceManager.RequestResource(info);
-                    if (view == null)
-                    {
-                        Logger.WriteWarning(nameof(DrawingData), $"Texture cannot be requested: {info}");
-                    }
-
-                    drw.Textures.Add(images.Key, view);
-
-                    if (info.Count > textureCount) textureCount = info.Count;
+                    Logger.WriteWarning(nameof(DrawingData), $"Texture cannot be requested: {info}");
                 }
-            });
+
+                drw.Textures.Add(images.Key, view);
+            }
         }
         /// <summary>
         /// Initialize materials

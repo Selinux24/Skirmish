@@ -25,17 +25,17 @@ namespace Engine.Collections
         /// <param name="maxDepth">Maximum depth</param>
         public QuadTree(BoundingBox bbox, int maxDepth)
         {
-            this.BoundingBox = bbox;
+            BoundingBox = bbox;
 
             int nodeCount = 0;
-            this.Root = QuadTreeNode.CreatePartitions(
+            Root = QuadTreeNode.CreatePartitions(
                 this, null,
                 bbox,
                 maxDepth,
                 0,
                 ref nodeCount);
 
-            this.Root.ConnectNodes();
+            Root.ConnectNodes();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Engine.Collections
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            return this.Root.GetBoundingBoxes(maxDepth);
+            return Root.GetBoundingBoxes(maxDepth);
         }
         /// <summary>
         /// Gets the nodes contained into the specified frustum
@@ -57,7 +57,7 @@ namespace Engine.Collections
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(ref frustum);
+                return Root.GetNodesInVolume(ref frustum);
             }
             finally
             {
@@ -76,7 +76,7 @@ namespace Engine.Collections
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(ref bbox);
+                return Root.GetNodesInVolume(ref bbox);
             }
             finally
             {
@@ -95,7 +95,7 @@ namespace Engine.Collections
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(ref sphere);
+                return Root.GetNodesInVolume(ref sphere);
             }
             finally
             {
@@ -110,7 +110,7 @@ namespace Engine.Collections
         /// <returns>Returns all leaf nodel</returns>
         public IEnumerable<QuadTreeNode> GetLeafNodes()
         {
-            return this.Root.GetLeafNodes();
+            return Root.GetLeafNodes();
         }
         /// <summary>
         /// Gets the closest node to the specified position
@@ -119,11 +119,11 @@ namespace Engine.Collections
         /// <returns>Returns the closest node to the specified position</returns>
         public QuadTreeNode FindNode(Vector3 position)
         {
-            var node = this.Root.GetNode(position);
-            if (node == null)
+            var node = Root.GetNode(position);
+            if (node != null)
             {
                 //Look for the closest node
-                var leafNodes = this.GetLeafNodes();
+                var leafNodes = GetLeafNodes();
 
                 float dist = float.MaxValue;
                 foreach (var leafNode in leafNodes)
@@ -140,15 +140,12 @@ namespace Engine.Collections
             return node;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Root != null)
+            if (Root != null)
             {
-                return string.Format("QuadTree Levels {0}", this.Root.GetMaxLevel() + 1);
+                return $"QuadTree Levels {Root.GetMaxLevel() + 1}";
             }
             else
             {

@@ -5,7 +5,7 @@ namespace Engine.UI
     /// <summary>
     /// Minimap description
     /// </summary>
-    public class UIMinimapDescription : SceneDrawableDescription
+    public class UIMinimapDescription : SceneObjectDescription
     {
         /// <summary>
         /// Top position

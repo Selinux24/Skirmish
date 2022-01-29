@@ -84,6 +84,16 @@ namespace Engine
                 return TotalTime.Ticks;
             }
         }
+        /// <summary>
+        /// Game time paused
+        /// </summary>
+        public bool Paused
+        {
+            get
+            {
+                return watch.IsPaused;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -113,14 +123,20 @@ namespace Engine
         /// </summary>
         public void Pause()
         {
-            watch.Pause();
+            while (!watch.IsPaused)
+            {
+                watch.Pause();
+            }
         }
         /// <summary>
         /// Resumes the stop watch
         /// </summary>
         public void Resume()
         {
-            watch.Resume();
+            while (watch.IsPaused)
+            {
+                watch.Resume();
+            }
         }
         /// <summary>
         /// Updates the stop watch counters

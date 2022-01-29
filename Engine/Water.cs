@@ -9,7 +9,7 @@ namespace Engine
     /// <summary>
     /// Water drawer
     /// </summary>
-    public class Water : Drawable
+    public sealed class Water : Drawable<WaterDescription>
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -53,28 +53,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public Water(string id, string name, Scene scene, WaterDescription description)
-            : base(id, name, scene, description)
+        public Water(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            WaterState = new WaterState
-            {
-                BaseColor = description.BaseColor,
-                WaterColor = description.WaterColor.RGB(),
-                WaterTransparency = description.WaterColor.Alpha,
-                WaveHeight = description.WaveHeight,
-                WaveChoppy = description.WaveChoppy,
-                WaveSpeed = description.WaveSpeed,
-                WaveFrequency = description.WaveFrequency,
-                Steps = description.HeightmapIterations,
-                GeometryIterations = description.GeometryIterations,
-                ColorIterations = description.ColorIterations,
-            };
 
-            InitializeBuffers(name, description.PlaneSize, description.PlaneHeight);
         }
         /// <summary>
         /// Destructor
@@ -97,10 +82,45 @@ namespace Engine
             }
         }
 
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(WaterDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            WaterState = new WaterState
+            {
+                BaseColor = Description.BaseColor,
+                WaterColor = Description.WaterColor.RGB(),
+                WaterTransparency = Description.WaterColor.Alpha,
+                WaveHeight = Description.WaveHeight,
+                WaveChoppy = Description.WaveChoppy,
+                WaveSpeed = Description.WaveSpeed,
+                WaveFrequency = Description.WaveFrequency,
+                Steps = Description.HeightmapIterations,
+                GeometryIterations = Description.GeometryIterations,
+                ColorIterations = Description.ColorIterations,
+            };
+
+            InitializeBuffers(Name, Description.PlaneSize, Description.PlaneHeight);
+        }
         /// <summary>
-        /// Draw
+        /// Initialize buffers
         /// </summary>
-        /// <param name="context">Context</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="planeSize">Plane size</param>
+        /// <param name="planeHeight">Plane height</param>
+        private void InitializeBuffers(string name, float planeSize, float planeHeight)
+        {
+            var plane = GeometryUtil.CreateXZPlane(planeSize, planeHeight);
+
+            var vertices = VertexPositionTexture.Generate(plane.Vertices, plane.Uvs);
+            var indices = plane.Indices;
+
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
+        }
+
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -158,22 +178,6 @@ namespace Engine
                     vertexBuffer.BufferOffset);
             }
         }
-        /// <summary>
-        /// Initialize buffers
-        /// </summary>
-        /// <param name="name">Buffer name</param>
-        /// <param name="planeSize">Plane size</param>
-        /// <param name="planeHeight">Plane height</param>
-        private void InitializeBuffers(string name, float planeSize, float planeHeight)
-        {
-            var plane = GeometryUtil.CreateXZPlane(planeSize, planeHeight);
-
-            var vertices = VertexPositionTexture.Generate(plane.Vertices, plane.Uvs);
-            var indices = plane.Indices;
-
-            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
-            indexBuffer = BufferManager.AddIndexData(name, false, indices);
-        }
     }
 
     /// <summary>
@@ -221,35 +225,5 @@ namespace Engine
         /// Color iterations
         /// </summary>
         public int ColorIterations { get; set; }
-    }
-
-    /// <summary>
-    /// Water extensions
-    /// </summary>
-    public static class WaterExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="id">Id</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="layer">Processing layer</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<Water> AddComponentWater(this Scene scene, string id, string name, WaterDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int layer = Scene.LayerEffects)
-        {
-            Water component = null;
-
-            await Task.Run(() =>
-            {
-                component = new Water(id, name, scene, description);
-
-                scene.AddComponent(component, usage, layer);
-            });
-
-            return component;
-        }
     }
 }

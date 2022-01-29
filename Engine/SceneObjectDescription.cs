@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Scene object description
     /// </summary>
-    public class SceneDrawableDescription
+    public class SceneObjectDescription
     {
         /// <summary>
         /// The object starts active

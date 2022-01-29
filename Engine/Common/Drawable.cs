@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable : BaseSceneObject, IUpdatable, IDrawable, ICullable, IDisposable
+    public abstract class Drawable<T> : BaseSceneObject<T>, IUpdatable, IDrawable, ICullable, IDisposable where T : SceneObjectDescription
     {
         /// <summary>
         /// Buffer manager
@@ -32,21 +33,13 @@ namespace Engine.Common
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        protected Drawable(string id, string name, Scene scene, SceneDrawableDescription description) :
-            base(id, name, scene, description)
+        public Drawable(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            Visible = description.StartsVisible;
-            CastShadow = description.CastShadow;
-            DeferredEnabled = description.DeferredEnabled;
-            DepthEnabled = description.DepthEnabled;
-            BlendMode = description.BlendMode;
-            Usage = SceneObjectUsages.None;
-            Layer = 0;
-            InstanceCount = 1;
+
         }
         /// <summary>
         /// Destructor
@@ -67,6 +60,21 @@ namespace Engine.Common
         /// </summary>
         /// <param name="disposing">Free managed resources</param>
         protected abstract void Dispose(bool disposing);
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
+        {
+            await base.InitializeAssets(description);
+
+            Visible = description.StartsVisible;
+            CastShadow = description.CastShadow;
+            DeferredEnabled = description.DeferredEnabled;
+            DepthEnabled = description.DepthEnabled;
+            BlendMode = description.BlendMode;
+            Usage = SceneObjectUsages.Default;
+            Layer = 0;
+            InstanceCount = 1;
+        }
 
         /// <inheritdoc/>
         public virtual void EarlyUpdate(UpdateContext context)

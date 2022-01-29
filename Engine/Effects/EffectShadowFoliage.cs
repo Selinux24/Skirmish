@@ -275,48 +275,25 @@ namespace Engine.Effects
         /// <summary>
         /// Update per frame data
         /// </summary>
-        /// <param name="viewProjection">View * projection</param>
-        /// <param name="eyePositionWorld">Eye position in world coordinates</param>
-        /// <param name="windDirection">Wind direction</param>
-        /// <param name="windStrength">Wind strength</param>
-        /// <param name="totalTime">Total time</param>
-        /// <param name="delta">Delta</param>
-        /// <param name="randomTexture">Random texture</param>
+        /// <param name="context">Drawing context</param>
+        /// <param name="state">State</param>
         public void UpdatePerFrame(
-            Matrix viewProjection,
-            Vector3 eyePositionWorld,
-            Vector3 windDirection,
-            float windStrength,
-            float totalTime,
-            Vector3 delta,
-            EngineShaderResourceView randomTexture)
+            DrawContextShadows context,
+            EffectShadowFoliageState state)
         {
-            WorldViewProjection = viewProjection;
-            EyePositionWorld = eyePositionWorld;
+            WorldViewProjection = context.ViewProjection;
+            EyePositionWorld = context.EyePosition;
 
-            WindDirection = windDirection;
-            WindStrength = windStrength;
-            TotalTime = totalTime;
-            Delta = delta;
-            TextureRandom = randomTexture;
-        }
-        /// <summary>
-        /// Update per model object data
-        /// </summary>
-        /// <param name="startRadius">Drawing start radius</param>
-        /// <param name="endRadius">Drawing end radius</param>
-        /// <param name="textureCount">Texture count</param>
-        /// <param name="texture">Texture</param>
-        public void UpdatePerObject(
-            float startRadius,
-            float endRadius,
-            uint textureCount,
-            EngineShaderResourceView texture)
-        {
-            StartRadius = startRadius;
-            EndRadius = endRadius;
-            TextureCount = textureCount;
-            Textures = texture;
+            StartRadius = state.StartRadius;
+            EndRadius = state.EndRadius;
+            TextureCount = state.TextureCount;
+            Textures = state.Texture;
+
+            WindDirection = state.WindDirection;
+            WindStrength = state.WindStrength;
+            TotalTime = state.TotalTime;
+            Delta = state.Delta;
+            TextureRandom = state.RandomTexture;
         }
     }
 }

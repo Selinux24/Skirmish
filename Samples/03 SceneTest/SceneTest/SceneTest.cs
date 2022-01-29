@@ -114,7 +114,7 @@ namespace SceneTest.SceneTest
             titleDesc.TextForeColor = Color.Yellow;
             titleDesc.TextShadowColor = Color.Orange;
 
-            var title = await this.AddComponentUITextArea("UITitle", "Title", titleDesc, LayerUI);
+            var title = await AddComponentUI<UITextArea, UITextAreaDescription>("UITitle", "Title", titleDesc);
             title.Text = "Scene Test - Textures";
             title.SetPosition(Vector2.Zero);
 
@@ -122,16 +122,16 @@ namespace SceneTest.SceneTest
             runtimeDesc.TextForeColor = Color.Yellow;
             runtimeDesc.TextShadowColor = Color.Orange;
 
-            runtime = await this.AddComponentUITextArea("UIRuntime", "Runtime", runtimeDesc, LayerUI);
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("UIRuntime", "Runtime", runtimeDesc);
             runtime.Text = "";
             runtime.SetPosition(new Vector2(5, title.Top + title.Height + 3));
 
-            spr = await this.AddComponentSprite("UIBackpanel", "Backpanel", new SpriteDescription()
+            spr = await AddComponentUI<Sprite, SpriteDescription>("UIBackpanel", "Backpanel", new SpriteDescription()
             {
                 Width = Game.Form.RenderWidth,
                 Height = runtime.Top + runtime.Height + 10,
                 BaseColor = new Color4(0, 0, 0, 0.75f),
-            }, SceneObjectUsages.UI, LayerUI - 1);
+            }, LayerUI - 1);
 
             var buttonFont = TextDrawerDescription.FromFamily("Lucida Console", 12);
 
@@ -144,7 +144,7 @@ namespace SceneTest.SceneTest
             buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             buttonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            butClose = await this.AddComponentUIButton("UIButClose", "ButClose", buttonDesc, LayerUI);
+            butClose = await AddComponentUI<UIButton, UIButtonDescription>("UIButClose", "ButClose", buttonDesc);
             butClose.MouseClick += (sender, eventArgs) =>
             {
                 if (eventArgs.Buttons.HasFlag(MouseButtons.Left))
@@ -154,7 +154,7 @@ namespace SceneTest.SceneTest
             };
             butClose.Visible = false;
 
-            blackPan = await this.AddComponentUIPanel("UIBlackPanel", "BlackPanel", new UIPanelDescription
+            blackPan = await AddComponentUI<UIPanel, UIPanelDescription>("UIBlackPanel", "BlackPanel", new UIPanelDescription
             {
                 Background = new SpriteDescription
                 {
@@ -174,10 +174,10 @@ namespace SceneTest.SceneTest
             pbDesc.Width = Game.Form.RenderWidth - 200;
             pbDesc.Height = 30;
 
-            progressBar = await this.AddComponentUIProgressBar("UIProgressBar", "ProgressBar", pbDesc, LayerUI + 2);
+            progressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("UIProgressBar", "ProgressBar", pbDesc, LayerUI + 2);
 
             var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, false, new Vector2(-14, -6));
-            cursor = await this.AddComponentUICursor("UICursor", "Cursor", cursorDesc, LayerUI * 2);
+            cursor = await AddComponentCursor<UICursor, UICursorDescription>("UICursor", "Cursor", cursorDesc);
             cursor.Visible = false;
         }
 
@@ -226,7 +226,7 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeSkyEffects()
         {
-            await this.AddComponentLensFlare("Flares", "Flares", new LensFlareDescription()
+            await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", new LensFlareDescription()
             {
                 ContentPath = @"Common/lensFlare",
                 GlowTexture = "lfGlow.png",
@@ -247,7 +247,7 @@ namespace SceneTest.SceneTest
                 }
             });
 
-            skydom = await this.AddComponentSkyScattering("Sky", "Sky", SkyScatteringDescription.Default(), SceneObjectUsages.None, 1);
+            skydom = await AddComponentSky<SkyScattering, SkyScatteringDescription>("Sky", "Sky", SkyScatteringDescription.Default(), 1);
 
             var cloudsDesc = new SkyPlaneDescription()
             {
@@ -257,20 +257,20 @@ namespace SceneTest.SceneTest
                 SkyMode = SkyPlaneModes.Perturbed,
             };
 
-            skyPlane = await this.AddComponentSkyPlane("Clouds", "Clouds", cloudsDesc, SceneObjectUsages.None, LayerSky);
+            skyPlane = await AddComponentSky<SkyPlane, SkyPlaneDescription>("Clouds", "Clouds", cloudsDesc);
         }
         private async Task InitializeScenery()
         {
             var sDesc = GroundDescription.FromFile("SceneTest/scenery", "Clif.json");
 
-            scenery = await this.AddComponentScenery("Scenery", "Scenery", sDesc, SceneObjectUsages.Ground, LayerDefault);
+            scenery = await AddComponentGround<Scenery, GroundDescription>("Scenery", "Scenery", sDesc);
             var bbox = scenery.GetBoundingBox();
 
             var waterDesc = WaterDescription.CreateCalm(Math.Max(bbox.Width, bbox.Depth), waterHeight);
             waterDesc.BaseColor = waterBaseColor;
             waterDesc.WaterColor = waterColor;
 
-            await this.AddComponentWater("Water", "Water", waterDesc, SceneObjectUsages.None, LayerDefault + 1);
+            await AddComponentEffect<Water, WaterDescription>("Water", "Water", waterDesc, LayerDefault + 1);
         }
         private async Task InitializeTrees()
         {
@@ -282,7 +282,7 @@ namespace SceneTest.SceneTest
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.json"),
             };
-            tree = await this.AddComponentModel("Tree", "Tree", desc, SceneObjectUsages.None, LayerDefault);
+            tree = await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);
 
             var descI = new ModelInstancedDescription()
             {
@@ -293,7 +293,7 @@ namespace SceneTest.SceneTest
                 Instances = 50,
                 Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.json"),
             };
-            treesI = await this.AddComponentModelInstanced("TreeI", "TreeI", descI, SceneObjectUsages.None, LayerDefault);
+            treesI = await AddComponent<ModelInstanced, ModelInstancedDescription>("TreeI", "TreeI", descI);
         }
         private async Task InitializeFloorAsphalt()
         {
@@ -342,10 +342,11 @@ namespace SceneTest.SceneTest
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            var floorAsphalt = await this.AddComponentModel("Floor", "Floor", desc, SceneObjectUsages.Ground, LayerDefault);
+            var floorAsphalt = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
+
             floorAsphalt.Manipulator.SetPosition(xDelta, yDelta, zDelta);
 
-            var floorAsphaltI = await this.AddComponentModelInstanced("FloorI", "FloorI", descI, SceneObjectUsages.Ground, LayerDefault);
+            var floorAsphaltI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("FloorI", "FloorI", descI);
 
             floorAsphaltI[0].Manipulator.SetPosition((-l * 2) + xDelta, yDelta, 0 + zDelta);
             floorAsphaltI[1].Manipulator.SetPosition((+l * 2) + xDelta, yDelta, 0 + zDelta);
@@ -359,7 +360,7 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeBuildingObelisk()
         {
-            var buildingObelisk = await this.AddComponentModel(
+            var buildingObelisk = await AddComponent<Model, ModelDescription>(
                 "Obelisk",
                 "Obelisk",
                 new ModelDescription()
@@ -368,9 +369,9 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
-                }, SceneObjectUsages.None, LayerDefault);
+                });
 
-            var buildingObeliskI = await this.AddComponentModelInstanced(
+            var buildingObeliskI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "ObeliskI",
                 "ObeliskI",
                 new ModelInstancedDescription()
@@ -380,7 +381,7 @@ namespace SceneTest.SceneTest
                     UseAnisotropicFiltering = true,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
-                }, SceneObjectUsages.None, LayerDefault);
+                });
 
             buildingObelisk.Manipulator.SetPosition(0 + xDelta, baseHeight + yDelta, 0 + zDelta);
             buildingObelisk.Manipulator.SetRotation(MathUtil.PiOverTwo * 1, 0, 0);
@@ -403,7 +404,7 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeCharacterSoldier()
         {
-            var characterSoldier = await this.AddComponentModel(
+            var characterSoldier = await AddComponentAgent<Model, ModelDescription>(
                 "Soldier",
                 "Soldier",
                 new ModelDescription()
@@ -411,9 +412,9 @@ namespace SceneTest.SceneTest
                     TextureIndex = 1,
                     CastShadow = true,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
-                }, SceneObjectUsages.Agent, LayerDefault);
+                });
 
-            var characterSoldierI = await this.AddComponentModelInstanced(
+            var characterSoldierI = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
                 "SoldierI",
                 "SoldierI",
                 new ModelInstancedDescription()
@@ -421,7 +422,7 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
-                }, SceneObjectUsages.Agent, LayerDefault);
+                });
 
             float s = spaceSize / 2f;
 
@@ -450,7 +451,7 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeVehicles()
         {
-            var vehicle = await this.AddComponentModel(
+            var vehicle = await AddComponentAgent<Model, ModelDescription>(
                 "Challenger",
                 "Challenger",
                 new ModelDescription()
@@ -458,9 +459,9 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/Challenger", "Challenger.json"),
-                }, SceneObjectUsages.Agent, LayerDefault);
+                });
 
-            var vehicleI = await this.AddComponentModelInstanced(
+            var vehicleI = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>(
                 "LeopardI",
                 "LeopardI",
                 new ModelInstancedDescription()
@@ -469,7 +470,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/leopard", "Leopard.json"),
-                }, SceneObjectUsages.Agent, LayerDefault);
+                });
 
             float s = -spaceSize / 2f;
 
@@ -499,7 +500,7 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeLamps()
         {
-            var lamp = await this.AddComponentModel(
+            var lamp = await AddComponent<Model, ModelDescription>(
                 "Lamp",
                 "Lamp",
                 new ModelDescription()
@@ -507,9 +508,9 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
-                }, SceneObjectUsages.None, LayerDefault);
+                });
 
-            var lampI = await this.AddComponentModelInstanced(
+            var lampI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "LampI",
                 "LampI",
                 new ModelInstancedDescription()
@@ -518,7 +519,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
-                }, SceneObjectUsages.None, LayerDefault);
+                });
 
             float dist = 0.23f;
             float pitch = MathUtil.DegreesToRadians(165) * -1;
@@ -549,7 +550,7 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeStreetLamps()
         {
-            var streetlamp = await this.AddComponentModel(
+            var streetlamp = await AddComponent<Model, ModelDescription>(
                 "StreetLamp",
                 "Street Lamp",
                 new ModelDescription()
@@ -557,9 +558,9 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
-                }, SceneObjectUsages.None, LayerDefault);
+                });
 
-            var streetlampI = await this.AddComponentModelInstanced(
+            var streetlampI = await AddComponent<ModelInstanced, ModelInstancedDescription>(
                 "StreetLampI",
                 "Street LampI",
                 new ModelInstancedDescription()
@@ -568,7 +569,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = 9,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
-                }, SceneObjectUsages.None, LayerDefault);
+                });
 
             streetlamp.Manipulator.SetPosition(-spaceSize + xDelta, baseHeight + yDelta, -spaceSize * -2f + zDelta);
 
@@ -614,7 +615,7 @@ namespace SceneTest.SceneTest
             int rowSize = xRowCount + zRowCount;
             int instances = rowSize * rows;
 
-            var container = await this.AddComponentModel(
+            var container = await AddComponentGround<Model, ModelDescription>(
                 "Container",
                 "Container",
                 new ModelDescription()
@@ -622,9 +623,9 @@ namespace SceneTest.SceneTest
                     CastShadow = true,
                     SphericVolume = false,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
-                }, SceneObjectUsages.Ground, LayerDefault);
+                });
 
-            var containerI = await this.AddComponentModelInstanced(
+            var containerI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>(
                 "ContainerI",
                 "ContainerI",
                 new ModelInstancedDescription()
@@ -633,7 +634,7 @@ namespace SceneTest.SceneTest
                     SphericVolume = false,
                     Instances = instances,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
-                }, SceneObjectUsages.Ground, LayerDefault);
+                });
 
             float s = -spaceSize / 2f;
             float areaSize = spaceSize * 3;
@@ -725,7 +726,10 @@ namespace SceneTest.SceneTest
                 DepthEnabled = true,
             };
 
-            await this.AddComponentPrimitiveListDrawer("TestCube", "Test Cube", desc, SceneObjectUsages.UI, LayerDefault);
+            await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "TestCube",
+                "Test Cube",
+                desc);
         }
         private async Task InitializeParticles()
         {
@@ -743,7 +747,10 @@ namespace SceneTest.SceneTest
             pDescriptions.Add("Explosion", pExplosion);
             pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            pManager = await this.AddComponentParticleManager("PM", "ParticleManager", ParticleManagerDescription.Default(), SceneObjectUsages.None, LayerEffects);
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>(
+                "PM",
+                "ParticleManager",
+                ParticleManagerDescription.Default());
 
             float d = 500;
             var positions = new Vector3[]
@@ -761,7 +768,7 @@ namespace SceneTest.SceneTest
             List<Triangle> markers = new List<Triangle>();
             for (int i = 0; i < positions.Length; i++)
             {
-                particlePlumes[i] = pManager.AddParticleSystem(
+                particlePlumes[i] = await pManager.AddParticleSystem(
                     ParticleSystemTypes.CPU,
                     pPlume,
                     new ParticleEmitter()
@@ -780,12 +787,18 @@ namespace SceneTest.SceneTest
                 Primitives = markers.ToArray(),
                 Color = new Color4(Color.Yellow.ToColor3(), 0.3333f),
             };
-            await this.AddComponentPrimitiveListDrawer("DebugPM", "Marker Cubes", desc);
+            await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "DebugPM",
+                "Marker Cubes",
+                desc);
         }
         private async Task InitializeDebug()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 20000 };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumes", "DebugLightsVolumeDrawer", desc, SceneObjectUsages.UI, LayerDefault);
+            lightsVolumeDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DebugVolumes",
+                "DebugLightsVolumeDrawer",
+                desc);
         }
 
         private void PlantTrees()

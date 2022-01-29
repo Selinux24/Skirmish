@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -10,7 +11,7 @@ namespace Engine.Common
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class BaseModel : Drawable, IUseMaterials, IUseSkinningData
+    public abstract class BaseModel<T> : Drawable<T>, IUseMaterials, IUseSkinningData where T : BaseModelDescription
     {
         /// <summary>
         /// Meshes by level of detail dictionary
@@ -19,7 +20,7 @@ namespace Engine.Common
         /// <summary>
         /// Default level of detail
         /// </summary>
-        private readonly LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
+        private LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
 
         /// <summary>
         /// Instancing buffer
@@ -44,68 +45,13 @@ namespace Engine.Common
         /// <summary>
         /// Base model
         /// </summary>
+        /// <param name="scene">Scene</param>
         /// <param name="id">Id</param>
         /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Object description</param>
-        protected BaseModel(string id, string name, Scene scene, BaseModelDescription description)
-            : base(id, name, scene, description)
+        protected BaseModel(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            if (description.Content == null)
-            {
-                throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
-            }
 
-            var desc = new DrawingDataDescription()
-            {
-                Instanced = description.Instanced,
-                Instances = description.Instances,
-                LoadAnimation = description.LoadAnimation,
-                LoadNormalMaps = description.LoadNormalMaps,
-                DynamicBuffers = description.Dynamic,
-
-                TextureCount = TextureCount,
-            };
-
-            if (desc.Instanced)
-            {
-                InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
-            }
-
-            var geo = description.Content.ReadModelContent().GetAwaiter().GetResult();
-            if (!geo.Any())
-            {
-                throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(description));
-            }
-
-            if (geo.Count() == 1)
-            {
-                var iGeo = geo.First();
-
-                if (description.Optimize) iGeo.Optimize();
-
-                var drawable = DrawingData.Build(Game, Name, iGeo, desc, InstancingBuffer).GetAwaiter().GetResult();
-
-                meshesByLOD.Add(LevelOfDetail.High, drawable);
-            }
-            else
-            {
-                var content = ContentData.BuildLOD(geo, description.Optimize);
-
-                foreach (var lod in content.Keys)
-                {
-                    if (defaultLevelOfDetail == LevelOfDetail.None)
-                    {
-                        defaultLevelOfDetail = lod;
-                    }
-
-                    var drawable = DrawingData.Build(Game, Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
-
-                    meshesByLOD.Add(lod, drawable);
-                }
-            }
-
-            UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
         /// <summary>
         /// Destructor
@@ -129,6 +75,68 @@ namespace Engine.Common
                     InstancingBuffer = null;
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.Content == null)
+            {
+                throw new ArgumentException($"{nameof(Description)} must have a {nameof(Description.Content)} instance specified.", nameof(Description));
+            }
+
+            var desc = new DrawingDataDescription()
+            {
+                Instanced = Description.Instanced,
+                Instances = Description.Instances,
+                LoadAnimation = Description.LoadAnimation,
+                LoadNormalMaps = Description.LoadNormalMaps,
+                DynamicBuffers = Description.Dynamic,
+
+                TextureCount = TextureCount,
+            };
+
+            if (desc.Instanced)
+            {
+                InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
+            }
+
+            var geo = await Description.Content.ReadModelContent();
+            if (!geo.Any())
+            {
+                throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(Description));
+            }
+
+            if (geo.Count() == 1)
+            {
+                var iGeo = geo.First();
+
+                if (Description.Optimize) iGeo.Optimize();
+
+                var drawable = await DrawingData.Build(Game, Name, iGeo, desc, InstancingBuffer);
+
+                meshesByLOD.Add(LevelOfDetail.High, drawable);
+            }
+            else
+            {
+                var content = ContentData.BuildLOD(geo, Description.Optimize);
+
+                foreach (var lod in content.Keys)
+                {
+                    if (defaultLevelOfDetail == LevelOfDetail.None)
+                    {
+                        defaultLevelOfDetail = lod;
+                    }
+
+                    var drawable = await DrawingData.Build(Game, Name, content[lod], desc, InstancingBuffer);
+
+                    meshesByLOD.Add(lod, drawable);
+                }
+            }
+
+            UseAnisotropicFiltering = Description.UseAnisotropicFiltering;
         }
 
         /// <summary>
