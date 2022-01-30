@@ -82,18 +82,18 @@ namespace Engine.Common
         {
             await base.InitializeAssets(description);
 
-            if (Description.Content == null)
+            if (description.Content == null)
             {
-                throw new ArgumentException($"{nameof(Description)} must have a {nameof(Description.Content)} instance specified.", nameof(Description));
+                throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
             }
 
             var desc = new DrawingDataDescription()
             {
-                Instanced = Description.Instanced,
-                Instances = Description.Instances,
-                LoadAnimation = Description.LoadAnimation,
-                LoadNormalMaps = Description.LoadNormalMaps,
-                DynamicBuffers = Description.Dynamic,
+                Instanced = description.Instanced,
+                Instances = description.Instances,
+                LoadAnimation = description.LoadAnimation,
+                LoadNormalMaps = description.LoadNormalMaps,
+                DynamicBuffers = description.Dynamic,
 
                 TextureCount = TextureCount,
             };
@@ -103,17 +103,17 @@ namespace Engine.Common
                 InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
             }
 
-            var geo = await Description.Content.ReadModelContent();
+            var geo = await description.Content.ReadModelContent();
             if (!geo.Any())
             {
-                throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(Description));
+                throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(description));
             }
 
             if (geo.Count() == 1)
             {
                 var iGeo = geo.First();
 
-                if (Description.Optimize) iGeo.Optimize();
+                if (description.Optimize) iGeo.Optimize();
 
                 var drawable = await DrawingData.Build(Game, Name, iGeo, desc, InstancingBuffer);
 
@@ -121,7 +121,7 @@ namespace Engine.Common
             }
             else
             {
-                var content = ContentData.BuildLOD(geo, Description.Optimize);
+                var content = ContentData.BuildLOD(geo, description.Optimize);
 
                 foreach (var lod in content.Keys)
                 {
@@ -136,7 +136,7 @@ namespace Engine.Common
                 }
             }
 
-            UseAnisotropicFiltering = Description.UseAnisotropicFiltering;
+            UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
 
         /// <summary>
