@@ -65,7 +65,14 @@ namespace SceneTest.SceneTest
 
         public SceneTest(Game game) : base(game)
         {
+            Game.GameStatusCollected += GameStatusCollected;
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
 
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 2000;
+            Camera.SlowMovementDelta = 100f;
+            Camera.MovementDelta = 500f;
         }
 
         public override Task Initialize()
@@ -75,33 +82,18 @@ namespace SceneTest.SceneTest
 
         public async Task LoadUserInterface()
         {
-            Game.GameStatusCollected += GameStatusCollected;
-            Game.VisibleMouse = false;
-            Game.LockMouse = true;
-
-            Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 2000;
-            Camera.SlowMovementDelta = 100f;
-            Camera.MovementDelta = 500f;
+            await base.Initialize();
 
             Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown, ambientUp, true);
 
-            await LoadResourcesAsync(
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 InitializeUI(),
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    RefreshUI();
-
-                    progressBar.Visible = true;
-                    progressBar.ProgressValue = 0;
-
-                    await LoadControls();
-                });
+                InitializeComponentsCompleted);
         }
         private async Task InitializeUI()
         {
@@ -180,8 +172,22 @@ namespace SceneTest.SceneTest
             cursor = await AddComponentCursor<UICursor, UICursorDescription>("UICursor", "Cursor", cursorDesc);
             cursor.Visible = false;
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
-        private async Task LoadControls()
+            RefreshUI();
+
+            progressBar.Visible = true;
+            progressBar.ProgressValue = 0;
+
+            LoadControls();
+        }
+
+        private void LoadControls()
         {
             var taskList = new Task[]
             {
@@ -200,7 +206,7 @@ namespace SceneTest.SceneTest
                 InitializeDebug(),
             };
 
-            await LoadResourcesAsync(
+            LoadResourcesAsync(
                 taskList,
                 async (res) =>
                 {

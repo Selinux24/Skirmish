@@ -44,32 +44,23 @@ namespace SpriteDrawing
 
         }
 
-        public override Task Initialize()
+        public override async Task Initialize()
         {
-            return LoadUserInterface();
+            await base.Initialize();
+
+            LoadUserInterface();
         }
 
-        private async Task LoadUserInterface()
+        private void LoadUserInterface()
         {
-            await LoadResourcesAsync(
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeConsole(),
                     InitializeBackground(),
                     InitializeProgressbar()
                 },
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    progressBar.Visible = true;
-                    progressBar.ProgressValue = 0;
-
-                    await LoadControls();
-                });
+                LoadUserInterfaceCompleted);
         }
         private async Task InitializeConsole()
         {
@@ -95,10 +86,22 @@ namespace SpriteDrawing
 
             progressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ProgressBar", "ProgressBar", desc);
         }
-
-        private async Task LoadControls()
+        private void LoadUserInterfaceCompleted(LoadResourcesResult res)
         {
-            await LoadResourcesAsync(
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            progressBar.Visible = true;
+            progressBar.ProgressValue = 0;
+
+            LoadControls();
+        }
+
+        private void LoadControls()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeSmiley(),
@@ -107,20 +110,7 @@ namespace SpriteDrawing
                     InitializeButtonTest(),
                     InitializeScroll(),
                 },
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    await Task.Delay(500);
-
-                    staticPan.Show(1000);
-                    progressBar.Visible = false;
-
-                    gameReady = true;
-                });
+                LoadControlsCompleted);
         }
         private async Task InitializeSmiley()
         {
@@ -276,6 +266,20 @@ namespace SpriteDrawing
             scrollTextArea.Text = Properties.Resources.Lorem;
 
             panel.AddChild(scrollTextArea);
+        }
+        private async Task LoadControlsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            await Task.Delay(500);
+
+            staticPan.Show(1000);
+            progressBar.Visible = false;
+
+            gameReady = true;
         }
 
         public override void OnReportProgress(LoadResourceProgress value)

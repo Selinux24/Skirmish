@@ -12,7 +12,7 @@ namespace Engine
     /// Ground class
     /// </summary>
     /// <remarks>Used for picking tests and navigation over surfaces</remarks>
-    public abstract class Ground<T> : Drawable<T>, IRayPickable<Triangle>, IIntersectable where T : GroundDescription
+    public abstract class Ground<T> : Drawable<T>, IGround, IRayPickable<Triangle>, IIntersectable where T : GroundDescription
     {
         /// <summary>
         /// Quadtree for base ground picking

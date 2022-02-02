@@ -10,7 +10,7 @@ namespace Engine
         /// <summary>
         /// Load identifier
         /// </summary>
-        public Guid Id { get; set; }
+        public string Id { get; set; }
         /// <summary>
         /// Scene
         /// </summary>

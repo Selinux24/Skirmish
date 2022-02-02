@@ -4,7 +4,7 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
-using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Animation.Mixamo
@@ -24,42 +24,26 @@ namespace Animation.Mixamo
 
         public SceneMixamo(Game game) : base(game)
         {
+            GameEnvironment.Background = Color.CornflowerBlue;
 
+            Game.VisibleMouse = true;
+            Game.LockMouse = false;
         }
 
         public override async Task Initialize()
         {
-            await InitializeUI();
+            await base.Initialize();
 
-            UpdateLayout();
-
-            try
-            {
-                await LoadResourcesAsync(
-                    new[]
-                    {
-                        InitializeFloor(),
-                        InitializeModel(),
-                    },
-                    (res) =>
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        InitializeEnvironment();
-
-                        gameReady = true;
-                    });
-            }
-            catch (Exception ex)
-            {
-                messages.Text = ex.Message;
-                messages.Visible = true;
-            }
+            InitializeUI();
         }
-        private async Task InitializeUI()
+
+        private void InitializeUI()
+        {
+            LoadResourcesAsync(
+                InitializeUITitle(),
+                InitializeUICompleted);
+        }
+        private async Task InitializeUITitle()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
             var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
@@ -81,6 +65,28 @@ namespace Animation.Mixamo
             console.Visible = false;
 
             uiReady = true;
+        }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeFloor(),
+                    InitializeModel(),
+                },
+                InitializeComponentsCompleted);
         }
         private async Task InitializeFloor()
         {
@@ -149,11 +155,23 @@ namespace Animation.Mixamo
 
             model.AnimationController.Start(new AnimationPlan(pDefault), 0);
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                messages.Text = res.GetExceptions().FirstOrDefault()?.Message;
+                messages.Visible = true;
+
+                return;
+            }
+
+            InitializeEnvironment();
+
+            gameReady = true;
+        }
 
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
-
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
             Lights.KeyLight.Enabled = true;
@@ -165,9 +183,6 @@ namespace Animation.Mixamo
             Camera.FarPlaneDistance = 500;
             Camera.Goto(30, 25, -36f);
             Camera.LookTo(0, 10, 0);
-
-            Game.VisibleMouse = true;
-            Game.LockMouse = false;
         }
 
         public override void Update(GameTime gameTime)

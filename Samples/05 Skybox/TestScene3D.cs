@@ -96,9 +96,26 @@ namespace Skybox
 
         public override async Task Initialize()
         {
+            await base.Initialize();
+
             InitializeCamera();
 
-            await LoadResourcesAsync(
+            InitializeResources();
+        }
+
+        private void InitializeCamera()
+        {
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000.0f;
+            Camera.Goto(new Vector3(-6, walker.Height, 5));
+            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
+            Camera.MovementDelta = 4f;
+            Camera.SlowMovementDelta = 2f;
+        }
+
+        private void InitializeResources()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeUI(),
@@ -114,75 +131,8 @@ namespace Skybox
                     InitializeDecalEmitter(),
                     InitializeDebug(),
                 },
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-
-                    InitializeNavigationMesh();
-
-                    await UpdateNavigationGraph();
-
-                    PrepareScene();
-
-                    InitializeSound();
-
-                    fireAudioEffect = AudioManager.CreateEffectInstance("Sphere", movingFire, Camera);
-                    fireAudioEffect.Play();
-
-                    AudioManager.MasterVolume = 1f;
-                    AudioManager.Start();
-                });
+                InitializeResourcesCompleted);
         }
-        private void InitializeCamera()
-        {
-            Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 5000.0f;
-            Camera.Goto(new Vector3(-6, walker.Height, 5));
-            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
-            Camera.MovementDelta = 4f;
-            Camera.SlowMovementDelta = 2f;
-        }
-        private void InitializeNavigationMesh()
-        {
-            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
-
-            var nvSettings = BuildSettings.Default;
-            nvSettings.TileSize = 32;
-            nvSettings.CellSize = 0.05f;
-            nvSettings.CellHeight = 0.2f;
-            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
-            nvSettings.Agents[0] = walker;
-
-            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
-        }
-        private void InitializeSound()
-        {
-            AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
-
-            AudioManager.AddEffectParams(
-                "Sphere",
-                new GameAudioEffectParameters
-                {
-                    SoundName = "target_balls_single_loop",
-                    IsLooped = true,
-                    UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
-                    Volume = 0.25f,
-                    EmitterRadius = 6,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-        }
-
-        public override void NavigationGraphUpdated()
-        {
-            gameReady = true;
-        }
-
         private async Task InitializeUI()
         {
             #region Cursor
@@ -300,6 +250,7 @@ namespace Skybox
         private async Task InitializeRuins()
         {
             var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.json");
+            ruinsDesc.Quadtree.MaximumDepth = 1;
 
             ruins = await AddComponentGround<Scenery, GroundDescription>("Ruins", "Ruins", ruinsDesc);
 
@@ -364,7 +315,44 @@ namespace Skybox
             graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
+        private async Task InitializeResourcesCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
+            UpdateLayout();
+
+            InitializeNavigationMesh();
+
+            await UpdateNavigationGraph();
+
+            PrepareScene();
+
+            InitializeSound();
+
+            fireAudioEffect = AudioManager.CreateEffectInstance("Sphere", movingFire, Camera);
+            fireAudioEffect.Play();
+
+            AudioManager.MasterVolume = 1f;
+            AudioManager.Start();
+
+            gameReady = true;
+        }
+        private void InitializeNavigationMesh()
+        {
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            var nvSettings = BuildSettings.Default;
+            nvSettings.TileSize = 32;
+            nvSettings.CellSize = 0.05f;
+            nvSettings.CellHeight = 0.2f;
+            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
+            nvSettings.Agents[0] = walker;
+
+            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
+        }
         private void PrepareScene()
         {
             Lights.DirectionalLights[0].Enabled = true;
@@ -437,6 +425,23 @@ namespace Skybox
             });
 
             fountain.Manipulator.SetScale(2.3f);
+        }
+        private void InitializeSound()
+        {
+            AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
+
+            AudioManager.AddEffectParams(
+                "Sphere",
+                new GameAudioEffectParameters
+                {
+                    SoundName = "target_balls_single_loop",
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
+                    Volume = 0.25f,
+                    EmitterRadius = 6,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
+                });
         }
 
         public override void Update(GameTime gameTime)

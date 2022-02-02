@@ -203,24 +203,7 @@ namespace Engine
             {
                 creatingResources = true;
 
-                // Get pending requests
-                float total = pendingRequests.Count() + 1f;
-                float current = 0;
-
-                // Process requests
-                foreach (var resource in pendingRequests)
-                {
-                    resource.Value.Create(game);
-
-                    resources.Add(resource.Key, resource.Value.ResourceView);
-
-                    progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
-                }
-
-                // Remove requests
-                RemoveRequests(pendingRequests.Select(r => r.Key));
-
-                progress?.Report(new LoadResourceProgress { Id = id, Progress = 1f });
+                ProcessPendingRequests(id, progress, pendingRequests);
             }
             catch (Exception ex)
             {
@@ -232,6 +215,51 @@ namespace Engine
 
                 callback?.Invoke();
             }
+        }
+        /// <summary>
+        /// Process pending request list
+        /// </summary>
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        /// <param name="pendingRequests">Pending request list</param>
+        private void ProcessPendingRequests(string id, IProgress<LoadResourceProgress> progress, IEnumerable<KeyValuePair<string, IGameResourceRequest>> pendingRequests)
+        {
+            // Get pending requests
+            float total = pendingRequests.Count() + 1;
+            float current = 0;
+
+            // Process requests
+            List<string> toRemove = new List<string>();
+            try
+            {
+                foreach (var resource in pendingRequests)
+                {
+                    resource.Value.Create(game);
+
+                    if (resources.ContainsKey(resource.Key))
+                    {
+                        // Updates existing request
+                        resources[resource.Key] = resource.Value.ResourceView;
+                    }
+                    else
+                    {
+                        // Adds the request
+                        resources.Add(resource.Key, resource.Value.ResourceView);
+                    }
+
+                    // Adds the key to the processed key list
+                    toRemove.Add(resource.Key);
+
+                    progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
+                }
+            }
+            finally
+            {
+                // Remove requests
+                RemoveRequests(toRemove);
+            }
+
+            progress?.Report(new LoadResourceProgress { Id = id, Progress = 1f });
         }
         /// <summary>
         /// Gets the pending requests

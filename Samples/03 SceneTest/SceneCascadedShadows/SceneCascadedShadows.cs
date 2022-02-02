@@ -44,11 +44,6 @@ namespace SceneTest.SceneCascadedShadows
         /// <param name="game">Game</param>
         public SceneCascadedShadows(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
@@ -56,11 +51,20 @@ namespace SceneTest.SceneCascadedShadows
             Camera.FarPlaneDistance = 5000;
             Camera.Goto(-10, 8, 20f);
             Camera.LookTo(0, 0, 0);
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeUI();
+        }
+        private void InitializeUI()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
-                    InitializeUI(),
+                    InitializeUITitle(),
                     InitializeUILevelsControl(),
                     InitializeUIDrawers(),
                     InitializeFloorAsphalt(),
@@ -69,23 +73,9 @@ namespace SceneTest.SceneCascadedShadows
                     InitializeSkyEffects(),
                     InitializeLights(),
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-
-                    buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
-                    buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
-                    buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
-                    buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
-                });
+                InitializeUICompleted);
         }
-
-        private async Task InitializeUI()
+        private async Task InitializeUITitle()
         {
             var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
             var defaultFont14 = TextDrawerDescription.FromFamily("Arial", 14);
@@ -146,6 +136,20 @@ namespace SceneTest.SceneCascadedShadows
             bufferDrawer3.Texture = shadowMap;
             bufferDrawer3.TextureIndex = 2;
             bufferDrawer3.Channels = ColorChannels.Red;
+        }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+            buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+            buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+            buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
         private async Task InitializeFloorAsphalt()

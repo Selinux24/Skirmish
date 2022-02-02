@@ -17,11 +17,6 @@ namespace SceneTest.SceneWater
         public SceneWater(Game game)
             : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
 #if DEBUG
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -34,20 +29,30 @@ namespace SceneTest.SceneWater
             Camera.FarPlaneDistance = 500;
             Camera.Goto(80, 10, 100f);
             Camera.LookTo(0, 0, 0);
+        }
+
+        public override async Task Initialize()
+        {
+            await base.Initialize();
 
             Lights.BaseFogColor = Color.White;
-
-            await LoadResourcesAsync(new[] {
-                InitializeLensFlare(),
-                InitializeSky(),
-                InitializeWater(),
-                InitializeSeaBottom(),
-            });
 
             Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Bloom, PostProcessBloomParams.Low);
 
             GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
             //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
+
+            InitializeComponents();
+        }
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(new[]
+            {
+                InitializeLensFlare(),
+                InitializeSky(),
+                InitializeWater(),
+                InitializeSeaBottom(),
+            });
         }
         private async Task InitializeLensFlare()
         {

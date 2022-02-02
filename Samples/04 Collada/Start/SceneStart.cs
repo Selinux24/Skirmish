@@ -2,6 +2,7 @@
 using Engine.Audio;
 using Engine.Audio.Tween;
 using Engine.Content;
+using Engine.PostProcessing;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -62,43 +63,28 @@ namespace Collada.Start
 
         public SceneStart(Game game) : base(game)
         {
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
 
+            GameEnvironment.Background = Color.Black;
         }
 
         public override async Task Initialize()
         {
-            GameEnvironment.Background = Color.Black;
+            await base.Initialize();
 
-            await LoadUserInteface();
+            LoadUserInteface();
         }
 
-        private async Task LoadUserInteface()
+        private void LoadUserInteface()
         {
-            await LoadResourcesAsync(
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeAudio(),
                     InitializeBackGround()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    SetBackground();
-
-                    Camera.Position = Vector3.BackwardLH * 8f;
-                    Camera.Interest = Vector3.Zero;
-
-                    PlayAudio();
-
-                    AudioManager.MasterVolume = 1f;
-                    AudioManager.Start();
-
-                    LoadGameAssets();
-                });
+                LoadUserIntefaceCompleted);
         }
         private async Task InitializeBackGround()
         {
@@ -142,37 +128,52 @@ namespace Collada.Start
 
             await Task.CompletedTask;
         }
+        private void LoadUserIntefaceCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            Camera.Position = Vector3.BackwardLH * 8f;
+            Camera.Interest = Vector3.Zero;
+
+            SetBackground();
+
+            Renderer.ClearPostProcessingEffects();
+
+            PlayAudio();
+
+            AudioManager.MasterVolume = 1f;
+            AudioManager.Start();
+
+            LoadGameAssets();
+        }
         private void SetBackground()
         {
-            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
+            backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f, true);
+
+            // Add a light
+            Vector3 lightPosition = (Camera.Position + Vector3.Left) * 10f;
+            Vector3 lightDirection = Vector3.ForwardLH;
+            float lightIntensity = Vector3.Distance(lightPosition, backGround.Manipulator.Position) * 2f;
+            var lightDesc = SceneLightSpotDescription.Create(lightPosition, lightDirection, 30, lightIntensity, lightIntensity * 2);
+            Lights.Add(new SceneLightSpot("toBackGround", false, Color3.White, Color3.White, true, lightDesc));
         }
 
         private void LoadGameAssets()
         {
-            _ = LoadResourcesAsync(
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeCursor(),
                     InitializeControls(),
                     InitializeModularDungeonTabs()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    SetControlPositions();
-
-                    gameReady = true;
-                });
+                LoadGameAssetsCompleted);
         }
         private async Task InitializeCursor()
         {
-            Game.VisibleMouse = false;
-            Game.LockMouse = false;
-
             await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", UICursorDescription.Default(Path.Combine(resourcesFolder, "pointer.png"), 36, 36), layerCursor);
         }
         private async Task InitializeControls()
@@ -201,9 +202,13 @@ namespace Collada.Start
             buttonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
             sceneDungeonWallButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonDungeonWall", "ButtonDungeonWall", buttonDesc, layerHUD);
+            sceneDungeonWallButton.Visible = false;
             sceneNavMeshTestButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonNavMeshTest", "ButtonNavMeshTest", buttonDesc, layerHUD);
+            sceneNavMeshTestButton.Visible = false;
             sceneDungeonButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonDungeon", "ButtonDungeon", buttonDesc, layerHUD);
+            sceneDungeonButton.Visible = false;
             sceneModularDungeonButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonModularDungeon", "ButtonModularDungeon", buttonDesc, layerHUD);
+            sceneModularDungeonButton.Visible = false;
 
             // Exit button
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Path.Combine(resourcesFolder, "buttons.png"), new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
@@ -216,6 +221,7 @@ namespace Collada.Start
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
             exitButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
+            exitButton.Visible = false;
 
             // Description text
             var tooltipFont = TextDrawerDescription.FromFile(Path.Combine(resourcesFolder, largeControlsFont), 12);
@@ -226,6 +232,7 @@ namespace Collada.Start
             tooltipDesc.EventsEnabled = false;
 
             description = await AddComponentUI<UITextArea, UITextAreaDescription>("Tooltip", "Tooltip", tooltipDesc, layerHUD);
+            description.Visible = false;
         }
         private async Task InitializeModularDungeonTabs()
         {
@@ -312,6 +319,17 @@ namespace Collada.Start
                     ShowAllButButton(100);
                 }
             };
+        }
+        private void LoadGameAssetsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            SetControlPositions();
+
+            gameReady = true;
         }
         private void SetControlPositions()
         {

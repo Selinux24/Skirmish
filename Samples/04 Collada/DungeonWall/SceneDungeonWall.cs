@@ -24,13 +24,6 @@ namespace Collada.DungeonWall
         public SceneDungeonWall(Game game)
             : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
-            await base.Initialize();
-
 #if DEBUG
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -38,42 +31,25 @@ namespace Collada.DungeonWall
             Game.VisibleMouse = false;
             Game.LockMouse = true;
 #endif
-            _ = LoadResourcesAsync(
+        }
+
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeText(),
                     InitializeDungeon(),
                     InitializeEmitter()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-                    UpdateLayout();
-                    InitializeCamera();
-                    InitializeEnvironment();
-                    gameReady = true;
-                });
-        }
-        private void InitializeCamera()
-        {
-            Camera.NearPlaneDistance = 0.5f;
-            Camera.FarPlaneDistance = 500;
-            Camera.Mode = CameraModes.Free;
-            Camera.Position = new Vector3(-5, 3, -5);
-            Camera.Interest = new Vector3(0, 0, 0);
-        }
-        private void InitializeEnvironment()
-        {
-            GameEnvironment.Background = Color.Black;
-
-            var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
-
-            pointLight = new SceneLightPoint("light", false, Color3.White, Color3.White, true, desc);
-
-            Lights.Add(pointLight);
+                InitializeComponentsCompleted);
         }
         private async Task InitializeText()
         {
@@ -137,6 +113,35 @@ namespace Collada.DungeonWall
             };
 
             lightEmitter = await AddComponent<Model, ModelDescription>("Emitter", "Emitter", desc);
+        }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+            UpdateLayout();
+            InitializeCamera();
+            InitializeEnvironment();
+            gameReady = true;
+        }
+        private void InitializeCamera()
+        {
+            Camera.NearPlaneDistance = 0.5f;
+            Camera.FarPlaneDistance = 500;
+            Camera.Mode = CameraModes.Free;
+            Camera.Position = new Vector3(-5, 3, -5);
+            Camera.Interest = new Vector3(0, 0, 0);
+        }
+        private void InitializeEnvironment()
+        {
+            GameEnvironment.Background = Color.Black;
+
+            var desc = SceneLightPointDescription.Create(new Vector3(0, 1, -1), 10f, 10f);
+
+            pointLight = new SceneLightPoint("light", false, Color3.White, Color3.White, true, desc);
+
+            Lights.Add(pointLight);
         }
 
         public override void Update(GameTime gameTime)

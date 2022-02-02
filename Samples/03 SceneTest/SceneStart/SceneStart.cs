@@ -39,11 +39,6 @@ namespace SceneTest.SceneStart
 
         public SceneStart(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
@@ -51,8 +46,19 @@ namespace SceneTest.SceneStart
 
             Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
             Renderer?.SetPostProcessingEffect(RenderPass.Final, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.Filmic);
+        }
 
-            var assetTasks = new[] {
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            var assetTasks = new[]
+            {
                 InitializeCursor(),
                 InitializeBackground(),
                 InitializeTitle(),
@@ -62,7 +68,9 @@ namespace SceneTest.SceneStart
                 InitializeMusic(),
             };
 
-            await LoadResourcesAsync(assetTasks, PrepareAssets);
+            LoadResourcesAsync(
+                assetTasks,
+                InitializeComponentsCompleted);
         }
         private async Task InitializeCursor()
         {
@@ -112,11 +120,17 @@ namespace SceneTest.SceneStart
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
             sceneMaterialsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonMaterials", "ButtonMaterials", startButtonDesc);
+            sceneMaterialsButton.Visible = false;
             sceneWaterButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonWater", "ButtonWater", startButtonDesc);
+            sceneWaterButton.Visible = false;
             sceneStencilPassButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonStencilPass", "ButtonStencilPass", startButtonDesc);
+            sceneStencilPassButton.Visible = false;
             sceneLightsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonLights", "ButtonLights", startButtonDesc);
+            sceneLightsButton.Visible = false;
             sceneCascadedShadowsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonCascadedShadows", "ButtonCascadedShadows", startButtonDesc);
+            sceneCascadedShadowsButton.Visible = false;
             sceneTestButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonTest", "ButtonTest", startButtonDesc);
+            sceneTestButton.Visible = false;
 
             var sceneButtons = new[]
             {
@@ -154,9 +168,11 @@ namespace SceneTest.SceneStart
         private async Task InitializeOptionsButton()
         {
             optsButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonOptions", "ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
+            optsButton.Visible = false;
             optsButton.MouseClick += OptsButtonClick;
 
             var optsBackground = await CreateComponent<Sprite, SpriteDescription>("ButtonOptions.Background", "ButtonOptions.Background", SpriteDescription.Default(Color.White));
+            optsBackground.Visible = false;
             optsBackground.EventsEnabled = false;
 
             optsButton.InsertChild(0, optsBackground);
@@ -231,7 +247,7 @@ namespace SceneTest.SceneStart
 
             await Task.CompletedTask;
         }
-        private void PrepareAssets(LoadResourcesResult res)
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
@@ -323,6 +339,14 @@ namespace SceneTest.SceneStart
             optsButton.Width = 50;
             optsButton.Height = 50;
             optsButton.SetPosition(Game.Form.RenderWidth - 10 - optsButton.Width, 10);
+            optsButton.Visible = true;
+
+            sceneMaterialsButton.Visible = true;
+            sceneWaterButton.Visible = true;
+            sceneStencilPassButton.Visible = true;
+            sceneLightsButton.Visible = true;
+            sceneCascadedShadowsButton.Visible = true;
+            sceneTestButton.Visible = true;
         }
 
         private void OpenPanel()

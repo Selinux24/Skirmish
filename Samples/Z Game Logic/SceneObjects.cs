@@ -113,15 +113,15 @@ namespace GameLogic
         public SceneObjects(Game game)
             : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
             GameEnvironment.Background = Color.Black;
 
             Camera.FarPlaneDistance = 1000f;
             Camera.Mode = CameraModes.FreeIsometric;
+        }
+
+        public override async Task Initialize()
+        {
+            await base.Initialize();
 
             NewGame();
 
@@ -135,32 +135,18 @@ namespace GameLogic
 
             Lights.Add(spotLight);
 
-            await LoadResourcesAsync(
+            InitializeResources();
+        }
+        private void InitializeResources()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeModels(),
                     InitializeHUD(),
                     InitializeDebug()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-
-                    InitializeAnimations();
-
-                    InitializePositions();
-
-                    GoToSoldier(skirmishGame.CurrentSoldier);
-
-                    Task.WhenAll(UpdateNavigationGraph());
-
-                    gameReady = true;
-                });
+                InitializeResourcesCompleted);
         }
         private async Task InitializeModels()
         {
@@ -343,6 +329,88 @@ namespace GameLogic
                 new PrimitiveListDrawerDescription<Line3D>() { Count = 5000 });
 
             lineDrawer.Visible = false;
+        }
+        private async Task InitializeResourcesCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            InitializeAnimations();
+
+            InitializePositions();
+
+            GoToSoldier(skirmishGame.CurrentSoldier);
+
+            await UpdateNavigationGraph();
+
+            gameReady = true;
+        }
+        private void InitializeAnimations()
+        {
+            soldierCrawl = AnimationPlan.CreateLoop("crawl");
+            soldierWalk = AnimationPlan.CreateLoop("walk");
+            soldierRun = AnimationPlan.CreateLoop("run");
+            soldierAssault = AnimationPlan.CreateLoop("assault");
+            soldierStand = AnimationPlan.CreateLoop("stand");
+            soldierDefendAssault = AnimationPlan.CreateLoop("defendAssault");
+            soldierRandomFire = AnimationPlan.CreateLoop("randomFire");
+            soldierReload = AnimationPlan.Create("reload");
+            soldierUseItem = AnimationPlan.Create("useItem");
+            soldierMoraleRestored = AnimationPlan.Create("moraleRestored");
+        }
+        private void InitializePositions()
+        {
+            BoundingBox bbox = terrain.GetBoundingBox();
+
+            float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
+            float teamSeparation = terrainHeight / (skirmishGame.Teams.Length);
+
+            float soldierSeparation = 12f;
+            int instanceIndex = 0;
+            uint teamIndex = 0;
+            foreach (var teamSoldiers in skirmishGame.Teams.Select(t => t.Soldiers))
+            {
+                float teamWidth = teamSoldiers.Length * soldierSeparation;
+
+                int soldierIndex = 0;
+                foreach (var soldierC in teamSoldiers)
+                {
+                    var soldier = troops[instanceIndex++];
+
+                    soldier.TextureIndex = teamIndex;
+                    soldier.AnimationController.Start(soldierStand, soldierIndex);
+
+                    float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
+                    float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
+
+                    if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
+                    {
+                        soldier.Manipulator.SetPosition(r.Position, true);
+                    }
+                    else
+                    {
+                        throw new GameLogicException("Bad position");
+                    }
+
+                    if (teamIndex == 0)
+                    {
+                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
+                    }
+
+                    soldierModels.Add(soldierC, soldier);
+                    var controller = new BasicManipulatorController();
+                    controller.PathEnd += Controller_PathEnd;
+                    soldierControllers.Add(soldierC, controller);
+
+                    soldierIndex++;
+                }
+
+                teamIndex++;
+            }
         }
 
         public override void NavigationGraphUpdated()
@@ -638,70 +706,6 @@ namespace GameLogic
             txtSoldier.SetPosition(new Vector2(10, butNext.Top + butNext.Height + 1));
             txtActionList.SetPosition(new Vector2(txtSoldier.Left, txtSoldier.Top + txtSoldier.Height + 1));
             txtAction.SetPosition(new Vector2(txtSoldier.Left, txtActionList.Top + txtActionList.Height + 1));
-        }
-
-        private void InitializeAnimations()
-        {
-            soldierCrawl = AnimationPlan.CreateLoop("crawl");
-            soldierWalk = AnimationPlan.CreateLoop("walk");
-            soldierRun = AnimationPlan.CreateLoop("run");
-            soldierAssault = AnimationPlan.CreateLoop("assault");
-            soldierStand = AnimationPlan.CreateLoop("stand");
-            soldierDefendAssault = AnimationPlan.CreateLoop("defendAssault");
-            soldierRandomFire = AnimationPlan.CreateLoop("randomFire");
-            soldierReload = AnimationPlan.Create("reload");
-            soldierUseItem = AnimationPlan.Create("useItem");
-            soldierMoraleRestored = AnimationPlan.Create("moraleRestored");
-        }
-        private void InitializePositions()
-        {
-            BoundingBox bbox = terrain.GetBoundingBox();
-
-            float terrainHeight = bbox.Maximum.Z - bbox.Minimum.Z;
-            float teamSeparation = terrainHeight / (skirmishGame.Teams.Length);
-
-            float soldierSeparation = 12f;
-            int instanceIndex = 0;
-            uint teamIndex = 0;
-            foreach (var teamSoldiers in skirmishGame.Teams.Select(t => t.Soldiers))
-            {
-                float teamWidth = teamSoldiers.Length * soldierSeparation;
-
-                int soldierIndex = 0;
-                foreach (var soldierC in teamSoldiers)
-                {
-                    var soldier = troops[instanceIndex++];
-
-                    soldier.TextureIndex = teamIndex;
-                    soldier.AnimationController.Start(soldierStand, soldierIndex);
-
-                    float x = (soldierIndex * soldierSeparation) - (teamWidth * 0.5f);
-                    float z = (teamIndex * teamSeparation) - (teamSeparation * 0.5f);
-
-                    if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
-                    {
-                        soldier.Manipulator.SetPosition(r.Position, true);
-                    }
-                    else
-                    {
-                        throw new GameLogicException("Bad position");
-                    }
-
-                    if (teamIndex == 0)
-                    {
-                        soldier.Manipulator.SetRotation(MathUtil.DegreesToRadians(180), 0, 0, true);
-                    }
-
-                    soldierModels.Add(soldierC, soldier);
-                    var controller = new BasicManipulatorController();
-                    controller.PathEnd += Controller_PathEnd;
-                    soldierControllers.Add(soldierC, controller);
-
-                    soldierIndex++;
-                }
-
-                teamIndex++;
-            }
         }
 
         private void Controller_PathEnd(object sender, EventArgs e)

@@ -32,17 +32,24 @@ namespace Terrain.Start
 
         public StartScene(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
+        }
 
-            await LoadResourcesAsync(InitializeAssets(), PrepareAssets);
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                InitializeAssets(),
+                InitializeComponentsCompleted);
         }
         private async Task InitializeAssets()
         {
@@ -127,7 +134,7 @@ namespace Terrain.Start
 
             #endregion
         }
-        private void PrepareAssets(LoadResourcesResult res)
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {

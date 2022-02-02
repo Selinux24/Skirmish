@@ -34,6 +34,8 @@ namespace ModelDrawing
 
         public override async Task Initialize()
         {
+            await base.Initialize();
+
             GameEnvironment.Background = Color.CornflowerBlue;
 
             Camera.NearPlaneDistance = 0.1f;
@@ -41,36 +43,12 @@ namespace ModelDrawing
             Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             Camera.LookTo(Vector3.Zero);
 
-            await LoadResourcesAsync(
-                InitializeUI(),
-                (uiRes) =>
-                {
-                    if (!uiRes.Completed)
-                    {
-                        uiRes.ThrowExceptions();
-                    }
+            InitializeUIObjects();
+        }
 
-                    UpdateLayout();
-
-                    uiReady = true;
-                });
-
-            await LoadResourcesAsync(
-                new[]
-                {
-                    InitializeFloor(),
-                    InitializeModels(),
-                    InitializeParticleVolumeDrawer()
-                },
-                (gameRes) =>
-                {
-                    if (!gameRes.Completed)
-                    {
-                        gameRes.ThrowExceptions();
-                    }
-
-                    gameReady = true;
-                });
+        private void InitializeUIObjects()
+        {
+            LoadResourcesAsync(InitializeUI(), InitializeUIObjectsCompleted);
         }
         private async Task InitializeUI()
         {
@@ -93,6 +71,31 @@ namespace ModelDrawing
             var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
             consoleDesc.StartsVisible = false;
             console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui6", "Console", consoleDesc, LayerUI + 1);
+        }
+        private void InitializeUIObjectsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            uiReady = true;
+
+            InitializeSceneObjects();
+        }
+
+        private void InitializeSceneObjects()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeFloor(),
+                    InitializeModels(),
+                    InitializeParticleVolumeDrawer()
+                },
+                InitializeSceneObjectsCompleted);
         }
         private async Task InitializeFloor()
         {
@@ -156,6 +159,15 @@ namespace ModelDrawing
                 "DebugParticleDrawer",
                 "DebugParticleDrawer",
                 desc);
+        }
+        private void InitializeSceneObjectsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)

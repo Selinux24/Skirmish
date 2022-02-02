@@ -4,9 +4,9 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -42,43 +42,26 @@ namespace Animation.SmoothTransitions
 
         public SceneSmoothTransitions(Game game) : base(game)
         {
+            GameEnvironment.Background = Color.CornflowerBlue;
 
+            Game.VisibleMouse = true;
+            Game.LockMouse = false;
         }
 
         public override async Task Initialize()
         {
-            await InitializeUI();
+            await base.Initialize();
 
-            UpdateLayout();
-
-            try
-            {
-                await LoadResourcesAsync(
-                    new[]
-                    {
-                        InitializeFloor(),
-                        InitializeSoldier(),
-                        InitializeDebug(),
-                    },
-                    (res) =>
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        InitializeEnvironment();
-
-                        gameReady = true;
-                    });
-            }
-            catch (Exception ex)
-            {
-                messages.Text = ex.Message;
-                messages.Visible = true;
-            }
+            InitializeUI();
         }
-        private async Task InitializeUI()
+
+        private void InitializeUI()
+        {
+            LoadResourcesAsync(
+                InitializeUITitle(),
+                InitializeUICompleted);
+        }
+        private async Task InitializeUITitle()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
             var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
@@ -100,6 +83,29 @@ namespace Animation.SmoothTransitions
             console.Visible = false;
 
             uiReady = true;
+        }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeFloor(),
+                    InitializeSoldier(),
+                    InitializeDebug(),
+                },
+                InitializeComponentsCompleted);
         }
         private async Task InitializeFloor()
         {
@@ -189,11 +195,23 @@ namespace Animation.SmoothTransitions
 
             itemTris.Visible = false;
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                messages.Text = res.GetExceptions().FirstOrDefault()?.Message;
+                messages.Visible = true;
+
+                return;
+            }
+
+            InitializeEnvironment();
+
+            gameReady = true;
+        }
 
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
-
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
             Lights.KeyLight.Enabled = true;
@@ -205,9 +223,6 @@ namespace Animation.SmoothTransitions
             Camera.FarPlaneDistance = 500;
             Camera.Goto(10, 5, -12f);
             Camera.LookTo(0, 5 * 0.6f, 0);
-
-            Game.VisibleMouse = true;
-            Game.LockMouse = false;
         }
 
         public override void Update(GameTime gameTime)

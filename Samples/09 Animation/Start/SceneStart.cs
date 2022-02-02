@@ -23,16 +23,21 @@ namespace Animation.Start
 
         public SceneStart(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
+        }
 
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
             var assetTasks = new[] {
                 InitializeCursor(),
                 InitializeBackground(),
@@ -41,7 +46,7 @@ namespace Animation.Start
                 InitializeMusic(),
             };
 
-            await LoadResourcesAsync(assetTasks, PrepareAssets);
+            LoadResourcesAsync(assetTasks, PrepareAssets);
         }
         private async Task InitializeCursor()
         {

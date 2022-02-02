@@ -224,11 +224,8 @@ namespace Engine.UI
                 Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
                 ColorChannels.All);
 
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
+            if (!BufferManager.SetIndexBuffer(indexBuffer)) return;
+            if (!BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList)) return;
 
             effect.UpdatePerFrame(
                 GetTransform(),
@@ -251,6 +248,9 @@ namespace Engine.UI
                     indexBuffer.BufferOffset,
                     vertexBuffer.BufferOffset);
             }
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
         }
         /// <summary>
         /// Percentage sprite draw

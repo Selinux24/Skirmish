@@ -112,7 +112,7 @@ namespace Engine.Effects
             SpecularColor = new Color4(light.SpecularColor, 0f);
             Intensity = light.Intensity;
             Intensity = light.Intensity;
-            Angle = light.AngleRadians;
+            Angle = light.FallOffAngleRadians;
             Radius = light.Radius;
             CastShadow = light.CastShadowsMarked ? 1 : 0;
             MapIndex = light.ShadowMapIndex;

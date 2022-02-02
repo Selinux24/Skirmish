@@ -570,35 +570,35 @@ namespace Engine
             }
 
             // Fire and forget
-            Task.Run(async () =>
+            Logger.WriteTrace(this, $"LoadPatches Init: {taskList.Count()} tasks.");
+
+            Scene.LoadResourcesAsync(taskList, LoadPatchesCompleted);
+
+            Logger.WriteTrace(this, "LoadPatches End.");
+        }
+        /// <summary>
+        /// Load patches callback
+        /// </summary>
+        /// <param name="result">Process result</param>
+        private void LoadPatchesCompleted(LoadResourcesResult<SceneryPatchTask> result)
+        {
+            foreach (var res in result.Results)
             {
-                Logger.WriteTrace(this, $"LoadPatches Init: {taskList.Count()} tasks.");
-
-                await Scene.LoadResourcesAsync(
-                    taskList,
-                    (result) =>
+                // Assign patch to dictionary
+                if (res.Completed)
+                {
+                    patchDictionary[res.Result.Id] = res.Result.Patch;
+                }
+                else
+                {
+                    while (!patchDictionary.TryRemove(res.Result.Id, out _))
                     {
-                        foreach (var res in result.Results)
-                        {
-                            // Assign patch to dictionary
-                            if (res.Completed)
-                            {
-                                patchDictionary[res.Result.Id] = res.Result.Patch;
-                            }
-                            else
-                            {
-                                while (!patchDictionary.TryRemove(res.Result.Id, out _))
-                                {
-                                    //None
-                                }
+                        //None
+                    }
 
-                                Logger.WriteError(this, $"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
-                            }
-                        }
-                    });
-
-                Logger.WriteTrace(this, "LoadPatches End.");
-            });
+                    Logger.WriteError(this, $"Error creating patch {res.Result.Id}: {res.Exception.Message}", res.Exception);
+                }
+            }
         }
 
         /// <inheritdoc/>

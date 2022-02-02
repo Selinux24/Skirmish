@@ -3,7 +3,6 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
-using System;
 using System.Threading.Tasks;
 
 namespace Animation.AnimationParts
@@ -30,43 +29,23 @@ namespace Animation.AnimationParts
 
         public SceneAnimationParts(Game game) : base(game)
         {
-
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override async Task Initialize()
         {
-            await InitializeUI();
+            await base.Initialize();
 
-            UpdateLayout();
-
-            try
-            {
-                await LoadResourcesAsync(
-                    new[]
-                    {
-                        InitializeTank(),
-                        InitializeFloor(),
-                        InitializeDebug()
-                    },
-                    (res) =>
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        InitializeEnvironment();
-
-                        gameReady = true;
-                    });
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ex);
-            }
+            InitializeUI();
         }
 
-        private async Task InitializeUI()
+        private void InitializeUI()
+        {
+            LoadResourcesAsync(
+                InitializeUITitle(),
+                InitializeUICompleted);
+        }
+        private async Task InitializeUITitle()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
 
@@ -82,7 +61,29 @@ namespace Animation.AnimationParts
 
             uiReady = true;
         }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
+            UpdateLayout();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeTank(),
+                    InitializeFloor(),
+                    InitializeDebug()
+                },
+                InitializeComponentsCompleted);
+        }
         private async Task InitializeTank()
         {
             var tDesc = new ModelDescription()
@@ -145,22 +146,30 @@ namespace Animation.AnimationParts
         private async Task InitializeDebug()
         {
             itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
-                "DebugItemTris", 
-                "DebugItemTris", 
+                "DebugItemTris",
+                "DebugItemTris",
                 new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
             itemTris.Visible = false;
 
             itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
-                "DebugItemLines", 
-                "DebugItemLines", 
+                "DebugItemLines",
+                "DebugItemLines",
                 new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
             itemLines.Visible = false;
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
+            InitializeEnvironment();
+
+            gameReady = true;
+        }
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
-
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
             Lights.KeyLight.Enabled = true;

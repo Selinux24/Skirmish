@@ -115,11 +115,7 @@ namespace Collada.ModularDungeon
             this.dungeonMapFile = dungeonMapFile;
 
             Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(SceneModularDungeon); });
-        }
 
-        public override async Task Initialize()
-        {
-            await base.Initialize();
 
 #if DEBUG
             Game.VisibleMouse = true;
@@ -128,6 +124,11 @@ namespace Collada.ModularDungeon
             Game.VisibleMouse = false;
             Game.LockMouse = true;
 #endif
+        }
+
+        public override async Task Initialize()
+        {
+            await base.Initialize();
 
             LoadUI();
         }
@@ -273,34 +274,13 @@ namespace Collada.ModularDungeon
 
         private void LoadUI()
         {
-            _ = LoadResourcesAsync(
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeUI(),
                     InitializeMapTexture()
                 },
-                (res) =>
-                {
-                    try
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        userInterfaceInitialized = true;
-
-                        UpdateLayout();
-
-                        LoadAssets();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.WriteError(this, ex);
-
-                        PrepareMessage(true, $"Error loading UI: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
-                    }
-                });
+                LoadUICompleted);
         }
         private async Task InitializeUI()
         {
@@ -356,6 +336,28 @@ namespace Collada.ModularDungeon
             dungeonMap = await AddComponentUI<Sprite, SpriteDescription>("map1", "DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), LayerUI + 2);
             dungeonMap.Visible = false;
         }
+        private void LoadUICompleted(LoadResourcesResult res)
+        {
+            try
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
+                userInterfaceInitialized = true;
+
+                UpdateLayout();
+
+                LoadAssets();
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, ex);
+
+                PrepareMessage(true, $"Error loading UI: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
+            }
+        }
 
         private void LoadAssets()
         {
@@ -369,41 +371,9 @@ namespace Collada.ModularDungeon
                 InitializeNPCs(),
                 InitializeAudio(),
             };
+            var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", tasks);
 
-            _ = LoadResourcesAsync(
-                LoadResourceGroup.FromTasks("LoadAssets", tasks),
-                (res) =>
-                {
-                    try
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        gameAssetsInitialized = true;
-
-                        InitializeEnvironment();
-                        InitializeLights();
-
-                        StartCamera();
-
-                        AudioManager.Start();
-
-                        ChangeToLevel(null);
-                    }
-                    catch (AggregateException ex)
-                    {
-                        Logger.WriteError(this, ex);
-
-                        var exceptions = ex.Flatten().InnerExceptions
-                            .Select(e => e.Message)
-                            .ToArray();
-
-                        string msg = $"Error loading Assets: {ex.Message}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, exceptions)}";
-                        dialog.ShowDialog(msg, () => { dialog.Show(100); });
-                    }
-                });
+            LoadResourcesAsync(resourceGroup, LoadAssetsCompleted);
         }
         private async Task InitializeDebug()
         {
@@ -733,6 +703,38 @@ namespace Collada.ModularDungeon
                 });
 
             await Task.CompletedTask;
+        }
+        private void LoadAssetsCompleted(LoadResourcesResult res)
+        {
+            try
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
+                gameAssetsInitialized = true;
+
+                InitializeEnvironment();
+                InitializeLights();
+
+                StartCamera();
+
+                AudioManager.Start();
+
+                ChangeToLevel(null);
+            }
+            catch (AggregateException ex)
+            {
+                Logger.WriteError(this, ex);
+
+                var exceptions = ex.Flatten().InnerExceptions
+                    .Select(e => e.Message)
+                    .ToArray();
+
+                string msg = $"Error loading Assets: {ex.Message}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, exceptions)}";
+                dialog.ShowDialog(msg, () => { dialog.Show(100); });
+            }
         }
         private void InitializeEnvironment()
         {
@@ -1447,31 +1449,7 @@ namespace Collada.ModularDungeon
         private void ChangeToLevel(string name)
         {
             levelInitialized = false;
-            _ = LoadResourcesAsync(
-                LoadResourceGroup.FromTasks($"Level.{name ?? "Default"}", ChangeToLevelAsync(name)),
-                (res) =>
-                {
-                    try
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
 
-                        levelInitialized = true;
-
-                        pbLevels.Hide(1000);
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.WriteError(this, ex);
-
-                        PrepareMessage(true, $"Error loading level {name ?? "Default"}: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
-                    }
-                });
-        }
-        private async Task ChangeToLevelAsync(string name)
-        {
             gameReady = false;
 
             Camera.Position = cameraInitialPosition;
@@ -1488,6 +1466,12 @@ namespace Collada.ModularDungeon
 
             SetSelectedItem(null);
 
+            var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", ChangeToLevelAsync(name));
+
+            LoadResourcesAsync(resourceGroup, ChangeToLevelCompleted);
+        }
+        private async Task ChangeToLevelAsync(string name)
+        {
             if (string.IsNullOrWhiteSpace(name))
             {
                 await scenery.LoadFirstLevel();
@@ -1500,22 +1484,42 @@ namespace Collada.ModularDungeon
             ConfigureNavigationGraph();
 
             await UpdateNavigationGraph();
+        }
+        private void ChangeToLevelCompleted(LoadResourcesResult res)
+        {
+            try
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
 
-            StartEntities();
+                StartEntities();
 
-            Vector3 pos = scenery.CurrentLevel.StartPosition;
-            Vector3 dir = scenery.CurrentLevel.LookingVector;
-            pos.Y += playerAgentType.Height;
-            Camera.Position = pos;
-            Camera.Interest = pos + dir;
+                Vector3 pos = scenery.CurrentLevel.StartPosition;
+                Vector3 dir = scenery.CurrentLevel.LookingVector;
+                pos.Y += playerAgentType.Height;
+                Camera.Position = pos;
+                Camera.Interest = pos + dir;
 
-            Lights.Add(torch);
+                Lights.Add(torch);
 
-            AudioManager.Start();
+                AudioManager.Start();
 
-            InitializePostProcessing();
+                InitializePostProcessing();
 
-            gameReady = true;
+                levelInitialized = true;
+
+                pbLevels.Hide(1000);
+
+                gameReady = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, ex);
+
+                PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
+            }
         }
 
         private void ConfigureNavigationGraph()

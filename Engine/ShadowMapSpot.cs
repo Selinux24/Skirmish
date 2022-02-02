@@ -31,7 +31,7 @@ namespace Engine
             if (light is ISceneLightSpot lightSpot)
             {
                 var near = 1f;
-                var projection = Matrix.PerspectiveFovLH(lightSpot.AngleRadians * 2f, 1f, near, lightSpot.Radius);
+                var projection = Matrix.PerspectiveFovLH(lightSpot.FallOffAngleRadians * 2f, 1f, near, lightSpot.Radius);
 
                 var pos = lightSpot.Position;
                 var look = lightSpot.Position + (lightSpot.Direction * lightSpot.Radius);

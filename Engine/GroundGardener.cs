@@ -603,6 +603,10 @@ namespace Engine
         /// Buffer data to write
         /// </summary>
         private readonly List<FoliagePatch> toAssign = new List<FoliagePatch>();
+        /// <summary>
+        /// Initialized flag
+        /// </summary>
+        private bool initialized = false;
 
         /// <summary>
         /// Wind direction
@@ -709,6 +713,8 @@ namespace Engine
             {
                 foliageBuffers.Add(new FoliageBuffer(Game, BufferManager, Name));
             }
+
+            initialized = true;
         }
 
         /// <summary>
@@ -764,6 +770,13 @@ namespace Engine
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
+            base.Update(context);
+
+            if (!initialized)
+            {
+                return;
+            }
+
             windTime += context.GameTime.ElapsedSeconds * WindStrength;
 
             var bbox = Description.PlantingArea ?? Scene.GetGroundBoundingBox();
@@ -949,6 +962,11 @@ namespace Engine
         {
             base.LateUpdate(context);
 
+            if (!initialized)
+            {
+                return;
+            }
+
             WritePatches(context.GameTime, context.EyePosition);
         }
         /// <summary>
@@ -1065,6 +1083,11 @@ namespace Engine
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
+            if (!initialized)
+            {
+                return;
+            }
+
             if (!Visible)
             {
                 return;
@@ -1109,6 +1132,11 @@ namespace Engine
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
+            if (!initialized)
+            {
+                return;
+            }
+
             if (!Visible)
             {
                 return;

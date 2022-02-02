@@ -37,14 +37,19 @@ namespace Instancing
 
         public TestScene(Game game) : base(game)
         {
-
+            GameEnvironment.Background = Color.Black;
         }
 
         public override async Task Initialize()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
+            await base.Initialize();
 
-            await LoadResourcesAsync(
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeTexts(),
@@ -54,28 +59,8 @@ namespace Instancing
                     InitializeTroops(),
                     InitializeWall()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-
-                    Camera.Goto(new Vector3(-48, 8, -30));
-                    Camera.LookTo(Vector3.Zero);
-                    Camera.FarPlaneDistance = 250;
-
-                    SetPostProcessingEffects();
-
-                    blurParams.TweenIntensity(1, 0, 60000, ScaleFuncs.CubicEaseOut);
-                    bloomParams.TweenIntensity(0, 1, 120000, ScaleFuncs.CubicEaseOut);
-
-                    gameReady = true;
-                });
+                InitializeComponentsCompleted);
         }
-
         private async Task InitializeTexts()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
@@ -316,6 +301,26 @@ namespace Instancing
                 wall[i].Manipulator.SetPosition(new Vector3(-60, 0, (i - 30 - 5) * x));
                 wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
             }
+        }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            Camera.Goto(new Vector3(-48, 8, -30));
+            Camera.LookTo(Vector3.Zero);
+            Camera.FarPlaneDistance = 250;
+
+            SetPostProcessingEffects();
+
+            blurParams.TweenIntensity(1, 0, 60000, ScaleFuncs.CubicEaseOut);
+            bloomParams.TweenIntensity(0, 1, 120000, ScaleFuncs.CubicEaseOut);
+
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)

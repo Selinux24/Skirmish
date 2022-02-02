@@ -96,49 +96,23 @@ namespace Animation.SimpleAnimation
         public SceneSimpleAnimation(Game game)
             : base(game)
         {
-
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override async Task Initialize()
         {
-            await InitializeUI();
+            await base.Initialize();
 
-            UpdateLayout();
-
-            try
-            {
-                await LoadResourcesAsync(
-                    new[]
-                    {
-                        InitializeLadder(),
-                        InitializeLadder2(),
-                        InitializeSoldier(),
-                        InitializeRat(),
-                        InitializeDoors(),
-                        InitializeJails(),
-                        InitializeFloor(),
-                        InitializeDebug()
-                    },
-                    (res) =>
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        InitializeEnvironment();
-
-                        gameReady = true;
-                    });
-            }
-            catch (Exception ex)
-            {
-                messages.Text = ex.Message;
-                messages.Visible = true;
-            }
+            InitializeUI();
         }
 
-        private async Task InitializeUI()
+        private void InitializeUI()
+        {
+            LoadResourcesAsync(
+                InitializeUITitle(),
+                InitializeUICompleted);
+        }
+        private async Task InitializeUITitle()
         {
             var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
             var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
@@ -162,6 +136,34 @@ namespace Animation.SimpleAnimation
             console.Visible = false;
 
             uiReady = true;
+        }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeLadder(),
+                    InitializeLadder2(),
+                    InitializeSoldier(),
+                    InitializeRat(),
+                    InitializeDoors(),
+                    InitializeJails(),
+                    InitializeFloor(),
+                    InitializeDebug()
+                },
+                InitializeComponentsCompleted);
         }
         private async Task InitializeFloor()
         {
@@ -477,20 +479,32 @@ namespace Animation.SimpleAnimation
         private async Task InitializeDebug()
         {
             itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
-                "DebugItemTris", 
-                "DebugItemTris", 
+                "DebugItemTris",
+                "DebugItemTris",
                 new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
 
             itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
-                "DebugItemLines", 
-                "DebugItemLines", 
+                "DebugItemLines",
+                "DebugItemLines",
                 new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+        }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                messages.Text = res.GetExceptions().FirstOrDefault()?.Message;
+                messages.Visible = true;
+
+                return;
+            }
+
+            InitializeEnvironment();
+
+            gameReady = true;
         }
 
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
-
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
             Lights.KeyLight.Enabled = true;

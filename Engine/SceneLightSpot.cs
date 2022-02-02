@@ -32,21 +32,21 @@ namespace Engine
         /// </summary>
         public Vector3 Direction { get; set; }
         /// <summary>
-        /// Cone angle in degrees
+        /// Fall-off (cone) angle in degrees
         /// </summary>
-        public float Angle { get; set; }
+        public float FallOffAngle { get; set; }
         /// <summary>
-        /// Cone angle in radians
+        /// Fall-off (cone) angle in radians
         /// </summary>
-        public float AngleRadians
+        public float FallOffAngleRadians
         {
             get
             {
-                return MathUtil.DegreesToRadians(Angle);
+                return MathUtil.DegreesToRadians(FallOffAngle);
             }
             set
             {
-                Angle = MathUtil.RadiansToDegrees(value);
+                FallOffAngle = MathUtil.RadiansToDegrees(value);
             }
         }
         /// <summary>
@@ -145,7 +145,7 @@ namespace Engine
         {
             Position = description.Position;
             Direction = description.Direction;
-            Angle = description.Angle;
+            FallOffAngle = description.FallOffAngle;
             Radius = description.Radius;
             Intensity = description.Intensity;
 
@@ -197,7 +197,7 @@ namespace Engine
 
                 Position = Position,
                 Radius = Radius,
-                Angle = Angle,
+                FallOffAngle = FallOffAngle,
                 Direction = Direction,
                 Intensity = Intensity,
 
@@ -216,7 +216,7 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public IEnumerable<Line3D> GetVolume(int sliceCount)
         {
-            var coneLines = Line3D.CreateWiredConeAngle(AngleRadians, Radius, sliceCount);
+            var coneLines = Line3D.CreateWiredConeAngle(FallOffAngleRadians, Radius, sliceCount);
 
             //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
@@ -248,7 +248,7 @@ namespace Engine
                 InitialIntensity = initialIntensity,
                 Position = Position,
                 Direction = Direction,
-                Angle = Angle,
+                Angle = FallOffAngle,
                 Radius = Radius,
                 Intensity = Intensity,
                 ShadowMapCount = ShadowMapCount,
@@ -278,7 +278,7 @@ namespace Engine
             initialIntensity = sceneLightsState.InitialIntensity;
             Position = sceneLightsState.Position;
             Direction = sceneLightsState.Direction;
-            Angle = sceneLightsState.Angle;
+            FallOffAngle = sceneLightsState.Angle;
             Radius = sceneLightsState.Radius;
             Intensity = sceneLightsState.Intensity;
             ShadowMapCount = sceneLightsState.ShadowMapCount;

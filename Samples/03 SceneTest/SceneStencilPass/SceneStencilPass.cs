@@ -23,11 +23,6 @@ namespace SceneTest.SceneStencilPass
         public SceneStencilPass(Game game)
             : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
 #if DEBUG
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -40,8 +35,18 @@ namespace SceneTest.SceneStencilPass
             Camera.FarPlaneDistance = 500;
             Camera.Goto(-10, 8, 20f);
             Camera.LookTo(0, 0, 0);
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeFloorAsphalt(),
@@ -51,7 +56,6 @@ namespace SceneTest.SceneStencilPass
                     InitializeLightsDrawer()
                 });
         }
-
         private async Task InitializeFloorAsphalt()
         {
             float l = spaceSize;

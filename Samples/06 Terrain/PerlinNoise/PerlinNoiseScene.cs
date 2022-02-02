@@ -101,7 +101,7 @@ namespace Terrain.PerlinNoise
 
         public PerlinNoiseScene(Game game) : base(game)
         {
-
+            Game.VisibleMouse = false;
         }
 
         public override async Task Initialize()
@@ -114,8 +114,6 @@ namespace Terrain.PerlinNoise
 
             ResizeTextureRenderer();
             ResizeUI();
-
-            Cursor.Show();
         }
         public async Task InitializeUI()
         {

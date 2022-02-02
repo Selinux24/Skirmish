@@ -37,58 +37,26 @@ namespace Collada.NavmeshTest
 
         public SceneNavmeshTest(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
-            await base.Initialize();
-
             GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
             Camera.MovementDelta = 25f;
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 InitializeText(),
-                (resUi) =>
-                {
-                    if (!resUi.Completed)
-                    {
-                        resUi.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-                    InitializeLights();
-                    InitializeAgent();
-
-                    _ = LoadResourcesAsync(
-                        new[]
-                        {
-                            InitializeNavmesh(),
-                            InitializeDebug()
-                        },
-                        (res) =>
-                        {
-                            if (!res.Completed)
-                            {
-                                res.ThrowExceptions();
-                            }
-
-                            var bbox = inputGeometry.GetBoundingBox();
-                            var center = bbox.GetCenter();
-                            float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
-
-                            Camera.Interest = center;
-                            Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
-
-                            Task.WhenAll(UpdateNavigationGraph());
-
-                            gameReady = true;
-                        });
-                });
+                InitializeComponentsCompleted);
         }
         private async Task InitializeText()
         {
@@ -118,6 +86,19 @@ Space: Finds random over navmesh";
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult resUi)
+        {
+            if (!resUi.Completed)
+            {
+                resUi.ThrowExceptions();
+            }
+
+            UpdateLayout();
+            InitializeLights();
+            InitializeAgent();
+
+            InitializeMapData();
+        }
         private void InitializeLights()
         {
             Lights.KeyLight.CastShadow = false;
@@ -139,6 +120,17 @@ Space: Finds random over navmesh";
 
             Camera.NearPlaneDistance = 0.01f;
             Camera.FarPlaneDistance *= 2;
+        }
+
+        private void InitializeMapData()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeNavmesh(),
+                    InitializeDebug()
+                },
+                InitializeMapDataCompleted);
         }
         private async Task InitializeNavmesh()
         {
@@ -188,6 +180,24 @@ Space: Finds random over navmesh";
                 Count = 10000
             };
             volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
+        }
+        private async Task InitializeMapDataCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            var bbox = inputGeometry.GetBoundingBox();
+            var center = bbox.GetCenter();
+            float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
+
+            Camera.Interest = center;
+            Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
+
+            await UpdateNavigationGraph();
+
+            gameReady = true;
         }
 
         public override async Task UpdateNavigationGraph()

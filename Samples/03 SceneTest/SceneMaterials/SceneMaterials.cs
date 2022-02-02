@@ -35,13 +35,6 @@ namespace SceneTest.SceneMaterials
         public SceneMaterials(Game game)
             : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
-            await base.Initialize();
-
 #if DEBUG
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -58,8 +51,18 @@ namespace SceneTest.SceneMaterials
             Lights.KeyLight.CastShadow = false;
 
             GameEnvironment.Background = Color.CornflowerBlue;
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeTextBoxes(),
@@ -70,20 +73,8 @@ namespace SceneTest.SceneMaterials
                     InitializeBuiltInList(),
                     InitializeMetallicList(),
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-                    PrepareScene();
-
-                    gameReady = true;
-                });
+                InitializeComponentsCompleted);
         }
-
         private async Task InitializeTextBoxes()
         {
             var spDesc = new SpriteDescription()
@@ -396,6 +387,18 @@ namespace SceneTest.SceneMaterials
                 }
             }
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+            PrepareScene();
+
+            gameReady = true;
+        }
 
         private void PrepareScene()
         {
@@ -518,19 +521,15 @@ namespace SceneTest.SceneMaterials
                 spheres1.Active = false;
                 spheres2.Active = false;
 
-                Task.Run(async () =>
-                {
-                    RemoveComponent(spheres1);
-                    RemoveComponent(spheres2);
+                RemoveComponent(spheres1);
+                RemoveComponent(spheres2);
 
-                    currentAlgorithm++;
-                    currentAlgorithm %= algorithmCount;
+                currentAlgorithm++;
+                currentAlgorithm %= algorithmCount;
 
-                    await LoadResourcesAsync(new Task[]
-                    {
-                        InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}"),
-                    });
-                });
+                var t = InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}");
+
+                LoadResourcesAsync(t);
             }
         }
 

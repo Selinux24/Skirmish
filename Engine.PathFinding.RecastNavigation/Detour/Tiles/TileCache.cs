@@ -533,8 +533,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
         private void ProcessRequests()
         {
+            if (!m_reqs.Any())
+            {
+                return;
+            }
+
+            // Copy requests
+            var reqs = m_reqs.ToArray();
+            m_reqs.Clear();
+
             // Process requests.
-            foreach (var req in m_reqs)
+            foreach (var req in reqs)
             {
                 int idx = DecodeObstacleIdObstacle(req.NRef);
                 if (idx >= m_params.MaxObstacles)
@@ -557,8 +566,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     ProcessRequestRemove(ob);
                 }
             }
-
-            m_reqs.Clear();
         }
         private void ProcessRequestAdd(TileCacheObstacle ob)
         {

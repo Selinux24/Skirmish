@@ -111,32 +111,19 @@ namespace Heightmap
 
         public override async Task Initialize()
         {
+            await base.Initialize();
+
             Camera.Position = new Vector3(10000, 10000, 10000);
             Camera.Interest = new Vector3(10001, 10000, 10000);
 
-            await InitializeUI();
+            InitializeUI();
         }
 
-        private async Task InitializeUI()
+        private void InitializeUI()
         {
-            await LoadResourcesAsync(
+            LoadResourcesAsync(
                 InitializeUIAssets(),
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-
-                    uiReady = true;
-
-                    fadePanel.BaseColor = Color.Black;
-                    fadePanel.Visible = true;
-
-                    await InitializeGameAssets();
-                });
+                InitializeUICompleted);
         }
         private async Task<double> InitializeUIAssets()
         {
@@ -189,8 +176,24 @@ namespace Heightmap
             sw.Stop();
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
+        private void InitializeUICompleted(LoadResourcesResult<double> res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
-        private async Task InitializeGameAssets()
+            UpdateLayout();
+
+            uiReady = true;
+
+            fadePanel.BaseColor = Color.Black;
+            fadePanel.Visible = true;
+
+            InitializeGameAssets();
+        }
+
+        private void InitializeGameAssets()
         {
             var loadTasks = new[]
             {
@@ -213,32 +216,9 @@ namespace Heightmap
                 InitializeDebugAssets(),
             };
 
-            await LoadResourcesAsync(
+            LoadResourcesAsync(
                 loadTasks,
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    skydom.RayleighScattering *= 0.8f;
-                    skydom.MieScattering *= 0.1f;
-
-                    GameEnvironment.TimeOfDay.BeginAnimation(8, 55, 00);
-
-                    Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
-                    ToggleFog();
-
-                    Camera.NearPlaneDistance = near;
-                    Camera.FarPlaneDistance = far;
-                    Camera.Position = new Vector3(24, 12, 14);
-                    Camera.Interest = new Vector3(0, 10, 0);
-                    Camera.MovementDelta = 45f;
-                    Camera.SlowMovementDelta = 20f;
-
-                    await InitializeTerrainObjects();
-                });
+                InitializeGameAssetsCompleted);
         }
         private async Task<double> InitializeRocks()
         {
@@ -610,8 +590,32 @@ namespace Heightmap
             sw.Stop();
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
         }
+        private void InitializeGameAssetsCompleted(LoadResourcesResult<double> res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
-        private async Task InitializeTerrainObjects()
+            skydom.RayleighScattering *= 0.8f;
+            skydom.MieScattering *= 0.1f;
+
+            GameEnvironment.TimeOfDay.BeginAnimation(8, 55, 00);
+
+            Lights.BaseFogColor = new Color((byte)95, (byte)147, (byte)233) * 0.5f;
+            ToggleFog();
+
+            Camera.NearPlaneDistance = near;
+            Camera.FarPlaneDistance = far;
+            Camera.Position = new Vector3(24, 12, 14);
+            Camera.Interest = new Vector3(0, 10, 0);
+            Camera.MovementDelta = 45f;
+            Camera.SlowMovementDelta = 20f;
+
+            InitializeTerrainObjects();
+        }
+
+        private void InitializeTerrainObjects()
         {
             var loadTasks = new[]
             {
@@ -621,26 +625,9 @@ namespace Heightmap
                 SetPositionOverTerrain(),
             };
 
-            await LoadResourcesAsync(
+            LoadResourcesAsync(
                 loadTasks,
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
-                    lantern = new SceneLightSpot("lantern", true, Color3.White, Color3.White, false, lanternDesc);
-                    Lights.Add(lantern);
-
-                    SetDebugInfo();
-
-                    Task.Run(async () =>
-                    {
-                        await SetPathFindingInfo();
-                    });
-                });
+                InitializeTerrainObjectsCompleted);
         }
         private async Task<double> InitializeGardener()
         {
@@ -1130,6 +1117,21 @@ namespace Heightmap
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.Reverse(tris2));
         }
+        private async Task InitializeTerrainObjectsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            var lanternDesc = SceneLightSpotDescription.Create(Camera.Position, Camera.Direction, 25f, 100, 10000);
+            lantern = new SceneLightSpot("lantern", true, Color3.White, Color3.White, false, lanternDesc);
+            Lights.Add(lantern);
+
+            SetDebugInfo();
+
+            await SetPathFindingInfo();
+        }
 
         private async Task SetPathFindingInfo()
         {
@@ -1164,6 +1166,13 @@ namespace Heightmap
             PathFinderDescription = new PathFinderDescription(nmsettings, nminput);
 
             await UpdateNavigationGraph();
+
+            gameReady = true;
+
+            fadePanel.ClearTween();
+            fadePanel.TweenAlpha(fadePanel.Alpha, 0, 2000, ScaleFuncs.CubicEaseOut);
+
+            UpdateGraphNodes(agent);
         }
 
         public override void Update(GameTime gameTime)
@@ -1581,8 +1590,8 @@ namespace Heightmap
                 if (windNextStrength < windStrength) windStrength = windNextStrength;
             }
 
-            gardener.SetWind(windDirection, windStrength);
-            gardener2.SetWind(windDirection, windStrength);
+            gardener?.SetWind(windDirection, windStrength);
+            gardener2?.SetWind(windDirection, windStrength);
         }
         private void UpdateDust(GameTime gameTime)
         {
@@ -1687,15 +1696,6 @@ namespace Heightmap
             Lights.FogRange = Lights.FogRange == 0f ? fogRange : 0f;
         }
 
-        public override void NavigationGraphUpdated()
-        {
-            gameReady = true;
-
-            fadePanel.ClearTween();
-            fadePanel.TweenAlpha(fadePanel.Alpha, 0, 2000, ScaleFuncs.CubicEaseOut);
-
-            UpdateGraphNodes(agent);
-        }
         private void UpdateGraphNodes(AgentType agent)
         {
             if (updatingNodes)

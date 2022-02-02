@@ -119,7 +119,44 @@ namespace Tanks
         /// <param name="game">Game</param>
         public SceneTanksGame(Game game) : base(game)
         {
+            InitializeEnvironment();
             InitializePlayers();
+        }
+        private void InitializeEnvironment()
+        {
+            GameEnvironment.Background = Color.Black;
+
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
+
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 2000;
+
+            GameEnvironment.ShadowDistanceLow *= 2f;
+        }
+        private void InitializePlayers()
+        {
+            player1Status = new PlayerStatus
+            {
+                Name = "Player 1",
+                Points = 0,
+                MaxLife = 100,
+                CurrentLife = 100,
+                MaxMove = 25,
+                CurrentMove = 25,
+                Color = Color.Blue,
+            };
+
+            player2Status = new PlayerStatus
+            {
+                Name = "Player 2",
+                Points = 0,
+                MaxLife = 100,
+                CurrentLife = 100,
+                MaxMove = 25,
+                CurrentMove = 25,
+                Color = Color.Red,
+            };
         }
 
         public override void OnReportProgress(LoadResourceProgress value)
@@ -133,50 +170,43 @@ namespace Tanks
             }
         }
 
-        public override Task Initialize()
+        public override async Task Initialize()
         {
-            GameEnvironment.Background = Color.Black;
+            await base.Initialize();
 
-            Game.VisibleMouse = false;
-            Game.LockMouse = false;
-
-            Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 2000;
-
-            GameEnvironment.ShadowDistanceLow *= 2f;
-
-            return LoadLoadingUI();
+            LoadLoadingUI();
         }
 
-        private async Task LoadLoadingUI()
+        private void LoadLoadingUI()
         {
-            await LoadResourcesAsync(
+            LoadResourcesAsync(
                 InitializeLoadingUI(),
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
+                LoadLoadingUICompleted);
+        }
+        private async Task LoadLoadingUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
-                    UpdateLayoutLoadingUI();
+            UpdateLayoutLoadingUI();
 
-                    fadePanel.BaseColor = Color.Black;
-                    fadePanel.Visible = true;
+            fadePanel.BaseColor = Color.Black;
+            fadePanel.Visible = true;
 
-                    await Task.Delay(1000);
+            await Task.Delay(1000);
 
-                    loadingText.Text = "Please wait...";
-                    loadingText.Visible = true;
-                    loadingText.TweenAlphaBounce(1, 0, 1000, ScaleFuncs.CubicEaseInOut);
+            loadingText.Text = "Please wait...";
+            loadingText.Visible = true;
+            loadingText.TweenAlphaBounce(1, 0, 1000, ScaleFuncs.CubicEaseInOut);
 
-                    await Task.Delay(2000);
+            await Task.Delay(2000);
 
-                    loadingBar.ProgressValue = 0;
-                    loadingBar.Visible = true;
+            loadingBar.ProgressValue = 0;
+            loadingBar.Visible = true;
 
-                    _ = Task.Run(LoadUI);
-                });
+            LoadUI();
         }
         private async Task InitializeLoadingUI()
         {
@@ -199,52 +229,13 @@ namespace Tanks
             loadingBar.Visible = false;
         }
 
-        private async Task LoadUI()
+        private void LoadUI()
         {
             List<Task> taskList = new List<Task>();
             taskList.AddRange(InitializeUI());
             taskList.AddRange(InitializeModels());
 
-            await LoadResourcesAsync(
-                taskList,
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    UpdateLayout();
-
-                    PrepareModels();
-                    UpdateCamera(true);
-
-                    AudioManager.MasterVolume = 1f;
-                    AudioManager.Start();
-
-                    Task.Run(async () =>
-                    {
-                        loadingText.ClearTween();
-                        loadingText.Hide(1000);
-                        loadingBar.ClearTween();
-                        loadingBar.Hide(500);
-
-                        await Task.Delay(1500);
-
-                        await ShowMessage("Ready!", 2000);
-
-                        SetOnGameEffects();
-
-                        fadePanel.ClearTween();
-                        fadePanel.Hide(2000);
-
-                        gameReady = true;
-
-                        UpdateGameControls(true);
-
-                        PaintShot(true);
-                    });
-                });
+            LoadResourcesAsync(taskList, LoadUICompleted);
         }
 
         private Task[] InitializeUI()
@@ -484,159 +475,6 @@ namespace Tanks
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
-        }
-
-        public override void GameGraphicsResized()
-        {
-            base.GameGraphicsResized();
-
-            UpdateLayout();
-        }
-        private void UpdateLayout()
-        {
-            UpdateLayoutLoadingUI();
-
-            gameMessage.Anchor = Anchors.Center;
-            gameMessage.Width = Game.Form.RenderWidth;
-            gameMessage.Height = Game.Form.RenderHeight;
-
-            gameKeyHelp.Anchor = Anchors.HorizontalCenter;
-            gameKeyHelp.Top = Game.Form.RenderHeight - 60;
-            gameKeyHelp.Width = 500;
-            gameKeyHelp.Height = 40;
-
-            float width = Game.Form.RenderWidth / 2f;
-            float height = width * 0.6666f;
-            dialog.Width = width;
-            dialog.Height = height;
-            dialog.Anchor = Anchors.Center;
-
-            float butWidth = 150;
-            float butHeight = 55;
-            float butMargin = 15;
-
-            dialogAccept.Width = butWidth;
-            dialogAccept.Height = butHeight;
-            dialogAccept.Top = dialog.Height - butMargin - butHeight;
-            dialogAccept.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) - (butWidth * 0.6666f);
-
-            dialogCancel.Width = butWidth;
-            dialogCancel.Height = butHeight;
-            dialogCancel.Top = dialog.Height - butMargin - butHeight;
-            dialogCancel.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) + (butWidth * 0.6666f);
-
-            dialogText.Padding = new Padding
-            {
-                Left = width * 0.1f,
-                Right = width * 0.1f,
-                Top = height * 0.1f,
-                Bottom = butHeight + (butMargin * 2f),
-            };
-
-            float playerWidth = 300;
-            player1Name.Width = playerWidth;
-            player1Name.Top = 10;
-            player1Name.Left = 10;
-            player1Points.Width = playerWidth;
-            player1Points.Top = 60;
-            player1Points.Left = 10;
-            player1Life.Width = playerWidth;
-            player1Life.Height = 30;
-            player1Life.Top = 100;
-            player1Life.Left = 10;
-            player2Name.Width = playerWidth;
-            player2Name.Top = 10;
-            player2Name.Left = Game.Form.RenderWidth - 10 - player2Name.Width;
-            player2Points.Width = playerWidth;
-            player2Points.Top = 60;
-            player2Points.Left = Game.Form.RenderWidth - 10 - player2Points.Width;
-            player2Life.Width = playerWidth;
-            player2Life.Height = 30;
-            player2Life.Top = 100;
-            player2Life.Left = Game.Form.RenderWidth - 10 - player2Life.Width;
-
-            turnText.Width = 300;
-            turnText.Anchor = Anchors.HorizontalCenter;
-            gameIcon.Width = 92;
-            gameIcon.Height = 82;
-            gameIcon.Top = 55;
-            gameIcon.Anchor = Anchors.HorizontalCenter;
-            playerTurnMarker.Width = 112;
-            playerTurnMarker.Height = 75;
-            playerTurnMarker.Top = 35;
-            playerTurnMarker.Left = Game.Form.RenderCenter.X - 112 - 120;
-
-            float top = Game.Form.RenderHeight - 150;
-            keyHelp.Left = 0;
-            keyHelp.Top = top;
-            keyHelp.Height = 150;
-            keyHelp.Width = 250;
-            keyRotate.Left = 0;
-            keyRotate.Top = top + 25;
-            keyRotate.Width = 372 * 0.25f;
-            keyRotate.Height = 365 * 0.25f;
-            keyMove.Left = keyRotate.Width;
-            keyMove.Top = top + 25;
-            keyMove.Width = 232 * 0.25f;
-            keyMove.Height = 365 * 0.25f;
-            KeyPitch.Left = keyRotate.Width + keyMove.Width;
-            KeyPitch.Top = top + 25;
-            KeyPitch.Width = 322 * 0.25f;
-            KeyPitch.Height = 365 * 0.25f;
-            keyRotateLeftText.Top = top + 20;
-            keyRotateLeftText.Left = 10;
-            keyRotateRightText.Top = top + 20;
-            keyRotateRightText.Left = keyRotate.Width - 30;
-            keyMoveForwardText.Top = top + 20;
-            keyMoveForwardText.Left = keyMove.AbsoluteCenter.X - 5;
-            keyMoveBackwardText.Top = top + keyMove.Height + 10;
-            keyMoveBackwardText.Left = keyMove.AbsoluteCenter.X - 5;
-            keyPitchUpText.Top = top + 20;
-            keyPitchUpText.Left = KeyPitch.AbsoluteCenter.X - 15;
-            keyPitchDownText.Top = top + KeyPitch.Height + 10;
-            keyPitchDownText.Left = KeyPitch.AbsoluteCenter.X + 10;
-
-            pbFire.Top = Game.Form.RenderHeight - 100;
-            pbFire.Width = 500;
-            pbFire.Height = 40;
-            fireKeyText.Anchor = Anchors.HorizontalCenter;
-            fireKeyText.Top = Game.Form.RenderHeight - 60;
-            fireKeyText.Width = 500;
-            fireKeyText.Height = 40;
-
-            miniMapBackground.Width = 200;
-            miniMapBackground.Height = 200;
-            miniMapBackground.Left = Game.Form.RenderWidth - 200 - 10;
-            miniMapBackground.Top = Game.Form.RenderHeight - 200 - 10;
-            miniMapTank1.Width = 273 * 0.1f;
-            miniMapTank1.Height = 365 * 0.1f;
-            miniMapTank1.Left = Game.Form.RenderWidth - 150 - 10;
-            miniMapTank1.Top = Game.Form.RenderHeight - 150 - 10;
-            miniMapTank2.Width = 273 * 0.1f;
-            miniMapTank2.Height = 365 * 0.1f;
-            miniMapTank2.Left = Game.Form.RenderWidth - 85 - 10;
-            miniMapTank2.Top = Game.Form.RenderHeight - 85 - 10;
-            windVelocity.Width = 180;
-            windVelocity.Height = 15;
-            windVelocity.Left = miniMapBackground.AbsoluteCenter.X - 90;
-            windVelocity.Top = miniMapBackground.AbsoluteCenter.Y - 130;
-            windDirectionArrow.Width = 100;
-            windDirectionArrow.Height = 100;
-            windDirectionArrow.Left = miniMapBackground.AbsoluteCenter.X - 50;
-            windDirectionArrow.Top = miniMapBackground.AbsoluteCenter.Y - 50;
-        }
-        private void UpdateLayoutLoadingUI()
-        {
-            fadePanel.Width = Game.Form.RenderWidth;
-            fadePanel.Height = Game.Form.RenderHeight;
-
-            loadingText.Anchor = Anchors.HorizontalCenter;
-            loadingText.Top = Game.Form.RenderCenter.Y - 75f;
-            loadingText.Width = Game.Form.RenderWidth * 0.8f;
-
-            loadingBar.Anchor = Anchors.Center;
-            loadingBar.Width = Game.Form.RenderWidth * 0.8f;
-            loadingBar.Height = 35;
         }
 
         private Task[] InitializeModels()
@@ -933,6 +771,188 @@ namespace Tanks
 
             await Task.CompletedTask;
         }
+
+        private async Task LoadUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            PrepareModels();
+            UpdateCamera(true);
+
+            AudioManager.MasterVolume = 1f;
+            AudioManager.Start();
+
+            loadingText.ClearTween();
+            loadingText.Hide(1000);
+            loadingBar.ClearTween();
+            loadingBar.Hide(500);
+
+            await Task.Delay(1500);
+
+            await ShowMessage("Ready!", 2000);
+
+            SetOnGameEffects();
+
+            fadePanel.ClearTween();
+            fadePanel.Hide(2000);
+
+            gameReady = true;
+
+            UpdateGameControls(true);
+
+            PaintShot(true);
+        }
+        private void UpdateLayout()
+        {
+            UpdateLayoutLoadingUI();
+
+            gameMessage.Anchor = Anchors.Center;
+            gameMessage.Width = Game.Form.RenderWidth;
+            gameMessage.Height = Game.Form.RenderHeight;
+
+            gameKeyHelp.Anchor = Anchors.HorizontalCenter;
+            gameKeyHelp.Top = Game.Form.RenderHeight - 60;
+            gameKeyHelp.Width = 500;
+            gameKeyHelp.Height = 40;
+
+            float width = Game.Form.RenderWidth / 2f;
+            float height = width * 0.6666f;
+            dialog.Width = width;
+            dialog.Height = height;
+            dialog.Anchor = Anchors.Center;
+
+            float butWidth = 150;
+            float butHeight = 55;
+            float butMargin = 15;
+
+            dialogAccept.Width = butWidth;
+            dialogAccept.Height = butHeight;
+            dialogAccept.Top = dialog.Height - butMargin - butHeight;
+            dialogAccept.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) - (butWidth * 0.6666f);
+
+            dialogCancel.Width = butWidth;
+            dialogCancel.Height = butHeight;
+            dialogCancel.Top = dialog.Height - butMargin - butHeight;
+            dialogCancel.Left = (dialog.Width * 0.5f) - (butWidth * 0.5f) + (butWidth * 0.6666f);
+
+            dialogText.Padding = new Padding
+            {
+                Left = width * 0.1f,
+                Right = width * 0.1f,
+                Top = height * 0.1f,
+                Bottom = butHeight + (butMargin * 2f),
+            };
+
+            float playerWidth = 300;
+            player1Name.Width = playerWidth;
+            player1Name.Top = 10;
+            player1Name.Left = 10;
+            player1Points.Width = playerWidth;
+            player1Points.Top = 60;
+            player1Points.Left = 10;
+            player1Life.Width = playerWidth;
+            player1Life.Height = 30;
+            player1Life.Top = 100;
+            player1Life.Left = 10;
+            player2Name.Width = playerWidth;
+            player2Name.Top = 10;
+            player2Name.Left = Game.Form.RenderWidth - 10 - player2Name.Width;
+            player2Points.Width = playerWidth;
+            player2Points.Top = 60;
+            player2Points.Left = Game.Form.RenderWidth - 10 - player2Points.Width;
+            player2Life.Width = playerWidth;
+            player2Life.Height = 30;
+            player2Life.Top = 100;
+            player2Life.Left = Game.Form.RenderWidth - 10 - player2Life.Width;
+
+            turnText.Width = 300;
+            turnText.Anchor = Anchors.HorizontalCenter;
+            gameIcon.Width = 92;
+            gameIcon.Height = 82;
+            gameIcon.Top = 55;
+            gameIcon.Anchor = Anchors.HorizontalCenter;
+            playerTurnMarker.Width = 112;
+            playerTurnMarker.Height = 75;
+            playerTurnMarker.Top = 35;
+            playerTurnMarker.Left = Game.Form.RenderCenter.X - 112 - 120;
+
+            float top = Game.Form.RenderHeight - 150;
+            keyHelp.Left = 0;
+            keyHelp.Top = top;
+            keyHelp.Height = 150;
+            keyHelp.Width = 250;
+            keyRotate.Left = 0;
+            keyRotate.Top = top + 25;
+            keyRotate.Width = 372 * 0.25f;
+            keyRotate.Height = 365 * 0.25f;
+            keyMove.Left = keyRotate.Width;
+            keyMove.Top = top + 25;
+            keyMove.Width = 232 * 0.25f;
+            keyMove.Height = 365 * 0.25f;
+            KeyPitch.Left = keyRotate.Width + keyMove.Width;
+            KeyPitch.Top = top + 25;
+            KeyPitch.Width = 322 * 0.25f;
+            KeyPitch.Height = 365 * 0.25f;
+            keyRotateLeftText.Top = top + 20;
+            keyRotateLeftText.Left = 10;
+            keyRotateRightText.Top = top + 20;
+            keyRotateRightText.Left = keyRotate.Width - 30;
+            keyMoveForwardText.Top = top + 20;
+            keyMoveForwardText.Left = keyMove.AbsoluteCenter.X - 5;
+            keyMoveBackwardText.Top = top + keyMove.Height + 10;
+            keyMoveBackwardText.Left = keyMove.AbsoluteCenter.X - 5;
+            keyPitchUpText.Top = top + 20;
+            keyPitchUpText.Left = KeyPitch.AbsoluteCenter.X - 15;
+            keyPitchDownText.Top = top + KeyPitch.Height + 10;
+            keyPitchDownText.Left = KeyPitch.AbsoluteCenter.X + 10;
+
+            pbFire.Top = Game.Form.RenderHeight - 100;
+            pbFire.Width = 500;
+            pbFire.Height = 40;
+            fireKeyText.Anchor = Anchors.HorizontalCenter;
+            fireKeyText.Top = Game.Form.RenderHeight - 60;
+            fireKeyText.Width = 500;
+            fireKeyText.Height = 40;
+
+            miniMapBackground.Width = 200;
+            miniMapBackground.Height = 200;
+            miniMapBackground.Left = Game.Form.RenderWidth - 200 - 10;
+            miniMapBackground.Top = Game.Form.RenderHeight - 200 - 10;
+            miniMapTank1.Width = 273 * 0.1f;
+            miniMapTank1.Height = 365 * 0.1f;
+            miniMapTank1.Left = Game.Form.RenderWidth - 150 - 10;
+            miniMapTank1.Top = Game.Form.RenderHeight - 150 - 10;
+            miniMapTank2.Width = 273 * 0.1f;
+            miniMapTank2.Height = 365 * 0.1f;
+            miniMapTank2.Left = Game.Form.RenderWidth - 85 - 10;
+            miniMapTank2.Top = Game.Form.RenderHeight - 85 - 10;
+            windVelocity.Width = 180;
+            windVelocity.Height = 15;
+            windVelocity.Left = miniMapBackground.AbsoluteCenter.X - 90;
+            windVelocity.Top = miniMapBackground.AbsoluteCenter.Y - 130;
+            windDirectionArrow.Width = 100;
+            windDirectionArrow.Height = 100;
+            windDirectionArrow.Left = miniMapBackground.AbsoluteCenter.X - 50;
+            windDirectionArrow.Top = miniMapBackground.AbsoluteCenter.Y - 50;
+        }
+        private void UpdateLayoutLoadingUI()
+        {
+            fadePanel.Width = Game.Form.RenderWidth;
+            fadePanel.Height = Game.Form.RenderHeight;
+
+            loadingText.Anchor = Anchors.HorizontalCenter;
+            loadingText.Top = Game.Form.RenderCenter.Y - 75f;
+            loadingText.Width = Game.Form.RenderWidth * 0.8f;
+
+            loadingBar.Anchor = Anchors.Center;
+            loadingBar.Width = Game.Form.RenderWidth * 0.8f;
+            loadingBar.Height = 35;
+        }
         private void PrepareModels()
         {
             landScape.Visible = true;
@@ -963,31 +983,6 @@ namespace Tanks
             tanks[1].Manipulator.SetNormal(n2);
 
             tanks.Visible = true;
-        }
-
-        private void InitializePlayers()
-        {
-            player1Status = new PlayerStatus
-            {
-                Name = "Player 1",
-                Points = 0,
-                MaxLife = 100,
-                CurrentLife = 100,
-                MaxMove = 25,
-                CurrentMove = 25,
-                Color = Color.Blue,
-            };
-
-            player2Status = new PlayerStatus
-            {
-                Name = "Player 2",
-                Points = 0,
-                MaxLife = 100,
-                CurrentLife = 100,
-                MaxMove = 25,
-                CurrentMove = 25,
-                Color = Color.Red,
-            };
         }
         private void UpdateGameControls(bool visible)
         {
@@ -1022,6 +1017,13 @@ namespace Tanks
             miniMapTank2.Visible = visible;
             windVelocity.Visible = visible;
             windDirectionArrow.Visible = visible;
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
         }
 
         public override void Update(GameTime gameTime)

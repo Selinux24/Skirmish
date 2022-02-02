@@ -85,7 +85,7 @@ namespace Engine.Content
             {
                 Position = Position,
                 Direction = direction,
-                Angle = FallOffAngle,
+                FallOffAngle = FallOffAngle,
                 Radius = radius,
                 Intensity = intensity,
             };

@@ -32,11 +32,6 @@ namespace SceneTest.SceneLights
         /// <param name="game">Game</param>
         public SceneLights(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
 #if DEBUG
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -49,8 +44,18 @@ namespace SceneTest.SceneLights
             Camera.FarPlaneDistance = 500;
             Camera.Goto(-10, 8, 20f);
             Camera.LookTo(0, 0, 0);
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeFloorAsphalt(),
@@ -62,20 +67,8 @@ namespace SceneTest.SceneLights
                     InitializeVolumeDrawer(),
                     InitializeBufferDrawer()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
-                    buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
-                    buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
-                    buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
-                });
+                InitializeComponentsCompleted);
         }
-
         private async Task InitializeFloorAsphalt()
         {
             float l = spaceSize;
@@ -222,6 +215,18 @@ namespace SceneTest.SceneLights
 
             bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBufferDrawer", "DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), LayerEffects);
             bufferDrawer.Visible = false;
+        }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+            buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+            buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+            buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
         public override void Update(GameTime gameTime)
