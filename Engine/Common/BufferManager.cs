@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -22,14 +23,14 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         /// <param name="vertices">Vertices</param>
         /// <returns>Returns new buffer</returns>
-        private static Buffer CreateVertexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<IVertexData> vertices)
+        private static async Task<Buffer> CreateVertexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<IVertexData> vertices)
         {
             if (vertices?.Any() != true)
             {
                 return null;
             }
 
-            return graphics.CreateVertexBuffer(name, vertices, dynamic);
+            return await Task.Run(() => graphics.CreateVertexBuffer(name, vertices, dynamic));
         }
         /// <summary>
         /// Creates an instancing buffer
@@ -39,14 +40,14 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         /// <param name="instancingData">Instancing data</param>
         /// <returns>Returns the new buffer</returns>
-        private static Buffer CreateInstancingBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<VertexInstancingData> instancingData)
+        private static async Task<Buffer> CreateInstancingBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<VertexInstancingData> instancingData)
         {
             if (instancingData?.Any() != true)
             {
                 return null;
             }
 
-            return graphics.CreateVertexBuffer(name, instancingData, dynamic);
+            return await Task.Run(() => graphics.CreateVertexBuffer(name, instancingData, dynamic));
         }
         /// <summary>
         /// Creates an index buffer
@@ -56,14 +57,14 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         /// <param name="indices">Indices</param>
         /// <returns>Returns new buffer</returns>
-        private static Buffer CreateIndexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<uint> indices)
+        private static async Task<Buffer> CreateIndexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<uint> indices)
         {
             if (indices?.Any() != true)
             {
                 return null;
             }
 
-            return graphics.CreateIndexBuffer(name, indices, dynamic);
+            return await Task.Run(() => graphics.CreateIndexBuffer(name, indices, dynamic));
         }
 
         /// <summary>
@@ -74,10 +75,6 @@ namespace Engine.Common
         /// Reserved slots
         /// </summary>
         private readonly int reservedSlots = 0;
-        /// <summary>
-        /// Descriptor request list
-        /// </summary>
-        private readonly List<IBufferDescriptorRequest> requestedDescriptors = new List<IBufferDescriptorRequest>();
         /// <summary>
         /// Vertex buffers
         /// </summary>
@@ -110,6 +107,10 @@ namespace Engine.Common
         /// Allocating buffers flag
         /// </summary>
         private bool allocating = false;
+        /// <summary>
+        /// Descriptor request list
+        /// </summary>
+        private ConcurrentBag<IBufferDescriptorRequest> requestedDescriptors = new ConcurrentBag<IBufferDescriptorRequest>();
 
         /// <summary>
         /// Gets whether the manager is initialized or not
@@ -123,12 +124,22 @@ namespace Engine.Common
         {
             get
             {
+                return PendingRequestCount > 0;
+            }
+        }
+        /// <summary>
+        /// Gets the pending request count
+        /// </summary>
+        public int PendingRequestCount
+        {
+            get
+            {
                 if (!Initilialized)
                 {
-                    return false;
+                    return 0;
                 }
 
-                return requestedDescriptors.Count > 0;
+                return requestedDescriptors.Count;
             }
         }
 
@@ -174,6 +185,7 @@ namespace Engine.Common
                 allocating = true;
 
                 requestedDescriptors.Clear();
+                requestedDescriptors = null;
 
                 vertexBufferDescriptors.Clear();
                 indexBufferDescriptors.Clear();
@@ -197,7 +209,30 @@ namespace Engine.Common
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
         /// <param name="callback">Callback</param>
-        internal void CreateBuffers(string id, IProgress<LoadResourceProgress> progress, Action callback = null)
+        internal async Task CreateBuffersAsync(string id, IProgress<LoadResourceProgress> progress, Action callback)
+        {
+            await CreateBuffersAsync(id, progress);
+
+            callback?.Invoke();
+        }
+        /// <summary>
+        /// Creates and populates vertex, instancing and index buffers
+        /// </summary>
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        /// <param name="callback">Callback</param>
+        internal async Task CreateBuffersAsync(string id, IProgress<LoadResourceProgress> progress, Func<Task> callback)
+        {
+            await CreateBuffersAsync(id, progress);
+
+            await callback?.Invoke();
+        }
+        /// <summary>
+        /// Creates and populates vertex, instancing and index buffers
+        /// </summary>
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        internal async Task CreateBuffersAsync(string id, IProgress<LoadResourceProgress> progress)
         {
             if (allocating)
             {
@@ -210,98 +245,103 @@ namespace Engine.Common
 
                 if (!Initilialized)
                 {
-                    Logger.WriteTrace(this, $"Creating reserved buffer descriptors");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Creating reserved buffer descriptors");
 
-                    CreateReservedBuffers();
+                    await CreateReservedBuffers();
 
-                    Logger.WriteTrace(this, $"Reserved buffer descriptors created");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reserved buffer descriptors created");
 
                     Initilialized = true;
                 }
 
-                if (HasPendingRequests)
+                if (!HasPendingRequests)
                 {
-                    Logger.WriteTrace(this, $"Processing descriptor requests");
-
-                    //Copy request collection
-                    var toAssign = requestedDescriptors
-                        .Where(r => r?.Processed == false)
-                        .ToArray();
-
-                    float current = 0;
-
-                    DoProcessRequest(id, progress, ref current, toAssign.Count(), toAssign);
-
-                    Logger.WriteTrace(this, $"Descriptor requests processed");
-
-                    Logger.WriteTrace(this, $"Reallocating buffers");
-
-                    var instancingList = instancingBufferDescriptors
-                        .Where(v => v.Dirty)
-                        .ToArray();
-
-                    var vertexList = vertexBufferDescriptors
-                        .Where(v => v.Dirty)
-                        .ToArray();
-
-                    var indexList = indexBufferDescriptors
-                        .Where(v => v.Dirty)
-                        .ToArray();
-
-                    float total =
-                        toAssign.Count() +
-                        instancingList.Count() +
-                        vertexList.Count() +
-                        indexList.Count();
-
-                    ReallocateInstances(id, progress, ref current, total, instancingList);
-
-                    ReallocateVertexData(id, progress, ref current, total, vertexList);
-
-                    ReallocateIndexData(id, progress, ref current, total, indexList);
-
-                    Logger.WriteTrace(this, $"Buffers reallocated");
+                    return;
                 }
+
+                //Copy request collection
+                var toAssign = requestedDescriptors
+                    .Where(r => r?.Processed == ProcessedStages.Requested)
+                    .ToArray();
+
+                float requestTotal = toAssign.Count();
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing descriptor requests: {requestTotal}");
+
+                float requestCurrent = await DoProcessRequest(id, progress, 0, requestTotal, toAssign);
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Descriptor requests processed: {requestCurrent}");
+
+                var instancingList = instancingBufferDescriptors
+                    .Where(v => v.Dirty)
+                    .ToArray();
+
+                var vertexList = vertexBufferDescriptors
+                    .Where(v => v.Dirty)
+                    .ToArray();
+
+                var indexList = indexBufferDescriptors
+                    .Where(v => v.Dirty)
+                    .ToArray();
+
+                float total =
+                    requestTotal +
+                    instancingList.Count() +
+                    vertexList.Count() +
+                    indexList.Count();
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocating {total - requestTotal} buffers: Vtx[{vertexList.Count()}], Idx[{indexList.Count()}], Ins[{instancingList.Count()}]");
+
+                float current = await ReallocateInstances(id, progress, requestCurrent, total, instancingList);
+
+                current = await ReallocateVertexData(id, progress, current, total, vertexList);
+
+                current = await ReallocateIndexData(id, progress, current, total, indexList);
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Buffers reallocated: {current - requestCurrent}");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Error creating buffers: {ex.Message}", ex);
+                Logger.WriteError(this, $"Loading Group {id ?? "no-id"} => Error creating buffers: {ex.Message}", ex);
+
+                throw;
             }
             finally
             {
                 allocating = false;
-
-                callback?.Invoke();
             }
         }
         /// <summary>
         /// Creates reserved buffers
         /// </summary>
-        private void CreateReservedBuffers()
+        private async Task CreateReservedBuffers()
         {
-            for (int i = 0; i < reservedSlots; i++)
+            await Task.Run(() =>
             {
-                var descriptor = vertexBufferDescriptors[i];
+                for (int i = 0; i < reservedSlots; i++)
+                {
+                    var descriptor = vertexBufferDescriptors[i];
 
-                int bufferIndex = vertexBuffers.Count;
-                int bindingIndex = vertexBufferBindings.Count;
+                    int bufferIndex = vertexBuffers.Count;
+                    int bindingIndex = vertexBufferBindings.Count;
 
-                string name = $"Reserved buffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
+                    string name = $"Reserved buffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
 
-                //Empty buffer
-                vertexBuffers.Add(null);
-                vertexBufferBindings.Add(new VertexBufferBinding());
+                    //Empty buffer
+                    vertexBuffers.Add(null);
+                    vertexBufferBindings.Add(new VertexBufferBinding());
 
-                descriptor.ClearInputs();
+                    descriptor.ClearInputs();
 
-                descriptor.BufferIndex = bufferIndex;
-                descriptor.BufferBindingIndex = bindingIndex;
-                descriptor.AllocatedSize = descriptor.Data.Count();
-                descriptor.Allocated = true;
-                descriptor.ReallocationNeeded = false;
+                    descriptor.BufferIndex = bufferIndex;
+                    descriptor.BufferBindingIndex = bindingIndex;
+                    descriptor.AllocatedSize = descriptor.Data.Count();
+                    descriptor.Allocated = true;
+                    descriptor.ReallocationNeeded = false;
 
-                Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Data.Count()}");
-            }
+                    Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Data.Count()}");
+                }
+            });
         }
         /// <summary>
         /// Do descriptor request processing
@@ -311,18 +351,23 @@ namespace Engine.Common
         /// <param name="current">Current progress value</param>
         /// <param name="total">Total progress value</param>
         /// <param name="toAssign">To assign buffer list</param>
-        private void DoProcessRequest(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<IBufferDescriptorRequest> toAssign)
+        private async Task<float> DoProcessRequest(string id, IProgress<LoadResourceProgress> progress, float current, float total, IEnumerable<IBufferDescriptorRequest> toAssign)
         {
             foreach (var request in toAssign)
             {
-                request.Process(this);
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing {request}");
+
+                await request.ProcessAsync(this);
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processed {request}");
 
                 progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
 
-            Monitor.Enter(requestedDescriptors);
-            requestedDescriptors.RemoveAll(r => r?.Processed != false);
-            Monitor.Exit(requestedDescriptors);
+            //Replaces the bag
+            requestedDescriptors = new ConcurrentBag<IBufferDescriptorRequest>(requestedDescriptors.Where(r => r?.Processed != ProcessedStages.Processed));
+
+            return current;
         }
         /// <summary>
         /// Reallocates the instance data
@@ -332,7 +377,7 @@ namespace Engine.Common
         /// <param name="current">Current progress value</param>
         /// <param name="total">Total progress value</param>
         /// <param name="dirtyList">Dirty buffer list</param>
-        private void ReallocateInstances(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<BufferManagerInstances> dirtyList)
+        private async Task<float> ReallocateInstances(string id, IProgress<LoadResourceProgress> progress, float current, float total, IEnumerable<BufferManagerInstances> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -344,7 +389,7 @@ namespace Engine.Common
                     //Recreate the buffer and binding
                     string name = $"InstancingBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
-                    var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
+                    var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
                     var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
@@ -353,7 +398,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace(this, $"Reallocated {name}. Size {descriptor.Instances}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocated {name}. Size {descriptor.Instances}");
                 }
                 else
                 {
@@ -363,7 +408,7 @@ namespace Engine.Common
                     //Create the buffer and binding
                     string name = $"InstancingBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
-                    var buffer = CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
+                    var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
                     var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
 
                     vertexBuffers.Add(buffer);
@@ -372,7 +417,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Instances}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Created {name} and binding. Size {descriptor.Instances}");
                 }
 
                 //Updates the allocated buffer size
@@ -382,6 +427,8 @@ namespace Engine.Common
 
                 progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
+
+            return current;
         }
         /// <summary>
         /// Reallocates the vertex data
@@ -391,7 +438,7 @@ namespace Engine.Common
         /// <param name="current">Current progress value</param>
         /// <param name="total">Total progress value</param>
         /// <param name="dirtyList">Dirty buffer list</param>
-        private void ReallocateVertexData(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<BufferManagerVertices> dirtyList)
+        private async Task<float> ReallocateVertexData(string id, IProgress<LoadResourceProgress> progress, float current, float total, IEnumerable<BufferManagerVertices> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -402,7 +449,7 @@ namespace Engine.Common
 
                     //Recreate the buffer and binding
                     string name = $"VertexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
-                    var buffer = CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
+                    var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
                     var binding = new VertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
@@ -411,7 +458,7 @@ namespace Engine.Common
                     //Dispose old buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace(this, $"Reallocated {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocated {name} and binding. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -420,7 +467,7 @@ namespace Engine.Common
 
                     //Create the buffer and binding
                     string name = $"VertexBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
-                    var buffer = CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
+                    var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
                     var binding = new VertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
                     vertexBuffers.Add(buffer);
@@ -431,7 +478,7 @@ namespace Engine.Common
                     descriptor.BufferIndex = bufferIndex;
                     descriptor.BufferBindingIndex = bindingIndex;
 
-                    Logger.WriteTrace(this, $"Created {name} and binding. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Created {name} and binding. Size {descriptor.Data.Count()}");
                 }
 
                 descriptor.ClearInstancingInputs();
@@ -449,6 +496,8 @@ namespace Engine.Common
 
                 progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
+
+            return current;
         }
         /// <summary>
         /// Reallocates the index data
@@ -458,7 +507,7 @@ namespace Engine.Common
         /// <param name="current">Current progress value</param>
         /// <param name="total">Total progress value</param>
         /// <param name="dirtyList">Dirty buffer list</param>
-        private void ReallocateIndexData(string id, IProgress<LoadResourceProgress> progress, ref float current, float total, IEnumerable<BufferManagerIndices> dirtyList)
+        private async Task<float> ReallocateIndexData(string id, IProgress<LoadResourceProgress> progress, float current, float total, IEnumerable<BufferManagerIndices> dirtyList)
         {
             foreach (var descriptor in dirtyList)
             {
@@ -466,7 +515,7 @@ namespace Engine.Common
                 {
                     //Recreate the buffer
                     string name = $"IndexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
-                    var buffer = CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
+                    var buffer = await CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     //Reserve current buffer
                     var oldBuffer = indexBuffers[descriptor.BufferIndex];
@@ -475,7 +524,7 @@ namespace Engine.Common
                     //Dispose buffer
                     oldBuffer?.Dispose();
 
-                    Logger.WriteTrace(this, $"Reallocated {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocated {name}. Size {descriptor.Data.Count()}");
                 }
                 else
                 {
@@ -483,13 +532,13 @@ namespace Engine.Common
 
                     //Recreate the buffer
                     string name = $"IndexBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
-                    var buffer = CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
+                    var buffer = await CreateIndexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
 
                     indexBuffers.Add(buffer);
 
                     descriptor.BufferIndex = bufferIndex;
 
-                    Logger.WriteTrace(this, $"Created {name}. Size {descriptor.Data.Count()}");
+                    Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Created {name}. Size {descriptor.Data.Count()}");
                 }
 
                 //Updates the allocated buffer size
@@ -499,6 +548,8 @@ namespace Engine.Common
 
                 progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
             }
+
+            return current;
         }
 
         /// <summary>
@@ -535,6 +586,8 @@ namespace Engine.Common
                 Action = BufferDescriptorRequestActions.Add,
             };
 
+            Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => AddVertexData {request}.");
+
             requestedDescriptors.Add(request);
 
             return request.VertexDescriptor;
@@ -555,6 +608,8 @@ namespace Engine.Common
                 Action = BufferDescriptorRequestActions.Add,
             };
 
+            Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => AddInstancingData {request}.");
+
             requestedDescriptors.Add(request);
 
             return request.Descriptor;
@@ -574,6 +629,8 @@ namespace Engine.Common
                 Dynamic = dynamic,
                 Action = BufferDescriptorRequestActions.Add,
             };
+
+            Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => AddIndexData {request}.");
 
             requestedDescriptors.Add(request);
 
@@ -764,7 +821,12 @@ namespace Engine.Common
         /// <param name="descriptor">Buffer descriptor</param>
         public bool SetIndexBuffer(BufferDescriptor descriptor)
         {
-            if (descriptor?.Ready != true)
+            if (descriptor == null)
+            {
+                return true;
+            }
+
+            if (!descriptor.Ready)
             {
                 return false;
             }
@@ -793,7 +855,12 @@ namespace Engine.Common
         /// <param name="topology">Topology</param>
         public bool SetInputAssembler(EngineEffectTechnique technique, BufferDescriptor descriptor, Topology topology)
         {
-            if (descriptor?.Ready != true)
+            if (descriptor == null)
+            {
+                return true;
+            }
+
+            if (!descriptor.Ready)
             {
                 return false;
             }
@@ -853,14 +920,14 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data?.Any() == true)
+            if (data?.Any() != true)
             {
-                var buffer = vertexBuffers[vertexBufferDescriptor.BufferIndex];
-
-                game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
+                return true;
             }
 
-            return true;
+            var buffer = vertexBuffers[vertexBufferDescriptor.BufferIndex];
+
+            return game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
         }
         /// <summary>
         /// Writes instancing data
@@ -888,16 +955,14 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data?.Any() == true)
+            if (data?.Any() != true)
             {
-                var instancingBuffer = vertexBuffers[instancingBufferDescriptor.BufferIndex];
-                if (instancingBuffer != null)
-                {
-                    game.Graphics.WriteDiscardBuffer(instancingBuffer, descriptor.BufferOffset, data);
-                }
+                return true;
             }
 
-            return true;
+            var instancingBuffer = vertexBuffers[instancingBufferDescriptor.BufferIndex];
+
+            return game.Graphics.WriteDiscardBuffer(instancingBuffer, descriptor.BufferOffset, data);
         }
         /// <summary>
         /// Writes imdex data into buffer
@@ -924,14 +989,14 @@ namespace Engine.Common
                 return false;
             }
 
-            if (data?.Any() == true)
+            if (data?.Any() != true)
             {
-                var buffer = indexBuffers[indexBufferDescriptor.BufferIndex];
-
-                game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
+                return true;
             }
 
-            return true;
+            var buffer = indexBuffers[indexBufferDescriptor.BufferIndex];
+
+            return game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
         }
     }
 }

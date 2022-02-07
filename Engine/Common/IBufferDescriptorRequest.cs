@@ -1,4 +1,5 @@
-﻿
+﻿using System.Threading.Tasks;
+
 namespace Engine.Common
 {
     /// <summary>
@@ -17,11 +18,16 @@ namespace Engine.Common
         /// <summary>
         /// Gets wheter the descriptor is processed into the buffer manager or not
         /// </summary>
-        bool Processed { get; }
+        ProcessedStages Processed { get; }
         /// <summary>
         /// Updates the buffer descriptor
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
         void Process(BufferManager bufferManager);
+        /// <summary>
+        /// Updates the buffer descriptor
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        Task ProcessAsync(BufferManager bufferManager);
     }
 }

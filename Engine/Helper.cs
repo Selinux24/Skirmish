@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -472,7 +473,7 @@ namespace Engine
         /// <returns>A string that consists of the members of values delimited by the separator string</returns>
         public static string Join<T>(this IEnumerable<T> list, string separator = "")
         {
-            var res = list.Select(a=> $"{a}");
+            var res = list.Select(a => $"{a}");
 
             return string.Join(separator, res);
         }
@@ -548,6 +549,23 @@ namespace Engine
             }
 
             return true;
+        }
+
+        #endregion
+
+        #region Concurrent Utils
+
+        /// <summary>
+        /// Clears a concurrent bag list
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="source">Concurrent bag</param>
+        public static void Clear<T>(this ConcurrentBag<T> source)
+        {
+            while (!source.IsEmpty)
+            {
+                source.TryTake(out T _);
+            }
         }
 
         #endregion

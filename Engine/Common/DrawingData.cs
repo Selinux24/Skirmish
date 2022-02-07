@@ -115,7 +115,11 @@ namespace Engine.Common
                 var view = await game.ResourceManager.RequestResource(info);
                 if (view == null)
                 {
-                    Logger.WriteWarning(nameof(DrawingData), $"Texture cannot be requested: {info}");
+                    string errorMessage = $"Texture cannot be requested: {info}";
+
+                    Logger.WriteError(nameof(DrawingData), errorMessage);
+
+                    throw new EngineException(errorMessage);
                 }
 
                 drw.Textures.Add(images.Key, view);
@@ -458,10 +462,17 @@ namespace Engine.Common
                 return;
             }
 
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {drw.Meshes.Keys.ToArray().Join("|")}");
+
+            var beforeCount = game.BufferManager.PendingRequestCount;
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
+
             var taskList = drw.Meshes.Values.Select(dictionary =>
             {
                 return Task.Run(() =>
                 {
+                    Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {dictionary.Keys.ToArray().Join("|")}");
+
                     if (!dictionary.Any())
                     {
                         return;
@@ -469,18 +480,44 @@ namespace Engine.Common
 
                     foreach (var mesh in dictionary.Values)
                     {
-                        //Vertices
-                        mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices, instancingBuffer);
-
-                        if (mesh.Indexed)
+                        try
                         {
-                            //Indices
-                            mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices);
+                            Logger.WriteTrace(nameof(DrawingData), $"{name}.{mesh.Name} Processing Mesh => {mesh}");
+
+                            //Vertices
+                            mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices, instancingBuffer);
+
+                            if (mesh.Indexed)
+                            {
+                                //Indices
+                                mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices);
+                            }
+
+                            Logger.WriteTrace(nameof(DrawingData), $"{name}.{mesh.Name} Processed Mesh => {mesh}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.WriteError(nameof(DrawingData), $"{name}.{mesh.Name} Error Processing Mesh => {ex.Message}", ex);
+
+                            throw;
                         }
                     }
                 });
             });
-            await Task.WhenAll(taskList);
+
+            try
+            {
+                await Task.WhenAll(taskList);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(nameof(DrawingData), $"{name} Error processing parallel tasks => {ex.Message}", ex);
+
+                throw;
+            }
+
+            var afterCount = game.BufferManager.PendingRequestCount;
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
         }
         /// <summary>
         /// Initialize lights

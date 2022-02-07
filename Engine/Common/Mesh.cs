@@ -325,5 +325,18 @@ namespace Engine.Common
 
             return triangleCache?.ToArray() ?? new Triangle[] { };
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            if (Indexed)
+            {
+                return $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}; Indices: {Indices?.Count() ?? 0}";
+            }
+            else
+            {
+                return $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}";
+            }
+        }
     }
 }

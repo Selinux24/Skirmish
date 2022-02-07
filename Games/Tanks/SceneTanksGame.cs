@@ -113,6 +113,8 @@ namespace Tanks
 
         private DecalDrawer decalDrawer;
 
+        private readonly string loadGroupSceneObjects = "loadGroupSceneObjects";
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -161,12 +163,18 @@ namespace Tanks
 
         public override void OnReportProgress(LoadResourceProgress value)
         {
-            progressValue = Math.Max(progressValue, value.Progress);
-
-            if (loadingBar != null)
+            if (loadingBar == null)
             {
+                return;
+            }
+
+            if (value.Id == loadGroupSceneObjects)
+            {
+                progressValue = Math.Max(progressValue, value.Progress);
+
                 loadingBar.ProgressValue = progressValue;
                 loadingBar.Caption.Text = $"{(int)(progressValue * 100f)}%";
+                loadingBar.Visible = true;
             }
         }
 
@@ -182,6 +190,27 @@ namespace Tanks
             LoadResourcesAsync(
                 InitializeLoadingUI(),
                 LoadLoadingUICompleted);
+        }
+        private async Task InitializeLoadingUI()
+        {
+            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
+            fadePanel.Visible = false;
+
+            loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
+            loadingText.TextForeColor = Color.Yellow;
+            loadingText.TextShadowColor = Color.Orange;
+            loadingText.TextHorizontalAlign = TextHorizontalAlign.Center;
+            loadingText.TextVerticalAlign = TextVerticalAlign.Middle;
+            loadingText.GrowControlWithText = false;
+            loadingText.Visible = false;
+
+            loadingBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
+            loadingBar.ProgressColor = Color.CornflowerBlue;
+            loadingBar.BaseColor = Color.Yellow;
+            loadingBar.Caption.TextForeColor = Color.Black;
+            loadingBar.Caption.Text = "0%";
+            loadingBar.ProgressValue = 0;
+            loadingBar.Visible = false;
         }
         private async Task LoadLoadingUICompleted(LoadResourcesResult res)
         {
@@ -203,30 +232,7 @@ namespace Tanks
 
             await Task.Delay(2000);
 
-            loadingBar.ProgressValue = 0;
-            loadingBar.Visible = true;
-
             LoadUI();
-        }
-        private async Task InitializeLoadingUI()
-        {
-            fadePanel = await AddComponentUI<UIPanel, UIPanelDescription>("FadePanel", "FadePanel", UIPanelDescription.Screen(this, Color4.Black * 0.3333f), LayerUIEffects);
-            fadePanel.Visible = false;
-
-            loadingText = await AddComponentUI<UITextArea, UITextAreaDescription>("LoadingText", "LoadingText", UITextAreaDescription.DefaultFromFile(fontFilename, 40, true), LayerUIEffects + 1);
-            loadingText.TextForeColor = Color.Yellow;
-            loadingText.TextShadowColor = Color.Orange;
-            loadingText.TextHorizontalAlign = TextHorizontalAlign.Center;
-            loadingText.TextVerticalAlign = TextVerticalAlign.Middle;
-            loadingText.GrowControlWithText = false;
-            loadingText.Visible = false;
-
-            loadingBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("LoadingBar", "LoadingBar", UIProgressBarDescription.DefaultFromFile(fontFilename, 20, true), LayerUIEffects + 1);
-            loadingBar.ProgressColor = Color.CornflowerBlue;
-            loadingBar.BaseColor = Color.Yellow;
-            loadingBar.Caption.TextForeColor = Color.Black;
-            loadingBar.Caption.Text = "0%";
-            loadingBar.Visible = false;
         }
 
         private void LoadUI()
@@ -235,7 +241,9 @@ namespace Tanks
             taskList.AddRange(InitializeUI());
             taskList.AddRange(InitializeModels());
 
-            LoadResourcesAsync(taskList, LoadUICompleted);
+            var loadingGroup = LoadResourceGroup.FromTasks(loadGroupSceneObjects, taskList);
+
+            LoadResourcesAsync(loadingGroup, LoadUICompleted);
         }
 
         private Task[] InitializeUI()

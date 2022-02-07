@@ -766,6 +766,14 @@ namespace Engine
 
         }
         /// <summary>
+        /// Buffer progress reporting
+        /// </summary>
+        /// <param name="value">Progress value from 0.0f to 1.0f</param>
+        public virtual void OnReportProgressBuffers(LoadResourceProgress value)
+        {
+
+        }
+        /// <summary>
         /// Game resources loading event
         /// </summary>
         /// <param name="id">Batch id</param>

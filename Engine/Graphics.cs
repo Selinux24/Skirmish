@@ -3105,10 +3105,10 @@ namespace Engine
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        internal void WriteDiscardBuffer<T>(Buffer buffer, IEnumerable<T> data)
+        internal bool WriteDiscardBuffer<T>(Buffer buffer, IEnumerable<T> data)
             where T : struct
         {
-            WriteDiscardBuffer(buffer, 0, data);
+            return WriteDiscardBuffer(buffer, 0, data);
         }
         /// <summary>
         /// Writes data into buffer
@@ -3118,23 +3118,39 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        internal void WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
+        internal bool WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
+            if (buffer == null)
+            {
+                return false;
+            }
+
             if (data?.Any() != true)
             {
-                return;
+                return true;
             }
 
-            deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-            using (stream)
+            try
             {
-                stream.Position = Marshal.SizeOf(default(T)) * offset;
-                stream.WriteRange(data.ToArray());
-            }
-            deviceContext.UnmapSubresource(buffer, 0);
+                deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                using (stream)
+                {
+                    stream.Position = Marshal.SizeOf(default(T)) * offset;
+                    stream.WriteRange(data.ToArray());
+                }
+                deviceContext.UnmapSubresource(buffer, 0);
 
-            Counters.BufferWrites++;
+                Counters.BufferWrites++;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, ex);
+
+                return false;
+            }
         }
         /// <summary>
         /// Writes data into buffer
@@ -3143,10 +3159,10 @@ namespace Engine
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, IEnumerable<T> data)
+        internal bool WriteNoOverwriteBuffer<T>(Buffer buffer, IEnumerable<T> data)
             where T : struct
         {
-            WriteNoOverwriteBuffer(buffer, 0, data);
+            return WriteNoOverwriteBuffer(buffer, 0, data);
         }
         /// <summary>
         /// Writes data into buffer
@@ -3156,23 +3172,39 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        internal void WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
+        internal bool WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
+            if (buffer == null)
+            {
+                return false;
+            }
+
             if (data?.Any() != true)
             {
-                return;
+                return true;
             }
 
-            deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
-            using (stream)
+            try
             {
-                stream.Position = Marshal.SizeOf(default(T)) * offset;
-                stream.WriteRange(data.ToArray());
-            }
-            deviceContext.UnmapSubresource(buffer, 0);
+                var dataBox = deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+                using (stream)
+                {
+                    stream.Position = Marshal.SizeOf(default(T)) * offset;
+                    stream.WriteRange(data.ToArray());
+                }
+                deviceContext.UnmapSubresource(buffer, 0);
 
-            Counters.BufferWrites++;
+                Counters.BufferWrites++;
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, ex);
+
+                return false;
+            }
         }
 
         /// <summary>

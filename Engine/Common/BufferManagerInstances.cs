@@ -82,7 +82,7 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Adds a buffer descritor to the internal descriptos list
+        /// Adds a buffer descritor to the internal descriptors list
         /// </summary>
         /// <param name="descriptor">Descriptor</param>
         /// <param name="id">Id</param>

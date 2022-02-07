@@ -100,7 +100,7 @@ namespace Engine
 
             MaximumCount = -1;
 
-            hasIndependantTransforms = (Description.TransformDependences?.Any() == true);
+            hasIndependantTransforms = Description.TransformDependences?.Any() == true;
         }
 
         /// <inheritdoc/>
@@ -108,15 +108,14 @@ namespace Engine
         {
             if (instances.Any())
             {
-                Parallel.ForEach(instances, i =>
-                {
-                    if (i.Active)
-                    {
-                        i.Update(context);
-                    }
-                });
+                instances
+                    .Where(i => i.Active)
+                    .AsParallel()
+                    .ForAll(i => i.Update(context));
 
-                instancesTmp = instances.Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None).ToArray();
+                instancesTmp = instances
+                    .Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)
+                    .ToArray();
             }
 
             //Process only visible instances
@@ -248,7 +247,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteTrace(this, $"{Name} - DrawShadows {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
@@ -327,6 +326,8 @@ namespace Engine
         /// <returns>Returns the number of drawn triangles</returns>
         private int DrawShadowMesh(IShadowMapDrawer effect, DrawingData drawingData, string meshName, int index, int length)
         {
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {index} Length {length}.");
+
             int count = 0;
 
             var graphics = Game.Graphics;
@@ -338,6 +339,7 @@ namespace Engine
                 var mesh = meshDict[materialName];
                 if (!mesh.Ready)
                 {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
                     continue;
                 }
 
@@ -352,15 +354,24 @@ namespace Engine
 
                 effect.UpdatePerObject(AnimationShadowDrawInfo.Empty, materialInfo, 0);
 
-                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+                if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
+                {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => IndexBuffer not set");
+                    continue;
+                }
 
                 var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
-                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+                if (!BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology))
+                {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => InputAssembler not set");
+                    continue;
+                }
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {index} Length {length}");
                     mesh.Draw(graphics, index, length);
                 }
             }
@@ -383,7 +394,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteTrace(this, $"{Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
@@ -466,6 +477,8 @@ namespace Engine
         /// <returns>Returns the number of drawn triangles</returns>
         private int DrawMesh(DrawContext context, IGeometryDrawer effect, DrawingData drawingData, string meshName, int index, int length)
         {
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {index} Length {length}. {context.DrawerMode}");
+
             int count = 0;
 
             var graphics = Game.Graphics;
@@ -477,6 +490,7 @@ namespace Engine
                 var mesh = meshDict[materialName];
                 if (!mesh.Ready)
                 {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
                     continue;
                 }
 
@@ -485,6 +499,7 @@ namespace Engine
                 bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
                 {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
                     continue;
                 }
 
@@ -498,15 +513,24 @@ namespace Engine
 
                 effect.UpdatePerObject(AnimationDrawInfo.Empty, materialInfo, 0);
 
-                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+                if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
+                {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => IndexBuffer not set");
+                    continue;
+                }
 
                 var technique = effect.GetTechnique(mesh.VertextType, true);
-                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+                if (!BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology))
+                {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => InputAssembler not set");
+                    continue;
+                }
 
                 for (int p = 0; p < technique.PassCount; p++)
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {index} Length {length}");
                     mesh.Draw(graphics, index, length);
                 }
             }

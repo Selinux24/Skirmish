@@ -148,6 +148,10 @@ namespace Engine
         /// </summary>
         public readonly IProgress<LoadResourceProgress> Progress;
         /// <summary>
+        /// Buffer progress reporter
+        /// </summary>
+        public readonly IProgress<LoadResourceProgress> ProgressBuffers;
+        /// <summary>
         /// Gets wheter a resource loading is running
         /// </summary>
         public bool ResourceLoadRuning { get; private set; } = false;
@@ -284,6 +288,7 @@ namespace Engine
             GameTime = new GameTime();
 
             Progress = new Progress<LoadResourceProgress>(ReportProgress);
+            ProgressBuffers = new Progress<LoadResourceProgress>(ReportProgressBuffers);
 
             BufferManager = new BufferManager(this);
 
@@ -543,6 +548,15 @@ namespace Engine
         {
             var activeScene = scenes.FirstOrDefault(s => s.Active);
             activeScene?.OnReportProgress(value);
+        }
+        /// <summary>
+        /// Report buffer progress callback
+        /// </summary>
+        /// <param name="value">Progress value from 0.0f to 1.0f</param>
+        public void ReportProgressBuffers(LoadResourceProgress value)
+        {
+            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            activeScene?.OnReportProgressBuffers(value);
         }
 
         /// <summary>
@@ -836,7 +850,7 @@ namespace Engine
                 Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
             }
 
-            IntegrateResources(taskGroup.Id, scene);
+            await IntegrateResources(taskGroup.Id, scene);
 
             return new LoadResourcesResult<T>
             {
@@ -874,7 +888,7 @@ namespace Engine
                 Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
             }
 
-            IntegrateResources(taskGroup.Id, scene);
+            await IntegrateResources(taskGroup.Id, scene);
 
             return new LoadResourcesResult
             {
@@ -886,18 +900,18 @@ namespace Engine
         /// Integrates the requested resources into the resource manager
         /// </summary>
         /// <param name="scene">Scene</param>
-        private void IntegrateResources(string id, Scene scene)
+        private async Task IntegrateResources(string id, Scene scene)
         {
             try
             {
                 ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
 
                 Logger.WriteInformation(this, "BufferManager: Recreating buffers");
-                BufferManager.CreateBuffers(id, Progress);
+                await BufferManager.CreateBuffersAsync(id, ProgressBuffers);
                 Logger.WriteInformation(this, "BufferManager: Buffers recreated");
 
                 Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                ResourceManager.CreateResources(id, Progress);
+                ResourceManager.CreateResources(id, ProgressBuffers);
                 Logger.WriteInformation(this, "ResourceManager: New resources created");
 
                 ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
