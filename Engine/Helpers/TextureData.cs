@@ -75,7 +75,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename)
         {
-            return ReadTexture(filename, Rectangle.Empty);
+            return ReadTextureArray(filename, new Rectangle[] { }).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -94,7 +94,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream)
         {
-            return ReadTexture(stream, Rectangle.Empty);
+            return ReadTextureArray(stream, new Rectangle[] { }).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data from a stream
@@ -173,7 +173,14 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data list</returns>
         public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<string> filenames)
         {
-            return ReadTextureArray(filenames, Rectangle.Empty);
+            List<TextureData> textureList = new List<TextureData>();
+
+            foreach (var file in filenames)
+            {
+                textureList.Add(ReadTexture(file));
+            }
+
+            return textureList;
         }
         /// <summary>
         /// Reads a texture data list from a file list
@@ -219,7 +226,14 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data list</returns>
         public static IEnumerable<TextureData> ReadTextureArray(IEnumerable<MemoryStream> streams)
         {
-            return ReadTextureArray(streams, Rectangle.Empty);
+            List<TextureData> textureList = new List<TextureData>();
+
+            foreach (var stream in streams)
+            {
+                textureList.Add(ReadTexture(stream));
+            }
+
+            return textureList;
         }
         /// <summary>
         /// Reads a texture data list from a stream list

@@ -703,7 +703,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Vertex buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        internal int AddVertexBufferDescription(BufferManagerVertices description)
+        public int AddVertexBufferDescription(BufferManagerVertices description)
         {
             int index = vertexBufferDescriptors.Count;
 
@@ -717,7 +717,7 @@ namespace Engine.Common
         /// <param name="vertexType">Vertex type</param>
         /// <param name="dynamic">Dynamic</param>
         /// <returns>Returns the internal description index</returns>
-        internal int FindVertexBufferDescription(VertexTypes vertexType, bool dynamic)
+        public int FindVertexBufferDescription(VertexTypes vertexType, bool dynamic)
         {
             return vertexBufferDescriptors.FindIndex(k =>
                 k.Type == vertexType &&
@@ -728,7 +728,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the description</returns>
-        internal BufferManagerVertices GetVertexBufferDescription(int index)
+        public BufferManagerVertices GetVertexBufferDescription(int index)
         {
             return vertexBufferDescriptors[index];
         }
@@ -737,7 +737,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Instancing buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        internal int AddInstancingBufferDescription(BufferManagerInstances description)
+        public int AddInstancingBufferDescription(BufferManagerInstances description)
         {
             int index = instancingBufferDescriptors.Count;
 
@@ -750,7 +750,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dynamic">Dynamic</param>
         /// <returns>Returns the internal description index</returns>
-        internal int FindInstancingBufferDescription(bool dynamic)
+        public int FindInstancingBufferDescription(bool dynamic)
         {
             return instancingBufferDescriptors.FindIndex(k => k.Dynamic == dynamic);
         }
@@ -759,7 +759,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the description</returns>
-        internal BufferManagerInstances GetInstancingBufferDescription(int index)
+        public BufferManagerInstances GetInstancingBufferDescription(int index)
         {
             return instancingBufferDescriptors[index];
         }
@@ -768,7 +768,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Index buffer description</param>
         /// <returns>Returns the internal description index</returns>
-        internal int AddIndexBufferDescription(BufferManagerIndices description)
+        public int AddIndexBufferDescription(BufferManagerIndices description)
         {
             int index = indexBufferDescriptors.Count;
 
@@ -781,7 +781,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dynamic">Dynamic</param>
         /// <returns>Returns the internal description index</returns>
-        internal int FindIndexBufferDescription(bool dynamic)
+        public int FindIndexBufferDescription(bool dynamic)
         {
             return indexBufferDescriptors.FindIndex(k => k.Dynamic == dynamic);
         }
@@ -790,7 +790,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the description</returns>
-        internal BufferManagerIndices GetIndexBufferDescription(int index)
+        public BufferManagerIndices GetIndexBufferDescription(int index)
         {
             return indexBufferDescriptors[index];
         }

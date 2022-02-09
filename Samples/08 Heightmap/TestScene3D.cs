@@ -1227,43 +1227,7 @@ namespace Heightmap
             UpdateDust(gameTime);
             UpdateDrawers();
         }
-        private void UpdatePlayer()
-        {
-            if (Game.Input.KeyJustReleased(Keys.P))
-            {
-                playerFlying = !playerFlying;
 
-                if (playerFlying)
-                {
-                    Camera.Following = null;
-                }
-                else
-                {
-                    var eyePos = new Vector3(0, agent.Height * 0.8f, 0);
-                    var offset = (eyePos * 1.25f) - (Vector3.Right * 1.25f) - (Vector3.BackwardLH * 10f);
-                    var view = soldier.Manipulator.Forward;
-
-                    Camera.Following = new CameraFollower(soldier.Manipulator, offset, view, 10f);
-                }
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.L))
-            {
-                lantern.Enabled = !lantern.Enabled;
-                lanternFixed = false;
-            }
-
-            if (Game.Input.KeyJustReleased(Keys.O))
-            {
-                foreach (var t in troops.GetInstances())
-                {
-                    var bbox = t.GetBoundingBox();
-                    BoundingCylinder bc = new BoundingCylinder(t.Manipulator.Position, 1.5f, bbox.Height);
-
-                    NavigationGraph.AddObstacle(bc);
-                }
-            }
-        }
         private void UpdateCamera(GameTime gameTime)
         {
             Vector3 position;
@@ -1274,6 +1238,11 @@ namespace Heightmap
             else
             {
                 position = UpdateWalkingCamera(gameTime);
+            }
+
+            if (playerFlying)
+            {
+                return;
             }
 
             if (!udaptingGraph)
@@ -1378,6 +1347,43 @@ namespace Heightmap
             soldier.Manipulator.UpdateInternals(true);
 
             return soldier.Manipulator.Position;
+        }
+        private void UpdatePlayer()
+        {
+            if (Game.Input.KeyJustReleased(Keys.P))
+            {
+                playerFlying = !playerFlying;
+
+                if (playerFlying)
+                {
+                    Camera.Following = null;
+                }
+                else
+                {
+                    var eyePos = new Vector3(0, agent.Height * 0.8f, 0);
+                    var offset = (eyePos * 1.25f) - (Vector3.Right * 1.25f) - (Vector3.BackwardLH * 10f);
+                    var view = soldier.Manipulator.Forward;
+
+                    Camera.Following = new CameraFollower(soldier.Manipulator, offset, view, 10f);
+                }
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.L))
+            {
+                lantern.Enabled = !lantern.Enabled;
+                lanternFixed = false;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.O))
+            {
+                foreach (var t in troops.GetInstances())
+                {
+                    var bbox = t.GetBoundingBox();
+                    BoundingCylinder bc = new BoundingCylinder(t.Manipulator.Position, 1.5f, bbox.Height);
+
+                    NavigationGraph.AddObstacle(bc);
+                }
+            }
         }
         private void UpdateInputDebugInfo(GameTime gameTime)
         {
@@ -1505,66 +1511,25 @@ namespace Heightmap
                 }
             }
         }
-        private void UpdateDrawers()
+
+        private void UpdateLights()
         {
-            if (showSoldierDEBUG)
+            float d = 1f;
+            float v = 5f;
+
+            var x = d * (float)Math.Cos(v * Game.GameTime.TotalSeconds);
+            var z = d * (float)Math.Sin(v * Game.GameTime.TotalSeconds);
+
+            spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
+            spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
+
+            spotLight1.Enabled = false;
+            spotLight2.Enabled = false;
+
+            if (lantern.Enabled && !lanternFixed)
             {
-                Color color = new Color(Color.Red.ToColor3(), 0.6f);
-
-                var tris = soldier.GetTriangles();
-
-                if (soldierTris == null)
-                {
-                    Task.Run(async () =>
-                    {
-                        var desc = new PrimitiveListDrawerDescription<Triangle>()
-                        {
-                            DepthEnabled = false,
-                            Primitives = tris.ToArray(),
-                            Color = color
-                        };
-                        soldierTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
-                    }).ConfigureAwait(true);
-                }
-                else
-                {
-                    soldierTris.SetPrimitives(color, tris);
-                }
-
-                BoundingBox[] bboxes = new BoundingBox[]
-                {
-                    soldier.GetBoundingBox(true),
-                    troops[0].GetBoundingBox(true),
-                    troops[1].GetBoundingBox(true),
-                    troops[2].GetBoundingBox(true),
-                    troops[3].GetBoundingBox(true),
-                };
-                if (soldierLines == null)
-                {
-                    Task.Run(async () =>
-                    {
-                        var desc = new PrimitiveListDrawerDescription<Line3D>()
-                        {
-                            Primitives = Line3D.CreateWiredBox(bboxes).ToArray(),
-                            Color = color
-                        };
-                        soldierLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
-                    }).ConfigureAwait(true);
-                }
-                else
-                {
-                    soldierLines.SetPrimitives(color, Line3D.CreateWiredBox(bboxes));
-                }
-            }
-
-            if (drawDrawVolumes)
-            {
-                UpdateLightDrawingVolumes();
-            }
-
-            if (drawCullVolumes)
-            {
-                UpdateLightCullingVolumes();
+                lantern.Position = Camera.Position + (Camera.Left * 2);
+                lantern.Direction = Camera.Direction;
             }
         }
         private void UpdateWind(GameTime gameTime)
@@ -1630,24 +1595,72 @@ namespace Heightmap
 
             _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDust, emitter);
         }
-        private void UpdateLights()
+        private void ToggleFog()
         {
-            float d = 1f;
-            float v = 5f;
-
-            var x = d * (float)Math.Cos(v * Game.GameTime.TotalSeconds);
-            var z = d * (float)Math.Sin(v * Game.GameTime.TotalSeconds);
-
-            spotLight1.Direction = Vector3.Normalize(new Vector3(x, -1, z));
-            spotLight2.Direction = Vector3.Normalize(new Vector3(-x, -1, -z));
-
-            spotLight1.Enabled = false;
-            spotLight2.Enabled = false;
-
-            if (lantern.Enabled && !lanternFixed)
+            Lights.FogStart = Lights.FogStart == 0f ? fogStart : 0f;
+            Lights.FogRange = Lights.FogRange == 0f ? fogRange : 0f;
+        }
+        private void UpdateDrawers()
+        {
+            if (showSoldierDEBUG)
             {
-                lantern.Position = Camera.Position + (Camera.Left * 2);
-                lantern.Direction = Camera.Direction;
+                UpdateSoldierTris();
+            }
+
+            if (drawDrawVolumes)
+            {
+                UpdateLightDrawingVolumes();
+            }
+
+            if (drawCullVolumes)
+            {
+                UpdateLightCullingVolumes();
+            }
+        }
+        private void UpdateSoldierTris()
+        {
+            Color color = new Color(Color.Red.ToColor3(), 0.6f);
+
+            var tris = soldier.GetTriangles();
+
+            if (soldierTris == null)
+            {
+                var desc = new PrimitiveListDrawerDescription<Triangle>()
+                {
+                    DepthEnabled = false,
+                    Primitives = tris.ToArray(),
+                    Color = color
+                };
+                var t = AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("SoldierTris", "SoldierTris", desc);
+                soldierTris = t.ConfigureAwait(true).GetAwaiter().GetResult();
+            }
+            else
+            {
+                soldierTris.SetPrimitives(color, tris);
+            }
+
+            BoundingBox[] bboxes = new BoundingBox[]
+            {
+                soldier.GetBoundingBox(true),
+                troops[0].GetBoundingBox(true),
+                troops[1].GetBoundingBox(true),
+                troops[2].GetBoundingBox(true),
+                troops[3].GetBoundingBox(true),
+            };
+
+            if (soldierLines == null)
+            {
+                var desc = new PrimitiveListDrawerDescription<Line3D>()
+                {
+                    Primitives = Line3D.CreateWiredBox(bboxes).ToArray(),
+                    Color = color
+                };
+                var t = AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
+                soldierLines = t.ConfigureAwait(true).GetAwaiter().GetResult();
+            }
+            else
+            {
+                soldierLines.SetPrimitives(color, Line3D.CreateWiredBox(bboxes));
             }
         }
         private void UpdateLightDrawingVolumes()
@@ -1690,11 +1703,6 @@ namespace Heightmap
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
-        private void ToggleFog()
-        {
-            Lights.FogStart = Lights.FogStart == 0f ? fogStart : 0f;
-            Lights.FogRange = Lights.FogRange == 0f ? fogRange : 0f;
-        }
 
         private void UpdateGraphNodes(AgentType agent)
         {
@@ -1703,11 +1711,11 @@ namespace Heightmap
                 return;
             }
 
+            updatingNodes = true;
+
             // Fire and forget
             Task.Run(() =>
             {
-                updatingNodes = true;
-
                 var nodes = GetNodes(agent).OfType<GraphNode>();
                 if (nodes.Any())
                 {

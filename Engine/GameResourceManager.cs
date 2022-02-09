@@ -3,12 +3,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Engine resource manager
@@ -117,7 +117,7 @@ namespace Engine
         /// <summary>
         /// Creating resources flag
         /// </summary>
-        private bool creatingResources = false;
+        private bool allocating = false;
 
         /// <summary>
         /// Gets wheter the resource manager has requests to process or not
@@ -181,39 +181,38 @@ namespace Engine
         /// </summary>
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
-        /// <param name="callback">Callback</param>
-        public void CreateResources(string id, IProgress<LoadResourceProgress> progress, Action callback = null)
+        public void CreateResources(string id, IProgress<LoadResourceProgress> progress)
         {
-            if (creatingResources)
+            if (allocating)
             {
-                callback?.Invoke();
-
-                return;
-            }
-
-            var pendingRequests = GetPendingRequests();
-            if (!pendingRequests.Any())
-            {
-                callback?.Invoke();
-
                 return;
             }
 
             try
             {
-                creatingResources = true;
+                allocating = true;
+
+                var pendingRequests = requestedResources.ToArray();
+                if (!pendingRequests.Any())
+                {
+                    return;
+                }
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Count()}");
 
                 ProcessPendingRequests(id, progress, pendingRequests);
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Count()}");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Error creating new resources: {ex.Message}", ex);
+                Logger.WriteError(this, $"Loading Group {id ?? "no-id"} => Error creating resources: {ex.Message}", ex);
+
+                throw;
             }
             finally
             {
-                creatingResources = false;
-
-                callback?.Invoke();
+                allocating = false;
             }
         }
         /// <summary>
@@ -262,21 +261,26 @@ namespace Engine
             progress?.Report(new LoadResourceProgress { Id = id, Progress = 1f });
         }
         /// <summary>
-        /// Gets the pending requests
-        /// </summary>
-        private IEnumerable<KeyValuePair<string, IGameResourceRequest>> GetPendingRequests()
-        {
-            return requestedResources.ToArray();
-        }
-        /// <summary>
         /// Removes the specified requests keys
         /// </summary>
         /// <param name="requestKeys">Request keys list</param>
         private void RemoveRequests(IEnumerable<string> requestKeys)
         {
-            foreach (string key in requestKeys)
+            var toRemove = requestKeys.ToList();
+
+            while (toRemove.Any())
             {
-                requestedResources.TryRemove(key, out _);
+                if (!requestedResources.ContainsKey(toRemove[0]))
+                {
+                    toRemove.RemoveAt(0);
+
+                    continue;
+                }
+
+                if (requestedResources.TryRemove(toRemove[0], out _))
+                {
+                    toRemove.RemoveAt(0);
+                }
             }
         }
 

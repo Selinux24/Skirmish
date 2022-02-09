@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    class BufferManagerInstances
+    public class BufferManagerInstances
     {
         /// <summary>
         /// Instancing descriptor list

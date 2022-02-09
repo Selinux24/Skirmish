@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    class BufferManagerVertices
+    public class BufferManagerVertices
     {
         /// <summary>
         /// Data list

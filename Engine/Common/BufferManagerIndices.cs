@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Index buffer description
     /// </summary>
-    class BufferManagerIndices
+    public class BufferManagerIndices
     {
         /// <summary>
         /// Data list

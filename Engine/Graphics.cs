@@ -2027,6 +2027,55 @@ namespace Engine
         /// <summary>
         /// Loads a texture from file in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns the resource view</returns>
+        public EngineShaderResourceView LoadTexture(string name, string filename, bool mipAutogen, bool dynamic)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var resource = TextureData.ReadTexture(filename))
+                {
+                    return new EngineShaderResourceView(name, CreateResource(resource, mipAutogen, dynamic));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from file Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="stream">Stream</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns the resource view</returns>
+        public EngineShaderResourceView LoadTexture(string name, MemoryStream stream, bool mipAutogen, bool dynamic)
+        {
+            try
+            {
+                Counters.Textures++;
+
+                using (var resource = TextureData.ReadTexture(stream))
+                {
+                    return new EngineShaderResourceView(name, CreateResource(resource, mipAutogen, dynamic));
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture from file in the graphics device
+        /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2051,6 +2100,7 @@ namespace Engine
         /// <summary>
         /// Loads a texture from file in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="stream">Stream</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2075,6 +2125,7 @@ namespace Engine
         /// <summary>
         /// Loads a texture array from a file in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="filename">Path file</param>
         /// <param name="rectangles">Crop rectangle list</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2096,6 +2147,7 @@ namespace Engine
         /// <summary>
         /// Loads a texture array from a file in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="stream">Stream</param>
         /// <param name="rectangles">Crop rectangle list</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2117,6 +2169,49 @@ namespace Engine
         /// <summary>
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filenames">Path file collection</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns the resource view</returns>
+        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<string> filenames, bool mipAutogen, bool dynamic)
+        {
+            try
+            {
+                var textureList = TextureData.ReadTextureArray(filenames);
+
+                return new EngineShaderResourceView(name, CreateResource(textureList, mipAutogen, dynamic));
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from file array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="streams">Stream collection</param>
+        /// <param name="mipAutogen">Try to generate texture mips</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns the resource view</returns>
+        public EngineShaderResourceView LoadTextureArray(string name, IEnumerable<MemoryStream> streams, bool mipAutogen, bool dynamic)
+        {
+            try
+            {
+                var textureList = TextureData.ReadTextureArray(streams);
+
+                return new EngineShaderResourceView(name, CreateResource(textureList, mipAutogen, dynamic));
+            }
+            catch (Exception ex)
+            {
+                throw new EngineException("LoadTexture from stream array Error. See inner exception for details", ex);
+            }
+        }
+        /// <summary>
+        /// Loads a texture array from a file collection in the graphics device
+        /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="filenames">Path file collection</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2138,6 +2233,7 @@ namespace Engine
         /// <summary>
         /// Loads a texture array from a file collection in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="streams">Stream collection</param>
         /// <param name="rectangle">Crop rectangle</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2159,6 +2255,7 @@ namespace Engine
         /// <summary>
         /// Loads a texture from file in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="faces">Cube faces</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2191,6 +2288,7 @@ namespace Engine
         /// <summary>
         /// Loads a texture from file in the graphics device
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="stream">Stream</param>
         /// <param name="faces">Cube faces</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
@@ -2223,6 +2321,7 @@ namespace Engine
         /// <summary>
         /// Creates a random 1D texture
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="size">Texture size</param>
         /// <param name="min">Minimum value</param>
         /// <param name="max">Maximum value</param>
@@ -3187,7 +3286,7 @@ namespace Engine
 
             try
             {
-                var dataBox = deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+                deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
                 using (stream)
                 {
                     stream.Position = Marshal.SizeOf(default(T)) * offset;

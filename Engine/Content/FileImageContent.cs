@@ -79,7 +79,14 @@ namespace Engine.Content
         /// <inheritdoc/>
         public EngineShaderResourceView CreateResource(Game game, bool mipAutogen = true, bool dynamic = false)
         {
-            return game.Graphics.LoadTexture(GetResourceKey(), path, cropRectangle, mipAutogen, dynamic);
+            if (cropRectangle == Rectangle.Empty)
+            {
+                return game.Graphics.LoadTexture(GetResourceKey(), path, mipAutogen, dynamic);
+            }
+            else
+            {
+                return game.Graphics.LoadTexture(GetResourceKey(), path, cropRectangle, mipAutogen, dynamic);
+            }
         }
         /// <inheritdoc/>
         public string GetResourceKey()

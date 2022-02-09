@@ -292,7 +292,7 @@ namespace Engine
         /// </summary>
         public void InvalidateCache()
         {
-            Logger.WriteTrace(this, $"ModelInstance Id: {Id}; LOD: {LevelOfDetail}; InvalidateCache");
+            Logger.WriteTrace(this, $"{nameof(ModelInstance)} {model.Name}.{Id} => LOD: {LevelOfDetail}; InvalidateCache");
 
             boundsHelper.Invalidate();
             geometryHelper.Invalidate();

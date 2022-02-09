@@ -462,48 +462,15 @@ namespace Engine.Common
                 return;
             }
 
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {drw.Meshes.Keys.ToArray().Join("|")}");
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {drw.Meshes.Keys.AsEnumerable().Join("|")}");
 
             var beforeCount = game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
 
-            var taskList = drw.Meshes.Values.Select(dictionary =>
-            {
-                return Task.Run(() =>
-                {
-                    Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {dictionary.Keys.ToArray().Join("|")}");
-
-                    if (!dictionary.Any())
-                    {
-                        return;
-                    }
-
-                    foreach (var mesh in dictionary.Values)
-                    {
-                        try
-                        {
-                            Logger.WriteTrace(nameof(DrawingData), $"{name}.{mesh.Name} Processing Mesh => {mesh}");
-
-                            //Vertices
-                            mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices, instancingBuffer);
-
-                            if (mesh.Indexed)
-                            {
-                                //Indices
-                                mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices);
-                            }
-
-                            Logger.WriteTrace(nameof(DrawingData), $"{name}.{mesh.Name} Processed Mesh => {mesh}");
-                        }
-                        catch (Exception ex)
-                        {
-                            Logger.WriteError(nameof(DrawingData), $"{name}.{mesh.Name} Error Processing Mesh => {ex.Message}", ex);
-
-                            throw;
-                        }
-                    }
-                });
-            });
+            //Generates a task list from the materials-mesh dictionary
+            var taskList = drw.Meshes.Values
+                .Where(dictionary => dictionary?.Any() == true)
+                .Select(dictionary => Task.Run(() => InitializeMeshDictionaryAsync(game, name, dynamicBuffers, instancingBuffer, dictionary)));
 
             try
             {
@@ -518,6 +485,55 @@ namespace Engine.Common
 
             var afterCount = game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests after Initialization => {afterCount}");
+        }
+        /// <summary>
+        /// Initializes a mesh dictionary
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        /// <param name="dictionary">Mesh dictionary</param>
+        private static void InitializeMeshDictionaryAsync(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Dictionary<string, Mesh> dictionary)
+        {
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Mesh Dictionary => {dictionary.Keys.AsEnumerable().Join("|")}");
+
+            foreach (var mesh in dictionary.Values)
+            {
+                InitializeMesh(game, name, dynamicBuffers, instancingBuffer, mesh);
+            }
+        }
+        /// <summary>
+        /// Initializes a mesh
+        /// </summary>
+        /// <param name="game">Game</param>
+        /// <param name="name">Owner name</param>
+        /// <param name="dynamicBuffers">Create dynamic buffers</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        /// <param name="mesh">Mesh</param>
+        private static void InitializeMesh(Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer, Mesh mesh)
+        {
+            try
+            {
+                Logger.WriteTrace(nameof(DrawingData), $"{name}.{mesh.Name} Processing Mesh => {mesh}");
+
+                //Vertices
+                mesh.VertexBuffer = game.BufferManager.AddVertexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Vertices, instancingBuffer);
+
+                if (mesh.Indexed)
+                {
+                    //Indices
+                    mesh.IndexBuffer = game.BufferManager.AddIndexData($"{name}.{mesh.Name}", dynamicBuffers, mesh.Indices);
+                }
+
+                Logger.WriteTrace(nameof(DrawingData), $"{name}.{mesh.Name} Processed Mesh => {mesh}");
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(nameof(DrawingData), $"{name}.{mesh.Name} Error Processing Mesh => {ex.Message}", ex);
+
+                throw;
+            }
         }
         /// <summary>
         /// Initialize lights

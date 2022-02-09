@@ -506,7 +506,7 @@ namespace Engine
         /// </summary>
         private void InvalidateCache()
         {
-            Logger.WriteTrace(this, $"Model Name: {Name}; LOD: {LevelOfDetail}; InvalidateCache");
+            Logger.WriteTrace(this, $"{nameof(Model)} {Name} => LOD: {LevelOfDetail}; InvalidateCache");
 
             boundsHelper.Invalidate();
             geometryHelper.Invalidate();

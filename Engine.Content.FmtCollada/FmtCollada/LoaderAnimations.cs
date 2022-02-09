@@ -234,12 +234,18 @@ namespace Engine.Content.FmtCollada
         private static IEnumerable<Matrix> ReadMatrix(Sampler sampler, Animation animationLibrary)
         {
             var input = sampler[EnumSemantics.Output];
-            if (input != null)
+            if (input == null)
             {
-                return animationLibrary[input.Source].ReadMatrix();
+                return Enumerable.Empty<Matrix>();
             }
 
-            return new Matrix[] { };
+            var source = animationLibrary[input.Source];
+            if (source.TechniqueCommon.Accessor.Stride == 16)
+            {
+                return source.ReadMatrix();
+            }
+
+            return Enumerable.Empty<Matrix>();
         }
         /// <summary>
         /// Reads the interpolation modes
