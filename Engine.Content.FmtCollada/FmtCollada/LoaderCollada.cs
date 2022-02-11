@@ -628,24 +628,16 @@ namespace Engine.Content.FmtCollada
 
             foreach (var polyList in polyLists)
             {
-                var verts = ProcessPolyList(polyList, meshSources);
-                if (!verts.Any())
+                ProcessPolyList(polyList, meshSources, out var verts, out var indices);
+                if (!verts.Any() || !indices.Any())
                 {
                     continue;
                 }
 
-                //Reorder vertices
-                VertexData[] data = new VertexData[verts.Count()];
-                for (int i = 0; i < data.Length; i += 3)
-                {
-                    data[i + 0] = verts.ElementAt(i + 0);
-                    data[i + 1] = verts.ElementAt(i + 2);
-                    data[i + 2] = verts.ElementAt(i + 1);
-                }
-
                 SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polyList.Material, false, isVolume);
 
-                meshInfo.SetVertices(data);
+                meshInfo.SetVertices(verts);
+                meshInfo.SetIndices(indices);
 
                 res.Add(meshInfo);
             }
@@ -658,9 +650,10 @@ namespace Engine.Content.FmtCollada
         /// <param name="polyList">Polygon list</param>
         /// <param name="meshSources">Mesh sources</param>
         /// <returns>Return vertext data</returns>
-        private static IEnumerable<VertexData> ProcessPolyList(PolyList polyList, IEnumerable<Source> meshSources)
+        private static void ProcessPolyList(PolyList polyList, IEnumerable<Source> meshSources, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
             List<VertexData> verts = new List<VertexData>();
+            List<uint> idx = new List<uint>();
 
             var vertexInput = polyList[EnumSemantics.Vertex];
             var normalInput = polyList[EnumSemantics.Normal];
@@ -678,6 +671,8 @@ namespace Engine.Content.FmtCollada
             for (int i = 0; i < polyList.Count; i++)
             {
                 int n = polyList.VCount[i];
+
+                idx.AddRange(BuildFace(n, verts.Count));
 
                 for (int v = 0; v < n; v++)
                 {
@@ -698,7 +693,36 @@ namespace Engine.Content.FmtCollada
                 }
             }
 
-            return verts.ToArray();
+            vertices = verts.ToArray();
+            indices = idx.ToArray();
+        }
+        private static IEnumerable<uint> BuildFace(int vertCount, int startIndex)
+        {
+            if (vertCount == 3)
+            {
+                return new uint[]
+                {
+                    (uint)startIndex,
+                    (uint)startIndex + 2,
+                    (uint)startIndex + 1
+                };
+            }
+
+            if (vertCount == 4)
+            {
+                return new uint[]
+                {
+                    (uint)startIndex,
+                    (uint)startIndex + 2,
+                    (uint)startIndex + 1,
+
+                    (uint)startIndex,
+                    (uint)startIndex + 3,
+                    (uint)startIndex + 2,
+                };
+            }
+
+            return Enumerable.Empty<uint>();
         }
         /// <summary>
         /// Process polygons
@@ -1479,6 +1503,10 @@ namespace Engine.Content.FmtCollada
             foreach (var il in lights)
             {
                 string lightName = il.Url.Replace("#", "");
+                if (!modelContent.Lights.ContainsKey(lightName))
+                {
+                    continue;
+                }
 
                 var light = modelContent.Lights[lightName];
 

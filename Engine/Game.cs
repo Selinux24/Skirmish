@@ -555,10 +555,9 @@ namespace Engine
         /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup)
+        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
         {
             return Task.Run(async () =>
             {
@@ -576,7 +575,7 @@ namespace Engine
                     ResourceLoadRuning = true;
                     try
                     {
-                        result = await InternalLoadResourcesAsync(scene, taskGroup);
+                        result = await InternalLoadResourcesAsync(taskGroup);
 
                         break;
                     }
@@ -596,11 +595,10 @@ namespace Engine
         /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
+        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
         {
             return Task.Run(async () =>
             {
@@ -618,7 +616,7 @@ namespace Engine
                     ResourceLoadRuning = true;
                     try
                     {
-                        result = await InternalLoadResourcesAsync(scene, taskGroup);
+                        result = await InternalLoadResourcesAsync(taskGroup);
 
                         break;
                     }
@@ -640,11 +638,10 @@ namespace Engine
         /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Func<LoadResourcesResult<T>, Task> callback)
+        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Func<LoadResourcesResult<T>, Task> callback)
         {
             return Task.Run(async () =>
             {
@@ -662,7 +659,7 @@ namespace Engine
                     ResourceLoadRuning = true;
                     try
                     {
-                        result = await InternalLoadResourcesAsync(scene, taskGroup);
+                        result = await InternalLoadResourcesAsync(taskGroup);
 
                         break;
                     }
@@ -683,10 +680,9 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup)
+        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup)
         {
             return Task.Run(async () =>
             {
@@ -704,7 +700,7 @@ namespace Engine
                     ResourceLoadRuning = true;
                     try
                     {
-                        result = await InternalLoadResourcesAsync(scene, taskGroup);
+                        result = await InternalLoadResourcesAsync(taskGroup);
 
                         break;
                     }
@@ -723,11 +719,10 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback)
+        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback)
         {
             return Task.Run(async () =>
             {
@@ -745,7 +740,7 @@ namespace Engine
                     ResourceLoadRuning = true;
                     try
                     {
-                        result = await InternalLoadResourcesAsync(scene, taskGroup);
+                        result = await InternalLoadResourcesAsync(taskGroup);
 
                         break;
                     }
@@ -766,11 +761,10 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
+        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
         {
             Task.Run(async () =>
             {
@@ -788,7 +782,7 @@ namespace Engine
                     ResourceLoadRuning = true;
                     try
                     {
-                        result = await InternalLoadResourcesAsync(scene, taskGroup);
+                        result = await InternalLoadResourcesAsync(taskGroup);
 
                         break;
                     }
@@ -811,10 +805,9 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <returns>Returns a load resource result.</returns>
-        private async Task<LoadResourcesResult<T>> InternalLoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup)
+        private async Task<LoadResourcesResult<T>> InternalLoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
         {
             List<TaskResult<T>> loadResult = new List<TaskResult<T>>();
 
@@ -842,7 +835,7 @@ namespace Engine
                 Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
             }
 
-            await IntegrateResources(taskGroup.Id, scene);
+            await IntegrateResources(taskGroup.Id);
 
             return new LoadResourcesResult<T>
             {
@@ -852,10 +845,9 @@ namespace Engine
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <returns>Returns a load resource result.</returns>
-        private async Task<LoadResourcesResult> InternalLoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup)
+        private async Task<LoadResourcesResult> InternalLoadResourcesAsync(LoadResourceGroup taskGroup)
         {
             List<TaskResult> loadResult = new List<TaskResult>();
 
@@ -880,7 +872,7 @@ namespace Engine
                 Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
             }
 
-            await IntegrateResources(taskGroup.Id, scene);
+            await IntegrateResources(taskGroup.Id);
 
             return new LoadResourcesResult
             {
@@ -891,22 +883,22 @@ namespace Engine
         /// <summary>
         /// Integrates the requested resources into the resource manager
         /// </summary>
-        /// <param name="scene">Scene</param>
-        private async Task IntegrateResources(string id, Scene scene)
+        /// <param name="id">Resource group id</param>
+        private async Task IntegrateResources(string id)
         {
             try
             {
-                Logger.WriteInformation(this, "BufferManager: Recreating buffers");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Recreating buffers");
                 await BufferManager.CreateBuffersAsync(id, ProgressBuffers);
-                Logger.WriteInformation(this, "BufferManager: Buffers recreated");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Buffers recreated");
 
-                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: Creating new resources");
                 ResourceManager.CreateResources(id, ProgressBuffers);
-                Logger.WriteInformation(this, "ResourceManager: New resources created");
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: New resources created");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Scene: {nameof(IntegrateResources)} error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => error: {ex.Message}", ex);
 
                 throw;
             }

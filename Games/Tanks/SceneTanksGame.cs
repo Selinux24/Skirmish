@@ -68,6 +68,8 @@ namespace Tanks
         private UITextArea keyPitchDownText;
 
         private UIProgressBar pbFire;
+        private readonly Color4 pbFireProgressColor = Color.Yellow;
+        private readonly Color4 pbFireBaseColor = new Color4(0, 0, 0, 0.5f);
         private UITextArea fireKeyText;
 
         private Sprite miniMapBackground;
@@ -88,6 +90,8 @@ namespace Tanks
         private ModelInstanced tanks;
         private float tankHeight = 0;
         private Model projectile;
+
+        private ModelInstanced trees;
 
         private Sprite[] trajectoryMarkerPool;
 
@@ -133,8 +137,11 @@ namespace Tanks
 
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 2000;
+            Camera.CameraRadius = 60f;
 
-            GameEnvironment.ShadowDistanceLow *= 2f;
+            GameEnvironment.ShadowDistanceHigh = 20f;
+            GameEnvironment.ShadowDistanceMedium = 300f;
+            GameEnvironment.ShadowDistanceLow = 1000f;
         }
         private void InitializePlayers()
         {
@@ -427,8 +434,8 @@ namespace Tanks
         {
             pbFire = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("PbFire", "PbFire", UIProgressBarDescription.Default());
             pbFire.Anchor = Anchors.HorizontalCenter;
-            pbFire.ProgressColor = Color.Yellow;
-            pbFire.BaseColor = new Color4(0, 0, 0, 0.5f);
+            pbFire.ProgressColor = pbFireProgressColor;
+            pbFire.BaseColor = pbFireBaseColor;
             pbFire.Visible = false;
 
             fireKeyText = await AddComponentUI<UITextArea, UITextAreaDescription>("FireKeyText", "FireKeyText", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true));
@@ -491,6 +498,7 @@ namespace Tanks
             {
                 InitializeModelsTanks(),
                 InitializeModelsTerrain(),
+                InitializeModelsTrees(),
                 InitializeLandscape(),
                 InitializeModelProjectile(),
                 InitializeParticleManager(),
@@ -554,6 +562,19 @@ namespace Tanks
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
 
             SetGround(terrain, true);
+        }
+        private async Task InitializeModelsTrees()
+        {
+            var tDesc = new ModelInstancedDescription()
+            {
+                CastShadow = true,
+                Optimize = true,
+                Content = ContentDescription.FromFile("Resources/Environment/Tree", "Tree.json"),
+                Instances = Helper.RandomGenerator.Next(200, 5000),
+            };
+
+            trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", tDesc, SceneObjectUsages.Agent);
+            trees.Visible = false;
         }
         private async Task InitializeLandscape()
         {
@@ -625,7 +646,7 @@ namespace Tanks
             var desc = DecalDrawerDescription.DefaultRotate(@"Resources/Crater.png", 100);
 
             decalDrawer = await AddComponentEffect<DecalDrawer, DecalDrawerDescription>("Craters", "Craters", desc);
-            decalDrawer.TintColor = new Color(223, 194, 179);
+            decalDrawer.TintColor = new Color(90, 77, 72, 170);
         }
         private async Task InitializeAudio()
         {
@@ -789,7 +810,10 @@ namespace Tanks
 
             UpdateLayout();
 
+            PlantTrees();
             PrepareModels();
+            GameEnvironment.Background = Color.Gray;
+            Lights.EnableFog(300, 1000, Color.Gray);
             UpdateCamera(true);
 
             AudioManager.MasterVolume = 1f;
@@ -961,14 +985,45 @@ namespace Tanks
             loadingBar.Width = Game.Form.RenderWidth * 0.8f;
             loadingBar.Height = 35;
         }
+        private void PlantTrees()
+        {
+            var bbox = terrain.GetBoundingBox();
+            var min = bbox.Minimum.XZ();
+            var max = bbox.Maximum.XZ();
+            var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
+
+            int treeCount = trees.InstanceCount;
+            while (treeCount > 0)
+            {
+                var point = Helper.RandomGenerator.NextVector2(min, max);
+                var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
+                var scale = Helper.RandomGenerator.NextFloat(1, 1.5f);
+
+                if (FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
+                {
+                    var pos = result.Position;
+                    if (sph.Contains(ref pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextFloat(0, 1) < 0.95f)
+                    {
+                        continue;
+                    }
+
+                    treeCount--;
+
+                    trees[treeCount].Manipulator.SetPosition(pos);
+                    trees[treeCount].Manipulator.SetRotation(rot, -MathUtil.PiOverTwo, 0);
+                    trees[treeCount].Manipulator.SetScale(scale);
+                }
+            }
+        }
         private void PrepareModels()
         {
             landScape.Visible = true;
             terrain.Visible = true;
+            trees.Visible = true;
 
-            Vector3 p1 = new Vector3(-100, 100, 0);
+            Vector3 p1 = new Vector3(-140, 100, 0);
             Vector3 n1 = Vector3.Up;
-            Vector3 p2 = new Vector3(+100, 100, 0);
+            Vector3 p2 = new Vector3(+140, 100, 0);
             Vector3 n2 = Vector3.Up;
 
             if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
@@ -1244,9 +1299,28 @@ You will lost all the game progress.",
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
 
-            if (terrain.Intersects(new IntersectionVolumeSphere(Camera.Position, Camera.CameraRadius), out var res))
+            UpdateCameraCollision();
+        }
+        private void UpdateCameraCollision()
+        {
+            if (!terrain.Intersects(new IntersectionVolumeSphere(Camera.Position, Camera.CameraRadius), out _))
             {
-                Camera.Position = prevPosition;
+                return;
+            }
+
+            Ray ray = new Ray(Camera.Position, Vector3.Down);
+
+            if (terrain.PickNearest(ray, out var cRes) && cRes.Distance <= Camera.CameraRadius)
+            {
+                var pos = Camera.Position;
+                var vw = Camera.Interest;
+
+                float y = MathUtil.Lerp(pos.Y, cRes.Position.Y + Camera.CameraRadius, 0.5f);
+                vw.Y -= pos.Y - y;
+                pos.Y = y;
+
+                Camera.Position = pos;
+                Camera.Interest = vw;
             }
         }
 
@@ -1550,6 +1624,7 @@ You will lost all the game progress.",
         private async Task EvaluateTurn(PlayerStatus shooter, PlayerStatus target)
         {
             pbFire.ProgressValue = 0;
+            pbFire.ProgressColor = pbFireProgressColor;
 
             if (target.CurrentLife == 0)
             {
@@ -1654,7 +1729,9 @@ You will lost all the game progress.",
         }
         private void AddCrater(Vector3 position, Vector3 normal)
         {
-            decalDrawer.AddDecal(position + (normal * 0.2f), normal, Vector2.One * 20f, float.PositiveInfinity);
+            var rnd = Helper.RandomGenerator.NextFloat(10f, 30f);
+
+            decalDrawer.AddDecal(position + (normal * 0.2f), normal, Vector2.One * rnd, float.PositiveInfinity);
         }
 
         private async Task ShowMessage(string text, int delay)

@@ -244,9 +244,6 @@ namespace Engine
 
                         bestDistance = r.Distance;
                         picked = true;
-
-                        bestDistance = r.Distance;
-                        picked = true;
                     }
                 }
             }
@@ -494,7 +491,8 @@ namespace Engine
             }
             else if (obj is IRayPickable<T> pickable)
             {
-                if (pickable.PickFirst(ray, rayPickingParams, out var r) && r.Distance <= maxDistance)
+                bool picked = pickable.PickFirst(ray, rayPickingParams, out var r);
+                if (picked && r.Distance <= maxDistance)
                 {
                     var result = new ScenePickingResult<T>
                     {
