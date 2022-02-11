@@ -224,6 +224,7 @@
     <Compile Include="SceneLightSpotState.cs" />
     <Compile Include="SceneLightsState.cs" />
     <Compile Include="SceneLightState.cs" />
+    <Compile Include="ScenePickingExtensions.cs" />
     <Compile Include="SceneState.cs" />
     <Compile Include="PostProcessing\IDrawerPostProcessParams.cs" />
     <Compile Include="PostProcessing\PostProcessBlurVignetteParams.cs" />
@@ -484,6 +485,7 @@
     <Compile Include="UI\MouseEventHandler.cs" />
     <Compile Include="UI\Padding.cs" />
     <Compile Include="UI\PivotAnchors.cs" />
+    <Compile Include="SceneUIExtensions.cs" />
     <Compile Include="UI\ScrollLayout.cs" />
     <Compile Include="UI\ScrollModes.cs" />
     <Compile Include="UI\Spacing.cs" />

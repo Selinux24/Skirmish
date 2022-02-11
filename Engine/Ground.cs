@@ -88,7 +88,7 @@ namespace Engine
 
                 // Store result
                 result.Position = gResult.Position;
-                result.Item = gResult.Item;
+                result.Primitive = gResult.Primitive;
                 result.Distance = gResult.Distance;
 
                 return true;
@@ -111,7 +111,7 @@ namespace Engine
 
                 // Store result
                 result.Position = pos;
-                result.Item = tri;
+                result.Primitive = tri;
                 result.Distance = d;
 
                 return true;
@@ -144,7 +144,7 @@ namespace Engine
 
                 // Store result
                 result.Position = gResult.Position;
-                result.Item = gResult.Item;
+                result.Primitive = gResult.Primitive;
                 result.Distance = gResult.Distance;
 
                 return true;
@@ -167,7 +167,7 @@ namespace Engine
 
                 // Store result
                 result.Position = pos;
-                result.Item = tri;
+                result.Primitive = tri;
                 result.Distance = d;
 
                 return true;
@@ -223,7 +223,7 @@ namespace Engine
                     picks.Add(new PickingResult<Triangle>
                     {
                         Position = pos.ElementAt(i),
-                        Item = tris.ElementAt(i),
+                        Primitive = tris.ElementAt(i),
                         Distance = ds.ElementAt(i),
                     });
                 }
@@ -310,7 +310,7 @@ namespace Engine
 
                             result.Distance = distance;
                             result.Position = position;
-                            result.Item = tri;
+                            result.Primitive = tri;
                         }
                     }
                 }
@@ -325,7 +325,7 @@ namespace Engine
                 {
                     result.Distance = distance;
                     result.Position = position;
-                    result.Item = tri;
+                    result.Primitive = tri;
 
                     return true;
                 }

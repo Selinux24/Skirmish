@@ -437,7 +437,7 @@ namespace Engine
                 {
                     result.Distance = distance;
                     result.Position = position;
-                    result.Item = tri;
+                    result.Primitive = tri;
 
                     return true;
                 }

@@ -60,7 +60,7 @@ namespace Engine.Common
 
             // Store result
             result.Position = pos;
-            result.Item = tri;
+            result.Primitive = tri;
             result.Distance = d;
 
             return true;
@@ -116,7 +116,7 @@ namespace Engine.Common
 
             // Store result
             result.Position = pos;
-            result.Item = tri;
+            result.Primitive = tri;
             result.Distance = d;
 
             return true;
@@ -175,7 +175,7 @@ namespace Engine.Common
                 picks.Add(new PickingResult<T>
                 {
                     Position = pos.ElementAt(i),
-                    Item = tri.ElementAt(i),
+                    Primitive = tri.ElementAt(i),
                     Distance = ds.ElementAt(i)
                 });
             }

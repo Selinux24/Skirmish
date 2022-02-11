@@ -132,7 +132,8 @@ namespace Terrain.Rts
         public RtsScene(Game game)
             : base(game)
         {
-
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000f;
         }
         ~RtsScene()
         {
@@ -151,69 +152,21 @@ namespace Terrain.Rts
 
         public override async Task Initialize()
         {
+            await base.Initialize();
+
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
 
-            Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 5000f;
-
-            await LoadResourcesAsync(InitializeUI(), (res) =>
-            {
-                if (!res.Completed)
-                {
-                    res.ThrowExceptions();
-                }
-
-                UpdateLayout();
-            });
-
-            List<Task> loadTasks = new List<Task>()
-            {
-                InitializeWalker(),
-                InitializeDebug(),
-                InitializeParticles(),
-                InitializeLensFlare(),
-                InitializeHelicopter(),
-                InitializeTanks(),
-                InitializeHeliport(),
-                InitializeGarage(),
-                InitializeBuildings(),
-                InitializeObelisk(),
-                InitializeRocks(),
-                InitializeTrees(),
-                InitializeSkydom(),
-                InitializeClouds(),
-                InitializeTerrain(),
-                InitializeGardener(),
-            };
-
-            await LoadResourcesAsync(
-                loadTasks,
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    InitializeAudio();
-
-                    InitializeLights();
-
-                    agentManager = new Brain(this);
-
-                    gardener.SetWind(windDirection, windStrength);
-
-                    AudioManager.MasterVolume = 1f;
-                    AudioManager.Start();
-
-                    Camera.Goto(heliport.Manipulator.Position + Vector3.One * 25f);
-                    Camera.LookTo(0, 10, 0);
-
-                    Task.WhenAll(InitializePathFinding());
-                });
+            InitializeUI();
         }
-        private async Task<TaskResult> InitializeUI()
+
+        private void InitializeUI()
+        {
+            LoadResourcesAsync(
+                InitializeUITitle(),
+                InitializeUICompleted);
+        }
+        private async Task<TaskResult> InitializeUITitle()
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Restart();
@@ -279,6 +232,44 @@ namespace Terrain.Rts
                 Text = "UI",
                 Duration = sw.Elapsed,
             };
+        }
+        private void InitializeUICompleted(LoadResourcesResult<TaskResult> res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            InitializeModels();
+        }
+
+        private void InitializeModels()
+        {
+            List<Task> loadTasks = new List<Task>()
+            {
+                InitializeWalker(),
+                InitializeDebug(),
+                InitializeParticles(),
+                InitializeLensFlare(),
+                InitializeHelicopter(),
+                InitializeTanks(),
+                InitializeHeliport(),
+                InitializeGarage(),
+                InitializeBuildings(),
+                InitializeObelisk(),
+                InitializeRocks(),
+                InitializeTrees(),
+                InitializeSkydom(),
+                InitializeClouds(),
+                InitializeTerrain(),
+                InitializeGardener(),
+            };
+
+            LoadResourcesAsync(
+                loadTasks,
+                InitializeModelsCompleted);
         }
         private async Task<TaskResult> InitializeWalker()
         {
@@ -429,6 +420,27 @@ namespace Terrain.Rts
             return new TaskResult()
             {
                 Text = "Debug",
+                Duration = sw.Elapsed,
+            };
+        }
+        private async Task<TaskResult> InitializeParticles()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
+            pPlume = ParticleSystemDescription.InitializeSmokePlume("Rts/resources/particles", "smoke.png");
+            pFire = ParticleSystemDescription.InitializeFire("Rts/resources/particles", "fire.png");
+            pDust = ParticleSystemDescription.InitializeDust("Rts/resources/particles", "smoke.png");
+            pProjectile = ParticleSystemDescription.InitializeProjectileTrail("Rts/resources/particles", "smoke.png");
+            pExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "fire.png");
+            pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "smoke.png");
+
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
+
+            sw.Stop();
+            return new TaskResult()
+            {
+                Text = "Particles",
                 Duration = sw.Elapsed,
             };
         }
@@ -777,69 +789,28 @@ namespace Terrain.Rts
                 Duration = sw.Elapsed,
             };
         }
-        private async Task<TaskResult> InitializeParticles()
+        private async Task InitializeModelsCompleted(LoadResourcesResult res)
         {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
-
-            pPlume = ParticleSystemDescription.InitializeSmokePlume("Rts/resources/particles", "smoke.png");
-            pFire = ParticleSystemDescription.InitializeFire("Rts/resources/particles", "fire.png");
-            pDust = ParticleSystemDescription.InitializeDust("Rts/resources/particles", "smoke.png");
-            pProjectile = ParticleSystemDescription.InitializeProjectileTrail("Rts/resources/particles", "smoke.png");
-            pExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "fire.png");
-            pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("Rts/resources/particles", "smoke.png");
-
-            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", ParticleManagerDescription.Default());
-
-            sw.Stop();
-            return new TaskResult()
+            if (!res.Completed)
             {
-                Text = "Particles",
-                Duration = sw.Elapsed,
-            };
-        }
-        private async Task<TaskResult> InitializePathFinding()
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-            sw.Restart();
+                res.ThrowExceptions();
+            }
 
-            Random posRnd = new Random(1);
+            InitializeAudio();
 
-            await InitializePositionRocks(posRnd);
-            await InitializePositionTrees(posRnd);
+            InitializeLights();
 
-            await Task.WhenAll(
-                InitializePositionHeliport(),
-                InitializePositionGarage(),
-                InitializePositionBuildings(),
-                InitializePositionObelisk());
+            agentManager = new Brain(this);
 
-            var navSettings = BuildSettings.Default;
-            navSettings.Agents = new[]
-            {
-                walkerAgentType,
-                tankAgentType,
-            };
-            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+            gardener.SetWind(windDirection, windStrength);
 
-            PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
+            AudioManager.MasterVolume = 1f;
+            AudioManager.Start();
 
-            sw.Stop();
+            Camera.Goto(heliport.Manipulator.Position + Vector3.One * 25f);
+            Camera.LookTo(0, 10, 0);
 
-            await UpdateNavigationGraph();
-
-            return new TaskResult()
-            {
-                Text = "PathFinding",
-                Duration = sw.Elapsed,
-            };
-        }
-        private void InitializeLights()
-        {
-            Lights.DirectionalLights[0].Enabled = true;
-            Lights.DirectionalLights[0].CastShadow = true;
-            Lights.DirectionalLights[1].Enabled = true;
-            Lights.DirectionalLights[2].Enabled = true;
+            await InitializePathFinding();
         }
         private void InitializeAudio()
         {
@@ -1073,6 +1044,49 @@ namespace Terrain.Rts
             var forestEffectInstance = AudioManager.CreateEffectInstance(forestEffect);
             forestEffectInstance.Play();
         }
+        private void InitializeLights()
+        {
+            Lights.DirectionalLights[0].Enabled = true;
+            Lights.DirectionalLights[0].CastShadow = true;
+            Lights.DirectionalLights[1].Enabled = true;
+            Lights.DirectionalLights[2].Enabled = true;
+        }
+        private async Task<TaskResult> InitializePathFinding()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
+            Random posRnd = new Random(1);
+
+            await InitializePositionRocks(posRnd);
+            await InitializePositionTrees(posRnd);
+
+            await Task.WhenAll(
+                InitializePositionHeliport(),
+                InitializePositionGarage(),
+                InitializePositionBuildings(),
+                InitializePositionObelisk());
+
+            var navSettings = BuildSettings.Default;
+            navSettings.Agents = new[]
+            {
+                walkerAgentType,
+                tankAgentType,
+            };
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            PathFinderDescription = new PathFinderDescription(navSettings, nvInput);
+
+            sw.Stop();
+
+            await UpdateNavigationGraph();
+
+            return new TaskResult()
+            {
+                Text = "PathFinding",
+                Duration = sw.Elapsed,
+            };
+        }
         private async Task InitializePositionRocks(Random posRnd)
         {
             await Task.Run(() =>
@@ -1222,6 +1236,7 @@ namespace Terrain.Rts
         public override void GameGraphicsResized()
         {
             base.GameGraphicsResized();
+
             UpdateLayout();
         }
         private void UpdateLayout()
@@ -1240,11 +1255,11 @@ namespace Terrain.Rts
             {
                 started = true;
 
-                Task.Run(async () =>
+                Task.Run(() =>
                 {
-                    await StartHelicopter();
-                    await StartTanks();
-                    await StartDebug();
+                    StartHelicopter();
+                    StartTanks();
+                    StartDebug();
 
                     BeginToggleGarageLights();
 
@@ -1252,221 +1267,212 @@ namespace Terrain.Rts
                 });
             }
         }
-        private async Task StartHelicopter()
+        private void StartHelicopter()
         {
-            await Task.Run(() =>
+            // Set position
+            var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
+            var ray = GetTopDownRay(heliport.Manipulator.Position);
+            if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
-                // Set position
-                var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
-                var ray = GetTopDownRay(heliport.Manipulator.Position);
-                if (PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r))
-                {
-                    helicopter.Manipulator.SetPosition(r.Position);
-                    helicopter.Manipulator.SetNormal(r.Item.Normal);
-                }
+                helicopter.Manipulator.SetPosition(r.PickingResult.Position);
+                helicopter.Manipulator.SetNormal(r.PickingResult.Primitive.Normal);
+            }
 
-                var hp = new AnimationPath();
-                hp.AddLoop("roll");
-                animations.Add("heli_default", new AnimationPlan(hp));
+            var hp = new AnimationPath();
+            hp.AddLoop("roll");
+            animations.Add("heli_default", new AnimationPlan(hp));
 
-                // Register animation paths
-                AnimationPath ap = new AnimationPath();
-                ap.AddLoop("default");
-                animations.Add("default", new AnimationPlan(ap));
+            // Register animation paths
+            AnimationPath ap = new AnimationPath();
+            ap.AddLoop("default");
+            animations.Add("default", new AnimationPlan(ap));
 
-                // Set animation
-                helicopter.AnimationController.ReplacePlan(animations["heli_default"]);
-                helicopter.AnimationController.TimeDelta = 3f;
-                helicopter.AnimationController.Start();
+            // Set animation
+            helicopter.AnimationController.ReplacePlan(animations["heli_default"]);
+            helicopter.AnimationController.TimeDelta = 3f;
+            helicopter.AnimationController.Start();
 
-                // Define weapons
-                var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 5f, Range = 100 };
-                var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 50 };
+            // Define weapons
+            var h1W = new WeaponDescription() { Name = "Missile", Damage = 100, Cadence = 5f, Range = 100 };
+            var h2W = new WeaponDescription() { Name = "Gatling", Damage = 10, Cadence = 0.1f, Range = 50 };
 
-                // Define stats
-                var hStats = new HelicopterAIStatsDescription()
-                {
-                    PrimaryWeapon = h1W,
-                    SecondaryWeapon = h2W,
-                    Life = 50,
-                    SightDistance = 100,
-                    SightAngle = 90,
-                    FlightHeight = 25,
-                };
+            // Define stats
+            var hStats = new HelicopterAIStatsDescription()
+            {
+                PrimaryWeapon = h1W,
+                SecondaryWeapon = h2W,
+                Life = 50,
+                SightDistance = 100,
+                SightAngle = 90,
+                FlightHeight = 25,
+            };
 
-                helicopterAgent = new HelicopterAIAgent(agentManager, null, helicopter, hStats);
+            helicopterAgent = new HelicopterAIAgent(agentManager, null, helicopter, hStats);
 
-                // Register events
-                helicopterAgent.Moving += Agent_Moving;
-                helicopterAgent.Attacking += Agent_Attacking;
-                helicopterAgent.Damaged += Agent_Damaged;
-                helicopterAgent.Destroyed += Agent_Destroyed;
+            // Register events
+            helicopterAgent.Moving += Agent_Moving;
+            helicopterAgent.Attacking += Agent_Attacking;
+            helicopterAgent.Damaged += Agent_Damaged;
+            helicopterAgent.Destroyed += Agent_Destroyed;
 
-                // Adds agent to agent manager to team 0
-                agentManager.AddAgent(0, helicopterAgent);
+            // Adds agent to agent manager to team 0
+            agentManager.AddAgent(0, helicopterAgent);
 
-                // Define patrolling check points
-                Vector3[] hCheckPoints = new Vector3[]
-                {
-                    new Vector3(+60, 20, +60),
-                    new Vector3(+60, 20, -60),
-                    new Vector3(-70, 20, +70),
-                    new Vector3(-60, 20, -60),
-                    new Vector3(+00, 25, +00),
-                };
+            // Define patrolling check points
+            Vector3[] hCheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 20, +60),
+                new Vector3(+60, 20, -60),
+                new Vector3(-70, 20, +70),
+                new Vector3(-60, 20, -60),
+                new Vector3(+00, 25, +00),
+            };
 
-                // Define behaviors
-                helicopterAgent.PatrolBehavior.InitPatrollingBehavior(hCheckPoints, 5, 8);
-                helicopterAgent.AttackBehavior.InitAttackingBehavior(15, 10);
-                helicopterAgent.RetreatBehavior.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
-                helicopterAgent.ActiveAI = true;
+            // Define behaviors
+            helicopterAgent.PatrolBehavior.InitPatrollingBehavior(hCheckPoints, 5, 8);
+            helicopterAgent.AttackBehavior.InitAttackingBehavior(15, 10);
+            helicopterAgent.RetreatBehavior.InitRetreatingBehavior(new Vector3(75, 0, 75), 12);
+            helicopterAgent.ActiveAI = true;
 
-                //Show
-                helicopter.Visible = true;
-                helicopter.Lights.ToList().ForEach(l => l.Enabled = true);
-            });
+            //Show
+            helicopter.Visible = true;
+            helicopter.Lights.ToList().ForEach(l => l.Enabled = true);
         }
-        private async Task StartTanks()
+        private void StartTanks()
         {
-            await Task.Run(() =>
+            var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
+
+            if (this.PickNearest(GetTopDownRay(-60, -60), RayPickingParams.Geometry, sceneryUsage, out ScenePickingResult<Triangle> r1))
             {
-                var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
+                tankP1.Manipulator.SetPosition(r1.PickingResult.Position);
+                tankP1.Manipulator.SetNormal(r1.PickingResult.Primitive.Normal);
+            }
 
-                if (PickNearest(GetTopDownRay(-60, -60), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r1))
+            if (this.PickNearest(GetTopDownRay(-70, 70), RayPickingParams.Geometry, sceneryUsage, out ScenePickingResult<Triangle> r2))
+            {
+                tankP2.Manipulator.SetPosition(r2.PickingResult.Position);
+                tankP2.Manipulator.SetNormal(r2.PickingResult.Primitive.Normal);
+            }
+
+            // Define weapons
+            var t1W = new WeaponDescription() { Name = "Machine Gun", Damage = 0.5f, Cadence = 0.05f, Range = 50 };
+            var t2W = new WeaponDescription() { Name = "Cannon", Damage = 50, Cadence = 2f, Range = 100 };
+
+            // Define stats
+            var tStats = new AIStatsDescription()
+            {
+                PrimaryWeapon = t1W,
+                SecondaryWeapon = t2W,
+                Life = 300,
+                SightDistance = 80,
+                SightAngle = 145,
+            };
+
+            // Initialize agents
+            tankP1Agent = new TankAIAgent(agentManager, tankAgentType, tankP1, tStats);
+            tankP2Agent = new TankAIAgent(agentManager, tankAgentType, tankP2, tStats);
+
+            tankP1Agent.SceneObject.Name = "Tank1";
+            tankP2Agent.SceneObject.Name = "Tank2";
+
+            // Register events
+            tankP1Agent.Moving += Agent_Moving;
+            tankP1Agent.Attacking += Agent_Attacking;
+            tankP1Agent.Damaged += Agent_Damaged;
+            tankP1Agent.Destroyed += Agent_Destroyed;
+            agentManager.AddAgent(1, tankP1Agent);
+
+            tankP2Agent.Moving += Agent_Moving;
+            tankP2Agent.Attacking += Agent_Attacking;
+            tankP2Agent.Damaged += Agent_Damaged;
+            tankP2Agent.Destroyed += Agent_Destroyed;
+            agentManager.AddAgent(1, tankP2Agent);
+
+            // Define check-points
+            Vector3[] t1CheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 0, -60),
+                new Vector3(-60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+            };
+
+            Vector3[] t2CheckPoints = new Vector3[]
+            {
+                new Vector3(+60, 0, -60),
+                new Vector3(+60, 0, +60),
+                new Vector3(-70, 0, +70),
+                new Vector3(-60, 0, -60),
+                new Vector3(+00, 0, +00),
+            };
+
+            //Adjust check-points
+            for (int i = 0; i < t1CheckPoints.Length; i++)
+            {
+                if (FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
                 {
-                    tankP1.Manipulator.SetPosition(r1.Position);
-                    tankP1.Manipulator.SetNormal(r1.Item.Normal);
+                    t1CheckPoints[i] = r.Position;
                 }
+            }
 
-                if (PickNearest(GetTopDownRay(-70, 70), RayPickingParams.Geometry, sceneryUsage, out PickingResult<Triangle> r2))
+            for (int i = 0; i < t2CheckPoints.Length; i++)
+            {
+                if (FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
                 {
-                    tankP2.Manipulator.SetPosition(r2.Position);
-                    tankP2.Manipulator.SetNormal(r2.Item.Normal);
+                    t2CheckPoints[i] = r.Position;
                 }
+            }
 
-                // Define weapons
-                var t1W = new WeaponDescription() { Name = "Machine Gun", Damage = 0.5f, Cadence = 0.05f, Range = 50 };
-                var t2W = new WeaponDescription() { Name = "Cannon", Damage = 50, Cadence = 2f, Range = 100 };
+            // Initialize behaviors
+            tankP1Agent.PatrolBehavior.InitPatrollingBehavior(t1CheckPoints, 10, 5);
+            tankP1Agent.AttackBehavior.InitAttackingBehavior(7, 10);
+            tankP1Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+            tankP1Agent.ActiveAI = true;
 
-                // Define stats
-                var tStats = new AIStatsDescription()
-                {
-                    PrimaryWeapon = t1W,
-                    SecondaryWeapon = t2W,
-                    Life = 300,
-                    SightDistance = 80,
-                    SightAngle = 145,
-                };
+            tankP2Agent.PatrolBehavior.InitPatrollingBehavior(t2CheckPoints, 10, 5);
+            tankP2Agent.AttackBehavior.InitAttackingBehavior(7, 10);
+            tankP2Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
+            tankP2Agent.ActiveAI = true;
 
-                // Initialize agents
-                tankP1Agent = new TankAIAgent(agentManager, tankAgentType, tankP1, tStats);
-                tankP2Agent = new TankAIAgent(agentManager, tankAgentType, tankP2, tStats);
-
-                tankP1Agent.SceneObject.Name = "Tank1";
-                tankP2Agent.SceneObject.Name = "Tank2";
-
-                // Register events
-                tankP1Agent.Moving += Agent_Moving;
-                tankP1Agent.Attacking += Agent_Attacking;
-                tankP1Agent.Damaged += Agent_Damaged;
-                tankP1Agent.Destroyed += Agent_Destroyed;
-                agentManager.AddAgent(1, tankP1Agent);
-
-                tankP2Agent.Moving += Agent_Moving;
-                tankP2Agent.Attacking += Agent_Attacking;
-                tankP2Agent.Damaged += Agent_Damaged;
-                tankP2Agent.Destroyed += Agent_Destroyed;
-                agentManager.AddAgent(1, tankP2Agent);
-
-                // Define check-points
-                Vector3[] t1CheckPoints = new Vector3[]
-                {
-                    new Vector3(+60, 0, -60),
-                    new Vector3(-60, 0, -60),
-                    new Vector3(+60, 0, +60),
-                    new Vector3(-70, 0, +70),
-                };
-
-                Vector3[] t2CheckPoints = new Vector3[]
-                {
-                    new Vector3(+60, 0, -60),
-                    new Vector3(+60, 0, +60),
-                    new Vector3(-70, 0, +70),
-                    new Vector3(-60, 0, -60),
-                    new Vector3(+00, 0, +00),
-                };
-
-                //Adjust check-points
-                for (int i = 0; i < t1CheckPoints.Length; i++)
-                {
-                    if (FindNearestGroundPosition(t1CheckPoints[i], out PickingResult<Triangle> r))
-                    {
-                        t1CheckPoints[i] = r.Position;
-                    }
-                }
-
-                for (int i = 0; i < t2CheckPoints.Length; i++)
-                {
-                    if (FindNearestGroundPosition(t2CheckPoints[i], out PickingResult<Triangle> r))
-                    {
-                        t2CheckPoints[i] = r.Position;
-                    }
-                }
-
-                // Initialize behaviors
-                tankP1Agent.PatrolBehavior.InitPatrollingBehavior(t1CheckPoints, 10, 5);
-                tankP1Agent.AttackBehavior.InitAttackingBehavior(7, 10);
-                tankP1Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
-                tankP1Agent.ActiveAI = true;
-
-                tankP2Agent.PatrolBehavior.InitPatrollingBehavior(t2CheckPoints, 10, 5);
-                tankP2Agent.AttackBehavior.InitAttackingBehavior(7, 10);
-                tankP2Agent.RetreatBehavior.InitRetreatingBehavior(new Vector3(-10, 0, -40), 10);
-                tankP2Agent.ActiveAI = true;
-
-                //Show
-                tankP1.Visible = true;
-                tankP2.Visible = true;
-                tankP1.Lights.ToList().ForEach(l => l.Enabled = true);
-                tankP2.Lights.ToList().ForEach(l => l.Enabled = true);
-            });
+            //Show
+            tankP1.Visible = true;
+            tankP2.Visible = true;
+            tankP1.Lights.ToList().ForEach(l => l.Enabled = true);
+            tankP2.Lights.ToList().ForEach(l => l.Enabled = true);
         }
-        private async Task StartDebug()
+        private void StartDebug()
         {
-            await Task.Run(() =>
-            {
-                // Ground position test
-                var bbox = terrain.GetBoundingBox();
+            // Ground position test
+            var bbox = terrain.GetBoundingBox();
 
-                float sep = 2.1f;
-                for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
+            float sep = 2.1f;
+            for (float x = bbox.Minimum.X + 1; x < bbox.Maximum.X - 1; x += sep)
+            {
+                for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
                 {
-                    for (float z = bbox.Minimum.Z + 1; z < bbox.Maximum.Z - 1; z += sep)
+                    if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
                     {
-                        if (FindTopGroundPosition(x, z, out PickingResult<Triangle> r))
-                        {
-                            oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
-                        }
-                        else
-                        {
-                            errs.Add(new Line3D(x, 10, z, x, -10, z));
-                        }
+                        oks.Add(new Line3D(r.Position, r.Position + Vector3.Up));
+                    }
+                    else
+                    {
+                        errs.Add(new Line3D(x, 10, z, x, -10, z));
                     }
                 }
+            }
 
-                if (oks.Count > 0)
-                {
-                    terrainLineDrawer.AddPrimitives(Color.Green, oks.ToArray());
-                }
-                if (errs.Count > 0)
-                {
-                    terrainLineDrawer.AddPrimitives(Color.Red, errs.ToArray());
-                }
+            if (oks.Count > 0)
+            {
+                terrainLineDrawer.AddPrimitives(Color.Green, oks.ToArray());
+            }
+            if (errs.Count > 0)
+            {
+                terrainLineDrawer.AddPrimitives(Color.Red, errs.ToArray());
+            }
 
-                // Axis
-                curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
-                curveLineDrawer.Visible = false;
-            });
+            // Axis
+            curveLineDrawer.SetPrimitives(wAxisColor, Line3D.CreateAxis(Matrix.Identity, 20f));
+            curveLineDrawer.Visible = false;
         }
         private void BeginToggleGarageLights()
         {
@@ -1639,15 +1645,16 @@ namespace Terrain.Rts
 
             if (Game.Input.KeyJustReleased(Keys.Space))
             {
-                if (follow)
-                {
-                    followTarget = null;
-                    follow = false;
-                }
+                followTarget = null;
+                follow = false;
+            }
 
-                if (PickNearest(pickingRay, 0, RayPickingParams.Default, SceneObjectUsages.Agent, out ISceneObject agent))
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            {
+                bool picked = this.PickNearest<Triangle>(pickingRay, 0, RayPickingParams.Default, SceneObjectUsages.Agent, out var agent);
+                if (picked)
                 {
-                    followTarget = agent;
+                    followTarget = agent.SceneObject;
                     follow = true;
                 }
             }
@@ -1724,9 +1731,9 @@ namespace Terrain.Rts
                 {
                     terrainPointDrawer.Clear();
 
-                    if (PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r))
+                    if (this.PickNearest(pickingRay, RayPickingParams.Default, out ScenePickingResult<Triangle> r))
                     {
-                        DEBUGPickingPosition(r.Position);
+                        DEBUGPickingPosition(r.PickingResult.Position);
                     }
                 }
             }
@@ -1914,12 +1921,12 @@ namespace Terrain.Rts
         }
         private void DrawTankPath(Ray pickingRay)
         {
-            var picked = PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r);
+            var picked = this.PickNearest(pickingRay, RayPickingParams.Default, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 var t1Position = tankP1.Manipulator.Position;
 
-                var result = FindPath(tankAgentType, t1Position, r.Position);
+                var result = FindPath(tankAgentType, t1Position, r.PickingResult.Position);
                 if (result != null)
                 {
                     DEBUGDrawPath(result.Positions, Color.Red);
@@ -1928,12 +1935,12 @@ namespace Terrain.Rts
         }
         private void UpdateTankPath(Ray pickingRay)
         {
-            var picked = PickNearest(pickingRay, RayPickingParams.Default, out PickingResult<Triangle> r);
+            var picked = this.PickNearest(pickingRay, RayPickingParams.Default, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 Task.Run(async () =>
                 {
-                    var path = await FindPathAsync(tankAgentType, tankP1.Manipulator.Position, r.Position, true);
+                    var path = await FindPathAsync(tankAgentType, tankP1.Manipulator.Position, r.PickingResult.Position, true);
                     if (path != null)
                     {
                         path.RefinePath(0.25f);
@@ -1948,6 +1955,11 @@ namespace Terrain.Rts
         public override void Draw(GameTime gameTime)
         {
             base.Draw(gameTime);
+
+            if (!gameReady)
+            {
+                return;
+            }
 
             shadowMapDrawer.Texture = useDebugTex ? debugTex : Renderer.GetResource(shadowResult);
 
@@ -2294,7 +2306,7 @@ namespace Terrain.Rts
             if (FindAllGroundPosition<Triangle>(position.X, position.Z, out var results))
             {
                 var positions = results.Select(r => r.Position).ToArray();
-                var triangles = results.Select(r => r.Item).ToArray();
+                var triangles = results.Select(r => r.Primitive).ToArray();
 
                 terrainPointDrawer.SetPrimitives(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
                 terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));

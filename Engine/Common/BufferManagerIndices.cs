@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <summary>
         /// Descriptor list
         /// </summary>
-        public readonly List<BufferDescriptor> descriptors = new List<BufferDescriptor>();
+        private readonly List<BufferDescriptor> descriptors = new List<BufferDescriptor>();
 
         /// <summary>
         /// Dynamic

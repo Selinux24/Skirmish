@@ -169,11 +169,11 @@ namespace Engine
                     SceneObjectUsages.Ground,
                     out var r);
 
-                if (found && r.Item.Normal.Y > 0.5f)
+                if (found && r.PickingResult.Primitive.Normal.Y > 0.5f)
                 {
                     res = new VertexBillboard()
                     {
-                        Position = r.Position,
+                        Position = r.PickingResult.Position,
                         Size = size,
                     };
 
@@ -1050,7 +1050,7 @@ namespace Engine
 
             //Find patches to assign data
             toAssign.Clear();
-            toAssign.AddRange(await UpdatePatchesAsync(bbox.Value));
+            toAssign.AddRange(await DoPlantAsync(bbox.Value));
         }
         /// <summary>
         /// Builds the quadtree from the specified bounding box
@@ -1118,7 +1118,7 @@ namespace Engine
         ///   - If not, add to toAssign list
         /// - If not planted, launch planting task y do nothing more. The node will be processed next time
         /// </remarks>
-        private async Task<IEnumerable<FoliagePatch>> UpdatePatchesAsync(BoundingBox bbox)
+        private async Task<IEnumerable<FoliagePatch>> DoPlantAsync(BoundingBox bbox)
         {
             List<FoliagePatch> toAssignList = new List<FoliagePatch>();
 
@@ -1248,7 +1248,7 @@ namespace Engine
 
             if (!freeBuffers.Any())
             {
-                Logger.WriteWarning(this, $"{Name}. => No free buffers found for {toAssign.Count()} patches to attach.");
+                Logger.WriteWarning(this, $"{Name}. => No free buffers found for {toAssign.Count} patches to attach.");
 
                 return;
             }
@@ -1264,7 +1264,7 @@ namespace Engine
 
             bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
 
-            Logger.WriteTrace(this, $"{Name}. => Attaching {toAssign.Count()} patches into {freeBuffers.Count()} buffers.");
+            Logger.WriteTrace(this, $"{Name}. => Attaching {toAssign.Count} patches into {freeBuffers.Count} buffers.");
 
             while (toAssign.Count > 0 && freeBuffers.Count > 0)
             {
@@ -1276,7 +1276,7 @@ namespace Engine
 
             if (toAssign.Any())
             {
-                Logger.WriteWarning(this, $"{Name}. => No free buffers found for {toAssign.Count()} patches to attach.");
+                Logger.WriteWarning(this, $"{Name}. => No free buffers found for {toAssign.Count} patches to attach.");
             }
         }
         /// <summary>

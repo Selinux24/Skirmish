@@ -216,8 +216,8 @@ namespace Engine
                     return true;
                 }
 
-                if (Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
-                    Vector3.Distance(lightPosition, eyePosition) > result.Distance)
+                if (Scene.PickNearest(ray, RayPickingParams.Perfect, out ScenePickingResult<Triangle> result) &&
+                    Vector3.Distance(lightPosition, eyePosition) > result.PickingResult.Distance)
                 {
                     return false;
                 }

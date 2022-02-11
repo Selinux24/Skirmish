@@ -164,14 +164,6 @@ namespace Engine
         /// Game status collected event
         /// </summary>
         public event GameStatusCollectedHandler GameStatusCollected;
-        /// <summary>
-        /// Fires when a resource load starts
-        /// </summary>
-        public event GameLoadResourcesEventHandler ResourcesLoading;
-        /// <summary>
-        /// Fires when a resource load ends
-        /// </summary>
-        public event GameLoadResourcesEventHandler ResourcesLoaded;
 
         /// <summary>
         /// Gets desktop mode description
@@ -904,8 +896,6 @@ namespace Engine
         {
             try
             {
-                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
-
                 Logger.WriteInformation(this, "BufferManager: Recreating buffers");
                 await BufferManager.CreateBuffersAsync(id, ProgressBuffers);
                 Logger.WriteInformation(this, "BufferManager: Buffers recreated");
@@ -913,8 +903,6 @@ namespace Engine
                 Logger.WriteInformation(this, "ResourceManager: Creating new resources");
                 ResourceManager.CreateResources(id, ProgressBuffers);
                 Logger.WriteInformation(this, "ResourceManager: New resources created");
-
-                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Id = id, Scene = scene });
             }
             catch (Exception ex)
             {

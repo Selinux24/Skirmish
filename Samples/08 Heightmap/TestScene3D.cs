@@ -897,7 +897,7 @@ namespace Heightmap
                     containers[i].Manipulator.SetScale(5);
                     containers[i].Manipulator.SetPosition(pos);
                     containers[i].Manipulator.SetRotation(MathUtil.Pi / 16f * (i - 2), 0, 0);
-                    containers[i].Manipulator.SetNormal(res.Item.Normal);
+                    containers[i].Manipulator.SetNormal(res.Primitive.Normal);
                     containers[i].Manipulator.UpdateInternals(true);
                 }
 
@@ -992,7 +992,7 @@ namespace Heightmap
                     helicopterI[i].Manipulator.SetScale(1.25f, true);
                     helicopterI[i].Manipulator.SetPosition(r.Position, true);
                     helicopterI[i].Manipulator.SetRotation(hPositions[i].Z, 0, 0, true);
-                    helicopterI[i].Manipulator.SetNormal(r.Item.Normal);
+                    helicopterI[i].Manipulator.SetNormal(r.Primitive.Normal);
 
                     helicopterI[i].AnimationController.TimeDelta = 0.5f * (i + 1);
                     helicopterI[i].AnimationController.Start(animations["m24_roll"]);
@@ -1024,7 +1024,7 @@ namespace Heightmap
                     bradleyI[i].Manipulator.SetScale(1.2f, true);
                     bradleyI[i].Manipulator.SetPosition(r.Position, true);
                     bradleyI[i].Manipulator.SetRotation(bPositions[i].Z, 0, 0, true);
-                    bradleyI[i].Manipulator.SetNormal(r.Item.Normal);
+                    bradleyI[i].Manipulator.SetNormal(r.Primitive.Normal);
                 }
             }
 

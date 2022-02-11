@@ -48,70 +48,6 @@ namespace Engine
         public const int LayerCursor = int.MaxValue;
 
         /// <summary>
-        /// Performs coarse ray picking over the specified collection
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="maxDistance">Maximum distance to test</param>
-        /// <param name="list">Collection of objects to test</param>
-        /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
-        private static List<Tuple<ISceneObject, float>> PickCoarse(ref Ray ray, float maxDistance, IEnumerable<ISceneObject> list)
-        {
-            List<Tuple<ISceneObject, float>> coarse = new List<Tuple<ISceneObject, float>>();
-
-            foreach (var gObj in list)
-            {
-                if (gObj is IComposed componsed)
-                {
-                    var pickComponents = componsed.GetComponents<IRayPickable<Triangle>>();
-                    foreach (var pickable in pickComponents)
-                    {
-                        if (TestCoarse(ref ray, pickable, maxDistance, out float d))
-                        {
-                            coarse.Add(new Tuple<ISceneObject, float>(gObj, d));
-                        }
-                    }
-                }
-                else if (
-                    gObj is IRayPickable<Triangle> pickable &&
-                    TestCoarse(ref ray, pickable, maxDistance, out float d))
-                {
-                    coarse.Add(new Tuple<ISceneObject, float>(gObj, d));
-                }
-            }
-
-            //Sort by distance
-            coarse.Sort((i1, i2) =>
-            {
-                return i1.Item2.CompareTo(i2.Item2);
-            });
-
-            return coarse;
-        }
-        /// <summary>
-        /// Perfors coarse picking between the specified ray and the bounding volume of the object
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Ray</param>
-        /// <param name="obj">Object</param>
-        /// <param name="maxDistance">Maximum distance to test</param>
-        /// <param name="distance">Gets the picking distance if intersection exists</param>
-        /// <returns>Returns true if exists intersection between the ray and the bounding volume of the object, into the maximum distance</returns>
-        private static bool TestCoarse<T>(ref Ray ray, IRayPickable<T> obj, float maxDistance, out float distance) where T : IRayIntersectable
-        {
-            distance = float.MaxValue;
-
-            var bsph = obj.GetBoundingSphere();
-            var intersects = Collision.RayIntersectsSphere(ref ray, ref bsph, out float d);
-            if (intersects && (maxDistance == 0 || d <= maxDistance))
-            {
-                distance = d;
-
-                return true;
-            }
-
-            return false;
-        }
-        /// <summary>
         /// Gets first normal texture size for the specified pixel count
         /// </summary>
         /// <param name="pixelCount">Pixel count</param>
@@ -126,70 +62,6 @@ namespace Engine
             }
 
             return texHeight;
-        }
-        /// <summary>
-        /// Gets wether the ray picks the object nearest to the specified best distance
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="obj">Object to test</param>
-        /// <param name="bestDistance">Best distance</param>
-        /// <param name="result">Resulting picking result</param>
-        /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestSingle<T>(Ray ray, RayPickingParams rayPickingParams, IRayPickable<T> obj, float bestDistance, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            bool pickedNearest = false;
-
-            result = new PickingResult<T>()
-            {
-                Distance = float.MaxValue,
-            };
-
-            var picked = obj.PickNearest(ray, rayPickingParams, out var r);
-            if (picked && r.Distance < bestDistance)
-            {
-                result = r;
-                pickedNearest = true;
-            }
-
-            return pickedNearest;
-        }
-        /// <summary>
-        /// Gets wether the ray picks the object nearest to the specified best distance
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="obj">Object to test</param>
-        /// <param name="bestDistance">Best distance</param>
-        /// <param name="result">Resulting picking result</param>
-        /// <returns>Returns true if the ray picks the object nearest to the specified best distance</returns>
-        private static bool PickNearestComposed<T>(Ray ray, RayPickingParams rayPickingParams, IComposed obj, float bestDistance, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            bool pickedNearest = false;
-
-            result = new PickingResult<T>()
-            {
-                Distance = float.MaxValue,
-            };
-
-            float dist = bestDistance;
-
-            var pickComponents = obj.GetComponents<IRayPickable<T>>();
-
-            foreach (var pickable in pickComponents)
-            {
-                var picked = pickable.PickNearest(ray, rayPickingParams, out var r);
-                if (picked && r.Distance < dist)
-                {
-                    dist = r.Distance;
-                    result = r;
-                    pickedNearest = true;
-                }
-            }
-
-            return pickedNearest;
         }
         /// <summary>
         /// Gets the current object triangle collection
@@ -355,11 +227,11 @@ namespace Engine
         /// <summary>
         /// Gets or sets the top most control in the UI hierarchy
         /// </summary>
-        public IUIControl TopMostControl { get; private set; }
+        public IUIControl TopMostControl { get; set; }
         /// <summary>
         /// Gets or sets the focused control the UI
         /// </summary>
-        public IUIControl FocusedControl { get; private set; }
+        public IUIControl FocusedControl { get; set; }
 
         /// <summary>
         /// Constructor
@@ -369,8 +241,6 @@ namespace Engine
         {
             Game = game;
 
-            Game.ResourcesLoading += FireResourcesLoading;
-            Game.ResourcesLoaded += FireResourcesLoaded;
             Game.Graphics.Resized += FireGraphicsResized;
 
             AudioManager = new GameAudioManager();
@@ -414,8 +284,6 @@ namespace Engine
         {
             if (disposing)
             {
-                Game.ResourcesLoading -= FireResourcesLoading;
-                Game.ResourcesLoaded -= FireResourcesLoaded;
                 Game.Graphics.Resized -= FireGraphicsResized;
 
                 Renderer?.Dispose();
@@ -475,7 +343,7 @@ namespace Engine
 
                 NavigationGraph?.Update(gameTime);
 
-                EvaluateInput();
+                this.EvaluateInput();
 
                 FloatTweenManager.Update(gameTime);
 
@@ -484,7 +352,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Logger.WriteError(this, $"Scene Updating error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(Scene)} => Updating error: {ex.Message}", ex);
 
                 throw;
             }
@@ -501,7 +369,7 @@ namespace Engine
             }
             catch (EngineException ex)
             {
-                Logger.WriteError(this, $"Scene Drawing error {Renderer?.GetType()}: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(Scene)} => Drawing error {Renderer?.GetType()}: {ex.Message}", ex);
 
                 throw;
             }
@@ -716,30 +584,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Fires when a requested resouce load process starts
-        /// </summary>
-        /// <param name="sender">Sender</param>
-        /// <param name="e">Event arguments</param>
-        private void FireResourcesLoading(object sender, GameLoadResourcesEventArgs e)
-        {
-            if (e.Scene == this)
-            {
-                GameResourcesLoading(e.Id);
-            }
-        }
-        /// <summary>
-        /// Fires when a requested resouce load process ends
-        /// </summary>
-        /// <param name="sender">Sender</param>
-        /// <param name="e">Event arguments</param>
-        private void FireResourcesLoaded(object sender, GameLoadResourcesEventArgs e)
-        {
-            if (e.Scene == this)
-            {
-                GameResourcesLoaded(e.Id);
-            }
-        }
-        /// <summary>
         /// Fires when the render window has been resized
         /// </summary>
         /// <param name="sender">Graphis device</param>
@@ -751,7 +595,9 @@ namespace Engine
             var fittedComponents = GetComponents<IScreenFitted>();
             if (fittedComponents.Any())
             {
-                fittedComponents.ToList().ForEach(c => c.Resize());
+                fittedComponents
+                    .AsParallel()
+                    .ForAll(c => c.Resize());
             }
 
             GameGraphicsResized();
@@ -774,27 +620,11 @@ namespace Engine
 
         }
         /// <summary>
-        /// Game resources loading event
-        /// </summary>
-        /// <param name="id">Batch id</param>
-        public virtual void GameResourcesLoading(string id)
-        {
-
-        }
-        /// <summary>
-        /// Game resources loaded event
-        /// </summary>
-        /// <param name="id">Batch id</param>
-        public virtual void GameResourcesLoaded(string id)
-        {
-
-        }
-        /// <summary>
         /// Grame graphics resized
         /// </summary>
         public virtual void GameGraphicsResized()
         {
-
+            Logger.WriteTrace(this, $"{nameof(Scene)} => Graphics resized.");
         }
 
         /// <summary>
@@ -986,7 +816,7 @@ namespace Engine
 
             if (internalComponents.Any(c => component.Id == c.Id))
             {
-                throw new EngineException($"The specified component id {component.Id} already exists.");
+                throw new EngineException($"{nameof(Scene)} => The specified component id {component.Id} already exists.");
             }
 
             if (component is IDrawable drawable)
@@ -1110,7 +940,7 @@ namespace Engine
 
             if (updateMaterialsPalette)
             {
-                Logger.WriteInformation(this, "Updating Material palette.");
+                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Material palette.");
 
                 UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
 
@@ -1121,7 +951,7 @@ namespace Engine
 
             if (updateAnimationsPalette)
             {
-                Logger.WriteInformation(this, "Updating Animation palette.");
+                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Animation palette.");
 
                 UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
 
@@ -1132,7 +962,7 @@ namespace Engine
 
             if (updateGlobals)
             {
-                Logger.WriteInformation(this, "Updating Scene Globals.");
+                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Scene Globals.");
 
                 Renderer?.UpdateGlobals();
 
@@ -1292,7 +1122,7 @@ namespace Engine
 
             if (!bbox.HasValue || bbox == new BoundingBox())
             {
-                Logger.WriteWarning(this, $"Scene Picking test: A ground must be defined into the scene in the first place.");
+                Logger.WriteWarning(this, $"{nameof(Scene)} => Picking test: A ground must be defined into the scene in the first place.");
             }
 
             float maxY = (bbox?.Maximum.Y + 1.0f) ?? float.MaxValue;
@@ -1302,245 +1132,6 @@ namespace Engine
                 Position = new Vector3(x, maxY, z),
                 Direction = Vector3.Down,
             };
-        }
-
-        /// <summary>
-        /// Gets the nearest pickable object in the ray path
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="maxDistance">Maximum distance for test</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Object usage mask</param>
-        /// <param name="model">Gets the resulting ray pickable object</param>
-        /// <returns>Returns true if a pickable object in the ray path was found</returns>
-        public bool PickNearest(Ray ray, float maxDistance, RayPickingParams rayPickingParams, SceneObjectUsages usage, out ISceneObject model)
-        {
-            model = null;
-
-            var cmpList = GetComponents<IDrawable>();
-
-            if (usage != SceneObjectUsages.None)
-            {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
-            }
-
-            var coarse = PickCoarse(ref ray, maxDistance, cmpList)
-                .Select(o => o.Item1)
-                .ToArray();
-
-            foreach (var obj in coarse)
-            {
-                if (obj is IRayPickable<Triangle> pickable && pickable.PickNearest(ray, rayPickingParams, out _))
-                {
-                    model = obj;
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Gets nearest picking position of giving ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest<T>(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(ray, rayPickingParams, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of giving ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest<T>(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            result = new PickingResult<T>()
-            {
-                Distance = float.MaxValue,
-            };
-
-            var cmpList = GetComponents<IDrawable>();
-
-            if (usage != SceneObjectUsages.None)
-            {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
-            }
-
-            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList);
-
-            bool picked = false;
-            float bestDistance = float.MaxValue;
-
-            foreach (var obj in coarse)
-            {
-                if (obj.Item2 > bestDistance)
-                {
-                    break;
-                }
-
-                if (obj.Item1 is IComposed composed)
-                {
-                    bool pickedComposed = PickNearestComposed<T>(ray, rayPickingParams, composed, bestDistance, out var r);
-                    if (pickedComposed)
-                    {
-                        result = r;
-
-                        bestDistance = r.Distance;
-                        picked = true;
-                    }
-                }
-                else if (obj.Item1 is IRayPickable<T> pickable)
-                {
-                    bool pickedSingle = PickNearestSingle(ray, rayPickingParams, pickable, bestDistance, out var r);
-                    if (pickedSingle)
-                    {
-                        result = r;
-
-                        bestDistance = r.Distance;
-                        picked = true;
-                    }
-                }
-            }
-
-            return picked;
-        }
-        /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst<T>(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(ray, rayPickingParams, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst<T>(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            result = new PickingResult<T>()
-            {
-                Distance = float.MaxValue,
-            };
-
-            IEnumerable<IDrawable> cmpList = GetComponents<IDrawable>();
-
-            if (usage != SceneObjectUsages.None)
-            {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
-            }
-
-            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList)
-                .Select(o => o.Item1)
-                .ToArray();
-
-            foreach (var obj in coarse)
-            {
-                if (obj is IComposed composed)
-                {
-                    var pickComponents = composed.GetComponents<IRayPickable<T>>();
-                    foreach (var pickable in pickComponents)
-                    {
-                        if (pickable.PickFirst(ray, rayPickingParams, out var r))
-                        {
-                            result = r;
-
-                            return true;
-                        }
-                    }
-                }
-                else if (
-                    obj is IRayPickable<T> pickable &&
-                    pickable.PickFirst(ray, rayPickingParams, out var r))
-                {
-                    result = r;
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Gets all picking position of giving ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickAll<T>(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(ray, rayPickingParams, SceneObjectUsages.None, out results);
-        }
-        /// <summary>
-        /// Gets all picking position of giving ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickAll<T>(Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
-        {
-            results = null;
-
-            IEnumerable<IDrawable> cmpList = GetComponents<IDrawable>();
-
-            if (usage != SceneObjectUsages.None)
-            {
-                cmpList = cmpList.Where(c => (c.Usage & usage) != SceneObjectUsages.None);
-            }
-
-            var coarse = PickCoarse(ref ray, float.MaxValue, cmpList)
-                .Select(o => o.Item1)
-                .ToArray();
-
-            List<PickingResult<T>> lResults = new List<PickingResult<T>>();
-
-            foreach (var obj in coarse)
-            {
-                if (obj is IComposed composed)
-                {
-                    var pickComponents = composed.GetComponents<IRayPickable<T>>();
-                    foreach (var pickable in pickComponents)
-                    {
-                        if (pickable.PickAll(ray, rayPickingParams, out var r))
-                        {
-                            lResults.AddRange(r);
-                        }
-                    }
-                }
-                else if (
-                    obj is IRayPickable<T> pickable &&
-                    pickable.PickAll(ray, rayPickingParams, out var r))
-                {
-                    lResults.AddRange(r);
-                }
-            }
-
-            results = lResults.ToArray();
-
-            return results.Any();
         }
 
         /// <summary>
@@ -1554,7 +1145,19 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            return PickNearest(ray, RayPickingParams.Default, GroundUsage, out result);
+            if (this.PickNearest<T>(ray, RayPickingParams.Default, GroundUsage, out var res))
+            {
+                result = res.PickingResult;
+
+                return true;
+            }
+
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue
+            };
+
+            return false;
         }
         /// <summary>
         /// Gets ground position giving x, z coordinates
@@ -1567,7 +1170,19 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            return PickFirst(ray, RayPickingParams.Default, GroundUsage, out result);
+            if (this.PickFirst<T>(ray, RayPickingParams.Default, GroundUsage, out var res))
+            {
+                result = res.PickingResult;
+
+                return true;
+            }
+
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue
+            };
+
+            return false;
         }
         /// <summary>
         /// Gets all ground positions giving x, z coordinates
@@ -1580,7 +1195,16 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            return PickAll(ray, RayPickingParams.Default, GroundUsage, out results);
+            if (this.PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var res))
+            {
+                results = res.SelectMany(r => r.PickingResults);
+
+                return true;
+            }
+
+            results = Enumerable.Empty<PickingResult<T>>();
+
+            return false;
         }
         /// <summary>
         /// Gets nearest ground position to "from" position
@@ -1592,35 +1216,23 @@ namespace Engine
         {
             var ray = GetTopDownRay(from.X, from.Z);
 
-            bool picked = PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var pResults);
+            bool picked = this.PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var pResults);
             if (picked)
             {
-                int index = -1;
-                float dist = float.MaxValue;
-                for (int i = 0; i < pResults.Count(); i++)
-                {
-                    float d = Vector3.DistanceSquared(from, pResults.ElementAt(i).Position);
-                    if (d <= dist)
-                    {
-                        dist = d;
-
-                        index = i;
-                    }
-                }
-
-                result = pResults.ElementAt(index);
+                result = pResults
+                    .OrderBy(r => r.GetMinimumDistance())
+                    .SelectMany(r => r.PickingResults)
+                    .First();
 
                 return true;
             }
-            else
-            {
-                result = new PickingResult<T>()
-                {
-                    Distance = float.MaxValue,
-                };
 
-                return false;
-            }
+            result = new PickingResult<T>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
         }
 
         /// <summary>
@@ -1974,7 +1586,7 @@ namespace Engine
                 if (FindNearestGroundPosition<Triangle>(positions[i], out var r))
                 {
                     positions[i] = r.Position;
-                    normals[i] = r.Item.Normal;
+                    normals[i] = r.Primitive.Normal;
                 }
             }
         }
@@ -2321,102 +1933,6 @@ namespace Engine
             var state = SerializationHelper.DeserializeFromFile<SceneState>(filename);
 
             SetState(state);
-        }
-
-        /// <summary>
-        /// Evaluates input over the specified scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        private void EvaluateInput()
-        {
-            TopMostControl = null;
-
-            //Gets all UIControl order by processing order
-            var evaluableCtrls = GetComponents<IUIControl>()
-                .Where(c => c.IsEvaluable())
-                .OrderBy(c => c.GetUpdateOrder())
-                .ToList();
-
-            if (!evaluableCtrls.Any())
-            {
-                return;
-            }
-
-            //Initialize state of selected controls
-            evaluableCtrls.ForEach(c => c.InitControlState());
-
-            //Gets all controls with the mouse pointer into its bounds
-            var mouseOverCtrls = evaluableCtrls.Where(c => c.IsMouseOver);
-            if (!mouseOverCtrls.Any())
-            {
-                return;
-            }
-
-            //Reverse the order for processing. Top-most first
-            mouseOverCtrls = mouseOverCtrls.Reverse();
-
-            IUIControl focusedControl = null;
-            foreach (var topMostControl in mouseOverCtrls)
-            {
-                //Evaluates all controls with the mouse pointer into its bounds
-                topMostControl.EvaluateTopMostControl(out var topControl, out focusedControl);
-                if (topControl != null)
-                {
-                    TopMostControl = topControl;
-
-                    break;
-                }
-            }
-
-            //Evaluate focused control
-            EvaluateFocus(focusedControl);
-        }
-        /// <summary>
-        /// Evaluates the current focus
-        /// </summary>
-        /// <param name="focusedControl">Current focused control</param>
-        /// <remarks>Fires set and lost focus events</remarks>
-        private void EvaluateFocus(IUIControl focusedControl)
-        {
-            if (FocusedControl != null)
-            {
-                var input = Game.Input;
-
-                bool mouseClicked = input.MouseButtonsState != MouseButtons.None;
-                bool overFocused = FocusedControl.Contains(input.MousePosition);
-                if (mouseClicked && !overFocused)
-                {
-                    //Clicked outside the current focused control
-
-                    //Lost focus
-                    FocusedControl.SetFocusLost();
-                    FocusedControl = null;
-                }
-            }
-
-            if (focusedControl != null && FocusedControl != focusedControl)
-            {
-                //Clicked on control
-
-                //Set focus
-                focusedControl.SetFocusControl();
-                FocusedControl = focusedControl;
-            }
-        }
-        /// <summary>
-        /// Sets the current focused control
-        /// </summary>
-        /// <param name="control">Control</param>
-        public void SetFocus(IUIControl control)
-        {
-            FocusedControl = control;
-        }
-        /// <summary>
-        /// Clears the current control focus
-        /// </summary>
-        public void ClearFocus()
-        {
-            FocusedControl = null;
         }
     }
 }

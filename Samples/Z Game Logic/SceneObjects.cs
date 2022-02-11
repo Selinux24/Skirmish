@@ -449,7 +449,7 @@ namespace GameLogic
             }
 
             Ray cursorRay = GetPickingRay();
-            bool picked = PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out PickingResult<Triangle> r);
+            bool picked = this.PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r);
 
             //DEBUG
             UpdateDebug();
@@ -516,11 +516,11 @@ namespace GameLogic
                 txtAction.Text = string.Format("{0}", CurrentAction);
             }
         }
-        private void Update3D(GameTime gameTime, Ray cursorRay, bool picked, PickingResult<Triangle> r)
+        private void Update3D(GameTime gameTime, Ray cursorRay, bool picked, ScenePickingResult<Triangle> r)
         {
             if (picked)
             {
-                cursor3D.Manipulator.SetPosition(r.Position);
+                cursor3D.Manipulator.SetPosition(r.PickingResult.Position);
             }
 
             if (Game.Input.KeyJustReleased(keyCAMNextIsometric))
@@ -555,7 +555,7 @@ namespace GameLogic
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Right))
             {
-                DoGoto(cursorRay, picked, r.Position);
+                DoGoto(cursorRay, picked, r.PickingResult.Position);
             }
 
             if (Game.Input.MouseWheelDelta > 0)
@@ -592,7 +592,7 @@ namespace GameLogic
                 Camera.LookTo(pickedPosition, CameraTranslations.UseDelta);
             }
         }
-        private void UpdateActions(Ray cursorRay, bool picked, PickingResult<Triangle> r)
+        private void UpdateActions(Ray cursorRay, bool picked, ScenePickingResult<Triangle> r)
         {
             if (CurrentAction != null)
             {
@@ -617,7 +617,7 @@ namespace GameLogic
 
                 if (selectorDone)
                 {
-                    UpdateSelected(cursorRay, r.Position, area);
+                    UpdateSelected(cursorRay, r.PickingResult.Position, area);
                 }
             }
         }

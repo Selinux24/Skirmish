@@ -545,7 +545,7 @@ namespace Skybox
 
                 if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
-                    var tri = Line3D.CreateWiredTriangle(r.Item);
+                    var tri = Line3D.CreateWiredTriangle(r.Primitive);
                     var cross = Line3D.CreateCross(r.Position, 0.1f);
 
                     volumesDrawer.SetPrimitives(Color.White, tri);
@@ -561,7 +561,7 @@ namespace Skybox
                 {
                     decalEmitter.AddDecal(
                         r.Position,
-                        r.Item.Normal,
+                        r.Primitive.Normal,
                         Vector2.One * 0.1f,
                         60);
                 }

@@ -392,7 +392,7 @@ namespace Deferred
                 if (FindTopGroundPosition<Triangle>((i * 10) - (tankAgents.Count * 10 / 2), 40, out var t1Pos))
                 {
                     tankAgents[i].Manipulator.SetPosition(t1Pos.Position);
-                    tankAgents[i].Manipulator.SetNormal(t1Pos.Item.Normal);
+                    tankAgents[i].Manipulator.SetNormal(t1Pos.Primitive.Normal);
                     cameraPosition += t1Pos.Position;
                     modelCount++;
                 }
@@ -514,10 +514,10 @@ namespace Deferred
                 var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-                if (PickNearest<Triangle>(pRay, rayPParams, out var r))
+                if (this.PickNearest<Triangle>(pRay, rayPParams, out var r))
                 {
-                    var tri = Line3D.CreateWiredTriangle(r.Item);
-                    var cross = Line3D.CreateCross(r.Position, 0.25f);
+                    var tri = Line3D.CreateWiredTriangle(r.PickingResult.Primitive);
+                    var cross = Line3D.CreateCross(r.PickingResult.Position, 0.25f);
 
                     volumesDrawer.SetPrimitives(Color.White, tri);
                     volumesDrawer.SetPrimitives(Color.Red, cross);
@@ -526,11 +526,11 @@ namespace Deferred
 
                     if (Game.Input.ShiftPressed)
                     {
-                        graph.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, tankAgentType, r.Position);
+                        graph.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, tankAgentType, r.PickingResult.Position);
                     }
                     else
                     {
-                        graph.RequestMoveCrowd(crowd, tankAgentType, r.Position);
+                        graph.RequestMoveCrowd(crowd, tankAgentType, r.PickingResult.Position);
                     }
                 }
             }

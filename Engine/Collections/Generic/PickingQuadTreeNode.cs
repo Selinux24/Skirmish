@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,46 +41,48 @@ namespace Engine.Collections.Generic
             int maxDepth,
             int treeDepth)
         {
-            if (treeDepth <= maxDepth)
+            if (treeDepth > maxDepth)
             {
-                //Find triangles into the bounding box
-                var nodeItems = items
-                    .Where(t =>
-                    {
-                        var tbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
-
-                        return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
-                    })
-                    .ToList(); //Break the reference
-
-                if (nodeItems.Any())
-                {
-                    // Creates a new node
-                    var node = new PickingQuadTreeNode<T>(quadTree, parent)
-                    {
-                        Id = -1,
-                        Level = treeDepth,
-                        BoundingBox = bbox,
-                    };
-
-                    bool haltByDepth = treeDepth == maxDepth;
-                    if (haltByDepth)
-                    {
-                        // Maximum tree depth reached. Stop the process
-                        node.Id = quadTree.GetNextNodeId();
-                        node.Items = nodeItems;
-                    }
-                    else
-                    {
-                        // Initialize node partitions
-                        InitializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1);
-                    }
-
-                    return node;
-                }
+                return null;
             }
 
-            return null;
+            //Find triangles into the bounding box
+            var nodeItems = items
+                .Where(t =>
+                {
+                    var tbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
+
+                    return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
+                })
+                .ToList(); //Break the reference
+
+            if (!nodeItems.Any())
+            {
+                return null;
+            }
+
+            // Creates a new node
+            var node = new PickingQuadTreeNode<T>(quadTree, parent)
+            {
+                Id = -1,
+                Level = treeDepth,
+                BoundingBox = bbox,
+            };
+
+            bool haltByDepth = treeDepth == maxDepth;
+            if (haltByDepth)
+            {
+                // Maximum tree depth reached. Stop the process
+                node.Id = quadTree.GetNextNodeId();
+                node.Items = nodeItems;
+            }
+            else
+            {
+                // Initialize node partitions
+                InitializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1);
+            }
+
+            return node;
         }
         /// <summary>
         /// Initializes node partitinos
@@ -125,13 +126,18 @@ namespace Engine.Collections.Generic
 
             if (childList.Count > 0)
             {
-                node.Children = childList.ToArray();
+                node.children.AddRange(childList);
                 node.TopLeftChild = topLeftChild;
                 node.TopRightChild = topRightChild;
                 node.BottomLeftChild = bottomLeftChild;
                 node.BottomRightChild = bottomRightChild;
             }
         }
+
+        /// <summary>
+        /// Children list
+        /// </summary>
+        private readonly List<PickingQuadTreeNode<T>> children = new List<PickingQuadTreeNode<T>>();
 
         /// <summary>
         /// Bounding box
@@ -217,7 +223,14 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Children list
         /// </summary>
-        public PickingQuadTreeNode<T>[] Children { get; set; }
+        public IEnumerable<PickingQuadTreeNode<T>> Children
+        {
+            get
+            {
+                //Copy collection
+                return children.AsEnumerable();
+            }
+        }
         /// <summary>
         /// Node items
         /// </summary>
@@ -248,12 +261,14 @@ namespace Engine.Collections.Generic
             BottomLeftNeighbor = BottomNeighbor?.FindNeighborNodeAtLeft();
             BottomRightNeighbor = BottomNeighbor?.FindNeighborNodeAtRight();
 
-            if (Children != null && Children.Length > 0)
+            if (!children.Any())
             {
-                for (int i = 0; i < Children.Length; i++)
-                {
-                    Children[i].ConnectNodes();
-                }
+                return;
+            }
+
+            foreach (var child in children)
+            {
+                child.ConnectNodes();
             }
         }
         /// <summary>
@@ -440,7 +455,7 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            if (Children == null)
+            if (!children.Any())
             {
                 if (PickNearestItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
                 {
@@ -572,7 +587,7 @@ namespace Engine.Collections.Generic
         {
             SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
 
-            foreach (var node in Children)
+            foreach (var node in children)
             {
                 if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
                 {
@@ -628,7 +643,7 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            if (Children == null)
+            if (!children.Any())
             {
                 if (PickFirstItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
                 {
@@ -706,7 +721,7 @@ namespace Engine.Collections.Generic
             item = default;
             distance = float.MaxValue;
 
-            foreach (var node in Children)
+            foreach (var node in children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out _);
                 if (!inBox)
@@ -769,7 +784,7 @@ namespace Engine.Collections.Generic
             items = null;
             distances = null;
 
-            if (Children == null)
+            if (!children.Any())
             {
                 if (PickAllItem(ray, facingOnly, out var iPositions, out var iItems, out var iDistances))
                 {
@@ -853,7 +868,7 @@ namespace Engine.Collections.Generic
             List<T> tris = new List<T>();
             List<float> dists = new List<float>();
 
-            foreach (var node in Children)
+            foreach (var node in children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
                 if (!inBox)
@@ -896,30 +911,22 @@ namespace Engine.Collections.Generic
         {
             List<BoundingBox> bboxes = new List<BoundingBox>();
 
-            if (Children != null)
+            if (!children.Any())
             {
-                bool haltByDepth = maxDepth > 0 && Level == maxDepth;
-                if (haltByDepth)
-                {
-                    Array.ForEach(Children, (c) =>
-                    {
-                        bboxes.Add(c.BoundingBox);
-                    });
-                }
-                else
-                {
-                    Array.ForEach(Children, (c) =>
-                    {
-                        bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
-                    });
-                }
+                bboxes.Add(BoundingBox);
+
+                return bboxes;
+            }
+
+            bool haltByDepth = maxDepth > 0 && Level == maxDepth;
+            if (haltByDepth)
+            {
+                return children.Select(c => c.BoundingBox);
             }
             else
             {
-                bboxes.Add(BoundingBox);
+                return children.SelectMany(c => c.GetBoundingBoxes(maxDepth));
             }
-
-            return bboxes.ToArray();
         }
         /// <summary>
         /// Gets maximum level value
@@ -927,23 +934,12 @@ namespace Engine.Collections.Generic
         /// <returns></returns>
         public int GetMaxLevel()
         {
-            int level = 0;
-
-            if (Children != null)
+            if (!children.Any())
             {
-                for (int i = 0; i < Children.Length; i++)
-                {
-                    int cLevel = Children[i].GetMaxLevel();
-
-                    if (cLevel > level) level = cLevel;
-                }
-            }
-            else
-            {
-                level = Level;
+                return Level;
             }
 
-            return level;
+            return children.Max(c => c.GetMaxLevel());
         }
 
         /// <summary>
@@ -955,7 +951,7 @@ namespace Engine.Collections.Generic
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
-            if (Children == null)
+            if (!children.Any())
             {
                 if (volume.Contains(BoundingBox) != ContainmentType.Disjoint)
                 {
@@ -964,9 +960,9 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < Children.Length; i++)
+                foreach (var child in children)
                 {
-                    var childNodes = Children[i].GetNodesInVolume(volume);
+                    var childNodes = child.GetNodesInVolume(volume);
                     if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
@@ -984,15 +980,15 @@ namespace Engine.Collections.Generic
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
-            if (Children == null)
+            if (!children.Any())
             {
                 nodes.Add(this);
             }
             else
             {
-                for (int i = 0; i < Children.Length; i++)
+                foreach (var child in children)
                 {
-                    var childNodes = Children[i].GetLeafNodes();
+                    var childNodes = child.GetLeafNodes();
                     if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
@@ -1009,7 +1005,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf node wich contains the specified position</returns>
         public PickingQuadTreeNode<T> GetNode(Vector3 position)
         {
-            if (Children == null)
+            if (!children.Any())
             {
                 if (BoundingBox.Contains(position) != ContainmentType.Disjoint)
                 {
@@ -1018,9 +1014,9 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < Children.Length; i++)
+                foreach (var child in children)
                 {
-                    var childNode = Children[i].GetNode(position);
+                    var childNode = child.GetNode(position);
                     if (childNode != null)
                     {
                         return childNode;
@@ -1034,15 +1030,15 @@ namespace Engine.Collections.Generic
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (Children == null)
+            if (!children.Any())
             {
                 //Leaf node
-                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Items {2}", Id, Level, Items.Count());
+                return $"{nameof(PickingQuadTreeNode<T>)} {Id}.Leaf; Depth {Level}; Items {Items.Count()}";
             }
             else
             {
                 //Node
-                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Childs {2}", Id, Level, Children.Length);
+                return $"{nameof(PickingQuadTreeNode<T>)} {Id}.Node; Depth {Level}; Childs {children.Count}";
             }
         }
     }

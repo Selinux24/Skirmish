@@ -274,19 +274,19 @@ Space: Finds random over navmesh";
                 var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-                if (PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                if (this.PickNearest(pRay, rayPParams, out ScenePickingResult<Triangle> r))
                 {
-                    DrawPoint(r.Position, 0.25f, Color.Red);
-                    DrawTriangle(r.Item, Color.White);
+                    DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
+                    DrawTriangle(r.PickingResult.Primitive, Color.White);
 
                     float radius = 5;
 
-                    DrawCircle(r.Position, radius, Color.Orange);
+                    DrawCircle(r.PickingResult.Position, radius, Color.Orange);
 
-                    var pt = NavigationGraph.FindRandomPoint(agent, r.Position, radius);
+                    var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
                     if (pt.HasValue)
                     {
-                        float dist = Vector3.Distance(r.Position, pt.Value);
+                        float dist = Vector3.Distance(r.PickingResult.Position, pt.Value);
                         Color color = dist < radius ? Color.LightGreen : Color.Pink;
                         DrawPoint(pt.Value, 2.5f, color);
                     }
@@ -311,12 +311,12 @@ Space: Finds random over navmesh";
                 var pRay = GetPickingRay();
                 var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
 
-                if (PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                if (this.PickNearest(pRay, rayPParams, out ScenePickingResult<Triangle> r))
                 {
-                    DrawPoint(r.Position, 0.25f, Color.Red);
-                    DrawTriangle(r.Item, Color.White);
+                    DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
+                    DrawTriangle(r.PickingResult.Primitive, Color.White);
 
-                    ToggleTile(r.Position);
+                    ToggleTile(r.PickingResult.Position);
                 }
             }
 

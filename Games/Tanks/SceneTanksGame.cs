@@ -974,12 +974,12 @@ namespace Tanks
             if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
             {
                 p1 = r1.Position - (Vector3.Up * 0.1f);
-                n1 = r1.Item.Normal;
+                n1 = r1.Primitive.Normal;
             }
             if (FindTopGroundPosition<Triangle>(p2.X, p2.Z, out var r2))
             {
                 p2 = r2.Position - (Vector3.Up * 0.1f);
-                n2 = r2.Item.Normal;
+                n2 = r2.Primitive.Normal;
             }
 
             tanks[0].Manipulator.SetPosition(p1);
@@ -1284,7 +1284,7 @@ You will lost all the game progress.",
             if (FindTopGroundPosition<Triangle>(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
             {
                 Shooter.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
-                Shooter.Manipulator.SetNormal(r.Item.Normal, 0.05f);
+                Shooter.Manipulator.SetNormal(r.Primitive.Normal, 0.05f);
             }
 
             Shooter.GetModelPartByName("Turret-mesh").Manipulator.RotateTo(Target.Manipulator.Position, Vector3.Up, Axis.Y, 0.01f);
@@ -1444,7 +1444,7 @@ You will lost all the game progress.",
             // Test collision with target
             if (Target.Intersects(projVolume, out var targetImpact))
             {
-                await ResolveShot(true, targetImpact.Position, targetImpact.Item.Normal);
+                await ResolveShot(true, targetImpact.Position, targetImpact.Primitive.Normal);
 
                 return;
             }
@@ -1461,7 +1461,7 @@ You will lost all the game progress.",
             // Test full collision with terrain mesh
             if (terrain.Intersects(projVolume, out var terrainImpact))
             {
-                await ResolveShot(false, terrainImpact.Position, terrainImpact.Item.Normal);
+                await ResolveShot(false, terrainImpact.Position, terrainImpact.Primitive.Normal);
             }
         }
         private async Task ResolveShot(bool impact, Vector3? impactPosition, Vector3? impactNormal)
