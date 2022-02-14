@@ -59,7 +59,10 @@ namespace Engine.Common
         /// Dispose resources
         /// </summary>
         /// <param name="disposing">Free managed resources</param>
-        protected abstract void Dispose(bool disposing);
+        protected virtual void Dispose(bool disposing)
+        {
+            Active = Visible = false;
+        }
 
         /// <inheritdoc/>
         public override async Task InitializeAssets(T description)

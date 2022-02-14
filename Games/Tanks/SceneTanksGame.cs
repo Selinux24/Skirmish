@@ -30,6 +30,8 @@ namespace Tanks
         private UIPanel fadePanel;
 
         private UITextArea gameMessage;
+        private readonly Color gameMessageForeColor = Color.Yellow;
+        private readonly Color gameMessageShadowColor = Color.Yellow * 0.5f;
         private UITextArea gameKeyHelp;
 
         private UIPanel dialog;
@@ -81,14 +83,17 @@ namespace Tanks
         private UIProgressBar windVelocity;
         private Sprite windDirectionArrow;
 
-        private Model landScape;
         private Scenery terrain;
         private float terrainTop;
         private readonly float terrainHeight = 100;
         private readonly float terrainSize = 1024;
         private readonly int mapSize = 256;
         private ModelInstanced tanks;
-        private float tankHeight = 0;
+        private readonly string tankBarrelPart = "Barrel-mesh";
+        private readonly string tankTurretPart = "Turret-mesh";
+        private readonly string tankHullPart = "Hull-mesh";
+        private readonly float maxBarrelPitch = MathUtil.DegreesToRadians(85);
+        private readonly float minBarrelPitch = MathUtil.DegreesToRadians(-5);
         private Model projectile;
 
         private ModelInstanced trees;
@@ -97,6 +102,10 @@ namespace Tanks
 
         private readonly Dictionary<string, ParticleSystemDescription> particleDescriptions = new Dictionary<string, ParticleSystemDescription>();
         private ParticleManager particleManager = null;
+        private readonly float explosionDurationSeconds = 0.5f;
+        private readonly float shotDurationSeconds = 0.2f;
+        private readonly LightTweenDescription lightExplosion = LightTweenDescription.ExplosionTween(500, 500, Color.LightYellow.ToColor3(), Color.Yellow.ToColor3());
+        private readonly LightTweenDescription lightShoot = LightTweenDescription.ShootTween(500, 500, Color.LightYellow.ToColor3(), Color.Yellow.ToColor3());
 
         private bool shooting = false;
         private bool gameEnding = false;
@@ -126,7 +135,6 @@ namespace Tanks
         public SceneTanksGame(Game game) : base(game)
         {
             InitializeEnvironment();
-            InitializePlayers();
         }
         private void InitializeEnvironment()
         {
@@ -142,30 +150,10 @@ namespace Tanks
             GameEnvironment.ShadowDistanceHigh = 20f;
             GameEnvironment.ShadowDistanceMedium = 300f;
             GameEnvironment.ShadowDistanceLow = 1000f;
-        }
-        private void InitializePlayers()
-        {
-            player1Status = new PlayerStatus
-            {
-                Name = "Player 1",
-                Points = 0,
-                MaxLife = 100,
-                CurrentLife = 100,
-                MaxMove = 25,
-                CurrentMove = 25,
-                Color = Color.Blue,
-            };
 
-            player2Status = new PlayerStatus
-            {
-                Name = "Player 2",
-                Points = 0,
-                MaxLife = 100,
-                CurrentLife = 100,
-                MaxMove = 25,
-                CurrentMove = 25,
-                Color = Color.Red,
-            };
+            GameEnvironment.LODDistanceHigh = 100f;
+            GameEnvironment.LODDistanceMedium = 500f;
+            GameEnvironment.LODDistanceLow = 1000f;
         }
 
         public override void OnReportProgress(LoadResourceProgress value)
@@ -244,6 +232,8 @@ namespace Tanks
 
         private void LoadUI()
         {
+            InitializePlayers();
+
             List<Task> taskList = new List<Task>();
             taskList.AddRange(InitializeUI());
             taskList.AddRange(InitializeModels());
@@ -270,8 +260,8 @@ namespace Tanks
         private async Task InitializeUIGameMessages()
         {
             gameMessage = await AddComponentUI<UITextArea, UITextAreaDescription>("GameMessage", "GameMessage", UITextAreaDescription.DefaultFromFile(fontFilename, 120, FontMapStyles.Regular, false), LayerUIEffects + 1);
-            gameMessage.TextForeColor = Color.Yellow;
-            gameMessage.TextShadowColor = Color.Yellow * 0.5f;
+            gameMessage.TextForeColor = gameMessageForeColor;
+            gameMessage.TextShadowColor = gameMessageShadowColor;
             gameMessage.TextHorizontalAlign = TextHorizontalAlign.Center;
             gameMessage.TextVerticalAlign = TextVerticalAlign.Middle;
             gameMessage.GrowControlWithText = false;
@@ -279,7 +269,7 @@ namespace Tanks
 
             gameKeyHelp = await AddComponentUI<UITextArea, UITextAreaDescription>("GameKeyHelp", "GameKeyHelp", UITextAreaDescription.DefaultFromFile(fontFilename, 25, FontMapStyles.Regular, true), LayerUIEffects + 1);
             gameKeyHelp.TextForeColor = Color.Yellow;
-            gameKeyHelp.Text = "Press space to exit";
+            gameKeyHelp.Text = "Press space to begin a new game, or escape to exit";
             gameKeyHelp.TextHorizontalAlign = TextHorizontalAlign.Center;
             gameKeyHelp.TextVerticalAlign = TextVerticalAlign.Middle;
             gameKeyHelp.GrowControlWithText = false;
@@ -499,11 +489,11 @@ namespace Tanks
                 InitializeModelsTanks(),
                 InitializeModelsTerrain(),
                 InitializeModelsTrees(),
-                InitializeLandscape(),
                 InitializeModelProjectile(),
                 InitializeParticleManager(),
                 InitializeDecalDrawer(),
                 InitializeAudio(),
+                InitializeLights(),
             };
         }
         private async Task InitializeModelsTanks()
@@ -514,14 +504,12 @@ namespace Tanks
                 Optimize = false,
                 Content = ContentDescription.FromFile("Resources/Leopard", "Leopard.json"),
                 Instances = 2,
-                TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
+                TransformNames = new[] { tankBarrelPart, tankTurretPart, tankHullPart },
                 TransformDependences = new[] { 1, 2, -1 },
             };
 
             tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
             tanks.Visible = false;
-
-            tankHeight = tanks[0].GetBoundingBox().Height * 0.5f;
         }
         private async Task InitializeModelsTerrain()
         {
@@ -576,38 +564,6 @@ namespace Tanks
             trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", tDesc, SceneObjectUsages.Agent);
             trees.Visible = false;
         }
-        private async Task InitializeLandscape()
-        {
-            float w = 1920f * 0.5f;
-            float h = 1080f * 0.5f;
-            float d = 2000f * 0.5f;
-            float elevation = 500 * 0.5f;
-
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-w*3, +h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(0f, 0f) },
-                new VertexData{ Position = new Vector3(+w*3, +h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(3f, 0f) },
-                new VertexData{ Position = new Vector3(-w*3, -h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(0f, 1f) },
-                new VertexData{ Position = new Vector3(+w*3, -h+elevation, d), Normal = Vector3.Up, Texture = new Vector2(3f, 1f) },
-            };
-
-            uint[] indices = new uint[]
-            {
-                0, 1, 2,
-                1, 3, 2,
-            };
-
-            var material = MaterialBlinnPhongContent.Default;
-            material.DiffuseTexture = "Resources/Landscape.png";
-
-            var content = new ModelDescription
-            {
-                Content = ContentDescription.FromContentData(vertices, indices, material),
-            };
-
-            landScape = await AddComponent<Model, ModelDescription>("Landscape", "Landscape", content);
-            landScape.Visible = false;
-        }
         private async Task InitializeModelProjectile()
         {
             var sphereDesc = GeometryUtil.CreateSphere(1, 5, 5);
@@ -640,6 +596,20 @@ namespace Tanks
             particleDescriptions.Add("Projectile", pProjectile);
             particleDescriptions.Add("Explosion", pExplosion);
             particleDescriptions.Add("SmokeExplosion", pSmokeExplosion);
+
+            var pShotExplosion = ParticleSystemDescription.InitializeExplosion("Resources/particles", "fire.png", 5);
+            pShotExplosion.Gravity = Direction3.Zero;
+            pShotExplosion.EmitterVelocitySensitivity = 1f;
+            pShotExplosion.MinVerticalVelocity = 0f;
+            pShotExplosion.MaxVerticalVelocity = 0f;
+            pShotExplosion.MinHorizontalVelocity = -0.1f;
+            pShotExplosion.MaxHorizontalVelocity = 0.1f;
+            particleDescriptions.Add("ShotExplosion", pShotExplosion);
+
+            var pShotSmoke = ParticleSystemDescription.InitializeExplosion("Resources/particles", "smoke.png", 5);
+            pShotSmoke.Gravity = Direction3.Zero;
+            pShotExplosion.EmitterVelocitySensitivity = 1f;
+            particleDescriptions.Add("ShotSmoke", pShotSmoke);
         }
         private async Task InitializeDecalDrawer()
         {
@@ -800,6 +770,25 @@ namespace Tanks
 
             await Task.CompletedTask;
         }
+        private async Task InitializeLights()
+        {
+            List<SceneLightPoint> pointLights = new List<SceneLightPoint>();
+
+            var lightDesc = SceneLightPointDescription.Create(Vector3.One * float.MaxValue, 0, 0);
+
+            for (int i = 0; i < 8; i++)
+            {
+                var light = new SceneLightPoint($"Explosion_{i}", true, Color3.Black, Color3.Black, false, lightDesc);
+
+                pointLights.Add(light);
+            }
+
+            Lights.AddRange(pointLights);
+
+            LightQueue.Initialize(pointLights);
+
+            await Task.CompletedTask;
+        }
 
         private async Task LoadUICompleted(LoadResourcesResult res)
         {
@@ -826,18 +815,7 @@ namespace Tanks
 
             await Task.Delay(1500);
 
-            await ShowMessage("Ready!", 2000);
-
-            SetOnGameEffects();
-
-            fadePanel.ClearTween();
-            fadePanel.Hide(2000);
-
-            gameReady = true;
-
-            UpdateGameControls(true);
-
-            PaintShot(true);
+            await StartGame();
         }
         private void UpdateLayout()
         {
@@ -849,7 +827,7 @@ namespace Tanks
 
             gameKeyHelp.Anchor = Anchors.HorizontalCenter;
             gameKeyHelp.Top = Game.Form.RenderHeight - 60;
-            gameKeyHelp.Width = 500;
+            gameKeyHelp.Width = 700;
             gameKeyHelp.Height = 40;
 
             float width = Game.Form.RenderWidth / 2f;
@@ -1017,7 +995,6 @@ namespace Tanks
         }
         private void PrepareModels()
         {
-            landScape.Visible = true;
             terrain.Visible = true;
             trees.Visible = true;
 
@@ -1038,14 +1015,95 @@ namespace Tanks
             }
 
             tanks[0].Manipulator.SetPosition(p1);
-            tanks[0].Manipulator.RotateTo(p2);
+            tanks[0].Manipulator.SetRotation(Quaternion.Identity);
             tanks[0].Manipulator.SetNormal(n1);
+            tanks[0].Manipulator.RotateTo(p2);
+            tanks[0].GetModelPartByName(tankTurretPart).Manipulator.SetRotation(Quaternion.Identity);
+            tanks[0].GetModelPartByName(tankBarrelPart).Manipulator.SetRotation(Quaternion.Identity);
 
             tanks[1].Manipulator.SetPosition(p2);
-            tanks[1].Manipulator.RotateTo(p1);
+            tanks[1].Manipulator.SetRotation(Quaternion.Identity);
             tanks[1].Manipulator.SetNormal(n2);
+            tanks[1].Manipulator.RotateTo(p1);
+            tanks[1].GetModelPartByName(tankTurretPart).Manipulator.SetRotation(Quaternion.Identity);
+            tanks[1].GetModelPartByName(tankBarrelPart).Manipulator.SetRotation(Quaternion.Identity);
 
             tanks.Visible = true;
+        }
+
+        private void LoadNewGame()
+        {
+            Task.Run(() =>
+            {
+                gameMessage.Hide(1000);
+                gameKeyHelp.Hide(1000);
+
+                InitializePlayers();
+
+                RemoveComponent(terrain);
+                decalDrawer.Clear();
+
+                LoadResourcesAsync(
+                    InitializeModelsTerrain(),
+                    LoadNewGameCompleted);
+            });
+        }
+        private async Task LoadNewGameCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            PlantTrees();
+            PrepareModels();
+
+            await StartGame();
+        }
+
+        private async Task StartGame()
+        {
+            currentTurn = 1;
+            currentPlayer = 0;
+
+            await ShowMessage("Ready!", 2000);
+
+            SetOnGameEffects();
+
+            fadePanel.ClearTween();
+            fadePanel.Hide(2000);
+
+            gameReady = true;
+
+            UpdateGameControls(true);
+
+            PaintShot(true);
+
+            gameEnding = false;
+        }
+        private void InitializePlayers()
+        {
+            player1Status = new PlayerStatus
+            {
+                Name = "Player 1",
+                Points = 0,
+                MaxLife = 100,
+                CurrentLife = 100,
+                MaxMove = 25,
+                CurrentMove = 25,
+                Color = Color.Blue,
+            };
+
+            player2Status = new PlayerStatus
+            {
+                Name = "Player 2",
+                Points = 0,
+                MaxLife = 100,
+                CurrentLife = 100,
+                MaxMove = 25,
+                CurrentMove = 25,
+                Color = Color.Red,
+            };
         }
         private void UpdateGameControls(bool visible)
         {
@@ -1097,6 +1155,8 @@ namespace Tanks
             {
                 return;
             }
+
+            LightQueue.Update(gameTime);
 
             UpdateTurnStatus();
             UpdatePlayersStatus();
@@ -1202,11 +1262,11 @@ You will lost all the game progress.",
 
             if (Game.Input.KeyPressed(Keys.Q))
             {
-                Shooter.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+                RotateTankBarrel(Shooter, gameTime.ElapsedSeconds);
             }
             if (Game.Input.KeyPressed(Keys.Z))
             {
-                Shooter.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+                RotateTankBarrel(Shooter, -gameTime.ElapsedSeconds);
             }
 
             if (ShooterStatus.CurrentMove <= 0)
@@ -1255,9 +1315,14 @@ You will lost all the game progress.",
         }
         private void UpdateInputEndGame()
         {
-            if (Game.Input.KeyJustReleased(Keys.Space))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.Exit();
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.Space))
+            {
+                LoadNewGame();
             }
         }
         private void UpdateInputFree(GameTime gameTime)
@@ -1276,8 +1341,6 @@ You will lost all the game progress.",
                 Game.Input.MouseXDelta,
                 Game.Input.MouseYDelta);
 #endif
-
-            Vector3 prevPosition = Camera.Position;
 
             if (Game.Input.KeyPressed(Keys.A))
             {
@@ -1355,13 +1418,11 @@ You will lost all the game progress.",
         }
         private void UpdateTanks()
         {
-            if (FindTopGroundPosition<Triangle>(Shooter.Manipulator.Position.X, Shooter.Manipulator.Position.Z, out var r))
-            {
-                Shooter.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
-                Shooter.Manipulator.SetNormal(r.Primitive.Normal, 0.05f);
-            }
+            ModelToGround(Shooter);
 
-            Shooter.GetModelPartByName("Turret-mesh").Manipulator.RotateTo(Target.Manipulator.Position, Vector3.Up, Axis.Y, 0.01f);
+            ModelToGround(Target);
+
+            RotateTankTurretTo(Shooter, Target.Manipulator.Position);
 
             PaintMinimap();
 
@@ -1408,10 +1469,7 @@ You will lost all the game progress.",
                 return;
             }
 
-            Vector3 from = Shooter.Manipulator.Position;
-            from.Y += tankHeight;
-
-            var shotDirection = Shooter.GetModelPartByName("Barrel-mesh").Manipulator.FinalTransform.Forward;
+            var (from, shotDirection) = GetTankBarrel(Shooter);
 
             Vector3 to = from + (shotDirection * 1000f);
 
@@ -1449,6 +1507,50 @@ You will lost all the game progress.",
 
                 dist += sampleDist;
             }
+        }
+        private void ModelToGround(ModelInstance model)
+        {
+            if (FindTopGroundPosition<Triangle>(model.Manipulator.Position.X, model.Manipulator.Position.Z, out var r))
+            {
+                model.Manipulator.SetPosition(r.Position - (Vector3.Up * 0.1f));
+                model.Manipulator.SetNormal(r.Primitive.Normal, 0.05f);
+            }
+        }
+        private (Vector3 Position, Vector3 Direction) GetTankBarrel(ModelInstance model)
+        {
+            var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
+
+            var dir = barrelManipulator.FinalTransform.Forward;
+            var pos = barrelManipulator.FinalTransform.TranslationVector + (dir * 15f);
+
+            return (pos, dir);
+        }
+        private void RotateTankBarrel(ModelInstance model, float pitch)
+        {
+            var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
+
+            //Extract single pitch angle from quaternion
+            float sAngle = barrelManipulator.Rotation.Angle;
+            if (barrelManipulator.Rotation.X < 0)
+            {
+                sAngle *= -1f;
+            }
+
+            if (sAngle + pitch >= maxBarrelPitch)
+            {
+                return;
+            }
+
+            if (sAngle + pitch <= minBarrelPitch)
+            {
+                return;
+            }
+
+            barrelManipulator.Rotate(0, pitch, 0);
+        }
+        private void RotateTankTurretTo(ModelInstance model, Vector3 position)
+        {
+            model.GetModelPartByName(tankTurretPart).Manipulator.RotateTo(position, Vector3.Up, Axis.Y, 0.01f);
         }
         private void PaintMinimap()
         {
@@ -1496,7 +1598,7 @@ You will lost all the game progress.",
 
         private void Shoot(float shotForce)
         {
-            var shotDirection = Shooter.GetModelPartByName("Barrel-mesh").Manipulator.FinalTransform.Forward;
+            var (barrelPosition, shotDirection) = GetTankBarrel(Shooter);
 
             shot = new ParabolicShot();
             shot.Configure(Game.GameTime, shotDirection, shotForce * 200, windDirection, currentWindVelocity);
@@ -1504,14 +1606,19 @@ You will lost all the game progress.",
             shooting = true;
 
             PlayEffectShooting(Shooter);
+
+            _ = AddShotSystem(barrelPosition, shotDirection);
         }
         private async Task IntegrateShot(GameTime gameTime)
         {
-            // Set projectile position
+            // Get barrel position
+            var (barrelPosition, _) = GetTankBarrel(Shooter);
+
+            // Calculate shot position
             Vector3 shotPos = shot.Integrate(gameTime, Vector3.Zero, Vector3.Zero);
-            Vector3 projectilePosition = Shooter.Manipulator.Position + shotPos;
-            projectilePosition.Y += tankHeight;
-            projectile.Manipulator.SetPosition(projectilePosition, true);
+
+            // Set projectile position
+            projectile.Manipulator.SetPosition(barrelPosition + shotPos, true);
             var projVolume = projectile.GetBoundingSphere(true);
             projectile.Visible = true;
 
@@ -1673,8 +1780,10 @@ You will lost all the game progress.",
         private async Task AddExplosionSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;
-            float duration = 0.5f;
+            float duration = explosionDurationSeconds;
             float rate = 0.01f;
+
+            LightQueue.QueueLight(Game.GameTime, position, lightExplosion, duration);
 
             var emitter1 = new ParticleEmitter()
             {
@@ -1698,11 +1807,42 @@ You will lost all the game progress.",
             await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["Explosion"], emitter1);
             await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["SmokeExplosion"], emitter2);
         }
+        private async Task AddShotSystem(Vector3 position, Vector3 direction)
+        {
+            float duration = shotDurationSeconds;
+            float rate = 0.005f;
+
+            LightQueue.QueueLight(Game.GameTime, position, lightShoot, duration);
+
+            var emitter1 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = direction * 10f,
+                Duration = duration,
+                EmissionRate = rate,
+                InfiniteDuration = false,
+                MaximumDistance = 1000f,
+            };
+            var emitter2 = new ParticleEmitter()
+            {
+                Position = position,
+                Velocity = direction * 10f,
+                Duration = duration * 2f,
+                EmissionRate = rate * 10f,
+                InfiniteDuration = false,
+                MaximumDistance = 1000f,
+            };
+
+            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["ShotExplosion"], emitter1);
+            await particleManager.AddParticleSystem(ParticleSystemTypes.CPU, particleDescriptions["ShotSmoke"], emitter2);
+        }
         private async Task AddSmokePlumeSystem(Vector3 position)
         {
             Vector3 velocity = Vector3.Up;
             float duration = Helper.RandomGenerator.NextFloat(10, 30);
             float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
+
+            LightQueue.QueueLight(Game.GameTime, position, lightExplosion, duration);
 
             var emitter1 = new ParticleEmitter()
             {
@@ -1736,6 +1876,9 @@ You will lost all the game progress.",
 
         private async Task ShowMessage(string text, int delay)
         {
+            gameMessage.TextForeColor = gameMessageForeColor;
+            gameMessage.TextShadowColor = gameMessageShadowColor;
+            gameMessage.TextHorizontalAlign = TextHorizontalAlign.Center;
             gameMessage.Text = text;
             gameMessage.TweenScale(0, 1, 500, ScaleFuncs.CubicEaseIn);
             gameMessage.Show(500);
@@ -1753,6 +1896,7 @@ You will lost all the game progress.",
             if (tankMoveEffectInstance == null)
             {
                 tankMoveEffectInstance = AudioManager.CreateEffectInstance(tankMoveEffect, emitter, Camera);
+                tankMoveEffectInstance.Volume = 0.5f;
                 tankMoveEffectInstance.Play();
 
                 Task.Run(async () =>
@@ -1849,7 +1993,7 @@ You will lost all the game progress.",
         private void SetOnGameEffects()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.RomBinDaHouse);
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.Filmic);
         }
         private void SetOnModalEffects()
         {

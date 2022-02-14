@@ -388,9 +388,9 @@ namespace Engine
                 {
                     if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                     {
-                        float d = Vector3.DistanceSquared(viewerPosition, l.Position);
+                        float d = Vector3.Distance(viewerPosition, l.Position) - l.Radius;
 
-                        return (l.Radius / d) >= (1f / distance);
+                        return d <= distance;
                     }
 
                     return false;
@@ -426,9 +426,9 @@ namespace Engine
                 {
                     if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                     {
-                        float d = Vector3.DistanceSquared(viewerPosition, l.Position);
+                        float d = Vector3.Distance(viewerPosition, l.Position) - l.Radius;
 
-                        return (l.Radius / d) >= (1f / distance);
+                        return d <= distance;
                     }
 
                     return false;

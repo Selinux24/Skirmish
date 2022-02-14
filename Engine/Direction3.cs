@@ -9,6 +9,10 @@ namespace Engine
     public struct Direction3 : IEquatable<Direction3>
     {
         /// <summary>
+        /// Zero direction
+        /// </summary>
+        public static readonly Direction3 Zero = new Direction3(0.0f, 0.0f, 0.0f);
+        /// <summary>
         /// A unit <see cref="Direction3"/> designating up (0, 1, 0).
         /// </summary>
         public static readonly Direction3 Up = new Direction3(0.0f, 1.0f, 0.0f);

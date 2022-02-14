@@ -250,10 +250,31 @@ namespace Engine
         /// <returns>Returns a position list</returns>
         private IEnumerable<Vector3> GetActiveDecals()
         {
+            if (!decals.Any())
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
             return decals
                 .Where(d => d.StartTime + d.MaxAge > Game.GameTime.TotalSeconds)
                 .Select(d => d.Position)
                 .ToArray();
+        }
+        /// <summary>
+        /// Clears all decals
+        /// </summary>
+        public void Clear()
+        {
+            if (!decals.Any())
+            {
+                return;
+            }
+
+            for (int i = 0; i < decals.Length; i++)
+            {
+                decals[i].StartTime = 0;
+                decals[i].MaxAge = 0;
+            }
         }
 
         /// <inheritdoc/>

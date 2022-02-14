@@ -143,6 +143,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="IShot.cs" />
+    <Compile Include="LightQueue.cs" />
     <Compile Include="ParabolicShot.cs" />
     <Compile Include="PlayerStatus.cs" />
     <Compile Include="SceneTanksGame.cs" />
@@ -201,9 +202,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\GameIcon.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Resources\Landscape.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Leopard\Leopard.json">
