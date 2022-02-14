@@ -90,6 +90,8 @@ namespace Engine
                 BufferManager?.RemoveVertexData(vertexBuffer);
                 BufferManager?.RemoveIndexData(indexBuffer);
             }
+
+            base.Dispose(disposing);
         }
 
         /// <inheritdoc/>

@@ -337,11 +337,6 @@ namespace Engine.Modular
         {
 
         }
-        /// <inheritdoc/>
-        protected override void Dispose(bool disposing)
-        {
-
-        }
 
         /// <inheritdoc/>
         public override async Task InitializeAssets(ModularSceneryDescription description)

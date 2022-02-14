@@ -543,6 +543,8 @@ namespace Engine.UI
                     .ForEach(c => c.Dispose());
                 children.Clear();
             }
+
+            base.Dispose(disposing);
         }
 
         /// <inheritdoc/>

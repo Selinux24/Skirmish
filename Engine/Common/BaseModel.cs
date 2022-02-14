@@ -75,6 +75,8 @@ namespace Engine.Common
                     InstancingBuffer = null;
                 }
             }
+
+            base.Dispose(disposing);
         }
 
         /// <inheritdoc/>

@@ -276,6 +276,8 @@ namespace Engine.UI
                 BufferManager?.RemoveVertexData(vertexBuffer);
                 BufferManager?.RemoveIndexData(indexBuffer);
             }
+
+            base.Dispose(disposing);
         }
 
         /// <inheritdoc/>
