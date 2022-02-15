@@ -96,7 +96,7 @@ namespace Tanks
         private readonly float minBarrelPitch = MathUtil.DegreesToRadians(-5);
         private Model projectile;
 
-        private readonly List<ModelInstanced> trees = new List<ModelInstanced>();
+        private readonly List<ModelInstanced> treeModels = new List<ModelInstanced>();
 
         private Sprite[] trajectoryMarkerPool;
 
@@ -148,7 +148,7 @@ namespace Tanks
             Camera.CameraRadius = 60f;
 
             GameEnvironment.ShadowDistanceHigh = 20f;
-            GameEnvironment.ShadowDistanceMedium = 300f;
+            GameEnvironment.ShadowDistanceMedium = 100f;
             GameEnvironment.ShadowDistanceLow = 1000f;
 
             GameEnvironment.LODDistanceHigh = 100f;
@@ -571,7 +571,7 @@ namespace Tanks
                 var tree = await AddComponent<ModelInstanced, ModelInstancedDescription>(modelName, modelName, tDesc, SceneObjectUsages.Agent);
                 tree.Visible = false;
 
-                trees.Add(tree);
+                treeModels.Add(tree);
             }
         }
         private async Task InitializeModelProjectile()
@@ -980,9 +980,9 @@ namespace Tanks
             var max = bbox.Maximum.XZ();
             var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
 
-            foreach (var tree in trees)
+            foreach (var treeModel in treeModels)
             {
-                PlantTree(tree, min, max, sph);
+                PlantTree(treeModel, min, max, sph);
             }
         }
         private void PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph)
@@ -1013,7 +1013,7 @@ namespace Tanks
         private void PrepareModels()
         {
             terrain.Visible = true;
-            trees.ForEach(t => t.Visible = true);
+            treeModels.ForEach(t => t.Visible = true);
 
             Vector3 p1 = new Vector3(-140, 100, 0);
             Vector3 n1 = Vector3.Up;
@@ -1174,6 +1174,7 @@ namespace Tanks
             }
 
             LightQueue.Update(gameTime);
+            TreeController.Update(gameTime);
 
             UpdateTurnStatus();
             UpdatePlayersStatus();
@@ -1444,6 +1445,8 @@ You will lost all the game progress.",
             PaintMinimap();
 
             PaintShot(true);
+
+            _ = IntegrateCollision();
         }
         private void UpdateCamera(bool firstUpdate)
         {
@@ -1742,6 +1745,42 @@ You will lost all the game progress.",
                 }
 
                 dialogActive = false;
+            });
+        }
+
+        private async Task IntegrateCollision()
+        {
+            await Task.Run(() =>
+            {
+                treeModels.ForEach(treeModel =>
+                {
+                    treeModel
+                        .GetInstances()
+                        .AsParallel()
+                        .ForAll((tree) =>
+                        {
+                            if (TreeController.IsBroken(tree))
+                            {
+                                return;
+                            }
+
+                            if (!Shooter.Intersects(tree.GetBoundingSphere(), out _))
+                            {
+                                return;
+                            }
+
+                            if (Shooter.Intersects(IntersectDetectionMode.Mesh, tree, IntersectDetectionMode.Mesh))
+                            {
+                                //Find collision vector
+                                var collision = Shooter.Manipulator.Position - tree.Manipulator.Position;
+                                collision.Y = 0;
+                                collision.Normalize();
+
+                                //Store a tree controller
+                                TreeController.AddFallingTree(tree, collision);
+                            }
+                        });
+                });
             });
         }
 

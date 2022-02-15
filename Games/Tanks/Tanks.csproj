@@ -149,6 +149,7 @@
     <Compile Include="SceneTanksGame.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TreeController.cs" />
     <Compile Include="UIControlExtensions.cs" />
     <Content Include="Resources\Arrow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
