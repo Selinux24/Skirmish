@@ -96,7 +96,7 @@ namespace Tanks
         private readonly float minBarrelPitch = MathUtil.DegreesToRadians(-5);
         private Model projectile;
 
-        private ModelInstanced trees;
+        private readonly List<ModelInstanced> trees = new List<ModelInstanced>();
 
         private Sprite[] trajectoryMarkerPool;
 
@@ -553,16 +553,26 @@ namespace Tanks
         }
         private async Task InitializeModelsTrees()
         {
-            var tDesc = new ModelInstancedDescription()
-            {
-                CastShadow = true,
-                Optimize = true,
-                Content = ContentDescription.FromFile("Resources/Environment/Tree", "Tree.json"),
-                Instances = Helper.RandomGenerator.Next(200, 5000),
-            };
+            int instances = Helper.RandomGenerator.Next(200, 5000) / 3;
 
-            trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", tDesc, SceneObjectUsages.Agent);
-            trees.Visible = false;
+            for (int i = 0; i < 3; i++)
+            {
+                string modelName = $"Tree{i + 1}";
+                string modelFileName = $"{modelName}.json";
+
+                var tDesc = new ModelInstancedDescription()
+                {
+                    CastShadow = true,
+                    Optimize = true,
+                    Content = ContentDescription.FromFile("Resources/Environment/Tree", modelFileName),
+                    Instances = instances,
+                };
+
+                var tree = await AddComponent<ModelInstanced, ModelInstancedDescription>(modelName, modelName, tDesc, SceneObjectUsages.Agent);
+                tree.Visible = false;
+
+                trees.Add(tree);
+            }
         }
         private async Task InitializeModelProjectile()
         {
@@ -970,12 +980,19 @@ namespace Tanks
             var max = bbox.Maximum.XZ();
             var sph = new BoundingSphere(bbox.Center, bbox.GetExtents().X * 0.66f);
 
-            int treeCount = trees.InstanceCount;
+            foreach (var tree in trees)
+            {
+                PlantTree(tree, min, max, sph);
+            }
+        }
+        private void PlantTree(ModelInstanced tree, Vector2 min, Vector2 max, BoundingSphere sph)
+        {
+            int treeCount = tree.InstanceCount;
             while (treeCount > 0)
             {
                 var point = Helper.RandomGenerator.NextVector2(min, max);
                 var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
-                var scale = Helper.RandomGenerator.NextFloat(1, 1.5f);
+                var scale = Helper.RandomGenerator.NextFloat(0.5f, 1f);
 
                 if (FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
@@ -987,16 +1004,16 @@ namespace Tanks
 
                     treeCount--;
 
-                    trees[treeCount].Manipulator.SetPosition(pos);
-                    trees[treeCount].Manipulator.SetRotation(rot, -MathUtil.PiOverTwo, 0);
-                    trees[treeCount].Manipulator.SetScale(scale);
+                    tree[treeCount].Manipulator.SetPosition(pos);
+                    tree[treeCount].Manipulator.SetRotation(rot, -MathUtil.PiOverTwo, 0);
+                    tree[treeCount].Manipulator.SetScale(scale);
                 }
             }
         }
         private void PrepareModels()
         {
             terrain.Visible = true;
-            trees.Visible = true;
+            trees.ForEach(t => t.Visible = true);
 
             Vector3 p1 = new Vector3(-140, 100, 0);
             Vector3 n1 = Vector3.Up;
