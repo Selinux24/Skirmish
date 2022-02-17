@@ -70,8 +70,9 @@ namespace Tanks
         private UITextArea keyPitchDownText;
 
         private UIProgressBar pbFire;
-        private readonly Color4 pbFireProgressColor = Color.Yellow;
-        private readonly Color4 pbFireBaseColor = new Color4(0, 0, 0, 0.5f);
+        private readonly Color4 pbFireBaseColor = Color.Yellow;
+        private readonly Color4 pbFireHBaseColor = Color.Red;
+        private readonly Color4 pbFireProgressColor = new Color4(Color.Yellow.ToColor3(), 0.9f);
         private UITextArea fireKeyText;
 
         private Sprite miniMapBackground;
@@ -457,8 +458,8 @@ namespace Tanks
             windVelocity = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("WindVelocity", "WindVelocity", UIProgressBarDescription.DefaultFromFile(fontFilename, 8), layerMarkers);
             windVelocity.Caption.Text = "Wind velocity";
             windVelocity.Caption.TextForeColor = Color.Yellow * 0.85f;
-            windVelocity.ProgressColor = Color.DeepSkyBlue;
-            windVelocity.BaseColor = new Color4(0, 0, 0, 0.5f);
+            windVelocity.BaseColor = Color.DeepSkyBlue;
+            windVelocity.ProgressColor = new Color4(Color.DarkBlue.ToColor3(), 0.5f);
             windVelocity.Visible = false;
 
             windDirectionArrow = await AddComponentUI<Sprite, SpriteDescription>("WindDirectionArrow", "WindDirectionArrow", SpriteDescription.Default("Resources/Wind.png"), layerMarkers);
@@ -1322,7 +1323,7 @@ You will lost all the game progress.",
             {
                 pbFire.ProgressValue += gameTime.ElapsedSeconds * 0.5f;
                 pbFire.ProgressValue %= 1f;
-                pbFire.ProgressColor = pbFire.ProgressValue < 0.75f ? Color.Yellow : Color4.Lerp(Color.Yellow, Color.Red, (pbFire.ProgressValue - 0.75f) / 0.25f);
+                pbFire.BaseColor = pbFire.ProgressValue < 0.75f ? pbFireBaseColor : Color4.Lerp(pbFireBaseColor, pbFireHBaseColor, (pbFire.ProgressValue - 0.75f) / 0.25f);
             }
 
             if (Game.Input.KeyJustReleased(Keys.Space))
