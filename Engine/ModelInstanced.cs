@@ -147,6 +147,7 @@ namespace Engine
                 current.AnimationController.Update(context.GameTime.ElapsedSeconds);
 
                 instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                instancingData[instanceIndex].TintColor = current.TintColor;
                 instancingData[instanceIndex].TextureIndex = current.TextureIndex;
                 instancingData[instanceIndex].MaterialIndex = current.MaterialIndex;
                 instancingData[instanceIndex].AnimationOffset = current.AnimationController.AnimationOffset;
@@ -511,7 +512,7 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                effect.UpdatePerObject(AnimationDrawInfo.Empty, materialInfo, 0);
+                effect.UpdatePerObject(AnimationDrawInfo.Empty, materialInfo, 0, Color4.White);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {

@@ -48,6 +48,10 @@ namespace Engine
         /// </summary>
         public uint TextureIndex { get; set; }
         /// <summary>
+        /// Tint color
+        /// </summary>
+        public Color4 TintColor { get; set; } = Color4.White;
+        /// <summary>
         /// Animation palette offset
         /// </summary>
         public uint AnimationOffset { get; set; }
@@ -395,7 +399,7 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex);
+                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 

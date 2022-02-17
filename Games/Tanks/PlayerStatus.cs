@@ -36,6 +36,10 @@ namespace Tanks
         /// </summary>
         public Color Color { get; set; }
         /// <summary>
+        /// Tint color
+        /// </summary>
+        public Color TintColor { get; set; }
+        /// <summary>
         /// Health
         /// </summary>
         public float Health

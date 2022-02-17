@@ -16,6 +16,7 @@ cbuffer cbPerFrame : register(b1)
 };
 cbuffer cbPerInstance : register(b2)
 {
+	float4 gTintColor;
 	uint gTextureIndex;
 	uint gMaterialIndex;
 	uint gAnimationOffset;
@@ -40,7 +41,7 @@ PSVertexPositionColor VSPositionColor(VSVertexPositionColor input)
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
 	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
-	output.color = input.color;
+	output.color = input.color * gTintColor;
     
 	return output;
 }
@@ -52,7 +53,7 @@ PSVertexPositionColor VSPositionColorI(VSVertexPositionColorI input)
 
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
-	output.color = input.color;
+	output.color = input.color * input.tintColor;
     output.materialIndex = input.materialIndex;
     
 	return output;
@@ -76,7 +77,7 @@ PSVertexPositionColor VSPositionColorSkinned(VSVertexPositionColorSkinned input)
 
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
 	output.positionWorld = mul(positionL, gWorld).xyz;
-	output.color = input.color;
+	output.color = input.color * gTintColor;
     
 	return output;
 }
@@ -101,7 +102,7 @@ PSVertexPositionColor VSPositionColorSkinnedI(VSVertexPositionColorSkinnedI inpu
 	
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
-	output.color = input.color;
+	output.color = input.color * input.tintColor;
     output.materialIndex = input.materialIndex;
     
 	return output;
@@ -128,7 +129,7 @@ PSVertexPositionNormalColor VSPositionNormalColor(VSVertexPositionNormalColor in
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
 	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3) gWorld));
-	output.color = input.color;
+	output.color = input.color * gTintColor;
     
 	return output;
 }
@@ -142,7 +143,7 @@ PSVertexPositionNormalColor VSPositionNormalColorI(VSVertexPositionNormalColorI 
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(instanceNormal, (float3x3) gWorld));
-	output.color = input.color;
+	output.color = input.color * input.tintColor;
     output.materialIndex = input.materialIndex;
 
 	return output;
@@ -170,7 +171,7 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinned(VSVertexPositionNormalC
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3) gWorld));
-	output.color = input.color;
+	output.color = input.color * gTintColor;
 
 	return output;
 }
@@ -200,7 +201,7 @@ PSVertexPositionNormalColor VSPositionNormalColorSkinnedI(VSVertexPositionNormal
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(instanceNormal, (float3x3) gWorld));
-	output.color = input.color;
+	output.color = input.color * input.tintColor;
     output.materialIndex = input.materialIndex;
 
 	return output;
@@ -227,6 +228,7 @@ PSVertexPositionTexture VSPositionTexture(VSVertexPositionTexture input)
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
 	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.tex = input.tex;
+	output.tintColor = gTintColor;
 	output.textureIndex = gTextureIndex;
     
 	return output;
@@ -240,6 +242,7 @@ PSVertexPositionTexture VSPositionTextureI(VSVertexPositionTextureI input)
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.tex = input.tex;
+	output.tintColor = input.tintColor;
 	output.textureIndex = input.textureIndex;
     output.materialIndex = input.materialIndex;
     
@@ -265,6 +268,7 @@ PSVertexPositionTexture VSPositionTextureSkinned(VSVertexPositionTextureSkinned 
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.tex = input.tex;
+	output.tintColor = gTintColor;
 	output.textureIndex = gTextureIndex;
     
 	return output;
@@ -291,6 +295,7 @@ PSVertexPositionTexture VSPositionTextureSkinnedI(VSVertexPositionTextureSkinned
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.tex = input.tex;
+	output.tintColor = input.tintColor;
 	output.textureIndex = input.textureIndex;
     output.materialIndex = input.materialIndex;
     
@@ -301,7 +306,9 @@ GBufferPSOutput PSPositionTexture(PSVertexPositionTexture input)
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-    output.color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+
+	output.color = color * input.tintColor;
 	output.normal = float4(0.0f, 0.0f, 0.0f, 0.0f);
     output.depth = float4(input.positionWorld, gMaterialIndex + input.materialIndex);
 
@@ -319,6 +326,7 @@ PSVertexPositionNormalTexture VSPositionNormalTexture(VSVertexPositionNormalText
 	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = gTintColor;
 	output.textureIndex = gTextureIndex;
     
 	return output;
@@ -334,6 +342,7 @@ PSVertexPositionNormalTexture VSPositionNormalTextureI(VSVertexPositionNormalTex
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(instanceNormal, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = input.tintColor;
 	output.textureIndex = input.textureIndex;
     output.materialIndex = input.materialIndex;
     
@@ -363,6 +372,7 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinned(VSVertexPositionNor
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = gTintColor;
 	output.textureIndex = gTextureIndex;
 	
 	return output;
@@ -394,6 +404,7 @@ PSVertexPositionNormalTexture VSPositionNormalTextureSkinnedI(VSVertexPositionNo
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(instanceNormal, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = input.tintColor;
 	output.textureIndex = input.textureIndex;
     output.materialIndex = input.materialIndex;
 
@@ -404,7 +415,9 @@ GBufferPSOutput PSPositionNormalTexture(PSVertexPositionNormalTexture input)
 {
 	GBufferPSOutput output = (GBufferPSOutput) 0;
 
-    output.color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
+
+	output.color = color * input.tintColor;
     output.normal = float4(normalize(input.normalWorld), 0);
     output.depth = float4(input.positionWorld, gMaterialIndex + input.materialIndex);
 
@@ -423,6 +436,7 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangent(VSVertexPosi
 	output.normalWorld = normalize(mul(input.normalLocal, (float3x3) gWorld));
 	output.tangentWorld = normalize(mul(input.tangentLocal, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = gTintColor;
 	output.textureIndex = gTextureIndex;
     
 	return output;
@@ -440,6 +454,7 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentI(VSVertexPos
 	output.normalWorld = normalize(mul(instanceNormal, (float3x3) gWorld));
 	output.tangentWorld = normalize(mul(instanceTangent, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = input.tintColor;
 	output.textureIndex = input.textureIndex;
     output.materialIndex = input.materialIndex;
     
@@ -473,6 +488,7 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinned(VSVer
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3) gWorld));
 	output.tangentWorld = normalize(mul(tangentL.xyz, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = gTintColor;
 	output.textureIndex = gTextureIndex;
     
 	return output;
@@ -509,6 +525,7 @@ PSVertexPositionNormalTextureTangent VSPositionNormalTextureTangentSkinnedI(VSVe
 	output.normalWorld = normalize(mul(instanceNormal.xyz, (float3x3) gWorld));
 	output.tangentWorld = normalize(mul(instanceTangent.xyz, (float3x3) gWorld));
 	output.tex = input.tex;
+	output.tintColor = input.tintColor;
 	output.textureIndex = input.textureIndex;
     output.materialIndex = input.materialIndex;
 
@@ -523,7 +540,7 @@ GBufferPSOutput PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTang
     float3 normalMapSample = gNormalMapArray.Sample(SamplerNormal, float3(input.tex, input.textureIndex)).rgb;
 	float3 bumpedNormalW = NormalSampleToWorldSpace(normalMapSample, input.normalWorld, input.tangentWorld);
 
-	output.color = color;
+	output.color = color * input.tintColor;
 	output.normal = float4(bumpedNormalW, 0);
     output.depth = float4(input.positionWorld, gMaterialIndex + input.materialIndex);
 

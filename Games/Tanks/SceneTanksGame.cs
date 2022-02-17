@@ -1037,6 +1037,7 @@ namespace Tanks
             tanks[0].Manipulator.RotateTo(p2);
             tanks[0].GetModelPartByName(tankTurretPart).Manipulator.SetRotation(Quaternion.Identity);
             tanks[0].GetModelPartByName(tankBarrelPart).Manipulator.SetRotation(Quaternion.Identity);
+            tanks[0].TintColor = player1Status.TintColor;
 
             tanks[1].Manipulator.SetPosition(p2);
             tanks[1].Manipulator.SetRotation(Quaternion.Identity);
@@ -1044,6 +1045,7 @@ namespace Tanks
             tanks[1].Manipulator.RotateTo(p1);
             tanks[1].GetModelPartByName(tankTurretPart).Manipulator.SetRotation(Quaternion.Identity);
             tanks[1].GetModelPartByName(tankBarrelPart).Manipulator.SetRotation(Quaternion.Identity);
+            tanks[1].TintColor = player2Status.TintColor;
 
             tanks.Visible = true;
         }
@@ -1109,6 +1111,7 @@ namespace Tanks
                 MaxMove = 25,
                 CurrentMove = 25,
                 Color = Color.Blue,
+                TintColor = new Color(0.5f, 0.5f, 1f, 1f),
             };
 
             player2Status = new PlayerStatus
@@ -1120,6 +1123,7 @@ namespace Tanks
                 MaxMove = 25,
                 CurrentMove = 25,
                 Color = Color.Red,
+                TintColor = new Color(1f, 0.5f, 0.5f, 1f),
             };
         }
         private void UpdateGameControls(bool visible)

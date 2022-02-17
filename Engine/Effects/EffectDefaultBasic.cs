@@ -175,6 +175,10 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
+        /// Tint color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector tintColorVar = null;
+        /// <summary>
         /// First animation offset effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar animationOffsetVar = null;
@@ -453,6 +457,20 @@ namespace Engine.Effects
             set
             {
                 worldViewProjectionVar.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Tint color
+        /// </summary>
+        protected Color4 TintColor
+        {
+            get
+            {
+                return tintColorVar.GetVector<Color4>();
+            }
+            set
+            {
+                tintColorVar.Set(value);
             }
         }
         /// <summary>
@@ -823,6 +841,7 @@ namespace Engine.Effects
             normalMapVar = Effect.GetVariableTexture("gPSNormalMapArray");
 
             //Per instance
+            tintColorVar = Effect.GetVariableVector("gVSTintColor");
             animationOffsetVar = Effect.GetVariableScalar("gVSAnimationOffset");
             animationOffset2Var = Effect.GetVariableScalar("gVSAnimationOffset2");
             animationInterpolationVar = Effect.GetVariableScalar("gVSAnimationInterpolation");
@@ -994,13 +1013,14 @@ namespace Engine.Effects
         /// <inheritdoc/>
         public void UpdatePerObject()
         {
-            UpdatePerObject(AnimationDrawInfo.Empty, MaterialDrawInfo.Empty, 0);
+            UpdatePerObject(AnimationDrawInfo.Empty, MaterialDrawInfo.Empty, 0, Color4.White);
         }
         /// <inheritdoc/>
         public void UpdatePerObject(
             AnimationDrawInfo animation,
             MaterialDrawInfo material,
-            uint textureIndex)
+            uint textureIndex,
+            Color4 tintColor)
         {
             AnimationOffset = animation.Offset1;
             AnimationOffset2 = animation.Offset2;
@@ -1013,6 +1033,7 @@ namespace Engine.Effects
             Anisotropic = material.UseAnisotropic;
 
             TextureIndex = textureIndex;
+            TintColor = tintColor;
         }
 
         /// <summary>

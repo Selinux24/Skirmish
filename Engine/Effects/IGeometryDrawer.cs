@@ -39,10 +39,12 @@ namespace Engine.Effects
         /// <param name="animation">Animation information</param>
         /// <param name="material">Material information</param>
         /// <param name="textureIndex">Texture index</param>
+        /// <param name="tintColor">Tint color</param>
         void UpdatePerObject(
             AnimationDrawInfo animation,
             MaterialDrawInfo material,
-            uint textureIndex);
+            uint textureIndex,
+            Color4 tintColor);
     }
 
     /// <summary>

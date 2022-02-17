@@ -58,6 +58,10 @@ namespace Engine
         /// </summary>
         public AnimationController AnimationController { get; private set; }
         /// <summary>
+        /// Tint color
+        /// </summary>
+        public Color4 TintColor { get; set; } = Color4.White;
+        /// <summary>
         /// Texture index
         /// </summary>
         public uint TextureIndex { get; set; } = 0;

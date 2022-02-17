@@ -99,6 +99,10 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableMatrix worldViewProjectionVar = null;
         /// <summary>
+        /// Tint color effect variable
+        /// </summary>
+        private readonly EngineEffectVariableVector tintColorVar = null;
+        /// <summary>
         /// First animation offset effect variable
         /// </summary>
         private readonly EngineEffectVariableScalar animationOffsetVar = null;
@@ -195,6 +199,20 @@ namespace Engine.Effects
             set
             {
                 worldViewProjectionVar.SetMatrix(value);
+            }
+        }
+        /// <summary>
+        /// Tint color
+        /// </summary>
+        protected Color4 TintColor
+        {
+            get
+            {
+                return tintColorVar.GetVector<Color4>();
+            }
+            set
+            {
+                tintColorVar.Set(value);
             }
         }
         /// <summary>
@@ -399,17 +417,25 @@ namespace Engine.Effects
             InstancingPositionNormalTextureTangent = Effect.GetTechniqueByName("PositionNormalTextureTangentI");
             InstancingPositionNormalTextureTangentSkinned = Effect.GetTechniqueByName("PositionNormalTextureTangentSkinnedI");
 
+            //Globals
+            animationPaletteWidthVar = Effect.GetVariableScalar("gAnimationPaletteWidth");
+
+            //Per frame
             worldVar = Effect.GetVariableMatrix("gWorld");
             worldViewProjectionVar = Effect.GetVariableMatrix("gWorldViewProjection");
+
+            //Per instance
+            tintColorVar = Effect.GetVariableVector("gTintColor");
+            textureIndexVar = Effect.GetVariableScalar("gTextureIndex");
+            materialIndexVar = Effect.GetVariableScalar("gMaterialIndex");
             animationOffsetVar = Effect.GetVariableScalar("gAnimationOffset");
             animationOffset2Var = Effect.GetVariableScalar("gAnimationOffset2");
             animationInterpolationVar = Effect.GetVariableScalar("gAnimationInterpolation");
-            materialIndexVar = Effect.GetVariableScalar("gMaterialIndex");
-            textureIndexVar = Effect.GetVariableScalar("gTextureIndex");
+
+            //Textures
+            animationPaletteVar = Effect.GetVariableTexture("gAnimationPalette");
             diffuseMapVar = Effect.GetVariableTexture("gDiffuseMapArray");
             normalMapVar = Effect.GetVariableTexture("gNormalMapArray");
-            animationPaletteWidthVar = Effect.GetVariableScalar("gAnimationPaletteWidth");
-            animationPaletteVar = Effect.GetVariableTexture("gAnimationPalette");
 
             //Samplers
             samplerDiffuseVar = Effect.GetVariableSampler("SamplerDiffuse");
@@ -542,13 +568,14 @@ namespace Engine.Effects
         /// <inheritdoc/>
         public void UpdatePerObject()
         {
-            UpdatePerObject(AnimationDrawInfo.Empty, MaterialDrawInfo.Empty, 0);
+            UpdatePerObject(AnimationDrawInfo.Empty, MaterialDrawInfo.Empty, 0, Color4.White);
         }
         /// <inheritdoc/>
         public void UpdatePerObject(
             AnimationDrawInfo animation,
             MaterialDrawInfo material,
-            uint textureIndex)
+            uint textureIndex,
+            Color4 tintColor)
         {
             AnimationOffset = animation.Offset1;
             AnimationOffset2 = animation.Offset2;
@@ -560,6 +587,7 @@ namespace Engine.Effects
             Anisotropic = material.UseAnisotropic;
 
             TextureIndex = textureIndex;
+            TintColor = tintColor;
         }
     }
 }
