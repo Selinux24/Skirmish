@@ -254,6 +254,10 @@ namespace Engine.Effects
         /// Spot light shadows map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture shadowMapSpotVar = null;
+        /// <summary>
+        /// Shadow intensity
+        /// </summary>
+        private readonly EngineEffectVariableScalar shadowIntensityVar = null;
 
         /// <summary>
         /// Current diffuse map
@@ -771,6 +775,20 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Shadow intensity
+        /// </summary>
+        protected float ShadowIntensity
+        {
+            get
+            {
+                return shadowIntensityVar.GetFloat();
+            }
+            set
+            {
+                shadowIntensityVar.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -834,6 +852,7 @@ namespace Engine.Effects
             shadowMapDirectionalVar = Effect.GetVariableTexture("gPSShadowMapDir");
             shadowMapPointVar = Effect.GetVariableTexture("gPSShadowMapPoint");
             shadowMapSpotVar = Effect.GetVariableTexture("gPSShadowMapSpot");
+            shadowIntensityVar = Effect.GetVariableScalar("gPSShadowIntensity");
 
             //Per object
             useColorDiffuseVar = Effect.GetVariableScalar("gPSUseColorDiffuse");
@@ -1075,6 +1094,7 @@ namespace Engine.Effects
                 ShadowMapDirectional = shadowMapDirectional?.Texture;
                 ShadowMapPoint = shadowMapPoint?.Texture;
                 ShadowMapSpot = shadowMapSpot?.Texture;
+                ShadowIntensity = lights.ShadowIntensity;
             }
             else
             {
@@ -1093,6 +1113,7 @@ namespace Engine.Effects
                 ShadowMapDirectional = null;
                 ShadowMapPoint = null;
                 ShadowMapSpot = null;
+                ShadowIntensity = 1;
             }
         }
     }

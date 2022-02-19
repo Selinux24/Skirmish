@@ -190,6 +190,11 @@ namespace Engine
         /// Sun color
         /// </summary>
         public Color3 SunColor { get; set; }
+        /// <summary>
+        /// Gets or sets the shadow intensity value
+        /// </summary>
+        /// <remarks>From 0 (darker) to 1 (lighter)</remarks>
+        public float ShadowIntensity { get; set; }
 
         /// <summary>
         /// Constructor
@@ -216,6 +221,8 @@ namespace Engine
                 new Tuple<float, Color3>(MathUtil.Pi * 0.98f, Color.Orange.RGB()),
                 new Tuple<float, Color3>(MathUtil.Pi * 2.00f, Color.Black.RGB()),
             });
+
+            ShadowIntensity = 0.5f;
         }
 
         /// <summary>

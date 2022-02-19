@@ -39,13 +39,13 @@ cbuffer cbPSPerFrame : register(b3)
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 	uint3 gPSLightCount;
-	uint PAD31;
+    float gPSShadowIntensity;
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
-	float2 PAD32;
+	float2 PAD31;
 	float3 gPSEyePositionWorld;
-	float PAD33;
+	float PAD32;
 };
 Texture2DArray<float> gPSShadowMapDir : register(t2);
 Texture2DArray<float> gPSShadowMapSpot : register(t3);
@@ -282,6 +282,7 @@ float4 PSPositionNormalColor(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.shadowMapDir = gPSShadowMapDir;
 	lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
+    lInput.minShadowIntensity = gPSShadowIntensity;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
@@ -556,6 +557,7 @@ float4 PSPositionNormalTexture(PSVertexPositionNormalTexture input) : SV_TARGET
 	lInput.shadowMapDir = gPSShadowMapDir;
 	lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
+    lInput.minShadowIntensity = gPSShadowIntensity;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
@@ -708,6 +710,7 @@ float4 PSPositionNormalTextureTangent(PSVertexPositionNormalTextureTangent input
 	lInput.shadowMapDir = gPSShadowMapDir;
 	lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
+    lInput.minShadowIntensity = gPSShadowIntensity;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;

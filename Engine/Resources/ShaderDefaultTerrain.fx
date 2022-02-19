@@ -25,7 +25,7 @@ cbuffer cbPSPerFrame : register(b3)
 	PointLight gPSPointLights[MAX_LIGHTS_POINT];
 	SpotLight gPSSpotLights[MAX_LIGHTS_SPOT];
 	uint3 gPSLightCount;
-	uint PAD31;
+    float gPSShadowIntensity;
 	float4 gPSFogColor;
 	float gPSFogStart;
 	float gPSFogRange;
@@ -91,6 +91,7 @@ float4 PSTerrainAlphaMap(PSVertexTerrain input) : SV_TARGET
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
+    lInput.minShadowIntensity = gPSShadowIntensity;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
@@ -127,6 +128,7 @@ float4 PSTerrainSlopes(PSVertexTerrain input) : SV_TARGET
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
+    lInput.minShadowIntensity = gPSShadowIntensity;
 
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
@@ -163,7 +165,8 @@ float4 PSTerrainFull(PSVertexTerrain input) : SV_TARGET
 	lInput.shadowMapDir = gPSShadowMapDir;
     lInput.shadowMapPoint = gPSShadowMapPoint;
 	lInput.shadowMapSpot = gPSShadowMapSpot;
-
+    lInput.minShadowIntensity = gPSShadowIntensity;
+	
 	lInput.fogStart = gPSFogStart;
 	lInput.fogRange = gPSFogRange;
 	lInput.fogColor = gPSFogColor;

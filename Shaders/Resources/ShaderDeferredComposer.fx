@@ -11,7 +11,7 @@ cbuffer cbPerFrame : register(b1)
     float4x4 gWorld;
     float4x4 gWorldViewProjection;
     float3 gEyePositionWorld;
-    float PAD11;
+    float gShadowIntensity;
 };
 cbuffer cbPerDirLight : register(b2)
 {
@@ -99,6 +99,7 @@ float4 PSDirectionalLight(PSLightInput input) : SV_TARGET
         linput.pNormal = normal;
         linput.ePosition = gEyePositionWorld;
         linput.shadowMap = gShadowMapDir;
+        linput.minShadowIntensity = gShadowIntensity;
 
         ComputeLightsOutput loutput = ComputeDirectionalLight(linput);
         float3 diffuseSpecular = (k.Diffuse.rgb * loutput.diffuse) + (k.Specular * loutput.specular);
@@ -138,6 +139,7 @@ float4 PSPointLight(PSLightInput input) : SV_TARGET
         linput.ePosition = gEyePositionWorld;
         linput.lod = gLOD;
         linput.shadowMapPoint = gShadowMapPoint;
+        linput.minShadowIntensity = gShadowIntensity;
 
         ComputeLightsOutput loutput = ComputePointLight(linput);
         float3 diffuseSpecular = (k.Diffuse.rgb * loutput.diffuse) + (k.Specular * loutput.specular);
@@ -177,6 +179,7 @@ float4 PSSpotLight(PSLightInput input) : SV_TARGET
         linput.ePosition = gEyePositionWorld;
         linput.lod = gLOD;
         linput.shadowMap = gShadowMapSpot;
+        linput.minShadowIntensity = gShadowIntensity;
 
         ComputeLightsOutput loutput = ComputeSpotLight(linput);
         float3 diffuseSpecular = (k.Diffuse.rgb * loutput.diffuse) + (k.Specular * loutput.specular);

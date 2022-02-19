@@ -114,6 +114,10 @@ namespace Engine.Effects
         /// Spot light shadows map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture shadowMapSpotVar = null;
+        /// <summary>
+        /// Shadow intensity
+        /// </summary>
+        private readonly EngineEffectVariableScalar shadowIntensityVar = null;
 
         /// <summary>
         /// Current target 1
@@ -484,6 +488,20 @@ namespace Engine.Effects
                 }
             }
         }
+        /// <summary>
+        /// Shadow intensity
+        /// </summary>
+        protected float ShadowIntensity
+        {
+            get
+            {
+                return shadowIntensityVar.GetFloat();
+            }
+            set
+            {
+                shadowIntensityVar.Set(value);
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -521,6 +539,7 @@ namespace Engine.Effects
             shadowMapDirectionalVar = Effect.GetVariableTexture("gShadowMapDir");
             shadowMapPointVar = Effect.GetVariableTexture("gShadowMapPoint");
             shadowMapSpotVar = Effect.GetVariableTexture("gShadowMapSpot");
+            shadowIntensityVar = Effect.GetVariableScalar("gShadowIntensity");
         }
 
         /// <summary>
@@ -653,6 +672,18 @@ namespace Engine.Effects
                 FogStart = lights.FogStart;
                 FogRange = lights.FogRange;
                 FogColor = lights.FogColor;
+
+                ShadowIntensity = lights.ShadowIntensity;
+            }
+            else
+            {
+                HemisphericLight = BufferLightHemispheric.Default;
+
+                FogStart = 0;
+                FogRange = 0;
+                FogColor = Color.Transparent;
+
+                ShadowIntensity = 1;
             }
 
             TG3Map = depthMap;

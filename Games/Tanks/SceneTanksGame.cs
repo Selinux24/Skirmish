@@ -1512,6 +1512,14 @@ You will lost all the game progress.",
             for (int i = 0; i < markers; i++)
             {
                 Vector3 markerPos = from + (shootDirection * dist);
+                dist += sampleDist;
+
+                // Test the individual marker visibility against camera
+                if (Camera.Frustum.Contains(markerPos) == ContainmentType.Disjoint)
+                {
+                    continue;
+                }
+
                 Vector3 screenPos = Vector3.Project(markerPos,
                     Game.Graphics.Viewport.X,
                     Game.Graphics.Viewport.Y,
@@ -1526,11 +1534,9 @@ You will lost all the game progress.",
                 trajectoryMarkerPool[i].Top = screenPos.Y - (trajectoryMarkerPool[i].Height * 0.5f);
                 trajectoryMarkerPool[i].Scale = scale;
                 trajectoryMarkerPool[i].BaseColor = ShooterStatus.Color;
-                trajectoryMarkerPool[i].Alpha = 1f - (i / (float)markers);
+                trajectoryMarkerPool[i].Alpha = 1f - (i / (float)(markers + 1));
                 trajectoryMarkerPool[i].Active = true;
                 trajectoryMarkerPool[i].Visible = true;
-
-                dist += sampleDist;
             }
         }
         private void ModelToGround(ModelInstance model)
