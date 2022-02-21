@@ -111,6 +111,7 @@ namespace Engine
                 instances
                     .Where(i => i.Active)
                     .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                     .ForAll(i => i.Update(context));
 
                 instancesTmp = instances

@@ -92,10 +92,6 @@ namespace Engine.Common
         /// Post-processing effects
         /// </summary>
         private readonly List<PostProcessingEffect> postProcessingEffects = new List<PostProcessingEffect>();
-        /// <summary>
-        /// Degree of paralelism
-        /// </summary>
-        private readonly int degreeOfParalelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75 * 2.0);
 
         /// <summary>
         /// Shadow map size
@@ -389,17 +385,17 @@ namespace Engine.Common
             {
                 updatables
                     .AsParallel()
-                    .WithDegreeOfParallelism(degreeOfParalelism)
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                     .ForAll(EarlyUpdateCall);
 
                 updatables
                     .AsParallel()
-                    .WithDegreeOfParallelism(degreeOfParalelism)
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                     .ForAll(UpdateCall);
 
                 updatables
                     .AsParallel()
-                    .WithDegreeOfParallelism(degreeOfParalelism)
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                     .ForAll(LateUpdateCall);
             }
 

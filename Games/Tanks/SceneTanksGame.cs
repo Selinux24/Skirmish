@@ -1768,6 +1768,7 @@ You will lost all the game progress.",
                     treeModel
                         .GetInstances()
                         .AsParallel()
+                        .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                         .ForAll((tree) =>
                         {
                             if (TreeController.IsBroken(tree))

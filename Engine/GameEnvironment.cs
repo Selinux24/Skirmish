@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -7,6 +8,11 @@ namespace Engine
     /// </summary>
     public class GameEnvironment : IHasGameState
     {
+        /// <summary>
+        /// Degree of paralelism
+        /// </summary>
+        public static readonly int DegreeOfParalelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75 * 2.0);
+
         /// <summary>
         /// Background color
         /// </summary>

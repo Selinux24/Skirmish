@@ -597,6 +597,7 @@ namespace Engine
             {
                 fittedComponents
                     .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
                     .ForAll(c => c.Resize());
             }
 
@@ -928,7 +929,32 @@ namespace Engine
         /// <returns>Returns the component collection</returns>
         public IEnumerable<T> GetComponents<T>()
         {
-            return internalComponents.OfType<T>().ToArray();
+            return internalComponents
+                .OfType<T>()
+                .ToArray();
+        }
+        /// <summary>
+        /// Gets component collection of the specified type
+        /// </summary>
+        /// <typeparam name="T">Component type</typeparam>
+        /// <param name="predicate">Function to test every item in the collection</param>
+        /// <returns>Returns the component collection</returns>
+        public IEnumerable<T> GetComponents<T>(Func<T, bool> predicate)
+        {
+            return internalComponents
+                .OfType<T>()
+                .Where(predicate)
+                .ToArray();
+        }
+
+        public IEnumerable<IDrawable> GetComponentsByUsage(SceneObjectUsages usage)
+        {
+            if (usage != SceneObjectUsages.None)
+            {
+                return GetComponents<IDrawable>(c => (c.Usage & usage) != SceneObjectUsages.None);
+            }
+
+            return GetComponents<IDrawable>();
         }
 
         /// <summary>
