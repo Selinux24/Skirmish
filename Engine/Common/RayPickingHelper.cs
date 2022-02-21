@@ -10,6 +10,76 @@ namespace Engine.Common
     public static class RayPickingHelper
     {
         /// <summary>
+        /// Performs volume ray picking over the specified collection
+        /// </summary>
+        /// <param name="list">Collection of objects to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
+        public static IEnumerable<(ISceneObject SceneObject, float Distance, Vector3 Position)> PickVolumes(IEnumerable<ISceneObject> list, Ray ray, float rayLength)
+        {
+            List<(ISceneObject SceneObject, float Distance, Vector3 Position)> coarse = new List<(ISceneObject SceneObject, float Distance, Vector3 Position)>();
+
+            foreach (var gObj in list)
+            {
+                if (gObj is IComposed componsed)
+                {
+                    var pickComponents = componsed.GetComponents<IRayPickable<Triangle>>();
+                    foreach (var pickable in pickComponents)
+                    {
+                        bool picked = RayPickingHelper.TestVolumes(pickable, ray, rayLength, out var d, out var p);
+                        if (picked)
+                        {
+                            coarse.Add((gObj, d, p));
+                        }
+                    }
+                }
+                else if (gObj is IRayPickable<Triangle> pickable)
+                {
+                    bool picked = RayPickingHelper.TestVolumes(pickable, ray, rayLength, out var d, out var p);
+                    if (picked)
+                    {
+                        coarse.Add((gObj, d, p));
+                    }
+                }
+            }
+
+            //Sort by distance
+            return coarse.OrderBy(c => c.Distance).ToArray();
+        }
+        /// <summary>
+        /// Perfors picking between the specified ray and the bounding volume of the object
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="distance">Returns the picking distance if any intersection exists</param>
+        /// <param name="position">Returns the picking intersection position if exists</param>
+        /// <returns>Returns true if exists intersection between the ray and the bounding volume of the object, into the maximum distance</returns>
+        public static bool TestVolumes<T>(IRayPickable<T> obj, Ray ray, float rayLength, out float distance, out Vector3 position) where T : IRayIntersectable
+        {
+            distance = float.MaxValue;
+            position = Vector3.Zero;
+
+            var bsph = obj.GetBoundingSphere();
+            var intersects = Collision.RayIntersectsSphere(ref ray, ref bsph, out float d);
+            if (intersects)
+            {
+                float maxDistance = rayLength <= 0 ? float.MaxValue : rayLength;
+                if (d <= maxDistance)
+                {
+                    distance = d;
+                    position = ray.Position + (Vector3.Normalize(ray.Direction) * d);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets nearest picking position of giving ray
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
@@ -65,6 +135,111 @@ namespace Engine.Common
 
             return true;
         }
+        /// <summary>
+        /// Gets nearest picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Object to test</param>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickNearest<T>(ISceneObject obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            if (obj is IComposed composed)
+            {
+                bool picked = PickNearest<T>(composed, ray, rayLength, rayPickingParams, out var res);
+
+                result = res;
+
+                return picked;
+            }
+
+            if (obj is IRayPickable<T> pickable)
+            {
+                bool picked = PickNearest(pickable, ray, rayLength, rayPickingParams, out var res);
+
+                result = res;
+
+                return picked;
+            }
+
+            result = new PickingResult<T>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
+        }
+        /// <summary>
+        /// Gets nearest picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
+        /// <param name="result">Resulting picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickNearest<T>(IRayPickable<T> obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            var picked = obj.PickNearest(ray, rayPickingParams, out var r);
+            if (picked)
+            {
+                float maxDistance = rayLength <= 0 ? float.MaxValue : rayLength;
+                if (r.Distance < maxDistance)
+                {
+                    result = r;
+
+                    return true;
+                }
+            }
+
+            result = new PickingResult<T>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
+        }
+        /// <summary>
+        /// Gets nearest picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
+        /// <param name="result">Resulting picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickNearest<T>(IComposed obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            result = new PickingResult<T>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            bool pickedNearest = false;
+            float dist = rayLength <= 0 ? float.MaxValue : rayLength;
+
+            var pickComponents = obj.GetComponents<IRayPickable<T>>();
+
+            foreach (var pickable in pickComponents)
+            {
+                var picked = pickable.PickNearest(ray, rayPickingParams, out var r);
+                if (picked && r.Distance < dist)
+                {
+                    dist = r.Distance;
+
+                    result = r;
+                    pickedNearest = true;
+                }
+            }
+
+            return pickedNearest;
+        }
+
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
@@ -122,6 +297,99 @@ namespace Engine.Common
             return true;
         }
         /// <summary>
+        /// Gets the unordered first picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Scene object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Picking params</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickFirst<T>(ISceneObject obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            if (obj is IComposed composed)
+            {
+                bool picked = PickFirst<T>(composed, ray, rayLength, rayPickingParams, out var res);
+
+                result = res;
+
+                return picked;
+            }
+
+            if (obj is IRayPickable<T> pickable)
+            {
+                bool picked = PickFirst(pickable, ray, rayLength, rayPickingParams, out var res);
+
+                result = res;
+
+                return picked;
+            }
+
+            result = new PickingResult<T>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
+        }
+        /// <summary>
+        /// Gets the unordered first picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
+        /// <param name="result">Resulting picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickFirst<T>(IComposed obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            float maxDistance = rayLength <= 0 ? float.MaxValue : rayLength;
+
+            var pickComponents = obj.GetComponents<IRayPickable<T>>();
+            foreach (var pickable in pickComponents)
+            {
+                if (pickable.PickFirst(ray, rayPickingParams, out var r) && r.Distance <= maxDistance)
+                {
+                    result = r;
+
+                    return true;
+                }
+            }
+
+            result = new PickingResult<T>();
+
+            return false;
+        }
+        /// <summary>
+        /// Gets the unordered first picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Ray picking parameters</param>
+        /// <param name="result">Resulting picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickFirst<T>(IRayPickable<T> obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            float maxDistance = rayLength <= 0 ? float.MaxValue : rayLength;
+
+            bool picked = obj.PickFirst(ray, rayPickingParams, out var r);
+            if (picked && r.Distance <= maxDistance)
+            {
+                result = r;
+
+                return true;
+            }
+
+            result = new PickingResult<T>();
+
+            return false;
+        }
+
+        /// <summary>
         /// Get all picking positions of giving ray
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
@@ -144,7 +412,7 @@ namespace Engine.Common
         /// <returns>Returns true if ground position found</returns>
         public static bool PickAll<T>(IRayPickable<T> obj, Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
-            results = null;
+            results = Enumerable.Empty<PickingResult<T>>();
 
             var bsph = obj.GetBoundingSphere();
             if (!bsph.Intersects(ref ray))
@@ -183,6 +451,106 @@ namespace Engine.Common
             results = picks;
 
             return true;
+        }
+        /// <summary>
+        /// Gets all picking positions of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Scene object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Picking params</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickAll<T>(ISceneObject obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
+        {
+            if (obj is IComposed composed)
+            {
+                var picked = PickAll<T>(composed, ray, rayLength, rayPickingParams, out var res);
+
+                results = res;
+
+                return picked;
+            }
+
+            if (obj is IRayPickable<T> pickable)
+            {
+                var picked = PickAll(pickable, ray, rayLength, rayPickingParams, out var res);
+
+                results = res;
+
+                return picked;
+            }
+
+            results = Enumerable.Empty<PickingResult<T>>();
+
+            return false;
+        }
+        /// <summary>
+        /// Gets all picking positions of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Scene object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Picking params</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickAll<T>(IComposed obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
+        {
+            float maxDistance = rayLength <= 0 ? float.MaxValue : rayLength;
+
+            results = obj
+                .GetComponents<IRayPickable<T>>()
+                .AsParallel()
+                .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                .Select(pickable =>
+                {
+                    bool picked = pickable.PickAll(ray, rayPickingParams, out var r);
+                    if (!picked)
+                    {
+                        return new { Picked = false, Results = Enumerable.Empty<PickingResult<T>>() };
+                    }
+
+                    var inboundResults = r.Where(i => i.Distance <= maxDistance).ToArray();
+
+                    return new
+                    {
+                        Picked = inboundResults.Any(),
+                        Results = inboundResults.AsEnumerable()
+                    };
+                })
+                .Where(r => r.Picked)
+                .SelectMany(r => r.Results)
+                .ToArray();
+
+            return results.Any();
+        }
+        /// <summary>
+        /// Gets all picking positions of the given ray
+        /// </summary>
+        /// <typeparam name="T">Primitive type</typeparam>
+        /// <param name="obj">Scene object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="rayLength">Ray length</param>
+        /// <param name="rayPickingParams">Picking params</param>
+        /// <param name="results">Picking results</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickAll<T>(IRayPickable<T> obj, Ray ray, float rayLength, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
+        {
+            bool picked = obj.PickAll(ray, rayPickingParams, out var r);
+            if (!picked)
+            {
+                results = Enumerable.Empty<PickingResult<T>>();
+
+                return false;
+            }
+
+            float maxDistance = rayLength <= 0 ? float.MaxValue : rayLength;
+
+            results = r.Where(i => i.Distance <= maxDistance).ToArray();
+
+            return results.Any();
         }
     }
 }

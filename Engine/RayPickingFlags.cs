@@ -34,5 +34,9 @@ namespace Engine
         /// Select all triangles
         /// </summary>
         AllTriangles = 0x08,
+        /// <summary>
+        /// Test volumes only
+        /// </summary>
+        Volumes = 0x16,
     }
 }

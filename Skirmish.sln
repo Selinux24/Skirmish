@@ -51,6 +51,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Games", "Games", "{8304C9ED
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanks", "Games\Tanks\Tanks.csproj", "{87B4A2CA-F402-465D-ACA5-581A55A59969}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTests", "EngineTests\EngineTests.csproj", "{9861580E-7A45-413A-971B-4DCAC955A9FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -301,6 +303,18 @@ Global
 		{87B4A2CA-F402-465D-ACA5-581A55A59969}.Release|x64.Build.0 = Release|x64
 		{87B4A2CA-F402-465D-ACA5-581A55A59969}.Release|x86.ActiveCfg = Release|x86
 		{87B4A2CA-F402-465D-ACA5-581A55A59969}.Release|x86.Build.0 = Release|x86
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Debug|x64.Build.0 = Debug|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Debug|x86.Build.0 = Debug|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|x64.ActiveCfg = Release|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|x64.Build.0 = Release|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|x86.ActiveCfg = Release|Any CPU
+		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

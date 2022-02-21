@@ -498,13 +498,13 @@ namespace Engine.Common
             {
                 //Avoid duplicate picked positions
                 var intersects = t.Intersects(ray, facingOnly, out Vector3 pos, out float d);
-                if (intersects && !pickedPositionList.ContainsValue(pos))
+                if (intersects)
                 {
                     float k = d;
                     while (pickedPositionList.ContainsKey(k))
                     {
                         //Avoid duplicate distance keys
-                        k += 0.001f;
+                        k += 0.000001f;
                     }
 
                     pickedPositionList.Add(k, pos);

@@ -946,7 +946,11 @@ namespace Engine
                 .Where(predicate)
                 .ToArray();
         }
-
+        /// <summary>
+        /// Gets drawable component collection by usage
+        /// </summary>
+        /// <param name="usage">Usage</param>
+        /// <returns>Returns the component list</returns>
         public IEnumerable<IDrawable> GetComponentsByUsage(SceneObjectUsages usage)
         {
             if (usage != SceneObjectUsages.None)
