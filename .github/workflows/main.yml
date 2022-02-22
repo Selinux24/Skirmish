@@ -58,8 +58,9 @@ jobs:
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"Selinux24_Skirmish_dev" /o:"selinux24-github" /d:sonar.login="${{secrets.SONAR_TOKEN}}" /d:sonar.host.url="https://sonarcloud.io"
       - name: Build
-          msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
+        run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
       - name: Test
-          mstest
+        run: mstest
       - name: Sonar end
-          .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{secrets.SONAR_TOKEN}}"
+        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{secrets.SONAR_TOKEN}}"
+        
