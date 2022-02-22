@@ -20,23 +20,23 @@ namespace Engine
         /// Coarse picking. Use mesh volumes instead of geometry
         /// </summary>
         /// <remarks>If the model has no mesh volumes, the ray pincking test uses the model's geometry</remarks>
-        Coarse = 0x01,
+        Coarse = 1,
         /// <summary>
         /// Geometry picking. Use mesh geometry
         /// </summary>
-        Geometry = 0x02,
+        Geometry = 2,
         /// <summary>
         /// Select only facing triangles
         /// </summary>
         /// <remarks>By default, ray picking test uses all triangles</remarks>
-        FacingOnly = 0x04,
+        FacingOnly = 4,
         /// <summary>
         /// Select all triangles
         /// </summary>
-        AllTriangles = 0x08,
+        AllTriangles = 8,
         /// <summary>
         /// Test volumes only
         /// </summary>
-        Volumes = 0x16,
+        Volumes = 16,
     }
 }

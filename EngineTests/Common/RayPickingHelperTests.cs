@@ -30,6 +30,19 @@ namespace Engine.Common.Tests
         static BoundingBox bbox2;
         static BoundingBox bbox3;
 
+        static Triangle bbox1t1;
+        static Triangle bbox1t2;
+        static Triangle bbox1t3;
+        static Triangle bbox1t4;
+        static Triangle bbox2t1;
+        static Triangle bbox2t2;
+        static Triangle bbox2t3;
+        static Triangle bbox2t4;
+        static Triangle bbox3t1;
+        static Triangle bbox3t2;
+        static Triangle bbox3t3;
+        static Triangle bbox3t4;
+
         static Ray ray;
         static Ray rayReverse;
         static RayPickingParams rayPickingParamsPerfect;
@@ -74,6 +87,25 @@ namespace Engine.Common.Tests
             bbox2 = BoundingBox.FromPoints(p2);
             bbox3 = BoundingBox.FromPoints(p3);
 
+            var bbox1Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox1);
+            var bbox2Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox2);
+            var bbox3Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox3);
+
+            bbox1t1 = bbox1Tris.ElementAt(0);
+            bbox1t2 = bbox1Tris.ElementAt(1);
+            bbox1t3 = bbox1Tris.ElementAt(2);
+            bbox1t4 = bbox1Tris.ElementAt(3);
+
+            bbox2t1 = bbox2Tris.ElementAt(0);
+            bbox2t2 = bbox2Tris.ElementAt(1);
+            bbox2t3 = bbox2Tris.ElementAt(2);
+            bbox2t4 = bbox2Tris.ElementAt(3);
+
+            bbox3t1 = bbox3Tris.ElementAt(0);
+            bbox3t2 = bbox3Tris.ElementAt(1);
+            bbox3t3 = bbox3Tris.ElementAt(2);
+            bbox3t4 = bbox3Tris.ElementAt(3);
+
             toQuad1Position = new Vector3(0, 0, 1);
             toQuad2Position = new Vector3(0, 0, 2);
             toQuad3Position = new Vector3(0, 0, 3);
@@ -81,17 +113,17 @@ namespace Engine.Common.Tests
             mockQuad1 = new Mock<IRayPickable<Triangle>>();
             mockQuad1.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(bsph1);
             mockQuad1.Setup(o => o.GetVolume(true)).Returns(t1);
-            mockQuad1.Setup(o => o.GetVolume(false)).Returns(Triangle.ComputeTriangleList(Topology.TriangleList, bbox1));
+            mockQuad1.Setup(o => o.GetVolume(false)).Returns(bbox1Tris);
 
             mockQuad2 = new Mock<IRayPickable<Triangle>>();
             mockQuad2.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(bsph2);
             mockQuad2.Setup(o => o.GetVolume(true)).Returns(t2);
-            mockQuad2.Setup(o => o.GetVolume(false)).Returns(Triangle.ComputeTriangleList(Topology.TriangleList, bbox2));
+            mockQuad2.Setup(o => o.GetVolume(false)).Returns(bbox2Tris);
 
             mockQuad3 = new Mock<IRayPickable<Triangle>>();
             mockQuad3.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(bsph3);
             mockQuad3.Setup(o => o.GetVolume(true)).Returns(t3);
-            mockQuad3.Setup(o => o.GetVolume(false)).Returns(Triangle.ComputeTriangleList(Topology.TriangleList, bbox3));
+            mockQuad3.Setup(o => o.GetVolume(false)).Returns(bbox3Tris);
         }
 
         [TestInitialize]
@@ -107,27 +139,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ray, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox1t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ray, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox2t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ray, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox3t1, res.Primitive);
             }
 
 
@@ -137,27 +172,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayReverse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(bbox1t3, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayReverse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(bbox2t3, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayReverse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(bbox3t3, res.Primitive);
             }
         }
         [TestMethod()]
@@ -167,27 +205,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ray, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, t1_1);
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(t1_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ray, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, t1_1);
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(t1_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ray, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, t1_1);
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(t1_1, res.Primitive);
             }
 
 
@@ -197,27 +238,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayReverse, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, t3_1);
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(t3_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayReverse, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, t3_1);
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(t3_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayReverse, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, t3_1);
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(t3_1, res.Primitive);
             }
         }
         [TestMethod()]
@@ -227,27 +271,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, ray, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1), res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, ray, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1), res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, ray, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1), res.Primitive);
             }
 
 
@@ -257,27 +304,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayReverse, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3), res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayReverse, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3), res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayReverse, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3), res.Primitive);
             }
         }
 
@@ -288,27 +338,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ray, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox1t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ray, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox2t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ray, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox3t1, res.Primitive);
             }
 
 
@@ -318,27 +371,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayReverse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(bbox1t3, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayReverse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(bbox2t3, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayReverse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(bbox3t3, res.Primitive);
             }
         }
         [TestMethod()]
@@ -348,27 +404,28 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ray, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, t1_1);
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(t1_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ray, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 3);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, t3_1);
+                Assert.AreEqual(3, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(t3_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ray, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 2);
-                Assert.AreEqual(res.Position, toQuad2Position);
-                Assert.AreEqual(res.Primitive, t2_1);
+                Assert.AreEqual(2, res.Distance);
+                Assert.AreEqual(toQuad2Position, res.Position);
+                Assert.AreEqual(t2_1, res.Primitive);
             }
 
 
@@ -377,27 +434,27 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayReverse, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 3);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, t1_1);
+                Assert.AreEqual(3, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(t1_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayReverse, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad3Position);
-                Assert.AreEqual(res.Primitive, t3_1);
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad3Position, res.Position);
+                Assert.AreEqual(t3_1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayReverse, rayPickingParamsPerfect, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 2);
-                Assert.AreEqual(res.Position, toQuad2Position);
-                Assert.AreEqual(res.Primitive, t2_1);
+                Assert.AreEqual(2, res.Distance);
+                Assert.AreEqual(toQuad2Position, res.Position);
+                Assert.AreEqual(t2_1, res.Primitive);
             }
         }
         [TestMethod()]
@@ -407,27 +464,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, ray, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox1t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, ray, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox2t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, ray, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 1);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(1, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox3t1, res.Primitive);
             }
 
 
@@ -436,27 +496,30 @@ namespace Engine.Common.Tests
                 bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayReverse, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 3);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(3, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox1t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayReverse, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 3);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(3, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox2t1, res.Primitive);
             }
 
             {
                 bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayReverse, rayPickingParamsCoarse, out var res);
 
                 Assert.IsTrue(picked);
-                Assert.AreEqual(res.Distance, 3);
-                Assert.AreEqual(res.Position, toQuad1Position);
-                Assert.AreEqual(res.Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
+
+                Assert.AreEqual(3, res.Distance);
+                Assert.AreEqual(toQuad1Position, res.Position);
+                Assert.AreEqual(bbox3t1, res.Primitive);
             }
         }
 
@@ -468,14 +531,14 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 2);
+                Assert.AreEqual(2, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox1t1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox1t2, res.ElementAt(1).Primitive);
             }
 
             {
@@ -483,14 +546,14 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 2);
+                Assert.AreEqual(2, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox2t1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox2t2, res.ElementAt(1).Primitive);
             }
 
             {
@@ -498,14 +561,14 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 2);
+                Assert.AreEqual(2, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox3t1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox3t2, res.ElementAt(1).Primitive);
             }
 
 
@@ -516,14 +579,14 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 2);
+                Assert.AreEqual(2, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox1t3, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox1t4, res.ElementAt(1).Primitive);
             }
 
             {
@@ -531,14 +594,14 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 2);
+                Assert.AreEqual(2, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox2t3, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox2t4, res.ElementAt(1).Primitive);
             }
 
             {
@@ -546,14 +609,14 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 2);
+                Assert.AreEqual(2, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox3t3, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox3t4, res.ElementAt(1).Primitive);
             }
         }
         [TestMethod()]
@@ -564,28 +627,28 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 6);
+                Assert.AreEqual(6, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, t1_1);
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, t1_2);
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 2);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, t2_1);
-                Assert.AreEqual(res.ElementAt(3).Distance, 2);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, t2_2);
+                Assert.AreEqual(2, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+                Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(2, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+                Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
 
-                Assert.AreEqual(res.ElementAt(4).Distance, 3);
-                Assert.AreEqual(res.ElementAt(4).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(4).Primitive, t3_1);
-                Assert.AreEqual(res.ElementAt(5).Distance, 3);
-                Assert.AreEqual(res.ElementAt(5).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(5).Primitive, t3_2);
+                Assert.AreEqual(3, res.ElementAt(4).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
+                Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
+                Assert.AreEqual(3, res.ElementAt(5).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
+                Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
             }
 
             {
@@ -593,28 +656,28 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 6);
+                Assert.AreEqual(6, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, t1_1);
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, t1_2);
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 2);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, t2_1);
-                Assert.AreEqual(res.ElementAt(3).Distance, 2);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, t2_2);
+                Assert.AreEqual(2, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+                Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(2, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+                Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
 
-                Assert.AreEqual(res.ElementAt(4).Distance, 3);
-                Assert.AreEqual(res.ElementAt(4).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(4).Primitive, t3_1);
-                Assert.AreEqual(res.ElementAt(5).Distance, 3);
-                Assert.AreEqual(res.ElementAt(5).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(5).Primitive, t3_2);
+                Assert.AreEqual(3, res.ElementAt(4).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
+                Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
+                Assert.AreEqual(3, res.ElementAt(5).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
+                Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
             }
 
             {
@@ -622,28 +685,28 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 6);
+                Assert.AreEqual(6, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, t1_1);
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, t1_2);
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 2);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, t2_1);
-                Assert.AreEqual(res.ElementAt(3).Distance, 2);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, t2_2);
+                Assert.AreEqual(2, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+                Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(2, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+                Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
 
-                Assert.AreEqual(res.ElementAt(4).Distance, 3);
-                Assert.AreEqual(res.ElementAt(4).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(4).Primitive, t3_1);
-                Assert.AreEqual(res.ElementAt(5).Distance, 3);
-                Assert.AreEqual(res.ElementAt(5).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(5).Primitive, t3_2);
+                Assert.AreEqual(3, res.ElementAt(4).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
+                Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
+                Assert.AreEqual(3, res.ElementAt(5).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
+                Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
             }
 
 
@@ -653,28 +716,28 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 6);
+                Assert.AreEqual(6, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, t3_1);
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, t3_2);
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(t3_1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(t3_2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 2);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, t2_1);
-                Assert.AreEqual(res.ElementAt(3).Distance, 2);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, t2_2);
+                Assert.AreEqual(2, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+                Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(2, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+                Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
 
-                Assert.AreEqual(res.ElementAt(4).Distance, 3);
-                Assert.AreEqual(res.ElementAt(4).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(4).Primitive, t1_1);
-                Assert.AreEqual(res.ElementAt(5).Distance, 3);
-                Assert.AreEqual(res.ElementAt(5).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(5).Primitive, t1_2);
+                Assert.AreEqual(3, res.ElementAt(4).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(4).Position);
+                Assert.AreEqual(t1_1, res.ElementAt(4).Primitive);
+                Assert.AreEqual(3, res.ElementAt(5).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(5).Position);
+                Assert.AreEqual(t1_2, res.ElementAt(5).Primitive);
             }
 
             {
@@ -682,28 +745,28 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 6);
+                Assert.AreEqual(6, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, t3_1);
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, t3_2);
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(t3_1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(t3_2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 2);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, t2_1);
-                Assert.AreEqual(res.ElementAt(3).Distance, 2);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, t2_2);
+                Assert.AreEqual(2, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+                Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(2, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+                Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
 
-                Assert.AreEqual(res.ElementAt(4).Distance, 3);
-                Assert.AreEqual(res.ElementAt(4).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(4).Primitive, t1_1);
-                Assert.AreEqual(res.ElementAt(5).Distance, 3);
-                Assert.AreEqual(res.ElementAt(5).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(5).Primitive, t1_2);
+                Assert.AreEqual(3, res.ElementAt(4).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(4).Position);
+                Assert.AreEqual(t1_1, res.ElementAt(4).Primitive);
+                Assert.AreEqual(3, res.ElementAt(5).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(5).Position);
+                Assert.AreEqual(t1_2, res.ElementAt(5).Primitive);
             }
 
             {
@@ -711,28 +774,28 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 6);
+                Assert.AreEqual(6, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, t3_1);
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, t3_2);
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(t3_1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(t3_2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 2);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, t2_1);
-                Assert.AreEqual(res.ElementAt(3).Distance, 2);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad2Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, t2_2);
+                Assert.AreEqual(2, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+                Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(2, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+                Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
 
-                Assert.AreEqual(res.ElementAt(4).Distance, 3);
-                Assert.AreEqual(res.ElementAt(4).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(4).Primitive, t1_1);
-                Assert.AreEqual(res.ElementAt(5).Distance, 3);
-                Assert.AreEqual(res.ElementAt(5).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(5).Primitive, t1_2);
+                Assert.AreEqual(3, res.ElementAt(4).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(4).Position);
+                Assert.AreEqual(t1_1, res.ElementAt(4).Primitive);
+                Assert.AreEqual(3, res.ElementAt(5).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(5).Position);
+                Assert.AreEqual(t1_2, res.ElementAt(5).Primitive);
             }
         }
         [TestMethod()]
@@ -743,21 +806,21 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 4);
+                Assert.AreEqual(4, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox1t1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox1t2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 3);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(3).Distance, 3);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(3, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(2).Position);
+                Assert.AreEqual(bbox1t3, res.ElementAt(2).Primitive);
+                Assert.AreEqual(3, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(3).Position);
+                Assert.AreEqual(bbox1t4, res.ElementAt(3).Primitive);
             }
 
             {
@@ -765,21 +828,21 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 4);
+                Assert.AreEqual(4, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox2t1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox2t2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 3);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(3).Distance, 3);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(3, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(2).Position);
+                Assert.AreEqual(bbox2t3, res.ElementAt(2).Primitive);
+                Assert.AreEqual(3, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(3).Position);
+                Assert.AreEqual(bbox2t4, res.ElementAt(3).Primitive);
             }
 
             {
@@ -787,22 +850,23 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 4);
+                Assert.AreEqual(4, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox3t1, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox3t2, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 3);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(3).Distance, 3);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(3, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(2).Position);
+                Assert.AreEqual(bbox3t3, res.ElementAt(2).Primitive);
+                Assert.AreEqual(3, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(3).Position);
+                Assert.AreEqual(bbox3t4, res.ElementAt(3).Primitive);
             }
+
 
 
 
@@ -811,21 +875,21 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 4);
+                Assert.AreEqual(4, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox1t3, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox1t4, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 3);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(3).Distance, 3);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(3, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(2).Position);
+                Assert.AreEqual(bbox1t1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(3, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(3).Position);
+                Assert.AreEqual(bbox1t2, res.ElementAt(3).Primitive);
             }
 
             {
@@ -833,21 +897,21 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 4);
+                Assert.AreEqual(4, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox2t3, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox2t4, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 3);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(3).Distance, 3);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(3, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(2).Position);
+                Assert.AreEqual(bbox2t1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(3, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(3).Position);
+                Assert.AreEqual(bbox2t2, res.ElementAt(3).Primitive);
             }
 
             {
@@ -855,21 +919,21 @@ namespace Engine.Common.Tests
 
                 Assert.IsTrue(picked);
 
-                Assert.AreEqual(res.Count(), 4);
+                Assert.AreEqual(4, res.Count());
 
-                Assert.AreEqual(res.ElementAt(0).Distance, 1);
-                Assert.AreEqual(res.ElementAt(0).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(0).Primitive, new Triangle(-1, -1, 3, 1, -1, 3, 1, 1, 3));
-                Assert.AreEqual(res.ElementAt(1).Distance, 1);
-                Assert.AreEqual(res.ElementAt(1).Position, toQuad3Position);
-                Assert.AreEqual(res.ElementAt(1).Primitive, new Triangle(-1, -1, 3, 1, 1, 3, -1, 1, 3));
+                Assert.AreEqual(1, res.ElementAt(0).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
+                Assert.AreEqual(bbox3t3, res.ElementAt(0).Primitive);
+                Assert.AreEqual(1, res.ElementAt(1).Distance);
+                Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
+                Assert.AreEqual(bbox3t4, res.ElementAt(1).Primitive);
 
-                Assert.AreEqual(res.ElementAt(2).Distance, 3);
-                Assert.AreEqual(res.ElementAt(2).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(2).Primitive, new Triangle(-1, -1, 1, -1, 1, 1, 1, 1, 1));
-                Assert.AreEqual(res.ElementAt(3).Distance, 3);
-                Assert.AreEqual(res.ElementAt(3).Position, toQuad1Position);
-                Assert.AreEqual(res.ElementAt(3).Primitive, new Triangle(-1, -1, 1, 1, 1, 1, 1, -1, 1));
+                Assert.AreEqual(3, res.ElementAt(2).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(2).Position);
+                Assert.AreEqual(bbox3t1, res.ElementAt(2).Primitive);
+                Assert.AreEqual(3, res.ElementAt(3).Distance);
+                Assert.AreEqual(toQuad1Position, res.ElementAt(3).Position);
+                Assert.AreEqual(bbox3t2, res.ElementAt(3).Primitive);
             }
         }
     }
