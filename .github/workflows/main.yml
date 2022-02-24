@@ -22,6 +22,9 @@ jobs:
       - name: Add MSBuild to PATH
         uses: microsoft/setup-msbuild@v1
 
+      - name: Setup VSTest Path
+        uses: darenm/Setup-VSTest@v1
+      
       - uses: actions/setup-java@v1
         with:
           java-version: 11
@@ -60,8 +63,8 @@ jobs:
       - name: Build
         run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
         
-      - name: Run Playwright tests
-        uses: microsoft/playwright-github-action@v1.5.0
+      - name: VSTest
+        run: vstest.console.exe /Platform:x64 .\EngineTests\EngineTests.csproj
         
       - name: Sonar end
         run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{secrets.SONAR_TOKEN}}"
