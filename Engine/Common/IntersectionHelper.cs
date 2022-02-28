@@ -52,15 +52,18 @@ namespace Engine.Common
             {
                 return one.Contains(twoSph) != ContainmentType.Disjoint;
             }
-            else if (two is IntersectionVolumeAxisAlignedBox twoBox)
+            
+            if (two is IntersectionVolumeAxisAlignedBox twoBox)
             {
                 return one.Contains(twoBox) != ContainmentType.Disjoint;
             }
-            else if (two is IntersectionVolumeFrustum twoFrustum)
+            
+            if (two is IntersectionVolumeFrustum twoFrustum)
             {
                 return one.Contains(twoFrustum) != ContainmentType.Disjoint;
             }
-            else if (two is IntersectionVolumeMesh twoMesh)
+            
+            if (two is IntersectionVolumeMesh twoMesh)
             {
                 return one.Contains((Triangle[])twoMesh) != ContainmentType.Disjoint;
             }
