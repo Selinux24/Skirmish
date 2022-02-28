@@ -33,11 +33,9 @@ namespace Engine
         /// </summary>
         /// <param name="center">Center position</param>
         /// <param name="radius">Sphere radius</param>
-        public IntersectionVolumeSphere(Vector3 center, float radius)
+        public IntersectionVolumeSphere(Vector3 center, float radius) : this(new BoundingSphere(center, radius))
         {
-            sphere = new BoundingSphere(center, radius);
 
-            Position = sphere.Center;
         }
 
         /// <inheritdoc/>

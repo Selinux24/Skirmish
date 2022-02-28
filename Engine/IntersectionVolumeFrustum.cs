@@ -37,12 +37,9 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="viewProj">Camera view * projection matrix</param>
-        public IntersectionVolumeFrustum(Matrix viewProj)
+        public IntersectionVolumeFrustum(Matrix viewProj) : this(new BoundingFrustum(viewProj))
         {
-            frustum = new BoundingFrustum(viewProj);
 
-            Position = frustum.GetCameraParams().Position;
-            Radius = frustum.GetCameraParams().ZFar;
         }
 
         /// <inheritdoc/>

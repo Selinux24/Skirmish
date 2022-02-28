@@ -139,6 +139,7 @@
     <Compile Include="Common\BaseSceneObjectState.cs" />
     <Compile Include="Common\ManipulatorControllerState.cs" />
     <Compile Include="Common\ProcessedStages.cs" />
+    <Compile Include="Common\VolumePickingResult.cs" />
     <Compile Include="Content\FileArrayImageContent.cs" />
     <Compile Include="Content\FileCubicImageContent.cs" />
     <Compile Include="Content\IImageContent.cs" />

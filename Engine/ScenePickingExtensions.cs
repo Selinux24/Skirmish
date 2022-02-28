@@ -149,31 +149,7 @@ namespace Engine
                 return true;
             }
 
-            bool picked = false;
-            float bestDistance = rayLength <= 0 ? float.MaxValue : rayLength;
-
-            foreach (var (obj, objDistance, objPosition) in volumes)
-            {
-                if (objDistance > bestDistance)
-                {
-                    continue;
-                }
-
-                //Test for best picking results
-                if (RayPickingHelper.PickNearest<T>(obj, ray, bestDistance, rayPickingParams, out var r))
-                {
-                    //Update result and best distance
-                    result = new ScenePickingResult<T>
-                    {
-                        SceneObject = obj,
-                        PickingResult = r,
-                    };
-                    bestDistance = r.Distance;
-                    picked = true;
-                }
-            }
-
-            return picked;
+            return RayPickingHelper.PickNearest(volumes.Select(v => v.SceneObject), ray, rayLength, rayPickingParams, out result);
         }
 
         /// <summary>
@@ -315,24 +291,7 @@ namespace Engine
                 return true;
             }
 
-            //Find first coincidence
-            foreach (var (sceneObject, _, _) in volumes)
-            {
-                var picked = RayPickingHelper.PickFirst<T>(sceneObject, ray, rayLength, rayPickingParams, out var res);
-                if (picked)
-                {
-                    result = new ScenePickingResult<T>
-                    {
-                        SceneObject = sceneObject,
-                        PickingResult = res,
-                    };
-
-                    //Result found
-                    return true;
-                }
-            }
-
-            return false;
+            return RayPickingHelper.PickFirst(volumes.Select(v => v.SceneObject), ray, rayLength, rayPickingParams, out result);
         }
 
         /// <summary>
@@ -475,28 +434,7 @@ namespace Engine
                 return true;
             }
 
-            results = volumes
-                .AsParallel()
-                .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                .Select(obj =>
-                {
-                    bool picked = RayPickingHelper.PickAll<T>(obj.SceneObject, ray, rayLength, rayPickingParams, out var res);
-
-                    return new
-                    {
-                        Picked = picked,
-                        Results = new ScenePickingResultMultiple<T>
-                        {
-                            SceneObject = obj.SceneObject,
-                            PickingResults = res,
-                        }
-                    };
-                })
-                .Where(r => r.Picked)
-                .Select(r => r.Results)
-                .ToArray();
-
-            return results.Any();
+            return RayPickingHelper.PickAll(volumes.Select(v => v.SceneObject), ray, rayLength, rayPickingParams, out results);
         }
     }
 

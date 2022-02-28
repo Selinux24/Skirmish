@@ -2,6 +2,7 @@
 using Moq;
 using SharpDX;
 using System;
+using System.Linq;
 
 namespace Engine.Common.Tests
 {
@@ -10,17 +11,35 @@ namespace Engine.Common.Tests
     {
         static TestContext _testContext;
 
+        static BoundingSphere bsph1;
+        static BoundingSphere bsph2;
+        static BoundingSphere bsph3;
+        static BoundingSphere bsph4;
+        static BoundingSphere bsph5;
+
         static IntersectionVolumeSphere sph1;
         static IntersectionVolumeSphere sph2;
         static IntersectionVolumeSphere sph3;
         static IntersectionVolumeSphere sph4;
         static IntersectionVolumeSphere sph5;
 
+        static BoundingBox bbox1;
+        static BoundingBox bbox2;
+        static BoundingBox bbox3;
+        static BoundingBox bbox4;
+        static BoundingBox bbox5;
+
         static IntersectionVolumeAxisAlignedBox box1;
         static IntersectionVolumeAxisAlignedBox box2;
         static IntersectionVolumeAxisAlignedBox box3;
         static IntersectionVolumeAxisAlignedBox box4;
         static IntersectionVolumeAxisAlignedBox box5;
+
+        static Triangle[] tmesh1;
+        static Triangle[] tmesh2;
+        static Triangle[] tmesh3;
+        static Triangle[] tmesh4;
+        static Triangle[] tmesh5;
 
         static IntersectionVolumeMesh mesh1;
         static IntersectionVolumeMesh mesh2;
@@ -34,6 +53,11 @@ namespace Engine.Common.Tests
         static Mock<IIntersectable> i4;
         static Mock<IIntersectable> i5;
 
+        static BoundingFrustum bfrustum1;
+        static BoundingFrustum bfrustum2;
+        static BoundingFrustum bfrustum3;
+        static BoundingFrustum bfrustum4;
+
         static IntersectionVolumeFrustum frustum1;
         static IntersectionVolumeFrustum frustum2;
         static IntersectionVolumeFrustum frustum3;
@@ -44,23 +68,44 @@ namespace Engine.Common.Tests
         {
             _testContext = context;
 
-            sph1 = new IntersectionVolumeSphere(new Vector3(-1.0f, 0f, 0f), 1f);
-            sph2 = new IntersectionVolumeSphere(new Vector3(+1.0f, 0f, 0f), 1f);
-            sph3 = new IntersectionVolumeSphere(new Vector3(+2.0f, 0f, 0f), 1f);
-            sph4 = new IntersectionVolumeSphere(new Vector3(-1.0f, 0f, 0f), 0.5f);
-            sph5 = new IntersectionVolumeSphere(new Vector3(-1.0f, 0f, 0f), 2f);
+            bsph1 = new BoundingSphere(new Vector3(-1.0f, 0f, 0f), 1f);
+            bsph2 = new BoundingSphere(new Vector3(+1.0f, 0f, 0f), 1f);
+            bsph3 = new BoundingSphere(new Vector3(+2.0f, 0f, 0f), 1f);
+            bsph4 = new BoundingSphere(new Vector3(-1.0f, 0f, 0f), 0.5f);
+            bsph5 = new BoundingSphere(new Vector3(-1.0f, 0f, 0f), 2f);
 
-            box1 = new IntersectionVolumeAxisAlignedBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
-            box2 = new IntersectionVolumeAxisAlignedBox((Vector3.One * -0.5f) + Vector3.Left, (Vector3.One * 0.5f) + Vector3.Left);
-            box3 = new IntersectionVolumeAxisAlignedBox(Vector3.One * -0.5f + (Vector3.Left * 2), Vector3.One * 0.5f + (Vector3.Left * 2));
-            box4 = new IntersectionVolumeAxisAlignedBox(Vector3.One * -0.25f, Vector3.One * 0.25f);
-            box5 = new IntersectionVolumeAxisAlignedBox(Vector3.One * -1f, Vector3.One * 1f);
+            sph1 = new IntersectionVolumeSphere(bsph1.Center, bsph1.Radius);
+            sph2 = new IntersectionVolumeSphere(bsph2.Center, bsph2.Radius);
+            sph3 = new IntersectionVolumeSphere(bsph3.Center, bsph3.Radius);
+            sph4 = new IntersectionVolumeSphere(bsph4.Center, bsph4.Radius);
+            sph5 = new IntersectionVolumeSphere(bsph5.Center, bsph5.Radius);
 
-            mesh1 = new IntersectionVolumeMesh(Triangle.ComputeTriangleList(Topology.TriangleList, box1));
-            mesh2 = new IntersectionVolumeMesh(Triangle.ComputeTriangleList(Topology.TriangleList, box2));
-            mesh3 = new IntersectionVolumeMesh(Triangle.ComputeTriangleList(Topology.TriangleList, box3));
-            mesh4 = new IntersectionVolumeMesh(Triangle.ComputeTriangleList(Topology.TriangleList, box4));
-            mesh5 = new IntersectionVolumeMesh(Triangle.ComputeTriangleList(Topology.TriangleList, box5));
+
+            bbox1 = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
+            bbox2 = new BoundingBox((Vector3.One * -0.5f) + Vector3.Left, (Vector3.One * 0.5f) + Vector3.Left);
+            bbox3 = new BoundingBox(Vector3.One * -0.5f + (Vector3.Left * 2), Vector3.One * 0.5f + (Vector3.Left * 2));
+            bbox4 = new BoundingBox(Vector3.One * -0.25f, Vector3.One * 0.25f);
+            bbox5 = new BoundingBox(Vector3.One * -1f, Vector3.One * 1f);
+
+            box1 = new IntersectionVolumeAxisAlignedBox(bbox1.Minimum, bbox1.Maximum);
+            box2 = new IntersectionVolumeAxisAlignedBox(bbox2.Minimum, bbox2.Maximum);
+            box3 = new IntersectionVolumeAxisAlignedBox(bbox3.Minimum, bbox3.Maximum);
+            box4 = new IntersectionVolumeAxisAlignedBox(bbox4.Minimum, bbox4.Maximum);
+            box5 = new IntersectionVolumeAxisAlignedBox(bbox5.Minimum, bbox5.Maximum);
+
+
+            tmesh1 = Triangle.ComputeTriangleList(Topology.TriangleList, box1).ToArray();
+            tmesh2 = Triangle.ComputeTriangleList(Topology.TriangleList, box2).ToArray();
+            tmesh3 = Triangle.ComputeTriangleList(Topology.TriangleList, box3).ToArray();
+            tmesh4 = Triangle.ComputeTriangleList(Topology.TriangleList, box4).ToArray();
+            tmesh5 = Triangle.ComputeTriangleList(Topology.TriangleList, box5).ToArray();
+
+            mesh1 = new IntersectionVolumeMesh(tmesh1);
+            mesh2 = new IntersectionVolumeMesh(tmesh2);
+            mesh3 = new IntersectionVolumeMesh(tmesh3);
+            mesh4 = new IntersectionVolumeMesh(tmesh4);
+            mesh5 = new IntersectionVolumeMesh(tmesh5);
+
 
             i1 = new Mock<IIntersectable>();
             i1.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Sphere)).Returns(sph1);
@@ -87,16 +132,22 @@ namespace Engine.Common.Tests
             i5.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Box)).Returns(box5);
             i5.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Mesh)).Returns(mesh5);
 
+
             var proj = Matrix.PerspectiveLH(1024, 1024, 0.1f, 1f);
             var view1 = Matrix.LookAtLH(new Vector3(-1, 0, 0), Vector3.Zero, Vector3.Up);
             var view2 = Matrix.LookAtLH(new Vector3(+1, 0, 0), Vector3.Zero, Vector3.Up);
             var view3 = Matrix.LookAtLH(new Vector3(-2, 0, 0), new Vector3(-3, 0, 0), Vector3.Up);
             var view4 = Matrix.LookAtLH(new Vector3(-2, 0, 0), new Vector3(-1, 0, 0), Vector3.Up);
 
-            frustum1 = new IntersectionVolumeFrustum(view1 * proj);
-            frustum2 = new IntersectionVolumeFrustum(view2 * proj);
-            frustum3 = new IntersectionVolumeFrustum(view3 * proj);
-            frustum4 = new IntersectionVolumeFrustum(view4 * proj);
+            bfrustum1 = new BoundingFrustum(view1 * proj);
+            bfrustum2 = new BoundingFrustum(view2 * proj);
+            bfrustum3 = new BoundingFrustum(view3 * proj);
+            bfrustum4 = new BoundingFrustum(view4 * proj);
+
+            frustum1 = new IntersectionVolumeFrustum(bfrustum1.Matrix);
+            frustum2 = new IntersectionVolumeFrustum(bfrustum2.Matrix);
+            frustum3 = new IntersectionVolumeFrustum(bfrustum3.Matrix);
+            frustum4 = new IntersectionVolumeFrustum(bfrustum4.Matrix);
         }
 
         [TestInitialize]
@@ -234,6 +285,41 @@ namespace Engine.Common.Tests
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
             Assert.IsTrue(res3);
+        }
+
+        [TestMethod()]
+        public void IntersectableSphereComparerTest()
+        {
+            bool res1 = bsph1 == sph1;
+            bool res2 = sph1 == bsph1;
+            bool res3 = bsph1 == sph2;
+            bool res4 = sph1 == bsph2;
+
+            Assert.IsTrue(res1);
+            Assert.IsTrue(res2);
+            Assert.IsFalse(res3);
+            Assert.IsFalse(res4);
+        }
+        [TestMethod()]
+        public void IntersectableBoxComparerTest()
+        {
+            bool res1 = bbox1 == box1;
+            bool res2 = box1 == bbox1;
+            bool res3 = bbox1 == box2;
+            bool res4 = box1 == bbox2;
+
+            Assert.IsTrue(res1);
+            Assert.IsTrue(res2);
+            Assert.IsFalse(res3);
+            Assert.IsFalse(res4);
+        }
+        [TestMethod()]
+        public void IntersectableMeshComparerTest()
+        {
+            CollectionAssert.AreEqual(tmesh1, (Triangle[])mesh1);
+            CollectionAssert.AreEqual((Triangle[])mesh1, tmesh1);
+            CollectionAssert.AreNotEqual(tmesh1, (Triangle[])mesh2);
+            CollectionAssert.AreNotEqual((Triangle[])mesh1, tmesh2);
         }
     }
 }

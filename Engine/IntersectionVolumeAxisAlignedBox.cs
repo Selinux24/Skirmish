@@ -25,6 +25,7 @@ namespace Engine
         public IntersectionVolumeAxisAlignedBox(BoundingBox bbox)
         {
             this.bbox = bbox;
+
             Position = bbox.GetCenter();
         }
         /// <summary>
@@ -32,10 +33,9 @@ namespace Engine
         /// </summary>
         /// <param name="min">Minimum point</param>
         /// <param name="max">Maximum point</param>
-        public IntersectionVolumeAxisAlignedBox(Vector3 min, Vector3 max)
+        public IntersectionVolumeAxisAlignedBox(Vector3 min, Vector3 max) : this(new BoundingBox(min, max))
         {
-            bbox = new BoundingBox(min, max);
-            Position = bbox.GetCenter();
+
         }
 
         /// <inheritdoc/>
