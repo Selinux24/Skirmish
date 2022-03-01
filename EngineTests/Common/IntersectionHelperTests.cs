@@ -2,10 +2,12 @@
 using Moq;
 using SharpDX;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Engine.Common.Tests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass()]
     public class IntersectionHelperTests
     {
