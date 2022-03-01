@@ -271,10 +271,9 @@ Space: Finds random over navmesh";
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Middle))
             {
-                var pRay = GetPickingRay();
-                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+                var pRay = GetPickingRay(RayPickingParams.FacingOnly | RayPickingParams.Perfect);
 
-                if (this.PickNearest(pRay, rayPParams, out ScenePickingResult<Triangle> r))
+                if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
                     DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
                     DrawTriangle(r.PickingResult.Primitive, Color.White);
@@ -308,10 +307,9 @@ Space: Finds random over navmesh";
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay();
-                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+                var pRay = GetPickingRay(RayPickingParams.FacingOnly | RayPickingParams.Perfect);
 
-                if (this.PickNearest(pRay, rayPParams, out ScenePickingResult<Triangle> r))
+                if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
                     DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
                     DrawTriangle(r.PickingResult.Primitive, Color.White);

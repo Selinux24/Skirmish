@@ -329,34 +329,19 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool PickNearest(Ray ray, out PickingResult<Triangle> result)
+        public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
         {
             return RayPickingHelper.PickNearest(this, ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
-        {
-            return RayPickingHelper.PickNearest(this, ray, rayPickingParams, out result);
-        }
-        /// <inheritdoc/>
-        public bool PickFirst(Ray ray, out PickingResult<Triangle> result)
+        public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
         {
             return RayPickingHelper.PickFirst(this, ray, out result);
         }
         /// <inheritdoc/>
-        public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
-        {
-            return RayPickingHelper.PickFirst(this, ray, rayPickingParams, out result);
-        }
-        /// <inheritdoc/>
-        public bool PickAll(Ray ray, out IEnumerable<PickingResult<Triangle>> results)
+        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Triangle>> results)
         {
             return RayPickingHelper.PickAll(this, ray, out results);
-        }
-        /// <inheritdoc/>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<Triangle>> results)
-        {
-            return RayPickingHelper.PickAll(this, ray, rayPickingParams, out results);
         }
 
         /// <inheritdoc/>

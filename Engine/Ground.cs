@@ -63,24 +63,17 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool PickNearest(Ray ray, out PickingResult<Triangle> result)
-        {
-            return PickNearest(ray, RayPickingParams.Default, out result);
-        }
-        /// <inheritdoc/>
-        public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
+        public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
                 Distance = float.MaxValue,
             };
 
-            bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-
             if (GroundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (!GroundPickingQuadtree.PickNearest(ray, facingOnly, out var gResult))
+                if (!GroundPickingQuadtree.PickNearest(ray, out var gResult))
                 {
                     // Without contacts
                     return false;
@@ -103,7 +96,7 @@ namespace Engine
                     return false;
                 }
 
-                if (!Intersection.IntersectNearest(ray, mesh, facingOnly, out var pos, out var tri, out var d))
+                if (!Intersection.IntersectNearest(ray, mesh, out var pos, out var tri, out var d))
                 {
                     // There are no intersected primitives
                     return false;
@@ -120,24 +113,17 @@ namespace Engine
             return false;
         }
         /// <inheritdoc/>
-        public bool PickFirst(Ray ray, out PickingResult<Triangle> result)
-        {
-            return PickFirst(ray, RayPickingParams.Default, out result);
-        }
-        /// <inheritdoc/>
-        public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
+        public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
         {
             result = new PickingResult<Triangle>()
             {
                 Distance = float.MaxValue,
             };
 
-            bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
-
             if (GroundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (!GroundPickingQuadtree.PickFirst(ray, facingOnly, out var gResult))
+                if (!GroundPickingQuadtree.PickFirst(ray, out var gResult))
                 {
                     return false;
                 }
@@ -159,7 +145,7 @@ namespace Engine
                     return false;
                 }
 
-                if (!Intersection.IntersectFirst(ray, mesh, facingOnly, out var pos, out var tri, out var d))
+                if (!Intersection.IntersectFirst(ray, mesh, out var pos, out var tri, out var d))
                 {
                     // There are no intersected primitives
                     return false;
@@ -176,21 +162,14 @@ namespace Engine
             return false;
         }
         /// <inheritdoc/>
-        public bool PickAll(Ray ray, out IEnumerable<PickingResult<Triangle>> results)
-        {
-            return PickAll(ray, RayPickingParams.Default, out results);
-        }
-        /// <inheritdoc/>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<Triangle>> results)
+        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Triangle>> results)
         {
             results = new PickingResult<Triangle>[] { };
-
-            bool facingOnly = rayPickingParams.HasFlag(RayPickingParams.FacingOnly);
 
             if (GroundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (!GroundPickingQuadtree.PickAll(ray, facingOnly, out var gResults))
+                if (!GroundPickingQuadtree.PickAll(ray, out var gResults))
                 {
                     // Without contacts
                     return false;
@@ -210,7 +189,7 @@ namespace Engine
                     return false;
                 }
 
-                if (!Intersection.IntersectAll(ray, mesh, facingOnly, out var pos, out var tris, out var ds))
+                if (!Intersection.IntersectAll(ray, mesh, out var pos, out var tris, out var ds))
                 {
                     // There are no intersected primitives
                     return false;

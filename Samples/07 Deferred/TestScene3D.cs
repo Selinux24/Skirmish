@@ -511,10 +511,9 @@ namespace Deferred
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay();
-                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+                var pRay = GetPickingRay(RayPickingParams.FacingOnly | RayPickingParams.Perfect);
 
-                if (this.PickNearest<Triangle>(pRay, rayPParams, out var r))
+                if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
                 {
                     var tri = Line3D.CreateWiredTriangle(r.PickingResult.Primitive);
                     var cross = Line3D.CreateCross(r.PickingResult.Position, 0.25f);

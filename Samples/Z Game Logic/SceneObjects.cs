@@ -448,8 +448,8 @@ namespace GameLogic
                 return;
             }
 
-            Ray cursorRay = GetPickingRay();
-            bool picked = this.PickNearest(cursorRay, RayPickingParams.Default, SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r);
+            var cursorRay = GetPickingRay();
+            bool picked = this.PickNearest(cursorRay, SceneObjectUsages.Ground, out ScenePickingResult<Triangle> r);
 
             //DEBUG
             UpdateDebug();
@@ -516,7 +516,7 @@ namespace GameLogic
                 txtAction.Text = string.Format("{0}", CurrentAction);
             }
         }
-        private void Update3D(GameTime gameTime, Ray cursorRay, bool picked, ScenePickingResult<Triangle> r)
+        private void Update3D(GameTime gameTime, PickingRay cursorRay, bool picked, ScenePickingResult<Triangle> r)
         {
             if (picked)
             {
@@ -575,7 +575,7 @@ namespace GameLogic
 
             spotLight.Position = soldierModels[skirmishGame.CurrentSoldier].Manipulator.Position + (Vector3.UnitY * 10f);
         }
-        private void DoGoto(Ray cursorRay, bool picked, Vector3 pickedPosition)
+        private void DoGoto(PickingRay cursorRay, bool picked, Vector3 pickedPosition)
         {
             Soldier pickedSoldier = PickSoldier(cursorRay, false);
             if (pickedSoldier != null)
@@ -592,7 +592,7 @@ namespace GameLogic
                 Camera.LookTo(pickedPosition, CameraTranslations.UseDelta);
             }
         }
-        private void UpdateActions(Ray cursorRay, bool picked, ScenePickingResult<Triangle> r)
+        private void UpdateActions(PickingRay cursorRay, bool picked, ScenePickingResult<Triangle> r)
         {
             if (CurrentAction != null)
             {
@@ -621,7 +621,7 @@ namespace GameLogic
                 }
             }
         }
-        private void UpdateSelected(Ray cursorRay, Vector3 position, Area area)
+        private void UpdateSelected(PickingRay cursorRay, Vector3 position, Area area)
         {
             if (CurrentAction.Action == Actions.Move)
             {
@@ -1099,11 +1099,11 @@ namespace GameLogic
 
             return null;
         }
-        private Soldier PickSoldier(Ray cursorRay, bool enemyOnly)
+        private Soldier PickSoldier(PickingRay cursorRay, bool enemyOnly)
         {
             return PickSoldierNearestToPosition(cursorRay, enemyOnly);
         }
-        private Soldier PickSoldierNearestToPosition(Ray cursorRay, bool enemyOnly)
+        private Soldier PickSoldierNearestToPosition(PickingRay cursorRay, bool enemyOnly)
         {
             Team[] teams = enemyOnly ? skirmishGame.EnemyOf(skirmishGame.CurrentTeam) : skirmishGame.Teams;
             if (!teams.Any())

@@ -209,14 +209,18 @@ namespace Engine
             {
                 //Calculate the ray from light to position
                 Vector3 lightPosition = light.GetPosition(maxZ);
-                Ray ray = new Ray(lightPosition, -light.Direction);
+                var ray = new Ray(lightPosition, -light.Direction);
 
-                if (!Scene.PickNearest<Triangle>(ray, RayPickingParams.Coarse, out _))
+                var coarseRay = new PickingRay(ray, RayPickingParams.Coarse);
+
+                if (!Scene.PickNearest<Triangle>(coarseRay, SceneObjectUsages.None, out _))
                 {
                     return true;
                 }
 
-                if (Scene.PickNearest(ray, RayPickingParams.Perfect, out ScenePickingResult<Triangle> result) &&
+                var perfectRay = new PickingRay(ray, RayPickingParams.Perfect);
+
+                if (Scene.PickNearest<Triangle>(perfectRay, SceneObjectUsages.None, out var result) &&
                     Vector3.Distance(lightPosition, eyePosition) > result.PickingResult.Distance)
                 {
                     return false;

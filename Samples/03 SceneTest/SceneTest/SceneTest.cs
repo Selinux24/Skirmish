@@ -811,7 +811,7 @@ namespace SceneTest.SceneTest
         {
             Vector3 delta = Vector3.Down;
 
-            Ray topDownRay = new Ray(new Vector3(350, 1000, 350), Vector3.Down);
+            var topDownRay = new PickingRay(new Ray(new Vector3(350, 1000, 350), Vector3.Down));
 
             scenery.PickFirst(topDownRay, out var treePos);
 
@@ -826,7 +826,8 @@ namespace SceneTest.SceneTest
                 float y = Helper.RandomGenerator.NextFloat(0, MathUtil.Pi / 16f);
                 float s = Helper.RandomGenerator.NextFloat(1.8f, 3.5f);
 
-                topDownRay = new Ray(new Vector3(px, 1000, pz), Vector3.Down);
+                topDownRay.Position = new Vector3(px, 1000, pz);
+                topDownRay.Direction = Vector3.Down;
                 scenery.PickFirst(topDownRay, out var treeIPos);
 
                 t.SetPosition(treeIPos.Position + delta);

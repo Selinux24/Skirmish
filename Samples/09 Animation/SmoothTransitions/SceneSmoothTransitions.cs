@@ -292,10 +292,9 @@ namespace Animation.SmoothTransitions
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay();
-                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+                var pRay = GetPickingRay(RayPickingParams.FacingOnly | RayPickingParams.Perfect);
 
-                if (this.PickNearest<Triangle>(pRay, rayPParams, out var r))
+                if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
                 {
                     MoveSoldierTo(gameTime, r.PickingResult.Position, Game.Input.KeyPressed(Keys.ShiftKey));
                 }

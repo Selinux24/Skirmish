@@ -1171,8 +1171,9 @@ namespace Collada.ModularDungeon
                         extents *= minDist;
 
                         var sBbox = new BoundingBox(center - extents, center + extents);
+                        var rRay = ray.GetRay();
 
-                        return sBbox.Intersects(ref ray);
+                        return sBbox.Intersects(ref rRay);
                     }
                 })
                 .ToList();
@@ -1195,7 +1196,7 @@ namespace Collada.ModularDungeon
                 SetSelectedItem(null);
             }
         }
-        private float CalcItemPickingDistance(Ray ray, ModularSceneryItem item)
+        private float CalcItemPickingDistance(PickingRay ray, ModularSceneryItem item)
         {
             if (item.Item.PickNearest(ray, out var res))
             {
@@ -1205,7 +1206,7 @@ namespace Collada.ModularDungeon
             {
                 var sph = item.Item.GetBoundingSphere();
 
-                return Intersection.DistanceFromPointToLine(ray, sph.Center);
+                return Intersection.DistanceFromPointToLine(ray.GetRay(), sph.Center);
             }
         }
 

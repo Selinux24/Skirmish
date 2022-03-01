@@ -216,6 +216,7 @@
     <Compile Include="ModelInstancedState.cs" />
     <Compile Include="ModelInstanceState.cs" />
     <Compile Include="ModelState.cs" />
+    <Compile Include="PickingRay.cs" />
     <Compile Include="Position4.cs" />
     <Compile Include="Position3.cs" />
     <Compile Include="Matrix4X4.cs" />

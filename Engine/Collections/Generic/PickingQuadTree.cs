@@ -50,10 +50,9 @@ namespace Engine.Collections.Generic
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(Ray ray, bool facingOnly, out PickingResult<T> result)
+        public bool PickNearest(PickingRay ray, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -63,7 +62,7 @@ namespace Engine.Collections.Generic
                     Distance = float.MaxValue,
                 };
 
-                if (Root.PickNearest(ray, facingOnly, out Vector3 position, out T item, out float distance))
+                if (Root.PickNearest(ray, out Vector3 position, out T item, out float distance))
                 {
                     result.Position = position;
                     result.Primitive = item;
@@ -85,10 +84,9 @@ namespace Engine.Collections.Generic
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(Ray ray, bool facingOnly, out PickingResult<T> result)
+        public bool PickFirst(PickingRay ray, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
@@ -98,7 +96,7 @@ namespace Engine.Collections.Generic
                     Distance = float.MaxValue,
                 };
 
-                if (Root.PickFirst(ray, facingOnly, out Vector3 position, out T item, out float distance))
+                if (Root.PickFirst(ray, out Vector3 position, out T item, out float distance))
                 {
                     result.Position = position;
                     result.Primitive = item;
@@ -120,15 +118,14 @@ namespace Engine.Collections.Generic
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(Ray ray, bool facingOnly, out IEnumerable<PickingResult<T>> results)
+        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                if (Root.PickAll(ray, facingOnly, out var positions, out var items, out var distances))
+                if (Root.PickAll(ray, out var positions, out var items, out var distances))
                 {
                     var res = new PickingResult<T>[positions.Count()];
 

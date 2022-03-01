@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
@@ -17,105 +16,10 @@ namespace Engine
         /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="scene">Scene</param>
         /// <param name="ray">Picking ray</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(scene, ray, float.MaxValue, RayPickingParams.Default, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(scene, ray, float.MaxValue, RayPickingParams.Default, usage, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, RayPickingParams rayPickingParams, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(scene, ray, float.MaxValue, rayPickingParams, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(scene, ray, float.MaxValue, rayPickingParams, usage, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, float rayLength, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(scene, ray, rayLength, RayPickingParams.Default, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, float rayLength, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(scene, ray, rayLength, RayPickingParams.Default, usage, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, float rayLength, RayPickingParams rayPickingParams, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickNearest(scene, ray, rayLength, rayPickingParams, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets nearest picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickNearest<T>(this Scene scene, Ray ray, float rayLength, RayPickingParams rayPickingParams, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
+        public static bool PickNearest<T>(this Scene scene, PickingRay ray, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
         {
             result = new ScenePickingResult<T>();
 
@@ -125,13 +29,13 @@ namespace Engine
                 return false;
             }
 
-            var volumes = RayPickingHelper.PickVolumes(cmpList, ray, rayLength);
+            var volumes = RayPickingHelper.PickVolumes(cmpList, ray);
             if (!volumes.Any())
             {
                 return false;
             }
 
-            if (rayPickingParams.HasFlag(RayPickingParams.Volumes))
+            if (ray.RayPickingParams.HasFlag(RayPickingParams.Volumes))
             {
                 result = volumes
                     .OrderBy(c => c.Distance)
@@ -149,20 +53,7 @@ namespace Engine
                 return true;
             }
 
-            return RayPickingHelper.PickNearest(volumes.Select(v => v.SceneObject), ray, rayLength, rayPickingParams, out result);
-        }
-
-        /// <summary>
-        /// Gets the unordered first picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(scene, ray, float.MaxValue, RayPickingParams.Default, SceneObjectUsages.None, out result);
+            return RayPickingHelper.PickNearest(volumes.Select(v => v.SceneObject), ray, out result);
         }
         /// <summary>
         /// Gets the unordered first picking position of the given ray
@@ -173,90 +64,7 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(scene, ray, float.MaxValue, RayPickingParams.Default, usage, out result);
-        }
-        /// <summary>
-        /// Gets the unordered first picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, RayPickingParams rayPickingParams, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(scene, ray, float.MaxValue, rayPickingParams, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets the unordered first picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(scene, ray, float.MaxValue, rayPickingParams, usage, out result);
-        }
-        /// <summary>
-        /// Gets the unordered first picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, float rayLength, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(scene, ray, rayLength, RayPickingParams.Default, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets the unordered first picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, float rayLength, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(scene, ray, rayLength, RayPickingParams.Default, usage, out result);
-        }
-        /// <summary>
-        /// Gets the unordered first picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, float rayLength, RayPickingParams rayPickingParams, out ScenePickingResult<T> result) where T : IRayIntersectable
-        {
-            return PickFirst(scene, ray, rayLength, rayPickingParams, SceneObjectUsages.None, out result);
-        }
-        /// <summary>
-        /// Gets the unordered first picking position of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickFirst<T>(this Scene scene, Ray ray, float rayLength, RayPickingParams rayPickingParams, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
+        public static bool PickFirst<T>(this Scene scene, PickingRay ray, SceneObjectUsages usage, out ScenePickingResult<T> result) where T : IRayIntersectable
         {
             result = new ScenePickingResult<T>();
 
@@ -268,13 +76,13 @@ namespace Engine
             }
 
             //Coarse filter
-            var volumes = RayPickingHelper.PickVolumes(cmpList, ray, rayLength);
+            var volumes = RayPickingHelper.PickVolumes(cmpList, ray);
             if (!volumes.Any())
             {
                 return false;
             }
 
-            if (rayPickingParams.HasFlag(RayPickingParams.Volumes))
+            if (ray.RayPickingParams.HasFlag(RayPickingParams.Volumes))
             {
                 result = volumes
                     .Select(c => new ScenePickingResult<T>
@@ -291,20 +99,7 @@ namespace Engine
                 return true;
             }
 
-            return RayPickingHelper.PickFirst(volumes.Select(v => v.SceneObject), ray, rayLength, rayPickingParams, out result);
-        }
-
-        /// <summary>
-        /// Gets all picking positions of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(scene, ray, float.MaxValue, RayPickingParams.Default, SceneObjectUsages.None, out results);
+            return RayPickingHelper.PickFirst(volumes.Select(v => v.SceneObject), ray, out result);
         }
         /// <summary>
         /// Gets all picking positions of the given ray
@@ -315,90 +110,7 @@ namespace Engine
         /// <param name="usage">Component usage</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, SceneObjectUsages usage, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(scene, ray, float.MaxValue, RayPickingParams.Default, usage, out results);
-        }
-        /// <summary>
-        /// Gets all picking positions of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, RayPickingParams rayPickingParams, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(scene, ray, float.MaxValue, rayPickingParams, SceneObjectUsages.None, out results);
-        }
-        /// <summary>
-        /// Gets all picking positions of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, RayPickingParams rayPickingParams, SceneObjectUsages usage, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(scene, ray, float.MaxValue, rayPickingParams, usage, out results);
-        }
-        /// <summary>
-        /// Gets all picking positions of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, float rayLength, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(scene, ray, rayLength, RayPickingParams.Default, SceneObjectUsages.None, out results);
-        }
-        /// <summary>
-        /// Gets all picking positions of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, float rayLength, SceneObjectUsages usage, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(scene, ray, rayLength, RayPickingParams.Default, usage, out results);
-        }
-        /// <summary>
-        /// Gets all picking positions of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, float rayLength, RayPickingParams rayPickingParams, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
-        {
-            return PickAll(scene, ray, rayLength, rayPickingParams, SceneObjectUsages.None, out results);
-        }
-        /// <summary>
-        /// Gets all picking positions of the given ray
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayLength">Ray length</param>
-        /// <param name="rayPickingParams">Ray picking parameters</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if intersection position found</returns>
-        public static bool PickAll<T>(this Scene scene, Ray ray, float rayLength, RayPickingParams rayPickingParams, SceneObjectUsages usage, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
+        public static bool PickAll<T>(this Scene scene, PickingRay ray, SceneObjectUsages usage, out IEnumerable<ScenePickingResultMultiple<T>> results) where T : IRayIntersectable
         {
             results = Enumerable.Empty<ScenePickingResultMultiple<T>>();
 
@@ -408,13 +120,13 @@ namespace Engine
                 return false;
             }
 
-            var volumes = RayPickingHelper.PickVolumes(cmpList, ray, rayLength);
+            var volumes = RayPickingHelper.PickVolumes(cmpList, ray);
             if (!volumes.Any())
             {
                 return false;
             }
 
-            if (rayPickingParams.HasFlag(RayPickingParams.Volumes))
+            if (ray.RayPickingParams.HasFlag(RayPickingParams.Volumes))
             {
                 results = volumes
                     .Select(c => new ScenePickingResultMultiple<T>
@@ -434,7 +146,7 @@ namespace Engine
                 return true;
             }
 
-            return RayPickingHelper.PickAll(volumes.Select(v => v.SceneObject), ray, rayLength, rayPickingParams, out results);
+            return RayPickingHelper.PickAll(volumes.Select(v => v.SceneObject), ray, out results);
         }
     }
 

@@ -60,14 +60,10 @@ namespace Engine.PathFinding.AStar
                 {
                     GridCollisionInfo[] info;
 
-                    Ray ray = new Ray()
-                    {
-                        Position = new Vector3(x, bbox.Maximum.Y + 0.01f, z),
-                        Direction = Vector3.Down,
-                    };
+                    PickingRay ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
 
                     bool intersects = Intersection.IntersectAll(
-                        ray, triangles, true,
+                        ray, triangles,
                         out var pickedPoints,
                         out var pickedTriangles,
                         out var pickedDistances);

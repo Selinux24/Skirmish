@@ -1095,8 +1095,9 @@ namespace Engine
         /// <summary>
         /// Gets picking ray from current mouse position
         /// </summary>
+        /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns picking ray from current mouse position</returns>
-        public Ray GetPickingRay()
+        public PickingRay GetPickingRay(RayPickingParams pickingParams = RayPickingParams.Default)
         {
             int mouseX = Game.Input.MouseX;
             int mouseY = Game.Input.MouseY;
@@ -1111,42 +1112,46 @@ namespace Engine
             Vector3 nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
             Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
 
-            return new Ray(nPoint, Vector3.Normalize(fPoint - nPoint));
+            return new PickingRay(nPoint, Vector3.Normalize(fPoint - nPoint), pickingParams);
         }
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
         /// </summary>
         /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public Ray GetTopDownRay(Point position)
+        public PickingRay GetTopDownRay(Point position, RayPickingParams pickingParams = RayPickingParams.Default)
         {
-            return GetTopDownRay(position.X, position.Y);
+            return GetTopDownRay(position.X, position.Y, pickingParams);
         }
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
         /// </summary>
         /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public Ray GetTopDownRay(Vector2 position)
+        public PickingRay GetTopDownRay(Vector2 position, RayPickingParams pickingParams = RayPickingParams.Default)
         {
-            return GetTopDownRay(position.X, position.Y);
+            return GetTopDownRay(position.X, position.Y, pickingParams);
         }
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
         /// </summary>
         /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public Ray GetTopDownRay(Vector3 position)
+        public PickingRay GetTopDownRay(Vector3 position, RayPickingParams pickingParams = RayPickingParams.Default)
         {
-            return GetTopDownRay(position.X, position.Z);
+            return GetTopDownRay(position.X, position.Z, pickingParams);
         }
         /// <summary>
         /// Gets vertical ray from scene's top and down vector with x and z coordinates
         /// </summary>
         /// <param name="x">X coordinate</param>
         /// <param name="z">Z coordinate</param>
+        /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public Ray GetTopDownRay(float x, float z)
+        public PickingRay GetTopDownRay(float x, float z, RayPickingParams pickingParams = RayPickingParams.Default)
         {
             var bbox = GetGroundBoundingBox();
 
@@ -1157,11 +1162,7 @@ namespace Engine
 
             float maxY = (bbox?.Maximum.Y + 1.0f) ?? float.MaxValue;
 
-            return new Ray()
-            {
-                Position = new Vector3(x, maxY, z),
-                Direction = Vector3.Down,
-            };
+            return new PickingRay(new Vector3(x, maxY, z), Vector3.Down, pickingParams);
         }
 
         /// <summary>
@@ -1175,7 +1176,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickNearest<T>(ray, RayPickingParams.Default, GroundUsage, out var res))
+            if (this.PickNearest<T>(ray, GroundUsage, out var res))
             {
                 result = res.PickingResult;
 
@@ -1200,7 +1201,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickFirst<T>(ray, RayPickingParams.Default, GroundUsage, out var res))
+            if (this.PickFirst<T>(ray, GroundUsage, out var res))
             {
                 result = res.PickingResult;
 
@@ -1225,7 +1226,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var res))
+            if (this.PickAll<T>(ray, GroundUsage, out var res))
             {
                 results = res.SelectMany(r => r.PickingResults);
 
@@ -1246,7 +1247,7 @@ namespace Engine
         {
             var ray = GetTopDownRay(from.X, from.Z);
 
-            bool picked = this.PickAll<T>(ray, RayPickingParams.Default, GroundUsage, out var pResults);
+            bool picked = this.PickAll<T>(ray, GroundUsage, out var pResults);
             if (picked)
             {
                 result = pResults

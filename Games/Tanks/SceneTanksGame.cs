@@ -995,20 +995,22 @@ namespace Tanks
                 var rot = Helper.RandomGenerator.NextFloat(0, MathUtil.TwoPi);
                 var scale = Helper.RandomGenerator.NextFloat(0.5f, 1f);
 
-                if (FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
+                if (!FindTopGroundPosition<Triangle>(point.X, point.Y, out var result))
                 {
-                    var pos = result.Position;
-                    if (sph.Contains(ref pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextFloat(0, 1) < 0.95f)
-                    {
-                        continue;
-                    }
-
-                    treeCount--;
-
-                    tree[treeCount].Manipulator.SetPosition(pos);
-                    tree[treeCount].Manipulator.SetRotation(rot, -MathUtil.PiOverTwo, 0);
-                    tree[treeCount].Manipulator.SetScale(scale);
+                    continue;
                 }
+
+                var pos = result.Position;
+                if (sph.Contains(ref pos) != ContainmentType.Disjoint && Helper.RandomGenerator.NextFloat(0, 1) < 0.95f)
+                {
+                    continue;
+                }
+
+                treeCount--;
+
+                tree[treeCount].Manipulator.SetPosition(pos);
+                tree[treeCount].Manipulator.SetRotation(rot, -MathUtil.PiOverTwo, 0);
+                tree[treeCount].Manipulator.SetScale(scale);
             }
         }
         private void PrepareModels()
@@ -1394,7 +1396,7 @@ You will lost all the game progress.",
                 return;
             }
 
-            Ray ray = new Ray(Camera.Position, Vector3.Down);
+            var ray = new PickingRay(Camera.Position, Vector3.Down);
 
             if (terrain.PickNearest(ray, out var cRes) && cRes.Distance <= Camera.CameraRadius)
             {

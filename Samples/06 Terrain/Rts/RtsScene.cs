@@ -1271,8 +1271,8 @@ namespace Terrain.Rts
         {
             // Set position
             var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
-            var ray = GetTopDownRay(heliport.Manipulator.Position);
-            if (this.PickNearest(ray, RayPickingParams.Geometry, sceneryUsage, out ScenePickingResult<Triangle> r))
+            var ray = GetTopDownRay(heliport.Manipulator.Position, RayPickingParams.Geometry);
+            if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
                 helicopter.Manipulator.SetPosition(r.PickingResult.Position);
                 helicopter.Manipulator.SetNormal(r.PickingResult.Primitive.Normal);
@@ -1342,13 +1342,13 @@ namespace Terrain.Rts
         {
             var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
 
-            if (this.PickNearest(GetTopDownRay(-60, -60), RayPickingParams.Geometry, sceneryUsage, out ScenePickingResult<Triangle> r1))
+            if (this.PickNearest(GetTopDownRay(-60, -60, RayPickingParams.Geometry), sceneryUsage, out ScenePickingResult<Triangle> r1))
             {
                 tankP1.Manipulator.SetPosition(r1.PickingResult.Position);
                 tankP1.Manipulator.SetNormal(r1.PickingResult.Primitive.Normal);
             }
 
-            if (this.PickNearest(GetTopDownRay(-70, 70), RayPickingParams.Geometry, sceneryUsage, out ScenePickingResult<Triangle> r2))
+            if (this.PickNearest(GetTopDownRay(-70, 70, RayPickingParams.Geometry), sceneryUsage, out ScenePickingResult<Triangle> r2))
             {
                 tankP2.Manipulator.SetPosition(r2.PickingResult.Position);
                 tankP2.Manipulator.SetNormal(r2.PickingResult.Primitive.Normal);
@@ -1567,7 +1567,7 @@ namespace Terrain.Rts
                 DEBUGUpdateGraphDrawer();
             }
         }
-        private void UpdateInputCamera(GameTime gameTime, Ray pickingRay)
+        private void UpdateInputCamera(GameTime gameTime, PickingRay pickingRay)
         {
             if (walkMode)
             {
@@ -1626,7 +1626,7 @@ namespace Terrain.Rts
                 Camera.Goto(prevPos);
             }
         }
-        private void UpdateInputFree(GameTime gameTime, Ray pickingRay)
+        private void UpdateInputFree(GameTime gameTime, PickingRay pickingRay)
         {
 #if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
@@ -1651,7 +1651,7 @@ namespace Terrain.Rts
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                bool picked = this.PickNearest<Triangle>(pickingRay, 0, RayPickingParams.Default, SceneObjectUsages.Agent, out var agent);
+                bool picked = this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.Agent, out var agent);
                 if (picked)
                 {
                     followTarget = agent.SceneObject;
@@ -1701,7 +1701,7 @@ namespace Terrain.Rts
                 if (helicopter.TextureIndex < 0) helicopter.TextureIndex = 0;
             }
         }
-        private void UpdateInputDebug(Ray pickingRay)
+        private void UpdateInputDebug(PickingRay pickingRay)
         {
             if (Game.Input.KeyJustReleased(Keys.C))
             {
@@ -1731,7 +1731,7 @@ namespace Terrain.Rts
                 {
                     terrainPointDrawer.Clear();
 
-                    if (this.PickNearest(pickingRay, RayPickingParams.Default, out ScenePickingResult<Triangle> r))
+                    if (this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                     {
                         DEBUGPickingPosition(r.PickingResult.Position);
                     }
@@ -1813,14 +1813,14 @@ namespace Terrain.Rts
                 DEBUGUpdateGraphDrawer();
             }
         }
-        private void UpdateCursor(Ray pickingRay)
+        private void UpdateCursor(PickingRay pickingRay)
         {
             if (!walkMode && terrain.PickNearest(pickingRay, out PickingResult<Triangle> r))
             {
                 cursor3D.Manipulator.SetPosition(r.Position);
             }
         }
-        private void UpdateTanks(Ray pickingRay)
+        private void UpdateTanks(PickingRay pickingRay)
         {
             if (Game.Input.MouseButtonPressed(MouseButtons.Left))
             {
@@ -1919,9 +1919,9 @@ namespace Terrain.Rts
                 pb.Visible = false;
             }
         }
-        private void DrawTankPath(Ray pickingRay)
+        private void DrawTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, RayPickingParams.Default, out ScenePickingResult<Triangle> r);
+            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 var t1Position = tankP1.Manipulator.Position;
@@ -1933,9 +1933,9 @@ namespace Terrain.Rts
                 }
             }
         }
-        private void UpdateTankPath(Ray pickingRay)
+        private void UpdateTankPath(PickingRay pickingRay)
         {
-            var picked = this.PickNearest(pickingRay, RayPickingParams.Default, out ScenePickingResult<Triangle> r);
+            var picked = this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r);
             if (picked)
             {
                 Task.Run(async () =>

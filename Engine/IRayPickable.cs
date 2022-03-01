@@ -14,15 +14,7 @@ namespace Engine
         /// <param name="ray">Picking ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickNearest(Ray ray, out PickingResult<T> result);
-        /// <summary>
-        /// Gets nearest picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result);
+        bool PickNearest(PickingRay ray, out PickingResult<T> result);
         /// <summary>
         /// Gets first picking position of giving ray
         /// </summary>
@@ -30,31 +22,14 @@ namespace Engine
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if ground position found</returns>
         /// <remarks>Based on geometry, not distance. For distance tests use PickNearest instead.</remarks>
-        bool PickFirst(Ray ray, out PickingResult<T> result);
-        /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        /// <remarks>Based on geometry, not distance. For distance tests use PickNearest instead.</remarks>
-        bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<T> result);
+        bool PickFirst(PickingRay ray, out PickingResult<T> result);
         /// <summary>
         /// Gets all picking position of giving ray
         /// </summary>
         /// <param name="ray">Picking ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if ground position found</returns>
-        bool PickAll(Ray ray, out IEnumerable<PickingResult<T>> results);
-        /// <summary>
-        /// Gets all picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
-        bool PickAll(Ray ray, RayPickingParams rayPickingParams, out IEnumerable<PickingResult<T>> results);
+        bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results);
 
         /// <summary>
         /// Gets bounding sphere
