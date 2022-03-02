@@ -457,7 +457,7 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            return Intersection.IntersectNearest(ray, Items, out result);
+            return RayPickingHelper.PickNearest(Items, ray, out result);
         }
         /// <summary>
         /// Pick nearest position in the node collection
@@ -468,7 +468,7 @@ namespace Engine.Collections.Generic
         private bool PickNearestNode(PickingRay ray, out PickingResult<T> result)
         {
             var boxHitsByDistance = FindContacts(ray);
-            if (boxHitsByDistance.Any())
+            if (!boxHitsByDistance.Any())
             {
                 result = new PickingResult<T>
                 {
@@ -574,7 +574,7 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            return Intersection.IntersectFirst(ray, Items, out result);
+            return RayPickingHelper.PickFirst(Items, ray, out result);
         }
         /// <summary>
         /// Pick first position in the node collection
@@ -649,7 +649,7 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            return Intersection.IntersectAll(ray, Items, out results);
+            return RayPickingHelper.PickAll(Items, ray, out results);
         }
         /// <summary>
         /// Pick all position in the node collection

@@ -91,14 +91,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets the internal ray
-        /// </summary>
-        public Ray GetRay()
-        {
-            return new Ray(Position, Direction);
-        }
-
-        /// <summary>
         /// Implicit conversion between Ray and PickingRay
         /// </summary>
         public static implicit operator Ray(PickingRay value)

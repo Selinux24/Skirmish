@@ -62,8 +62,7 @@ namespace Engine.PathFinding.AStar
 
                     PickingRay ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
 
-                    bool intersects = Intersection.IntersectAll(ray, triangles, out var picks);
-
+                    bool intersects = RayPickingHelper.PickAll(triangles, ray, out var picks);
                     if (intersects)
                     {
                         info = new GridCollisionInfo[picks.Count()];
@@ -114,7 +113,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="nodeSize">Node size</param>
         /// <param name="collisionValues">Collision values</param>
         /// <returns>Generates a grid node list</returns>
-        private List<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
+        private IEnumerable<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
         {
             List<GridNode> result = new List<GridNode>();
 
@@ -158,7 +157,7 @@ namespace Engine.PathFinding.AStar
 
                 //Process multiple point nodes
                 var resMultiple = MultipleCollision(max, nodeSize, coor0, coor1, coor2, coor3);
-                if (resMultiple.Count > 0)
+                if (resMultiple.Any())
                 {
                     result.AddRange(resMultiple);
                 }
@@ -201,7 +200,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="coor2">Collision info 3</param>
         /// <param name="coor3">Collision info 4</param>
         /// <returns>Returns a node list from multiple collision data</returns>
-        private List<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
+        private IEnumerable<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
         {
             List<GridNode> result = new List<GridNode>();
 
@@ -229,19 +228,25 @@ namespace Engine.PathFinding.AStar
         /// Fill node connections
         /// </summary>
         /// <param name="nodes">Grid nodes</param>
-        private void FillConnections(List<GridNode> nodes)
+        private void FillConnections(IEnumerable<GridNode> nodes)
         {
-            for (int i = 0; i < nodes.Count; i++)
+            for (int i = 0; i < nodes.Count(); i++)
             {
-                if (!nodes[i].FullConnected)
+                var nodeA = nodes.ElementAt(i);
+                if (nodeA.FullConnected)
                 {
-                    for (int n = i + 1; n < nodes.Count; n++)
+                    continue;
+                }
+
+                for (int n = i + 1; n < nodes.Count(); n++)
+                {
+                    var nodeB = nodes.ElementAt(n);
+                    if (nodeB.FullConnected)
                     {
-                        if (!nodes[n].FullConnected)
-                        {
-                            nodes[i].TryConnect(nodes[n]);
-                        }
+                        continue;
                     }
+
+                    nodeA.TryConnect(nodeB);
                 }
             }
         }

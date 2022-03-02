@@ -56,9 +56,6 @@ namespace Engine.Common
         /// <returns>Returns true if exists intersection between the ray and the bounding volume of the object, into the maximum distance</returns>
         private static bool TestCoarse(IComposed componsed, PickingRay ray, out float distance, out Vector3 position)
         {
-            distance = float.MaxValue;
-            position = Vector3.Zero;
-
             var pickComponents = componsed.GetComponents<IRayPickable<Triangle>>();
 
             foreach (var pickable in pickComponents)
@@ -71,6 +68,9 @@ namespace Engine.Common
                     return true;
                 }
             }
+
+            distance = float.MaxValue;
+            position = Vector3.Zero;
 
             return false;
         }
@@ -85,11 +85,8 @@ namespace Engine.Common
         /// <returns>Returns true if exists intersection between the ray and the bounding volume of the object, into the maximum distance</returns>
         private static bool TestCoarse<T>(IRayPickable<T> obj, PickingRay ray, out float distance, out Vector3 position) where T : IRayIntersectable
         {
-            distance = float.MaxValue;
-            position = Vector3.Zero;
-
+            Ray rRay = ray;
             var bsph = obj.GetBoundingSphere();
-            var rRay = ray.GetRay();
             var intersects = Collision.RayIntersectsSphere(ref rRay, ref bsph, out float d);
             if (intersects && d <= ray.MaxDistance)
             {
@@ -98,6 +95,9 @@ namespace Engine.Common
 
                 return true;
             }
+
+            distance = float.MaxValue;
+            position = Vector3.Zero;
 
             return false;
         }
@@ -119,15 +119,10 @@ namespace Engine.Common
 
             // Coarse first
             var bsph = obj.GetBoundingSphere();
-            var rRay = ray.GetRay();
-            if (!bsph.Intersects(ref rRay, out float sDist))
+            Ray rRay = ray;
+            if (!bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance)
             {
                 // Coarse exit
-                return false;
-            }
-            if (sDist > ray.MaxDistance)
-            {
-                // Coarse intersection too far
                 return false;
             }
 
@@ -139,14 +134,30 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!Intersection.IntersectNearest(ray, triangles, out var res))
+            return PickNearest(triangles, ray, out result);
+        }
+        /// <summary>
+        /// Gets nearest picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Intersectable type</typeparam>
+        /// <param name="collection">Intersectable list</param>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickNearest<T>(IEnumerable<T> collection, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            if (!PickAll(collection, ray, out var results))
             {
-                // There are no intersection
+                result = new PickingResult<T>
+                {
+                    Distance = float.MaxValue,
+                };
+
                 return false;
             }
 
-            // Store result
-            result = res;
+            //Returns the first result of the results list
+            result = results.First();
 
             return true;
         }
@@ -161,11 +172,6 @@ namespace Engine.Common
         public static bool PickNearest<T>(IEnumerable<ISceneObject> collection, PickingRay ray, out ScenePickingResult<T> result) where T : IRayIntersectable
         {
             result = new ScenePickingResult<T>();
-
-            if (collection?.Any() != true)
-            {
-                return false;
-            }
 
             bool picked = false;
             var pRay = ray; //Copy ray struct
@@ -266,15 +272,10 @@ namespace Engine.Common
 
             // Coarse first
             var bsph = obj.GetBoundingSphere();
-            var rRay = ray.GetRay();
-            if (!bsph.Intersects(ref rRay, out float sDist))
+            Ray rRay = ray;
+            if (!bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance)
             {
                 // Coarse exit
-                return false;
-            }
-            if (sDist > ray.MaxDistance)
-            {
-                // Coarse intersection too far
                 return false;
             }
 
@@ -286,16 +287,41 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!Intersection.IntersectFirst(ray, triangles, out var res))
+            return PickFirst(triangles, ray, out result);
+        }
+        /// <summary>
+        /// Gets the unordered first picking position of the given ray
+        /// </summary>
+        /// <typeparam name="T">Intersectable type</typeparam>
+        /// <param name="collection">Intersectable list</param>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickFirst<T>(IEnumerable<T> collection, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
+        {
+            foreach (var intersectable in collection)
             {
-                // There are no intersection
-                return false;
+                if (!intersectable.Intersects(ray, out var pos, out var d))
+                {
+                    continue;
+                }
+
+                result = new PickingResult<T>
+                {
+                    Position = pos,
+                    Primitive = intersectable,
+                    Distance = d,
+                };
+
+                return true;
             }
 
-            // Store result
-            result = res;
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue,
+            };
 
-            return true;
+            return false;
         }
         /// <summary>
         /// Gets the unordered first picking position of the given ray
@@ -315,11 +341,8 @@ namespace Engine.Common
                 var picked = PickFirstInternal<T>(obj, ray, out var res);
                 if (picked)
                 {
-                    result = new ScenePickingResult<T>
-                    {
-                        SceneObject = obj,
-                        PickingResult = res,
-                    };
+                    result.SceneObject = obj;
+                    result.PickingResult = res;
 
                     //Result found
                     return true;
@@ -399,15 +422,10 @@ namespace Engine.Common
 
             // Coarse first
             var bsph = obj.GetBoundingSphere();
-            var rRay = ray.GetRay();
-            if (!bsph.Intersects(ref rRay, out float sDist))
+            Ray rRay = ray;
+            if (!bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance)
             {
                 // Coarse exit
-                return false;
-            }
-            if (sDist > ray.MaxDistance)
-            {
-                // Coarse intersection too far
                 return false;
             }
 
@@ -419,13 +437,56 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!Intersection.IntersectAll(ray, triangles, out var resultList))
+            return PickAll(triangles, ray, out results);
+        }
+        /// <summary>
+        /// Gets all picking positions of the given ray
+        /// </summary>
+        /// <typeparam name="T">Intersectable type</typeparam>
+        /// <param name="collection">Intersectable list</param>
+        /// <param name="ray">Picking ray</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns true if intersection position found</returns>
+        public static bool PickAll<T>(IEnumerable<T> collection, PickingRay ray, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
+        {
+            if (!collection.Any())
             {
-                // There are no intersected triangles in the volume triangles
+                results = Enumerable.Empty<PickingResult<T>>();
+
                 return false;
             }
 
-            results = resultList.ToArray();
+            //Create a sorted list to store the ray picks sorted by pick distance
+            SortedDictionary<float, PickingResult<T>> pickList = new SortedDictionary<float, PickingResult<T>>();
+
+            foreach (var intersectable in collection)
+            {
+                //Tests the intersection
+                var intersects = intersectable.Intersects(ray, out var pos, out var d);
+                if (!intersects)
+                {
+                    //No intersection found
+                    continue;
+                }
+
+                float k = d;
+                while (pickList.ContainsKey(k))
+                {
+                    //Avoid duplicate distance keys
+                    k += 0.0001f;
+                }
+
+                PickingResult<T> pick = new PickingResult<T>
+                {
+                    Position = pos,
+                    Primitive = intersectable,
+                    Distance = d,
+                };
+
+                pickList.Add(k, pick);
+            }
+
+            results = pickList.Values.ToArray();
 
             return results.Any();
         }

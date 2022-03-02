@@ -1171,8 +1171,7 @@ namespace Collada.ModularDungeon
                         extents *= minDist;
 
                         var sBbox = new BoundingBox(center - extents, center + extents);
-                        var rRay = ray.GetRay();
-
+                        Ray rRay = ray;
                         return sBbox.Intersects(ref rRay);
                     }
                 })
@@ -1205,8 +1204,7 @@ namespace Collada.ModularDungeon
             else
             {
                 var sph = item.Item.GetBoundingSphere();
-
-                return Intersection.DistanceFromPointToLine(ray.GetRay(), sph.Center);
+                return Intersection.DistanceFromPointToLine(ray, sph.Center);
             }
         }
 

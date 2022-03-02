@@ -264,7 +264,7 @@ namespace Engine.Common
         /// <returns>Whether the two objects intersected</returns>
         public static bool RayIntersectsBox(PickingRay ray, BoundingBox box, out float distance)
         {
-            var rRay = ray.GetRay();
+            Ray rRay = ray;
             if (Collision.RayIntersectsBox(ref rRay, ref box, out distance) && distance <= ray.MaxDistance)
             {
                 return true;
@@ -287,7 +287,7 @@ namespace Engine.Common
             point = Vector3.Zero;
             distance = float.MaxValue;
 
-            var rRay = ray.GetRay();
+            Ray rRay = ray;
             if (Collision.RayIntersectsTriangle(ref rRay, ref vertex1, ref vertex2, ref vertex3, out float d) && d <= ray.MaxDistance)
             {
                 point = rRay.Position + (rRay.Direction * d);
@@ -451,124 +451,6 @@ namespace Engine.Common
             }
 
             return false;
-        }
-
-        /// <summary>
-        /// Performs intersection test with ray and ray intersectable item list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="intersectableList">Ray intersectable item list</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns first found intersection if any</returns>
-        public static bool IntersectFirst<T>(PickingRay ray, IEnumerable<T> intersectableList, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue,
-            };
-
-            if (!intersectableList.Any())
-            {
-                return false;
-            }
-
-            foreach (var intersectable in intersectableList)
-            {
-                if (!intersectable.Intersects(ray, out var pos, out var d))
-                {
-                    continue;
-                }
-
-                result = new PickingResult<T>
-                {
-                    Position = pos,
-                    Primitive = intersectable,
-                    Distance = d,
-                };
-
-                return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Performs intersection test with ray and ray intersectable item list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="intersectableList">Triangle list</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns nearest found intersection if any</returns>
-        public static bool IntersectNearest<T>(PickingRay ray, IEnumerable<T> intersectableList, out PickingResult<T> result) where T : IRayIntersectable
-        {
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue,
-            };
-
-            if (!intersectableList.Any())
-            {
-                return false;
-            }
-
-            if (!IntersectAll(ray, intersectableList, out var results))
-            {
-                return false;
-            }
-
-            //Returns the first result of the results list
-            result = results.First();
-
-            return true;
-        }
-        /// <summary>
-        /// Performs intersection test with ray and ray intersectable item list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="intersectableList">Triangle list</param>
-        /// <param name="results">Picking result list</param>
-        /// <returns>Returns all found intersections if any, sorted by distance to the ray position, nearest first</returns>
-        public static bool IntersectAll<T>(PickingRay ray, IEnumerable<T> intersectableList, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
-        {
-            if (!intersectableList.Any())
-            {
-                results = Enumerable.Empty<PickingResult<T>>();
-
-                return false;
-            }
-
-            //Create a sorted list to store the ray picks sorted by pick distance
-            SortedDictionary<float, PickingResult<T>> pickList = new SortedDictionary<float, PickingResult<T>>();
-
-            foreach (var intersectable in intersectableList)
-            {
-                //Tests the intersection
-                var intersects = intersectable.Intersects(ray, out var pos, out var d);
-                if (!intersects)
-                {
-                    //No intersection found
-                    continue;
-                }
-
-                float k = d;
-                while (pickList.ContainsKey(k))
-                {
-                    //Avoid duplicate distance keys
-                    k += 0.0001f;
-                }
-
-                PickingResult<T> pick = new PickingResult<T>
-                {
-                    Position = pos,
-                    Primitive = intersectable,
-                    Distance = d,
-                };
-
-                pickList.Add(k, pick);
-            }
-
-            results = pickList.Values.ToArray();
-
-            return results.Any();
         }
 
         /// <summary>
