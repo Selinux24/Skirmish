@@ -62,23 +62,21 @@ namespace Engine.PathFinding.AStar
 
                     PickingRay ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
 
-                    bool intersects = Intersection.IntersectAll(
-                        ray, triangles,
-                        out var pickedPoints,
-                        out var pickedTriangles,
-                        out var pickedDistances);
+                    bool intersects = Intersection.IntersectAll(ray, triangles, out var picks);
 
                     if (intersects)
                     {
-                        info = new GridCollisionInfo[pickedPoints.Count()];
+                        info = new GridCollisionInfo[picks.Count()];
 
-                        for (int i = 0; i < pickedPoints.Count(); i++)
+                        for (int i = 0; i < picks.Count(); i++)
                         {
+                            var pick = picks.ElementAt(i);
+
                             info[i] = new GridCollisionInfo()
                             {
-                                Point = pickedPoints.ElementAt(i),
-                                Triangle = pickedTriangles.ElementAt(i),
-                                Distance = pickedDistances.ElementAt(i)
+                                Point = pick.Position,
+                                Triangle = pick.Primitive,
+                                Distance = pick.Distance,
                             };
                         }
                     }

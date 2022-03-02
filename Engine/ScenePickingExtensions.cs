@@ -29,7 +29,7 @@ namespace Engine
                 return false;
             }
 
-            var volumes = RayPickingHelper.PickVolumes(cmpList, ray);
+            var volumes = RayPickingHelper.PickCoarse(cmpList, ray);
             if (!volumes.Any())
             {
                 return false;
@@ -76,7 +76,7 @@ namespace Engine
             }
 
             //Coarse filter
-            var volumes = RayPickingHelper.PickVolumes(cmpList, ray);
+            var volumes = RayPickingHelper.PickCoarse(cmpList, ray);
             if (!volumes.Any())
             {
                 return false;
@@ -120,7 +120,7 @@ namespace Engine
                 return false;
             }
 
-            var volumes = RayPickingHelper.PickVolumes(cmpList, ray);
+            var volumes = RayPickingHelper.PickCoarse(cmpList, ray);
             if (!volumes.Any())
             {
                 return false;

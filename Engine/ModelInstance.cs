@@ -413,24 +413,22 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
             var bsph = GetBoundingSphere();
             if (bsph.Intersects(sphere))
             {
                 var mesh = GetVolume(false);
-                if (Intersection.SphereIntersectsMesh(sphere, mesh, out Triangle tri, out Vector3 position, out float distance))
+                if (Intersection.SphereIntersectsMesh(sphere, mesh, out var res))
                 {
-                    result.Distance = distance;
-                    result.Position = position;
-                    result.Primitive = tri;
+                    result = res;
 
                     return true;
                 }
             }
+
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
 
             return false;
         }

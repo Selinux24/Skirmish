@@ -55,7 +55,13 @@ namespace Engine
         /// Animation palette offset
         /// </summary>
         public uint AnimationOffset { get; set; }
+        /// <summary>
+        /// Transition palette offset
+        /// </summary>
         public uint TransitionOffset { get; set; }
+        /// <summary>
+        /// Transition interpolation value
+        /// </summary>
         public float TransitionInterpolation { get; set; }
         /// <summary>
         /// Level of detail
@@ -588,26 +594,20 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
             var bsph = GetBoundingSphere();
-            if (bsph.Intersects(sphere))
+            if (!bsph.Intersects(sphere))
             {
-                var mesh = GetVolume(false);
-                if (Intersection.SphereIntersectsMesh(sphere, mesh, out Triangle tri, out Vector3 position, out float distance))
+                result = new PickingResult<Triangle>()
                 {
-                    result.Distance = distance;
-                    result.Position = position;
-                    result.Primitive = tri;
+                    Distance = float.MaxValue,
+                };
 
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            var mesh = GetVolume(false);
+
+            return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
         }
 
         /// <inheritdoc/>

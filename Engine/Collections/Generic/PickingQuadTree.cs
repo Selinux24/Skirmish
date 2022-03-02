@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Engine.Collections.Generic
 {
@@ -57,21 +56,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                result = new PickingResult<T>()
-                {
-                    Distance = float.MaxValue,
-                };
-
-                if (Root.PickNearest(ray, out Vector3 position, out T item, out float distance))
-                {
-                    result.Position = position;
-                    result.Primitive = item;
-                    result.Distance = distance;
-
-                    return true;
-                }
-
-                return false;
+                return Root.PickNearest(ray, out result);
             }
             finally
             {
@@ -91,21 +76,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                result = new PickingResult<T>()
-                {
-                    Distance = float.MaxValue,
-                };
-
-                if (Root.PickFirst(ray, out Vector3 position, out T item, out float distance))
-                {
-                    result.Position = position;
-                    result.Primitive = item;
-                    result.Distance = distance;
-
-                    return true;
-                }
-
-                return false;
+                return Root.PickFirst(ray, out result);
             }
             finally
             {
@@ -125,28 +96,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                if (Root.PickAll(ray, out var positions, out var items, out var distances))
-                {
-                    var res = new PickingResult<T>[positions.Count()];
-
-                    for (int i = 0; i < res.Length; i++)
-                    {
-                        res[i] = new PickingResult<T>()
-                        {
-                            Position = positions.ElementAt(i),
-                            Primitive = items.ElementAt(i),
-                            Distance = distances.ElementAt(i),
-                        };
-                    }
-
-                    results = res;
-
-                    return true;
-                }
-
-                results = Enumerable.Empty<PickingResult<T>>();
-
-                return false;
+                return Root.PickAll(ray, out results);
             }
             finally
             {

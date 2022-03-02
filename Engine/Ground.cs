@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -18,10 +17,6 @@ namespace Engine
         /// Quadtree for base ground picking
         /// </summary>
         protected PickingQuadTree<Triangle> GroundPickingQuadtree = null;
-        /// <summary>
-        /// Collision detection mode
-        /// </summary>
-        protected CollisionDetectionMode CollisionDetection;
 
         /// <summary>
         /// Constructor
@@ -33,14 +28,6 @@ namespace Engine
             : base(scene, id, name)
         {
 
-        }
-
-        /// <inheritdoc/>
-        public override async Task InitializeAssets(T description)
-        {
-            await base.InitializeAssets(description);
-
-            CollisionDetection = description.CollisionDetection;
         }
 
         /// <inheritdoc/>
@@ -65,154 +52,35 @@ namespace Engine
         /// <inheritdoc/>
         public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
             if (GroundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (!GroundPickingQuadtree.PickNearest(ray, out var gResult))
-                {
-                    // Without contacts
-                    return false;
-                }
-
-                // Store result
-                result.Position = gResult.Position;
-                result.Primitive = gResult.Primitive;
-                result.Distance = gResult.Distance;
-
-                return true;
-            }
-            else if (CollisionDetection == CollisionDetectionMode.BruteForce)
-            {
-                // Brute force
-                var mesh = GetVolume(true);
-                if (!mesh.Any())
-                {
-                    // Empty mesh
-                    return false;
-                }
-
-                if (!Intersection.IntersectNearest(ray, mesh, out var pos, out var tri, out var d))
-                {
-                    // There are no intersected primitives
-                    return false;
-                }
-
-                // Store result
-                result.Position = pos;
-                result.Primitive = tri;
-                result.Distance = d;
-
-                return true;
+                return GroundPickingQuadtree.PickNearest(ray, out result);
             }
 
-            return false;
+            return RayPickingHelper.PickNearest(this, ray, out result);
         }
         /// <inheritdoc/>
         public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
             if (GroundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (!GroundPickingQuadtree.PickFirst(ray, out var gResult))
-                {
-                    return false;
-                }
-
-                // Store result
-                result.Position = gResult.Position;
-                result.Primitive = gResult.Primitive;
-                result.Distance = gResult.Distance;
-
-                return true;
-            }
-            else if (CollisionDetection == CollisionDetectionMode.BruteForce)
-            {
-                // Brute force
-                var mesh = GetVolume(true);
-                if (!mesh.Any())
-                {
-                    // Empty mesh
-                    return false;
-                }
-
-                if (!Intersection.IntersectFirst(ray, mesh, out var pos, out var tri, out var d))
-                {
-                    // There are no intersected primitives
-                    return false;
-                }
-
-                // Store result
-                result.Position = pos;
-                result.Primitive = tri;
-                result.Distance = d;
-
-                return true;
+                return GroundPickingQuadtree.PickFirst(ray, out result);
             }
 
-            return false;
+            return RayPickingHelper.PickFirst(this, ray, out result);
         }
         /// <inheritdoc/>
         public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Triangle>> results)
         {
-            results = new PickingResult<Triangle>[] { };
-
             if (GroundPickingQuadtree != null)
             {
                 // Use quadtree
-                if (!GroundPickingQuadtree.PickAll(ray, out var gResults))
-                {
-                    // Without contacts
-                    return false;
-                }
-
-                results = gResults;
-
-                return true;
-            }
-            else if (CollisionDetection == CollisionDetectionMode.BruteForce)
-            {
-                // Brute force
-                var mesh = GetVolume(true);
-                if (!mesh.Any())
-                {
-                    // Empty mesh
-                    return false;
-                }
-
-                if (!Intersection.IntersectAll(ray, mesh, out var pos, out var tris, out var ds))
-                {
-                    // There are no intersected primitives
-                    return false;
-                }
-
-                // Store results
-                List<PickingResult<Triangle>> picks = new List<PickingResult<Triangle>>(pos.Count());
-                for (int i = 0; i < pos.Count(); i++)
-                {
-                    picks.Add(new PickingResult<Triangle>
-                    {
-                        Position = pos.ElementAt(i),
-                        Primitive = tris.ElementAt(i),
-                        Distance = ds.ElementAt(i),
-                    });
-                }
-
-                results = picks;
-
-                return true;
+                return GroundPickingQuadtree.PickAll(ray, out results);
             }
 
-            return false;
+            return RayPickingHelper.PickAll(this, ray, out results);
         }
 
         /// <inheritdoc/>
@@ -261,13 +129,13 @@ namespace Engine
         /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
-            result = new PickingResult<Triangle>()
-            {
-                Distance = float.MaxValue,
-            };
-
             if (GroundPickingQuadtree != null)
             {
+                result = new PickingResult<Triangle>()
+                {
+                    Distance = float.MaxValue,
+                };
+
                 // Use quadtree
                 var nodes = GroundPickingQuadtree.GetNodesInVolume(sphere);
                 if (!nodes.Any())
@@ -279,38 +147,28 @@ namespace Engine
                 float minDistance = float.MaxValue;
                 foreach (var node in nodes)
                 {
-                    if (Intersection.SphereIntersectsMesh(sphere, node.Items, out Triangle tri, out Vector3 position, out float distance))
+                    if (Intersection.SphereIntersectsMesh(sphere, node.Items, out var res))
                     {
                         intersects = true;
 
-                        if (distance < minDistance)
+                        if (res.Distance < minDistance)
                         {
-                            minDistance = distance;
+                            minDistance = res.Distance;
 
-                            result.Distance = distance;
-                            result.Position = position;
-                            result.Primitive = tri;
+                            result = res;
                         }
                     }
                 }
 
                 return intersects;
             }
-            else if (CollisionDetection == CollisionDetectionMode.BruteForce)
+            else
             {
                 // Brute force
                 var mesh = GetVolume(true);
-                if (Intersection.SphereIntersectsMesh(sphere, mesh, out Triangle tri, out Vector3 position, out float distance))
-                {
-                    result.Distance = distance;
-                    result.Position = position;
-                    result.Primitive = tri;
 
-                    return true;
-                }
+                return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
             }
-
-            return false;
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)

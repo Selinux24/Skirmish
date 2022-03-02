@@ -73,10 +73,6 @@ namespace Engine
         /// Use anisotropic filtering
         /// </summary>
         public bool UseAnisotropic { get; set; } = true;
-        /// <summary>
-        /// Collision detection mode
-        /// </summary>
-        public CollisionDetectionMode CollisionDetection { get; set; } = CollisionDetectionMode.Default;
 
         /// <summary>
         /// Constructor

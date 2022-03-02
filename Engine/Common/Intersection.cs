@@ -59,33 +59,64 @@ namespace Engine.Common
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="triangle">Triangle</param>
-        /// <param name="point">Returns the closest point in the triangle to the sphere center</param>
-        /// <param name="distance">Returns the distance from the closest point to the sphere center</param>
+        /// <param name="result">Returns the piking result</param>
         /// <returns>Returns true if the sphere intersects the triangle</returns>
-        public static bool SphereIntersectsTriangle(BoundingSphere sphere, Triangle triangle, out Vector3 point, out float distance)
+        public static bool SphereIntersectsTriangle(BoundingSphere sphere, Triangle triangle, out PickingResult<Triangle> result)
         {
-            ClosestPointInTriangle(sphere.Center, triangle, out point);
+            ClosestPointInTriangle(sphere.Center, triangle, out var point);
 
-            distance = Vector3.Distance(sphere.Center, point);
+            float distance = Vector3.Distance(sphere.Center, point);
 
-            return distance <= sphere.Radius;
+            if (distance <= sphere.Radius)
+            {
+                result = new PickingResult<Triangle>
+                {
+                    Primitive = triangle,
+                    Distance = distance,
+                    Position = point,
+                };
+
+                return true;
+            }
+
+            result = new PickingResult<Triangle>
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle mesh
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="mesh">Triangle mesh</param>
-        /// <param name="triangle">Returns the closest triangle to the sphere center</param>
-        /// <param name="point">Returns the closest point in the triangle mesh to the sphere center</param>
-        /// <param name="distance">Returns the distance from the closest point to the sphere center</param>
+        /// <param name="result">Returns the piking result</param>
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out Triangle triangle, out Vector3 point, out float distance)
+        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out PickingResult<Triangle> result)
         {
-            ClosestPointInMesh(sphere.Center, mesh, out triangle, out point);
+            ClosestPointInMesh(sphere.Center, mesh, out var triangle, out var point);
 
-            distance = Vector3.Distance(sphere.Center, point);
+            float distance = Vector3.Distance(sphere.Center, point);
 
-            return distance <= sphere.Radius;
+            if (distance <= sphere.Radius)
+            {
+                result = new PickingResult<Triangle>
+                {
+                    Primitive = triangle,
+                    Distance = distance,
+                    Position = point,
+                };
+
+                return true;
+            }
+
+            result = new PickingResult<Triangle>
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle mesh
@@ -96,11 +127,9 @@ namespace Engine.Common
         /// <param name="points">Returns the intersection point list</param>
         /// <param name="distances">Returns the distance list from the sphere center to the intersection points</param>
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles, out IEnumerable<Vector3> points, out IEnumerable<float> distances)
+        public static bool SphereIntersectsMeshAll(BoundingSphere sphere, IEnumerable<Triangle> mesh, out IEnumerable<PickingResult<Triangle>> results)
         {
-            List<Triangle> tris = new List<Triangle>();
-            List<Vector3> pts = new List<Vector3>();
-            List<float> dst = new List<float>();
+            List<PickingResult<Triangle>> picks = new List<PickingResult<Triangle>>();
 
             foreach (var t in mesh)
             {
@@ -110,17 +139,13 @@ namespace Engine.Common
                 if (dist <= sphere.Radius)
                 {
                     // Store intersection data
-                    tris.Add(t);
-                    pts.Add(closestToTri);
-                    dst.Add(dist);
+                    picks.Add(new PickingResult<Triangle> { Primitive = t, Position = closestToTri, Distance = dist });
                 }
             }
 
-            triangles = tris.ToArray();
-            points = pts.ToArray();
-            distances = dst.ToArray();
+            results = picks;
 
-            return tris.Count > 0;
+            return picks.Any();
         }
 
         /// <summary>
@@ -257,13 +282,13 @@ namespace Engine.Common
         /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
         /// <param name="distance">Distance to point</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref PickingRay ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point, out float distance)
+        public static bool RayIntersectsTriangle(PickingRay ray, Vector3 vertex1, Vector3 vertex2, Vector3 vertex3, out Vector3 point, out float distance)
         {
             point = Vector3.Zero;
             distance = float.MaxValue;
 
             var rRay = ray.GetRay();
-            if (Collision.RayIntersectsTriangle(ref rRay, ref vertex1, ref vertex2, ref vertex3, out float d))
+            if (Collision.RayIntersectsTriangle(ref rRay, ref vertex1, ref vertex2, ref vertex3, out float d) && d <= ray.MaxDistance)
             {
                 point = rRay.Position + (rRay.Direction * d);
                 distance = d;
@@ -432,27 +457,34 @@ namespace Engine.Common
         /// Performs intersection test with ray and ray intersectable item list
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="items">Ray intersectable item list</param>
-        /// <param name="position">Result picked position</param>
-        /// <param name="item">Result picked ray intersectable item</param>
-        /// <param name="distance">Result distance to picked position</param>
-        /// <returns>Returns first intersection if exists</returns>
-        public static bool IntersectFirst<T>(PickingRay ray, IEnumerable<T> items, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        /// <param name="intersectableList">Ray intersectable item list</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns first found intersection if any</returns>
+        public static bool IntersectFirst<T>(PickingRay ray, IEnumerable<T> intersectableList, out PickingResult<T> result) where T : IRayIntersectable
         {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
-
-            foreach (var cItem in items)
+            result = new PickingResult<T>
             {
-                if (!cItem.Intersects(ray, out Vector3 pos, out float d))
+                Distance = float.MaxValue,
+            };
+
+            if (!intersectableList.Any())
+            {
+                return false;
+            }
+
+            foreach (var intersectable in intersectableList)
+            {
+                if (!intersectable.Intersects(ray, out var pos, out var d))
                 {
                     continue;
                 }
 
-                position = pos;
-                item = cItem;
-                distance = d;
+                result = new PickingResult<T>
+                {
+                    Position = pos,
+                    Primitive = intersectable,
+                    Distance = d,
+                };
 
                 return true;
             }
@@ -463,35 +495,28 @@ namespace Engine.Common
         /// Performs intersection test with ray and ray intersectable item list
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="items">Triangle list</param>
-        /// <param name="position">Result picked position</param>
-        /// <param name="item">Result picked ray intersectable item</param>
-        /// <param name="distance">Result distance to picked position</param>
-        /// <returns>Returns nearest intersection if exists</returns>
-        public static bool IntersectNearest<T>(PickingRay ray, IEnumerable<T> items, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
+        /// <param name="intersectableList">Triangle list</param>
+        /// <param name="result">Picking result</param>
+        /// <returns>Returns nearest found intersection if any</returns>
+        public static bool IntersectNearest<T>(PickingRay ray, IEnumerable<T> intersectableList, out PickingResult<T> result) where T : IRayIntersectable
         {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue,
+            };
 
-            if (!IntersectAll(ray, items, out var pickedPositions, out var pickedTriangles, out var pickedDistances))
+            if (!intersectableList.Any())
             {
                 return false;
             }
 
-            float distanceMin = float.MaxValue;
-
-            for (int i = 0; i < pickedPositions.Count(); i++)
+            if (!IntersectAll(ray, intersectableList, out var results))
             {
-                float dist = pickedDistances.ElementAt(i);
-                if (dist < distanceMin)
-                {
-                    distanceMin = dist;
-                    position = pickedPositions.ElementAt(i);
-                    item = pickedTriangles.ElementAt(i);
-                    distance = pickedDistances.ElementAt(i);
-                }
+                return false;
             }
+
+            //Returns the first result of the results list
+            result = results.First();
 
             return true;
         }
@@ -499,62 +524,51 @@ namespace Engine.Common
         /// Performs intersection test with ray and ray intersectable item list
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="items">Triangle list</param>
-        /// <param name="pickedPositions">Picked position list</param>
-        /// <param name="pickedItems">Picked ray intersectable item list</param>
-        /// <param name="pickedDistances">Distances to picked positions</param>
-        /// <returns>Returns all intersections if exists</returns>
-        public static bool IntersectAll<T>(PickingRay ray, IEnumerable<T> items, out IEnumerable<Vector3> pickedPositions, out IEnumerable<T> pickedItems, out IEnumerable<float> pickedDistances) where T : IRayIntersectable
+        /// <param name="intersectableList">Triangle list</param>
+        /// <param name="results">Picking result list</param>
+        /// <returns>Returns all found intersections if any, sorted by distance to the ray position, nearest first</returns>
+        public static bool IntersectAll<T>(PickingRay ray, IEnumerable<T> intersectableList, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
-            SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
-            SortedDictionary<float, T> pickedTriangleList = new SortedDictionary<float, T>();
-            SortedDictionary<float, float> pickedDistancesList = new SortedDictionary<float, float>();
-
-            foreach (T t in items)
+            if (!intersectableList.Any())
             {
-                //Avoid duplicate picked positions
-                var intersects = t.Intersects(ray, out Vector3 pos, out float d);
+                results = Enumerable.Empty<PickingResult<T>>();
+
+                return false;
+            }
+
+            //Create a sorted list to store the ray picks sorted by pick distance
+            SortedDictionary<float, PickingResult<T>> pickList = new SortedDictionary<float, PickingResult<T>>();
+
+            foreach (var intersectable in intersectableList)
+            {
+                //Tests the intersection
+                var intersects = intersectable.Intersects(ray, out var pos, out var d);
                 if (!intersects)
                 {
+                    //No intersection found
                     continue;
                 }
 
                 float k = d;
-                while (pickedPositionList.ContainsKey(k))
+                while (pickList.ContainsKey(k))
                 {
                     //Avoid duplicate distance keys
                     k += 0.0001f;
                 }
 
-                pickedPositionList.Add(k, pos);
-                pickedTriangleList.Add(k, t);
-                pickedDistancesList.Add(k, d);
+                PickingResult<T> pick = new PickingResult<T>
+                {
+                    Position = pos,
+                    Primitive = intersectable,
+                    Distance = d,
+                };
+
+                pickList.Add(k, pick);
             }
 
-            if (pickedPositionList.Values.Count > 0)
-            {
-                var tmpPickedPositions = new Vector3[pickedPositionList.Values.Count];
-                var tmpPickedItems = new T[pickedTriangleList.Values.Count];
-                var tmpPickedDistances = new float[pickedDistancesList.Values.Count];
+            results = pickList.Values.ToArray();
 
-                pickedPositionList.Values.CopyTo(tmpPickedPositions, 0);
-                pickedTriangleList.Values.CopyTo(tmpPickedItems, 0);
-                pickedDistancesList.Values.CopyTo(tmpPickedDistances, 0);
-
-                pickedPositions = tmpPickedPositions;
-                pickedItems = tmpPickedItems;
-                pickedDistances = tmpPickedDistances;
-
-                return true;
-            }
-            else
-            {
-                pickedPositions = null;
-                pickedItems = null;
-                pickedDistances = null;
-
-                return false;
-            }
+            return results.Any();
         }
 
         /// <summary>

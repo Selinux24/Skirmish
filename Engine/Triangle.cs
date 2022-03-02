@@ -670,24 +670,19 @@ namespace Engine
         /// <returns>Returns true if ray intersects with this triangle</returns>
         public bool Intersects(PickingRay ray, out Vector3 point, out float distance)
         {
-            point = Vector3.Zero;
-            distance = 0;
-
-            bool cull = false;
             if (ray.FacingOnly)
             {
-                cull = Vector3.Dot(ray.Direction, Normal) >= 0f;
+                bool cull = Vector3.Dot(ray.Direction, Normal) >= 0f;
+                if (cull)
+                {
+                    point = Vector3.Zero;
+                    distance = float.MaxValue;
+
+                    return false;
+                }
             }
 
-            if (!cull)
-            {
-                var p1 = Point1;
-                var p2 = Point2;
-                var p3 = Point3;
-                return Intersection.RayIntersectsTriangle(ref ray, ref p1, ref p2, ref p3, out point, out distance);
-            }
-
-            return false;
+            return Intersection.RayIntersectsTriangle(ray, Point1, Point2, Point3, out point, out distance);
         }
 
         /// <summary>
