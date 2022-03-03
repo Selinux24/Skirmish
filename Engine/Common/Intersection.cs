@@ -184,10 +184,65 @@ namespace Engine.Common
         /// <param name="box">Bounding box</param>
         /// <param name="triangle">Triangle</param>
         /// <returns>Returns true if the box intersects the triangle</returns>
+        /// <remarks>Separating axis theorem implementation adapted from "https://github.com/typicalMoves/dava.engine/blob/main/Sources/Internal/Math/AABBox3.cpp"</remarks>
         public static bool BoxIntersectsTriangle(BoundingBox box, Triangle triangle)
         {
-            // Own implementation. Not found in SharpDX
-            return BoxContainsTriangle(box, triangle) != ContainmentType.Disjoint;
+            // Translate the triangle to origin, and use only the box extents to refer to the box
+            var boxCenter = box.GetCenter();
+            var boxExtents = box.GetExtents();
+            Triangle origTri = new Triangle(triangle.Point1 - boxCenter, triangle.Point2 - boxCenter, triangle.Point3 - boxCenter);
+
+            // Test first 3 edges
+            var edge1 = triangle.GetEdge1();
+            float fex = Math.Abs(edge1.X);
+            float fey = Math.Abs(edge1.Y);
+            float fez = Math.Abs(edge1.Z);
+            if (!AxisTestX01(boxExtents, origTri, edge1.Z, edge1.Y, fez, fey)) return false;
+            if (!AxisTestY02(boxExtents, origTri, edge1.Z, edge1.X, fez, fex)) return false;
+            if (!AxisTestZ12(boxExtents, origTri, edge1.Y, edge1.X, fey, fex)) return false;
+
+            // Test second 3 edges
+            var edge2 = triangle.GetEdge2();
+            fex = Math.Abs(edge2.X);
+            fey = Math.Abs(edge2.Y);
+            fez = Math.Abs(edge2.Z);
+            if (!AxisTestX01(boxExtents, origTri, edge2.Z, edge2.Y, fez, fey)) return false;
+            if (!AxisTestY02(boxExtents, origTri, edge2.Z, edge2.X, fez, fex)) return false;
+            if (!AxisTestZ0(boxExtents, origTri, edge2.Y, edge2.X, fey, fex)) return false;
+
+            // Test third 3 edges
+            var edge3 = triangle.GetEdge3();
+            fex = Math.Abs(edge3.X);
+            fey = Math.Abs(edge3.Y);
+            fez = Math.Abs(edge3.Z);
+            if (!AxisTestX2(boxExtents, origTri, edge3.Z, edge3.Y, fez, fey)) return false;
+            if (!AxisTestY1(boxExtents, origTri, edge3.Z, edge3.X, fez, fex)) return false;
+            if (!AxisTestZ12(boxExtents, origTri, edge3.Y, edge3.X, fey, fex)) return false;
+
+            // Test X direction
+            Helper.MinMax(origTri.Point1.X, origTri.Point2.X, origTri.Point3.X, out float min, out float max);
+            if (min > boxExtents.X || max < -boxExtents.X)
+            {
+                return false;
+            }
+
+            // Test Y direction
+            Helper.MinMax(origTri.Point1.Y, origTri.Point2.Y, origTri.Point3.Y, out min, out max);
+            if (min > boxExtents.Y || max < -boxExtents.Y)
+            {
+                return false;
+            }
+
+            // Test Z direction
+            Helper.MinMax(origTri.Point1.Z, origTri.Point2.Z, origTri.Point3.Z, out min, out max);
+            if (min > boxExtents.Z || max < -boxExtents.Z)
+            {
+                return false;
+            }
+
+            // Test the box extents vs the triangle plane
+            BoundingBox aabb = new BoundingBox(-boxExtents, boxExtents);
+            return triangle.Plane.Intersects(ref aabb) == PlaneIntersectionType.Intersecting;
         }
         /// <summary>
         /// Determines whether a box intersects with a mesh
@@ -203,6 +258,91 @@ namespace Engine.Common
                 .ToArray();
 
             return triangles.Any();
+        }
+
+        private static bool AxisTestX01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
+            float p2 = a * tri.Point3.Y - b * tri.Point3.Z;
+            Helper.MinMax(p0, p2, out float min, out float max);
+
+            float rad = fa * extents.Y + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestX2(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
+            float p1 = a * tri.Point2.Y - b * tri.Point2.Z;
+            Helper.MinMax(p0, p1, out float min, out float max);
+
+            float rad = fa * extents.Y + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestY02(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
+            float p2 = -a * tri.Point3.X + b * tri.Point3.Z;
+            Helper.MinMax(p0, p2, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestY1(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
+            float p1 = -a * tri.Point2.X + b * tri.Point2.Z;
+            Helper.MinMax(p0, p1, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestZ12(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p1 = a * tri.Point2.X - b * tri.Point2.Y;
+            float p2 = a * tri.Point3.X - b * tri.Point3.Y;
+            Helper.MinMax(p1, p2, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Y;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestZ0(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = a * tri.Point1.X - b * tri.Point1.Y;
+            float p1 = a * tri.Point2.X - b * tri.Point2.Y;
+            Helper.MinMax(p0, p1, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Y;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -615,73 +755,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Gets whether the specified edge overlaps with the axis
-        /// </summary>
-        /// <param name="extents">Box extents</param>
-        /// <param name="tri">Triangle</param>
-        /// <param name="edge">Edge</param>
-        /// <param name="axis">Axis</param>
-        private static bool TriangleOverlapOnBoxAxis(Vector3 extents, Triangle tri, Vector3 edge, Axis axis)
-        {
-            if (axis == Axis.X)
-            {
-                // a.X ^ b.X = (1,0,0) ^ edge
-                // axis = Vector3(0, -edge.Z, edge.Y)
-                float dPoint1 = tri.Point1.Z * edge.Y - tri.Point1.Y * edge.Z;
-                float dPoint2 = tri.Point2.Z * edge.Y - tri.Point2.Y * edge.Z;
-                float dPoint3 = tri.Point3.Z * edge.Y - tri.Point3.Y * edge.Z;
-                float dhalf = Math.Abs(extents.Y * edge.Z) + Math.Abs(extents.Z * edge.Y);
-                if (Math.Min(dPoint1, Math.Min(dPoint2, dPoint3)) >= dhalf ||
-                    Math.Max(dPoint1, Math.Max(dPoint2, dPoint3)) <= -dhalf)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (axis == Axis.Y)
-            {
-                // a.Y ^ b.X = (0,1,0) ^ edge
-                // axis = Vector3(edge.Z, 0, -edge.X)
-                float dPoint1 = tri.Point1.X * edge.Z - tri.Point1.Z * edge.X;
-                float dPoint2 = tri.Point2.X * edge.Z - tri.Point2.Z * edge.X;
-                float dPoint3 = tri.Point3.X * edge.Z - tri.Point3.Z * edge.X;
-                float dhalf = Math.Abs(extents.X * edge.Z) + Math.Abs(extents.Z * edge.X);
-                if (Math.Min(dPoint1, Math.Min(dPoint2, dPoint3)) >= dhalf ||
-                    Math.Max(dPoint1, Math.Max(dPoint2, dPoint3)) <= -dhalf)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (axis == Axis.Z)
-            {
-                // a.Y ^ b.X = (0,0,1) ^ edge
-                // axis = Vector3(-edge.Y, edge.X, 0)
-                float dPoint1 = tri.Point1.Y * edge.X - tri.Point1.X * edge.Y;
-                float dPoint2 = tri.Point2.Y * edge.X - tri.Point2.X * edge.Y;
-                float dPoint3 = tri.Point3.Y * edge.X - tri.Point3.X * edge.Y;
-                float dhalf = Math.Abs(extents.Y * edge.X) + Math.Abs(extents.X * edge.Y);
-                if (Math.Min(dPoint1, Math.Min(dPoint2, dPoint3)) >= dhalf ||
-                    Math.Max(dPoint1, Math.Max(dPoint2, dPoint3)) <= -dhalf)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
         /// Determines whether a BoundingSphere contains a BoundingSphere.
         /// </summary>
         /// <param name="sphere1">The first sphere to test</param>
@@ -799,63 +872,29 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType BoxContainsTriangle(BoundingBox box, Triangle triangle)
         {
-            Vector3 boxExtents = box.GetExtents();
+            var test1 = box.Contains(triangle.Point1);
+            var test2 = box.Contains(triangle.Point2);
+            var test3 = box.Contains(triangle.Point3);
 
-            BoundingBox triBounds = BoundingBox.FromPoints(triangle.GetVertices().ToArray());
-            Vector3 triExtents = triBounds.GetExtents();
-            Vector3 triCenter = triBounds.GetCenter();
-
-            float triBoundCenterX = Math.Abs(triCenter.X);
-            float triBoundCenterY = Math.Abs(triCenter.Y);
-            float triBoundCenterZ = Math.Abs(triCenter.Z);
-
-            if (triExtents.X + boxExtents.X <= triBoundCenterX ||
-                triExtents.Y + boxExtents.Y <= triBoundCenterY ||
-                triExtents.Z + boxExtents.Z <= triBoundCenterZ)
+            if (test1 == ContainmentType.Contains && test2 == ContainmentType.Contains && test3 == ContainmentType.Contains)
             {
-                // The triangle is outside of the bounding box 
-                return ContainmentType.Disjoint;
-            }
-
-            if (triExtents.X + triBoundCenterX <= boxExtents.X &&
-                triExtents.Y + triBoundCenterY <= boxExtents.Y &&
-                triExtents.Z + triBoundCenterZ <= boxExtents.Z)
-            {
-                // The triangle is inside the bounding box
+                // All three points into the box
                 return ContainmentType.Contains;
             }
 
-            // Test the triangle normal
-
-            Vector3 edge1 = triangle.GetEdge1();
-            Vector3 edge2 = triangle.GetEdge2();
-            Vector3 crossEdge = Vector3.Cross(edge1, edge2);
-            float triDist = Vector3.Dot(triangle.Point1, crossEdge);
-
-            if (Math.Abs(crossEdge.X * boxExtents.X) +
-                Math.Abs(crossEdge.Y * boxExtents.Y) +
-                Math.Abs(crossEdge.Z * boxExtents.Z) <= Math.Abs(triDist))
+            if (test1 == ContainmentType.Contains || test2 == ContainmentType.Contains || test3 == ContainmentType.Contains)
             {
-                return ContainmentType.Disjoint;
+                // One point at least, into the box
+                return ContainmentType.Intersects;
             }
 
-            // Test the nine edge cross-products
+            // Test intersection
+            if (BoxIntersectsTriangle(box, triangle))
+            {
+                return ContainmentType.Intersects;
+            }
 
-            Vector3 edge3 = triangle.GetEdge3();
-
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge1, Axis.X)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge2, Axis.X)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge3, Axis.X)) { return ContainmentType.Disjoint; }
-
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge1, Axis.Y)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge2, Axis.Y)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge3, Axis.Y)) { return ContainmentType.Disjoint; }
-
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge1, Axis.Z)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge2, Axis.Z)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge3, Axis.Z)) { return ContainmentType.Disjoint; }
-
-            return ContainmentType.Intersects;
+            return ContainmentType.Disjoint;
         }
         /// <summary>
         /// Determines whether a BoundingBox contains a Triangle mesh.
@@ -869,8 +908,7 @@ namespace Engine.Common
 
             foreach (var t in mesh)
             {
-                ContainmentType c = BoxContainsTriangle(box, t);
-
+                var c = BoxContainsTriangle(box, t);
                 if (c == res)
                 {
                     continue;

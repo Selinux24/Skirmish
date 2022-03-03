@@ -20,6 +20,7 @@ namespace Engine.Common.Tests
         static BoundingSphere bsph5;
 
         static IntersectionVolumeSphere sph1;
+        static IntersectionVolumeSphere sph1_1;
         static IntersectionVolumeSphere sph2;
         static IntersectionVolumeSphere sph3;
         static IntersectionVolumeSphere sph4;
@@ -72,7 +73,7 @@ namespace Engine.Common.Tests
 
             bsph1 = new BoundingSphere(new Vector3(-1.0f, 0f, 0f), 1f);
             bsph2 = new BoundingSphere(new Vector3(+1.0f, 0f, 0f), 1f);
-            bsph3 = new BoundingSphere(new Vector3(+2.0f, 0f, 0f), 1f);
+            bsph3 = new BoundingSphere(new Vector3(+3.0f, 0f, 0f), 1f);
             bsph4 = new BoundingSphere(new Vector3(-1.0f, 0f, 0f), 0.5f);
             bsph5 = new BoundingSphere(new Vector3(-1.0f, 0f, 0f), 2f);
 
@@ -85,7 +86,7 @@ namespace Engine.Common.Tests
 
             bbox1 = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
             bbox2 = new BoundingBox((Vector3.One * -0.5f) + Vector3.Left, (Vector3.One * 0.5f) + Vector3.Left);
-            bbox3 = new BoundingBox(Vector3.One * -0.5f + (Vector3.Left * 2), Vector3.One * 0.5f + (Vector3.Left * 2));
+            bbox3 = new BoundingBox(Vector3.One * -0.5f + (Vector3.Left * 3), Vector3.One * 0.5f + (Vector3.Left * 3));
             bbox4 = new BoundingBox(Vector3.One * -0.25f, Vector3.One * 0.25f);
             bbox5 = new BoundingBox(Vector3.One * -1f, Vector3.One * 1f);
 
@@ -108,6 +109,9 @@ namespace Engine.Common.Tests
             mesh4 = new IntersectionVolumeMesh(tmesh4);
             mesh5 = new IntersectionVolumeMesh(tmesh5);
 
+            var bsph1_1 = BoundingSphere.FromBox(bbox1);
+            bsph1_1.Radius *= 0.5f;
+            sph1_1 = new IntersectionVolumeSphere(bsph1_1);
 
             i1 = new Mock<IIntersectable>();
             i1.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Sphere)).Returns(sph1);
@@ -301,6 +305,11 @@ namespace Engine.Common.Tests
             Assert.IsTrue(res2);
             Assert.IsFalse(res3);
             Assert.IsFalse(res4);
+
+            Assert.AreEqual((IntersectionVolumeSphere)bsph1, sph1);
+            Assert.AreEqual(sph1, (IntersectionVolumeSphere)bsph1);
+            Assert.AreNotEqual((IntersectionVolumeSphere)bsph1, sph2);
+            Assert.AreNotEqual(sph1, (IntersectionVolumeSphere)bsph2);
         }
         [TestMethod()]
         public void IntersectableBoxComparerTest()
@@ -314,6 +323,11 @@ namespace Engine.Common.Tests
             Assert.IsTrue(res2);
             Assert.IsFalse(res3);
             Assert.IsFalse(res4);
+
+            Assert.AreEqual((IntersectionVolumeAxisAlignedBox)bbox1, box1);
+            Assert.AreEqual(box1, (IntersectionVolumeAxisAlignedBox)bbox1);
+            Assert.AreNotEqual((IntersectionVolumeAxisAlignedBox)bbox1, box2);
+            Assert.AreNotEqual(box1, (IntersectionVolumeAxisAlignedBox)bbox2);
         }
         [TestMethod()]
         public void IntersectableMeshComparerTest()
@@ -322,6 +336,218 @@ namespace Engine.Common.Tests
             CollectionAssert.AreEqual((Triangle[])mesh1, tmesh1);
             CollectionAssert.AreNotEqual(tmesh1, (Triangle[])mesh2);
             CollectionAssert.AreNotEqual((Triangle[])mesh1, tmesh2);
+
+            Assert.AreEqual((IntersectionVolumeMesh)tmesh1, mesh1);
+            Assert.AreEqual(mesh1, (IntersectionVolumeMesh)tmesh1);
+            Assert.AreNotEqual((IntersectionVolumeMesh)tmesh1, mesh2);
+            Assert.AreNotEqual(mesh1, (IntersectionVolumeMesh)tmesh2);
+        }
+        [TestMethod()]
+        public void IntersectableFrustumComparerTest()
+        {
+            bool res1 = frustum1 == bfrustum1;
+            bool res2 = frustum1 == bfrustum1;
+            bool res3 = bfrustum1 == frustum2;
+            bool res4 = frustum1 == bfrustum2;
+
+            Assert.IsTrue(res1);
+            Assert.IsTrue(res2);
+            Assert.IsFalse(res3);
+            Assert.IsFalse(res4);
+
+            Assert.AreEqual((IntersectionVolumeFrustum)bfrustum1, frustum1);
+            Assert.AreEqual(frustum1, (IntersectionVolumeFrustum)bfrustum1);
+            Assert.AreNotEqual((IntersectionVolumeFrustum)bfrustum1, frustum2);
+            Assert.AreNotEqual(frustum1, (IntersectionVolumeFrustum)bfrustum2);
+        }
+
+        [TestMethod()]
+        public void IntersectableSphereConstructorTest()
+        {
+            IntersectionVolumeSphere sph = new IntersectionVolumeSphere(bsph1);
+
+            Assert.AreEqual(bsph1, (BoundingSphere)sph);
+        }
+        [TestMethod()]
+        public void IntersectableBoxConstructorTest()
+        {
+            IntersectionVolumeAxisAlignedBox box = new IntersectionVolumeAxisAlignedBox(bbox1);
+
+            Assert.AreEqual(bbox1, (BoundingBox)box);
+        }
+        [TestMethod()]
+        public void IntersectableMeshConstructorTest()
+        {
+            IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(tmesh1);
+
+            CollectionAssert.AreEqual(tmesh1, (Triangle[])mesh);
+        }
+        [TestMethod()]
+        public void IntersectableMeshBadConstructorTest()
+        {
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(new Triangle[] { }); });
+        }
+
+        [TestMethod()]
+        public void IntersectsSphereBoxTest1()
+        {
+            var res = sph1.Contains(bbox1);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsSphereBoxTest2()
+        {
+            var res = sph1.Contains(bbox2);
+
+            Assert.AreEqual(ContainmentType.Contains, res);
+        }
+        [TestMethod()]
+        public void IntersectsSphereBoxTest3()
+        {
+            var res = sph1.Contains(bbox3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [TestMethod()]
+        public void IntersectsSphereSphereTest1()
+        {
+            var res = sph1.Contains(sph1);
+
+            Assert.AreEqual(ContainmentType.Contains, res);
+        }
+        [TestMethod()]
+        public void IntersectsSphereSphereTest2()
+        {
+            var res = sph1.Contains(sph2);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsSphereSphereTest3()
+        {
+            var res = sph1.Contains(sph3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [TestMethod()]
+        public void IntersectsSphereMeshTest1()
+        {
+            var res = sph1.Contains(tmesh1);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsSphereMeshTest2()
+        {
+            var res = sph1.Contains(tmesh2);
+
+            Assert.AreEqual(ContainmentType.Contains, res);
+        }
+        [TestMethod()]
+        public void IntersectsSphereMeshTest3()
+        {
+            var res = sph1.Contains(tmesh3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [TestMethod()]
+        public void IntersectsSphereFrustumTest1()
+        {
+            var res = sph1.Contains(frustum1);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsSphereFrustumTest2()
+        {
+            var res = sph1.Contains(frustum3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [TestMethod()]
+        public void IntersectsBoxBoxTest1()
+        {
+            var res = box1.Contains(bbox1);
+
+            Assert.AreEqual(ContainmentType.Contains, res);
+        }
+        [TestMethod()]
+        public void IntersectsBoxBoxTest2()
+        {
+            var res = box1.Contains(bbox2);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsBoxBoxTest3()
+        {
+            var res = box1.Contains(bbox3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [TestMethod()]
+        public void IntersectsBoxSphereTest1()
+        {
+            var res = box1.Contains(sph1_1);
+
+            Assert.AreEqual(ContainmentType.Contains, res);
+        }
+        [TestMethod()]
+        public void IntersectsBoxSphereTest2()
+        {
+            var res = box1.Contains(sph2);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsBoxSphereTest3()
+        {
+            var res = box1.Contains(sph3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [TestMethod()]
+        public void IntersectsBoxMeshTest1()
+        {
+            var res = box1.Contains(tmesh1);
+
+            Assert.AreEqual(ContainmentType.Contains, res);
+        }
+        [TestMethod()]
+        public void IntersectsBoxMeshTest2()
+        {
+            var res = box1.Contains(tmesh2);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsBoxMeshTest3()
+        {
+            var res = box1.Contains(tmesh3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
+        }
+
+        [TestMethod()]
+        public void IntersectsBoxFrustumTest1()
+        {
+            var res = box1.Contains(frustum1);
+
+            Assert.AreEqual(ContainmentType.Intersects, res);
+        }
+        [TestMethod()]
+        public void IntersectsBoxFrustumTest2()
+        {
+            var res = box1.Contains(frustum3);
+
+            Assert.AreEqual(ContainmentType.Disjoint, res);
         }
     }
 }

@@ -723,18 +723,18 @@ namespace Engine
             return Vector3.Subtract(Point2, Point1);
         }
         /// <summary>
-        /// Gets the edge vector between points 3 and 1
+        /// Gets the edge vector between points 3 and 2
         /// </summary>
         public Vector3 GetEdge2()
         {
-            return Vector3.Subtract(Point3, Point1);
+            return Vector3.Subtract(Point3, Point2);
         }
         /// <summary>
-        /// Gets the edge vector between points 2 and 3
+        /// Gets the edge vector between points 1 and 3
         /// </summary>
         public Vector3 GetEdge3()
         {
-            return Vector3.Subtract(Point2, Point3);
+            return Vector3.Subtract(Point1, Point3);
         }
         /// <summary>
         /// Gets ray edgest by edge index (0 to 2)

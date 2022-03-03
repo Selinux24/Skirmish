@@ -550,6 +550,44 @@ namespace Engine
 
             return true;
         }
+        /// <summary>
+        /// Gets the minimum and maximum values
+        /// </summary>
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, out float min, out float max)
+        {
+            if (value1 < value2)
+            {
+                min = value1;
+                max = value2;
+            }
+            else
+            {
+                min = value2;
+                max = value1;
+            }
+        }
+        /// <summary>
+        /// Gets the minimum and maximum values
+        /// </summary>
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
+        /// <param name="value3">Value 3</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, float value3, out float min, out float max)
+        {
+            min = value1;
+            if (value2 < min) min = value2;
+            if (value3 < min) min = value3;
+
+            max = value1;
+            if (value2 > max) max = value2;
+            if (value3 > max) max = value3;
+        }
 
         #endregion
 
