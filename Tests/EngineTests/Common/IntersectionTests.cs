@@ -1094,7 +1094,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void BoxContainsFrustumContainedTest()
         {
-            var res = Intersection.BoxContainsFrustum(box1, frustum3);
+            var res = Intersection.BoxContainsFrustum(box2, frustum3);
 
             Assert.AreEqual(ContainmentType.Contains, res);
         }
@@ -1629,7 +1629,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void MeshContainsFrustumContainedTest()
         {
-            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box1);
+            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
 
             var res = Intersection.MeshContainsFrustum(mesh, frustum3);
 
