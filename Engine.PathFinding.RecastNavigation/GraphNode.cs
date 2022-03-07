@@ -156,11 +156,10 @@ namespace Engine.PathFinding.RecastNavigation
         /// Gets if the node contains the specified node
         /// </summary>
         /// <param name="point">Point to test</param>
-        /// <param name="distance">Resulting distance to point</param>
         /// <returns>Returns true if the current node contains the specified point</returns>
-        public bool Contains(Vector3 point, out float distance)
+        public bool Contains(Vector3 point)
         {
-            return Intersection.PointInMesh(point, Triangles, out distance);
+            return Intersection.PointInMesh(point, Triangles);
         }
         /// <summary>
         /// Gets node points (triangle list)

@@ -59,12 +59,10 @@ namespace Engine.Common.Tests
         static BoundingFrustum bfrustum1;
         static BoundingFrustum bfrustum2;
         static BoundingFrustum bfrustum3;
-        static BoundingFrustum bfrustum4;
 
         static IntersectionVolumeFrustum frustum1;
         static IntersectionVolumeFrustum frustum2;
         static IntersectionVolumeFrustum frustum3;
-        static IntersectionVolumeFrustum frustum4;
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -138,22 +136,18 @@ namespace Engine.Common.Tests
             i5.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Box)).Returns(box5);
             i5.Setup(i => i.GetIntersectionVolume(IntersectDetectionMode.Mesh)).Returns(mesh5);
 
-
-            var proj = Matrix.PerspectiveLH(1024, 1024, 0.1f, 1f);
+            var proj = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, 1f);
             var view1 = Matrix.LookAtLH(new Vector3(-1, 0, 0), Vector3.Zero, Vector3.Up);
             var view2 = Matrix.LookAtLH(new Vector3(+1, 0, 0), Vector3.Zero, Vector3.Up);
             var view3 = Matrix.LookAtLH(new Vector3(-2, 0, 0), new Vector3(-3, 0, 0), Vector3.Up);
-            var view4 = Matrix.LookAtLH(new Vector3(-2, 0, 0), new Vector3(-1, 0, 0), Vector3.Up);
 
             bfrustum1 = new BoundingFrustum(view1 * proj);
             bfrustum2 = new BoundingFrustum(view2 * proj);
             bfrustum3 = new BoundingFrustum(view3 * proj);
-            bfrustum4 = new BoundingFrustum(view4 * proj);
 
             frustum1 = new IntersectionVolumeFrustum(bfrustum1.Matrix);
             frustum2 = new IntersectionVolumeFrustum(bfrustum2.Matrix);
             frustum3 = new IntersectionVolumeFrustum(bfrustum3.Matrix);
-            frustum4 = new IntersectionVolumeFrustum(bfrustum4.Matrix);
         }
 
         [TestInitialize]
@@ -286,11 +280,9 @@ namespace Engine.Common.Tests
         {
             bool res1 = IntersectionHelper.Intersects(frustum1, frustum2);
             bool res2 = IntersectionHelper.Intersects(frustum1, frustum3);
-            bool res3 = IntersectionHelper.Intersects(frustum1, frustum4);
 
             Assert.IsTrue(res1);
             Assert.IsFalse(res2);
-            Assert.IsTrue(res3);
         }
 
         [TestMethod()]

@@ -301,9 +301,7 @@ namespace Engine.Common
         /// <returns></returns>
         public static bool Coplanar(Triangle t1, Triangle t2)
         {
-            Vector3 n1 = Vector3.Cross(Vector3.Subtract(t1.Point2, t1.Point1), Vector3.Subtract(t1.Point3, t1.Point1));
-
-            return Coplanar3D(t1, t2, n1);
+            return Coplanar3D(t1, t2, t1.Normal);
         }
 
         /// <summary>

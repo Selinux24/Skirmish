@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Triangle
     /// </summary>
-    public struct Triangle : IVertexList, IRayIntersectable
+    public struct Triangle : IVertexList, IRayIntersectable, IEquatable<Triangle>
     {
         /// <summary>
         /// First point
@@ -636,12 +636,6 @@ namespace Engine
 
         }
 
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return string.Format("Vertex 1 {0}; Vertex 2 {1}; Vertex 3 {2};", Point1, Point2, Point3);
-        }
-
         /// <summary>
         /// Intersection test between ray and triangle
         /// </summary>
@@ -682,7 +676,7 @@ namespace Engine
                 }
             }
 
-            return Intersection.RayIntersectsTriangle(ray, Point1, Point2, Point3, out point, out distance);
+            return Intersection.RayIntersectsTriangle(ray, this, out point, out distance);
         }
 
         /// <summary>
@@ -716,6 +710,19 @@ namespace Engine
         }
 
         /// <summary>
+        /// Retrieves the three edges of the triangle.
+        /// </summary>
+        /// <returns>An array of vectors representing the three edges of the triangle.</returns>
+        public IEnumerable<(Vector3 P1, Vector3 P2)> GetEdges()
+        {
+            return new[]
+            {
+                (Point2, Point1),
+                (Point3, Point2),
+                (Point1, Point2),
+            };
+        }
+        /// <summary>
         /// Gets the edge vector between points 2 and 1
         /// </summary>
         public Vector3 GetEdge1()
@@ -736,36 +743,6 @@ namespace Engine
         {
             return Vector3.Subtract(Point1, Point3);
         }
-        /// <summary>
-        /// Gets ray edgest by edge index (0 to 2)
-        /// </summary>
-        /// <param name="index">Edge index</param>
-        public Ray GetEdgeRay(int index)
-        {
-            if (index == 0)
-            {
-                var pos = Point1;
-                var dir = Vector3.Subtract(Point2, Point1);
-
-                return new Ray(pos, dir);
-            }
-            else if (index == 1)
-            {
-                var pos = Point1;
-                var dir = Vector3.Subtract(Point3, Point1);
-
-                return new Ray(pos, dir);
-            }
-            else if (index == 2)
-            {
-                var pos = Point3;
-                var dir = Vector3.Subtract(Point2, Point3);
-
-                return new Ray(pos, dir);
-            }
-
-            throw new ArgumentException($"Bad edge index", nameof(index));
-        }
 
         /// <summary>
         /// Gets a new triangle with reversed normal vector
@@ -774,6 +751,58 @@ namespace Engine
         public Triangle ReverseNormal()
         {
             return new Triangle(Point1, Point3, Point2);
+        }
+
+        /// <inheritdoc/>
+        public static bool operator ==(Triangle left, Triangle right)
+        {
+            return left.Equals(ref right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(Triangle left, Triangle right)
+        {
+            return !left.Equals(ref right);
+        }
+        /// <inheritdoc/>
+        public bool Equals(Triangle other)
+        {
+            return Equals(ref other);
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Triangle))
+            {
+                return false;
+            }
+
+            var strongValue = (Triangle)obj;
+            return Equals(ref strongValue);
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(ref Triangle other)
+        {
+            return
+                other.Point1.Equals(Point1) &&
+                other.Point2.Equals(Point2) &&
+                other.Point3.Equals(Point3);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Point1.GetHashCode();
+                hashCode = (hashCode * 397) ^ Point2.GetHashCode();
+                hashCode = (hashCode * 397) ^ Point3.GetHashCode();
+                return hashCode;
+            }
+        }
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Vertex 1 {Point1}; Vertex 2 {Point2}; Vertex 3 {Point3};";
         }
     }
 }

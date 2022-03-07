@@ -1204,7 +1204,8 @@ namespace Collada.ModularDungeon
             else
             {
                 var sph = item.Item.GetBoundingSphere();
-                return Intersection.DistanceFromPointToLine(ray, sph.Center);
+                Intersection.ClosestPointInRay(ray, sph.Center, out float distance);
+                return distance;
             }
         }
 

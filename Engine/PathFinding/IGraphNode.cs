@@ -18,7 +18,7 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="point">Point to test</param>
         /// <returns>Returns whether this node contains specified point</returns>
-        bool Contains(Vector3 point, out float distance);
+        bool Contains(Vector3 point);
         /// <summary>
         /// Gets the point list of this node perimeter
         /// </summary>
