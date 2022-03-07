@@ -559,15 +559,7 @@ namespace Engine.Common
         /// <returns>A value indicating whether the point is contained within the triangle mesh.</returns>
         public static bool PointInMesh(Vector3 p, IEnumerable<Triangle> mesh)
         {
-            foreach (var tri in mesh)
-            {
-                if (PointInTriangle(p, tri))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return mesh.Any(t => PointInTriangle(p, t));
         }
         /// <summary>
         /// Gets the closest point in a ray from a specified point
@@ -1019,10 +1011,10 @@ namespace Engine.Common
             }
 
             //Test far plane segments
-            for (int i = 4; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
-                var p1 = corners[i + 0];
-                var p2 = corners[(i + 1) % 4];
+                var p1 = corners[i + 4];
+                var p2 = corners[((i + 1) % 4) + 4];
 
                 if (FrustumIntersectsSegment(frustum1, p1, p2))
                 {
@@ -1060,8 +1052,7 @@ namespace Engine.Common
             {
                 return ContainmentType.Contains;
             }
-
-            if (verticesIn)
+            else if (verticesIn)
             {
                 return ContainmentType.Intersects;
             }
