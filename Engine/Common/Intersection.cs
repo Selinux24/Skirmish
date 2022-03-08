@@ -1032,28 +1032,19 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType FrustumContainsTriangle(BoundingFrustum frustum, Triangle triangle)
         {
-            bool allVerticesIn = true;
-            bool verticesIn = false;
             var vertices = triangle.GetVertices();
-            for (int i = 0; i < vertices.Count(); i++)
-            {
-                var v = vertices.ElementAt(i);
-                if (frustum.Contains(ref v) == ContainmentType.Disjoint)
-                {
-                    allVerticesIn = false;
-                }
-                else
-                {
-                    verticesIn = true;
-                }
-            }
 
-            if (allVerticesIn)
+            var inVerts = vertices.Where(v => frustum.Contains(ref v) != ContainmentType.Disjoint);
+
+            if (inVerts.Count() == vertices.Count())
             {
+                // All vertices into the frustum
                 return ContainmentType.Contains;
             }
-            else if (verticesIn)
+
+            if (inVerts.Any())
             {
+                // At least one vertex into the frustum
                 return ContainmentType.Intersects;
             }
 
@@ -1133,7 +1124,7 @@ namespace Engine.Common
 
             return ContainmentType.Disjoint;
         }
-        
+
         /// <summary>
         /// Gets whether a frustum is intersected with the specified segment or not
         /// </summary>
