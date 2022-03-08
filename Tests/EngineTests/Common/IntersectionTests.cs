@@ -1,74 +1,178 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
+using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace Engine.Common.Tests
 {
+    [ExcludeFromCodeCoverage]
     [TestClass()]
     public class IntersectionTests
     {
-        BoundingSphere sph1 = new BoundingSphere(Vector3.Zero, 1f);
-        BoundingSphere sph2 = new BoundingSphere(Vector3.Zero, 30f);
-        BoundingSphere sph3 = new BoundingSphere(Vector3.Zero, 0.5f);
-        BoundingSphere sph4 = new BoundingSphere(Vector3.One, 1f);
-        BoundingSphere sph5 = new BoundingSphere(Vector3.One * 3, 1f);
+        static TestContext _testContext;
 
-        BoundingBox box1 = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
-        BoundingBox box2 = new BoundingBox(Vector3.One * -1f, Vector3.One * 1f);
-        BoundingBox box3 = new BoundingBox(Vector3.One * -0.25f, Vector3.One * 0.25f);
-        BoundingBox box4 = new BoundingBox((Vector3.One * -0.5f) + Vector3.One, (Vector3.One * 0.5f) + Vector3.One);
-        BoundingBox box5 = new BoundingBox((Vector3.One * -0.5f) + (Vector3.One * 3f), (Vector3.One * 0.5f) + (Vector3.One * 3f));
-        BoundingBox box6 = new BoundingBox((Vector3.One * -0.5f) + (Vector3.One * 0.75f), (Vector3.One * 0.75f) + (Vector3.One * 3f));
+        static BoundingSphere sph1;
+        static BoundingSphere sph2;
+        static BoundingSphere sph3;
+        static BoundingSphere sph4;
+        static BoundingSphere sph5;
 
-        static Vector3 frustOrigin1 = Vector3.BackwardLH * +0.5f;
-        static Vector3 frustOrigin2 = Vector3.BackwardLH * +1.0f;
-        static Vector3 frustOrigin3 = Vector3.BackwardLH * +.25f;
-        static Vector3 frustOrigin4 = (Vector3.BackwardLH * +0.5f) + Vector3.One * 0.5f;
-        static Vector3 frustOrigin5 = (Vector3.BackwardLH * +0.5f) + (Vector3.One * 3f);
+        static BoundingBox box1;
+        static BoundingBox box2;
+        static BoundingBox box3;
+        static BoundingBox box4;
+        static BoundingBox box5;
+        static BoundingBox box6;
 
-        BoundingFrustum frustum1 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin1, frustOrigin1 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 1.0f));
-        BoundingFrustum frustum2 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin2, frustOrigin2 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 2.0f));
-        BoundingFrustum frustum3 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin3, frustOrigin3 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 0.5f));
-        BoundingFrustum frustum4 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin4, frustOrigin4 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 1.0f));
-        BoundingFrustum frustum5 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin5, frustOrigin5 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 1.0f));
+        static BoundingFrustum frustum1;
+        static BoundingFrustum frustum2;
+        static BoundingFrustum frustum3;
+        static BoundingFrustum frustum4;
+        static BoundingFrustum frustum5;
 
-        Triangle tri1 = new Triangle(new Vector3(-0.5f, 0.0f, 0.5f), new Vector3(0.5f, 0.0f, 0.5f), new Vector3(-0.5f, 0.0f, -0.5f));
-        Triangle tri2 = new Triangle(new Vector3(-1.0f, 0.0f, 1.0f), new Vector3(1.0f, 0.0f, 1.0f), new Vector3(-1.0f, 0.0f, -1.0f));
-        Triangle tri3 = new Triangle(new Vector3(-.25f, 0.0f, .25f), new Vector3(.25f, 0.0f, .25f), new Vector3(-.25f, 0.0f, -.25f));
-        Triangle tri4 = new Triangle(new Vector3(+0.5f, 0.0f, 1.5f), new Vector3(1.0f, 0.0f, 1.0f), new Vector3(+0.5f, 0.0f, +0.5f));
-        Triangle tri5 = new Triangle(new Vector3(+2.5f, 0.0f, 3.5f), new Vector3(3.5f, 0.0f, 3.5f), new Vector3(+2.5f, 0.0f, +2.5f));
-        Triangle tri6 = new Triangle(new Vector3(-0.5f, 0.5f, 0.0f), new Vector3(0.5f, 0.5f, 0.0f), new Vector3(-0.5f, -0.5f, 0.0f));
-        Triangle tri7 = new Triangle(new Vector3(-0.5f, 10.0f, 0.5f), new Vector3(0.5f, 10.0f, 0.5f), new Vector3(-0.5f, 10.0f, -0.5f));
-        Triangle tri8 = new Triangle(new Vector3(-0.5f, -10.0f, 0.5f), new Vector3(0.5f, -10.0f, 0.5f), new Vector3(-0.5f, -10.0f, -0.5f));
+        static Triangle tri1;
+        static Triangle tri2;
+        static Triangle tri3;
+        static Triangle tri4;
+        static Triangle tri5;
+        static Triangle tri6;
+        static Triangle tri7;
+        static Triangle tri8;
 
-        Ray rayIn = new Ray(Vector3.One * -10f, Vector3.One * 20f);
-        Ray rayOut = new Ray(Vector3.One * -10f, Vector3.ForwardLH * 10f);
+        static Ray rayIn;
+        static Ray rayOut;
 
-        Vector3 pointIn = Vector3.Zero;
-        Vector3 pointOver = Vector3.Up;
-        Vector3 pointBelow = Vector3.Down;
+        static Vector3 pointIn;
+        static Vector3 pointOver;
+        static Vector3 pointBelow;
 
-        Vector3 pointRayLeft = (Vector3.One * -10f) - Vector3.Up;
-        Vector3 pointRayCenter = new Vector3(-1, 1, -1);
-        Vector3 pointRayRigh = (Vector3.One * +10f) + Vector3.Up;
+        static Vector3 pointRayLeft;
+        static Vector3 pointRayCenter;
+        static Vector3 pointRayRigh;
 
-        Vector3 triCenterPlane = new Vector3(0.2f, 0.0f, 0.2f);
-        Vector3 triCenterOver = new Vector3(0.2f, 1.0f, 0.2f);
-        Vector3 triCenterBelow = new Vector3(0.2f, -1.0f, 0.2f);
+        static Vector3 triCenterPlane;
+        static Vector3 triCenterOver;
+        static Vector3 triCenterBelow;
 
-        Vector3 triP1Perfect = new Vector3(-0.5f, 0.0f, 0.5f);
-        Vector3 triP1 = new Vector3(-0.8f, 1.0f, 0.8f);
-        Vector3 triP2Perfect = new Vector3(0.5f, 0.0f, 0.5f);
-        Vector3 triP2 = new Vector3(0.8f, 1.0f, 0.8f);
-        Vector3 triP3Perfect = new Vector3(-0.5f, 0.0f, -0.5f);
-        Vector3 triP3 = new Vector3(-0.8f, 1.0f, -0.8f);
+        static Vector3 triP1Perfect;
+        static Vector3 triP1;
+        static Vector3 triP2Perfect;
+        static Vector3 triP2;
+        static Vector3 triP3Perfect;
+        static Vector3 triP3;
 
-        Vector3 triS1Perfect = new Vector3(0.0f, 0.0f, 0.5f);
-        Vector3 triS1 = new Vector3(0.0f, 1.0f, 0.8f);
-        Vector3 triS2Perfect = new Vector3(0.0f, 0.0f, 0.0f);
-        Vector3 triS2 = new Vector3(0.2f, 1.0f, -0.2f);
-        Vector3 triS3Perfect = new Vector3(-0.5f, 0.0f, 0.0f);
-        Vector3 triS3 = new Vector3(-0.8f, 1.0f, 0.0f);
+        static Vector3 triS1Perfect;
+        static Vector3 triS1;
+        static Vector3 triS2Perfect;
+        static Vector3 triS2;
+        static Vector3 triS3Perfect;
+        static Vector3 triS3;
+
+        static Vector3 segment1A;
+        static Vector3 segment1B;
+        static Vector3 segment2A;
+        static Vector3 segment2B;
+        static Vector3 segment3A;
+        static Vector3 segment3B;
+        static Vector3 segment4A;
+        static Vector3 segment4B;
+        static Vector3 segment5A;
+        static Vector3 segment5B;
+        static Vector3 segment6A;
+        static Vector3 segment6B;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            _testContext = context;
+
+            sph1 = new BoundingSphere(Vector3.Zero, 1f);
+            sph2 = new BoundingSphere(Vector3.Zero, 30f);
+            sph3 = new BoundingSphere(Vector3.Zero, 0.5f);
+            sph4 = new BoundingSphere(Vector3.One, 1f);
+            sph5 = new BoundingSphere(Vector3.One * 3, 1f);
+
+            box1 = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
+            box2 = new BoundingBox(Vector3.One * -1f, Vector3.One * 1f);
+            box3 = new BoundingBox(Vector3.One * -0.25f, Vector3.One * 0.25f);
+            box4 = new BoundingBox((Vector3.One * -0.5f) + Vector3.One, (Vector3.One * 0.5f) + Vector3.One);
+            box5 = new BoundingBox((Vector3.One * -0.5f) + (Vector3.One * 3f), (Vector3.One * 0.5f) + (Vector3.One * 3f));
+            box6 = new BoundingBox((Vector3.One * -0.5f) + (Vector3.One * 0.75f), (Vector3.One * 0.75f) + (Vector3.One * 3f));
+
+            Vector3 frustOrigin1 = Vector3.BackwardLH * +0.5f;
+            Vector3 frustOrigin2 = Vector3.BackwardLH * +1.0f;
+            Vector3 frustOrigin3 = Vector3.BackwardLH * +.25f;
+            Vector3 frustOrigin4 = (Vector3.BackwardLH * +0.5f) + Vector3.One * 0.5f;
+            Vector3 frustOrigin5 = (Vector3.BackwardLH * +0.5f) + (Vector3.One * 3f);
+
+            frustum1 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin1, frustOrigin1 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 1.0f));
+            frustum2 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin2, frustOrigin2 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 2.0f));
+            frustum3 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin3, frustOrigin3 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 0.5f));
+            frustum4 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin4, frustOrigin4 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 1.0f));
+            frustum5 = new BoundingFrustum(Matrix.LookAtLH(frustOrigin5, frustOrigin5 + Vector3.ForwardLH, Vector3.Up) * Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, 1.0f));
+
+            tri1 = new Triangle(new Vector3(-0.5f, 0.0f, 0.5f), new Vector3(0.5f, 0.0f, 0.5f), new Vector3(-0.5f, 0.0f, -0.5f));
+            tri2 = new Triangle(new Vector3(-1.0f, 0.0f, 1.0f), new Vector3(1.0f, 0.0f, 1.0f), new Vector3(-1.0f, 0.0f, -1.0f));
+            tri3 = new Triangle(new Vector3(-.25f, 0.0f, .25f), new Vector3(.25f, 0.0f, .25f), new Vector3(-.25f, 0.0f, -.25f));
+            tri4 = new Triangle(new Vector3(+0.5f, 0.0f, 1.5f), new Vector3(1.0f, 0.0f, 1.0f), new Vector3(+0.5f, 0.0f, +0.5f));
+            tri5 = new Triangle(new Vector3(+2.5f, 0.0f, 3.5f), new Vector3(3.5f, 0.0f, 3.5f), new Vector3(+2.5f, 0.0f, +2.5f));
+            tri6 = new Triangle(new Vector3(-0.5f, 0.5f, 0.0f), new Vector3(0.5f, 0.5f, 0.0f), new Vector3(-0.5f, -0.5f, 0.0f));
+            tri7 = new Triangle(new Vector3(-0.5f, 10.0f, 0.5f), new Vector3(0.5f, 10.0f, 0.5f), new Vector3(-0.5f, 10.0f, -0.5f));
+            tri8 = new Triangle(new Vector3(-0.5f, -10.0f, 0.5f), new Vector3(0.5f, -10.0f, 0.5f), new Vector3(-0.5f, -10.0f, -0.5f));
+
+            rayIn = new Ray(Vector3.One * -10f, Vector3.One * 20f);
+            rayOut = new Ray(Vector3.One * -10f, Vector3.ForwardLH * 10f);
+
+            pointIn = Vector3.Zero;
+            pointOver = Vector3.Up;
+            pointBelow = Vector3.Down;
+
+            pointRayLeft = (Vector3.One * -10f) - Vector3.Up;
+            pointRayCenter = new Vector3(-1, 1, -1);
+            pointRayRigh = (Vector3.One * +10f) + Vector3.Up;
+
+            triCenterPlane = new Vector3(0.2f, 0.0f, 0.2f);
+            triCenterOver = new Vector3(0.2f, 1.0f, 0.2f);
+            triCenterBelow = new Vector3(0.2f, -1.0f, 0.2f);
+
+            triP1Perfect = new Vector3(-0.5f, 0.0f, 0.5f);
+            triP1 = new Vector3(-0.8f, 1.0f, 0.8f);
+            triP2Perfect = new Vector3(0.5f, 0.0f, 0.5f);
+            triP2 = new Vector3(0.8f, 1.0f, 0.8f);
+            triP3Perfect = new Vector3(-0.5f, 0.0f, -0.5f);
+            triP3 = new Vector3(-0.8f, 1.0f, -0.8f);
+
+            triS1Perfect = new Vector3(0.0f, 0.0f, 0.5f);
+            triS1 = new Vector3(0.0f, 1.0f, 0.8f);
+            triS2Perfect = new Vector3(0.0f, 0.0f, 0.0f);
+            triS2 = new Vector3(0.2f, 1.0f, -0.2f);
+            triS3Perfect = new Vector3(-0.5f, 0.0f, 0.0f);
+            triS3 = new Vector3(-0.8f, 1.0f, 0.0f);
+
+            segment1A = new Vector3(-0.1f, 0.0f, 0.0f);
+            segment1B = new Vector3(+0.1f, 0.0f, 0.0f);
+
+            segment2A = new Vector3(-5.0f, 0.0f, 0.0f);
+            segment2B = new Vector3(+5.0f, 0.0f, 0.0f);
+
+            segment3A = new Vector3(+0.0f, 0.0f, 0.0f);
+            segment3B = new Vector3(+5.0f, 0.0f, 0.0f);
+
+            segment4A = new Vector3(+5.0f, 0.0f, 0.0f);
+            segment4B = new Vector3(+10.0f, 0.0f, 0.0f);
+
+            segment5A = new Vector3(+10.0f, 0.0f, 0.0f);
+            segment5B = new Vector3(+5.0f, 0.0f, 0.0f);
+
+            segment6A = new Vector3(-5.0f, 5.0f, 0.0f);
+            segment6B = new Vector3(+5.0f, 5.0f, 0.0f);
+        }
+        [TestInitialize]
+        public void SetupTest()
+        {
+            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+        }
 
         [TestMethod()]
         public void SphereIntersectsSphereContainsTest()
@@ -590,6 +694,47 @@ namespace Engine.Common.Tests
         }
 
         [TestMethod()]
+        public void SphereIntersectsTriangleResultContainsTest()
+        {
+            var res = Intersection.SphereIntersectsTriangle(sph1, tri2, out var pick);
+
+            Assert.IsTrue(res);
+            Assert.AreEqual(sph1.Center, pick.Position);
+            Assert.AreEqual(0, pick.Distance);
+            Assert.AreEqual(tri2, pick.Primitive);
+        }
+        [TestMethod()]
+        public void SphereIntersectsTriangleResultContainedTest()
+        {
+            var res = Intersection.SphereIntersectsTriangle(sph1, tri3, out var pick);
+
+            Assert.IsTrue(res);
+            Assert.AreEqual(sph1.Center, pick.Position);
+            Assert.AreEqual(0, pick.Distance);
+            Assert.AreEqual(tri3, pick.Primitive);
+        }
+        [TestMethod()]
+        public void SphereIntersectsTriangleResultIntersectedTest()
+        {
+            var res = Intersection.SphereIntersectsTriangle(sph1, tri4, out var pick);
+
+            Assert.IsTrue(res);
+            Assert.AreEqual(tri4.Point3, pick.Position);
+            Assert.AreEqual(Vector3.Distance(sph1.Center, tri4.Point3), pick.Distance);
+            Assert.AreEqual(tri4, pick.Primitive);
+        }
+        [TestMethod()]
+        public void SphereIntersectsTriangleResultNotIntersectedTest()
+        {
+            var res = Intersection.SphereIntersectsTriangle(sph1, tri5, out var pick);
+
+            Assert.IsFalse(res);
+            Assert.AreEqual(Vector3.Zero, pick.Position);
+            Assert.AreEqual(float.MaxValue, pick.Distance);
+            Assert.AreEqual(new Triangle(), pick.Primitive);
+        }
+
+        [TestMethod()]
         public void BoxIntersectsTriangleContainsTest()
         {
             var res = Intersection.BoxIntersectsTriangle(box1, tri2);
@@ -651,6 +796,41 @@ namespace Engine.Common.Tests
         }
 
         [TestMethod()]
+        public void TriangleIntersectsMeshResultContainsTest()
+        {
+            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box2);
+
+            var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
+
+            // A mesh is not a volume. Tri 1 is into the box 2, but not intersections were possible
+            Assert.IsFalse(res);
+            Assert.IsFalse(triangles.Any());
+            Assert.IsFalse(segments.Any());
+        }
+        [TestMethod()]
+        public void TriangleIntersectsMeshResultIntersectedTest()
+        {
+            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box3);
+
+            var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
+
+            Assert.IsTrue(res);
+            Assert.IsTrue(triangles.Any());
+            Assert.IsTrue(segments.Any());
+        }
+        [TestMethod()]
+        public void TriangleIntersectsMeshResultNotIntersectedTest()
+        {
+            var mesh = Triangle.ComputeTriangleList(Topology.TriangleList, box4);
+
+            var res = Intersection.TriangleIntersectsMesh(tri1, mesh, out var triangles, out var segments);
+
+            Assert.IsFalse(res);
+            Assert.IsFalse(triangles.Any());
+            Assert.IsFalse(segments.Any());
+        }
+
+        [TestMethod()]
         public void RayIntersectsBoxIntersectedTest()
         {
             var res = Intersection.RayIntersectsBox(rayIn, box1);
@@ -699,6 +879,159 @@ namespace Engine.Common.Tests
             Assert.IsFalse(res);
             Assert.AreEqual(float.MaxValue, distance);
             Assert.AreEqual(Vector3.Zero, position);
+        }
+
+        [TestMethod()]
+        public void FrustumIntersectsSegmentContainsTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment1A, segment1B);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentContainedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment2A, segment2B);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentIntersectedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment3A, segment3B);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentNotIntersectedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment4A, segment4B);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentNotIntersectedTest2()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment5A, segment5B);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentNotIntersectedTest3()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment6A, segment6B);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultContainsTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment1A, segment1B, out float distance, out Vector3 point);
+
+            Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, distance);
+            Assert.AreEqual(Vector3.Zero, point);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultContainedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment2A, segment2B, out float distance, out Vector3 point);
+
+            Assert.IsTrue(res);
+            Assert.AreNotEqual(float.MaxValue, distance);
+            Assert.AreNotEqual(Vector3.Zero, point);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultIntersectedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment3A, segment3B, out float distance, out Vector3 point);
+
+            Assert.IsTrue(res);
+            Assert.AreNotEqual(float.MaxValue, distance);
+            Assert.AreNotEqual(Vector3.Zero, point);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultNotIntersectedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment4A, segment4B, out float distance, out Vector3 point);
+
+            Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, distance);
+            Assert.AreEqual(Vector3.Zero, point);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultNotIntersectedTest2()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment5A, segment5B, out float distance, out Vector3 point);
+
+            Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, distance);
+            Assert.AreEqual(Vector3.Zero, point);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultNotIntersectedTest3()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment6A, segment6B, out float distance, out Vector3 point);
+
+            Assert.IsFalse(res);
+            Assert.AreEqual(float.MaxValue, distance);
+            Assert.AreEqual(Vector3.Zero, point);
+        }
+
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultPointsContainsTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment1A, segment1B, out Vector3? enteringPoint, out Vector3? exitingPoint);
+
+            Assert.IsFalse(res);
+            Assert.IsNull(enteringPoint);
+            Assert.IsNull(exitingPoint);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultPointsContainedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment2A, segment2B, out Vector3? enteringPoint, out Vector3? exitingPoint);
+
+            Assert.IsTrue(res);
+            Assert.IsNotNull(enteringPoint);
+            Assert.IsNotNull(exitingPoint);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultPointsIntersectedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment3A, segment3B, out Vector3? enteringPoint, out Vector3? exitingPoint);
+
+            Assert.IsTrue(res);
+            Assert.IsNotNull(enteringPoint);
+            Assert.IsNull(exitingPoint);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultPointsNotIntersectedTest()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment4A, segment4B, out Vector3? enteringPoint, out Vector3? exitingPoint);
+
+            Assert.IsFalse(res);
+            Assert.IsNull(enteringPoint);
+            Assert.IsNull(exitingPoint);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultPointsNotIntersectedTest2()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment5A, segment5B, out Vector3? enteringPoint, out Vector3? exitingPoint);
+
+            Assert.IsFalse(res);
+            Assert.IsNull(enteringPoint);
+            Assert.IsNull(exitingPoint);
+        }
+        [TestMethod()]
+        public void FrustumIntersectsSegmentResultPointsNotIntersectedTest3()
+        {
+            var res = Intersection.FrustumIntersectsSegment(frustum1, segment6A, segment6B, out Vector3? enteringPoint, out Vector3? exitingPoint);
+
+            Assert.IsFalse(res);
+            Assert.IsNull(enteringPoint);
+            Assert.IsNull(exitingPoint);
         }
 
         [TestMethod()]

@@ -1104,7 +1104,6 @@ namespace Engine.Common
 
             return res;
         }
-
         /// <summary>
         /// Gets whether the frustum contains the point list
         /// </summary>
@@ -1134,13 +1133,14 @@ namespace Engine.Common
 
             return ContainmentType.Disjoint;
         }
+        
         /// <summary>
-        /// Gets whether a frustum is intersected with the specified segmetn or not
+        /// Gets whether a frustum is intersected with the specified segment or not
         /// </summary>
         /// <param name="frustum">Frustum</param>
         /// <param name="p1">First segment point</param>
         /// <param name="p2">Second segment point</param>
-        /// <returns>Returs true </returns>
+        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2)
         {
             Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
@@ -1150,17 +1150,28 @@ namespace Engine.Common
                 return false;
             }
 
-            return Vector3.Distance(p1, p2) > inDistance;
+            if (!inDistance.HasValue || Math.Abs(inDistance.Value) == float.MaxValue)
+            {
+                return false;
+            }
+
+            float rayLength = Vector3.Distance(p1, p2);
+            if (inDistance >= rayLength)
+            {
+                return false;
+            }
+
+            return true;
         }
         /// <summary>
-        /// Gets whether a frustum is intersected with the specified segmetn or not
+        /// Gets whether a frustum is intersected with the specified segment or not
         /// </summary>
         /// <param name="frustum">Frustum</param>
         /// <param name="p1">First segment point</param>
         /// <param name="p2">Second segment point</param>
         /// <param name="distance">Returns the intersection distance</param>
         /// <param name="point">Returns the intersection point</param>
-        /// <returns>Returs true </returns>
+        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2, out float distance, out Vector3 point)
         {
             distance = float.MaxValue;
@@ -1173,15 +1184,60 @@ namespace Engine.Common
                 return false;
             }
 
-            if (Vector3.Distance(p1, p2) > inDistance)
+            if (!inDistance.HasValue || Math.Abs(inDistance.Value) == float.MaxValue)
+            {
+                return false;
+            }
+
+            float rayLength = Vector3.Distance(p1, p2);
+            if (inDistance >= rayLength)
             {
                 return false;
             }
 
             distance = inDistance.Value;
-            point = ray.Position + (ray.Direction * inDistance.Value);
+            point = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
 
             return true;
+        }
+        /// <summary>
+        /// Gets whether a frustum is intersected with the specified segment or not
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="p1">First segment point</param>
+        /// <param name="p2">Second segment point</param>
+        /// <param name="enteringPoint">Entering segment point</param>
+        /// <param name="exitingPoint">Exiting segment point</param>
+        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
+        public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2, out Vector3? enteringPoint, out Vector3? exitingPoint)
+        {
+            enteringPoint = null;
+            exitingPoint = null;
+
+            Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+
+            if (!frustum.Intersects(ref ray, out var inDistance, out var outDistance))
+            {
+                return false;
+            }
+
+            float rayLength = Vector3.Distance(p1, p2);
+
+            bool intoSegmentBounds = false;
+
+            if (inDistance.HasValue && Math.Abs(inDistance.Value) != float.MaxValue && inDistance <= rayLength)
+            {
+                enteringPoint = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
+                intoSegmentBounds = true;
+            }
+
+            if (outDistance.HasValue && Math.Abs(outDistance.Value) != float.MaxValue && outDistance <= rayLength)
+            {
+                exitingPoint = ray.Position + (Vector3.Normalize(ray.Direction) * outDistance.Value);
+                intoSegmentBounds = true;
+            }
+
+            return intoSegmentBounds;
         }
 
         /// <summary>
