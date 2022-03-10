@@ -115,7 +115,7 @@
     <Compile Include="Common\IntersectionHelperTests.cs" />
     <Compile Include="Common\IntersectionTests.cs" />
     <Compile Include="Common\RayPickingHelperTests.cs" />
-    <Compile Include="PickingRayests.cs" />
+    <Compile Include="PickingRayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
