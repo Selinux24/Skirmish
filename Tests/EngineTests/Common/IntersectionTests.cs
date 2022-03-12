@@ -611,57 +611,45 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void TriangleIntersectsTriangleResultContainsTest()
         {
-            var res = Intersection.TriangleIntersectsTriangle(tri1, tri2, out bool coplanar, out var segment);
+            var res = Intersection.TriangleIntersectsTriangle(tri1, tri2, out var segment);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(coplanar);
-            Assert.IsTrue(segment.Point1 == segment.Point2);
-            Assert.AreEqual(Vector3.Zero, segment.Point1);
-            Assert.AreEqual(Vector3.Zero, segment.Point2);
+            Assert.IsNull(segment);
         }
         [TestMethod()]
         public void TriangleIntersectsTriangleResultContainedTest()
         {
-            var res = Intersection.TriangleIntersectsTriangle(tri1, tri3, out bool coplanar, out var segment);
+            var res = Intersection.TriangleIntersectsTriangle(tri1, tri3, out var segment);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(coplanar);
-            Assert.IsTrue(segment.Point1 == segment.Point2);
-            Assert.AreEqual(Vector3.Zero, segment.Point1);
-            Assert.AreEqual(Vector3.Zero, segment.Point2);
+            Assert.IsNull(segment);
         }
         [TestMethod()]
         public void TriangleIntersectsTriangleResultIntersectedTest()
         {
-            var res = Intersection.TriangleIntersectsTriangle(tri1, tri4, out bool coplanar, out var segment);
+            var res = Intersection.TriangleIntersectsTriangle(tri1, tri4, out var segment);
 
             Assert.IsTrue(res);
-            Assert.IsTrue(coplanar);
-            Assert.IsTrue(segment.Point1 == segment.Point2);
-            Assert.AreEqual(Vector3.Zero, segment.Point1);
-            Assert.AreEqual(Vector3.Zero, segment.Point2);
+            Assert.IsNull(segment);
         }
         [TestMethod()]
         public void TriangleIntersectsTriangleResultIntersectedTest2()
         {
-            var res = Intersection.TriangleIntersectsTriangle(tri1, tri6, out bool coplanar, out var segment);
+            var res = Intersection.TriangleIntersectsTriangle(tri1, tri6, out var segment);
 
             Assert.IsTrue(res);
-            Assert.IsFalse(coplanar);
-            Assert.IsFalse(segment.Point1 == segment.Point2);
-            Assert.AreEqual(new Vector3(-0.5f, 0, 0), segment.Point1);
-            Assert.AreEqual(new Vector3(0, 0, 0), segment.Point2);
+            Assert.IsNotNull(segment);
+            Assert.IsFalse(segment.Value.Point1 == segment.Value.Point2);
+            Assert.AreEqual(new Vector3(-0.5f, 0, 0), segment.Value.Point1);
+            Assert.AreEqual(new Vector3(0, 0, 0), segment.Value.Point2);
         }
         [TestMethod()]
         public void TriangleIntersectsTriangleResultNotIntersectedTest()
         {
-            var res = Intersection.TriangleIntersectsTriangle(tri1, tri5, out bool coplanar, out var segment);
+            var res = Intersection.TriangleIntersectsTriangle(tri1, tri5, out var segment);
 
             Assert.IsFalse(res);
-            Assert.IsTrue(coplanar);
-            Assert.IsTrue(segment.Point1 == segment.Point2);
-            Assert.AreEqual(Vector3.Zero, segment.Point1);
-            Assert.AreEqual(Vector3.Zero, segment.Point2);
+            Assert.IsNull(segment);
         }
 
         [TestMethod()]

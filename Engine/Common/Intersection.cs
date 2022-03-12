@@ -466,12 +466,11 @@ namespace Engine.Common
         /// </summary>
         /// <param name="triangle1">Triangle one</param>
         /// <param name="triangle2">Triangle two</param>
-        /// <param name="coplanar">Returns true if the triangles are coplanar</param>
         /// <param name="segment">Returns the intersection segment (if the triangles are not coplanar)</param>
         /// <returns>Returns true if the triangles intersects</returns>
-        public static bool TriangleIntersectsTriangle(Triangle triangle1, Triangle triangle2, out bool coplanar, out Line3D segment)
+        public static bool TriangleIntersectsTriangle(Triangle triangle1, Triangle triangle2, out Line3D? segment)
         {
-            return IntersectionTriangle.Intersection(triangle1, triangle2, out coplanar, out segment);
+            return IntersectionTriangle.Intersection(triangle1, triangle2, out segment);
         }
         /// <summary>
         /// Determines whether the triangle and the mesh intersects or not
@@ -505,10 +504,10 @@ namespace Engine.Common
             bool intersected = false;
             foreach (var t in mesh)
             {
-                if (TriangleIntersectsTriangle(triangle, t, out _, out Line3D segment))
+                if (TriangleIntersectsTriangle(triangle, t, out var segment))
                 {
                     tris.Add(t);
-                    segs.Add(segment);
+                    if (segment.HasValue) segs.Add(segment.Value);
 
                     intersected = true;
                 }
