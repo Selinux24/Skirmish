@@ -40,6 +40,11 @@ namespace Engine.Common.Tests
         static Triangle tri7;
         static Triangle tri8;
 
+        static float triToTriDeltaInto;
+        static float triToTriDeltaExact;
+        static float triToTriDeltaOuter;
+        static Triangle triOrigin;
+
         static Ray rayIn;
         static Ray rayOut;
 
@@ -120,6 +125,11 @@ namespace Engine.Common.Tests
             tri6 = new Triangle(new Vector3(-0.5f, 0.5f, 0.0f), new Vector3(0.5f, 0.5f, 0.0f), new Vector3(-0.5f, -0.5f, 0.0f));
             tri7 = new Triangle(new Vector3(-0.5f, 10.0f, 0.5f), new Vector3(0.5f, 10.0f, 0.5f), new Vector3(-0.5f, 10.0f, -0.5f));
             tri8 = new Triangle(new Vector3(-0.5f, -10.0f, 0.5f), new Vector3(0.5f, -10.0f, 0.5f), new Vector3(-0.5f, -10.0f, -0.5f));
+
+            triToTriDeltaInto = 0.9f;
+            triToTriDeltaExact = 1.0f;
+            triToTriDeltaOuter = 1.1f;
+            triOrigin = new Triangle(new Vector3(-0.5f, 0.0f, 0.5f), new Vector3(0.5f, 0.0f, 0.5f), new Vector3(-0.5f, 0.0f, -0.5f));
 
             rayIn = new Ray(Vector3.One * -10f, Vector3.One * 20f);
             rayOut = new Ray(Vector3.One * -10f, Vector3.ForwardLH * 10f);
@@ -604,6 +614,767 @@ namespace Engine.Common.Tests
         public void TriangleIntersectsTriangleNotIntersectedTest()
         {
             var res = Intersection.TriangleIntersectsTriangle(tri1, tri5);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOverOriginTest()
+        {
+            var triOverOrigin = Triangle.Transform(triOrigin, Matrix.Translation(0, triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellBelowOriginTest()
+        {
+            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix.Translation(0, -triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactOverOriginTest()
+        {
+            var triOverOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaExact, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
+            Assert.IsFalse(res);
+
+            triOverOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaExact * 0.5f, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactBelowOriginTest()
+        {
+            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaExact, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
+            Assert.IsFalse(res);
+
+            triBelowOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaExact * 0.5f, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoOverOriginTest()
+        {
+            var triOverOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaInto, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
+            Assert.IsFalse(res);
+
+            triOverOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaInto * 0.5f, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoBelowOriginTest()
+        {
+            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaInto, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
+            Assert.IsFalse(res);
+
+            triBelowOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaInto * 0.5f, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterOverOriginTest()
+        {
+            var triOverOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaOuter, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
+            Assert.IsFalse(res);
+
+            triOverOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaOuter * 0.5f, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverOrigin);
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterBelowOriginTest()
+        {
+            var triBelowOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaOuter, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
+            Assert.IsFalse(res);
+
+            triBelowOrigin = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaOuter * 0.5f, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowOrigin);
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactPlaneLeftCoplanarTest()
+        {
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaExact, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactPlaneRightCoplanarTest()
+        {
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaExact, 0, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactPlaneForwardCoplanarTest()
+        {
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, 0, triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactPlaneBackwardCoplanarTest()
+        {
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, 0, -triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactOverLeftCoplanarTest()
+        {
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaExact, triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactOverRightCoplanarTest()
+        {
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaExact, triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactOverForwardCoplanarTest()
+        {
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, triToTriDeltaExact, triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactOverBackwardCoplanarTest()
+        {
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, triToTriDeltaExact, -triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactBelowLeftCoplanarTest()
+        {
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaExact, -triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactBelowRightCoplanarTest()
+        {
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaExact, -triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactBelowForwardCoplanarTest()
+        {
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, -triToTriDeltaExact, triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellExactBelowBackwardCoplanarTest()
+        {
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, -triToTriDeltaExact, -triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoPlaneLeftCoplanarTest()
+        {
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaInto, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoPlaneRightCoplanarTest()
+        {
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaInto, 0, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoPlaneForwardCoplanarTest()
+        {
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, 0, triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoPlaneBackwardCoplanarTest()
+        {
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, 0, -triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoOverLeftCoplanarTest()
+        {
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaInto, triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoOverRightCoplanarTest()
+        {
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaInto, triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoOverForwardCoplanarTest()
+        {
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, triToTriDeltaInto, triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoOverBackwardCoplanarTest()
+        {
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, triToTriDeltaInto, -triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoBelowLeftCoplanarTest()
+        {
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaInto, -triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoBelowRightCoplanarTest()
+        {
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaInto, -triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoBelowForwardCoplanarTest()
+        {
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, -triToTriDeltaInto, triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellIntoBelowBackwardCoplanarTest()
+        {
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, -triToTriDeltaInto, -triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterPlaneLeftCoplanarTest()
+        {
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaOuter, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterPlaneRightCoplanarTest()
+        {
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaOuter, 0, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterPlaneForwardCoplanarTest()
+        {
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, 0, triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterPlaneBackwardCoplanarTest()
+        {
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, 0, -triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterOverLeftCoplanarTest()
+        {
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaOuter, triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterOverRightCoplanarTest()
+        {
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaOuter, triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterOverForwardCoplanarTest()
+        {
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, triToTriDeltaOuter, triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterOverBackwardCoplanarTest()
+        {
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, triToTriDeltaOuter, -triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterBelowLeftCoplanarTest()
+        {
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(-triToTriDeltaOuter, -triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterBelowRightCoplanarTest()
+        {
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(triToTriDeltaOuter, -triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterBelowForwardCoplanarTest()
+        {
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, -triToTriDeltaOuter, triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTriangleParalellOuterBelowBackwardCoplanarTest()
+        {
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.Translation(0, -triToTriDeltaOuter, -triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactPlaneLeftCoplanarTest()
+        {
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaExact, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+            Assert.IsFalse(res);
+
+            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaExact * 0.5f, 0, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactPlaneRightCoplanarTest()
+        {
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaExact, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+            Assert.IsFalse(res);
+
+            triRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaExact * 0.5f, 0, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactPlaneForwardCoplanarTest()
+        {
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, triToTriDeltaExact));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+            Assert.IsFalse(res);
+
+            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, triToTriDeltaExact * 0.5f));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactPlaneBackwardCoplanarTest()
+        {
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, -triToTriDeltaExact));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+            Assert.IsFalse(res);
+
+            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, -triToTriDeltaExact * 0.5f));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactOverLeftCoplanarTest()
+        {
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaExact, triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactOverRightCoplanarTest()
+        {
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaExact, triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactOverForwardCoplanarTest()
+        {
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaExact, triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactOverBackwardCoplanarTest()
+        {
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaExact, -triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactBelowLeftCoplanarTest()
+        {
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaExact, -triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactBelowRightCoplanarTest()
+        {
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaExact, -triToTriDeltaExact, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactBelowForwardCoplanarTest()
+        {
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaExact, triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularExactBelowBackwardCoplanarTest()
+        {
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaExact, -triToTriDeltaExact));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoPlaneLeftCoplanarTest()
+        {
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaInto, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+            Assert.IsFalse(res);
+
+            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaInto * 0.5f, 0, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoPlaneRightCoplanarTest()
+        {
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaInto, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+            Assert.IsFalse(res);
+
+            triRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaInto * 0.5f, 0, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoPlaneForwardCoplanarTest()
+        {
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, triToTriDeltaInto));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+            Assert.IsFalse(res);
+
+            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, triToTriDeltaInto * 0.5f));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoPlaneBackwardCoplanarTest()
+        {
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, -triToTriDeltaInto));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+            Assert.IsFalse(res);
+
+            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, -triToTriDeltaInto * 0.5f));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+            Assert.IsTrue(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoOverLeftCoplanarTest()
+        {
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaInto, triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoOverRightCoplanarTest()
+        {
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaInto, triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoOverForwardCoplanarTest()
+        {
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaInto, triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoOverBackwardCoplanarTest()
+        {
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaInto, -triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoBelowLeftCoplanarTest()
+        {
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaInto, -triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoBelowRightCoplanarTest()
+        {
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaInto, -triToTriDeltaInto, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoBelowForwardCoplanarTest()
+        {
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaInto, triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularIntoBelowBackwardCoplanarTest()
+        {
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaInto, -triToTriDeltaInto));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterPlaneLeftCoplanarTest()
+        {
+            var triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaOuter, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+            Assert.IsFalse(res);
+
+            triLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaOuter * 0.5f, 0, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triLeftCoplanar);
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterPlaneRightCoplanarTest()
+        {
+            var triRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaOuter, 0, 0));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+            Assert.IsFalse(res);
+
+            triRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaOuter * 0.5f, 0, 0));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triRightCoplanar);
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterPlaneForwardCoplanarTest()
+        {
+            var triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, triToTriDeltaOuter));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+            Assert.IsFalse(res);
+
+            triForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, triToTriDeltaOuter * 0.5f));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triForwardCoplanar);
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterPlaneBackwardCoplanarTest()
+        {
+            var triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, -triToTriDeltaOuter));
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+            Assert.IsFalse(res);
+
+            triBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, 0, -triToTriDeltaOuter * 0.5f));
+            res = Intersection.TriangleIntersectsTriangle(triOrigin, triBackwardCoplanar);
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterOverLeftCoplanarTest()
+        {
+            var triOverLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaOuter, triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterOverRightCoplanarTest()
+        {
+            var triOverRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaOuter, triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterOverForwardCoplanarTest()
+        {
+            var triOverForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaOuter, triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterOverBackwardCoplanarTest()
+        {
+            var triOverBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, triToTriDeltaOuter, -triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triOverBackwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterBelowLeftCoplanarTest()
+        {
+            var triBelowLeftCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(-triToTriDeltaOuter, -triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowLeftCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterBelowRightCoplanarTest()
+        {
+            var triBelowRightCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(triToTriDeltaOuter, -triToTriDeltaOuter, 0));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowRightCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterBelowForwardCoplanarTest()
+        {
+            var triBelowForwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaOuter, triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowForwardCoplanar);
+
+            Assert.IsFalse(res);
+        }
+        [TestMethod()]
+        public void TriangleIntersectsTrianglePerpendicularOuterBelowBackwardCoplanarTest()
+        {
+            var triBelowBackwardCoplanar = Triangle.Transform(triOrigin, Matrix.RotationAxis(Vector3.UnitZ, MathUtil.PiOverTwo) * Matrix.Translation(0, -triToTriDeltaOuter, -triToTriDeltaOuter));
+
+            var res = Intersection.TriangleIntersectsTriangle(triOrigin, triBelowBackwardCoplanar);
 
             Assert.IsFalse(res);
         }

@@ -24,19 +24,18 @@ namespace Engine.Common
         /// <param name="t2">Triangle 2</param>
         public static bool Intersection(Triangle t1, Triangle t2)
         {
-            var res = Intersection(t1, t2, out var test1, out var test2, out var distances);
-            if (res == false)
+            var res = Intersection(t1, t2, out var coplanar, out var test1, out var test2, out var distances);
+            if (!res)
             {
                 // Not intersection.
                 return false;
             }
 
-            if (!res.HasValue)
+            if (coplanar)
             {
                 // May be coplanar.
                 return Coplanar3D(t1, t2, t1.Normal);
             }
-
 
             var intRes = DetectIntersection3D(test1, test2, distances, out var inTest1, out var inTest2);
             if (!intRes)
@@ -55,20 +54,18 @@ namespace Engine.Common
         /// <param name="segment">If the triangles are not coplanar and there was intersection, returns de intersections segment</param>
         public static bool Intersection(Triangle t1, Triangle t2, out Line3D? segment)
         {
-            var res = Intersection(t1, t2, out var test1, out var test2, out var distances);
-            if (res == false)
+            var res = Intersection(t1, t2, out var coplanar, out var test1, out var test2, out var distances);
+            if (!res)
             {
                 // Not intersection.
                 segment = null;
-
                 return false;
             }
 
-            if (!res.HasValue)
+            if (coplanar)
             {
                 // May be coplanar.
                 segment = null;
-
                 return Coplanar3D(t1, t2, t1.Normal);
             }
 
@@ -77,18 +74,15 @@ namespace Engine.Common
             {
                 // Not intersection or coplanar.
                 segment = null;
-
                 return Coplanar3D(test1, test2, t1.Normal);
             }
 
             return ConstructIntersection3D(inTest1, inTest2, t1.Normal, t2.Normal, out segment);
         }
 
-        private static bool? Intersection(Triangle t1, Triangle t2, out Triangle test1, out Triangle test2, out Vector3 distances)
+        private static bool Intersection(Triangle t1, Triangle t2, out bool coplanar, out Triangle test1, out Triangle test2, out Vector3 distances)
         {
-            test1 = new Triangle();
-            test2 = new Triangle();
-            distances = new Vector3(float.MaxValue);
+            coplanar = false;
 
             // Compute distance signs of p1, q1 and r1 to the plane of triangle(p2,q2,r2)
 
@@ -98,6 +92,10 @@ namespace Engine.Common
 
             if (((dp1 * dq1) > 0.0f) && ((dp1 * dr1) > 0.0f))
             {
+                test1 = new Triangle();
+                test2 = new Triangle();
+                distances = new Vector3(float.MaxValue);
+
                 return false;
             }
 
@@ -109,6 +107,10 @@ namespace Engine.Common
 
             if (((dp2 * dq2) > 0.0f) && ((dp2 * dr2) > 0.0f))
             {
+                test1 = new Triangle();
+                test2 = new Triangle();
+                distances = new Vector3(float.MaxValue);
+
                 return false;
             }
 
@@ -205,7 +207,12 @@ namespace Engine.Common
                     else
                     {
                         // triangles are co-planar
-                        return null;
+                        coplanar = true;
+                        test1 = new Triangle();
+                        test2 = new Triangle();
+                        distances = new Vector3(float.MaxValue);
+
+                        return true;
                     }
                 }
             }
