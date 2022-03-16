@@ -53,8 +53,27 @@ namespace Engine
         /// <summary>
         /// Gets the volume geometry of the instance
         /// </summary>
-        /// <param name="full">Gets full geometry</param>
+        /// <param name="volumeType">Volume type</param>
         /// <returns>Returns the volume geometry of the instance</returns>
-        IEnumerable<T> GetVolume(bool full);
+        IEnumerable<T> GetVolume(VolumeTypes volumeType);
+    }
+
+    /// <summary>
+    /// Volumen types
+    /// </summary>
+    public enum VolumeTypes
+    {
+        /// <summary>
+        /// Full geometry
+        /// </summary>
+        Full,
+        /// <summary>
+        /// Coarse geometry
+        /// </summary>
+        Coarse,
+        /// <summary>
+        /// Navigation geometry
+        /// </summary>
+        Navigation,
     }
 }

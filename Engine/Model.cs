@@ -579,11 +579,10 @@ namespace Engine
         {
             return boundsHelper.GetOrientedBoundingBox(Manipulator, refresh);
         }
-
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetVolume(bool full)
+        public IEnumerable<Triangle> GetVolume(VolumeTypes volumeTypes)
         {
-            if (!full && DrawingData?.VolumeMesh?.Any() == true)
+            if (volumeTypes != VolumeTypes.Full && DrawingData?.VolumeMesh?.Any() == true)
             {
                 return Triangle.Transform(DrawingData.VolumeMesh, Manipulator.LocalTransform);
             }
@@ -605,11 +604,10 @@ namespace Engine
                 return false;
             }
 
-            var mesh = GetVolume(false);
+            var mesh = GetVolume(VolumeTypes.Coarse);
 
             return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
         }
-
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
         {
@@ -620,7 +618,6 @@ namespace Engine
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, volume);
         }
-
         /// <inheritdoc/>
         public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
         {
@@ -634,7 +631,7 @@ namespace Engine
             }
             else
             {
-                return (IntersectionVolumeMesh)GetVolume(true).ToArray();
+                return (IntersectionVolumeMesh)GetVolume(VolumeTypes.Coarse).ToArray();
             }
         }
 

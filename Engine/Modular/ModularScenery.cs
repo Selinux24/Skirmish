@@ -1083,10 +1083,14 @@ namespace Engine.Modular
 
             return res;
         }
-
         /// <inheritdoc/>
-        public override IEnumerable<Triangle> GetVolume(bool full)
+        public override IEnumerable<Triangle> GetVolume(VolumeTypes volumeTypes)
         {
+            if (volumeTypes != VolumeTypes.Navigation)
+            {
+                return Enumerable.Empty<Triangle>();
+            }
+
             List<Triangle> triangles = new List<Triangle>();
 
             foreach (var asset in assets.Values)
@@ -1096,12 +1100,10 @@ namespace Engine.Modular
                     continue;
                 }
 
-                var assetfull = full && asset.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
-
                 var instances = asset.GetInstances().Where(i => i.Visible);
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetVolume(assetfull));
+                    triangles.AddRange(instance.GetVolume(volumeTypes));
                 }
             }
 
@@ -1112,12 +1114,10 @@ namespace Engine.Modular
                     continue;
                 }
 
-                var objfull = full && obj.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
-
                 var instances = obj.GetInstances().Where(i => i.Visible);
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetVolume(objfull));
+                    triangles.AddRange(instance.GetVolume(volumeTypes));
                 }
             }
 
@@ -1506,10 +1506,7 @@ namespace Engine.Modular
             }
         }
 
-        /// <summary>
-        /// Gets the culling volume for scene culling tests
-        /// </summary>
-        /// <returns>Return the culling volume</returns>
+        /// <inheritdoc/>
         public override IIntersectionVolume GetCullingVolume()
         {
             return assetMapIntersections;

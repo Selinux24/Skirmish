@@ -98,16 +98,14 @@ namespace Engine
         {
             return new OrientedBoundingBox(GetBoundingBox(refresh));
         }
-
         /// <inheritdoc/>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
+        public virtual IEnumerable<Triangle> GetVolume(VolumeTypes volumeTypes)
         {
-            return GroundPickingQuadtree.GetBoundingBoxes(level);
-        }
+            if (GroundPickingQuadtree == null)
+            {
+                return Enumerable.Empty<Triangle>();
+            }
 
-        /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetVolume(bool full)
-        {
             List<Triangle> res = new List<Triangle>();
 
             var leafNodes = GroundPickingQuadtree.GetLeafNodes();
@@ -121,54 +119,46 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public virtual IIntersectionVolume GetCullingVolume()
-        {
-            return null;
-        }
-
-        /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
-            if (GroundPickingQuadtree != null)
-            {
-                result = new PickingResult<Triangle>()
-                {
-                    Distance = float.MaxValue,
-                };
-
-                // Use quadtree
-                var nodes = GroundPickingQuadtree.GetNodesInVolume(sphere);
-                if (!nodes.Any())
-                {
-                    return false;
-                }
-
-                bool intersects = false;
-                float minDistance = float.MaxValue;
-                foreach (var node in nodes)
-                {
-                    if (Intersection.SphereIntersectsMesh(sphere, node.Items, out var res))
-                    {
-                        intersects = true;
-
-                        if (res.Distance < minDistance)
-                        {
-                            minDistance = res.Distance;
-
-                            result = res;
-                        }
-                    }
-                }
-
-                return intersects;
-            }
-            else
+            if (GroundPickingQuadtree == null)
             {
                 // Brute force
-                var mesh = GetVolume(true);
+                var mesh = GetVolume(VolumeTypes.Coarse);
 
                 return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
             }
+
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            // Use quadtree
+            var nodes = GroundPickingQuadtree.GetNodesInVolume(sphere);
+            if (!nodes.Any())
+            {
+                return false;
+            }
+
+            bool intersects = false;
+            float minDistance = float.MaxValue;
+            foreach (var node in nodes)
+            {
+                if (Intersection.SphereIntersectsMesh(sphere, node.Items, out var res))
+                {
+                    intersects = true;
+
+                    if (res.Distance < minDistance)
+                    {
+                        minDistance = res.Distance;
+
+                        result = res;
+                    }
+                }
+            }
+
+            return intersects;
         }
         /// <inheritdoc/>
         public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
@@ -180,7 +170,6 @@ namespace Engine
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, volume);
         }
-
         /// <inheritdoc/>
         public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
         {
@@ -194,8 +183,24 @@ namespace Engine
             }
             else
             {
-                return (IntersectionVolumeMesh)GetVolume(true).ToArray();
+                return (IntersectionVolumeMesh)GetVolume(VolumeTypes.Coarse).ToArray();
             }
+        }
+
+        /// <inheritdoc/>
+        public virtual IIntersectionVolume GetCullingVolume()
+        {
+            return null;
+        }
+        /// <inheritdoc/>
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
+        {
+            if (GroundPickingQuadtree == null)
+            {
+                return Enumerable.Empty<BoundingBox>();
+            }
+
+            return GroundPickingQuadtree.GetBoundingBoxes(level);
         }
     }
 }

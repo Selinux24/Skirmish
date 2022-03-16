@@ -140,8 +140,8 @@ namespace Engine.Common.Tests
         private static void Setup(Mock<IRayPickable<Triangle>> pickableMock, BoundingSphere sphere, IEnumerable<Triangle> boxTris, IEnumerable<Triangle> mesh)
         {
             pickableMock.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(sphere);
-            pickableMock.Setup(o => o.GetVolume(false)).Returns(boxTris);
-            pickableMock.Setup(o => o.GetVolume(true)).Returns(mesh);
+            pickableMock.Setup(o => o.GetVolume(VolumeTypes.Coarse)).Returns(boxTris);
+            pickableMock.Setup(o => o.GetVolume(VolumeTypes.Full)).Returns(mesh);
             pickableMock.As<ISceneObject>().SetupAllProperties();
         }
 

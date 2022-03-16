@@ -2504,14 +2504,14 @@ namespace Terrain.Rts
             {
                 var instance = tree1[i];
 
-                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
+                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(VolumeTypes.Coarse)));
             }
 
             for (int i = 0; i < tree2.InstanceCount; i++)
             {
                 var instance = tree2[i];
 
-                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(false)));
+                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(VolumeTypes.Coarse)));
             }
 
             staticObjLineDrawer.SetPrimitives(objColor, lines.ToArray());

@@ -71,8 +71,6 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         private static IEnumerable<T> GetTrianglesForNavigationGraph<T>(IDrawable obj) where T : IRayIntersectable
         {
-            List<T> tris = new List<T>();
-
             List<IRayPickable<T>> volumes = new List<IRayPickable<T>>();
 
             if (obj is IComposed composed)
@@ -89,16 +87,13 @@ namespace Engine
                 volumes.Add(pickable);
             }
 
+            List<T> tris = new List<T>();
+
             for (int p = 0; p < volumes.Count; p++)
             {
-                var full = obj.Usage.HasFlag(SceneObjectUsages.FullPathFinding);
+                var vTris = volumes[p].GetVolume(VolumeTypes.Navigation);
 
-                var vTris = volumes[p].GetVolume(full);
-                if (vTris.Any())
-                {
-                    //Use volume mesh
-                    tris.AddRange(vTris);
-                }
+                tris.AddRange(vTris);
             }
 
             return tris;
@@ -114,19 +109,13 @@ namespace Engine
             List<IRayPickable<T>> volumes = new List<IRayPickable<T>>();
 
             var trnChilds = composed.GetComponents<ITransformable3D>();
-            if (trnChilds.Any())
+            foreach (var child in trnChilds)
             {
-                foreach (var child in trnChilds)
-                {
-                    child.Manipulator.UpdateInternals(true);
-                }
+                child.Manipulator.UpdateInternals(true);
             }
 
             var pickableChilds = composed.GetComponents<IRayPickable<T>>();
-            if (pickableChilds.Any())
-            {
-                volumes.AddRange(pickableChilds);
-            }
+            volumes.AddRange(pickableChilds);
 
             return volumes.ToArray();
         }
@@ -1251,8 +1240,8 @@ namespace Engine
             if (picked)
             {
                 result = pResults
-                    .OrderBy(r => r.GetMinimumDistance())
                     .SelectMany(r => r.PickingResults)
+                    .OrderBy(r => Vector3.DistanceSquared(from, r.Position))
                     .First();
 
                 return true;
@@ -1454,34 +1443,22 @@ namespace Engine
         /// <returns>Returns a triangle list</returns>
         public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
         {
-            List<Triangle> tris = new List<Triangle>();
-
-            var pfComponents = GetComponents<IDrawable>()
+            var tris = GetComponents<IDrawable>()
                 .Where(c =>
                 {
                     return
                         !c.HasOwner &&
                         c.Visible &&
                         (c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding));
-                });
-
-            foreach (var cmp in pfComponents)
-            {
-                var currTris = GetTrianglesForNavigationGraph<Triangle>(cmp);
-                if (currTris.Any())
-                {
-                    tris.AddRange(currTris);
-                }
-            }
+                })
+                .SelectMany(c => GetTrianglesForNavigationGraph<Triangle>(c));
 
             var bounds = PathFinderDescription.Settings.Bounds;
             if (bounds.HasValue)
             {
-                tris = tris.FindAll(t =>
+                tris = tris.Where(t =>
                 {
-                    var tbbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
-
-                    return bounds.Value.Contains(ref tbbox) != ContainmentType.Disjoint;
+                    return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
                 });
             }
 
