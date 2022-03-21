@@ -1271,7 +1271,7 @@ namespace Terrain.Rts
         {
             // Set position
             var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
-            var ray = GetTopDownRay(heliport.Manipulator.Position, RayPickingParams.Geometry);
+            var ray = GetTopDownRay(heliport.Manipulator.Position, RayPickingParams.Objects);
             if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
                 helicopter.Manipulator.SetPosition(r.PickingResult.Position);
@@ -1342,13 +1342,13 @@ namespace Terrain.Rts
         {
             var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
 
-            if (this.PickNearest(GetTopDownRay(-60, -60, RayPickingParams.Geometry), sceneryUsage, out ScenePickingResult<Triangle> r1))
+            if (this.PickNearest(GetTopDownRay(-60, -60, RayPickingParams.Objects), sceneryUsage, out ScenePickingResult<Triangle> r1))
             {
                 tankP1.Manipulator.SetPosition(r1.PickingResult.Position);
                 tankP1.Manipulator.SetNormal(r1.PickingResult.Primitive.Normal);
             }
 
-            if (this.PickNearest(GetTopDownRay(-70, 70, RayPickingParams.Geometry), sceneryUsage, out ScenePickingResult<Triangle> r2))
+            if (this.PickNearest(GetTopDownRay(-70, 70, RayPickingParams.Objects), sceneryUsage, out ScenePickingResult<Triangle> r2))
             {
                 tankP2.Manipulator.SetPosition(r2.PickingResult.Position);
                 tankP2.Manipulator.SetNormal(r2.PickingResult.Primitive.Normal);
@@ -2504,14 +2504,14 @@ namespace Terrain.Rts
             {
                 var instance = tree1[i];
 
-                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(VolumeTypes.Coarse)));
+                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetGeometry(GeometryTypes.Hull)));
             }
 
             for (int i = 0; i < tree2.InstanceCount; i++)
             {
                 var instance = tree2[i];
 
-                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetVolume(VolumeTypes.Coarse)));
+                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetGeometry(GeometryTypes.Hull)));
             }
 
             staticObjLineDrawer.SetPrimitives(objColor, lines.ToArray());

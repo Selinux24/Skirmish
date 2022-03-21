@@ -1,6 +1,6 @@
 {
   "modelFilename": "birch_a.dae",
-  "volumeMeshes": [
+  "hullMeshes": [
     "Volume"
   ]
 }

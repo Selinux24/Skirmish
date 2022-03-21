@@ -9,34 +9,37 @@ namespace Engine
     public enum RayPickingParams
     {
         /// <summary>
-        /// Default flags - Mesh volumes, facing-only triangles
+        /// No params
         /// </summary>
-        Default = Coarse | FacingOnly,
+        None = 0,
         /// <summary>
-        /// Perfect picking - Mesh geometry, all triangles
+        /// Default flags - Hull meshes when available & facing-only triangles
         /// </summary>
-        Perfect = Geometry | AllTriangles,
+        Default = Hull | FacingOnly,
         /// <summary>
-        /// Coarse picking. Use mesh volumes instead of geometry
+        /// Fast picking - Mesh bounding volumes & facing-only triangles
         /// </summary>
-        /// <remarks>If the model has no mesh volumes, the ray pincking test uses the model's geometry</remarks>
+        Fast = Coarse | FacingOnly,
+        /// <summary>
+        /// Perfect picking - Mesh geometry & facing-only triangles
+        /// </summary>
+        Perfect = Objects | FacingOnly,
+        /// <summary>
+        /// Use bounding volumes instead of geometry
+        /// </summary>
         Coarse = 1,
         /// <summary>
-        /// Geometry picking. Use mesh geometry
+        /// Use hull geometry if available
         /// </summary>
-        Geometry = 2,
+        Hull = 2,
+        /// <summary>
+        /// Use mesh geometry
+        /// </summary>
+        Objects = 4,
         /// <summary>
         /// Select only facing triangles
         /// </summary>
         /// <remarks>By default, ray picking test uses all triangles</remarks>
-        FacingOnly = 4,
-        /// <summary>
-        /// Select all triangles
-        /// </summary>
-        AllTriangles = 8,
-        /// <summary>
-        /// Test volumes only
-        /// </summary>
-        Volumes = 16,
+        FacingOnly = 8,
     }
 }

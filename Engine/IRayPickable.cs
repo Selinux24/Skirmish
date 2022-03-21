@@ -51,26 +51,26 @@ namespace Engine
         OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false);
 
         /// <summary>
-        /// Gets the volume geometry of the instance
+        /// Gets the geometry of the instance
         /// </summary>
-        /// <param name="volumeType">Volume type</param>
-        /// <returns>Returns the volume geometry of the instance</returns>
-        IEnumerable<T> GetVolume(VolumeTypes volumeType);
+        /// <param name="geometryType">Geometry type</param>
+        /// <returns>Returns the geometry of the instance</returns>
+        IEnumerable<T> GetGeometry(GeometryTypes geometryType);
     }
 
     /// <summary>
-    /// Volumen types
+    /// Geometry types
     /// </summary>
-    public enum VolumeTypes
+    public enum GeometryTypes
     {
         /// <summary>
-        /// Full geometry
+        /// Object geometry
         /// </summary>
-        Full,
+        Object,
         /// <summary>
-        /// Coarse geometry
+        /// Hull geometry
         /// </summary>
-        Coarse,
+        Hull,
         /// <summary>
         /// Navigation geometry
         /// </summary>

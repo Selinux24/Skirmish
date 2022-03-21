@@ -29,15 +29,15 @@ namespace Engine
                 return false;
             }
 
-            var volumes = RayPickingHelper.PickCoarse(cmpList, ray);
-            if (!volumes.Any())
+            var coarseInt = RayPickingHelper.PickCoarse(cmpList, ray);
+            if (!coarseInt.Any())
             {
                 return false;
             }
 
-            if (ray.RayPickingParams.HasFlag(RayPickingParams.Volumes))
+            if (ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
             {
-                result = volumes
+                result = coarseInt
                     .OrderBy(c => c.Distance)
                     .Select(c => new ScenePickingResult<T>
                     {
@@ -53,7 +53,7 @@ namespace Engine
                 return true;
             }
 
-            return RayPickingHelper.PickNearest(volumes.Select(v => v.SceneObject), ray, out result);
+            return RayPickingHelper.PickNearest(coarseInt.Select(v => v.SceneObject), ray, out result);
         }
         /// <summary>
         /// Gets the unordered first picking position of the given ray
@@ -76,15 +76,15 @@ namespace Engine
             }
 
             //Coarse filter
-            var volumes = RayPickingHelper.PickCoarse(cmpList, ray);
-            if (!volumes.Any())
+            var coarseInt = RayPickingHelper.PickCoarse(cmpList, ray);
+            if (!coarseInt.Any())
             {
                 return false;
             }
 
-            if (ray.RayPickingParams.HasFlag(RayPickingParams.Volumes))
+            if (ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
             {
-                result = volumes
+                result = coarseInt
                     .Select(c => new ScenePickingResult<T>
                     {
                         SceneObject = c.SceneObject,
@@ -99,7 +99,7 @@ namespace Engine
                 return true;
             }
 
-            return RayPickingHelper.PickFirst(volumes.Select(v => v.SceneObject), ray, out result);
+            return RayPickingHelper.PickFirst(coarseInt.Select(v => v.SceneObject), ray, out result);
         }
         /// <summary>
         /// Gets all picking positions of the given ray
@@ -120,15 +120,15 @@ namespace Engine
                 return false;
             }
 
-            var volumes = RayPickingHelper.PickCoarse(cmpList, ray);
-            if (!volumes.Any())
+            var coarseInt = RayPickingHelper.PickCoarse(cmpList, ray);
+            if (!coarseInt.Any())
             {
                 return false;
             }
 
-            if (ray.RayPickingParams.HasFlag(RayPickingParams.Volumes))
+            if (ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
             {
-                results = volumes
+                results = coarseInt
                     .Select(c => new ScenePickingResultMultiple<T>
                     {
                         SceneObject = c.SceneObject,
@@ -146,7 +146,7 @@ namespace Engine
                 return true;
             }
 
-            return RayPickingHelper.PickAll(volumes.Select(v => v.SceneObject), ray, out results);
+            return RayPickingHelper.PickAll(coarseInt.Select(v => v.SceneObject), ray, out results);
         }
     }
 

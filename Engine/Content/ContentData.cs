@@ -179,7 +179,7 @@ namespace Engine.Content
         /// </summary>
         public ContentData()
         {
-            //Adding default material for non material geometry, like volumes
+            //Adding default material for non material geometry, like hulls
             Materials.Add(NoMaterial, MaterialBlinnPhongContent.Default);
         }
 
@@ -403,7 +403,7 @@ namespace Engine.Content
         /// <param name="sourceMesh">Source mesh name</param>
         /// <param name="targetMesh">Target mesh name</param>
         /// <param name="material">Material name</param>
-        /// <returns>Returns a submesh content if source mesh isn't a volume</returns>
+        /// <returns>Returns a submesh content if source mesh isn't a hull</returns>
         private SubMeshContent ComputeSubmeshContent(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string sourceMesh, string targetMesh, string material)
         {
             if (!geometry.ContainsKey(sourceMesh))
@@ -415,7 +415,7 @@ namespace Engine.Content
 
             if (dict.ContainsKey(material))
             {
-                if (dict[material].IsVolume)
+                if (dict[material].IsHull)
                 {
                     //Group into new dictionary
                     ImportMaterial(targetMesh, material, dict[material]);
@@ -852,11 +852,11 @@ namespace Engine.Content
         }
 
         /// <summary>
-        /// Marks volume flag for all the geometry contained into the model
+        /// Marks hull flag for all the geometry contained into the model
         /// </summary>
-        /// <param name="isVolume">Flag value</param>
+        /// <param name="isHull">Hull flag value</param>
         /// <returns>Returns the number of meshes setted</returns>
-        public int SetVolumeMark(bool isVolume)
+        public int SetHullMark(bool isHull)
         {
             int count = 0;
 
@@ -866,7 +866,7 @@ namespace Engine.Content
                 {
                     foreach (var s in g.Value.Values)
                     {
-                        s.IsVolume = isVolume;
+                        s.IsHull = isHull;
                         count++;
                     }
                 }
@@ -875,22 +875,22 @@ namespace Engine.Content
             return count;
         }
         /// <summary>
-        /// Marks volume flag for all the geometry filtered by the specified mask
+        /// Marks hull flag for all the geometry filtered by the specified mask
         /// </summary>
-        /// <param name="isVolume">Flag value</param>
+        /// <param name="isHull">Hull flag value</param>
         /// <param name="mask">Asset name flag</param>
         /// <returns>Returns the number of meshes setted</returns>
-        public int SetVolumeMark(bool isVolume, string mask)
+        public int SetHullMark(bool isHull, string mask)
         {
-            return SetVolumeMark(isVolume, new[] { mask });
+            return SetHullMark(isHull, new[] { mask });
         }
         /// <summary>
-        /// Marks volume flag for all the geometry filtered by the specified mask list
+        /// Marks hull flag for all the geometry filtered by the specified mask list
         /// </summary>
-        /// <param name="isVolume">Flag value</param>
+        /// <param name="isHull">Hull flag value</param>
         /// <param name="masks">Asset name flag list</param>
         /// <returns>Returns the number of meshes setted</returns>
-        public int SetVolumeMark(bool isVolume, IEnumerable<string> masks)
+        public int SetHullMark(bool isHull, IEnumerable<string> masks)
         {
             int count = 0;
 
@@ -898,7 +898,7 @@ namespace Engine.Content
             {
                 foreach (var mask in masks)
                 {
-                    count += SetVolumeMarkGeo(mask, isVolume);
+                    count += SetHullMarkGeo(mask, isHull);
                 }
             }
 
@@ -908,9 +908,9 @@ namespace Engine.Content
         /// Marks the geometry dictionary
         /// </summary>
         /// <param name="mask">Mask name</param>
-        /// <param name="isVolume">Mask value</param>
+        /// <param name="isHull">Hull mask value</param>
         /// <returns>Returns the number of meshes setted</returns>
-        private int SetVolumeMarkGeo(string mask, bool isVolume)
+        private int SetHullMarkGeo(string mask, bool isHull)
         {
             int count = 0;
 
@@ -924,7 +924,7 @@ namespace Engine.Content
                 {
                     foreach (var s in g.Value.Values)
                     {
-                        s.IsVolume = isVolume;
+                        s.IsHull = isHull;
                         count++;
                     }
                 }

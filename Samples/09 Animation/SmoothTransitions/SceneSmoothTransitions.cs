@@ -293,7 +293,7 @@ namespace Animation.SmoothTransitions
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay(RayPickingParams.FacingOnly | RayPickingParams.Perfect);
+                var pRay = GetPickingRay(RayPickingParams.Perfect);
 
                 if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
                 {

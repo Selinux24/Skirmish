@@ -3,9 +3,9 @@
 namespace Engine.Common
 {
     /// <summary>
-    /// Volume picking result
+    /// Coarse picking result
     /// </summary>
-    public struct VolumePickingResult
+    public struct CoarsePickingResult
     {
         /// <summary>
         /// Picked object
@@ -26,7 +26,7 @@ namespace Engine.Common
         /// <param name="sceneObject">Picked object</param>
         /// <param name="distance">Picking distance</param>
         /// <param name="position">Picking position</param>
-        public VolumePickingResult(ISceneObject sceneObject, float distance, Vector3 position)
+        public CoarsePickingResult(ISceneObject sceneObject, float distance, Vector3 position)
         {
             SceneObject = sceneObject;
             Distance = distance;

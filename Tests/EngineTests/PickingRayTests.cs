@@ -28,11 +28,11 @@ namespace Engine.Tests
             position = Vector3.One;
             direction = Vector3.Normalize(Vector3.One);
             testRay = new Ray(position, direction);
-            testRayParams = RayPickingParams.Geometry;
+            testRayParams = RayPickingParams.Objects;
             testRayLength = 100f;
 
             facingOnlyParams = RayPickingParams.FacingOnly;
-            allFacesParams = RayPickingParams.AllTriangles;
+            allFacesParams = RayPickingParams.None;
 
             badRayLength = -1;
         }

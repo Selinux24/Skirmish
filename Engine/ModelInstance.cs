@@ -360,13 +360,13 @@ namespace Engine
             return boundsHelper.GetOrientedBoundingBox(Manipulator, refresh);
         }
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetVolume(VolumeTypes volumeTypes)
+        public IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
         {
             var drawingData = model.GetDrawingData(model.GetLODMinimum());
-            if (volumeTypes != VolumeTypes.Full && drawingData?.VolumeMesh?.Any() == true)
+            if (geometryType != GeometryTypes.Object && drawingData?.HullMesh?.Any() == true)
             {
                 //Transforms the volume mesh
-                return Triangle.Transform(drawingData.VolumeMesh, Manipulator.LocalTransform);
+                return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
             }
 
             //Returns the actual triangles (yet transformed)
@@ -415,7 +415,7 @@ namespace Engine
             var bsph = GetBoundingSphere();
             if (bsph.Intersects(sphere))
             {
-                var mesh = GetVolume(VolumeTypes.Coarse);
+                var mesh = GetGeometry(GeometryTypes.Hull);
                 if (Intersection.SphereIntersectsMesh(sphere, mesh, out var res))
                 {
                     result = res;
@@ -454,7 +454,7 @@ namespace Engine
             }
             else
             {
-                return (IntersectionVolumeMesh)GetVolume(VolumeTypes.Coarse).ToArray();
+                return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Hull).ToArray();
             }
         }
 

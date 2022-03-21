@@ -55,9 +55,9 @@ namespace Engine.Content
         /// </summary>
         public string Material { get; set; }
         /// <summary>
-        /// Gets or sets whether the current submesh content is a volume mesh
+        /// Gets or sets whether the current submesh content is a hull mesh
         /// </summary>
-        public bool IsVolume { get; set; }
+        public bool IsHull { get; set; }
         /// <summary>
         /// Transform
         /// </summary>
@@ -129,16 +129,16 @@ namespace Engine.Content
         /// </summary>
         /// <param name="topology">Submesh topology</param>
         /// <param name="material">Material name</param>
-        /// <param name="isTextured">Textured mesh</param>
-        /// <param name="isVolume">Volume mesh</param>
-        public SubMeshContent(Topology topology, string material, bool isTextured, bool isVolume)
+        /// <param name="isTextured">Is textured mesh</param>
+        /// <param name="isHull">Is hull mesh</param>
+        public SubMeshContent(Topology topology, string material, bool isTextured, bool isHull)
         {
             Id = GetNextId();
 
             Topology = topology;
             Material = material;
             Textured = isTextured;
-            IsVolume = isVolume;
+            IsHull = isHull;
         }
 
         /// <summary>

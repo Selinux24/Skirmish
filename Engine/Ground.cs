@@ -99,7 +99,7 @@ namespace Engine
             return new OrientedBoundingBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetVolume(VolumeTypes volumeTypes)
+        public virtual IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
         {
             if (GroundPickingQuadtree == null)
             {
@@ -124,7 +124,7 @@ namespace Engine
             if (GroundPickingQuadtree == null)
             {
                 // Brute force
-                var mesh = GetVolume(VolumeTypes.Coarse);
+                var mesh = GetGeometry(GeometryTypes.Hull);
 
                 return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
             }
@@ -183,7 +183,7 @@ namespace Engine
             }
             else
             {
-                return (IntersectionVolumeMesh)GetVolume(VolumeTypes.Coarse).ToArray();
+                return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Hull).ToArray();
             }
         }
 

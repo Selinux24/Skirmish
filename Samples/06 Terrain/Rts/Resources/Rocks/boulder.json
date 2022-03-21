@@ -1,6 +1,6 @@
 {
   "modelFilename": "boulder.dae",
-  "volumeMeshes": [
+  "hullMeshes": [
     "Volume"
   ]
 }

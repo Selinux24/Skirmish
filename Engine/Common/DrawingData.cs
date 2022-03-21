@@ -15,9 +15,9 @@ namespace Engine.Common
     public class DrawingData : IDisposable
     {
         /// <summary>
-        /// Volume mesh triangle list
+        /// Hull mesh triangle list
         /// </summary>
-        private readonly List<Triangle> volumeMesh = new List<Triangle>();
+        private readonly List<Triangle> hullMesh = new List<Triangle>();
         /// <summary>
         /// Light list
         /// </summary>
@@ -45,13 +45,13 @@ namespace Engine.Common
         /// </summary>
         public Dictionary<string, Dictionary<string, Mesh>> Meshes { get; private set; } = new Dictionary<string, Dictionary<string, Mesh>>();
         /// <summary>
-        /// Volume mesh
+        /// Hull mesh
         /// </summary>
-        public IEnumerable<Triangle> VolumeMesh
+        public IEnumerable<Triangle> HullMesh
         {
             get
             {
-                return volumeMesh.ToArray();
+                return hullMesh.ToArray();
             }
         }
         /// <summary>
@@ -185,15 +185,18 @@ namespace Engine.Common
         {
             var isSkinned = skinningInfo.HasValue;
 
-            //Extract volumes
-            var volumeTriangles = submeshes
-                .Where(g => g.Value.IsVolume)
+            //Extract hull geometry
+            var hullTriangles = submeshes
+                .Where(g => g.Value.IsHull)
                 .SelectMany(material => material.Value.GetTriangles())
                 .ToArray();
-            drw.volumeMesh.AddRange(volumeTriangles);
+            drw.hullMesh.AddRange(hullTriangles);
 
             //Extract meshes
-            var subMeshList = submeshes.Where(g => !g.Value.IsVolume).ToArray();
+            var subMeshList = submeshes
+                .Where(g => !g.Value.IsHull)
+                .ToArray();
+
             foreach (var subMesh in subMeshList)
             {
                 var geometry = subMesh.Value;

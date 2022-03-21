@@ -271,7 +271,7 @@ Space: Finds random over navmesh";
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Middle))
             {
-                var pRay = GetPickingRay(RayPickingParams.FacingOnly | RayPickingParams.Perfect);
+                var pRay = GetPickingRay(RayPickingParams.Perfect);
 
                 if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
@@ -307,7 +307,7 @@ Space: Finds random over navmesh";
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay(RayPickingParams.FacingOnly | RayPickingParams.Perfect);
+                var pRay = GetPickingRay(RayPickingParams.Perfect);
 
                 if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {

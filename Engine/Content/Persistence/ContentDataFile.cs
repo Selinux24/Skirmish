@@ -1,8 +1,6 @@
 ﻿
 namespace Engine.Content.Persistence
 {
-    using Engine.Animation;
-
     /// <summary>
     /// Model content description
     /// </summary>
@@ -18,9 +16,9 @@ namespace Engine.Content.Persistence
         /// <remarks>For model files containing several levels of details for the same model</remarks>
         public string[] LODMeshes { get; set; } = null;
         /// <summary>
-        /// Volume meshes collection
+        /// Hull meshes collection
         /// </summary>
-        public string[] VolumeMeshes { get; set; } = null;
+        public string[] HullMeshes { get; set; } = null;
         /// <summary>
         /// Animation description
         /// </summary>

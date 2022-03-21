@@ -14,9 +14,9 @@ namespace Engine.Modular.Persistence
     public class LevelMap
     {
         /// <summary>
-        /// Volume meshes masks
+        /// Hull meshes masks
         /// </summary>
-        public IEnumerable<string> Volumes { get; set; } = Enumerable.Empty<string>();
+        public IEnumerable<string> Hulls { get; set; } = Enumerable.Empty<string>();
         /// <summary>
         /// Particle systems
         /// </summary>

@@ -14,7 +14,7 @@ namespace Engine.Content.OnePageDungeon
 
         public float PositionDelta { get; set; } = 1;
 
-        public IEnumerable<string> Volumes { get; set; } = new[] { "volume", "_volume", "_volume", "_volumes" };
+        public IEnumerable<string> Hulls { get; set; } = new[] { "volume", "_volume", "_volume", "_volumes" };
 
         public IEnumerable<string> Floors { get; set; } = new string[] { };
         public IEnumerable<string> Walls { get; set; } = new string[] { };

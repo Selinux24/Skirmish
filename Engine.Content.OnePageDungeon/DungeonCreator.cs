@@ -376,7 +376,7 @@ namespace Engine.Content.OnePageDungeon
         {
             LevelMap levels = new LevelMap()
             {
-                Volumes = configuration.Volumes.ToArray(),
+                Hulls = configuration.Hulls.ToArray(),
             };
 
             levels.Levels = new[] { CreateLevel(dungeon, configuration) };

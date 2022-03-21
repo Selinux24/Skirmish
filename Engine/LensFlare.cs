@@ -218,7 +218,7 @@ namespace Engine
                     return true;
                 }
 
-                var perfectRay = new PickingRay(ray, RayPickingParams.Perfect);
+                var perfectRay = new PickingRay(ray, RayPickingParams.Objects);
 
                 if (Scene.PickNearest<Triangle>(perfectRay, SceneObjectUsages.None, out var result) &&
                     Vector3.Distance(lightPosition, eyePosition) > result.PickingResult.Distance)

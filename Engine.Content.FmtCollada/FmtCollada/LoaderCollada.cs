@@ -118,7 +118,7 @@ namespace Engine.Content.FmtCollada
             }
 
             string armatureName = content.ArmatureName;
-            var volumes = content.VolumeMeshes;
+            var hulls = content.HullMeshes;
             var meshesByLOD = content.LODMeshes;
             var animation = content.Animation;
             bool useControllerTransform = content.UseControllerTransform;
@@ -129,7 +129,7 @@ namespace Engine.Content.FmtCollada
             ProcessLibraryLights(dae, modelContent);
             ProcessLibraryImages(dae, modelContent, contentFolder);
             ProcessLibraryMaterial(dae, modelContent);
-            ProcessLibraryGeometries(dae, modelContent, volumes);
+            ProcessLibraryGeometries(dae, modelContent, hulls);
             ProcessLibraryControllers(dae, modelContent);
 
             //Scene Relations
@@ -184,14 +184,14 @@ namespace Engine.Content.FmtCollada
             return res;
         }
         /// <summary>
-        /// Gets whether the specified geometry name is a marked volume
+        /// Gets whether the specified geometry name is a marked hull
         /// </summary>
         /// <param name="geometryName">Geometry name</param>
-        /// <param name="volumes">List of volumen name prefixes</param>
-        /// <returns>Returns true if the geometry name starts with any of the volume names in the collection</returns>
-        private static bool IsVolume(string geometryName, IEnumerable<string> volumes)
+        /// <param name="hulls">List of hull name prefixes</param>
+        /// <returns>Returns true if the geometry name starts with any of the hull names in the collection</returns>
+        private static bool IsHull(string geometryName, IEnumerable<string> hulls)
         {
-            return volumes?.Any(v => geometryName.StartsWith(v, StringComparison.OrdinalIgnoreCase)) == true;
+            return hulls?.Any(v => geometryName.StartsWith(v, StringComparison.OrdinalIgnoreCase)) == true;
         }
 
         #region Dictionary loaders
@@ -318,8 +318,8 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
-        /// <param name="volumes">Volume mesh names</param>
-        private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, IEnumerable<string> volumes)
+        /// <param name="hulls">Hull mesh names</param>
+        private static void ProcessLibraryGeometries(Collada dae, ContentData modelContent, IEnumerable<string> hulls)
         {
             if (dae.LibraryGeometries?.Any() != true)
             {
@@ -328,9 +328,9 @@ namespace Engine.Content.FmtCollada
 
             foreach (var geometry in dae.LibraryGeometries)
             {
-                bool isVolume = IsVolume(geometry.Name, volumes);
+                bool isHull = IsHull(geometry.Name, hulls);
 
-                var info = ProcessGeometry(geometry, isVolume);
+                var info = ProcessGeometry(geometry, isHull);
                 if (info?.Any() != true)
                 {
                     continue;
@@ -403,21 +403,21 @@ namespace Engine.Content.FmtCollada
         /// Process geometry list
         /// </summary>
         /// <param name="geometry">Geometry info</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessGeometry(Geometry geometry, bool isHull)
         {
             if (geometry.Mesh != null)
             {
-                return ProcessMesh(geometry.Mesh, isVolume);
+                return ProcessMesh(geometry.Mesh, isHull);
             }
             else if (geometry.Spline != null)
             {
-                return ProcessSpline(geometry.Spline, isVolume);
+                return ProcessSpline(geometry.Spline, isHull);
             }
             else if (geometry.ConvexMesh != null)
             {
-                return ProcessConvexMesh(geometry.ConvexMesh, isVolume);
+                return ProcessConvexMesh(geometry.ConvexMesh, isHull);
             }
 
             return Enumerable.Empty<SubMeshContent>();
@@ -426,38 +426,38 @@ namespace Engine.Content.FmtCollada
         /// Process mesh
         /// </summary>
         /// <param name="mesh">Mesh</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessMesh(Engine.Collada.Mesh mesh, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessMesh(Engine.Collada.Mesh mesh, bool isHull)
         {
             //Procesar por topología
             if (mesh.Lines?.Any() == true)
             {
-                return ProcessLines(mesh.Lines, mesh.Sources, isVolume);
+                return ProcessLines(mesh.Lines, mesh.Sources, isHull);
             }
             else if (mesh.LineStrips?.Any() == true)
             {
-                return ProcessLineStrips(mesh.LineStrips, mesh.Sources, isVolume);
+                return ProcessLineStrips(mesh.LineStrips, mesh.Sources, isHull);
             }
             else if (mesh.Triangles?.Any() == true)
             {
-                return ProcessTriangles(mesh.Triangles, mesh.Sources, isVolume);
+                return ProcessTriangles(mesh.Triangles, mesh.Sources, isHull);
             }
             else if (mesh.TriFans?.Any() == true)
             {
-                return ProcessTriFans(mesh.TriFans, mesh.Sources, isVolume);
+                return ProcessTriFans(mesh.TriFans, mesh.Sources, isHull);
             }
             else if (mesh.TriStrips?.Any() == true)
             {
-                return ProcessTriStrips(mesh.TriStrips, mesh.Sources, isVolume);
+                return ProcessTriStrips(mesh.TriStrips, mesh.Sources, isHull);
             }
             else if (mesh.PolyList?.Any() == true)
             {
-                return ProcessPolyLists(mesh.PolyList, mesh.Sources, isVolume);
+                return ProcessPolyLists(mesh.PolyList, mesh.Sources, isHull);
             }
             else if (mesh.Polygons?.Any() == true)
             {
-                return ProcessPolygons(mesh.Polygons, mesh.Sources, isVolume);
+                return ProcessPolygons(mesh.Polygons, mesh.Sources, isHull);
             }
 
             return Enumerable.Empty<SubMeshContent>();
@@ -466,9 +466,9 @@ namespace Engine.Content.FmtCollada
         /// Process spline
         /// </summary>
         /// <param name="mesh">Mesh</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessSpline(Spline spline, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessSpline(Spline spline, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -476,9 +476,9 @@ namespace Engine.Content.FmtCollada
         /// Process convex mesh
         /// </summary>
         /// <param name="mesh">Mesh</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessConvexMesh(ConvexMesh convexMesh, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessConvexMesh(ConvexMesh convexMesh, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -487,9 +487,9 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="lines">Lines</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessLines(IEnumerable<Lines> lines, IEnumerable<Source> meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessLines(IEnumerable<Lines> lines, IEnumerable<Source> meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -498,9 +498,9 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="lines">Line strips</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessLineStrips(IEnumerable<LineStrips> lines, IEnumerable<Source> meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessLineStrips(IEnumerable<LineStrips> lines, IEnumerable<Source> meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -509,9 +509,9 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="triangles">Triangles</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessTriangles(IEnumerable<Triangles> triangles, IEnumerable<Source> meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessTriangles(IEnumerable<Triangles> triangles, IEnumerable<Source> meshSources, bool isHull)
         {
             if (triangles?.Any() != true)
             {
@@ -537,7 +537,7 @@ namespace Engine.Content.FmtCollada
                     data[i + 2] = verts.ElementAt(i + 1);
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, triangle.Material, false, isVolume);
+                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, triangle.Material, false, isHull);
 
                 meshInfo.SetVertices(data);
 
@@ -593,9 +593,9 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="triFans">Triangle fans</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessTriFans(IEnumerable<TriFans> triFans, IEnumerable<Source> meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessTriFans(IEnumerable<TriFans> triFans, IEnumerable<Source> meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -604,9 +604,9 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="triStrips">Triangle strips</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessTriStrips(IEnumerable<TriStrips> triStrips, IEnumerable<Source> meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessTriStrips(IEnumerable<TriStrips> triStrips, IEnumerable<Source> meshSources, bool isHull)
         {
             throw new NotImplementedException();
         }
@@ -615,9 +615,9 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="polyLists">Polygon lists</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessPolyLists(IEnumerable<PolyList> polyLists, IEnumerable<Source> meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessPolyLists(IEnumerable<PolyList> polyLists, IEnumerable<Source> meshSources, bool isHull)
         {
             if (polyLists?.Any() != true)
             {
@@ -634,7 +634,7 @@ namespace Engine.Content.FmtCollada
                     continue;
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polyList.Material, false, isVolume);
+                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polyList.Material, false, isHull);
 
                 meshInfo.SetVertices(verts);
                 meshInfo.SetIndices(indices);
@@ -696,6 +696,12 @@ namespace Engine.Content.FmtCollada
             vertices = verts.ToArray();
             indices = idx.ToArray();
         }
+        /// <summary>
+        /// Builds a poligon face
+        /// </summary>
+        /// <param name="vertCount">Vertex count</param>
+        /// <param name="startIndex">Start index</param>
+        /// <returns>Returns a face index list</returns>
         private static IEnumerable<uint> BuildFace(int vertCount, int startIndex)
         {
             if (vertCount == 3)
@@ -729,9 +735,9 @@ namespace Engine.Content.FmtCollada
         /// </summary>
         /// <param name="polygons">Polygons</param>
         /// <param name="meshSources">Mesh sources</param>
-        /// <param name="isVolume">Current geometry is a volume mesh</param>
+        /// <param name="isHull">Current geometry is a hull mesh</param>
         /// <returns>Returns sub mesh content</returns>
-        private static IEnumerable<SubMeshContent> ProcessPolygons(IEnumerable<Polygons> polygons, IEnumerable<Source> meshSources, bool isVolume)
+        private static IEnumerable<SubMeshContent> ProcessPolygons(IEnumerable<Polygons> polygons, IEnumerable<Source> meshSources, bool isHull)
         {
             if (polygons?.Any() != true)
             {
@@ -757,7 +763,7 @@ namespace Engine.Content.FmtCollada
                     data[i + 2] = verts.ElementAt(i + 1);
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polygon.Material, false, isVolume);
+                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polygon.Material, false, isHull);
 
                 meshInfo.SetVertices(data);
 

@@ -316,14 +316,14 @@ namespace Engine.Modular
             return -1;
         }
         /// <summary>
-        /// Gets a list of masks to find volume meshes for the specified asset name
+        /// Gets a list of masks to find hull meshes for the specified asset name
         /// </summary>
         /// <param name="levels">Level list</param>
         /// <param name="assetName">Asset name</param>
-        /// <returns>Returns a list of masks to find volume meshes for the specified asset name</returns>
+        /// <returns>Returns a list of masks to find hull meshes for the specified asset name</returns>
         private static IEnumerable<string> GetMasksForAsset(LevelMap levels, string assetName)
         {
-            return levels.Volumes.Select(v => assetName + v).ToArray();
+            return levels.Hulls.Select(v => assetName + v).ToArray();
         }
 
         /// <summary>
@@ -517,8 +517,8 @@ namespace Engine.Modular
             try
             {
                 var masks = GetMasksForAsset(levels, assetName);
-                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
-                var usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                var hasHulls = modelContent.SetHullMark(true, masks) > 0;
+                var usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
 
 
                 var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -604,11 +604,11 @@ namespace Engine.Modular
             try
             {
                 var masks = GetMasksForAsset(levels, assetName);
-                var hasVolumes = modelContent.SetVolumeMark(true, masks) > 0;
+                var hasHulls = modelContent.SetHullMark(true, masks) > 0;
                 SceneObjectUsages usage = SceneObjectUsages.None;
                 if (pathFinding)
                 {
-                    usage = hasVolumes ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                    usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
                 }
 
                 var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -1084,9 +1084,9 @@ namespace Engine.Modular
             return res;
         }
         /// <inheritdoc/>
-        public override IEnumerable<Triangle> GetVolume(VolumeTypes volumeTypes)
+        public override IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
         {
-            if (volumeTypes != VolumeTypes.Navigation)
+            if (geometryType != GeometryTypes.Navigation)
             {
                 return Enumerable.Empty<Triangle>();
             }
@@ -1103,7 +1103,7 @@ namespace Engine.Modular
                 var instances = asset.GetInstances().Where(i => i.Visible);
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetVolume(volumeTypes));
+                    triangles.AddRange(instance.GetGeometry(geometryType));
                 }
             }
 
@@ -1117,7 +1117,7 @@ namespace Engine.Modular
                 var instances = obj.GetInstances().Where(i => i.Visible);
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetVolume(volumeTypes));
+                    triangles.AddRange(instance.GetGeometry(geometryType));
                 }
             }
 
@@ -1597,7 +1597,7 @@ namespace Engine.Modular
             /// </summary>
             /// <param name="assetConfiguration">Configuration</param>
             /// <param name="assets">Asset list</param>
-            public void Build(Persistence.AssetMap assetConfiguration, Dictionary<string, ModelInstanced> assets)
+            public void Build(AssetMap assetConfiguration, Dictionary<string, ModelInstanced> assets)
             {
                 //Fill per complex asset bounding boxes
                 Fill(assets);

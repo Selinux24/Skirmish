@@ -21,17 +21,18 @@ namespace Engine.Common
             // Coarse first
             var bsph = obj.GetBoundingSphere();
             Ray rRay = ray;
-            if (!bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance)
+            bool coarseInt = bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance;
+            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
             {
                 // Coarse exit
                 triangles = Enumerable.Empty<T>();
 
-                return false;
+                return coarseInt;
             }
 
             // Next geometry
-            VolumeTypes volumeType = ray.RayPickingParams.HasFlag(RayPickingParams.Geometry) ? VolumeTypes.Full : VolumeTypes.Coarse;
-            triangles = obj.GetVolume(volumeType);
+            GeometryTypes geometryType = ray.RayPickingParams.HasFlag(RayPickingParams.Hull) ? GeometryTypes.Hull : GeometryTypes.Object;
+            triangles = obj.GetGeometry(geometryType);
 
             return triangles.Any();
         }
@@ -41,14 +42,14 @@ namespace Engine.Common
         /// <param name="collection">Collection to test</param>
         /// <param name="ray">Ray</param>
         /// <returns>Returns a list of ray pickable objects order by distance to ray origin</returns>
-        public static IEnumerable<VolumePickingResult> PickCoarse(IEnumerable<ISceneObject> collection, PickingRay ray)
+        public static IEnumerable<CoarsePickingResult> PickCoarse(IEnumerable<ISceneObject> collection, PickingRay ray)
         {
             if (!collection.Any())
             {
-                return Enumerable.Empty<VolumePickingResult>();
+                return Enumerable.Empty<CoarsePickingResult>();
             }
 
-            List<VolumePickingResult> coarse = new List<VolumePickingResult>();
+            List<CoarsePickingResult> coarse = new List<CoarsePickingResult>();
 
             foreach (var obj in collection)
             {
@@ -56,7 +57,7 @@ namespace Engine.Common
                 {
                     if (TestCoarse(componsed, ray, out var d, out var p))
                     {
-                        coarse.Add(new VolumePickingResult(obj, d, p));
+                        coarse.Add(new CoarsePickingResult(obj, d, p));
                     }
                 }
                 else if (obj is IRayPickable<Triangle> pickable)
@@ -64,7 +65,7 @@ namespace Engine.Common
                     bool picked = TestCoarse(pickable, ray, out var d, out var p);
                     if (picked)
                     {
-                        coarse.Add(new VolumePickingResult(obj, d, p));
+                        coarse.Add(new CoarsePickingResult(obj, d, p));
                     }
                 }
             }
@@ -73,7 +74,7 @@ namespace Engine.Common
             return coarse.OrderBy(c => c.Distance).ToArray();
         }
         /// <summary>
-        /// Perfors picking between the specified ray and the bounding volume of the object
+        /// Performs picking between the specified ray and the bounding volume of the object
         /// </summary>
         /// <param name="componsed">Componsed object to test</param>
         /// <param name="ray">Ray</param>
@@ -101,7 +102,7 @@ namespace Engine.Common
             return false;
         }
         /// <summary>
-        /// Perfors picking between the specified ray and the bounding volume of the object
+        /// Performs picking between the specified ray and the bounding volume of the object
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="obj">Object to test</param>
@@ -138,17 +139,18 @@ namespace Engine.Common
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickNearest<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
-            if (PickCoarse(obj, ray, out var triangles))
+            bool coarseInt = PickCoarse(obj, ray, out var triangles);
+            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
             {
-                return PickNearest(triangles, ray, out result);
+                result = new PickingResult<T>
+                {
+                    Distance = float.MaxValue,
+                };
+
+                return coarseInt;
             }
 
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue,
-            };
-
-            return false;
+            return PickNearest(triangles, ray, out result);
         }
         /// <summary>
         /// Gets nearest picking position of the given ray
@@ -179,7 +181,7 @@ namespace Engine.Common
         /// Gets nearest picking position of the given ray
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="collection">Picked volumes</param>
+        /// <param name="collection">Scene object collection</param>
         /// <param name="ray">Ray</param>
         /// <param name="result">Resulting picking result</param>
         /// <returns>Returns true if intersection position found</returns>
@@ -279,17 +281,18 @@ namespace Engine.Common
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickFirst<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
-            if (PickCoarse(obj, ray, out var triangles))
+            bool coarseInt = PickCoarse(obj, ray, out var triangles);
+            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
             {
-                return PickFirst(triangles, ray, out result);
+                result = new PickingResult<T>
+                {
+                    Distance = float.MaxValue,
+                };
+
+                return coarseInt;
             }
 
-            result = new PickingResult<T>
-            {
-                Distance = float.MaxValue,
-            };
-
-            return false;
+            return PickFirst(triangles, ray, out result);
         }
         /// <summary>
         /// Gets the unordered first picking position of the given ray
@@ -329,7 +332,7 @@ namespace Engine.Common
         /// Gets the unordered first picking position of the given ray
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="collection">Picked volumes</param>
+        /// <param name="collection">Scene object collection</param>
         /// <param name="ray">Ray</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if intersection position found</returns>
@@ -420,14 +423,15 @@ namespace Engine.Common
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickAll<T>(IRayPickable<T> obj, PickingRay ray, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
-            if (PickCoarse(obj, ray, out var triangles))
+            bool coarseInt = PickCoarse(obj, ray, out var triangles);
+            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
             {
-                return PickAll(triangles, ray, out results);
+                results = Enumerable.Empty<PickingResult<T>>();
+
+                return coarseInt;
             }
 
-            results = Enumerable.Empty<PickingResult<T>>();
-
-            return false;
+            return PickAll(triangles, ray, out results);
         }
         /// <summary>
         /// Gets all picking positions of the given ray
@@ -484,7 +488,7 @@ namespace Engine.Common
         /// Gets all picking positions of the given ray
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="collection">Picked volumes</param>
+        /// <param name="collection">Scene object collection</param>
         /// <param name="ray">Ray</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if intersection position found</returns>
