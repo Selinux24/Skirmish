@@ -2,6 +2,7 @@
 using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
 using SharpDX;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Skybox
 {
-    public class TestScene3D : Scene
+    public class TestScene3D : WalkableScene
     {
         private const float alpha = 0.25f;
 

@@ -21,7 +21,7 @@ namespace Terrain.Rts
     using Terrain.Rts.Emitters;
     using Terrain.Start;
 
-    public class RtsScene : Scene
+    public class RtsScene : WalkableScene
     {
         private const int MaxPickingTest = 10000;
         private const int MaxGridDrawer = 10000;

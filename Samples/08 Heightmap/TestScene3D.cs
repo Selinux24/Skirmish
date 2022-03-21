@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace Heightmap
 {
-    public class TestScene3D : Scene
+    public class TestScene3D : WalkableScene
     {
         private const float near = 0.5f;
         private const float far = 3000f;

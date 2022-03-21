@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Collada.Dungeon
 {
-    public class SceneDungeon : Scene
+    public class SceneDungeon : WalkableScene
     {
         private readonly string resourcesFolder = "dungeon/resources";
 

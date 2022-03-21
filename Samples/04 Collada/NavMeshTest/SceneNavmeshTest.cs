@@ -14,7 +14,7 @@ namespace Collada.NavmeshTest
     /// <summary>
     /// Navigation mesh test scene
     /// </summary>
-    class SceneNavmeshTest : Scene
+    class SceneNavmeshTest : WalkableScene
     {
         private readonly string resourcesFolder = "navmeshtest/resources";
 

@@ -2,6 +2,7 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.UI;
 using SharpDX;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Animation.Mixamo
 {
-    public class SceneMixamo : Scene
+    public class SceneMixamo : WalkableScene
     {
         private UITextArea title = null;
         private UITextArea runtime = null;

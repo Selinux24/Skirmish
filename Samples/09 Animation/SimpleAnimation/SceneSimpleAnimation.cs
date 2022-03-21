@@ -517,7 +517,7 @@ namespace Animation.SimpleAnimation
             {
                 for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    bbox = BoundingBox.Merge(bbox, item[i].GetBoundingBox());
+                    bbox = SharpDX.BoundingBox.Merge(bbox, item[i].GetBoundingBox());
                 }
             });
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;

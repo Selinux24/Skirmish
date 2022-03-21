@@ -2,6 +2,7 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.AStar;
 using Engine.UI;
 using SharpDX;
@@ -15,7 +16,7 @@ namespace GameLogic
     using GameLogic.Rules;
     using GameLogic.Rules.Enum;
 
-    public class SceneObjects : Scene
+    public class SceneObjects : WalkableScene
     {
         private UITextArea txtTitle = null;
         private UITextArea txtGame = null;

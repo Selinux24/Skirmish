@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.UI;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Deferred
 {
-    public class TestScene3D : Scene
+    public class TestScene3D : WalkableScene
     {
         private const int MaxGridDrawer = 10000;
 

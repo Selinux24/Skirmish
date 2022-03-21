@@ -20,7 +20,7 @@ using System.Threading.Tasks;
 
 namespace Collada.ModularDungeon
 {
-    public class SceneModularDungeon : Scene
+    public class SceneModularDungeon : WalkableScene
     {
         private const float maxDistance = 35;
 
