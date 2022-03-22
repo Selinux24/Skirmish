@@ -115,6 +115,7 @@
     <Compile Include="Common\IntersectionHelperTests.cs" />
     <Compile Include="Common\IntersectionTests.cs" />
     <Compile Include="Common\RayPickingHelperTests.cs" />
+    <Compile Include="PathFinding\PathFinderDescriptionTests.cs" />
     <Compile Include="PickingRayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -123,6 +124,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj">
+      <Project>{0D7D6C77-588E-4371-A815-A58B87653991}</Project>
+      <Name>Engine.PathFinding.RecastNavigation</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Engine\Engine.csproj">
       <Project>{A4BAC380-82CB-4DB8-953F-A291F0BEF559}</Project>
       <Name>Engine</Name>
