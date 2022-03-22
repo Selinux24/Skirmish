@@ -862,7 +862,7 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     nearest = nPoint;
 
-                    return nPoint.X == position.X && nPoint.Z == position.Z;
+                    return nPoint == position;
                 }
             }
 

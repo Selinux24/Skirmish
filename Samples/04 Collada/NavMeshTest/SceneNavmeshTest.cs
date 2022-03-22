@@ -134,12 +134,13 @@ Space: Finds random over navmesh";
         }
         private async Task InitializeNavmesh()
         {
+            var contentDesc = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json");
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,
                 CastShadow = true,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json"),
+                Content = contentDesc,
             };
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
@@ -311,7 +312,23 @@ Space: Finds random over navmesh";
 
                 if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
-                    DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
+                    volumesDrawer.Clear(Color.Red);
+                    volumesDrawer.Clear(Color.Green);
+                    volumesDrawer.Clear(Color.Gray);
+                    volumesDrawer.Clear(Color.White);
+
+                    var pColor = Color.Red;
+                    if (IsWalkable(agent, r.PickingResult.Position, out var nearest))
+                    {
+                        pColor = Color.Green;
+                    }
+
+                    if (nearest.HasValue)
+                    {
+                        DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, Color.Gray);
+                    }
+
+                    DrawPoint(r.PickingResult.Position, 0.25f, pColor);
                     DrawTriangle(r.PickingResult.Primitive, Color.White);
 
                     ToggleTile(r.PickingResult.Position);

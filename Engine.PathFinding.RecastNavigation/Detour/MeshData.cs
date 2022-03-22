@@ -68,7 +68,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 var v = new Vector3
                 {
                     X = param.BMin.X + iv.X * param.CellSize,
-                    Y = param.BMin.Y + iv.Y * param.CellHeight,
+                    Y = param.BMin.Y + (iv.Y - 1) * param.CellHeight, //It's a hack
                     Z = param.BMin.Z + iv.Z * param.CellSize
                 };
                 NavVerts.Add(v);
