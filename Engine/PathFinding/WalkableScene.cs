@@ -469,9 +469,10 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="agent">Agent</param>
         /// <param name="position">Position</param>
+        /// <param name="distanceThreshold">Distance threshold</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
         /// <returns>Returns true if the specified position is walkable</returns>
-        public virtual bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
+        public virtual bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             if (NavigationGraph == null)
             {
@@ -480,7 +481,7 @@ namespace Engine.PathFinding
                 return true;
             }
 
-            return NavigationGraph.IsWalkable(agent, position, out nearest);
+            return NavigationGraph.IsWalkable(agent, position, distanceThreshold, out nearest);
         }
         /// <summary>
         /// Gets final position for agents walking over the ground if exists
@@ -521,10 +522,11 @@ namespace Engine.PathFinding
             }
 
             var positions = results.Select(r => r.Position).ToArray();
+            float threshold = Vector3.Distance(prevPosition, newPosition);
 
             foreach (var position in positions)
             {
-                if (IsWalkable(agent, position, out var nearest))
+                if (IsWalkable(agent, position, threshold, out var nearest))
                 {
                     finalPosition = GetPositionWalkable(agent, prevPosition, newPosition, position, adjustHeight);
 

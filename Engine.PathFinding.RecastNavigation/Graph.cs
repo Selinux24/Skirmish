@@ -838,12 +838,12 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position)
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
         {
-            return IsWalkable(agent, position, out _);
+            return IsWalkable(agent, position, distanceThreshold, out _);
         }
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             nearest = null;
 
@@ -852,7 +852,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (query != null)
             {
                 //Set extents based upon agent height
-                var agentExtents = new Vector3(agent.Height, agent.Height * 2, agent.Height);
+                var agentExtents = new Vector3(agent.Height);
 
                 var status = query.FindNearestPoly(
                     position, agentExtents, new QueryFilter(),
@@ -862,7 +862,9 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     nearest = nPoint;
 
-                    return nPoint == position;
+                    return
+                        nPoint.XZ() == position.XZ() &&
+                        Vector3.Distance(nPoint, position) <= distanceThreshold;
                 }
             }
 

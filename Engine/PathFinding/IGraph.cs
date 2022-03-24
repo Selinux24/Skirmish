@@ -41,16 +41,18 @@ namespace Engine.PathFinding
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <param name="position">Position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        bool IsWalkable(AgentType agent, Vector3 position);
+        /// <param name="distanceThreshold">Distance threshold</param>
+        /// <returns>Returns true if the specified position is walkable, and found nearest position is within the distance threshold with the specified position.</returns>
+        bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold);
         /// <summary>
         /// Gets wether the specified position is walkable for the specified agent type
         /// </summary>
         /// <param name="agent">Agent type</param>
         /// <param name="position">Position</param>
+        /// <param name="distanceThreshold">Distance threshold</param>
         /// <param name="nearest">Gets the nearest walkable position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest);
+        /// <returns>Returns true if the specified position is walkable, and found nearest position is within the distance threshold with the specified position.</returns>
+        bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest);
 
         /// <summary>
         /// Creates the graph at specified position

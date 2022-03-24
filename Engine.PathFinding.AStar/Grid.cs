@@ -144,12 +144,12 @@ namespace Engine.PathFinding.AStar
             return result;
         }
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position)
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
         {
             return nodes.Any(n => n.Contains(position));
         }
         /// <inheritdoc/>
-        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             bool contains = false;
             nearest = null;

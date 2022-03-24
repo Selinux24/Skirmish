@@ -312,24 +312,7 @@ Space: Finds random over navmesh";
 
                 if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
-                    volumesDrawer.Clear(Color.Red);
-                    volumesDrawer.Clear(Color.Green);
-                    volumesDrawer.Clear(Color.Gray);
-                    volumesDrawer.Clear(Color.White);
-
-                    var pColor = Color.Red;
-                    if (IsWalkable(agent, r.PickingResult.Position, out var nearest))
-                    {
-                        pColor = Color.Green;
-                    }
-
-                    if (nearest.HasValue)
-                    {
-                        DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, Color.Gray);
-                    }
-
-                    DrawPoint(r.PickingResult.Position, 0.25f, pColor);
-                    DrawTriangle(r.PickingResult.Primitive, Color.White);
+                    DrawContact(r.PickingResult.Position, r.PickingResult.Primitive);
 
                     ToggleTile(r.PickingResult.Position);
                 }
@@ -378,6 +361,24 @@ Space: Finds random over navmesh";
             }
 
             debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
+        }
+        private void DrawContact(Vector3 position, Triangle triangle)
+        {
+            volumesDrawer.Clear(Color.Red);
+            volumesDrawer.Clear(Color.Green);
+            volumesDrawer.Clear(Color.Gray);
+            volumesDrawer.Clear(Color.White);
+
+            bool walkable = IsWalkable(agent, position, 0.1f, out var nearest);
+            var pColor = walkable ? Color.Green : Color.Red;
+
+            if (nearest.HasValue)
+            {
+                DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, Color.Gray);
+            }
+
+            DrawPoint(position, 0.25f, pColor);
+            DrawTriangle(triangle, Color.White);
         }
         private void UpdateFilesInput()
         {
