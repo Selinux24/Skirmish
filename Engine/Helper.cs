@@ -661,28 +661,28 @@ namespace Engine
             return one.X * two.Y - one.Y * two.X;
         }
         /// <summary>
-        /// Gets angle between two vectors
+        /// Gets the angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value in radians</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Vector2 one, Vector2 two)
         {
             //Get the dot product
             float dot = Vector2.Dot(one, two);
 
             // Divide the dot by the product of the magnitudes of the vectors
-            dot /= (one.Length() * two.Length());
+            dot /= one.Length() * two.Length();
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)Math.Acos(dot);
         }
         /// <summary>
-        /// Gets angle between two quaternions
+        /// Gets the angle between two quaternions
         /// </summary>
         /// <param name="one">First quaternions</param>
         /// <param name="two">Second quaternions</param>
-        /// <returns>Returns angle value in radians</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Quaternion one, Quaternion two)
         {
             float dot = Quaternion.Dot(one, two);
@@ -690,38 +690,53 @@ namespace Engine
             return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f)) * 2f;
         }
         /// <summary>
-        /// Gets angle between two vectors
+        /// Gets the angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Vector3 one, Vector3 two)
         {
-            //Get the dot product
             float dot = Vector3.Dot(one, two);
 
-            // Divide the dot by the product of the magnitudes of the vectors
-            dot /= one.Length() * two.Length();
-            dot = MathUtil.Clamp(dot, 0, 1);
-
-            //Get the arc cosin of the angle, you now have your angle in radians 
-            return (float)Math.Acos(dot);
+            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f));
         }
         /// <summary>
-        /// Gets angle between two vectors in the same plane
+        /// Gets the signed angle between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector2 one, Vector2 two)
+        {
+            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
+        }
+        /// <summary>
+        /// Gets the signed angle between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector3 one, Vector3 two)
+        {
+            float dot = Vector3.Dot(one, two);
+
+            return (float)Math.Acos(Math.Min(dot, 1f));
+        }
+        /// <summary>
+        /// Gets the angle between two vectors in the same plane
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
         /// <param name="planeNormal">Plane normal</param>
-        /// <returns>Returns angle value</returns>
-        /// <remarks>Result signed</remarks>
-        public static float Angle(Vector3 one, Vector3 two, Vector3 planeNormal)
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector3 one, Vector3 two, Vector3 planeNormal)
         {
             Plane p = new Plane(planeNormal, 0);
 
-            float dot = MathUtil.Clamp(Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two)), 0, 1);
+            float dot = Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two));
 
-            float angle = (float)Math.Acos(dot);
+            float angle = (float)Math.Acos(MathUtil.Clamp(dot, 0, 1));
 
             Vector3 cross = Vector3.Cross(one, two);
 
@@ -733,21 +748,11 @@ namespace Engine
             return angle;
         }
         /// <summary>
-        /// Gets angle between two vectors with sign
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value</returns>
-        public static float AngleSigned(Vector2 one, Vector2 two)
-        {
-            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
-        }
-        /// <summary>
-        /// Gets yaw and pitch values from vector
+        /// Gets the yaw and pitch values from vector
         /// </summary>
         /// <param name="vec">Vector</param>
-        /// <param name="yaw">Yaw</param>
-        /// <param name="pitch">Pitch</param>
+        /// <param name="yaw">Yaw value</param>
+        /// <param name="pitch">Pitch value</param>
         public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
         {
             yaw = (float)Math.Atan2(vec.X, vec.Y);
@@ -772,7 +777,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Get vector from yaw and pitch angles
+        /// Get the vector from yaw and pitch angles
         /// </summary>
         /// <param name="yaw">Yaw angle</param>
         /// <param name="pitch">Pitch angle</param>

@@ -19,11 +19,13 @@ namespace Engine.PathFinding.Tests
         static Agent agentDefault;
         static Agent agentSmall;
         static Agent agentTall;
+        static Agent agentInclined;
 
         static IEnumerable<Triangle> zeroPlaneTris;
         static IEnumerable<Triangle> hOnePlaneTris;
         static IEnumerable<Triangle> hTwoPlaneTris;
         static IEnumerable<Triangle> sceneryTris;
+        static IEnumerable<Triangle> inclinedPlaneTris;
 
         static Vector3 pointZero;
         static Vector3 pointOne;
@@ -43,6 +45,7 @@ namespace Engine.PathFinding.Tests
             agentDefault = new Agent() { Radius = rDefault, Height = hOne * 0.5f };
             agentSmall = new Agent() { Radius = rDefault, Height = hOne * 0.1f };
             agentTall = new Agent() { Radius = rDefault, Height = hOne * 1.5f };
+            agentInclined = new Agent() { Radius = rDefault, Height = hOne * 0.5f, MaxSlope = 50f };
 
             var pZero = GeometryUtil.CreateXZPlane(10, hZero);
             zeroPlaneTris = Triangle.ComputeTriangleList(Topology.TriangleList, pZero.Vertices, pZero.Indices);
@@ -57,6 +60,9 @@ namespace Engine.PathFinding.Tests
             pointTwo = Vector3.Up * hTwo;
 
             sceneryTris = (new[] { zeroPlaneTris, hOnePlaneTris, hTwoPlaneTris }).SelectMany(t => t);
+
+            var pInclined = GeometryUtil.CreatePlane(10, 0, Vector3.Normalize(new Vector3(1, 1, 0)));
+            inclinedPlaneTris = Triangle.ComputeTriangleList(Topology.TriangleList, pInclined.Vertices, pInclined.Indices);
         }
 
         [TestInitialize]
@@ -187,6 +193,29 @@ namespace Engine.PathFinding.Tests
             Assert.AreEqual(pointOne, n2);
             Assert.IsTrue(walkable3);
             Assert.AreEqual(pointTwo, n3);
+        }
+
+        [TestMethod()]
+        public void BuildNavmeshInclinedTest()
+        {
+            BuildSettings settings = BuildSettings.Default;
+            settings.Agents = new[] { agentInclined };
+            InputGeometry input = new InputGeometry(() => { return inclinedPlaneTris; });
+
+            var pfDesc = new PathFinderDescription(settings, input);
+            var graph = pfDesc.Build().GetAwaiter().GetResult();
+
+            var walkable1 = graph.IsWalkable(agentInclined, pointZero, 0.5f, out var n1);
+            var walkable2 = graph.IsWalkable(agentInclined, pointOne, 0.5f, out var n2);
+            var walkable3 = graph.IsWalkable(agentInclined, pointTwo, 0.5f, out var n3);
+
+            Assert.IsNotNull(graph, "Graph is null");
+            Assert.IsTrue(walkable1, "Point zero spected to be walkable.");
+            //Assert.AreEqual(pointZero, n1, "Point zero spected to be the nearest point.");
+            Assert.IsFalse(walkable2, "Point one spected to be walkable.");
+            //Assert.IsNull(n2, "No nearest point spected for point one");
+            Assert.IsFalse(walkable3, "Point two point spected to be walkable.");
+            //Assert.IsNull(n3, "No nearest point spected for point two");
         }
     }
 }

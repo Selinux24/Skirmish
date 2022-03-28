@@ -1096,6 +1096,41 @@ namespace Engine.Common
             };
         }
         /// <summary>
+        /// Creates a plane with the specified normal
+        /// </summary>
+        /// <param name="size">Plane size</param>
+        /// <param name="height">Plane height</param>
+        /// <param name="normal">Plane normal</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreatePlane(float size, float height, Vector3 normal)
+        {
+            var geometry = CreateXZPlane(size, height);
+
+            var rotNormal = Vector3.Normalize(normal);
+            if (rotNormal == Vector3.Up)
+            {
+                //No need to transform
+                return geometry;
+            }
+
+            float angle = Helper.AngleSigned(Vector3.Up, rotNormal);
+
+            Vector3 axis;
+            if (angle == MathUtil.Pi)
+            {
+                //Paralell negative axis: Vector3.Down
+                axis = Vector3.Left;
+            }
+            else
+            {
+                axis = Vector3.Normalize(Vector3.Cross(Vector3.Up, rotNormal));
+            }
+
+            geometry.Transform(Matrix.RotationAxis(axis, angle));
+
+            return geometry;
+        }
+        /// <summary>
         /// Creates a curve plane
         /// </summary>
         /// <param name="size">Quad size</param>
