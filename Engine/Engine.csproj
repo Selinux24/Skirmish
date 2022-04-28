@@ -185,6 +185,10 @@
     <Compile Include="Common\BufferManagerIndices.cs" />
     <Compile Include="Common\BufferManagerInstances.cs" />
     <Compile Include="Common\GeometryHelper.cs" />
+    <Compile Include="Coroutines\Coroutine.cs" />
+    <Compile Include="Coroutines\WaitForCount.cs" />
+    <Compile Include="Coroutines\Yielder.cs" />
+    <Compile Include="Coroutines\YieldInstruction.cs" />
     <Compile Include="Effects\EffectShadowFoliageState.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />

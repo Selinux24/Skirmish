@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -8,6 +9,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Coroutines;
     using Engine.Effects;
     using Engine.Tween;
 
@@ -96,6 +98,11 @@ namespace Engine
         /// Animation palette width
         /// </summary>
         private uint animationPaletteWidth;
+
+        /// <summary>
+        /// Corotine manager
+        /// </summary>
+        private readonly Yielder coroutineManager = new Yielder();
 
         /// <summary>
         /// Scene bounding box
@@ -253,6 +260,8 @@ namespace Engine
 
                 AudioManager?.Update(gameTime);
 
+                coroutineManager.ProcessCoroutines();
+
                 this.EvaluateInput();
 
                 FloatTweenManager.Update(gameTime);
@@ -324,6 +333,15 @@ namespace Engine
             Counters.ClearAll();
 
             return true;
+        }
+
+        /// <summary>
+        /// Starts a new coroutine
+        /// </summary>
+        /// <param name="routine">Enumerator routine</param>
+        public Coroutine StartCoroutine(IEnumerator routine)
+        {
+            return coroutineManager.StartCoroutine(routine);
         }
 
         /// <summary>
