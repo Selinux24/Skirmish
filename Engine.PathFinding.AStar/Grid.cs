@@ -134,14 +134,14 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            Vector3[] result = new Vector3[] { };
+            IEnumerable<Vector3> result = null;
 
             await Task.Run(() =>
             {
                 result = AStarQuery.FindPath(this, from, to);
             });
 
-            return result;
+            return result ?? Enumerable.Empty<Vector3>();
         }
         /// <inheritdoc/>
         public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
