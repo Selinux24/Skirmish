@@ -239,10 +239,6 @@ namespace Engine.Effects
         /// </summary>
         private readonly EngineEffectVariableSampler samplerNormalVar = null;
         /// <summary>
-        /// Sampler for specular maps
-        /// </summary>
-        private readonly EngineEffectVariableSampler samplerSpecularVar = null;
-        /// <summary>
         /// Directional shadow map effect variable
         /// </summary>
         private readonly EngineEffectVariableTexture shadowMapDirectionalVar = null;
@@ -708,7 +704,6 @@ namespace Engine.Effects
 
                     samplerDiffuseVar.SetValue(0, sampler);
                     samplerNormalVar.SetValue(0, sampler);
-                    samplerSpecularVar.SetValue(0, sampler);
                 }
             }
         }
@@ -869,7 +864,6 @@ namespace Engine.Effects
 
             //Samplers
             samplerDiffuseVar = Effect.GetVariableSampler("SamplerDiffuse");
-            samplerSpecularVar = Effect.GetVariableSampler("SamplerSpecular");
             samplerNormalVar = Effect.GetVariableSampler("SamplerNormal");
 
             //Initialize states

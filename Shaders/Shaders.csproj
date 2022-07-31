@@ -53,12 +53,21 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
+    <PixelShader Include="ShaderDefaultBasic\PositionNormalColor.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalColor.vs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\PositionTexture.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\PositionTexture.vs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\PositionNormalTexture.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTexture.vs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\PositionNormalTextureTangent.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureTangent.vs.hlsl" />
+    <None Include="Shaders.snk" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders.snk" />
+    <PixelShader Include="ShaderDefaultBasic\PositionColor.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Lib\IncGBufferLights.hlsl" />
@@ -188,12 +197,64 @@
   <ItemGroup>
     <EffectShader Include="Lib\IncQuaternion.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionColor.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionColorSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionColorI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionColorSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionTextureI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionTextureSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionTextureSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalColorI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalColorSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalColorSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureTangentI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureTangentSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>del /Q /F "$(SolutionDir)Engine\Resources\*.*"
 mkdir "$(SolutionDir)Engine\Resources"
+copy /Y "$(ProjectDir)Lib\*.hlsl" "$(SolutionDir)Engine\Resources\Lib\*.hlsl"
 copy /Y "$(ProjectDir)Resources\*.fx" "$(SolutionDir)Engine\Resources\*.fx"
-copy /Y "$(TargetDir)Resources\*.cso" "$(SolutionDir)Engine\Resources\*.cso"</PostBuildEvent>
+copy /Y "$(TargetDir)Resources\*.cso" "$(SolutionDir)Engine\Resources\*.cso"
+copy /Y "$(ProjectDir)ShaderDefaultBasic\*.hlsl" "$(SolutionDir)Engine\Resources\*.hlsl"
+copy /Y "$(TargetDir)ShaderDefaultBasic\*.cso" "$(SolutionDir)Engine\Resources\*.cso"
+</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

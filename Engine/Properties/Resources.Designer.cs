@@ -73,6 +73,216 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] IncAnimation {
+            get {
+                object obj = ResourceManager.GetObject("IncAnimation", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncGBufferLights {
+            get {
+                object obj = ResourceManager.GetObject("IncGBufferLights", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncHelpers {
+            get {
+                object obj = ResourceManager.GetObject("IncHelpers", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncLights {
+            get {
+                object obj = ResourceManager.GetObject("IncLights", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncMaterials {
+            get {
+                object obj = ResourceManager.GetObject("IncMaterials", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncMatrix {
+            get {
+                object obj = ResourceManager.GetObject("IncMatrix", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncPostProcessing {
+            get {
+                object obj = ResourceManager.GetObject("IncPostProcessing", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncQuaternion {
+            get {
+                object obj = ResourceManager.GetObject("IncQuaternion", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncScattering {
+            get {
+                object obj = ResourceManager.GetObject("IncScattering", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncTerrain {
+            get {
+                object obj = ResourceManager.GetObject("IncTerrain", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] IncVertexFormats {
+            get {
+                object obj = ResourceManager.GetObject("IncVertexFormats", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionColor {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionColor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionColor_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionColor_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionNormalColor {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionNormalColor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionNormalColor_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionNormalColor_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionNormalTexture {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionNormalTexture", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionNormalTexture_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionNormalTexture_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionNormalTextureTangent {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionNormalTextureTangent", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionNormalTextureTangent_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionNormalTextureTangent_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionTexture {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionTexture", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_PositionTexture_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_PositionTexture_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] ShaderDefaultBasicCso {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultBasicCso", resourceCulture);
@@ -566,6 +776,406 @@ namespace Engine.Properties {
         internal static byte[] ShaderShadowTerrainFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowTerrainFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor_Skinned {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor_Skinned", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor_Skinned_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor_Skinned_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor_Skinned_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor_Skinned_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionColor_Skinned_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionColor_Skinned_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor_Skinned {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor_Skinned", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor_Skinned_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor_Skinned_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor_Skinned_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor_Skinned_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalColor_Skinned_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalColor_Skinned_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture_Skinned {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture_Skinned", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture_Skinned_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture_Skinned_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture_Skinned_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture_Skinned_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTexture_Skinned_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTexture_Skinned_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent_Skinned {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent_Skinned", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent_Skinned_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent_Skinned_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent_Skinned_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent_Skinned_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionNormalTextureTangent_Skinned_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionNormalTextureTangent_Skinned_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture_Skinned {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture_Skinned", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture_Skinned_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture_Skinned_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture_Skinned_I {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture_Skinned_I", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_PositionTexture_Skinned_I_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_PositionTexture_Skinned_I_Cso", resourceCulture);
                 return ((byte[])(obj));
             }
         }

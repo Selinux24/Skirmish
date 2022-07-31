@@ -222,9 +222,10 @@ namespace Engine.Effects
         /// <returns>Returns the new generated effect instance</returns>
         private static T CreateEffect<T>(Graphics graphics, byte[] resCso, byte[] resFx) where T : Drawer
         {
+            bool compile = resCso == null;
             var res = resCso ?? resFx;
 
-            var effect = (T)Activator.CreateInstance(typeof(T), graphics, res, false);
+            var effect = (T)Activator.CreateInstance(typeof(T), graphics, res, compile);
 
             effect.Optimize();
 

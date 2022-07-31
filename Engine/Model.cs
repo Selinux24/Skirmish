@@ -289,9 +289,9 @@ namespace Engine
             }
 
             int count = 0;
-            foreach (string meshName in DrawingData.Meshes.Keys)
+            foreach (var mesh in DrawingData.Meshes)
             {
-                count += DrawMesh(context, effect, meshName);
+                count += DrawMesh(context, effect, mesh.Key, mesh.Value);
             }
 
             Counters.InstancesPerFrame++;
@@ -364,27 +364,25 @@ namespace Engine
         /// <param name="effect">Effect</param>
         /// <param name="meshName">Mesh name</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, IGeometryDrawer effect, string meshName)
+        private int DrawMesh(DrawContext context, IGeometryDrawer effect, string meshName, Dictionary<string, Mesh> meshDict)
         {
             int count = 0;
 
             var graphics = Game.Graphics;
 
-            var meshDict = DrawingData.Meshes[meshName];
-
             var localTransform = GetTransformByName(meshName);
 
             effect.UpdatePerFrameFull(localTransform, context);
 
-            foreach (string materialName in meshDict.Keys)
+            foreach (var mat in meshDict)
             {
-                var mesh = meshDict[materialName];
+                var mesh = mat.Value;
                 if (!mesh.Ready)
                 {
                     continue;
                 }
 
-                var material = DrawingData.Materials[materialName];
+                var material = DrawingData.Materials[mat.Key];
 
                 bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)

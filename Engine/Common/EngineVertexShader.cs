@@ -13,10 +13,6 @@ namespace Engine.Common
         /// Vertex shader
         /// </summary>
         private VertexShader shader = null;
-        /// <summary>
-        /// Input layout
-        /// </summary>
-        private InputLayout layout = null;
 
         /// <summary>
         /// Name
@@ -29,14 +25,12 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         /// <param name="vertexShader">Vertex shader</param>
         /// <param name="inputLayout">Input layout</param>
-        internal EngineVertexShader(string name, VertexShader vertexShader, InputLayout inputLayout)
+        internal EngineVertexShader(string name, VertexShader vertexShader)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A vertex shader name must be specified.");
             shader = vertexShader ?? throw new ArgumentNullException(nameof(vertexShader), "A vertex shader must be specified.");
-            layout = inputLayout ?? throw new ArgumentNullException(nameof(inputLayout), "A input layout must be specified.");
 
             shader.DebugName = name;
-            layout.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -64,10 +58,15 @@ namespace Engine.Common
             {
                 shader?.Dispose();
                 shader = null;
-
-                layout?.Dispose();
-                layout = null;
             }
+        }
+
+        /// <summary>
+        /// Gets the internal shader
+        /// </summary>
+        internal VertexShader GetShader()
+        {
+            return shader;
         }
     }
 }

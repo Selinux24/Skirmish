@@ -71,7 +71,6 @@ cbuffer cbPSPerInstance : register(b5)
 
 SamplerState SamplerDiffuse : register(s0);
 SamplerState SamplerNormal : register(s1);
-SamplerState SamplerSpecular : register(s2);
 
 /**********************************************************************************************************
 POSITION COLOR

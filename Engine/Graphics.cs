@@ -893,6 +893,17 @@ namespace Engine
             ClearDepthStencilBuffer(depthMap, clearDepth, clearStencil);
         }
 
+
+        public void SetVertexShader(EngineVertexShader vertexShader)
+        {
+            deviceContext.VertexShader.Set(vertexShader.GetShader());
+        }
+
+        public void SetPixelShader(EnginePixelShader pixelShader)
+        {
+            deviceContext.PixelShader.Set(pixelShader.GetShader());
+        }
+
         /// <summary>
         /// Clear shader resources
         /// </summary>
@@ -1417,6 +1428,40 @@ namespace Engine
                 dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
                 BindFlags.IndexBuffer,
                 dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a constant buffer for the specified data type
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="device">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <returns>Returns created buffer</returns>
+        internal Buffer CreateConstantBuffer<T>(string name)
+            where T : struct
+        {
+            int sizeInBytes = Marshal.SizeOf(typeof(T));
+            sizeInBytes = (sizeInBytes + 15) / 16 * 16;
+
+            ResourceUsage usage = ResourceUsage.Dynamic;
+            BindFlags binding = BindFlags.ConstantBuffer;
+            CpuAccessFlags access = CpuAccessFlags.Write;
+
+            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, 1);
+
+            var description = new BufferDescription()
+            {
+                Usage = usage,
+                SizeInBytes = sizeInBytes,
+                BindFlags = binding,
+                CpuAccessFlags = access,
+                OptionFlags = ResourceOptionFlags.None,
+                StructureByteStride = 0,
+            };
+
+            return new Buffer(device, description)
+            {
+                DebugName = name,
+            };
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -2891,21 +2936,18 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="entryPoint">Entry point</param>
-        /// <param name="input">Input elements</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader LoadVertexShader(
+        internal EngineVertexShader CompileVertexShader(
             string name,
-            string filename,
             string entryPoint,
-            InputElement[] input,
+            string filename,
             string profile)
         {
-            return LoadVertexShader(
+            return CompileVertexShader(
                 name,
-                File.ReadAllBytes(filename),
                 entryPoint,
-                input,
+                File.ReadAllBytes(filename),
                 profile);
         }
         /// <summary>
@@ -2914,23 +2956,20 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="filename">Path to file</param>
         /// <param name="entryPoint">Entry point</param>
-        /// <param name="input">Input elements</param>
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader LoadVertexShader(
+        internal EngineVertexShader CompileVertexShader(
             string name,
-            string filename,
             string entryPoint,
-            InputElement[] input,
+            string filename,
             string profile,
             out string compilationErrors)
         {
-            return LoadVertexShader(
+            return CompileVertexShader(
                 name,
-                File.ReadAllBytes(filename),
                 entryPoint,
-                input,
+                File.ReadAllBytes(filename),
                 profile,
                 out compilationErrors);
         }
@@ -2940,21 +2979,18 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="byteCode">Byte code</param>
         /// <param name="entryPoint">Entry point</param>
-        /// <param name="input">Input elements</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader LoadVertexShader(
+        internal EngineVertexShader CompileVertexShader(
             string name,
-            byte[] byteCode,
             string entryPoint,
-            InputElement[] input,
+            byte[] byteCode,
             string profile)
         {
-            var res = LoadVertexShader(
+            var res = CompileVertexShader(
                 name,
-                byteCode,
                 entryPoint,
-                input,
+                byteCode,
                 profile,
                 out string compilationErrors);
 
@@ -2971,15 +3007,13 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="byteCode">Byte code</param>
         /// <param name="entryPoint">Entry point</param>
-        /// <param name="input">Input elements</param>
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader LoadVertexShader(
+        internal EngineVertexShader CompileVertexShader(
             string name,
-            byte[] byteCode,
             string entryPoint,
-            InputElement[] input,
+            byte[] byteCode,
             string profile,
             out string compilationErrors)
         {
@@ -2999,18 +3033,38 @@ namespace Engine
                     compilationErrors = cmpResult.Message;
                 }
 
-                InputLayout layout = new InputLayout(
-                    device,
-                    ShaderSignature.GetInputSignature(cmpResult.Bytecode),
-                    input);
-
                 VertexShader vertexShader = new VertexShader(
                     device,
                     cmpResult.Bytecode);
 
-                return new EngineVertexShader(name, vertexShader, layout);
+                return new EngineVertexShader(name, vertexShader);
             }
         }
+        /// <summary>
+        /// Loads a vertex shader from pre-compiled file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded shader</returns>
+        internal EngineVertexShader LoadVertexShader(
+            string name,
+            byte[] bytes)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var effectCode = ShaderBytecode.FromStream(ms))
+                {
+                    var shader = new VertexShader(
+                        device,
+                        effectCode.Data);
+
+                    return new EngineVertexShader(name, shader);
+                }
+            }
+        }
+
         /// <summary>
         /// Loads a pixel shader from file
         /// </summary>
@@ -3019,16 +3073,16 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader LoadPixelShader(
+        internal EnginePixelShader CompilePixelShader(
             string name,
-            string filename,
             string entryPoint,
+            string filename,
             string profile)
         {
-            var res = LoadPixelShader(
+            var res = CompilePixelShader(
                 name,
-                File.ReadAllBytes(filename),
                 entryPoint,
+                File.ReadAllBytes(filename),
                 profile,
                 out string compilationErrors);
 
@@ -3048,17 +3102,17 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader LoadPixelShader(
+        internal EnginePixelShader CompilePixelShader(
             string name,
-            string filename,
             string entryPoint,
+            string filename,
             string profile,
             out string compilationErrors)
         {
-            return LoadPixelShader(
+            return CompilePixelShader(
                 name,
-                File.ReadAllBytes(filename),
                 entryPoint,
+                File.ReadAllBytes(filename),
                 profile,
                 out compilationErrors);
         }
@@ -3070,16 +3124,16 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader LoadPixelShader(
+        internal EnginePixelShader CompilePixelShader(
             string name,
-            byte[] byteCode,
             string entryPoint,
+            byte[] byteCode,
             string profile)
         {
-            var res = LoadPixelShader(
+            var res = CompilePixelShader(
                 name,
-                byteCode,
                 entryPoint,
+                byteCode,
                 profile,
                 out string compilationErrors);
 
@@ -3099,10 +3153,10 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader LoadPixelShader(
+        internal EnginePixelShader CompilePixelShader(
             string name,
-            byte[] byteCode,
             string entryPoint,
+            byte[] byteCode,
             string profile,
             out string compilationErrors)
         {
@@ -3124,6 +3178,30 @@ namespace Engine
                 }
 
                 return new EnginePixelShader(name, new PixelShader(device, cmpResult.Bytecode));
+            }
+        }
+        /// <summary>
+        /// Loads a pixel shader from pre-compiled file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded shader</returns>
+        internal EnginePixelShader LoadPixelShader(
+            string name,
+            byte[] bytes)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var effectCode = ShaderBytecode.FromStream(ms))
+                {
+                    var shader = new PixelShader(
+                        device,
+                        effectCode.Data);
+
+                    return new EnginePixelShader(name, shader);
+                }
             }
         }
 
@@ -3197,6 +3275,18 @@ namespace Engine
             return new EngineSamplerState(name, new SamplerState(device, description));
         }
 
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        internal bool WriteDiscardBuffer<T>(Buffer buffer, T data)
+            where T : struct
+        {
+            return WriteDiscardBuffer(buffer, 0, new[] { data });
+        }
         /// <summary>
         /// Writes data into buffer
         /// </summary>

@@ -59,5 +59,13 @@ namespace Engine.Common
                 shader = null;
             }
         }
+
+        /// <summary>
+        /// Gets the internal shader
+        /// </summary>
+        internal PixelShader GetShader()
+        {
+            return shader;
+        }
     }
 }

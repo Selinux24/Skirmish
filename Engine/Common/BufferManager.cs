@@ -892,6 +892,39 @@ namespace Engine.Common
             game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
             return true;
         }
+        /// <summary>
+        /// Sets input layout to device context
+        /// </summary>
+        /// <param name="descriptor">Buffer descriptor</param>
+        /// <param name="topology">Topology</param>
+        public bool SetInputAssembler(BufferDescriptor descriptor, Topology topology)
+        {
+            if (descriptor == null)
+            {
+                return true;
+            }
+
+            if (!descriptor.Ready)
+            {
+                return false;
+            }
+
+            if (!Initilialized)
+            {
+                Logger.WriteWarning(this, "Attempt to set technique to Input Assembler with no initialized manager");
+                return false;
+            }
+
+            var vertexBufferDescriptor = vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
+            if (vertexBufferDescriptor.Dirty)
+            {
+                Logger.WriteWarning(this, $"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
+                return false;
+            }
+
+            game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
+            return true;
+        }
 
         /// <summary>
         /// Writes vertex data into buffer

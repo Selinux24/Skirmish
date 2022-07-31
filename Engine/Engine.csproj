@@ -189,6 +189,11 @@
     <Compile Include="Coroutines\WaitForCount.cs" />
     <Compile Include="Coroutines\Yielder.cs" />
     <Compile Include="Coroutines\YieldInstruction.cs" />
+    <Compile Include="Effects\PositionColorPs.cs" />
+    <Compile Include="Effects\PositionColorVsSkinnedI.cs" />
+    <Compile Include="Effects\PositionColorVsSkinned.cs" />
+    <Compile Include="Effects\PositionColorVsI.cs" />
+    <Compile Include="Effects\PositionColorVs.cs" />
     <Compile Include="Effects\EffectShadowFoliageState.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
@@ -748,6 +753,9 @@
     <PackageReference Include="SharpDX.XAudio2">
       <Version>4.2.0</Version>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\Lib\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
