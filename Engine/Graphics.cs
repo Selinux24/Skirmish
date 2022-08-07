@@ -893,15 +893,56 @@ namespace Engine
             ClearDepthStencilBuffer(depthMap, clearDepth, clearStencil);
         }
 
-
+        /// <summary>
+        /// Sets the vertex shader in the current device context
+        /// </summary>
+        /// <param name="vertexShader">Vertex shader</param>
         public void SetVertexShader(EngineVertexShader vertexShader)
         {
             deviceContext.VertexShader.Set(vertexShader.GetShader());
         }
+        /// <summary>
+        /// Removes the vertex shader from the current device context
+        /// </summary>
+        public void ClearVertexShader()
+        {
+            device.ImmediateContext.VertexShader.Set(null);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current vertex shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="numViews">Number of viewa</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetVertexShaderResources(int startSlot, int numViews, EngineShaderResourceView resourceView)
+        {
+            deviceContext.VertexShader.SetShaderResources(startSlot, numViews, resourceView?.GetResource());
+        }
 
+        /// <summary>
+        /// Sets the pixel shader in the current device context
+        /// </summary>
+        /// <param name="pixelShader">Pixel shader</param>
         public void SetPixelShader(EnginePixelShader pixelShader)
         {
             deviceContext.PixelShader.Set(pixelShader.GetShader());
+        }
+        /// <summary>
+        /// Removes the vertex shader from the current device context
+        /// </summary>
+        public void ClearPixelShader()
+        {
+            device.ImmediateContext3.PixelShader.Set(null);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current pixel shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="numViews">Number of viewa</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetPixelShaderResources(int startSlot, int numViews, EngineShaderResourceView resourceView)
+        {
+            deviceContext.PixelShader.SetShaderResources(startSlot, numViews, resourceView?.GetResource());
         }
 
         /// <summary>
@@ -1546,6 +1587,20 @@ namespace Engine
         internal InputLayout CreateInputLayout(string name, ShaderBytecode shaderBytecode, InputElement[] elements)
         {
             return new InputLayout(device, shaderBytecode, elements)
+            {
+                DebugName = name,
+            };
+        }
+        /// <summary>
+        /// Creates a new Input Layout for a Shader
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Code bytesk</param>
+        /// <param name="elements">Input elements</param>
+        /// <returns>Returns a new Input Layout</returns>
+        internal InputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
+        {
+            return new InputLayout(device, bytes, elements)
             {
                 DebugName = name,
             };
@@ -3037,7 +3092,7 @@ namespace Engine
                     device,
                     cmpResult.Bytecode);
 
-                return new EngineVertexShader(name, vertexShader);
+                return new EngineVertexShader(name, vertexShader, cmpResult.Bytecode);
             }
         }
         /// <summary>
@@ -3060,7 +3115,7 @@ namespace Engine
                         device,
                         effectCode.Data);
 
-                    return new EngineVertexShader(name, shader);
+                    return new EngineVertexShader(name, shader, effectCode);
                 }
             }
         }
@@ -3177,7 +3232,7 @@ namespace Engine
                     compilationErrors = cmpResult.Message;
                 }
 
-                return new EnginePixelShader(name, new PixelShader(device, cmpResult.Bytecode));
+                return new EnginePixelShader(name, new PixelShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
             }
         }
         /// <summary>
@@ -3200,7 +3255,7 @@ namespace Engine
                         device,
                         effectCode.Data);
 
-                    return new EnginePixelShader(name, shader);
+                    return new EnginePixelShader(name, shader, effectCode);
                 }
             }
         }

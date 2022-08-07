@@ -2,6 +2,8 @@
 
 namespace Engine.Effects
 {
+    using Engine.BuiltInEffects;
+    using Engine.BuiltInShaders;
     using Engine.Common;
     using Engine.Properties;
 
@@ -116,6 +118,36 @@ namespace Engine.Effects
         public static EffectPostProcess EffectPostProcess { get; private set; }
 
         /// <summary>
+        /// Position color pixel shader
+        /// </summary>
+        public static PositionColorPs PositionColorPs { get; private set; }
+        /// <summary>
+        /// Position color vertex shader
+        /// </summary>
+        public static PositionColorVs PositionColorVs { get; private set; }
+        /// <summary>
+        /// Position color vertex shader instanced
+        /// </summary>
+        public static PositionColorVsI PositionColorVsI { get; private set; }
+        /// <summary>
+        /// Position color skinned vertex shader
+        /// </summary>
+        public static PositionColorVsSkinned PositionColorVsSkinned { get; private set; }
+        /// <summary>
+        /// Position color skinned vertex shader instanced
+        /// </summary>
+        public static PositionColorVsSkinnedI PositionColorVsSkinnedI { get; private set; }
+
+        /// <summary>
+        /// Basic position color drawer
+        /// </summary>
+        public static BasicPositionColor BasicPositionColor { get; private set; }
+        /// <summary>
+        /// Basic position color instanced drawer
+        /// </summary>
+        public static BasicPositionColorInstanced BasicPositionColorInstanced { get; private set; }
+
+        /// <summary>
         /// Initializes pool
         /// </summary>
         /// <param name="graphics">Device</param>
@@ -150,6 +182,15 @@ namespace Engine.Effects
             EffectShadowCascade = CreateEffect<EffectShadowCascade>(graphics, Resources.ShaderShadowCascadeCso, Resources.ShaderShadowCascadeFx);
 
             EffectPostProcess = CreateEffect<EffectPostProcess>(graphics, Resources.ShaderPostProcessCso, Resources.ShaderPostProcessFx);
+
+            PositionColorPs = new PositionColorPs(graphics);
+            PositionColorVs = new PositionColorVs(graphics);
+            PositionColorVsI = new PositionColorVsI(graphics);
+            PositionColorVsSkinned = new PositionColorVsSkinned(graphics);
+            PositionColorVsSkinnedI = new PositionColorVsSkinnedI(graphics);
+
+            BasicPositionColor = new BasicPositionColor(graphics, PositionColorVs, PositionColorVsSkinned, PositionColorPs);
+            BasicPositionColorInstanced = new BasicPositionColorInstanced(graphics, PositionColorVsI, PositionColorVsSkinnedI, PositionColorPs);
         }
         /// <summary>
         /// Dispose of used resources
@@ -210,6 +251,21 @@ namespace Engine.Effects
 
             EffectPostProcess?.Dispose();
             EffectPostProcess = null;
+
+            PositionColorPs?.Dispose();
+            PositionColorPs = null;
+            PositionColorVs?.Dispose();
+            PositionColorVs = null;
+            PositionColorVsI?.Dispose();
+            PositionColorVsI = null;
+            PositionColorVsSkinned?.Dispose();
+            PositionColorVsSkinned = null;
+            PositionColorVsSkinnedI?.Dispose();
+            PositionColorVsSkinnedI = null;
+            BasicPositionColor?.Dispose();
+            BasicPositionColor = null;
+            BasicPositionColorInstanced?.Dispose();
+            BasicPositionColorInstanced = null;
         }
 
         /// <summary>

@@ -103,6 +103,8 @@ namespace Engine.Common
         /// Input layouts by technique
         /// </summary>
         private readonly Dictionary<EngineEffectTechnique, InputLayout> inputLayouts = new Dictionary<EngineEffectTechnique, InputLayout>();
+
+        private readonly Dictionary<IEngineVertexShader, InputLayout> inputLayouts2 = new Dictionary<IEngineVertexShader, InputLayout>();
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -895,9 +897,10 @@ namespace Engine.Common
         /// <summary>
         /// Sets input layout to device context
         /// </summary>
+        /// <param name="vertexShader">Vertex shader</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="topology">Topology</param>
-        public bool SetInputAssembler(BufferDescriptor descriptor, Topology topology)
+        public bool SetInputAssembler(IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology)
         {
             if (descriptor == null)
             {
@@ -922,6 +925,15 @@ namespace Engine.Common
                 return false;
             }
 
+            //The technique defines the vertex type
+            if (!inputLayouts2.ContainsKey(vertexShader))
+            {
+                inputLayouts2.Add(
+                    vertexShader,
+                    game.Graphics.CreateInputLayout(descriptor.Id, vertexShader.GetShaderBytecode(), vertexBufferDescriptor.Input.ToArray()));
+            }
+
+            game.Graphics.IAInputLayout = inputLayouts2[vertexShader];
             game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
             return true;
         }

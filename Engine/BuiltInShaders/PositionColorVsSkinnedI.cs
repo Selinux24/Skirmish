@@ -2,18 +2,20 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Engine.Effects
+namespace Engine.BuiltInShaders
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Basic effect
     /// </summary>
     public class PositionColorVsSkinnedI : IDisposable
     {
+        /// <summary>
+        /// Global data structure
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct VSGlobals
         {
@@ -23,6 +25,9 @@ namespace Engine.Effects
             public uint Pad3;
         }
 
+        /// <summary>
+        /// Per frame data structure
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct VSPerFrame
         {
@@ -30,14 +35,24 @@ namespace Engine.Effects
             public Matrix WorldViewProjection;
         }
 
-        private readonly EngineVertexShader shader;
-        private readonly Buffer vsGlobals;
-        private readonly Buffer vsPerFrame;
+        /// <summary>
+        /// Globals constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<VSGlobals> vsGlobals;
+        /// <summary>
+        /// Per frame constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
 
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
+
+        /// <summary>
+        /// Shader
+        /// </summary>
+        public readonly EngineVertexShader Shader;
 
         /// <summary>
         /// Constructor
@@ -51,15 +66,15 @@ namespace Engine.Effects
             var bytes = Resources.Vs_PositionColor_Skinned_I_Cso ?? Resources.Vs_PositionColor_Skinned_I;
             if (compile)
             {
-                shader = graphics.CompileVertexShader(nameof(PositionColorVsSkinnedI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionColorVsSkinnedI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                shader = graphics.LoadVertexShader(nameof(PositionColorVsSkinnedI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionColorVsSkinnedI), bytes);
             }
 
-            vsGlobals = graphics.CreateConstantBuffer<VSGlobals>(nameof(PositionColorVsSkinnedI) + "." + nameof(VSGlobals));
-            vsPerFrame = graphics.CreateConstantBuffer<VSPerFrame>(nameof(PositionColorVsSkinnedI) + "." + nameof(VSPerFrame));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSPerFrame));
         }
         /// <summary>
         /// Destructor
@@ -85,22 +100,33 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                shader?.Dispose();
+                Shader?.Dispose();
                 vsGlobals?.Dispose();
                 vsPerFrame?.Dispose();
             }
         }
 
-
-        public void SetVSGlobals(uint animationPaletteWidth)
+        /// <summary>
+        /// Sets global data
+        /// </summary>
+        /// <param name="animationPalette">Animation palette texture</param>
+        /// <param name="animationPaletteWidth">Animation palette texture width</param>
+        public void SetVSGlobals(EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             var data = new VSGlobals
             {
                 AnimationPaletteWidth = animationPaletteWidth,
             };
 
-            Graphics.WriteDiscardBuffer(vsGlobals, data);
+            vsGlobals.WriteData(data);
+
+            Graphics.SetVertexShaderResources(0, 1, animationPalette);
         }
+        /// <summary>
+        /// Sets per frame data
+        /// </summary>
+        /// <param name="world">World matrix</param>
+        /// <param name="worldViewProjection">World view projection matrix</param>
         public void SetVSPerFrame(Matrix world, Matrix worldViewProjection)
         {
             var data = new VSPerFrame
@@ -109,18 +135,7 @@ namespace Engine.Effects
                 WorldViewProjection = Matrix.Transpose(worldViewProjection),
             };
 
-            Graphics.WriteDiscardBuffer(vsPerFrame, data);
-        }
-        public void SetShader()
-        {
-            Graphics.SetVertexShader(shader);
-        }
-        public void Draw(Mesh mesh, BufferManager bufferManager)
-        {
-            bufferManager.SetIndexBuffer(mesh.IndexBuffer);
-            bufferManager.SetInputAssembler(mesh.VertexBuffer, mesh.Topology);
-
-            mesh.Draw(Graphics);
+            vsPerFrame.WriteData(data);
         }
     }
 }

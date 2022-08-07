@@ -2,32 +2,47 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Engine.Effects
+namespace Engine.BuiltInShaders
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Basic effect
     /// </summary>
     public class PositionColorVsI : IDisposable
     {
+        /// <summary>
+        /// Per frame data structure
+        /// </summary>
         [StructLayout(LayoutKind.Sequential)]
         public struct VSPerFrame
         {
+            /// <summary>
+            /// World matrix
+            /// </summary>
             public Matrix World;
+            /// <summary>
+            /// World view projection matrix
+            /// </summary>
             public Matrix WorldViewProjection;
         }
 
-        private readonly EngineVertexShader shader;
-        private readonly Buffer vsPerFrame;
+        /// <summary>
+        /// Per frame constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
 
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
+
+        /// <summary>
+        /// Shader
+        /// </summary>
+        public readonly EngineVertexShader Shader;
 
         /// <summary>
         /// Constructor
@@ -41,14 +56,14 @@ namespace Engine.Effects
             var bytes = Resources.Vs_PositionColor_I_Cso ?? Resources.Vs_PositionColor_I;
             if (compile)
             {
-                shader = graphics.CompileVertexShader(nameof(PositionColorVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionColorVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                shader = graphics.LoadVertexShader(nameof(PositionColorVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionColorVsI), bytes);
             }
 
-            vsPerFrame = graphics.CreateConstantBuffer<VSPerFrame>(nameof(PositionColorVsI) + "." + nameof(VSPerFrame));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsI) + "." + nameof(VSPerFrame));
         }
         /// <summary>
         /// Destructor
@@ -74,12 +89,16 @@ namespace Engine.Effects
         {
             if (disposing)
             {
-                shader?.Dispose();
+                Shader?.Dispose();
                 vsPerFrame?.Dispose();
             }
         }
 
-
+        /// <summary>
+        /// Sets per frame data
+        /// </summary>
+        /// <param name="world">World matrix</param>
+        /// <param name="worldViewProjection">World view projection matrix</param>
         public void SetVSPerFrame(Matrix world, Matrix worldViewProjection)
         {
             var data = new VSPerFrame
@@ -88,18 +107,7 @@ namespace Engine.Effects
                 WorldViewProjection = Matrix.Transpose(worldViewProjection),
             };
 
-            Graphics.WriteDiscardBuffer(vsPerFrame, data);
-        }
-        public void SetShader()
-        {
-            Graphics.SetVertexShader(shader);
-        }
-        public void Draw(Mesh mesh, BufferManager bufferManager)
-        {
-            bufferManager.SetIndexBuffer(mesh.IndexBuffer);
-            bufferManager.SetInputAssembler(mesh.VertexBuffer, mesh.Topology);
-
-            mesh.Draw(Graphics);
+            vsPerFrame.WriteData(data);
         }
     }
 }

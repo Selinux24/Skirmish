@@ -7,16 +7,18 @@ namespace Engine.Common
     /// <summary>
     /// Vertex shader description
     /// </summary>
-    public class EngineVertexShader : IDisposable
+    public class EngineVertexShader : IDisposable, IEngineVertexShader
     {
         /// <summary>
         /// Vertex shader
         /// </summary>
-        private VertexShader shader = null;
-
+        private readonly VertexShader shader;
         /// <summary>
-        /// Name
+        /// Shader byte code
         /// </summary>
+        private readonly byte[] shaderByteCode;
+
+        /// <inheritdoc/>
         public string Name { get; private set; }
 
         /// <summary>
@@ -24,11 +26,12 @@ namespace Engine.Common
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="vertexShader">Vertex shader</param>
-        /// <param name="inputLayout">Input layout</param>
-        internal EngineVertexShader(string name, VertexShader vertexShader)
+        /// <param name="byteCode">Shader byte code</param>
+        internal EngineVertexShader(string name, VertexShader vertexShader, byte[] byteCode)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A vertex shader name must be specified.");
             shader = vertexShader ?? throw new ArgumentNullException(nameof(vertexShader), "A vertex shader must be specified.");
+            shaderByteCode = byteCode ?? throw new ArgumentNullException(nameof(byteCode), "The vertex shader byte code must be specified.");
 
             shader.DebugName = name;
         }
@@ -57,8 +60,13 @@ namespace Engine.Common
             if (disposing)
             {
                 shader?.Dispose();
-                shader = null;
             }
+        }
+
+        /// <inheritdoc/>
+        public byte[] GetShaderBytecode()
+        {
+            return shaderByteCode;
         }
 
         /// <summary>
