@@ -72,5 +72,13 @@ namespace Engine.Common
         {
             graphics.WriteDiscardBuffer(buffer, data);
         }
+
+        /// <summary>
+        /// Gets the internal buffer
+        /// </summary>
+        internal Buffer GetBuffer()
+        {
+            return buffer;
+        }
     }
 }

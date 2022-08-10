@@ -1,4 +1,5 @@
 #include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncMaterials.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
 /**********************************************************************************************************
@@ -6,10 +7,12 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbVSGlobals : register(b0)
 {
+	uint gMaterialPaletteWidth;
 	uint gAnimationPaletteWidth;
-	uint3 PAD01;
+	uint2 PAD01;
 };
-Texture2D gAnimationPalette : register(t0);
+Texture2D gMaterialPalette : register(t0);
+Texture2D gAnimationPalette : register(t1);
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -17,15 +20,23 @@ cbuffer cbVSPerFrame : register(b1)
 	float4x4 gWorldViewProjection;
 };
 
+struct PSVertexPositionColor2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float4 color : COLOR0;
+};
+
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
-PSVertexPositionColor main(VSVertexPositionColorSkinnedI input)
+PSVertexPositionColor2 main(VSVertexPositionColorSkinnedI input)
 {
-	PSVertexPositionColor output = (PSVertexPositionColor)0;
+	PSVertexPositionColor2 output = (PSVertexPositionColor2)0;
+
+	Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
 	ComputePositionWeights(
 		gAnimationPalette,
 		input.animationOffset,
@@ -41,8 +52,7 @@ PSVertexPositionColor main(VSVertexPositionColorSkinnedI input)
 
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
-	output.color = input.color * input.tintColor;
-	output.materialIndex = input.materialIndex;
+	output.color = input.color * input.tintColor * material.Diffuse;
 
 	return output;
 }

@@ -282,16 +282,10 @@ namespace Engine
                 return;
             }
 
-            var effect = GetEffect(context.DrawerMode);
-            if (effect == null)
-            {
-                return;
-            }
-
             int count = 0;
             foreach (var mesh in DrawingData.Meshes)
             {
-                count += DrawMesh(context, effect, mesh.Key, mesh.Value);
+                count += DrawMesh(context, mesh.Key, mesh.Value);
             }
 
             Counters.InstancesPerFrame++;
@@ -361,18 +355,14 @@ namespace Engine
         /// Draws a mesh
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Effect</param>
-        /// <param name="meshName">Mesh name</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, IGeometryDrawer effect, string meshName, Dictionary<string, Mesh> meshDict)
+        private int DrawMesh(DrawContext context, string meshName, Dictionary<string, Mesh> meshDict)
         {
             int count = 0;
 
             var graphics = Game.Graphics;
 
             var localTransform = GetTransformByName(meshName);
-
-            effect.UpdatePerFrameFull(localTransform, context);
 
             foreach (var mat in meshDict)
             {
@@ -403,20 +393,45 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
-
-                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                var technique = effect.GetTechnique(mesh.VertextType, false);
-                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                count += mesh.Count;
-
-                for (int p = 0; p < technique.PassCount; p++)
+                if (mesh.VertextType == VertexTypes.PositionColor)
                 {
-                    graphics.EffectPassApply(technique, p, 0);
+                    var effect = DrawerPool.BasicPositionColor;
 
-                    mesh.Draw(graphics);
+                    effect.UpdatePerFrame(localTransform, context);
+
+                    effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
+
+                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+
+                    count += mesh.Count;
+
+                    effect.Draw(BufferManager, new[] { mesh });
+                }
+                else
+                {
+                    var effect = GetEffect(context.DrawerMode);
+                    if (effect == null)
+                    {
+                        continue;
+                    }
+
+                    effect.UpdatePerFrameFull(localTransform, context);
+
+                    effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
+
+                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+
+                    var technique = effect.GetTechnique(mesh.VertextType, false);
+                    BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+
+                    count += mesh.Count;
+
+                    for (int p = 0; p < technique.PassCount; p++)
+                    {
+                        graphics.EffectPassApply(technique, p, 0);
+
+                        mesh.Draw(graphics);
+                    }
                 }
             }
 

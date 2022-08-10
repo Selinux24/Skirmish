@@ -261,22 +261,10 @@ namespace Engine
             Counters.InstancesPerFrame += dictionary.Count;
             Counters.PrimitivesPerFrame += drawCount / stride;
 
-            var effect = DrawerPool.EffectDefaultBasic;
-            var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
-
-            BufferManager.SetInputAssembler(technique, vertexBuffer, topology);
-
-            effect.UpdatePerFrameBasic(Matrix.Identity, context);
-            effect.UpdatePerObject();
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.Draw(drawCount, vertexBuffer.BufferOffset);
-            }
+            var effect = DrawerPool.BasicPositionColor;
+            effect.UpdatePerFrame(Matrix.Identity, context);
+            effect.UpdatePerObject(new AnimationDrawInfo(), new MaterialDrawInfo { Material = MeshMaterial.DefaultPhong, UseAnisotropic = false }, 0, Color.White);
+            effect.Draw(BufferManager, vertexBuffer, drawCount, topology);
         }
         /// <summary>
         /// Writes dictionary data in buffer

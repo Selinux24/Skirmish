@@ -14,21 +14,6 @@ namespace Engine.BuiltInShaders
     public class PositionColorPs : IDisposable
     {
         /// <summary>
-        /// Global data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct VSGlobals
-        {
-            /// <summary>
-            /// Material palette width
-            /// </summary>
-            public uint MaterialPaletteWidth;
-            public uint Pad1;
-            public uint Pad2;
-            public uint Pad3;
-        }
-
-        /// <summary>
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
@@ -61,10 +46,6 @@ namespace Engine.BuiltInShaders
         public readonly EnginePixelShader Shader;
 
         /// <summary>
-        /// Globals constant buffer
-        /// </summary>
-        private readonly EngineConstantBuffer<VSGlobals> vsGlobals;
-        /// <summary>
         /// Per frame constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
@@ -93,7 +74,6 @@ namespace Engine.BuiltInShaders
                 Shader = graphics.LoadPixelShader(nameof(PositionColorPs), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorPs) + "." + nameof(VSGlobals));
             vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorPs) + "." + nameof(VSPerFrame));
         }
         /// <summary>
@@ -121,27 +101,10 @@ namespace Engine.BuiltInShaders
             if (disposing)
             {
                 Shader?.Dispose();
-                vsGlobals?.Dispose();
                 vsPerFrame?.Dispose();
             }
         }
 
-        /// <summary>
-        /// Sets the globals data
-        /// </summary>
-        /// <param name="materialPalette">Material palette texture</param>
-        /// <param name="materialPaletteWidth">Material palette texture width</param>
-        public void SetVSGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth)
-        {
-            var data = new VSGlobals
-            {
-                MaterialPaletteWidth = materialPaletteWidth,
-            };
-
-            vsGlobals.WriteData(data);
-
-            Graphics.SetPixelShaderResources(0, 1, materialPalette);
-        }
         /// <summary>
         /// Sets per frame data
         /// </summary>
@@ -158,8 +121,15 @@ namespace Engine.BuiltInShaders
                 FogStart = fogStart,
                 FogRange = fogRange,
             };
-
             vsPerFrame.WriteData(data);
+        }
+
+        /// <summary>
+        /// Sets the pixel shader constant buffers
+        /// </summary>
+        public void SetConstantBuffers()
+        {
+            Graphics.SetPixelShaderConstantBuffer(1, vsPerFrame);
         }
     }
 }

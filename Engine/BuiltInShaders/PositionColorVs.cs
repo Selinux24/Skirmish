@@ -14,6 +14,21 @@ namespace Engine.BuiltInShaders
     public class PositionColorVs : IDisposable
     {
         /// <summary>
+        /// Global data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct VSGlobals
+        {
+            /// <summary>
+            /// Material palette width
+            /// </summary>
+            public uint MaterialPaletteWidth;
+            public uint Pad1;
+            public uint Pad2;
+            public uint Pad3;
+        }
+
+        /// <summary>
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
@@ -48,6 +63,14 @@ namespace Engine.BuiltInShaders
             public uint Pad3;
         }
 
+        /// <summary>
+        /// Globals constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<VSGlobals> vsGlobals;
+        /// <summary>
+        /// Material palette resource view
+        /// </summary>
+        private EngineShaderResourceView materialPalette;
         /// <summary>
         /// Per frame constant buffer
         /// </summary>
@@ -86,6 +109,7 @@ namespace Engine.BuiltInShaders
                 Shader = graphics.LoadVertexShader(nameof(PositionColorVs), bytes);
             }
 
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVs) + "." + nameof(VSGlobals));
             vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVs) + "." + nameof(VSPerFrame));
             vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(PositionColorVs) + "." + nameof(VSPerInstance));
         }
@@ -114,11 +138,27 @@ namespace Engine.BuiltInShaders
             if (disposing)
             {
                 Shader?.Dispose();
+                vsGlobals?.Dispose();
                 vsPerFrame?.Dispose();
                 vsPerInstance?.Dispose();
             }
         }
 
+        /// <summary>
+        /// Sets the globals data
+        /// </summary>
+        /// <param name="materialPalette">Material palette texture</param>
+        /// <param name="materialPaletteWidth">Material palette texture width</param>
+        public void SetVSGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth)
+        {
+            this.materialPalette = materialPalette;
+
+            var data = new VSGlobals
+            {
+                MaterialPaletteWidth = materialPaletteWidth,
+            };
+            vsGlobals.WriteData(data);
+        }
         /// <summary>
         /// Sets per frame data
         /// </summary>
@@ -131,7 +171,6 @@ namespace Engine.BuiltInShaders
                 World = Matrix.Transpose(world),
                 WorldViewProjection = Matrix.Transpose(worldViewProjection),
             };
-
             vsPerFrame.WriteData(data);
         }
         /// <summary>
@@ -146,8 +185,19 @@ namespace Engine.BuiltInShaders
                 TintColor = tintColor,
                 MaterialIndex = materialIndex,
             };
-
             vsPerInstance.WriteData(data);
+        }
+
+        /// <summary>
+        /// Sets the vertex shader constant buffers
+        /// </summary>
+        public void SetConstantBuffers()
+        {
+            Graphics.SetVertexShaderConstantBuffer(0, vsGlobals);
+            Graphics.SetVertexShaderConstantBuffer(1, vsPerFrame);
+            Graphics.SetVertexShaderConstantBuffer(2, vsPerInstance);
+
+            Graphics.SetVertexShaderResourceView(0, materialPalette);
         }
     }
 }

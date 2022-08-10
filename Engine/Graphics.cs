@@ -909,14 +909,23 @@ namespace Engine
             device.ImmediateContext.VertexShader.Set(null);
         }
         /// <summary>
+        /// Sets the contaxt buffer to the current vertex shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="slot">Slot</param>
+        /// <param name="buffer">Buffer</param>
+        public void SetVertexShaderConstantBuffer<T>(int slot, EngineConstantBuffer<T> buffer) where T : struct
+        {
+            deviceContext.VertexShader?.SetConstantBuffer(slot, buffer?.GetBuffer());
+        }
+        /// <summary>
         /// Sets the specified resource in the current vertex shader
         /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="numViews">Number of viewa</param>
+        /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource</param>
-        public void SetVertexShaderResources(int startSlot, int numViews, EngineShaderResourceView resourceView)
+        public void SetVertexShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            deviceContext.VertexShader.SetShaderResources(startSlot, numViews, resourceView?.GetResource());
+            deviceContext.VertexShader?.SetShaderResource(slot, resourceView?.GetResource());
         }
 
         /// <summary>
@@ -935,14 +944,23 @@ namespace Engine
             device.ImmediateContext3.PixelShader.Set(null);
         }
         /// <summary>
+        /// Sets the contaxt buffer to the current pixel shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="slot">Slot</param>
+        /// <param name="buffer">Buffer</param>
+        public void SetPixelShaderConstantBuffer<T>(int slot, EngineConstantBuffer<T> buffer) where T : struct
+        {
+            deviceContext.PixelShader?.SetConstantBuffer(slot, buffer?.GetBuffer());
+        }
+        /// <summary>
         /// Sets the specified resource in the current pixel shader
         /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="numViews">Number of viewa</param>
+        /// <param name="slot">Slot</param>
         /// <param name="resourceView">Resource</param>
-        public void SetPixelShaderResources(int startSlot, int numViews, EngineShaderResourceView resourceView)
+        public void SetPixelShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            deviceContext.PixelShader.SetShaderResources(startSlot, numViews, resourceView?.GetResource());
+            deviceContext.PixelShader?.SetShaderResource(slot, resourceView?.GetResource());
         }
 
         /// <summary>

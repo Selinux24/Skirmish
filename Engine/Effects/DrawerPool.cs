@@ -325,6 +325,9 @@ namespace Engine.Effects
             EffectShadowBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
 
             EffectShadowPoint.UpdateGlobals(animationPalette, animationPaletteWidth);
+
+            BasicPositionColor.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+            BasicPositionColorInstanced.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
     }
 }

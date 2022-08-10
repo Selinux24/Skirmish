@@ -721,9 +721,11 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeTestCube()
         {
-            var bbox = new BoundingBox(Vector3.One * -0.5f, Vector3.One * 0.5f);
+            float size = 1f;
+            float half = size * 0.5f;
+            var bbox = new BoundingBox(Vector3.One * -half, Vector3.One * half);
             var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
-            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + xDelta, 0.5f + yDelta, 0 + zDelta));
+            cubeTris = Triangle.Transform(cubeTris, Matrix.Translation(30 + xDelta, half + yDelta, 0 + zDelta));
 
             var desc = new PrimitiveListDrawerDescription<Triangle>()
             {

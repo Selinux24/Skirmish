@@ -83,9 +83,12 @@ namespace Engine.BuiltInEffects
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
-            positionColorVsSkinned.SetVSGlobals(animationPalette, animationPaletteWidth);
+            positionColorVs.SetVSGlobals(
+                materialPalette, materialPaletteWidth);
 
-            positionColorPs.SetVSGlobals(materialPalette, materialPaletteWidth);
+            positionColorVsSkinned.SetVSGlobals(
+                materialPalette, materialPaletteWidth,
+                animationPalette, animationPaletteWidth);
         }
         /// <inheritdoc/>
         public void UpdatePerFrame(
@@ -128,6 +131,8 @@ namespace Engine.BuiltInEffects
             graphics.SetVertexShader(positionColorVs.Shader);
             graphics.ClearPixelShader();
 
+            positionColorVs.SetConstantBuffers();
+
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
@@ -141,6 +146,30 @@ namespace Engine.BuiltInEffects
             }
         }
         /// <inheritdoc/>
+        public void DrawShadows(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
+        {
+            if (drawCount <= 0)
+            {
+                return;
+            }
+
+            // Set the vertex and clear the pixel shaders that will be used to render this mesh shadow map.
+            graphics.SetVertexShader(positionColorVs.Shader);
+            graphics.ClearPixelShader();
+
+            positionColorVs.SetConstantBuffers();
+
+            // Set the vertex input layout.
+            if (!bufferManager.SetInputAssembler(positionColorVs.Shader, vertexBuffer, topology))
+            {
+                return;
+            }
+
+            // Render the primitives.
+            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
+        }
+
+        /// <inheritdoc/>
         public void DrawShadowsSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes)
         {
             if (meshes?.Any() != true)
@@ -148,9 +177,11 @@ namespace Engine.BuiltInEffects
                 return;
             }
 
-            // Set the vertex and pixel shaders that will be used to render this mesh.
+            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
             graphics.SetVertexShader(positionColorVsSkinned.Shader);
             graphics.ClearPixelShader();
+
+            positionColorVsSkinned.SetConstantBuffers();
 
             foreach (var mesh in meshes)
             {
@@ -164,6 +195,30 @@ namespace Engine.BuiltInEffects
                 mesh.Draw(graphics);
             }
         }
+        /// <inheritdoc/>
+        public void DrawShadowsSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
+        {
+            if (drawCount <= 0)
+            {
+                return;
+            }
+
+            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
+            graphics.SetVertexShader(positionColorVsSkinned.Shader);
+            graphics.ClearPixelShader();
+
+            positionColorVsSkinned.SetConstantBuffers();
+
+            // Set the vertex input layout.
+            if (!bufferManager.SetInputAssembler(positionColorVsSkinned.Shader, vertexBuffer, topology))
+            {
+                return;
+            }
+
+            // Render the primitives.
+            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
+        }
+
         /// <inheritdoc/>
         public void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes)
         {
@@ -176,6 +231,9 @@ namespace Engine.BuiltInEffects
             graphics.SetVertexShader(positionColorVs.Shader);
             graphics.SetPixelShader(positionColorPs.Shader);
 
+            positionColorVs.SetConstantBuffers();
+            positionColorPs.SetConstantBuffers();
+
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
@@ -189,6 +247,31 @@ namespace Engine.BuiltInEffects
             }
         }
         /// <inheritdoc/>
+        public void Draw(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
+        {
+            if (drawCount <= 0)
+            {
+                return;
+            }
+
+            // Set the vertex and pixel shaders that will be used to render this mesh.
+            graphics.SetVertexShader(positionColorVs.Shader);
+            graphics.SetPixelShader(positionColorPs.Shader);
+
+            positionColorVs.SetConstantBuffers();
+            positionColorPs.SetConstantBuffers();
+
+            // Set the vertex input layout.
+            if (!bufferManager.SetInputAssembler(positionColorVs.Shader, vertexBuffer, topology))
+            {
+                return;
+            }
+
+            // Render the primitives.
+            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
+        }
+
+        /// <inheritdoc/>
         public void DrawSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes)
         {
             if (meshes?.Any() != true)
@@ -199,6 +282,9 @@ namespace Engine.BuiltInEffects
             // Set the vertex and pixel shaders that will be used to render this mesh.
             graphics.SetVertexShader(positionColorVsSkinned.Shader);
             graphics.SetPixelShader(positionColorPs.Shader);
+
+            positionColorVsSkinned.SetConstantBuffers();
+            positionColorPs.SetConstantBuffers();
 
             foreach (var mesh in meshes)
             {
@@ -211,6 +297,30 @@ namespace Engine.BuiltInEffects
                 // Render the mesh.
                 mesh.Draw(graphics);
             }
+        }
+        /// <inheritdoc/>
+        public void DrawSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
+        {
+            if (drawCount <= 0)
+            {
+                return;
+            }
+
+            // Set the vertex and pixel shaders that will be used to render this mesh.
+            graphics.SetVertexShader(positionColorVsSkinned.Shader);
+            graphics.SetPixelShader(positionColorPs.Shader);
+
+            positionColorVsSkinned.SetConstantBuffers();
+            positionColorPs.SetConstantBuffers();
+
+            // Set the vertex input layout.
+            if (!bufferManager.SetInputAssembler(positionColorVsSkinned.Shader, vertexBuffer, topology))
+            {
+                return;
+            }
+
+            // Render the primitives.
+            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
         }
     }
 }

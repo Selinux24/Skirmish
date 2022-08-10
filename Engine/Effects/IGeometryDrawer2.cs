@@ -27,7 +27,9 @@ namespace Engine.Effects
         /// </summary>
         /// <param name="world">World</param>
         /// <param name="context">Context</param>
-        void UpdatePerFrame(Matrix world, DrawContext context);
+        void UpdatePerFrame(
+            Matrix world,
+            DrawContext context);
         /// <summary>
         /// Update per model object data
         /// </summary>
@@ -48,11 +50,29 @@ namespace Engine.Effects
         /// <param name="meshes">Mesh list</param>
         void DrawShadows(BufferManager bufferManager, IEnumerable<Mesh> meshes);
         /// <summary>
+        /// Draws the specified vertex buffer shadow maps
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="vertexBuffer">Vertex buffer</param>
+        /// <param name="drawCount">Primitive count</param>
+        /// <param name="topology">Topology</param>
+        void DrawShadows(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
+
+        /// <summary>
         /// Draws the specified skinned meshes shadow maps
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="meshes">Mesh list</param>
         void DrawShadowsSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes);
+        /// <summary>
+        /// Draws the specified skinned vetex buffer shadow maps
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="vertexBuffer">Skinned vertex buffer</param>
+        /// <param name="drawCount">Primitive count</param>
+        /// <param name="topology">Topology</param>
+        void DrawShadowsSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
+
         /// <summary>
         /// Draws the specified meshes
         /// </summary>
@@ -60,10 +80,27 @@ namespace Engine.Effects
         /// <param name="meshes">Mesh list</param>
         void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes);
         /// <summary>
+        /// Draws the specified vertex buffer
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="vertexBuffer">Vertex buffer</param>
+        /// <param name="drawCount">Primitive count</param>
+        /// <param name="topology">Topology</param>
+        void Draw(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
+
+        /// <summary>
         /// Draws the specified skinned meshes
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="meshes">Mesh list</param>
         void DrawSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes);
+        /// <summary>
+        /// Draws the specified skinned vertex buffer
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        /// <param name="vertexBuffer">Skinned vertex buffer</param>
+        /// <param name="drawCount">Primitive count</param>
+        /// <param name="topology">Topology</param>
+        void DrawSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
     }
 }

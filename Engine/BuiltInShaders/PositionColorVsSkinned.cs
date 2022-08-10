@@ -20,12 +20,15 @@ namespace Engine.BuiltInShaders
         public struct VSGlobals
         {
             /// <summary>
+            /// Material palette width
+            /// </summary>
+            public uint MaterialPaletteWidth;
+            /// <summary>
             /// Animation palette width
             /// </summary>
             public uint AnimationPaletteWidth;
             public uint Pad1;
             public uint Pad2;
-            public uint Pad3;
         }
 
         /// <summary>
@@ -80,6 +83,14 @@ namespace Engine.BuiltInShaders
         /// Globals constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<VSGlobals> vsGlobals;
+        /// <summary>
+        /// Material palette resource view
+        /// </summary>
+        private EngineShaderResourceView materialPalette;
+        /// <summary>
+        /// Animation palette resource view
+        /// </summary>
+        private EngineShaderResourceView animationPalette;
         /// <summary>
         /// Per frame constant buffer
         /// </summary>
@@ -156,18 +167,21 @@ namespace Engine.BuiltInShaders
         /// <summary>
         /// Sets global data
         /// </summary>
+        /// <param name="materialPalette">Material palette texture</param>
+        /// <param name="materialPaletteWidth">Material palette texture width</param>
         /// <param name="animationPalette">Animation palette texture</param>
         /// <param name="animationPaletteWidth">Animation palette texture width</param>
-        public void SetVSGlobals(EngineShaderResourceView animationPalette, uint animationPaletteWidth)
+        public void SetVSGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
+            this.materialPalette = materialPalette;
+            this.animationPalette = animationPalette;
+
             var data = new VSGlobals
             {
+                MaterialPaletteWidth = materialPaletteWidth,
                 AnimationPaletteWidth = animationPaletteWidth,
             };
-
             vsGlobals.WriteData(data);
-
-            Graphics.SetVertexShaderResources(0, 1, animationPalette);
         }
         /// <summary>
         /// Sets per frame data
@@ -181,7 +195,6 @@ namespace Engine.BuiltInShaders
                 World = Matrix.Transpose(world),
                 WorldViewProjection = Matrix.Transpose(worldViewProjection),
             };
-
             vsPerFrame.WriteData(data);
         }
         /// <summary>
@@ -202,8 +215,20 @@ namespace Engine.BuiltInShaders
                 AnimationOffset2 = animationOffset2,
                 AnimationInterpolation = animationInterpolation,
             };
-
             vsPerInstance.WriteData(data);
+        }
+
+        /// <summary>
+        /// Sets the vertex shader constant buffers
+        /// </summary>
+        public void SetConstantBuffers()
+        {
+            Graphics.SetVertexShaderConstantBuffer(0, vsGlobals);
+            Graphics.SetVertexShaderConstantBuffer(1, vsPerFrame);
+            Graphics.SetVertexShaderConstantBuffer(2, vsPerInstance);
+
+            Graphics.SetVertexShaderResourceView(0, materialPalette);
+            Graphics.SetVertexShaderResourceView(1, animationPalette);
         }
     }
 }

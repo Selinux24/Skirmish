@@ -4,13 +4,6 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPSGlobals : register(b0)
-{
-	uint gMaterialPaletteWidth;
-	uint3 PAD01;
-};
-Texture2D gMaterialPalette : register(t0);
-
 cbuffer cbPSPerFrame : register(b1)
 {
 	float3 gEyePositionWorld;
@@ -21,14 +14,19 @@ cbuffer cbPSPerFrame : register(b1)
 	float2 PAD12;
 };
 
+struct PSVertexPositionColor2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float4 color : COLOR0;
+};
+
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
-float4 main(PSVertexPositionColor input) : SV_TARGET
+float4 main(PSVertexPositionColor2 input) : SV_TARGET
 {
-	Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
-
-	float4 matColor = input.color * material.Diffuse;
+	float4 matColor = input.color;
 
 	if (gFogRange > 0)
 	{
