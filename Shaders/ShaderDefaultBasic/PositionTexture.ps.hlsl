@@ -1,17 +1,29 @@
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncLights.hlsl"
 
+#ifndef CHANNEL_ALL
+#define CHANNEL_ALL 	0
+#endif
+#ifndef CHANNEL_RED
+#define CHANNEL_RED 	1
+#endif
+#ifndef CHANNEL_GREEN
+#define CHANNEL_GREEN	2
+#endif
+#ifndef CHANNEL_BLUE
+#define CHANNEL_BLUE	3
+#endif
+#ifndef CHANNEL_ALPHA
+#define CHANNEL_ALPHA	4
+#endif
+#ifndef CHANNEL_NALPHA
+#define CHANNEL_NALPHA	5
+#endif
+
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPSGlobals : register(b0)
-{
-	uint gMaterialPaletteWidth;
-	uint3 PAD01;
-};
-Texture2D gMaterialPalette : register(t0);
-
-cbuffer cbPSPerFrame : register(b1)
+cbuffer cbPSPerFrame : register(b0)
 {
 	float3 gEyePositionWorld;
 	float PAD11;
@@ -20,98 +32,69 @@ cbuffer cbPSPerFrame : register(b1)
 	float gFogRange;
 	float2 PAD12;
 };
-Texture2DArray gDiffuseMapArray : register(t5);
 
-cbuffer cbPSPerInstance : register(b2)
+cbuffer cbPSPerFrame2 : register(b1)
 {
 	uint gChannel;
 	uint3 PAD21;
 };
 
+Texture2DArray gDiffuseMapArray : register(t0);
+
 SamplerState SamplerDiffuse : register(s0);
+
+struct PSVertexPositionTexture2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float2 tex : TEXCOORD0;
+	float4 tintColor : TINTCOLOR;
+	uint textureIndex : TEXTUREINDEX;
+};
 
 /**********************************************************************************************************
 POSITION TEXTURE
 **********************************************************************************************************/
-float4 GrayscaleRed(PSVertexPositionTexture input) : SV_TARGET
+float4 main(PSVertexPositionTexture2 input) : SV_TARGET
 {
 	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
-	//Grayscale of red channel
-	return float4(color.rrr, 1);
-}
-float4 GrayscaleGreen(PSVertexPositionTexture input) : SV_TARGET
-{
-	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-
-	//Grayscale of green channel
-	return float4(color.ggg, 1);
-}
-float4 GrayscaleBlue(PSVertexPositionTexture input) : SV_TARGET
-{
-	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-
-	//Grayscale of blue channel
-	return float4(color.bbb, 1);
-}
-float4 GrayscaleAlpha(PSVertexPositionTexture input) : SV_TARGET
-{
-	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-
-	//Grayscale of alpha channel
-	return float4(color.aaa, 1);
-}
-float4 NoAlpha(PSVertexPositionTexture input) : SV_TARGET
-{
-	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-
-	//Color channel
-	return float4(color.rgb, 1);
-}
-float4 main(PSVertexPositionTexture input) : SV_TARGET
-{
-	if(gChannel == 0)
+	if(gChannel == CHANNEL_ALL)
 	{
-		Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
-
-
-		float4 textureColor = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-		textureColor *= input.tintColor * material.Diffuse;
-
-		if (gFogRange > 0)
-		{
-			float distToEye = length(gEyePositionWorld - input.positionWorld);
-
-			textureColor = ComputeFog(textureColor, distToEye, gFogStart, gFogRange, gFogColor);
-		}
-
-		return textureColor;
+		color *= input.tintColor;
 	}
-	
-	if(gChannel == 1)
+	else if(gChannel == CHANNEL_RED)
 	{
-		return GrayscaleRed(input);
+		//Grayscale of red channel
+		color = float4(color.rrr, 1);
+	}
+	else if(gChannel == CHANNEL_GREEN)
+	{
+		//Grayscale of green channel
+		color = float4(color.ggg, 1);
+	}
+	else if(gChannel == CHANNEL_BLUE)
+	{
+		//Grayscale of blue channel
+		color = float4(color.bbb, 1);
+	}
+	else if(gChannel == CHANNEL_ALPHA)
+	{
+		//Grayscale of alpha channel
+		color = float4(color.aaa, 1);
+	}
+	else if(gChannel == CHANNEL_NALPHA)
+	{
+		//Color channel
+		color = float4(color.rgb, 1);
 	}
 
-	if(gChannel == 2)
+	if (gFogRange > 0)
 	{
-		return GrayscaleGreen(input);
+		float distToEye = length(gEyePositionWorld - input.positionWorld);
+
+		color = ComputeFog(color, distToEye, gFogStart, gFogRange, gFogColor);
 	}
 
-	if(gChannel == 3)
-	{
-		return GrayscaleBlue(input);
-	}
-
-	if(gChannel == 4)
-	{
-		return GrayscaleAlpha(input);
-	}
-
-	if(gChannel == 5)
-	{
-		return NoAlpha(input);
-	}
-
-	return float4(0,0,0,1);
+	return color;
 }

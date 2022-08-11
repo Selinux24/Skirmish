@@ -11,7 +11,7 @@ namespace Engine.BuiltInShaders
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class PositionColorPs : IDisposable
+    public class PositionTexturePs : IDisposable
     {
         /// <summary>
         /// Per frame data structure
@@ -41,6 +41,21 @@ namespace Engine.BuiltInShaders
         }
 
         /// <summary>
+        /// Per frame spec data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct VSPerFrame2
+        {
+            /// <summary>
+            /// Color output channel
+            /// </summary>
+            public uint Channel;
+            public uint Pad1;
+            public uint Pad2;
+            public uint Pad3;
+        }
+
+        /// <summary>
         /// Shader
         /// </summary>
         public readonly EnginePixelShader Shader;
@@ -49,6 +64,14 @@ namespace Engine.BuiltInShaders
         /// Per frame constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
+        /// <summary>
+        /// Per frame spec constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<VSPerFrame2> vsPerFrame2;
+        /// <summary>
+        /// Diffuse map resource view
+        /// </summary>
+        private EngineShaderResourceView diffuseMapArray;
 
         /// <summary>
         /// Graphics instance
@@ -59,27 +82,28 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorPs(Graphics graphics)
+        public PositionTexturePs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionColor_Cso == null;
-            var bytes = Resources.Ps_PositionColor_Cso ?? Resources.Ps_PositionColor;
+            bool compile = Resources.Ps_PositionTexture_Cso == null;
+            var bytes = Resources.Ps_PositionTexture_Cso ?? Resources.Ps_PositionTexture;
             if (compile)
             {
-                Shader = graphics.CompilePixelShader(nameof(PositionColorPs), "main", bytes, HelperShaders.PSProfile);
+                Shader = graphics.CompilePixelShader(nameof(PositionTexturePs), "main", bytes, HelperShaders.PSProfile);
             }
             else
             {
-                Shader = graphics.LoadPixelShader(nameof(PositionColorPs), bytes);
+                Shader = graphics.LoadPixelShader(nameof(PositionTexturePs), bytes);
             }
 
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorPs) + "." + nameof(VSPerFrame));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionTexturePs) + "." + nameof(VSPerFrame));
+            vsPerFrame2 = new EngineConstantBuffer<VSPerFrame2>(graphics, nameof(PositionTexturePs) + "." + nameof(VSPerFrame2));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorPs()
+        ~PositionTexturePs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -102,6 +126,7 @@ namespace Engine.BuiltInShaders
             {
                 Shader?.Dispose();
                 vsPerFrame?.Dispose();
+                vsPerFrame2?.Dispose();
             }
         }
 
@@ -123,13 +148,35 @@ namespace Engine.BuiltInShaders
             };
             vsPerFrame.WriteData(data);
         }
+        /// <summary>
+        /// Sets per frame spec data
+        /// </summary>
+        /// <param name="channel">Color output channel</param>
+        public void SetVSPerFrame2(uint channel)
+        {
+            var data = new VSPerFrame2
+            {
+                Channel = channel,
+            };
+            vsPerFrame2.WriteData(data);
+        }
+        /// <summary>
+        /// Sets the diffuse map array
+        /// </summary>
+        /// <param name="diffuseMapArray">Diffuse map array</param>
+        public void SetDiffuseMap(EngineShaderResourceView diffuseMapArray)
+        {
+            this.diffuseMapArray = diffuseMapArray;
+        }
 
         /// <summary>
         /// Sets the pixel shader constant buffers
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, vsPerFrame);
+            Graphics.SetPixelShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsPerFrame, vsPerFrame2 });
+
+            Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
         }
     }
 }

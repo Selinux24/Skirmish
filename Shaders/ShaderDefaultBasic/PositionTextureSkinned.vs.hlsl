@@ -1,4 +1,5 @@
 #include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncMaterials.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
 /**********************************************************************************************************
@@ -6,10 +7,10 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbGlobals : register(b0)
 {
+	uint gMaterialPaletteWidth;
 	uint gAnimationPaletteWidth;
-	uint3 PAD01;
+	uint2 PAD01;
 };
-Texture2D gAnimationPalette : register(t0);
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -29,15 +30,28 @@ cbuffer cbVSPerInstance : register(b2)
 	float PAD22;
 };
 
+Texture2D gMaterialPalette : register(t0);
+Texture2D gAnimationPalette : register(t1);
+
+struct PSVertexPositionTexture2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float2 tex : TEXCOORD0;
+	float4 tintColor : TINTCOLOR;
+	uint textureIndex : TEXTUREINDEX;
+};
+
 /**********************************************************************************************************
 POSITION TEXTURE
 **********************************************************************************************************/
-PSVertexPositionTexture main(VSVertexPositionTextureSkinned input)
+PSVertexPositionTexture2 main(VSVertexPositionTextureSkinned input)
 {
-	PSVertexPositionTexture output = (PSVertexPositionTexture)0;
+	PSVertexPositionTexture2 output = (PSVertexPositionTexture2)0;
+
+	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gMaterialPaletteWidth);
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
 	ComputePositionWeights(
 		gAnimationPalette,
 		gAnimationOffset,
@@ -52,8 +66,7 @@ PSVertexPositionTexture main(VSVertexPositionTextureSkinned input)
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.tex = input.tex;
-	output.tintColor = gTintColor;
-	output.materialIndex = gMaterialIndex;
+	output.tintColor = gTintColor * material.Diffuse;
 	output.textureIndex = gTextureIndex;
 
 	return output;

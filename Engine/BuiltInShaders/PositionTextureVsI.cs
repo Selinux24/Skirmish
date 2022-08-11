@@ -11,7 +11,7 @@ namespace Engine.BuiltInShaders
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class PositionColorVsSkinnedI : IDisposable
+    public class PositionTextureVsI : IDisposable
     {
         /// <summary>
         /// Global data structure
@@ -23,12 +23,9 @@ namespace Engine.BuiltInShaders
             /// Material palette width
             /// </summary>
             public uint MaterialPaletteWidth;
-            /// <summary>
-            /// Animation palette width
-            /// </summary>
-            public uint AnimationPaletteWidth;
             public uint Pad1;
             public uint Pad2;
+            public uint Pad3;
         }
 
         /// <summary>
@@ -42,7 +39,7 @@ namespace Engine.BuiltInShaders
             /// </summary>
             public Matrix World;
             /// <summary>
-            /// World-View-Projection matrix
+            /// World view projection matrix
             /// </summary>
             public Matrix WorldViewProjection;
         }
@@ -55,10 +52,6 @@ namespace Engine.BuiltInShaders
         /// Material palette resource view
         /// </summary>
         private EngineShaderResourceView materialPalette;
-        /// <summary>
-        /// Animation palette resource view
-        /// </summary>
-        private EngineShaderResourceView animationPalette;
         /// <summary>
         /// Per frame constant buffer
         /// </summary>
@@ -78,28 +71,28 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVsSkinnedI(Graphics graphics)
+        public PositionTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_PositionColor_Skinned_I_Cso ?? Resources.Vs_PositionColor_Skinned_I;
+            bool compile = Resources.Vs_PositionTexture_I_Cso == null;
+            var bytes = Resources.Vs_PositionTexture_I_Cso ?? Resources.Vs_PositionTexture_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionColorVsSkinnedI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionColorVsSkinnedI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionTextureVsI), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSPerFrame));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionTextureVsI) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionTextureVsI) + "." + nameof(VSPerFrame));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVsSkinnedI()
+        ~PositionTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -127,21 +120,17 @@ namespace Engine.BuiltInShaders
         }
 
         /// <summary>
-        /// Sets global data
+        /// Sets the globals data
         /// </summary>
         /// <param name="materialPalette">Material palette texture</param>
         /// <param name="materialPaletteWidth">Material palette texture width</param>
-        /// <param name="animationPalette">Animation palette texture</param>
-        /// <param name="animationPaletteWidth">Animation palette texture width</param>
-        public void SetVSGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
+        public void SetVSGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth)
         {
             this.materialPalette = materialPalette;
-            this.animationPalette = animationPalette;
 
             var data = new VSGlobals
             {
                 MaterialPaletteWidth = materialPaletteWidth,
-                AnimationPaletteWidth = animationPaletteWidth,
             };
             vsGlobals.WriteData(data);
         }
@@ -167,7 +156,7 @@ namespace Engine.BuiltInShaders
         {
             Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsGlobals, vsPerFrame });
 
-            Graphics.SetVertexShaderResourceViews(0, new[] { materialPalette, animationPalette });
+            Graphics.SetVertexShaderResourceView(0, materialPalette);
         }
     }
 }

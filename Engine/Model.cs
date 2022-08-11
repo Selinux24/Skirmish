@@ -407,6 +407,20 @@ namespace Engine
 
                     effect.Draw(BufferManager, new[] { mesh });
                 }
+                else if (mesh.VertextType == VertexTypes.PositionTexture)
+                {
+                    var effect = DrawerPool.BasicPositionTexture;
+
+                    effect.UpdatePerFrame(localTransform, context);
+
+                    effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
+
+                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+
+                    count += mesh.Count;
+
+                    effect.Draw(BufferManager, new[] { mesh });
+                }
                 else
                 {
                     var effect = GetEffect(context.DrawerMode);

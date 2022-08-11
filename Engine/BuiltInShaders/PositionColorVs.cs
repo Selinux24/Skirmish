@@ -193,9 +193,7 @@ namespace Engine.BuiltInShaders
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetVertexShaderConstantBuffer(0, vsGlobals);
-            Graphics.SetVertexShaderConstantBuffer(1, vsPerFrame);
-            Graphics.SetVertexShaderConstantBuffer(2, vsPerInstance);
+            Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsGlobals, vsPerFrame, vsPerInstance });
 
             Graphics.SetVertexShaderResourceView(0, materialPalette);
         }

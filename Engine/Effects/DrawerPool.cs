@@ -148,6 +148,36 @@ namespace Engine.Effects
         public static BasicPositionColorInstanced BasicPositionColorInstanced { get; private set; }
 
         /// <summary>
+        /// Position texture pixel shader
+        /// </summary>
+        public static PositionTexturePs PositionTexturePs { get; private set; }
+        /// <summary>
+        /// Position texture vertex shader
+        /// </summary>
+        public static PositionTextureVs PositionTextureVs { get; private set; }
+        /// <summary>
+        /// Position texture vertex shader instanced
+        /// </summary>
+        public static PositionTextureVsI PositionTextureVsI { get; private set; }
+        /// <summary>
+        /// Position texture skinned vertex shader
+        /// </summary>
+        public static PositionTextureVsSkinned PositionTextureVsSkinned { get; private set; }
+        /// <summary>
+        /// Position texture skinned vertex shader instanced
+        /// </summary>
+        public static PositionTextureVsSkinnedI PositionTextureVsSkinnedI { get; private set; }
+
+        /// <summary>
+        /// Basic position texture drawer
+        /// </summary>
+        public static BasicPositionTexture BasicPositionTexture { get; private set; }
+        /// <summary>
+        /// Basic position texture instanced drawer
+        /// </summary>
+        public static BasicPositionTextureInstanced BasicPositionTextureInstanced { get; private set; }
+
+        /// <summary>
         /// Initializes pool
         /// </summary>
         /// <param name="graphics">Device</param>
@@ -191,6 +221,15 @@ namespace Engine.Effects
 
             BasicPositionColor = new BasicPositionColor(graphics, PositionColorVs, PositionColorVsSkinned, PositionColorPs);
             BasicPositionColorInstanced = new BasicPositionColorInstanced(graphics, PositionColorVsI, PositionColorVsSkinnedI, PositionColorPs);
+
+            PositionTexturePs = new PositionTexturePs(graphics);
+            PositionTextureVs = new PositionTextureVs(graphics);
+            PositionTextureVsI = new PositionTextureVsI(graphics);
+            PositionTextureVsSkinned = new PositionTextureVsSkinned(graphics);
+            PositionTextureVsSkinnedI = new PositionTextureVsSkinnedI(graphics);
+
+            BasicPositionTexture = new BasicPositionTexture(graphics, PositionTextureVs, PositionTextureVsSkinned, PositionTexturePs);
+            BasicPositionTextureInstanced = new BasicPositionTextureInstanced(graphics, PositionTextureVsI, PositionTextureVsSkinnedI, PositionTexturePs);
         }
         /// <summary>
         /// Dispose of used resources
@@ -266,6 +305,21 @@ namespace Engine.Effects
             BasicPositionColor = null;
             BasicPositionColorInstanced?.Dispose();
             BasicPositionColorInstanced = null;
+
+            PositionTexturePs?.Dispose();
+            PositionTexturePs = null;
+            PositionTextureVs?.Dispose();
+            PositionTextureVs = null;
+            PositionTextureVsI?.Dispose();
+            PositionTextureVsI = null;
+            PositionTextureVsSkinned?.Dispose();
+            PositionTextureVsSkinned = null;
+            PositionTextureVsSkinnedI?.Dispose();
+            PositionTextureVsSkinnedI = null;
+            BasicPositionTexture?.Dispose();
+            BasicPositionTexture = null;
+            BasicPositionTextureInstanced?.Dispose();
+            BasicPositionTextureInstanced = null;
         }
 
         /// <summary>
@@ -328,6 +382,9 @@ namespace Engine.Effects
 
             BasicPositionColor.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
             BasicPositionColorInstanced.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+
+            BasicPositionTexture.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+            BasicPositionTextureInstanced.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
     }
 }

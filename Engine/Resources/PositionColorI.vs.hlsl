@@ -9,13 +9,14 @@ cbuffer cbVSGlobals : register(b0)
 	uint gMaterialPaletteWidth;
 	uint3 PAD01;
 };
-Texture2D gMaterialPalette : register(t0);
 
 cbuffer cbVSPerFrame : register(b1)
 {
 	float4x4 gWorld;
 	float4x4 gWorldViewProjection;
 };
+
+Texture2D gMaterialPalette : register(t0);
 
 struct PSVertexPositionColor2
 {

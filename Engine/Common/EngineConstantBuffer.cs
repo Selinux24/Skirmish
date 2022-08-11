@@ -5,10 +5,26 @@ namespace Engine.Common
     using SharpDX.Direct3D11;
 
     /// <summary>
+    /// Engine constant buffer interface
+    /// </summary>
+    public interface IEngineConstantBuffer
+    {
+        /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; }
+
+        /// <summary>
+        /// Gets the internal buffer
+        /// </summary>
+        Buffer GetBuffer();
+    }
+
+    /// <summary>
     /// Engine constant buffer
     /// </summary>
     /// <typeparam name="T">Type of fuffer</typeparam>
-    public class EngineConstantBuffer<T> : IDisposable where T : struct
+    public class EngineConstantBuffer<T> : IEngineConstantBuffer, IDisposable where T : struct
     {
         /// <summary>
         /// Graphics
@@ -76,7 +92,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets the internal buffer
         /// </summary>
-        internal Buffer GetBuffer()
+        public Buffer GetBuffer()
         {
             return buffer;
         }

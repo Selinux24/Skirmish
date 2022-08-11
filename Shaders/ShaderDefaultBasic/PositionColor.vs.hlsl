@@ -9,7 +9,6 @@ cbuffer cbVSGlobals : register(b0)
 	uint gMaterialPaletteWidth;
 	uint3 PAD01;
 };
-Texture2D gMaterialPalette : register(t0);
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -23,6 +22,8 @@ cbuffer cbVSPerInstance : register(b2)
 	uint gMaterialIndex;
 	uint3 PAD21;
 };
+
+Texture2D gMaterialPalette : register(t0);
 
 struct PSVertexPositionColor2
 {

@@ -11,7 +11,7 @@ namespace Engine.BuiltInShaders
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class PositionColorVsSkinnedI : IDisposable
+    public class PositionTextureVsSkinnedI : IDisposable
     {
         /// <summary>
         /// Global data structure
@@ -37,13 +37,7 @@ namespace Engine.BuiltInShaders
         [StructLayout(LayoutKind.Sequential)]
         public struct VSPerFrame
         {
-            /// <summary>
-            /// World matrix
-            /// </summary>
             public Matrix World;
-            /// <summary>
-            /// World-View-Projection matrix
-            /// </summary>
             public Matrix WorldViewProjection;
         }
 
@@ -78,28 +72,28 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVsSkinnedI(Graphics graphics)
+        public PositionTextureVsSkinnedI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_PositionColor_Skinned_I_Cso ?? Resources.Vs_PositionColor_Skinned_I;
+            bool compile = Resources.Vs_PositionTexture_Skinned_I_Cso == null;
+            var bytes = Resources.Vs_PositionTexture_Skinned_I_Cso ?? Resources.Vs_PositionTexture_Skinned_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionColorVsSkinnedI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionTextureVsSkinnedI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionColorVsSkinnedI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionTextureVsSkinnedI), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSPerFrame));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionTextureVsSkinnedI) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionTextureVsSkinnedI) + "." + nameof(VSPerFrame));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVsSkinnedI()
+        ~PositionTextureVsSkinnedI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

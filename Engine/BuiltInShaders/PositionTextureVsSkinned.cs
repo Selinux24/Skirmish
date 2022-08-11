@@ -11,7 +11,7 @@ namespace Engine.BuiltInShaders
     /// <summary>
     /// Basic effect
     /// </summary>
-    public class PositionColorVsSkinnedI : IDisposable
+    public class PositionTextureVsSkinned : IDisposable
     {
         /// <summary>
         /// Global data structure
@@ -42,9 +42,44 @@ namespace Engine.BuiltInShaders
             /// </summary>
             public Matrix World;
             /// <summary>
-            /// World-View-Projection matrix
+            /// World view projection matrix
             /// </summary>
             public Matrix WorldViewProjection;
+        }
+
+        /// <summary>
+        /// Per instance data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct VSPerInstance
+        {
+            /// <summary>
+            /// Tint color
+            /// </summary>
+            public Color4 TintColor;
+            /// <summary>
+            /// Material index
+            /// </summary>
+            public uint MaterialIndex;
+            /// <summary>
+            /// Texture index
+            /// </summary>
+            public uint TextureIndex;
+            public uint Pad1;
+            public uint Pad2;
+            /// <summary>
+            /// Animation offset 1
+            /// </summary>
+            public uint AnimationOffset;
+            /// <summary>
+            /// Animation offset 2
+            /// </summary>
+            public uint AnimationOffset2;
+            /// <summary>
+            /// Animation interpolation value
+            /// </summary>
+            public float AnimationInterpolation;
+            public float Pad4;
         }
 
         /// <summary>
@@ -63,6 +98,10 @@ namespace Engine.BuiltInShaders
         /// Per frame constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
+        /// <summary>
+        /// Per instance constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<VSPerInstance> vsPerInstance;
 
         /// <summary>
         /// Graphics instance
@@ -78,28 +117,29 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVsSkinnedI(Graphics graphics)
+        public PositionTextureVsSkinned(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_PositionColor_Skinned_I_Cso ?? Resources.Vs_PositionColor_Skinned_I;
+            bool compile = Resources.Vs_PositionTexture_Skinned_Cso == null;
+            var bytes = Resources.Vs_PositionTexture_Skinned_Cso ?? Resources.Vs_PositionTexture_Skinned;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionColorVsSkinnedI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionTextureVsSkinned), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionColorVsSkinnedI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionTextureVsSkinned), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsSkinnedI) + "." + nameof(VSPerFrame));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionTextureVsSkinned) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionTextureVsSkinned) + "." + nameof(VSPerFrame));
+            vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(PositionTextureVsSkinned) + "." + nameof(VSPerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVsSkinnedI()
+        ~PositionTextureVsSkinned()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -123,6 +163,7 @@ namespace Engine.BuiltInShaders
                 Shader?.Dispose();
                 vsGlobals?.Dispose();
                 vsPerFrame?.Dispose();
+                vsPerInstance?.Dispose();
             }
         }
 
@@ -159,13 +200,35 @@ namespace Engine.BuiltInShaders
             };
             vsPerFrame.WriteData(data);
         }
+        /// <summary>
+        /// Sets per instance data
+        /// </summary>
+        /// <param name="tintColor">Tint color</param>
+        /// <param name="materialIndex">Material index</param>
+        /// <param name="textureIndex">Texture index</param>
+        /// <param name="animationOffset">Animation offset 1</param>
+        /// <param name="animationOffset2">Animation offset 2</param>
+        /// <param name="animationInterpolation">Animation interpolation value</param>
+        public void SetVSPerInstance(Color4 tintColor, uint materialIndex, uint textureIndex, uint animationOffset, uint animationOffset2, float animationInterpolation)
+        {
+            var data = new VSPerInstance
+            {
+                TintColor = tintColor,
+                MaterialIndex = materialIndex,
+                TextureIndex = textureIndex,
+                AnimationOffset = animationOffset,
+                AnimationOffset2 = animationOffset2,
+                AnimationInterpolation = animationInterpolation,
+            };
+            vsPerInstance.WriteData(data);
+        }
 
         /// <summary>
         /// Sets the vertex shader constant buffers
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsGlobals, vsPerFrame });
+            Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsGlobals, vsPerFrame, vsPerInstance });
 
             Graphics.SetVertexShaderResourceViews(0, new[] { materialPalette, animationPalette });
         }
