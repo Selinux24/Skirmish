@@ -9,9 +9,9 @@ namespace Engine.BuiltInShaders
     using Engine.Properties;
 
     /// <summary>
-    /// Basic effect
+    /// Skinned position color vertex shader
     /// </summary>
-    public class PositionColorVsSkinned : IDisposable
+    public class SkinnedPositionColorVs : IDisposable
     {
         /// <summary>
         /// Global data structure
@@ -114,7 +114,7 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVsSkinned(Graphics graphics)
+        public SkinnedPositionColorVs(Graphics graphics)
         {
             Graphics = graphics;
 
@@ -122,21 +122,21 @@ namespace Engine.BuiltInShaders
             var bytes = Resources.Vs_PositionColor_Skinned_Cso ?? Resources.Vs_PositionColor_Skinned;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionColorVsSkinned), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionColorVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionColorVsSkinned), bytes);
+                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionColorVs), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVsSkinned) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsSkinned) + "." + nameof(VSPerFrame));
-            vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(PositionColorVsSkinned) + "." + nameof(VSPerInstance));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(SkinnedPositionColorVs) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(SkinnedPositionColorVs) + "." + nameof(VSPerFrame));
+            vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(SkinnedPositionColorVs) + "." + nameof(VSPerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVsSkinned()
+        ~SkinnedPositionColorVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

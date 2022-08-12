@@ -9,7 +9,7 @@ namespace Engine.BuiltInShaders
     using Engine.Properties;
 
     /// <summary>
-    /// Basic effect
+    /// Position texture vertex shader
     /// </summary>
     public class PositionTextureVs : IDisposable
     {

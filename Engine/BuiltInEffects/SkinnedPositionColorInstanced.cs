@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,14 +10,14 @@ namespace Engine.BuiltInEffects
     using Engine.Effects;
 
     /// <summary>
-    /// Basic position-color drawer
+    /// Skinned position-color instanced drawer
     /// </summary>
-    public class BasicPositionColor : IGeometryDrawer2
+    public class SkinnedPositionColorInstanced : IGeometryDrawer2
     {
         /// <summary>
-        /// Position color shader
+        /// Skinned instanced position color shader
         /// </summary>
-        private readonly PositionColorVs vertexShader;
+        private readonly SkinnedPositionColorVsI vertexShader;
         /// <summary>
         /// Position color pixel shader
         /// </summary>
@@ -31,12 +32,12 @@ namespace Engine.BuiltInEffects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="positionColorVs">Position color vertex shader</param>
+        /// <param name="positionColorVsSkinnedI">Skinned position color vertex shader</param>
         /// <param name="positionColorPs">Position color pixel shader</param>
-        public BasicPositionColor(Graphics graphics, PositionColorVs positionColorVs, PositionColorPs positionColorPs)
+        public SkinnedPositionColorInstanced(Graphics graphics, SkinnedPositionColorVsI positionColorVsSkinnedI, PositionColorPs positionColorPs)
         {
             Graphics = graphics;
-            vertexShader = positionColorVs;
+            vertexShader = positionColorVsSkinnedI;
             pixelShader = positionColorPs;
         }
 
@@ -48,7 +49,8 @@ namespace Engine.BuiltInEffects
             uint animationPaletteWidth)
         {
             vertexShader.SetVSGlobals(
-                materialPalette, materialPaletteWidth);
+                materialPalette, materialPaletteWidth,
+                animationPalette, animationPaletteWidth);
         }
         /// <inheritdoc/>
         public void UpdatePerFrame(
@@ -66,9 +68,7 @@ namespace Engine.BuiltInEffects
             uint textureIndex,
             Color4 tintColor)
         {
-            vertexShader.SetVSPerInstance(
-                tintColor,
-                material.Material?.ResourceIndex ?? 0);
+
         }
 
         /// <inheritdoc/>
@@ -79,7 +79,7 @@ namespace Engine.BuiltInEffects
                 return;
             }
 
-            // Set the vertex and clear the pixel shaders that will be used to render this mesh shadow map.
+            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
             Graphics.SetVertexShader(vertexShader.Shader);
             Graphics.ClearPixelShader();
 
@@ -105,7 +105,7 @@ namespace Engine.BuiltInEffects
                 return;
             }
 
-            // Set the vertex and clear the pixel shaders that will be used to render this mesh shadow map.
+            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
             Graphics.SetVertexShader(vertexShader.Shader);
             Graphics.ClearPixelShader();
 

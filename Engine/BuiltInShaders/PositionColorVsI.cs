@@ -9,7 +9,7 @@ namespace Engine.BuiltInShaders
     using Engine.Properties;
 
     /// <summary>
-    /// Basic effect
+    /// Position color instanced vertex shader
     /// </summary>
     public class PositionColorVsI : IDisposable
     {

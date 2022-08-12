@@ -132,20 +132,16 @@ namespace Engine.Effects
         /// <summary>
         /// Position color skinned vertex shader
         /// </summary>
-        public static PositionColorVsSkinned PositionColorVsSkinned { get; private set; }
+        public static SkinnedPositionColorVs PositionColorVsSkinned { get; private set; }
         /// <summary>
         /// Position color skinned vertex shader instanced
         /// </summary>
-        public static PositionColorVsSkinnedI PositionColorVsSkinnedI { get; private set; }
+        public static SkinnedPositionColorVsI PositionColorVsSkinnedI { get; private set; }
 
         /// <summary>
         /// Basic position color drawer
         /// </summary>
         public static BasicPositionColor BasicPositionColor { get; private set; }
-        /// <summary>
-        /// Basic position color instanced drawer
-        /// </summary>
-        public static BasicPositionColorInstanced BasicPositionColorInstanced { get; private set; }
 
         /// <summary>
         /// Position texture pixel shader
@@ -162,20 +158,16 @@ namespace Engine.Effects
         /// <summary>
         /// Position texture skinned vertex shader
         /// </summary>
-        public static PositionTextureVsSkinned PositionTextureVsSkinned { get; private set; }
+        public static SkinnedPositionTextureVs PositionTextureVsSkinned { get; private set; }
         /// <summary>
         /// Position texture skinned vertex shader instanced
         /// </summary>
-        public static PositionTextureVsSkinnedI PositionTextureVsSkinnedI { get; private set; }
+        public static SkinnedPositionTextureVsI PositionTextureVsSkinnedI { get; private set; }
 
         /// <summary>
         /// Basic position texture drawer
         /// </summary>
         public static BasicPositionTexture BasicPositionTexture { get; private set; }
-        /// <summary>
-        /// Basic position texture instanced drawer
-        /// </summary>
-        public static BasicPositionTextureInstanced BasicPositionTextureInstanced { get; private set; }
 
         /// <summary>
         /// Initializes pool
@@ -216,20 +208,18 @@ namespace Engine.Effects
             PositionColorPs = new PositionColorPs(graphics);
             PositionColorVs = new PositionColorVs(graphics);
             PositionColorVsI = new PositionColorVsI(graphics);
-            PositionColorVsSkinned = new PositionColorVsSkinned(graphics);
-            PositionColorVsSkinnedI = new PositionColorVsSkinnedI(graphics);
+            PositionColorVsSkinned = new SkinnedPositionColorVs(graphics);
+            PositionColorVsSkinnedI = new SkinnedPositionColorVsI(graphics);
 
-            BasicPositionColor = new BasicPositionColor(graphics, PositionColorVs, PositionColorVsSkinned, PositionColorPs);
-            BasicPositionColorInstanced = new BasicPositionColorInstanced(graphics, PositionColorVsI, PositionColorVsSkinnedI, PositionColorPs);
+            BasicPositionColor = new BasicPositionColor(graphics, PositionColorVs, PositionColorPs);
 
             PositionTexturePs = new PositionTexturePs(graphics);
             PositionTextureVs = new PositionTextureVs(graphics);
             PositionTextureVsI = new PositionTextureVsI(graphics);
-            PositionTextureVsSkinned = new PositionTextureVsSkinned(graphics);
-            PositionTextureVsSkinnedI = new PositionTextureVsSkinnedI(graphics);
-
-            BasicPositionTexture = new BasicPositionTexture(graphics, PositionTextureVs, PositionTextureVsSkinned, PositionTexturePs);
-            BasicPositionTextureInstanced = new BasicPositionTextureInstanced(graphics, PositionTextureVsI, PositionTextureVsSkinnedI, PositionTexturePs);
+            PositionTextureVsSkinned = new SkinnedPositionTextureVs(graphics);
+            PositionTextureVsSkinnedI = new SkinnedPositionTextureVsI(graphics);
+            
+            BasicPositionTexture = new BasicPositionTexture(graphics, PositionTextureVs, PositionTexturePs);
         }
         /// <summary>
         /// Dispose of used resources
@@ -301,10 +291,6 @@ namespace Engine.Effects
             PositionColorVsSkinned = null;
             PositionColorVsSkinnedI?.Dispose();
             PositionColorVsSkinnedI = null;
-            BasicPositionColor?.Dispose();
-            BasicPositionColor = null;
-            BasicPositionColorInstanced?.Dispose();
-            BasicPositionColorInstanced = null;
 
             PositionTexturePs?.Dispose();
             PositionTexturePs = null;
@@ -316,10 +302,6 @@ namespace Engine.Effects
             PositionTextureVsSkinned = null;
             PositionTextureVsSkinnedI?.Dispose();
             PositionTextureVsSkinnedI = null;
-            BasicPositionTexture?.Dispose();
-            BasicPositionTexture = null;
-            BasicPositionTextureInstanced?.Dispose();
-            BasicPositionTextureInstanced = null;
         }
 
         /// <summary>
@@ -381,10 +363,7 @@ namespace Engine.Effects
             EffectShadowPoint.UpdateGlobals(animationPalette, animationPaletteWidth);
 
             BasicPositionColor.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-            BasicPositionColorInstanced.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-
             BasicPositionTexture.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-            BasicPositionTextureInstanced.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
     }
 }

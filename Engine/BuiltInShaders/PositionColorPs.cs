@@ -9,7 +9,7 @@ namespace Engine.BuiltInShaders
     using Engine.Properties;
 
     /// <summary>
-    /// Basic effect
+    /// Position color pixel shader
     /// </summary>
     public class PositionColorPs : IDisposable
     {

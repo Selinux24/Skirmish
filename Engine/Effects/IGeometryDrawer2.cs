@@ -59,21 +59,6 @@ namespace Engine.Effects
         void DrawShadows(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
 
         /// <summary>
-        /// Draws the specified skinned meshes shadow maps
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="meshes">Mesh list</param>
-        void DrawShadowsSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes);
-        /// <summary>
-        /// Draws the specified skinned vetex buffer shadow maps
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="vertexBuffer">Skinned vertex buffer</param>
-        /// <param name="drawCount">Primitive count</param>
-        /// <param name="topology">Topology</param>
-        void DrawShadowsSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
-
-        /// <summary>
         /// Draws the specified meshes
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
@@ -87,20 +72,5 @@ namespace Engine.Effects
         /// <param name="drawCount">Primitive count</param>
         /// <param name="topology">Topology</param>
         void Draw(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
-
-        /// <summary>
-        /// Draws the specified skinned meshes
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="meshes">Mesh list</param>
-        void DrawSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes);
-        /// <summary>
-        /// Draws the specified skinned vertex buffer
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="vertexBuffer">Skinned vertex buffer</param>
-        /// <param name="drawCount">Primitive count</param>
-        /// <param name="topology">Topology</param>
-        void DrawSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
     }
 }

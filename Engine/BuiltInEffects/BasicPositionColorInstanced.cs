@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,27 +9,23 @@ namespace Engine.BuiltInEffects
     using Engine.Effects;
 
     /// <summary>
-    /// Basic position-color drawer
+    /// Basic position-color instanced drawer
     /// </summary>
-    public class BasicPositionColorInstanced : IGeometryDrawer2, IDisposable
+    public class BasicPositionColorInstanced : IGeometryDrawer2
     {
-        /// <summary>
-        /// Graphics
-        /// </summary>
-        private readonly Graphics graphics;
-
         /// <summary>
         /// Instanced position color shader
         /// </summary>
-        private readonly PositionColorVsI positionColorVsI;
-        /// <summary>
-        /// Skinned instanced position color shader
-        /// </summary>
-        private readonly PositionColorVsSkinnedI positionColorVsSkinnedI;
+        private readonly PositionColorVsI vertexShader;
         /// <summary>
         /// Position color pixel shader
         /// </summary>
-        private readonly PositionColorPs positionColorPs;
+        private readonly PositionColorPs pixelShader;
+
+        /// <summary>
+        /// Graphics
+        /// </summary>
+        protected readonly Graphics Graphics;
 
         /// <summary>
         /// Constructor
@@ -39,40 +34,11 @@ namespace Engine.BuiltInEffects
         /// <param name="positionColorVsI">Position color vertex shader</param>
         /// <param name="positionColorVsSkinnedI">Skinned position color vertex shader</param>
         /// <param name="positionColorPs">Position color pixel shader</param>
-        public BasicPositionColorInstanced(Graphics graphics, PositionColorVsI positionColorVsI, PositionColorVsSkinnedI positionColorVsSkinnedI, PositionColorPs positionColorPs)
+        public BasicPositionColorInstanced(Graphics graphics, PositionColorVsI positionColorVsI, PositionColorPs positionColorPs)
         {
-            this.graphics = graphics;
-
-            this.positionColorVsI = positionColorVsI;
-            this.positionColorVsSkinnedI = positionColorVsSkinnedI;
-            this.positionColorPs = positionColorPs;
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BasicPositionColorInstanced()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-
-            }
+            Graphics = graphics;
+            vertexShader = positionColorVsI;
+            pixelShader = positionColorPs;
         }
 
         /// <inheritdoc/>
@@ -82,22 +48,17 @@ namespace Engine.BuiltInEffects
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
-            positionColorVsI.SetVSGlobals(
+            vertexShader.SetVSGlobals(
                 materialPalette, materialPaletteWidth);
-
-            positionColorVsSkinnedI.SetVSGlobals(
-                materialPalette, materialPaletteWidth,
-                animationPalette, animationPaletteWidth);
         }
         /// <inheritdoc/>
         public void UpdatePerFrame(
             Matrix world,
             DrawContext context)
         {
-            positionColorVsI.SetVSPerFrame(world, context.ViewProjection);
-            positionColorVsSkinnedI.SetVSPerFrame(world, context.ViewProjection);
+            vertexShader.SetVSPerFrame(world, context.ViewProjection);
 
-            positionColorPs.SetVSPerFrame(context.EyePosition, context.Lights.FogColor, context.Lights.FogStart, context.Lights.FogRange);
+            pixelShader.SetVSPerFrame(context.EyePosition, context.Lights.FogColor, context.Lights.FogStart, context.Lights.FogRange);
         }
         /// <inheritdoc/>
         public void UpdatePerObject(
@@ -118,21 +79,21 @@ namespace Engine.BuiltInEffects
             }
 
             // Set the vertex and clear the pixel shaders that will be used to render this mesh shadow map.
-            graphics.SetVertexShader(positionColorVsI.Shader);
-            graphics.ClearPixelShader();
+            Graphics.SetVertexShader(vertexShader.Shader);
+            Graphics.ClearPixelShader();
 
-            positionColorVsI.SetConstantBuffers();
+            vertexShader.SetConstantBuffers();
 
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(positionColorVsI.Shader, mesh.VertexBuffer, mesh.Topology))
+                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology))
                 {
                     continue;
                 }
 
                 // Render the mesh.
-                mesh.Draw(graphics);
+                mesh.Draw(Graphics);
             }
         }
         /// <inheritdoc/>
@@ -144,69 +105,19 @@ namespace Engine.BuiltInEffects
             }
 
             // Set the vertex and clear the pixel shaders that will be used to render this mesh shadow map.
-            graphics.SetVertexShader(positionColorVsI.Shader);
-            graphics.ClearPixelShader();
+            Graphics.SetVertexShader(vertexShader.Shader);
+            Graphics.ClearPixelShader();
 
-            positionColorVsI.SetConstantBuffers();
+            vertexShader.SetConstantBuffers();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(positionColorVsI.Shader, vertexBuffer, topology))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology))
             {
                 return;
             }
 
             // Render the primitives.
-            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
-        }
-
-        /// <inheritdoc/>
-        public void DrawShadowsSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes)
-        {
-            if (meshes?.Any() != true)
-            {
-                return;
-            }
-
-            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
-            graphics.SetVertexShader(positionColorVsSkinnedI.Shader);
-            graphics.ClearPixelShader();
-
-            positionColorVsSkinnedI.SetConstantBuffers();
-
-            foreach (var mesh in meshes)
-            {
-                // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(positionColorVsSkinnedI.Shader, mesh.VertexBuffer, mesh.Topology))
-                {
-                    continue;
-                }
-
-                // Render the mesh.
-                mesh.Draw(graphics);
-            }
-        }
-        /// <inheritdoc/>
-        public void DrawShadowsSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
-        {
-            if (drawCount <= 0)
-            {
-                return;
-            }
-
-            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
-            graphics.SetVertexShader(positionColorVsSkinnedI.Shader);
-            graphics.ClearPixelShader();
-
-            positionColorVsSkinnedI.SetConstantBuffers();
-
-            // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(positionColorVsSkinnedI.Shader, vertexBuffer, topology))
-            {
-                return;
-            }
-
-            // Render the primitives.
-            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
+            Graphics.Draw(drawCount, vertexBuffer.BufferOffset);
         }
 
         /// <inheritdoc/>
@@ -218,22 +129,22 @@ namespace Engine.BuiltInEffects
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            graphics.SetVertexShader(positionColorVsI.Shader);
-            graphics.SetPixelShader(positionColorPs.Shader);
+            Graphics.SetVertexShader(vertexShader.Shader);
+            Graphics.SetPixelShader(pixelShader.Shader);
 
-            positionColorVsI.SetConstantBuffers();
-            positionColorPs.SetConstantBuffers();
+            vertexShader.SetConstantBuffers();
+            pixelShader.SetConstantBuffers();
 
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(positionColorVsI.Shader, mesh.VertexBuffer, mesh.Topology))
+                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology))
                 {
                     continue;
                 }
 
                 // Render the mesh.
-                mesh.Draw(graphics);
+                mesh.Draw(Graphics);
             }
         }
         /// <inheritdoc/>
@@ -245,72 +156,20 @@ namespace Engine.BuiltInEffects
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            graphics.SetVertexShader(positionColorVsI.Shader);
-            graphics.SetPixelShader(positionColorPs.Shader);
+            Graphics.SetVertexShader(vertexShader.Shader);
+            Graphics.SetPixelShader(pixelShader.Shader);
 
-            positionColorVsI.SetConstantBuffers();
-            positionColorPs.SetConstantBuffers();
+            vertexShader.SetConstantBuffers();
+            pixelShader.SetConstantBuffers();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(positionColorVsI.Shader, vertexBuffer, topology))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology))
             {
                 return;
             }
 
             // Render the primitives.
-            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
-        }
-
-        /// <inheritdoc/>
-        public void DrawSkinned(BufferManager bufferManager, IEnumerable<Mesh> meshes)
-        {
-            if (meshes?.Any() != true)
-            {
-                return;
-            }
-
-            // Set the vertex and pixel shaders that will be used to render this mesh.
-            graphics.SetVertexShader(positionColorVsSkinnedI.Shader);
-            graphics.SetPixelShader(positionColorPs.Shader);
-
-            positionColorVsSkinnedI.SetConstantBuffers();
-            positionColorPs.SetConstantBuffers();
-
-            foreach (var mesh in meshes)
-            {
-                // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(positionColorVsSkinnedI.Shader, mesh.VertexBuffer, mesh.Topology))
-                {
-                    continue;
-                }
-
-                // Render the mesh.
-                mesh.Draw(graphics);
-            }
-        }
-        /// <inheritdoc/>
-        public void DrawSkinned(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
-        {
-            if (drawCount <= 0)
-            {
-                return;
-            }
-
-            // Set the vertex and pixel shaders that will be used to render this mesh.
-            graphics.SetVertexShader(positionColorVsSkinnedI.Shader);
-            graphics.SetPixelShader(positionColorPs.Shader);
-
-            positionColorVsSkinnedI.SetConstantBuffers();
-            positionColorPs.SetConstantBuffers();
-
-            // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(positionColorVsSkinnedI.Shader, vertexBuffer, topology))
-            {
-                return;
-            }
-
-            // Render the primitives.
-            graphics.Draw(drawCount, vertexBuffer.BufferOffset);
+            Graphics.Draw(drawCount, vertexBuffer.BufferOffset);
         }
     }
 }
