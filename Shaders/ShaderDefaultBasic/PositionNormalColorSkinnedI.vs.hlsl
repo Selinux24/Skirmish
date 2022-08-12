@@ -1,15 +1,16 @@
 #include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncMaterials.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbGlobals : register(b0)
+cbuffer cbVSGlobals : register(b0)
 {
+	uint gMaterialPaletteWidth;
 	uint gAnimationPaletteWidth;
-	uint3 PAD01;
+	uint2 PAD01;
 };
-Texture2D gAnimationPalette : register(t0);
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -17,15 +18,28 @@ cbuffer cbVSPerFrame : register(b1)
 	float4x4 gWorldViewProjection;
 };
 
+Texture2D gMaterialPalette : register(t0);
+Texture2D gAnimationPalette : register(t1);
+
+struct PSVertexPositionNormalColor2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+	float4 color : COLOR0;
+	Material material : MATERIAL;
+};
+
 /**********************************************************************************************************
 POSITION NORMAL COLOR
 **********************************************************************************************************/
-PSVertexPositionNormalColor main(VSVertexPositionNormalColorSkinnedI input)
+PSVertexPositionNormalColor2 main(VSVertexPositionNormalColorSkinnedI input)
 {
-	PSVertexPositionNormalColor output = (PSVertexPositionNormalColor)0;
+	PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2)0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
 
 	ComputePositionNormalWeights(
 		gAnimationPalette,
@@ -47,7 +61,7 @@ PSVertexPositionNormalColor main(VSVertexPositionNormalColorSkinnedI input)
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.normalWorld = normalize(mul(instanceNormal, (float3x3) gWorld));
 	output.color = input.color * input.tintColor;
-	output.materialIndex = input.materialIndex;
+	output.material = material;
 
 	return output;
 }

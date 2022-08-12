@@ -393,59 +393,44 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                if (mesh.VertextType == VertexTypes.PositionColor)
+                var effect2 = GetEffect2(context.DrawerMode, mesh.VertextType);
+                if (effect2 != null)
                 {
-                    var effect = DrawerPool.BasicPositionColor;
+                    effect2.UpdatePerFrame(localTransform, context);
 
-                    effect.UpdatePerFrame(localTransform, context);
-
-                    effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
+                    effect2.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
 
                     BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
                     count += mesh.Count;
 
-                    effect.Draw(BufferManager, new[] { mesh });
+                    effect2.Draw(BufferManager, new[] { mesh });
+
+                    continue;
                 }
-                else if (mesh.VertextType == VertexTypes.PositionTexture)
+
+                var effect = GetEffect(context.DrawerMode);
+                if (effect == null)
                 {
-                    var effect = DrawerPool.BasicPositionTexture;
-
-                    effect.UpdatePerFrame(localTransform, context);
-
-                    effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
-
-                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                    count += mesh.Count;
-
-                    effect.Draw(BufferManager, new[] { mesh });
+                    continue;
                 }
-                else
+
+                effect.UpdatePerFrameFull(localTransform, context);
+
+                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
+
+                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+
+                var technique = effect.GetTechnique(mesh.VertextType, false);
+                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+
+                count += mesh.Count;
+
+                for (int p = 0; p < technique.PassCount; p++)
                 {
-                    var effect = GetEffect(context.DrawerMode);
-                    if (effect == null)
-                    {
-                        continue;
-                    }
+                    graphics.EffectPassApply(technique, p, 0);
 
-                    effect.UpdatePerFrameFull(localTransform, context);
-
-                    effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
-
-                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                    var technique = effect.GetTechnique(mesh.VertextType, false);
-                    BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                    count += mesh.Count;
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        mesh.Draw(graphics);
-                    }
+                    mesh.Draw(graphics);
                 }
             }
 

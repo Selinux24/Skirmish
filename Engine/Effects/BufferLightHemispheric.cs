@@ -23,8 +23,8 @@ namespace Engine.Effects
             {
                 return new BufferLightHemispheric()
                 {
-                    AmbientDown = Color3.White,
-                    AmbientUp = Color3.White,
+                    AmbientDown = Color4.White,
+                    AmbientUp = Color4.White,
                 };
             }
         }
@@ -46,11 +46,11 @@ namespace Engine.Effects
         /// <summary>
         /// Ambient Up
         /// </summary>
-        public Color3 AmbientDown;
+        public Color4 AmbientDown;
         /// <summary>
         /// Ambient Down
         /// </summary>
-        public Color3 AmbientUp;
+        public Color4 AmbientUp;
 
         /// <summary>
         /// Constructor
@@ -58,8 +58,8 @@ namespace Engine.Effects
         /// <param name="light">Light</param>
         public BufferLightHemispheric(ISceneLightHemispheric light)
         {
-            AmbientDown = light.AmbientDown;
-            AmbientUp = light.AmbientUp;
+            AmbientDown = new Color4(light.AmbientDown, 0f);
+            AmbientUp = new Color4(light.AmbientUp, 0f);
         }
 
         /// <summary>

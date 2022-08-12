@@ -288,6 +288,33 @@ namespace Engine.Common
 
             return null;
         }
+        /// <summary>
+        /// Gets the drawing effect for the current instance
+        /// </summary>
+        /// <param name="mode">Drawing mode</param>
+        /// <returns>Returns the drawing effect</returns>
+        protected IGeometryDrawer2 GetEffect2(DrawerModes mode, VertexTypes vertexType)
+        {
+            if (mode.HasFlag(DrawerModes.Forward))
+            {
+                if (vertexType == VertexTypes.PositionColor)
+                {
+                    return DrawerPool.BasicPositionColor;
+                }
+
+                if (vertexType == VertexTypes.PositionNormalColor)
+                {
+                    return DrawerPool.BasicPositionNormalColor;
+                }
+
+                if (vertexType == VertexTypes.PositionTexture)
+                {
+                    return DrawerPool.BasicPositionTexture;
+                }
+            }
+
+            return null;
+        }
 
         /// <inheritdoc/>
         public IEnumerable<IMeshMaterial> GetMaterials()

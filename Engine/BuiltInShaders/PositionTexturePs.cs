@@ -17,7 +17,7 @@ namespace Engine.BuiltInShaders
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame
+        public struct VSPerFrame : IBufferData
         {
             /// <summary>
             /// Eye position world
@@ -38,13 +38,19 @@ namespace Engine.BuiltInShaders
             public float FogRange;
             public float Pad2;
             public float Pad3;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerFrame));
+            }
         }
 
         /// <summary>
         /// Per frame spec data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame2
+        public struct VSPerFrame2 : IBufferData
         {
             /// <summary>
             /// Color output channel
@@ -53,6 +59,12 @@ namespace Engine.BuiltInShaders
             public uint Pad1;
             public uint Pad2;
             public uint Pad3;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerFrame2));
+            }
         }
 
         /// <summary>

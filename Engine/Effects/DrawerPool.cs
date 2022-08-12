@@ -144,6 +144,32 @@ namespace Engine.Effects
         public static BasicPositionColor BasicPositionColor { get; private set; }
 
         /// <summary>
+        /// Position normal color pixel shader
+        /// </summary>
+        public static PositionNormalColorPs PositionNormalColorPs { get; private set; }
+        /// <summary>
+        /// Position normal color vertex shader
+        /// </summary>
+        public static PositionNormalColorVs PositionNormalColorVs { get; private set; }
+        /// <summary>
+        /// Position normal color vertex shader instanced
+        /// </summary>
+        public static PositionNormalColorVsI PositionNormalColorVsI { get; private set; }
+        /// <summary>
+        /// Position normal color skinned vertex shader
+        /// </summary>
+        public static SkinnedPositionNormalColorVs PositionNormalColorVsSkinned { get; private set; }
+        /// <summary>
+        /// Position normal color skinned vertex shader instanced
+        /// </summary>
+        public static SkinnedPositionNormalColorVsI PositionNormalColorVsSkinnedI { get; private set; }
+
+        /// <summary>
+        /// Basic position normal color drawer
+        /// </summary>
+        public static BasicPositionNormalColor BasicPositionNormalColor { get; private set; }
+
+        /// <summary>
         /// Position texture pixel shader
         /// </summary>
         public static PositionTexturePs PositionTexturePs { get; private set; }
@@ -213,12 +239,20 @@ namespace Engine.Effects
 
             BasicPositionColor = new BasicPositionColor(graphics, PositionColorVs, PositionColorPs);
 
+            PositionNormalColorPs = new PositionNormalColorPs(graphics);
+            PositionNormalColorVs = new PositionNormalColorVs(graphics);
+            PositionNormalColorVsI = new PositionNormalColorVsI(graphics);
+            PositionNormalColorVsSkinned = new SkinnedPositionNormalColorVs(graphics);
+            PositionNormalColorVsSkinnedI = new SkinnedPositionNormalColorVsI(graphics);
+
+            BasicPositionNormalColor = new BasicPositionNormalColor(graphics, PositionNormalColorVs, PositionNormalColorPs);
+
             PositionTexturePs = new PositionTexturePs(graphics);
             PositionTextureVs = new PositionTextureVs(graphics);
             PositionTextureVsI = new PositionTextureVsI(graphics);
             PositionTextureVsSkinned = new SkinnedPositionTextureVs(graphics);
             PositionTextureVsSkinnedI = new SkinnedPositionTextureVsI(graphics);
-            
+
             BasicPositionTexture = new BasicPositionTexture(graphics, PositionTextureVs, PositionTexturePs);
         }
         /// <summary>
@@ -292,6 +326,17 @@ namespace Engine.Effects
             PositionColorVsSkinnedI?.Dispose();
             PositionColorVsSkinnedI = null;
 
+            PositionNormalColorPs?.Dispose();
+            PositionNormalColorPs = null;
+            PositionNormalColorVs?.Dispose();
+            PositionNormalColorVs = null;
+            PositionNormalColorVsI?.Dispose();
+            PositionNormalColorVsI = null;
+            PositionNormalColorVsSkinned?.Dispose();
+            PositionNormalColorVsSkinned = null;
+            PositionNormalColorVsSkinnedI?.Dispose();
+            PositionNormalColorVsSkinnedI = null;
+
             PositionTexturePs?.Dispose();
             PositionTexturePs = null;
             PositionTextureVs?.Dispose();
@@ -363,6 +408,7 @@ namespace Engine.Effects
             EffectShadowPoint.UpdateGlobals(animationPalette, animationPaletteWidth);
 
             BasicPositionColor.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+            BasicPositionNormalColor.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
             BasicPositionTexture.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
     }

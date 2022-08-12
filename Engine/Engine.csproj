@@ -136,6 +136,10 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\BasicPositionNormalColorInstanced.cs" />
+    <Compile Include="BuiltInEffects\BasicPositionNormalColor.cs" />
+    <Compile Include="BuiltInEffects\SkinnedPositionNormalColor.cs" />
+    <Compile Include="BuiltInEffects\SkinnedPositionNormalColorInstanced.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionTexture.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionColor.cs" />
@@ -144,9 +148,14 @@
     <Compile Include="BuiltInEffects\BasicPositionTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
+    <Compile Include="BuiltInShaders\PositionNormalColorVsI.cs" />
+    <Compile Include="BuiltInShaders\PositionNormalColorVs.cs" />
+    <Compile Include="BuiltInShaders\PositionNormalColorPs.cs" />
     <Compile Include="BuiltInShaders\PositionTexturePs.cs" />
     <Compile Include="BuiltInShaders\PositionTextureVs.cs" />
     <Compile Include="BuiltInShaders\PositionTextureVsI.cs" />
+    <Compile Include="BuiltInShaders\SkinnedPositionNormalColorVs.cs" />
+    <Compile Include="BuiltInShaders\SkinnedPositionNormalColorVsI.cs" />
     <Compile Include="BuiltInShaders\SkinnedPositionTextureVs.cs" />
     <Compile Include="BuiltInShaders\SkinnedPositionTextureVsI.cs" />
     <Compile Include="Common\BaseSceneObjectState.cs" />

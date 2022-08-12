@@ -104,9 +104,7 @@ namespace Engine.Effects
             ToShadowSpace = Matrix.Transpose(light.ToShadowSpace);
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public int GetStride()
         {
 #if DEBUG

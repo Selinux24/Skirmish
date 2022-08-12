@@ -9,9 +9,9 @@ namespace Engine.BuiltInShaders
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position texture vertex shader
+    /// Skinned position normal color vertex shader
     /// </summary>
-    public class SkinnedPositionTextureVs : IDisposable
+    public class SkinnedPositionNormalColorVs : IDisposable
     {
         /// <summary>
         /// Global data structure
@@ -73,12 +73,9 @@ namespace Engine.BuiltInShaders
             /// Material index
             /// </summary>
             public uint MaterialIndex;
-            /// <summary>
-            /// Texture index
-            /// </summary>
-            public uint TextureIndex;
             public uint Pad1;
             public uint Pad2;
+            public uint Pad3;
             /// <summary>
             /// Animation offset 1
             /// </summary>
@@ -135,29 +132,29 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionTextureVs(Graphics graphics)
+        public SkinnedPositionNormalColorVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionTexture_Skinned_Cso == null;
-            var bytes = Resources.Vs_PositionTexture_Skinned_Cso ?? Resources.Vs_PositionTexture_Skinned;
+            bool compile = Resources.Vs_PositionNormalColor_Skinned_Cso == null;
+            var bytes = Resources.Vs_PositionNormalColor_Skinned_Cso ?? Resources.Vs_PositionNormalColor_Skinned;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionTextureVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionNormalColorVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionTextureVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionNormalColorVs), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(SkinnedPositionTextureVs) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(SkinnedPositionTextureVs) + "." + nameof(VSPerFrame));
-            vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(SkinnedPositionTextureVs) + "." + nameof(VSPerInstance));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(SkinnedPositionNormalColorVs) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(SkinnedPositionNormalColorVs) + "." + nameof(VSPerFrame));
+            vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(SkinnedPositionNormalColorVs) + "." + nameof(VSPerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionTextureVs()
+        ~SkinnedPositionNormalColorVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -223,17 +220,15 @@ namespace Engine.BuiltInShaders
         /// </summary>
         /// <param name="tintColor">Tint color</param>
         /// <param name="materialIndex">Material index</param>
-        /// <param name="textureIndex">Texture index</param>
         /// <param name="animationOffset">Animation offset 1</param>
         /// <param name="animationOffset2">Animation offset 2</param>
         /// <param name="animationInterpolation">Animation interpolation value</param>
-        public void SetVSPerInstance(Color4 tintColor, uint materialIndex, uint textureIndex, uint animationOffset, uint animationOffset2, float animationInterpolation)
+        public void SetVSPerInstance(Color4 tintColor, uint materialIndex, uint animationOffset, uint animationOffset2, float animationInterpolation)
         {
             var data = new VSPerInstance
             {
                 TintColor = tintColor,
                 MaterialIndex = materialIndex,
-                TextureIndex = textureIndex,
                 AnimationOffset = animationOffset,
                 AnimationOffset2 = animationOffset2,
                 AnimationInterpolation = animationInterpolation,

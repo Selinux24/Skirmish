@@ -40,6 +40,10 @@ namespace Engine.Common
         /// Lights
         /// </summary>
         public SceneLights Lights { get; set; }
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public Vector3 LevelOfDetail { get; set; }
 
         /// <summary>
         /// Directional shadow map

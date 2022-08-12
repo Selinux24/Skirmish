@@ -1558,14 +1558,12 @@ namespace Engine
         /// Creates a constant buffer for the specified data type
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <returns>Returns created buffer</returns>
         internal Buffer CreateConstantBuffer<T>(string name)
-            where T : struct
+            where T : struct, IBufferData
         {
-            int sizeInBytes = Marshal.SizeOf(typeof(T));
-            sizeInBytes = (sizeInBytes + 15) / 16 * 16;
+            int sizeInBytes = default(T).GetStride() / 16 * 16;
 
             ResourceUsage usage = ResourceUsage.Dynamic;
             BindFlags binding = BindFlags.ConstantBuffer;

@@ -210,6 +210,7 @@ namespace Engine
 
             //Initialize context data from scene
             DrawContext.Lights = Scene.Lights;
+            DrawContext.LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow);
 
             //Initialize context data from shadow mapping
             DrawContext.ShadowMapDirectional = ShadowMapperDirectional;

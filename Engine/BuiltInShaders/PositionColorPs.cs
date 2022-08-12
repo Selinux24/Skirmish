@@ -17,7 +17,7 @@ namespace Engine.BuiltInShaders
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame
+        public struct VSPerFrame : IBufferData
         {
             /// <summary>
             /// Eye position world
@@ -38,6 +38,12 @@ namespace Engine.BuiltInShaders
             public float FogRange;
             public float Pad2;
             public float Pad3;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerFrame));
+            }
         }
 
         /// <summary>

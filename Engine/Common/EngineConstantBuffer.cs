@@ -24,7 +24,7 @@ namespace Engine.Common
     /// Engine constant buffer
     /// </summary>
     /// <typeparam name="T">Type of fuffer</typeparam>
-    public class EngineConstantBuffer<T> : IEngineConstantBuffer, IDisposable where T : struct
+    public class EngineConstantBuffer<T> : IEngineConstantBuffer, IDisposable where T : struct, IBufferData
     {
         /// <summary>
         /// Graphics

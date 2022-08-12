@@ -4,14 +4,7 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbGlobals : register(b0)
-{
-	uint gMaterialPaletteWidth;
-	float3 gLOD;
-};
-Texture2D gMaterialPalette : register(t0);
-
-cbuffer cbPSPerFrame : register(b1)
+cbuffer cbPSPerFrame : register(b0)
 {
 	float3 gEyePositionWorld;
 	float PAD11;
@@ -24,22 +17,31 @@ cbuffer cbPSPerFrame : register(b1)
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 	uint3 gLightCount;
-    float gShadowIntensity;
+	float gShadowIntensity;
+	float3 gLOD;
+	float PAD13;
 };
-Texture2DArray<float> gShadowMapDir : register(t1);
-Texture2DArray<float> gShadowMapSpot : register(t2);
-TextureCubeArray<float> gShadowMapPoint : register(t3);
+Texture2DArray<float> gShadowMapDir : register(t0);
+Texture2DArray<float> gShadowMapSpot : register(t1);
+TextureCubeArray<float> gShadowMapPoint : register(t2);
+
+struct PSVertexPositionNormalColor2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+	float4 color : COLOR0;
+	Material material : MATERIAL;
+};
 
 /**********************************************************************************************************
 POSITION NORMAL COLOR
 **********************************************************************************************************/
-float4 main(PSVertexPositionNormalColor input) : SV_TARGET
+float4 main(PSVertexPositionNormalColor2 input) : SV_TARGET
 {
-	Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
-
 	ComputeLightsInput lInput;
 
-	lInput.material = material;
+	lInput.material = input.material;
 	lInput.objectPosition = input.positionWorld;
 	lInput.objectNormal = normalize(input.normalWorld);
 	lInput.objectDiffuseColor = input.color;
@@ -58,7 +60,7 @@ float4 main(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.shadowMapDir = gShadowMapDir;
 	lInput.shadowMapPoint = gShadowMapPoint;
 	lInput.shadowMapSpot = gShadowMapSpot;
-    lInput.minShadowIntensity = gShadowIntensity;
+	lInput.minShadowIntensity = gShadowIntensity;
 
 	lInput.fogStart = gFogStart;
 	lInput.fogRange = gFogRange;

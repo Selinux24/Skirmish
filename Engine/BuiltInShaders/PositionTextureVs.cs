@@ -17,7 +17,7 @@ namespace Engine.BuiltInShaders
         /// Global data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSGlobals
+        public struct VSGlobals : IBufferData
         {
             /// <summary>
             /// Material palette width
@@ -26,13 +26,19 @@ namespace Engine.BuiltInShaders
             public uint Pad1;
             public uint Pad2;
             public uint Pad3;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSGlobals));
+            }
         }
 
         /// <summary>
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame
+        public struct VSPerFrame : IBufferData
         {
             /// <summary>
             /// World matrix
@@ -42,13 +48,19 @@ namespace Engine.BuiltInShaders
             /// World view projection matrix
             /// </summary>
             public Matrix WorldViewProjection;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerFrame));
+            }
         }
 
         /// <summary>
         /// Per instance data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerInstance
+        public struct VSPerInstance : IBufferData
         {
             /// <summary>
             /// Tint color
@@ -64,6 +76,12 @@ namespace Engine.BuiltInShaders
             public uint TextureIndex;
             public uint Pad1;
             public uint Pad2;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerInstance));
+            }
         }
 
         /// <summary>

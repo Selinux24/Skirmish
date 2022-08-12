@@ -9,9 +9,9 @@ namespace Engine.BuiltInShaders
     using Engine.Properties;
 
     /// <summary>
-    /// Position color instanced vertex shader
+    /// Position normal color vertex shader
     /// </summary>
-    public class PositionColorVsI : IDisposable
+    public class PositionNormalColorVs : IDisposable
     {
         /// <summary>
         /// Global data structure
@@ -57,6 +57,31 @@ namespace Engine.BuiltInShaders
         }
 
         /// <summary>
+        /// Per instance data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Sequential)]
+        public struct VSPerInstance : IBufferData
+        {
+            /// <summary>
+            /// Tint color
+            /// </summary>
+            public Color4 TintColor;
+            /// <summary>
+            /// Material index
+            /// </summary>
+            public uint MaterialIndex;
+            public uint Pad1;
+            public uint Pad2;
+            public uint Pad3;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerInstance));
+            }
+        }
+
+        /// <summary>
         /// Globals constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<VSGlobals> vsGlobals;
@@ -68,6 +93,10 @@ namespace Engine.BuiltInShaders
         /// Per frame constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
+        /// <summary>
+        /// Per instance constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<VSPerInstance> vsPerInstance;
 
         /// <summary>
         /// Graphics instance
@@ -83,28 +112,29 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVsI(Graphics graphics)
+        public PositionNormalColorVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_I_Cso == null;
-            var bytes = Resources.Vs_PositionColor_I_Cso ?? Resources.Vs_PositionColor_I;
+            bool compile = Resources.Vs_PositionNormalColor_Cso == null;
+            var bytes = Resources.Vs_PositionNormalColor_Cso ?? Resources.Vs_PositionNormalColor;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionColorVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionNormalColorVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionColorVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionNormalColorVs), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVsI) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsI) + "." + nameof(VSPerFrame));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionNormalColorVs) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionNormalColorVs) + "." + nameof(VSPerFrame));
+            vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(PositionNormalColorVs) + "." + nameof(VSPerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVsI()
+        ~PositionNormalColorVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -128,6 +158,7 @@ namespace Engine.BuiltInShaders
                 Shader?.Dispose();
                 vsGlobals?.Dispose();
                 vsPerFrame?.Dispose();
+                vsPerInstance?.Dispose();
             }
         }
 
@@ -160,13 +191,27 @@ namespace Engine.BuiltInShaders
             };
             vsPerFrame.WriteData(data);
         }
+        /// <summary>
+        /// Sets per instance data
+        /// </summary>
+        /// <param name="tintColor">Tint color</param>
+        /// <param name="materialIndex">Material index</param>
+        public void SetVSPerInstance(Color4 tintColor, uint materialIndex)
+        {
+            var data = new VSPerInstance
+            {
+                TintColor = tintColor,
+                MaterialIndex = materialIndex,
+            };
+            vsPerInstance.WriteData(data);
+        }
 
         /// <summary>
         /// Sets the vertex shader constant buffers
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsGlobals, vsPerFrame });
+            Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsGlobals, vsPerFrame, vsPerInstance });
 
             Graphics.SetVertexShaderResourceView(0, materialPalette);
         }

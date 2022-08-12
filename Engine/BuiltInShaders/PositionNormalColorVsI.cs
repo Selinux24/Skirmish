@@ -9,9 +9,9 @@ namespace Engine.BuiltInShaders
     using Engine.Properties;
 
     /// <summary>
-    /// Position color instanced vertex shader
+    /// Position normal color instanced vertex shader
     /// </summary>
-    public class PositionColorVsI : IDisposable
+    public class PositionNormalColorVsI : IDisposable
     {
         /// <summary>
         /// Global data structure
@@ -83,28 +83,28 @@ namespace Engine.BuiltInShaders
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVsI(Graphics graphics)
+        public PositionNormalColorVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_I_Cso == null;
-            var bytes = Resources.Vs_PositionColor_I_Cso ?? Resources.Vs_PositionColor_I;
+            bool compile = Resources.Vs_PositionNormalColor_I_Cso == null;
+            var bytes = Resources.Vs_PositionNormalColor_I_Cso ?? Resources.Vs_PositionNormalColor_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionColorVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionNormalColorVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionColorVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionNormalColorVsI), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionColorVsI) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionColorVsI) + "." + nameof(VSPerFrame));
+            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionNormalColorVsI) + "." + nameof(VSGlobals));
+            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionNormalColorVsI) + "." + nameof(VSPerFrame));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVsI()
+        ~PositionNormalColorVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

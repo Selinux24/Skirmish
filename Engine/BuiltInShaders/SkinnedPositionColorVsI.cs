@@ -17,7 +17,7 @@ namespace Engine.BuiltInShaders
         /// Global data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSGlobals
+        public struct VSGlobals : IBufferData
         {
             /// <summary>
             /// Material palette width
@@ -29,13 +29,19 @@ namespace Engine.BuiltInShaders
             public uint AnimationPaletteWidth;
             public uint Pad1;
             public uint Pad2;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSGlobals));
+            }
         }
 
         /// <summary>
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame
+        public struct VSPerFrame : IBufferData
         {
             /// <summary>
             /// World matrix
@@ -45,6 +51,12 @@ namespace Engine.BuiltInShaders
             /// World-View-Projection matrix
             /// </summary>
             public Matrix WorldViewProjection;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerFrame));
+            }
         }
 
         /// <summary>
