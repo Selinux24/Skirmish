@@ -1563,11 +1563,11 @@ namespace Engine
         internal Buffer CreateConstantBuffer<T>(string name)
             where T : struct, IBufferData
         {
-            int sizeInBytes = default(T).GetStride() / 16 * 16;
+            int sizeInBytes = Marshal.SizeOf(typeof(T));
+            sizeInBytes = sizeInBytes / 16 * 16;
 
-            ResourceUsage usage = ResourceUsage.Dynamic;
+            ResourceUsage usage = ResourceUsage.Default;
             BindFlags binding = BindFlags.ConstantBuffer;
-            CpuAccessFlags access = CpuAccessFlags.Write;
 
             Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, 1);
 
@@ -1576,7 +1576,7 @@ namespace Engine
                 Usage = usage,
                 SizeInBytes = sizeInBytes,
                 BindFlags = binding,
-                CpuAccessFlags = access,
+                CpuAccessFlags = CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
@@ -3531,6 +3531,23 @@ namespace Engine
 
                 return false;
             }
+        }
+
+        /// <summary>
+        /// Updates a constant buffer value in the device
+        /// </summary>
+        /// <typeparam name="T">Type of data</typeparam>
+        /// <param name="dataStream">Data stream</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="value">Value</param>
+        internal bool UpdateConstantBuffer<T>(DataStream dataStream, Buffer buffer, T value) where T : struct, IBufferData
+        {
+            Marshal.StructureToPtr(value, dataStream.DataPointer, false);
+
+            var dataBox = new DataBox(dataStream.DataPointer, 0, 0);
+            device.ImmediateContext.UpdateSubresource(dataBox, buffer, 0);
+
+            return true;
         }
 
         /// <summary>

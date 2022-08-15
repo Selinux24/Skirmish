@@ -9,7 +9,7 @@ namespace Engine.Effects
     /// <summary>
     /// Point light buffer
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit, Size = 80)]
     public struct BufferLightPoint : IBufferData
     {
         /// <summary>
@@ -58,47 +58,47 @@ namespace Engine.Effects
         /// <summary>
         /// Diffuse color
         /// </summary>
+        [FieldOffset(0)]
         public Color4 DiffuseColor;
+
         /// <summary>
         /// Specular color
         /// </summary>
+        [FieldOffset(16)]
         public Color4 SpecularColor;
+
         /// <summary>
         /// Light position
         /// </summary>
+        [FieldOffset(32)]
         public Vector3 Position;
         /// <summary>
         /// Intensity
         /// </summary>
+        [FieldOffset(44)]
         public float Intensity;
+
         /// <summary>
         /// Light radius
         /// </summary>
+        [FieldOffset(48)]
         public float Radius;
         /// <summary>
         /// The light casts shadow
         /// </summary>
+        [FieldOffset(52)]
         public float CastShadow;
         /// <summary>
         /// Perspective values
         /// </summary>
+        [FieldOffset(56)]
         public Vector2 PerspectiveValues;
+
         /// <summary>
         /// Shadow map index
         /// </summary>
+        [FieldOffset(64)]
         public int MapIndex;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public uint Pad1;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public uint Pad2;
-        /// <summary>
-        /// Padding
-        /// </summary>
-        public uint Pad3;
 
         /// <summary>
         /// Constructor
@@ -116,23 +116,17 @@ namespace Engine.Effects
 
             var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, Radius + 0.1f);
             PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]);
-
-            Pad1 = 1000;
-            Pad2 = 2000;
-            Pad3 = 3000;
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public int GetStride()
         {
 #if DEBUG
             int size = Marshal.SizeOf(typeof(BufferLightPoint));
-            if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+            if (size % 16 != 0) throw new EngineException($"Buffer {nameof(BufferLightPoint)} strides must be divisible by 16 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-            return Marshal.SizeOf(typeof(BufferLightPoint));
+            return Marshal.SizeOf(typeof(BufferLightHemispheric));
 #endif
         }
     }

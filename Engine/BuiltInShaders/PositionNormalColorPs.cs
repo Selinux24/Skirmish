@@ -17,73 +17,90 @@ namespace Engine.BuiltInShaders
         /// <summary>
         /// Per frame data structure
         /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame : IBufferData
+        [StructLayout(LayoutKind.Explicit, Size = 4176)]
+        public struct PerFrame : IBufferData
         {
             /// <summary>
             /// Eye position world
             /// </summary>
+            [FieldOffset(0)]
             public Vector3 EyePositionWorld;
-            public float Pad1;
+
             /// <summary>
             /// Fog color
             /// </summary>
+            [FieldOffset(16)]
             public Color4 FogColor;
+
             /// <summary>
             /// Fog start distance
             /// </summary>
+            [FieldOffset(32)]
             public float FogStart;
             /// <summary>
             /// Fog range distance
             /// </summary>
+            [FieldOffset(36)]
             public float FogRange;
-            public float Pad2;
-            public float Pad3;
+
             /// <summary>
-            /// Hemispheric light
+            /// Level of detail values
             /// </summary>
-            public BufferLightHemispheric HemiLight;
-            /// <summary>
-            /// Directional lights
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightDirectional.MAX)]
-            public BufferLightDirectional[] DirLights;
-            /// <summary>
-            /// Point lights
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightPoint.MAX)]
-            public BufferLightPoint[] PointLights;
-            /// <summary>
-            /// Spot lights
-            /// </summary>
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightSpot.MAX)]
-            public BufferLightSpot[] SpotLights;
+            [FieldOffset(48)]
+            public Vector3 LevelOfDetail;
+
             /// <summary>
             /// Directional lights count
             /// </summary>
+            [FieldOffset(64)]
             public uint DirLightsCount;
             /// <summary>
             /// Point lights count
             /// </summary>
+            [FieldOffset(68)]
             public uint PointLightsCount;
             /// <summary>
             /// Spot lights count
             /// </summary>
+            [FieldOffset(72)]
             public uint SpotLightsCount;
             /// <summary>
             /// Shadow intensity
             /// </summary>
+            [FieldOffset(76)]
             public float ShadowIntensity;
+
             /// <summary>
-            /// Level of detail values
+            /// Hemispheric light
             /// </summary>
-            public Vector3 LevelOfDetail;
-            public float Pad4;
+            [FieldOffset(80)]
+            public BufferLightHemispheric HemiLight;
+            /// <summary>
+            /// Directional lights
+            /// </summary>
+            [FieldOffset(112), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightDirectional.MAX)]
+            public BufferLightDirectional[] DirLights;
+            /// <summary>
+            /// Point lights
+            /// </summary>
+            [FieldOffset(592), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightPoint.MAX)]
+            public BufferLightPoint[] PointLights;
+            /// <summary>
+            /// Spot lights
+            /// </summary>
+            [FieldOffset(1872), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightSpot.MAX)]
+            public BufferLightSpot[] SpotLights;
 
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(VSPerFrame));
+#if DEBUG
+                int size = Marshal.SizeOf(typeof(PerFrame));
+                if (size % 16 != 0) throw new EngineException($"Buffer {nameof(PerFrame)} strides must be divisible by 16 in order to be sent to shaders and effects as arrays");
+                return size;
+#else
+            return Marshal.SizeOf(typeof(BufferLightHemispheric));
+#endif
             }
         }
 
@@ -95,7 +112,7 @@ namespace Engine.BuiltInShaders
         /// <summary>
         /// Per frame constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
+        private readonly EngineConstantBuffer<PerFrame> cbPerFrame;
         /// <summary>
         /// Directional shadow map resource view
         /// </summary>
@@ -133,7 +150,7 @@ namespace Engine.BuiltInShaders
                 Shader = graphics.LoadPixelShader(nameof(PositionNormalColorPs), bytes);
             }
 
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionNormalColorPs) + "." + nameof(VSPerFrame));
+            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(PositionNormalColorPs) + "." + nameof(PerFrame));
         }
         /// <summary>
         /// Destructor
@@ -160,7 +177,7 @@ namespace Engine.BuiltInShaders
             if (disposing)
             {
                 Shader?.Dispose();
-                vsPerFrame?.Dispose();
+                cbPerFrame?.Dispose();
             }
         }
 
@@ -170,7 +187,7 @@ namespace Engine.BuiltInShaders
         /// <param name="eyePositionWorld">Eye position world</param>
         /// <param name="lights">Scene lights</param>
         /// <param name="levelOfDetail">Level of detail</param>
-        public void SetVSPerFrame(
+        public void SetCBPerFrame(
             Vector3 eyePositionWorld,
             SceneLights lights,
             Vector3 levelOfDetail)
@@ -180,23 +197,28 @@ namespace Engine.BuiltInShaders
             var pointLights = BufferLightPoint.Build(lights?.GetVisiblePointLights(), out int pointLength);
             var spotLights = BufferLightSpot.Build(lights?.GetVisibleSpotLights(), out int spotLength);
 
-            var data = new VSPerFrame
+            var data = new PerFrame
             {
                 EyePositionWorld = eyePositionWorld,
+
                 FogColor = lights?.FogColor ?? Color.Transparent,
+
                 FogStart = lights?.FogStart ?? 0,
                 FogRange = lights?.FogRange ?? 0,
-                HemiLight = hemiLight,
-                DirLights = dirLights,
-                PointLights = pointLights,
-                SpotLights = spotLights,
+
+                LevelOfDetail = levelOfDetail,
+
                 DirLightsCount = (uint)dirLength,
                 PointLightsCount = (uint)pointLength,
                 SpotLightsCount = (uint)spotLength,
                 ShadowIntensity = lights?.ShadowIntensity ?? 0f,
-                LevelOfDetail = levelOfDetail,
+
+                HemiLight = hemiLight,
+                DirLights = dirLights,
+                PointLights = pointLights,
+                SpotLights = spotLights,
             };
-            vsPerFrame.WriteData(data);
+            cbPerFrame.WriteData(data);
         }
         /// <summary>
         /// Sets the directional shadow map array
@@ -228,7 +250,7 @@ namespace Engine.BuiltInShaders
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, vsPerFrame);
+            Graphics.SetPixelShaderConstantBuffer(0, cbPerFrame);
 
             Graphics.SetPixelShaderResourceViews(0, new[] { shadowMapDir, shadowMapSpot, shadowMapPoint });
         }

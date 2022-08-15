@@ -292,6 +292,7 @@ namespace Engine.Common
         /// Gets the drawing effect for the current instance
         /// </summary>
         /// <param name="mode">Drawing mode</param>
+        /// <param name="vertexType">Vertex type</param>
         /// <returns>Returns the drawing effect</returns>
         protected IGeometryDrawer2 GetEffect2(DrawerModes mode, VertexTypes vertexType)
         {

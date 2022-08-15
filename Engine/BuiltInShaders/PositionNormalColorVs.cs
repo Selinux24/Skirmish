@@ -17,7 +17,7 @@ namespace Engine.BuiltInShaders
         /// Global data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSGlobals : IBufferData
+        public struct Globals : IBufferData
         {
             /// <summary>
             /// Material palette width
@@ -30,7 +30,7 @@ namespace Engine.BuiltInShaders
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(VSGlobals));
+                return Marshal.SizeOf(typeof(Globals));
             }
         }
 
@@ -38,7 +38,7 @@ namespace Engine.BuiltInShaders
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame : IBufferData
+        public struct PerFrame : IBufferData
         {
             /// <summary>
             /// World matrix
@@ -52,7 +52,7 @@ namespace Engine.BuiltInShaders
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(VSPerFrame));
+                return Marshal.SizeOf(typeof(PerFrame));
             }
         }
 
@@ -60,7 +60,7 @@ namespace Engine.BuiltInShaders
         /// Per instance data structure
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerInstance : IBufferData
+        public struct PerInstance : IBufferData
         {
             /// <summary>
             /// Tint color
@@ -77,14 +77,14 @@ namespace Engine.BuiltInShaders
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(VSPerInstance));
+                return Marshal.SizeOf(typeof(PerInstance));
             }
         }
 
         /// <summary>
         /// Globals constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<VSGlobals> vsGlobals;
+        private readonly EngineConstantBuffer<Globals> cbGlobals;
         /// <summary>
         /// Material palette resource view
         /// </summary>
@@ -92,11 +92,11 @@ namespace Engine.BuiltInShaders
         /// <summary>
         /// Per frame constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
+        private readonly EngineConstantBuffer<PerFrame> cbPerFrame;
         /// <summary>
         /// Per instance constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<VSPerInstance> vsPerInstance;
+        private readonly EngineConstantBuffer<PerInstance> cbPerInstance;
 
         /// <summary>
         /// Graphics instance
@@ -127,9 +127,9 @@ namespace Engine.BuiltInShaders
                 Shader = graphics.LoadVertexShader(nameof(PositionNormalColorVs), bytes);
             }
 
-            vsGlobals = new EngineConstantBuffer<VSGlobals>(graphics, nameof(PositionNormalColorVs) + "." + nameof(VSGlobals));
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionNormalColorVs) + "." + nameof(VSPerFrame));
-            vsPerInstance = new EngineConstantBuffer<VSPerInstance>(graphics, nameof(PositionNormalColorVs) + "." + nameof(VSPerInstance));
+            cbGlobals = new EngineConstantBuffer<Globals>(graphics, nameof(PositionNormalColorVs) + "." + nameof(Globals));
+            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(PositionNormalColorVs) + "." + nameof(PerFrame));
+            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(PositionNormalColorVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
@@ -156,9 +156,9 @@ namespace Engine.BuiltInShaders
             if (disposing)
             {
                 Shader?.Dispose();
-                vsGlobals?.Dispose();
-                vsPerFrame?.Dispose();
-                vsPerInstance?.Dispose();
+                cbGlobals?.Dispose();
+                cbPerFrame?.Dispose();
+                cbPerInstance?.Dispose();
             }
         }
 
@@ -167,43 +167,51 @@ namespace Engine.BuiltInShaders
         /// </summary>
         /// <param name="materialPalette">Material palette texture</param>
         /// <param name="materialPaletteWidth">Material palette texture width</param>
-        public void SetVSGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth)
+        public void SetCBGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth)
         {
             this.materialPalette = materialPalette;
 
-            var data = new VSGlobals
+            var data = new Globals
             {
                 MaterialPaletteWidth = materialPaletteWidth,
+
+                Pad1 = 9999,
+                Pad2 = 9999,
+                Pad3 = 9999,
             };
-            vsGlobals.WriteData(data);
+            cbGlobals.WriteData(data);
         }
         /// <summary>
         /// Sets per frame data
         /// </summary>
         /// <param name="world">World matrix</param>
         /// <param name="worldViewProjection">World view projection matrix</param>
-        public void SetVSPerFrame(Matrix world, Matrix worldViewProjection)
+        public void SetCBPerFrame(Matrix world, Matrix worldViewProjection)
         {
-            var data = new VSPerFrame
+            var data = new PerFrame
             {
                 World = Matrix.Transpose(world),
                 WorldViewProjection = Matrix.Transpose(worldViewProjection),
             };
-            vsPerFrame.WriteData(data);
+            cbPerFrame.WriteData(data);
         }
         /// <summary>
         /// Sets per instance data
         /// </summary>
         /// <param name="tintColor">Tint color</param>
         /// <param name="materialIndex">Material index</param>
-        public void SetVSPerInstance(Color4 tintColor, uint materialIndex)
+        public void SetCBPerInstance(Color4 tintColor, uint materialIndex)
         {
-            var data = new VSPerInstance
+            var data = new PerInstance
             {
                 TintColor = tintColor,
                 MaterialIndex = materialIndex,
+
+                Pad1 = 9999,
+                Pad2 = 9999,
+                Pad3 = 9999,
             };
-            vsPerInstance.WriteData(data);
+            cbPerInstance.WriteData(data);
         }
 
         /// <summary>
@@ -211,7 +219,7 @@ namespace Engine.BuiltInShaders
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsGlobals, vsPerFrame, vsPerInstance });
+            Graphics.SetVertexShaderConstantBuffers(0, new IEngineConstantBuffer[] { cbGlobals, cbPerFrame, cbPerInstance });
 
             Graphics.SetVertexShaderResourceView(0, materialPalette);
         }

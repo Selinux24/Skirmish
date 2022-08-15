@@ -58,9 +58,9 @@ namespace Engine.BuiltInEffects
         {
             vertexShader.SetVSPerFrame(world, context.ViewProjection);
 
-            pixelShader.SetVSPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
+            pixelShader.SetCBPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
             pixelShader.SetDirShadowMap(context.ShadowMapDirectional.Texture);
-            pixelShader.SetSpotShadowMap(context.ShadowMapPoint.Texture);
+            pixelShader.SetSpotShadowMap(context.ShadowMapSpot.Texture);
             pixelShader.SetPointShadowMap(context.ShadowMapPoint.Texture);
         }
         /// <inheritdoc/>
@@ -90,7 +90,7 @@ namespace Engine.BuiltInEffects
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology))
+                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, true))
                 {
                     continue;
                 }
@@ -114,7 +114,7 @@ namespace Engine.BuiltInEffects
             vertexShader.SetConstantBuffers();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology, true))
             {
                 return;
             }
@@ -141,7 +141,7 @@ namespace Engine.BuiltInEffects
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology))
+                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, true))
                 {
                     continue;
                 }
@@ -166,7 +166,7 @@ namespace Engine.BuiltInEffects
             pixelShader.SetConstantBuffers();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology, true))
             {
                 return;
             }

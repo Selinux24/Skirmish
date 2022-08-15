@@ -47,7 +47,7 @@ namespace Engine.BuiltInEffects
             EngineShaderResourceView animationPalette,
             uint animationPaletteWidth)
         {
-            vertexShader.SetVSGlobals(
+            vertexShader.SetCBGlobals(
                 materialPalette, materialPaletteWidth);
         }
         /// <inheritdoc/>
@@ -55,11 +55,11 @@ namespace Engine.BuiltInEffects
             Matrix world,
             DrawContext context)
         {
-            vertexShader.SetVSPerFrame(world, context.ViewProjection);
+            vertexShader.SetCBPerFrame(world, context.ViewProjection);
 
-            pixelShader.SetVSPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
+            pixelShader.SetCBPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
             pixelShader.SetDirShadowMap(context.ShadowMapDirectional.Texture);
-            pixelShader.SetSpotShadowMap(context.ShadowMapPoint.Texture);
+            pixelShader.SetSpotShadowMap(context.ShadowMapSpot.Texture);
             pixelShader.SetPointShadowMap(context.ShadowMapPoint.Texture);
         }
         /// <inheritdoc/>
@@ -69,7 +69,7 @@ namespace Engine.BuiltInEffects
             uint textureIndex,
             Color4 tintColor)
         {
-            vertexShader.SetVSPerInstance(
+            vertexShader.SetCBPerInstance(
                 tintColor,
                 material.Material?.ResourceIndex ?? 0);
         }
@@ -91,7 +91,7 @@ namespace Engine.BuiltInEffects
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology))
+                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, false))
                 {
                     continue;
                 }
@@ -115,7 +115,7 @@ namespace Engine.BuiltInEffects
             vertexShader.SetConstantBuffers();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology, false))
             {
                 return;
             }
@@ -142,7 +142,7 @@ namespace Engine.BuiltInEffects
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology))
+                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, false))
                 {
                     continue;
                 }
@@ -167,7 +167,7 @@ namespace Engine.BuiltInEffects
             pixelShader.SetConstantBuffers();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology, false))
             {
                 return;
             }

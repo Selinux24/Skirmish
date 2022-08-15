@@ -9,7 +9,7 @@ namespace Engine.Effects
     /// <summary>
     /// Spot light buffer
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit, Size = 144)]
     public struct BufferLightSpot : IBufferData
     {
         /// <summary>
@@ -58,46 +58,62 @@ namespace Engine.Effects
         /// <summary>
         /// Diffuse color
         /// </summary>
+        [FieldOffset(0)]
         public Color4 DiffuseColor;
+
         /// <summary>
         /// Specular color
         /// </summary>
+        [FieldOffset(16)]
         public Color4 SpecularColor;
+
         /// <summary>
         /// Light position
         /// </summary>
+        [FieldOffset(32)]
         public Vector3 Position;
         /// <summary>
         /// Spot radius
         /// </summary>
+        [FieldOffset(44)]
         public float Angle;
+
         /// <summary>
         /// Light direction vector
         /// </summary>
+        [FieldOffset(48)]
         public Vector3 Direction;
         /// <summary>
         /// Intensity
         /// </summary>
+        [FieldOffset(60)]
         public float Intensity;
+
         /// <summary>
         /// Light radius
         /// </summary>
+        [FieldOffset(64)]
         public float Radius;
         /// <summary>
         /// The light casts shadow
         /// </summary>
+        [FieldOffset(68)]
         public float CastShadow;
         /// <summary>
         /// Shadow map index
         /// </summary>
+        [FieldOffset(72)]
         public int MapIndex;
         /// <summary>
         /// Sub-shadow map count
         /// </summary>
+        [FieldOffset(76)]
         public uint MapCount;
+
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
+        [FieldOffset(80)]
         public Matrix FromLightVP;
 
         /// <summary>
@@ -125,17 +141,15 @@ namespace Engine.Effects
             }
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public int GetStride()
         {
 #if DEBUG
             int size = Marshal.SizeOf(typeof(BufferLightSpot));
-            if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+            if (size % 16 != 0) throw new EngineException($"Buffer {nameof(BufferLightSpot)} strides must be divisible by 16 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-            return Marshal.SizeOf(typeof(BufferLightSpot));
+            return Marshal.SizeOf(typeof(BufferLightHemispheric));
 #endif
         }
     }

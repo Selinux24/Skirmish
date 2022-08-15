@@ -6,7 +6,7 @@ namespace Engine.Effects
     /// <summary>
     /// Hemispheric light buffer
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit, Size = 32)]
     public struct BufferLightHemispheric : IBufferData
     {
         /// <summary>
@@ -46,10 +46,12 @@ namespace Engine.Effects
         /// <summary>
         /// Ambient Up
         /// </summary>
+        [FieldOffset(0)]
         public Color4 AmbientDown;
         /// <summary>
         /// Ambient Down
         /// </summary>
+        [FieldOffset(16)]
         public Color4 AmbientUp;
 
         /// <summary>
@@ -62,14 +64,12 @@ namespace Engine.Effects
             AmbientUp = new Color4(light.AmbientUp, 0f);
         }
 
-        /// <summary>
-        /// Size in bytes
-        /// </summary>
+        /// <inheritdoc/>
         public int GetStride()
         {
 #if DEBUG
             int size = Marshal.SizeOf(typeof(BufferLightHemispheric));
-            if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+            if (size % 16 != 0) throw new EngineException($"Buffer {nameof(BufferLightHemispheric)} strides must be divisible by 16 in order to be sent to shaders and effects as arrays");
             return size;
 #else
             return Marshal.SizeOf(typeof(BufferLightHemispheric));

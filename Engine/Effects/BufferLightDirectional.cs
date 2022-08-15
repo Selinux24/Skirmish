@@ -9,7 +9,7 @@ namespace Engine.Effects
     /// <summary>
     /// Directional light buffer
     /// </summary>
-    [StructLayout(LayoutKind.Sequential)]
+    [StructLayout(LayoutKind.Explicit, Size = 160)]
     public struct BufferLightDirectional : IBufferData
     {
         /// <summary>
@@ -58,34 +58,48 @@ namespace Engine.Effects
         /// <summary>
         /// Diffuse color
         /// </summary>
+        [FieldOffset(0)]
         public Color4 DiffuseColor;
+
         /// <summary>
         /// Specular color
         /// </summary>
+        [FieldOffset(16)]
         public Color4 SpecularColor;
+
         /// <summary>
         /// Light direction vector
         /// </summary>
+        [FieldOffset(32)]
         public Vector3 DirToLight;
         /// <summary>
         /// The light casts shadow
         /// </summary>
+        [FieldOffset(44)]
         public float CastShadow;
+
         /// <summary>
         /// X cascade offsets
         /// </summary>
+        [FieldOffset(48)]
         public Vector4 ToCascadeOffsetX;
+
         /// <summary>
         /// Y cascade offsets
         /// </summary>
+        [FieldOffset(64)]
         public Vector4 ToCascadeOffsetY;
+
         /// <summary>
         /// Cascade scales
         /// </summary>
+        [FieldOffset(80)]
         public Vector4 ToCascadeScale;
+
         /// <summary>
         /// From light view * projection matrix array
         /// </summary>
+        [FieldOffset(96)]
         public Matrix ToShadowSpace;
 
         /// <summary>
@@ -109,10 +123,10 @@ namespace Engine.Effects
         {
 #if DEBUG
             int size = Marshal.SizeOf(typeof(BufferLightDirectional));
-            if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
+            if (size % 16 != 0) throw new EngineException($"Buffer {nameof(BufferLightDirectional)} strides must be divisible by 16 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-            return Marshal.SizeOf(typeof(BufferLightDirectional));
+            return Marshal.SizeOf(typeof(BufferLightHemispheric));
 #endif
         }
     }

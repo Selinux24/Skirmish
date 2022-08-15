@@ -1,8 +1,10 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.Common
 {
     using SharpDX.Direct3D11;
+    using System.Runtime.InteropServices;
 
     /// <summary>
     /// Engine constant buffer interface
@@ -34,6 +36,10 @@ namespace Engine.Common
         /// Buffer
         /// </summary>
         private readonly Buffer buffer;
+        /// <summary>
+        /// Data stream to update the buffer in memory
+        /// </summary>
+        private readonly DataStream dataStream;
 
         /// <summary>
         /// Name
@@ -50,6 +56,7 @@ namespace Engine.Common
             this.graphics = graphics;
 
             Name = name;
+            dataStream = new DataStream(Marshal.SizeOf(typeof(T)), true, true);
             buffer = graphics.CreateConstantBuffer<T>(name);
         }
         /// <summary>
@@ -76,6 +83,7 @@ namespace Engine.Common
         {
             if (disposing)
             {
+                dataStream?.Dispose();
                 buffer?.Dispose();
             }
         }
@@ -86,7 +94,7 @@ namespace Engine.Common
         /// <param name="data">Data</param>
         public void WriteData(T data)
         {
-            graphics.WriteDiscardBuffer(buffer, data);
+            graphics.UpdateConstantBuffer(dataStream, buffer, data);
         }
 
         /// <summary>

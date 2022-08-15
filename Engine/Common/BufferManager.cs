@@ -102,9 +102,11 @@ namespace Engine.Common
         /// <summary>
         /// Input layouts by technique
         /// </summary>
-        private readonly Dictionary<EngineEffectTechnique, InputLayout> inputLayouts = new Dictionary<EngineEffectTechnique, InputLayout>();
-
-        private readonly Dictionary<IEngineVertexShader, InputLayout> inputLayouts2 = new Dictionary<IEngineVertexShader, InputLayout>();
+        private readonly Dictionary<EngineEffectTechnique, InputLayout> techniqueInputLayouts = new Dictionary<EngineEffectTechnique, InputLayout>();
+        /// <summary>
+        /// Input layouts by vertex shaders
+        /// </summary>
+        private readonly Dictionary<string, InputLayout> vertexShadersInputLayouts = new Dictionary<string, InputLayout>();
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -200,8 +202,8 @@ namespace Engine.Common
                 indexBuffers.ForEach(b => b?.Dispose());
                 indexBuffers.Clear();
 
-                inputLayouts.Values.ToList().ForEach(il => il?.Dispose());
-                inputLayouts.Clear();
+                techniqueInputLayouts.Values.ToList().ForEach(il => il?.Dispose());
+                techniqueInputLayouts.Clear();
             }
         }
 
@@ -880,17 +882,18 @@ namespace Engine.Common
                 return false;
             }
 
-            //The technique defines the vertex type
-            if (!inputLayouts.ContainsKey(technique))
+            if (!techniqueInputLayouts.ContainsKey(technique))
             {
+                // The vertex shader's technique defines the input vertex data type
                 var signature = technique.GetSignature();
+                var inputLayout = vertexBufferDescriptor.Input.ToArray();
 
-                inputLayouts.Add(
+                techniqueInputLayouts.Add(
                     technique,
-                    game.Graphics.CreateInputLayout(descriptor.Id, signature, vertexBufferDescriptor.Input.ToArray()));
+                    game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
             }
 
-            game.Graphics.IAInputLayout = inputLayouts[technique];
+            game.Graphics.IAInputLayout = techniqueInputLayouts[technique];
             game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
             return true;
         }
@@ -900,7 +903,8 @@ namespace Engine.Common
         /// <param name="vertexShader">Vertex shader</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="topology">Topology</param>
-        public bool SetInputAssembler(IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology)
+        /// <param name="instanced">Use instancig data</param>
+        public bool SetInputAssembler(IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
         {
             if (descriptor == null)
             {
@@ -925,15 +929,20 @@ namespace Engine.Common
                 return false;
             }
 
-            //The technique defines the vertex type
-            if (!inputLayouts2.ContainsKey(vertexShader))
+            if (!vertexShadersInputLayouts.ContainsKey(descriptor.Id))
             {
-                inputLayouts2.Add(
-                    vertexShader,
-                    game.Graphics.CreateInputLayout(descriptor.Id, vertexShader.GetShaderBytecode(), vertexBufferDescriptor.Input.ToArray()));
+                // The vertex shader defines the input vertex data type
+                var signature = vertexShader.GetShaderBytecode();
+                var inputLayout = instanced ?
+                    vertexBufferDescriptor.Input.ToArray() :
+                    vertexBufferDescriptor.Input.Where(i => i.Classification == InputClassification.PerVertexData).ToArray();
+
+                vertexShadersInputLayouts.Add(
+                    descriptor.Id,
+                    game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
             }
 
-            game.Graphics.IAInputLayout = inputLayouts2[vertexShader];
+            game.Graphics.IAInputLayout = vertexShadersInputLayouts[descriptor.Id];
             game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
             return true;
         }
