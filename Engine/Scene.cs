@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
     using Engine.Common;
     using Engine.Coroutines;
     using Engine.Effects;
@@ -924,6 +925,7 @@ namespace Engine
 
                 Renderer?.UpdateGlobals();
 
+                BuiltInShaders.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
                 DrawerPool.UpdateSceneGlobals(GameEnvironment, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
             }
         }

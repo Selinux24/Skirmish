@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.Animation;
+    using Engine.BuiltIn;
     using Engine.Common;
     using Engine.Effects;
 
@@ -364,6 +365,8 @@ namespace Engine
 
             var localTransform = GetTransformByName(meshName);
 
+            BuiltInShaders.UpdatePerFrame(localTransform, context);
+
             foreach (var mat in meshDict)
             {
                 var mesh = mat.Value;
@@ -396,9 +399,7 @@ namespace Engine
                 var effect2 = GetEffect2(context.DrawerMode, mesh.VertextType);
                 if (effect2 != null)
                 {
-                    effect2.UpdatePerFrame(localTransform, context);
-
-                    effect2.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
+                    effect2.Update(animationInfo, materialInfo, TextureIndex, TintColor);
 
                     BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 

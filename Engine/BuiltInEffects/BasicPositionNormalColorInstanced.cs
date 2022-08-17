@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace Engine.BuiltInEffects
 {
-    using Engine.BuiltInShaders;
+    using Engine.BuiltIn;
     using Engine.Common;
     using Engine.Effects;
 
@@ -42,29 +42,7 @@ namespace Engine.BuiltInEffects
         }
 
         /// <inheritdoc/>
-        public void UpdateGlobals(
-            EngineShaderResourceView materialPalette,
-            uint materialPaletteWidth,
-            EngineShaderResourceView animationPalette,
-            uint animationPaletteWidth)
-        {
-            vertexShader.SetVSGlobals(
-                materialPalette, materialPaletteWidth);
-        }
-        /// <inheritdoc/>
-        public void UpdatePerFrame(
-            Matrix world,
-            DrawContext context)
-        {
-            vertexShader.SetVSPerFrame(world, context.ViewProjection);
-
-            pixelShader.SetCBPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
-            pixelShader.SetDirShadowMap(context.ShadowMapDirectional.Texture);
-            pixelShader.SetSpotShadowMap(context.ShadowMapSpot.Texture);
-            pixelShader.SetPointShadowMap(context.ShadowMapPoint.Texture);
-        }
-        /// <inheritdoc/>
-        public void UpdatePerObject(
+        public void Update(
             AnimationDrawInfo animation,
             MaterialDrawInfo material,
             uint textureIndex,

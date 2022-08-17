@@ -2,7 +2,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltInShaders
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
@@ -16,54 +16,55 @@ namespace Engine.BuiltInShaders
         /// <summary>
         /// Per frame data structure
         /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame : IBufferData
+        [StructLayout(LayoutKind.Explicit, Size = 48)]
+        public struct PerFrame : IBufferData
         {
             /// <summary>
             /// Eye position world
             /// </summary>
+            [FieldOffset(0)]
             public Vector3 EyePositionWorld;
-            public float Pad1;
+
             /// <summary>
             /// Fog color
             /// </summary>
+            [FieldOffset(16)]
             public Color4 FogColor;
+
             /// <summary>
             /// Fog start distance
             /// </summary>
+            [FieldOffset(32)]
             public float FogStart;
             /// <summary>
             /// Fog range distance
             /// </summary>
+            [FieldOffset(36)]
             public float FogRange;
-            public float Pad2;
-            public float Pad3;
 
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(VSPerFrame));
+                return Marshal.SizeOf(typeof(PerFrame));
             }
         }
 
         /// <summary>
         /// Per frame spec data structure
         /// </summary>
-        [StructLayout(LayoutKind.Sequential)]
-        public struct VSPerFrame2 : IBufferData
+        [StructLayout(LayoutKind.Explicit, Size = 16)]
+        public struct PerFrame2 : IBufferData
         {
             /// <summary>
             /// Color output channel
             /// </summary>
+            [FieldOffset(0)]
             public uint Channel;
-            public uint Pad1;
-            public uint Pad2;
-            public uint Pad3;
 
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(VSPerFrame2));
+                return Marshal.SizeOf(typeof(PerFrame2));
             }
         }
 
@@ -75,11 +76,11 @@ namespace Engine.BuiltInShaders
         /// <summary>
         /// Per frame constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<VSPerFrame> vsPerFrame;
+        private readonly EngineConstantBuffer<PerFrame> cbPerFrame;
         /// <summary>
         /// Per frame spec constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<VSPerFrame2> vsPerFrame2;
+        private readonly EngineConstantBuffer<PerFrame2> cbPerFrame2;
         /// <summary>
         /// Diffuse map resource view
         /// </summary>
@@ -109,8 +110,8 @@ namespace Engine.BuiltInShaders
                 Shader = graphics.LoadPixelShader(nameof(PositionTexturePs), bytes);
             }
 
-            vsPerFrame = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(PositionTexturePs) + "." + nameof(VSPerFrame));
-            vsPerFrame2 = new EngineConstantBuffer<VSPerFrame2>(graphics, nameof(PositionTexturePs) + "." + nameof(VSPerFrame2));
+            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(PositionTexturePs) + "." + nameof(PerFrame));
+            cbPerFrame2 = new EngineConstantBuffer<PerFrame2>(graphics, nameof(PositionTexturePs) + "." + nameof(PerFrame2));
         }
         /// <summary>
         /// Destructor
@@ -137,8 +138,8 @@ namespace Engine.BuiltInShaders
             if (disposing)
             {
                 Shader?.Dispose();
-                vsPerFrame?.Dispose();
-                vsPerFrame2?.Dispose();
+                cbPerFrame?.Dispose();
+                cbPerFrame2?.Dispose();
             }
         }
 
@@ -151,14 +152,14 @@ namespace Engine.BuiltInShaders
         /// <param name="fogRange">Fog range distance</param>
         public void SetVSPerFrame(Vector3 eyePositionWorld, Color4 fogColor, float fogStart, float fogRange)
         {
-            var data = new VSPerFrame
+            var data = new PerFrame
             {
                 EyePositionWorld = eyePositionWorld,
                 FogColor = fogColor,
                 FogStart = fogStart,
                 FogRange = fogRange,
             };
-            vsPerFrame.WriteData(data);
+            cbPerFrame.WriteData(data);
         }
         /// <summary>
         /// Sets per frame spec data
@@ -166,11 +167,11 @@ namespace Engine.BuiltInShaders
         /// <param name="channel">Color output channel</param>
         public void SetVSPerFrame2(uint channel)
         {
-            var data = new VSPerFrame2
+            var data = new PerFrame2
             {
                 Channel = channel,
             };
-            vsPerFrame2.WriteData(data);
+            cbPerFrame2.WriteData(data);
         }
         /// <summary>
         /// Sets the diffuse map array
@@ -186,7 +187,7 @@ namespace Engine.BuiltInShaders
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffers(0, new IEngineConstantBuffer[] { vsPerFrame, vsPerFrame2 });
+            Graphics.SetPixelShaderConstantBuffers(0, new IEngineConstantBuffer[] { cbPerFrame, cbPerFrame2 });
 
             Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
         }

@@ -357,6 +357,7 @@ namespace Engine
 
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
+            BuiltIn.BuiltInShaders.Initialize(Graphics);
             DrawerPool.Initialize(Graphics);
         }
         /// <summary>
@@ -397,6 +398,7 @@ namespace Engine
                     scenes = null;
                 }
 
+                BuiltIn.BuiltInShaders.DisposeResources();
                 DrawerPool.DisposeResources();
 
                 FontMapCache.Clear();

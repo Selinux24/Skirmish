@@ -11,33 +11,13 @@ namespace Engine.Effects
     public interface IGeometryDrawer2
     {
         /// <summary>
-        /// Update effect globals
-        /// </summary>
-        /// <param name="materialPalette">Material palette texture</param>
-        /// <param name="materialPaletteWidth">Material palette texture width</param>
-        /// <param name="animationPalette">Animation palette texture</param>
-        /// <param name="animationPaletteWidth">Animation palette texture width</param>
-        void UpdateGlobals(
-            EngineShaderResourceView materialPalette,
-            uint materialPaletteWidth,
-            EngineShaderResourceView animationPalette,
-            uint animationPaletteWidth);
-        /// <summary>
-        /// Update per frame full data
-        /// </summary>
-        /// <param name="world">World</param>
-        /// <param name="context">Context</param>
-        void UpdatePerFrame(
-            Matrix world,
-            DrawContext context);
-        /// <summary>
-        /// Update per model object data
+        /// Update object data
         /// </summary>
         /// <param name="animation">Animation information</param>
         /// <param name="material">Material information</param>
         /// <param name="textureIndex">Texture index</param>
         /// <param name="tintColor">Tint color</param>
-        void UpdatePerObject(
+        void Update(
             AnimationDrawInfo animation,
             MaterialDrawInfo material,
             uint textureIndex,

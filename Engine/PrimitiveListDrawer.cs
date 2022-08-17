@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
     using Engine.Common;
     using Engine.Effects;
 
@@ -258,13 +259,12 @@ namespace Engine
                 return;
             }
 
+            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
+            BuiltInShaders.BasicPositionColor.Update(new AnimationDrawInfo(), new MaterialDrawInfo { Material = MeshMaterial.DefaultPhong, UseAnisotropic = false }, 0, Color.White);
+            BuiltInShaders.BasicPositionColor.Draw(BufferManager, vertexBuffer, drawCount, topology);
+
             Counters.InstancesPerFrame += dictionary.Count;
             Counters.PrimitivesPerFrame += drawCount / stride;
-
-            var effect = DrawerPool.BasicPositionColor;
-            effect.UpdatePerFrame(Matrix.Identity, context);
-            effect.UpdatePerObject(new AnimationDrawInfo(), new MaterialDrawInfo { Material = MeshMaterial.DefaultPhong, UseAnisotropic = false }, 0, Color.White);
-            effect.Draw(BufferManager, vertexBuffer, drawCount, topology);
         }
         /// <summary>
         /// Writes dictionary data in buffer

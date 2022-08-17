@@ -2,23 +2,21 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltInShaders
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Effects;
-    using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
-    /// Position normal color pixel shader
+    /// Per-frame resources
     /// </summary>
-    public class PositionNormalColorPs : IDisposable
+    public class ResourcesPSPerFrame : IDisposable
     {
         /// <summary>
         /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 4176)]
-        public struct PerFrame : IBufferData
+        public struct PSPerFrame : IBufferData
         {
             /// <summary>
             /// Eye position world
@@ -94,68 +92,27 @@ namespace Engine.BuiltInShaders
             /// <inheritdoc/>
             public int GetStride()
             {
-#if DEBUG
-                int size = Marshal.SizeOf(typeof(PerFrame));
-                if (size % 16 != 0) throw new EngineException($"Buffer {nameof(PerFrame)} strides must be divisible by 16 in order to be sent to shaders and effects as arrays");
-                return size;
-#else
-            return Marshal.SizeOf(typeof(BufferLightHemispheric));
-#endif
+                return Marshal.SizeOf(typeof(PSPerFrame));
             }
         }
 
         /// <summary>
-        /// Shader
+        /// Globals constant buffer
         /// </summary>
-        public readonly EnginePixelShader Shader;
-
-        /// <summary>
-        /// Per frame constant buffer
-        /// </summary>
-        private readonly EngineConstantBuffer<PerFrame> cbPerFrame;
-        /// <summary>
-        /// Directional shadow map resource view
-        /// </summary>
-        private EngineShaderResourceView shadowMapDir;
-        /// <summary>
-        /// Spot shadow map resource view
-        /// </summary>
-        private EngineShaderResourceView shadowMapSpot;
-        /// <summary>
-        /// Point shadow map resource view
-        /// </summary>
-        private EngineShaderResourceView shadowMapPoint;
-
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
+        public EngineConstantBuffer<PSPerFrame> PerFrame { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public PositionNormalColorPs(Graphics graphics)
+        /// <param name="graphics">Graphics</param>
+        public ResourcesPSPerFrame(Graphics graphics)
         {
-            Graphics = graphics;
-
-            bool compile = Resources.Ps_PositionNormalColor_Cso == null;
-            var bytes = Resources.Ps_PositionNormalColor_Cso ?? Resources.Ps_PositionNormalColor;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(PositionNormalColorPs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(PositionNormalColorPs), bytes);
-            }
-
-            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(PositionNormalColorPs) + "." + nameof(PerFrame));
+            PerFrame = new EngineConstantBuffer<PSPerFrame>(graphics, nameof(ResourcesPSPerFrame) + "." + nameof(PSPerFrame));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionNormalColorPs()
+        ~ResourcesPSPerFrame()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -176,8 +133,7 @@ namespace Engine.BuiltInShaders
         {
             if (disposing)
             {
-                Shader?.Dispose();
-                cbPerFrame?.Dispose();
+                PerFrame?.Dispose();
             }
         }
 
@@ -187,17 +143,14 @@ namespace Engine.BuiltInShaders
         /// <param name="eyePositionWorld">Eye position world</param>
         /// <param name="lights">Scene lights</param>
         /// <param name="levelOfDetail">Level of detail</param>
-        public void SetCBPerFrame(
-            Vector3 eyePositionWorld,
-            SceneLights lights,
-            Vector3 levelOfDetail)
+        public void SetCBPerFrame(Vector3 eyePositionWorld, SceneLights lights, Vector3 levelOfDetail)
         {
             var hemiLight = BufferLightHemispheric.Build(lights?.GetVisibleHemisphericLight());
             var dirLights = BufferLightDirectional.Build(lights?.GetVisibleDirectionalLights(), out int dirLength);
             var pointLights = BufferLightPoint.Build(lights?.GetVisiblePointLights(), out int pointLength);
             var spotLights = BufferLightSpot.Build(lights?.GetVisibleSpotLights(), out int spotLength);
 
-            var data = new PerFrame
+            var data = new PSPerFrame
             {
                 EyePositionWorld = eyePositionWorld,
 
@@ -218,41 +171,7 @@ namespace Engine.BuiltInShaders
                 PointLights = pointLights,
                 SpotLights = spotLights,
             };
-            cbPerFrame.WriteData(data);
-        }
-        /// <summary>
-        /// Sets the directional shadow map array
-        /// </summary>
-        /// <param name="shadowMapDir">Directional shadow map array</param>
-        public void SetDirShadowMap(EngineShaderResourceView shadowMapDir)
-        {
-            this.shadowMapDir = shadowMapDir;
-        }
-        /// <summary>
-        /// Sets the spot shadow map array
-        /// </summary>
-        /// <param name="shadowMapSpot">Spot shadow map array</param>
-        public void SetSpotShadowMap(EngineShaderResourceView shadowMapSpot)
-        {
-            this.shadowMapSpot = shadowMapSpot;
-        }
-        /// <summary>
-        /// Sets the point shadow map array
-        /// </summary>
-        /// <param name="shadowMapPoint">Point shadow map array</param>
-        public void SetPointShadowMap(EngineShaderResourceView shadowMapPoint)
-        {
-            this.shadowMapPoint = shadowMapPoint;
-        }
-
-        /// <summary>
-        /// Sets the pixel shader constant buffers
-        /// </summary>
-        public void SetConstantBuffers()
-        {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerFrame);
-
-            Graphics.SetPixelShaderResourceViews(0, new[] { shadowMapDir, shadowMapSpot, shadowMapPoint });
+            PerFrame.WriteData(data);
         }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltInEffects
 {
-    using Engine.BuiltInShaders;
+    using Engine.BuiltIn;
     using Engine.Common;
     using Engine.Effects;
 
@@ -42,27 +41,7 @@ namespace Engine.BuiltInEffects
         }
 
         /// <inheritdoc/>
-        public void UpdateGlobals(
-            EngineShaderResourceView materialPalette,
-            uint materialPaletteWidth,
-            EngineShaderResourceView animationPalette,
-            uint animationPaletteWidth)
-        {
-            vertexShader.SetVSGlobals(
-                materialPalette, materialPaletteWidth,
-                animationPalette, animationPaletteWidth);
-        }
-        /// <inheritdoc/>
-        public void UpdatePerFrame(
-            Matrix world,
-            DrawContext context)
-        {
-            vertexShader.SetVSPerFrame(world, context.ViewProjection);
-
-            pixelShader.SetVSPerFrame(context.EyePosition, context.Lights.FogColor, context.Lights.FogStart, context.Lights.FogRange);
-        }
-        /// <inheritdoc/>
-        public void UpdatePerObject(
+        public void Update(
             AnimationDrawInfo animation,
             MaterialDrawInfo material,
             uint textureIndex,

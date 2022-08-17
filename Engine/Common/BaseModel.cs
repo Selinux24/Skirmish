@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
+    using Engine.BuiltIn;
     using Engine.Content;
     using Engine.Effects;
 
@@ -300,17 +301,17 @@ namespace Engine.Common
             {
                 if (vertexType == VertexTypes.PositionColor)
                 {
-                    return DrawerPool.BasicPositionColor;
+                    return BuiltInShaders.BasicPositionColor;
                 }
 
                 if (vertexType == VertexTypes.PositionNormalColor)
                 {
-                    return DrawerPool.BasicPositionNormalColor;
+                    return BuiltInShaders.BasicPositionNormalColor;
                 }
 
                 if (vertexType == VertexTypes.PositionTexture)
                 {
-                    return DrawerPool.BasicPositionTexture;
+                    return BuiltInShaders.BasicPositionTexture;
                 }
             }
 
