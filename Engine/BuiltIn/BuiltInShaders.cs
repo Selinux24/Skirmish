@@ -1,9 +1,11 @@
 ﻿using SharpDX;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.BuiltInEffects;
     using Engine.Common;
+    using Engine.Effects;
 
     /// <summary>
     /// Built-in shaders resource helper
@@ -11,21 +13,270 @@ namespace Engine.BuiltIn
     public static class BuiltInShaders
     {
         /// <summary>
-        /// Vertex shader global resources
+        /// Global data structure
         /// </summary>
-        private static ResourcesVSGlobal vsGlobalResources;
+        [StructLayout(LayoutKind.Explicit, Size = 16)]
+        struct VSGlobal : IBufferData
+        {
+            public static VSGlobal Build(uint materialPaletteWidth, uint animationPaletteWidth)
+            {
+                return new VSGlobal
+                {
+                    MaterialPaletteWidth = materialPaletteWidth,
+                    AnimationPaletteWidth = animationPaletteWidth
+                };
+            }
+
+            /// <summary>
+            /// Material palette width
+            /// </summary>
+            [FieldOffset(0)]
+            public uint MaterialPaletteWidth;
+            /// <summary>
+            /// Animation palette width
+            /// </summary>
+            [FieldOffset(4)]
+            public uint AnimationPaletteWidth;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSGlobal));
+            }
+        }
         /// <summary>
-        /// Vertex shader per-frame resources
+        /// Per-frame data structure
         /// </summary>
-        private static ResourcesVSPerFrame vsPerFrameResources;
+        [StructLayout(LayoutKind.Explicit, Size = 128)]
+        struct VSPerFrame : IBufferData
+        {
+            public static VSPerFrame Build(Matrix localTransform, DrawContext context)
+            {
+                return new VSPerFrame
+                {
+                    World = Matrix.Transpose(localTransform),
+                    WorldViewProjection = Matrix.Transpose(localTransform * context.ViewProjection),
+                };
+            }
+
+            /// <summary>
+            /// World matrix
+            /// </summary>
+            [FieldOffset(0)]
+            public Matrix World;
+            /// <summary>
+            /// World view projection matrix
+            /// </summary>
+            [FieldOffset(64)]
+            public Matrix WorldViewProjection;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(VSPerFrame));
+            }
+        }
         /// <summary>
-        /// Lights pixel shader per-frame resources
+        /// Per frame data structure
         /// </summary>
-        private static ResourcesPSPerFrameLit psPerFrameLitResources;
+        [StructLayout(LayoutKind.Explicit, Size = 48)]
+        struct PSPerFrameNoLit : IBufferData
+        {
+            public static PSPerFrameNoLit Build(DrawContext context)
+            {
+                return new PSPerFrameNoLit
+                {
+                    EyePositionWorld = context.EyePosition,
+
+                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
+
+                    FogStart = context.Lights?.FogStart ?? 0,
+                    FogRange = context.Lights?.FogRange ?? 0,
+                };
+            }
+
+            /// <summary>
+            /// Eye position world
+            /// </summary>
+            [FieldOffset(0)]
+            public Vector3 EyePositionWorld;
+
+            /// <summary>
+            /// Fog color
+            /// </summary>
+            [FieldOffset(16)]
+            public Color4 FogColor;
+
+            /// <summary>
+            /// Fog start distance
+            /// </summary>
+            [FieldOffset(32)]
+            public float FogStart;
+            /// <summary>
+            /// Fog range distance
+            /// </summary>
+            [FieldOffset(36)]
+            public float FogRange;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PSPerFrameNoLit));
+            }
+        }
         /// <summary>
-        /// No lights pixel shader per-frame resources
+        /// Per frame data structure
         /// </summary>
-        private static ResourcesPSPerFrameNoLit psPerFrameNoLitResources;
+        [StructLayout(LayoutKind.Explicit, Size = 4176)]
+        struct PSPerFrameLit : IBufferData
+        {
+            public static PSPerFrameLit Build(DrawContext context)
+            {
+                var hemiLight = BufferLightHemispheric.Build(context.Lights?.GetVisibleHemisphericLight());
+                var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), out int dirLength);
+                var pointLights = BufferLightPoint.Build(context.Lights?.GetVisiblePointLights(), out int pointLength);
+                var spotLights = BufferLightSpot.Build(context.Lights?.GetVisibleSpotLights(), out int spotLength);
+
+                return new PSPerFrameLit
+                {
+                    EyePositionWorld = context.EyePosition,
+
+                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
+
+                    FogStart = context.Lights?.FogStart ?? 0,
+                    FogRange = context.Lights?.FogRange ?? 0,
+
+                    LevelOfDetail = context.LevelOfDetail,
+
+                    DirLightsCount = (uint)dirLength,
+                    PointLightsCount = (uint)pointLength,
+                    SpotLightsCount = (uint)spotLength,
+                    ShadowIntensity = context.Lights?.ShadowIntensity ?? 0f,
+
+                    HemiLight = hemiLight,
+                    DirLights = dirLights,
+                    PointLights = pointLights,
+                    SpotLights = spotLights,
+                };
+            }
+
+            /// <summary>
+            /// Eye position world
+            /// </summary>
+            [FieldOffset(0)]
+            public Vector3 EyePositionWorld;
+
+            /// <summary>
+            /// Fog color
+            /// </summary>
+            [FieldOffset(16)]
+            public Color4 FogColor;
+
+            /// <summary>
+            /// Fog start distance
+            /// </summary>
+            [FieldOffset(32)]
+            public float FogStart;
+            /// <summary>
+            /// Fog range distance
+            /// </summary>
+            [FieldOffset(36)]
+            public float FogRange;
+
+            /// <summary>
+            /// Level of detail values
+            /// </summary>
+            [FieldOffset(48)]
+            public Vector3 LevelOfDetail;
+
+            /// <summary>
+            /// Directional lights count
+            /// </summary>
+            [FieldOffset(64)]
+            public uint DirLightsCount;
+            /// <summary>
+            /// Point lights count
+            /// </summary>
+            [FieldOffset(68)]
+            public uint PointLightsCount;
+            /// <summary>
+            /// Spot lights count
+            /// </summary>
+            [FieldOffset(72)]
+            public uint SpotLightsCount;
+            /// <summary>
+            /// Shadow intensity
+            /// </summary>
+            [FieldOffset(76)]
+            public float ShadowIntensity;
+
+            /// <summary>
+            /// Hemispheric light
+            /// </summary>
+            [FieldOffset(80)]
+            public BufferLightHemispheric HemiLight;
+            /// <summary>
+            /// Directional lights
+            /// </summary>
+            [FieldOffset(112), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightDirectional.MAX)]
+            public BufferLightDirectional[] DirLights;
+            /// <summary>
+            /// Point lights
+            /// </summary>
+            [FieldOffset(592), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightPoint.MAX)]
+            public BufferLightPoint[] PointLights;
+            /// <summary>
+            /// Spot lights
+            /// </summary>
+            [FieldOffset(1872), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightSpot.MAX)]
+            public BufferLightSpot[] SpotLights;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PSPerFrameLit));
+            }
+        }
+
+        /// <summary>
+        /// Vertex shader global constant buffer
+        /// </summary>
+        private static EngineConstantBuffer<VSGlobal> vsGlobalConstantBuffer;
+        /// <summary>
+        /// Material palette resource view
+        /// </summary>
+        private static EngineShaderResourceView vsGlobalMaterialPalette;
+        /// <summary>
+        /// Animation palette resource view
+        /// </summary>
+        private static EngineShaderResourceView vsGlobalAnimationPalette;
+
+        /// <summary>
+        /// Vertex shader per-frame constant buffer
+        /// </summary>
+        private static EngineConstantBuffer<VSPerFrame> vsPerFrameConstantBuffer;
+
+        /// <summary>
+        /// No lights pixel shader per-frame constant buffer
+        /// </summary>
+        private static EngineConstantBuffer<PSPerFrameNoLit> psPerFrameNoLitConstantBuffer;
+
+        /// <summary>
+        /// Lights pixel shader per-frame constant buffer
+        /// </summary>
+        private static EngineConstantBuffer<PSPerFrameLit> psPerFrameLitConstantBuffer;
+        /// <summary>
+        /// Directional shadow map resource view
+        /// </summary>
+        private static EngineShaderResourceView psPerFrameLitShadowMapDir;
+        /// <summary>
+        /// Spot shadow map resource view
+        /// </summary>
+        private static EngineShaderResourceView psPerFrameLitShadowMapSpot;
+        /// <summary>
+        /// Point shadow map resource view
+        /// </summary>
+        private static EngineShaderResourceView psPerFrameLitShadowMapPoint;
 
         /// <summary>
         /// Position color pixel shader
@@ -106,15 +357,41 @@ namespace Engine.BuiltIn
         public static BasicPositionTexture BasicPositionTexture { get; private set; }
 
         /// <summary>
+        /// Position normal texture pixel shader
+        /// </summary>
+        public static PositionNormalTexturePs PositionNormalTexturePs { get; private set; }
+        /// <summary>
+        /// Position normal texture vertex shader
+        /// </summary>
+        public static PositionNormalTextureVs PositionNormalTextureVs { get; private set; }
+        /// <summary>
+        /// Position normal texture vertex shader instanced
+        /// </summary>
+        public static PositionNormalTextureVsI PositionNormalTextureVsI { get; private set; }
+        /// <summary>
+        /// Position normal texture skinned vertex shader
+        /// </summary>
+        public static SkinnedPositionNormalTextureVs PositionNormalTextureVsSkinned { get; private set; }
+        /// <summary>
+        /// Position normal texture skinned vertex shader instanced
+        /// </summary>
+        public static SkinnedPositionNormalTextureVsI PositionNormalTextureVsSkinnedI { get; private set; }
+
+        /// <summary>
+        /// Basic position normal texture drawer
+        /// </summary>
+        public static BasicPositionNormalTexture BasicPositionNormalTexture { get; private set; }
+
+        /// <summary>
         /// Initializes pool
         /// </summary>
         /// <param name="graphics">Device</param>
         public static void Initialize(Graphics graphics)
         {
-            vsGlobalResources = new ResourcesVSGlobal(graphics);
-            vsPerFrameResources = new ResourcesVSPerFrame(graphics);
-            psPerFrameLitResources = new ResourcesPSPerFrameLit(graphics);
-            psPerFrameNoLitResources = new ResourcesPSPerFrameNoLit(graphics);
+            vsGlobalConstantBuffer = new EngineConstantBuffer<VSGlobal>(graphics, nameof(BuiltInShaders) + "." + nameof(VSGlobal));
+            vsPerFrameConstantBuffer = new EngineConstantBuffer<VSPerFrame>(graphics, nameof(BuiltInShaders) + "." + nameof(VSPerFrame));
+            psPerFrameLitConstantBuffer = new EngineConstantBuffer<PSPerFrameLit>(graphics, nameof(BuiltInShaders) + "." + nameof(PSPerFrameLit));
+            psPerFrameNoLitConstantBuffer = new EngineConstantBuffer<PSPerFrameNoLit>(graphics, nameof(BuiltInShaders) + "." + nameof(PSPerFrameNoLit));
 
             PositionColorPs = new PositionColorPs(graphics);
             PositionColorVs = new PositionColorVs(graphics);
@@ -139,20 +416,28 @@ namespace Engine.BuiltIn
             PositionTextureVsSkinnedI = new SkinnedPositionTextureVsI(graphics);
 
             BasicPositionTexture = new BasicPositionTexture(graphics, PositionTextureVs, PositionTexturePs);
+
+            PositionNormalTexturePs = new PositionNormalTexturePs(graphics);
+            PositionNormalTextureVs = new PositionNormalTextureVs(graphics);
+            PositionNormalTextureVsI = new PositionNormalTextureVsI(graphics);
+            PositionNormalTextureVsSkinned = new SkinnedPositionNormalTextureVs(graphics);
+            PositionNormalTextureVsSkinnedI = new SkinnedPositionNormalTextureVsI(graphics);
+
+            BasicPositionNormalTexture = new BasicPositionNormalTexture(graphics, PositionNormalTextureVs, PositionNormalTexturePs);
         }
         /// <summary>
         /// Dispose of used resources
         /// </summary>
         public static void DisposeResources()
         {
-            vsGlobalResources?.Dispose();
-            vsGlobalResources = null;
-            vsPerFrameResources?.Dispose();
-            vsPerFrameResources = null;
-            psPerFrameLitResources?.Dispose();
-            psPerFrameLitResources = null;
-            psPerFrameNoLitResources?.Dispose();
-            psPerFrameNoLitResources = null;
+            vsGlobalConstantBuffer?.Dispose();
+            vsGlobalConstantBuffer = null;
+            vsPerFrameConstantBuffer?.Dispose();
+            vsPerFrameConstantBuffer = null;
+            psPerFrameLitConstantBuffer?.Dispose();
+            psPerFrameLitConstantBuffer = null;
+            psPerFrameNoLitConstantBuffer?.Dispose();
+            psPerFrameNoLitConstantBuffer = null;
 
             PositionColorPs?.Dispose();
             PositionColorPs = null;
@@ -186,6 +471,17 @@ namespace Engine.BuiltIn
             PositionTextureVsSkinned = null;
             PositionTextureVsSkinnedI?.Dispose();
             PositionTextureVsSkinnedI = null;
+
+            PositionNormalTexturePs?.Dispose();
+            PositionNormalTexturePs = null;
+            PositionNormalTextureVs?.Dispose();
+            PositionNormalTextureVs = null;
+            PositionNormalTextureVsI?.Dispose();
+            PositionNormalTextureVsI = null;
+            PositionNormalTextureVsSkinned?.Dispose();
+            PositionNormalTextureVsSkinned = null;
+            PositionNormalTextureVsSkinnedI?.Dispose();
+            PositionNormalTextureVsSkinnedI = null;
         }
 
         /// <summary>
@@ -197,9 +493,10 @@ namespace Engine.BuiltIn
         /// <param name="animationPaletteWidth">Animation palette width</param>
         public static void UpdateGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
-            vsGlobalResources?.SetCBGlobals(
-                materialPalette, materialPaletteWidth,
-                animationPalette, animationPaletteWidth);
+            vsGlobalMaterialPalette = materialPalette;
+            vsGlobalAnimationPalette = animationPalette;
+
+            vsGlobalConstantBuffer?.WriteData(VSGlobal.Build(materialPaletteWidth, animationPaletteWidth));
         }
         /// <summary>
         /// Updates per-frame data
@@ -208,34 +505,56 @@ namespace Engine.BuiltIn
         /// <param name="context">Draw context</param>
         public static void UpdatePerFrame(Matrix localTransform, DrawContext context)
         {
-            vsPerFrameResources?.SetCBPerFrame(localTransform, localTransform * context.ViewProjection);
-            psPerFrameLitResources?.SetCBPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
-            psPerFrameNoLitResources?.SetCBPerFrame(context.EyePosition, context.Lights);
+            if (context == null)
+            {
+                return;
+            }
+
+            vsPerFrameConstantBuffer?.WriteData(VSPerFrame.Build(localTransform, context));
+
+            psPerFrameNoLitConstantBuffer?.WriteData(PSPerFrameNoLit.Build(context));
+
+            psPerFrameLitConstantBuffer?.WriteData(PSPerFrameLit.Build(context));
+            psPerFrameLitShadowMapDir = context.ShadowMapDirectional?.Texture;
+            psPerFrameLitShadowMapSpot = context.ShadowMapSpot?.Texture;
+            psPerFrameLitShadowMapPoint = context.ShadowMapPoint?.Texture;
         }
 
         public static IEngineConstantBuffer GetVSGlobal()
         {
-            return vsGlobalResources?.Globals;
+            return vsGlobalConstantBuffer;
         }
         public static EngineShaderResourceView GetMaterialPalette()
         {
-            return vsGlobalResources?.MaterialPalette;
+            return vsGlobalMaterialPalette;
         }
         public static EngineShaderResourceView GetAnimationPalette()
         {
-            return vsGlobalResources?.AnimationPalette;
+            return vsGlobalAnimationPalette;
         }
         public static IEngineConstantBuffer GetVSPerFrame()
         {
-            return vsPerFrameResources?.PerFrame;
-        }
-        public static IEngineConstantBuffer GetPSPerFrameLit()
-        {
-            return psPerFrameLitResources?.PerFrame;
+            return vsPerFrameConstantBuffer;
         }
         public static IEngineConstantBuffer GetPSPerFrameNoLit()
         {
-            return psPerFrameNoLitResources?.PerFrame;
+            return psPerFrameNoLitConstantBuffer;
+        }
+        public static IEngineConstantBuffer GetPSPerFrameLit()
+        {
+            return psPerFrameLitConstantBuffer;
+        }
+        public static EngineShaderResourceView GetPSPerFrameLitShadowMapDir()
+        {
+            return psPerFrameLitShadowMapDir;
+        }
+        public static EngineShaderResourceView GetPSPerFrameLitShadowMapSpot()
+        {
+            return psPerFrameLitShadowMapSpot;
+        }
+        public static EngineShaderResourceView GetPSPerFrameLitShadowMapPoint()
+        {
+            return psPerFrameLitShadowMapPoint;
         }
     }
 }

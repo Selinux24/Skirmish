@@ -297,23 +297,30 @@ namespace Engine.Common
         /// <returns>Returns the drawing effect</returns>
         protected IGeometryDrawer2 GetDrawer(DrawerModes mode, VertexTypes vertexType)
         {
-            if (mode.HasFlag(DrawerModes.Forward))
+            if (!mode.HasFlag(DrawerModes.Forward))
             {
-                if (vertexType == VertexTypes.PositionColor)
-                {
-                    return BuiltInShaders.BasicPositionColor;
-                }
-
-                if (vertexType == VertexTypes.PositionNormalColor)
-                {
-                    return BuiltInShaders.BasicPositionNormalColor;
-                }
-
-                if (vertexType == VertexTypes.PositionTexture)
-                {
-                    return BuiltInShaders.BasicPositionTexture;
-                }
+                return null;
             }
+
+            if (vertexType == VertexTypes.PositionColor)
+            {
+                return BuiltInShaders.BasicPositionColor;
+            }
+
+            if (vertexType == VertexTypes.PositionNormalColor)
+            {
+                return BuiltInShaders.BasicPositionNormalColor;
+            }
+
+            if (vertexType == VertexTypes.PositionTexture)
+            {
+                return BuiltInShaders.BasicPositionTexture;
+            }
+
+            //if (vertexType == VertexTypes.PositionNormalTexture)
+            //{
+            //    return BuiltInShaders.BasicPositionNormalTexture;
+            //}
 
             return null;
         }

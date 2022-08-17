@@ -7,14 +7,19 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal color pixel shader
+    /// Position normal texture pixel shader
     /// </summary>
-    public class PositionNormalColorPs : IDisposable
+    public class PositionNormalTexturePs : IDisposable
     {
         /// <summary>
         /// Shader
         /// </summary>
         public readonly EnginePixelShader Shader;
+
+        /// <summary>
+        /// Diffuse map resource view
+        /// </summary>
+        private EngineShaderResourceView diffuseMapArray;
 
         /// <summary>
         /// Graphics instance
@@ -25,12 +30,12 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionNormalColorPs(Graphics graphics)
+        public PositionNormalTexturePs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionNormalColor_Cso == null;
-            var bytes = Resources.Ps_PositionNormalColor_Cso ?? Resources.Ps_PositionNormalColor;
+            bool compile = Resources.Ps_PositionNormalTexture_Cso == null;
+            var bytes = Resources.Ps_PositionNormalTexture_Cso ?? Resources.Ps_PositionNormalTexture;
             if (compile)
             {
                 Shader = graphics.CompilePixelShader(nameof(PositionNormalColorPs), "main", bytes, HelperShaders.PSProfile);
@@ -43,7 +48,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionNormalColorPs()
+        ~PositionNormalTexturePs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -69,6 +74,15 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
+        /// Sets the diffuse map array
+        /// </summary>
+        /// <param name="diffuseMapArray">Diffuse map array</param>
+        public void SetDiffuseMap(EngineShaderResourceView diffuseMapArray)
+        {
+            this.diffuseMapArray = diffuseMapArray;
+        }
+
+        /// <summary>
         /// Sets the pixel shader constant buffers
         /// </summary>
         public void SetConstantBuffers()
@@ -80,6 +94,7 @@ namespace Engine.BuiltIn
                 BuiltInShaders.GetPSPerFrameLitShadowMapDir(),
                 BuiltInShaders.GetPSPerFrameLitShadowMapSpot(),
                 BuiltInShaders.GetPSPerFrameLitShadowMapPoint(),
+                diffuseMapArray,
             };
 
             Graphics.SetPixelShaderResourceViews(0, rv);

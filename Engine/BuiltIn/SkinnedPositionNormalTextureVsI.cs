@@ -7,43 +7,43 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal color pixel shader
+    /// Skinned position normal texture instanced vertex shader
     /// </summary>
-    public class PositionNormalColorPs : IDisposable
+    public class SkinnedPositionNormalTextureVsI : IDisposable
     {
-        /// <summary>
-        /// Shader
-        /// </summary>
-        public readonly EnginePixelShader Shader;
-
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
         /// <summary>
+        /// Shader
+        /// </summary>
+        public readonly EngineVertexShader Shader;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionNormalColorPs(Graphics graphics)
+        public SkinnedPositionNormalTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionNormalColor_Cso == null;
-            var bytes = Resources.Ps_PositionNormalColor_Cso ?? Resources.Ps_PositionNormalColor;
+            bool compile = Resources.Vs_PositionNormalTexture_Skinned_I_Cso == null;
+            var bytes = Resources.Vs_PositionNormalTexture_Skinned_I_Cso ?? Resources.Vs_PositionNormalTexture_Skinned_I;
             if (compile)
             {
-                Shader = graphics.CompilePixelShader(nameof(PositionNormalColorPs), "main", bytes, HelperShaders.PSProfile);
+                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadPixelShader(nameof(PositionNormalColorPs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionNormalTextureVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionNormalColorPs()
+        ~SkinnedPositionNormalTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -69,20 +69,25 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
-        /// Sets the pixel shader constant buffers
+        /// Sets the vertex shader constant buffers
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrameNoLit());
+            var cb = new[]
+            {
+                BuiltInShaders.GetVSGlobal(),
+                BuiltInShaders.GetVSPerFrame(),
+            };
+
+            Graphics.SetVertexShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
-                BuiltInShaders.GetPSPerFrameLitShadowMapDir(),
-                BuiltInShaders.GetPSPerFrameLitShadowMapSpot(),
-                BuiltInShaders.GetPSPerFrameLitShadowMapPoint(),
+                BuiltInShaders.GetMaterialPalette(),
+                BuiltInShaders.GetAnimationPalette(),
             };
 
-            Graphics.SetPixelShaderResourceViews(0, rv);
+            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

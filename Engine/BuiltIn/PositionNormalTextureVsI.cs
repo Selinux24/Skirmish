@@ -7,43 +7,43 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal color pixel shader
+    /// Position normal texture instanced vertex shader
     /// </summary>
-    public class PositionNormalColorPs : IDisposable
+    public class PositionNormalTextureVsI : IDisposable
     {
-        /// <summary>
-        /// Shader
-        /// </summary>
-        public readonly EnginePixelShader Shader;
-
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
         /// <summary>
+        /// Shader
+        /// </summary>
+        public readonly EngineVertexShader Shader;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionNormalColorPs(Graphics graphics)
+        public PositionNormalTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionNormalColor_Cso == null;
-            var bytes = Resources.Ps_PositionNormalColor_Cso ?? Resources.Ps_PositionNormalColor;
+            bool compile = Resources.Vs_PositionNormalTexture_I_Cso == null;
+            var bytes = Resources.Vs_PositionNormalTexture_I_Cso ?? Resources.Vs_PositionNormalTexture_I;
             if (compile)
             {
-                Shader = graphics.CompilePixelShader(nameof(PositionNormalColorPs), "main", bytes, HelperShaders.PSProfile);
+                Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadPixelShader(nameof(PositionNormalColorPs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(PositionNormalTextureVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionNormalColorPs()
+        ~PositionNormalTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -69,20 +69,19 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
-        /// Sets the pixel shader constant buffers
+        /// Sets the vertex shader constant buffers
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrameNoLit());
-
-            var rv = new[]
+            var cb = new[]
             {
-                BuiltInShaders.GetPSPerFrameLitShadowMapDir(),
-                BuiltInShaders.GetPSPerFrameLitShadowMapSpot(),
-                BuiltInShaders.GetPSPerFrameLitShadowMapPoint(),
+                BuiltInShaders.GetVSGlobal(),
+                BuiltInShaders.GetVSPerFrame(),
             };
 
-            Graphics.SetPixelShaderResourceViews(0, rv);
+            Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            Graphics.SetVertexShaderResourceView(0, BuiltInShaders.GetMaterialPalette());
         }
     }
 }
