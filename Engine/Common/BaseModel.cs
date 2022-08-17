@@ -295,7 +295,7 @@ namespace Engine.Common
         /// <param name="mode">Drawing mode</param>
         /// <param name="vertexType">Vertex type</param>
         /// <returns>Returns the drawing effect</returns>
-        protected IGeometryDrawer2 GetEffect2(DrawerModes mode, VertexTypes vertexType)
+        protected IGeometryDrawer2 GetDrawer(DrawerModes mode, VertexTypes vertexType)
         {
             if (mode.HasFlag(DrawerModes.Forward))
             {

@@ -111,7 +111,7 @@ namespace Engine.BuiltIn
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetVSPerFrame());
+            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrameNoLit());
 
             var rv = new[]
             {

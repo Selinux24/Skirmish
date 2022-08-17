@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
@@ -14,46 +13,10 @@ namespace Engine.BuiltIn
     public class PositionTexturePs : IDisposable
     {
         /// <summary>
-        /// Per frame data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 48)]
-        public struct PerFrame : IBufferData
-        {
-            /// <summary>
-            /// Eye position world
-            /// </summary>
-            [FieldOffset(0)]
-            public Vector3 EyePositionWorld;
-
-            /// <summary>
-            /// Fog color
-            /// </summary>
-            [FieldOffset(16)]
-            public Color4 FogColor;
-
-            /// <summary>
-            /// Fog start distance
-            /// </summary>
-            [FieldOffset(32)]
-            public float FogStart;
-            /// <summary>
-            /// Fog range distance
-            /// </summary>
-            [FieldOffset(36)]
-            public float FogRange;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PerFrame));
-            }
-        }
-
-        /// <summary>
         /// Per frame spec data structure
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 16)]
-        public struct PerFrame2 : IBufferData
+        public struct PerFrame : IBufferData
         {
             /// <summary>
             /// Color output channel
@@ -64,7 +27,7 @@ namespace Engine.BuiltIn
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerFrame2));
+                return Marshal.SizeOf(typeof(PerFrame));
             }
         }
 
@@ -77,10 +40,6 @@ namespace Engine.BuiltIn
         /// Per frame constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<PerFrame> cbPerFrame;
-        /// <summary>
-        /// Per frame spec constant buffer
-        /// </summary>
-        private readonly EngineConstantBuffer<PerFrame2> cbPerFrame2;
         /// <summary>
         /// Diffuse map resource view
         /// </summary>
@@ -111,7 +70,6 @@ namespace Engine.BuiltIn
             }
 
             cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(PositionTexturePs) + "." + nameof(PerFrame));
-            cbPerFrame2 = new EngineConstantBuffer<PerFrame2>(graphics, nameof(PositionTexturePs) + "." + nameof(PerFrame2));
         }
         /// <summary>
         /// Destructor
@@ -138,40 +96,22 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+
                 cbPerFrame?.Dispose();
-                cbPerFrame2?.Dispose();
             }
         }
 
         /// <summary>
         /// Sets per frame data
         /// </summary>
-        /// <param name="eyePositionWorld">Eye position world</param>
-        /// <param name="fogColor">Fog color</param>
-        /// <param name="fogStart">Fog start distance</param>
-        /// <param name="fogRange">Fog range distance</param>
-        public void SetVSPerFrame(Vector3 eyePositionWorld, Color4 fogColor, float fogStart, float fogRange)
+        /// <param name="channel">Color output channel</param>
+        public void SetVSPerFrame(uint channel)
         {
             var data = new PerFrame
             {
-                EyePositionWorld = eyePositionWorld,
-                FogColor = fogColor,
-                FogStart = fogStart,
-                FogRange = fogRange,
-            };
-            cbPerFrame.WriteData(data);
-        }
-        /// <summary>
-        /// Sets per frame spec data
-        /// </summary>
-        /// <param name="channel">Color output channel</param>
-        public void SetVSPerFrame2(uint channel)
-        {
-            var data = new PerFrame2
-            {
                 Channel = channel,
             };
-            cbPerFrame2.WriteData(data);
+            cbPerFrame.WriteData(data);
         }
         /// <summary>
         /// Sets the diffuse map array
@@ -187,7 +127,13 @@ namespace Engine.BuiltIn
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffers(0, new IEngineConstantBuffer[] { cbPerFrame, cbPerFrame2 });
+            var cb = new[]
+            {
+                BuiltInShaders.GetPSPerFrameNoLit(),
+                cbPerFrame,
+            };
+
+            Graphics.SetPixelShaderConstantBuffers(0, cb);
 
             Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
         }

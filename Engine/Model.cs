@@ -365,8 +365,6 @@ namespace Engine
 
             var localTransform = GetTransformByName(meshName);
 
-            BuiltInShaders.UpdatePerFrame(localTransform, context);
-
             foreach (var mat in meshDict)
             {
                 var mesh = mat.Value;
@@ -396,16 +394,17 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                var effect2 = GetEffect2(context.DrawerMode, mesh.VertextType);
-                if (effect2 != null)
+                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType);
+                if (drawer != null)
                 {
-                    effect2.Update(animationInfo, materialInfo, TextureIndex, TintColor);
+                    BuiltInShaders.UpdatePerFrame(localTransform, context);
+                    drawer.Update(animationInfo, materialInfo, TextureIndex, TintColor);
 
                     BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
-                    count += mesh.Count;
+                    drawer.Draw(BufferManager, new[] { mesh });
 
-                    effect2.Draw(BufferManager, new[] { mesh });
+                    count += mesh.Count;
 
                     continue;
                 }
@@ -417,7 +416,6 @@ namespace Engine
                 }
 
                 effect.UpdatePerFrameFull(localTransform, context);
-
                 effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
@@ -425,14 +423,14 @@ namespace Engine
                 var technique = effect.GetTechnique(mesh.VertextType, false);
                 BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
-                count += mesh.Count;
-
                 for (int p = 0; p < technique.PassCount; p++)
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
                     mesh.Draw(graphics);
                 }
+
+                count += mesh.Count;
             }
 
             return count;

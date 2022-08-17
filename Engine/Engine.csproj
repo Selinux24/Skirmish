@@ -149,7 +149,8 @@
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
     <Compile Include="BuiltIn\BuiltInShaders.cs" />
-    <Compile Include="BuiltIn\ResourcesPSPerFrame.cs" />
+    <Compile Include="BuiltIn\ResourcesPSPerFrameNoLit.cs" />
+    <Compile Include="BuiltIn\ResourcesPSPerFrameLit.cs" />
     <Compile Include="BuiltIn\ResourcesVSPerFrame.cs" />
     <Compile Include="BuiltIn\ResourcesVSGlobal.cs" />
     <Compile Include="BuiltIn\PositionNormalColorVsI.cs" />

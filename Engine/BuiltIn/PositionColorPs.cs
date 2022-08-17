@@ -1,6 +1,4 @@
-﻿using SharpDX;
-using System;
-using System.Runtime.InteropServices;
+﻿using System;
 
 namespace Engine.BuiltIn
 {
@@ -14,50 +12,9 @@ namespace Engine.BuiltIn
     public class PositionColorPs : IDisposable
     {
         /// <summary>
-        /// Per frame data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 48)]
-        public struct PerFrame : IBufferData
-        {
-            /// <summary>
-            /// Eye position world
-            /// </summary>
-            [FieldOffset(0)]
-            public Vector3 EyePositionWorld;
-
-            /// <summary>
-            /// Fog color
-            /// </summary>
-            [FieldOffset(16)]
-            public Color4 FogColor;
-
-            /// <summary>
-            /// Fog start distance
-            /// </summary>
-            [FieldOffset(32)]
-            public float FogStart;
-            /// <summary>
-            /// Fog range distance
-            /// </summary>
-            [FieldOffset(36)]
-            public float FogRange;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PerFrame));
-            }
-        }
-
-        /// <summary>
         /// Shader
         /// </summary>
         public readonly EnginePixelShader Shader;
-
-        /// <summary>
-        /// Per frame constant buffer
-        /// </summary>
-        private readonly EngineConstantBuffer<PerFrame> cbPerFrame;
 
         /// <summary>
         /// Graphics instance
@@ -82,8 +39,6 @@ namespace Engine.BuiltIn
             {
                 Shader = graphics.LoadPixelShader(nameof(PositionColorPs), bytes);
             }
-
-            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(PositionColorPs) + "." + nameof(PerFrame));
         }
         /// <summary>
         /// Destructor
@@ -110,27 +65,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
-                cbPerFrame?.Dispose();
             }
-        }
-
-        /// <summary>
-        /// Sets per frame data
-        /// </summary>
-        /// <param name="eyePositionWorld">Eye position world</param>
-        /// <param name="fogColor">Fog color</param>
-        /// <param name="fogStart">Fog start distance</param>
-        /// <param name="fogRange">Fog range distance</param>
-        public void SetVSPerFrame(Vector3 eyePositionWorld, Color4 fogColor, float fogStart, float fogRange)
-        {
-            var data = new PerFrame
-            {
-                EyePositionWorld = eyePositionWorld,
-                FogColor = fogColor,
-                FogStart = fogStart,
-                FogRange = fogRange,
-            };
-            cbPerFrame.WriteData(data);
         }
 
         /// <summary>
@@ -138,7 +73,7 @@ namespace Engine.BuiltIn
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerFrame);
+            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrameNoLit());
         }
     }
 }

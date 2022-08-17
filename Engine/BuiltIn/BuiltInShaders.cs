@@ -19,9 +19,13 @@ namespace Engine.BuiltIn
         /// </summary>
         private static ResourcesVSPerFrame vsPerFrameResources;
         /// <summary>
-        /// Pixel shader per-frame resources
+        /// Lights pixel shader per-frame resources
         /// </summary>
-        private static ResourcesPSPerFrame psPerFrameResources;
+        private static ResourcesPSPerFrameLit psPerFrameLitResources;
+        /// <summary>
+        /// No lights pixel shader per-frame resources
+        /// </summary>
+        private static ResourcesPSPerFrameNoLit psPerFrameNoLitResources;
 
         /// <summary>
         /// Position color pixel shader
@@ -109,7 +113,8 @@ namespace Engine.BuiltIn
         {
             vsGlobalResources = new ResourcesVSGlobal(graphics);
             vsPerFrameResources = new ResourcesVSPerFrame(graphics);
-            psPerFrameResources = new ResourcesPSPerFrame(graphics);
+            psPerFrameLitResources = new ResourcesPSPerFrameLit(graphics);
+            psPerFrameNoLitResources = new ResourcesPSPerFrameNoLit(graphics);
 
             PositionColorPs = new PositionColorPs(graphics);
             PositionColorVs = new PositionColorVs(graphics);
@@ -144,8 +149,10 @@ namespace Engine.BuiltIn
             vsGlobalResources = null;
             vsPerFrameResources?.Dispose();
             vsPerFrameResources = null;
-            psPerFrameResources?.Dispose();
-            psPerFrameResources = null;
+            psPerFrameLitResources?.Dispose();
+            psPerFrameLitResources = null;
+            psPerFrameNoLitResources?.Dispose();
+            psPerFrameNoLitResources = null;
 
             PositionColorPs?.Dispose();
             PositionColorPs = null;
@@ -202,7 +209,8 @@ namespace Engine.BuiltIn
         public static void UpdatePerFrame(Matrix localTransform, DrawContext context)
         {
             vsPerFrameResources?.SetCBPerFrame(localTransform, localTransform * context.ViewProjection);
-            psPerFrameResources?.SetCBPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
+            psPerFrameLitResources?.SetCBPerFrame(context.EyePosition, context.Lights, context.LevelOfDetail);
+            psPerFrameNoLitResources?.SetCBPerFrame(context.EyePosition, context.Lights);
         }
 
         public static IEngineConstantBuffer GetVSGlobal()
@@ -221,9 +229,13 @@ namespace Engine.BuiltIn
         {
             return vsPerFrameResources?.PerFrame;
         }
-        public static IEngineConstantBuffer GetPSPerFrame()
+        public static IEngineConstantBuffer GetPSPerFrameLit()
         {
-            return psPerFrameResources?.PerFrame;
+            return psPerFrameLitResources?.PerFrame;
+        }
+        public static IEngineConstantBuffer GetPSPerFrameNoLit()
+        {
+            return psPerFrameNoLitResources?.PerFrame;
         }
     }
 }

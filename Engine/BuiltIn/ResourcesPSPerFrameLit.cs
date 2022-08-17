@@ -10,7 +10,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Per-frame resources
     /// </summary>
-    public class ResourcesPSPerFrame : IDisposable
+    public class ResourcesPSPerFrameLit : IDisposable
     {
         /// <summary>
         /// Per frame data structure
@@ -105,14 +105,14 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public ResourcesPSPerFrame(Graphics graphics)
+        public ResourcesPSPerFrameLit(Graphics graphics)
         {
-            PerFrame = new EngineConstantBuffer<PSPerFrame>(graphics, nameof(ResourcesPSPerFrame) + "." + nameof(PSPerFrame));
+            PerFrame = new EngineConstantBuffer<PSPerFrame>(graphics, nameof(ResourcesPSPerFrameLit) + "." + nameof(PSPerFrame));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ResourcesPSPerFrame()
+        ~ResourcesPSPerFrameLit()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
