@@ -37,6 +37,11 @@ namespace Engine
         private bool hasIndependantTransforms = false;
 
         /// <summary>
+        /// Instancing buffer
+        /// </summary>
+        protected BufferDescriptor InstancingBuffer { get; private set; } = null;
+
+        /// <summary>
         /// Gets manipulator per instance list
         /// </summary>
         /// <returns>Gets manipulator per instance list</returns>
@@ -82,6 +87,28 @@ namespace Engine
         {
 
         }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~ModelInstanced()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (InstancingBuffer != null)
+                {
+                    BufferManager.RemoveInstancingData(InstancingBuffer);
+                    InstancingBuffer = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
 
         /// <inheritdoc/>
         public override async Task InitializeAssets(ModelInstancedDescription description)
@@ -92,6 +119,10 @@ namespace Engine
             {
                 throw new ArgumentException($"Instances parameter must be more than 0: {Description.Instances}");
             }
+
+            InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, Description.Instances);
+
+            await InitializeGeometry(description, InstancingBuffer);
 
             InstanceCount = Description.Instances;
 

@@ -25,11 +25,6 @@ namespace Engine.Common
         private LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
 
         /// <summary>
-        /// Instancing buffer
-        /// </summary>
-        protected BufferDescriptor InstancingBuffer { get; private set; } = null;
-
-        /// <summary>
         /// Gets the texture count for texture index
         /// </summary>
         public int TextureCount { get; private set; }
@@ -70,12 +65,6 @@ namespace Engine.Common
             {
                 meshesByLOD.Values.ToList().ForEach(m => m?.Dispose());
                 meshesByLOD.Clear();
-
-                if (InstancingBuffer != null)
-                {
-                    BufferManager.RemoveInstancingData(InstancingBuffer);
-                    InstancingBuffer = null;
-                }
             }
 
             base.Dispose(disposing);
@@ -86,7 +75,16 @@ namespace Engine.Common
         {
             await base.InitializeAssets(description);
 
-            if (description.Content == null)
+            UseAnisotropicFiltering = description?.UseAnisotropicFiltering ?? false;
+        }
+        /// <summary>
+        /// Initializes model geometry
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        protected async Task InitializeGeometry(T description, BufferDescriptor instancingBuffer = null)
+        {
+            if (description?.Content == null)
             {
                 throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
             }
@@ -102,11 +100,6 @@ namespace Engine.Common
                 TextureCount = TextureCount,
             };
 
-            if (desc.Instanced)
-            {
-                InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
-            }
-
             var geo = await description.Content.ReadModelContent();
             if (!geo.Any())
             {
@@ -119,7 +112,7 @@ namespace Engine.Common
 
                 if (description.Optimize) iGeo.Optimize();
 
-                var drawable = await DrawingData.Build(Game, Name, iGeo, desc, InstancingBuffer);
+                var drawable = await DrawingData.Build(Game, Name, iGeo, desc, instancingBuffer);
 
                 meshesByLOD.Add(LevelOfDetail.High, drawable);
             }
@@ -134,13 +127,11 @@ namespace Engine.Common
                         defaultLevelOfDetail = lod;
                     }
 
-                    var drawable = await DrawingData.Build(Game, Name, content[lod], desc, InstancingBuffer);
+                    var drawable = await DrawingData.Build(Game, Name, content[lod], desc, instancingBuffer);
 
                     meshesByLOD.Add(lod, drawable);
                 }
             }
-
-            UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
 
         /// <summary>

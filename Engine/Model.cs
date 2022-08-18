@@ -9,7 +9,6 @@ namespace Engine
     using Engine.Animation;
     using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Basic Model
@@ -124,6 +123,8 @@ namespace Engine
         public override async Task InitializeAssets(ModelDescription description)
         {
             await base.InitializeAssets(description);
+
+            await InitializeGeometry(description);
 
             TextureIndex = Description.TextureIndex;
 
