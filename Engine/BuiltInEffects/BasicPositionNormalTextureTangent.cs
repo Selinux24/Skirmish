@@ -8,18 +8,18 @@ namespace Engine.BuiltInEffects
     using Engine.Common;
 
     /// <summary>
-    /// Basic position-texture drawer
+    /// Basic position-normal-texture-tangent drawer
     /// </summary>
-    public class BasicPositionTexture : IGeometryDrawer2
+    public class BasicPositionNormalTextureTangent : IGeometryDrawer2
     {
         /// <summary>
-        /// Position texture shader
+        /// Position normal texture tangent shader
         /// </summary>
-        private readonly PositionTextureVs vertexShader;
+        private readonly PositionNormalTextureTangentVs vertexShader;
         /// <summary>
-        /// Position texture pixel shader
+        /// Position normal texture tangent pixel shader
         /// </summary>
-        private readonly PositionTexturePs pixelShader;
+        private readonly PositionNormalTextureTangentPs pixelShader;
 
         /// <summary>
         /// Graphics
@@ -30,13 +30,13 @@ namespace Engine.BuiltInEffects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="positionTextureVs">Position texture vertex shader</param>
-        /// <param name="positionTexturePs">Position texture pixel shader</param>
-        public BasicPositionTexture(Graphics graphics, PositionTextureVs positionTextureVs, PositionTexturePs positionTexturePs)
+        /// <param name="positionNormalTextureTangentVs">Position normal texture tangent vertex shader</param>
+        /// <param name="positionNormalTextureTangentPs">Position normal texture tangent pixel shader</param>
+        public BasicPositionNormalTextureTangent(Graphics graphics, PositionNormalTextureTangentVs positionNormalTextureTangentVs, PositionNormalTextureTangentPs positionNormalTextureTangentPs)
         {
             Graphics = graphics;
-            vertexShader = positionTextureVs;
-            pixelShader = positionTexturePs;
+            vertexShader = positionNormalTextureTangentVs;
+            pixelShader = positionNormalTextureTangentPs;
         }
 
         /// <inheritdoc/>
@@ -45,6 +45,7 @@ namespace Engine.BuiltInEffects
             vertexShader.WriteCBPerInstance(material, tintColor, textureIndex);
 
             pixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
+            pixelShader.SetNormalMap(material.Material?.NormalMap);
         }
         /// <inheritdoc/>
         public void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes)

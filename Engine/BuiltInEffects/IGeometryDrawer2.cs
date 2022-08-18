@@ -28,9 +28,7 @@ namespace Engine.BuiltInEffects
         /// Draws the specified vertex buffer
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
-        /// <param name="vertexBuffer">Vertex buffer</param>
-        /// <param name="drawCount">Primitive count</param>
-        /// <param name="topology">Topology</param>
-        void Draw(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology);
+        /// <param name="options">Draw options</param>
+        void Draw(BufferManager bufferManager, DrawOptions options);
     }
 }

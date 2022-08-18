@@ -171,6 +171,36 @@ namespace Engine.BuiltIn
         public static SkinnedPositionNormalTexture SkinnedPositionNormalTexture { get; private set; }
 
         /// <summary>
+        /// Position normal texture tangent pixel shader
+        /// </summary>
+        public static PositionNormalTextureTangentPs PositionNormalTextureTangentPs { get; private set; }
+        /// <summary>
+        /// Position normal texture tangent vertex shader
+        /// </summary>
+        public static PositionNormalTextureTangentVs PositionNormalTextureTangentVs { get; private set; }
+        /// <summary>
+        /// Position normal texture tangent vertex shader instanced
+        /// </summary>
+        public static PositionNormalTextureTangentVsI PositionNormalTextureTangentVsI { get; private set; }
+        /// <summary>
+        /// Position normal texture tangent skinned vertex shader
+        /// </summary>
+        public static SkinnedPositionNormalTextureTangentVs PositionNormalTextureTangentVsSkinned { get; private set; }
+        /// <summary>
+        /// Position normal texture tangent skinned vertex shader instanced
+        /// </summary>
+        public static SkinnedPositionNormalTextureTangentVsI PositionNormalTextureTangentVsSkinnedI { get; private set; }
+
+        /// <summary>
+        /// Basic position normal texture tangent drawer
+        /// </summary>
+        public static BasicPositionNormalTextureTangent BasicPositionNormalTextureTangent { get; private set; }
+        /// <summary>
+        /// Skinned position normal texture tangent drawer
+        /// </summary>
+        public static SkinnedPositionNormalTextureTangent SkinnedPositionNormalTextureTangent { get; private set; }
+
+        /// <summary>
         /// Initializes pool
         /// </summary>
         /// <param name="graphics">Device</param>
@@ -216,6 +246,15 @@ namespace Engine.BuiltIn
 
             BasicPositionNormalTexture = new BasicPositionNormalTexture(graphics, PositionNormalTextureVs, PositionNormalTexturePs);
             SkinnedPositionNormalTexture = new SkinnedPositionNormalTexture(graphics, PositionNormalTextureVsSkinned, PositionNormalTexturePs);
+
+            PositionNormalTextureTangentPs = new PositionNormalTextureTangentPs(graphics);
+            PositionNormalTextureTangentVs = new PositionNormalTextureTangentVs(graphics);
+            PositionNormalTextureTangentVsI = new PositionNormalTextureTangentVsI(graphics);
+            PositionNormalTextureTangentVsSkinned = new SkinnedPositionNormalTextureTangentVs(graphics);
+            PositionNormalTextureTangentVsSkinnedI = new SkinnedPositionNormalTextureTangentVsI(graphics);
+
+            BasicPositionNormalTextureTangent = new BasicPositionNormalTextureTangent(graphics, PositionNormalTextureTangentVs, PositionNormalTextureTangentPs);
+            SkinnedPositionNormalTextureTangent = new SkinnedPositionNormalTextureTangent(graphics, PositionNormalTextureTangentVsSkinned, PositionNormalTextureTangentPs);
         }
         /// <summary>
         /// Dispose of used resources
@@ -274,6 +313,17 @@ namespace Engine.BuiltIn
             PositionNormalTextureVsSkinned = null;
             PositionNormalTextureVsSkinnedI?.Dispose();
             PositionNormalTextureVsSkinnedI = null;
+
+            PositionNormalTextureTangentPs?.Dispose();
+            PositionNormalTextureTangentPs = null;
+            PositionNormalTextureTangentVs?.Dispose();
+            PositionNormalTextureTangentVs = null;
+            PositionNormalTextureTangentVsI?.Dispose();
+            PositionNormalTextureTangentVsI = null;
+            PositionNormalTextureTangentVsSkinned?.Dispose();
+            PositionNormalTextureTangentVsSkinned = null;
+            PositionNormalTextureTangentVsSkinnedI?.Dispose();
+            PositionNormalTextureTangentVsSkinnedI = null;
         }
 
         /// <summary>

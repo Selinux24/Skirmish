@@ -328,6 +328,11 @@ namespace Engine.Common
                 return BuiltInShaders.BasicPositionNormalTexture;
             }
 
+            if (vertexType == VertexTypes.PositionNormalTextureTangent)
+            {
+                return BuiltInShaders.BasicPositionNormalTextureTangent;
+            }
+
             return null;
         }
         /// <summary>
@@ -336,24 +341,29 @@ namespace Engine.Common
         /// <param name="vertexType">Vertex type</param>
         private IGeometryDrawer2 GetSkinnedDrawer(VertexTypes vertexType)
         {
-            if (vertexType == VertexTypes.PositionColor)
+            if (vertexType == VertexTypes.PositionColorSkinned)
             {
                 return BuiltInShaders.SkinnedPositionColor;
             }
 
-            if (vertexType == VertexTypes.PositionNormalColor)
+            if (vertexType == VertexTypes.PositionNormalColorSkinned)
             {
                 return BuiltInShaders.SkinnedPositionNormalColor;
             }
 
-            if (vertexType == VertexTypes.PositionTexture)
+            if (vertexType == VertexTypes.PositionTextureSkinned)
             {
                 return BuiltInShaders.SkinnedPositionTexture;
             }
 
-            if (vertexType == VertexTypes.PositionNormalTexture)
+            if (vertexType == VertexTypes.PositionNormalTextureSkinned)
             {
                 return BuiltInShaders.SkinnedPositionNormalTexture;
+            }
+
+            if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
+            {
+                return BuiltInShaders.SkinnedPositionNormalTextureTangent;
             }
 
             return null;

@@ -43,7 +43,7 @@ namespace Engine.BuiltInEffects
         /// <inheritdoc/>
         public void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-
+            pixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
         }
         /// <inheritdoc/>
         public void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes)
@@ -73,13 +73,8 @@ namespace Engine.BuiltInEffects
             }
         }
         /// <inheritdoc/>
-        public void Draw(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
+        public void Draw(BufferManager bufferManager, DrawOptions options)
         {
-            if (drawCount <= 0)
-            {
-                return;
-            }
-
             // Set the vertex and pixel shaders that will be used to render this mesh.
             Graphics.SetVertexShader(vertexShader.Shader);
             Graphics.SetPixelShader(pixelShader.Shader);
@@ -88,13 +83,29 @@ namespace Engine.BuiltInEffects
             pixelShader.SetConstantBuffers();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology, true))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
             {
                 return;
             }
 
             // Render the primitives.
-            Graphics.Draw(drawCount, vertexBuffer.BufferOffset);
+            if (options.Indexed)
+            {
+                Graphics.DrawIndexedInstanced(
+                    options.IndexBuffer.Count,
+                    options.InstanceCount,
+                    options.IndexBuffer.BufferOffset,
+                    options.VertexBuffer.BufferOffset, options.StartInstanceLocation);
+            }
+            else
+            {
+                int drawCount = options.DrawCount > 0 ? options.DrawCount : options.VertexBuffer.Count;
+
+                Graphics.DrawInstanced(
+                    drawCount,
+                    options.InstanceCount,
+                    options.VertexBuffer.BufferOffset, options.StartInstanceLocation);
+            }
         }
     }
 }

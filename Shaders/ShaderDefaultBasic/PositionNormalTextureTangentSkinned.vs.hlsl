@@ -1,15 +1,16 @@
 #include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncMaterials.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbGlobals : register(b0)
+cbuffer cbVSGlobals : register(b0)
 {
-	uint gAnimationPaletteWidth;
-	uint3 PAD01;
+    uint gMaterialPaletteWidth;
+    uint gAnimationPaletteWidth;
+    uint2 PAD01;
 };
-Texture2D gAnimationPalette : register(t0);
 
 cbuffer cbVSPerFrame : register(b1)
 {
@@ -29,17 +30,31 @@ cbuffer cbVSPerInstance : register(b2)
 	float PAD22;
 };
 
+Texture2D gMaterialPalette : register(t0);
+Texture2D gAnimationPalette : register(t1);
+
+struct PSVertexPositionNormalTextureTangent2
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 tintColor : TINTCOLOR;
+    uint textureIndex : TEXTUREINDEX;
+    Material material : MATERIAL;
+};
+
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE TANGENT
 **********************************************************************************************************/
-PSVertexPositionNormalTextureTangent main(VSVertexPositionNormalTextureTangentSkinned input)
+PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentSkinned input)
 {
-	PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent)0;
+    PSVertexPositionNormalTextureTangent2 output = (PSVertexPositionNormalTextureTangent2) 0;
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
 	ComputePositionNormalTangentWeights(
 		gAnimationPalette,
 		gAnimationOffset,
@@ -55,14 +70,16 @@ PSVertexPositionNormalTextureTangent main(VSVertexPositionNormalTextureTangentSk
 		normalL,
 		tangentL);
 
+	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gMaterialPaletteWidth);
+	
 	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
 	output.positionWorld = mul(positionL, gWorld).xyz;
 	output.normalWorld = normalize(mul(normalL.xyz, (float3x3) gWorld));
 	output.tangentWorld = normalize(mul(tangentL.xyz, (float3x3) gWorld));
 	output.tex = input.tex;
 	output.tintColor = gTintColor;
-	output.materialIndex = gMaterialIndex;
 	output.textureIndex = gTextureIndex;
+    output.material = material;
 
 	return output;
 }

@@ -8,18 +8,18 @@ namespace Engine.BuiltInEffects
     using Engine.Common;
 
     /// <summary>
-    /// Basic position-texture drawer
+    /// Skinned position-normal-texture-tangent drawer
     /// </summary>
-    public class BasicPositionTexture : IGeometryDrawer2
+    public class SkinnedPositionNormalTextureTangent : IGeometryDrawer2
     {
         /// <summary>
-        /// Position texture shader
+        /// Skinned position normal texture tangent shader
         /// </summary>
-        private readonly PositionTextureVs vertexShader;
+        private readonly SkinnedPositionNormalTextureTangentVs vertexShader;
         /// <summary>
-        /// Position texture pixel shader
+        /// Position normal texture tangent pixel shader
         /// </summary>
-        private readonly PositionTexturePs pixelShader;
+        private readonly PositionNormalTextureTangentPs pixelShader;
 
         /// <summary>
         /// Graphics
@@ -30,21 +30,22 @@ namespace Engine.BuiltInEffects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="positionTextureVs">Position texture vertex shader</param>
-        /// <param name="positionTexturePs">Position texture pixel shader</param>
-        public BasicPositionTexture(Graphics graphics, PositionTextureVs positionTextureVs, PositionTexturePs positionTexturePs)
+        /// <param name="positionNormalTextureTangentVsSkinned">Skinned position normal texture tangent vertex shader</param>
+        /// <param name="positionNormalTextureTangentPs">Position normal texture tangent pixel shader</param>
+        public SkinnedPositionNormalTextureTangent(Graphics graphics, SkinnedPositionNormalTextureTangentVs positionNormalTextureTangentVsSkinned, PositionNormalTextureTangentPs positionNormalTextureTangentPs)
         {
             Graphics = graphics;
-            vertexShader = positionTextureVs;
-            pixelShader = positionTexturePs;
+            vertexShader = positionNormalTextureTangentVsSkinned;
+            pixelShader = positionNormalTextureTangentPs;
         }
 
         /// <inheritdoc/>
         public void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            vertexShader.WriteCBPerInstance(material, tintColor, textureIndex);
+            vertexShader.WriteCBPerInstance(material, tintColor, textureIndex, animation);
 
             pixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
+            pixelShader.SetNormalMap(material.Material?.NormalMap);
         }
         /// <inheritdoc/>
         public void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes)

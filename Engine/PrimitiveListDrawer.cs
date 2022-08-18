@@ -261,7 +261,12 @@ namespace Engine
 
             BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
             BuiltInShaders.BasicPositionColor.Update(MaterialDrawInfo.Empty, Color.White, 0, AnimationDrawInfo.Empty);
-            BuiltInShaders.BasicPositionColor.Draw(BufferManager, vertexBuffer, drawCount, topology);
+            BuiltInShaders.BasicPositionColor.Draw(BufferManager, new DrawOptions
+            {
+                VertexBuffer = vertexBuffer,
+                DrawCount = drawCount,
+                Topology = topology,
+            });
 
             Counters.InstancesPerFrame += dictionary.Count;
             Counters.PrimitivesPerFrame += drawCount / stride;

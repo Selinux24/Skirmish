@@ -136,10 +136,12 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\BasicPositionNormalTextureTangent.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTexture.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalColor.cs" />
+    <Compile Include="BuiltInEffects\SkinnedPositionNormalTextureTangent.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalTexture.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalColor.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalTextureInstanced.cs" />
@@ -154,8 +156,11 @@
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
     <Compile Include="BuiltIn\BuiltInShaders.cs" />
     <Compile Include="BuiltIn\BuiltInShadersBuffers.cs" />
+    <Compile Include="BuiltIn\PositionNormalTextureTangentPs.cs" />
     <Compile Include="BuiltIn\PositionNormalTexturePs.cs" />
+    <Compile Include="BuiltIn\PositionNormalTextureTangentVs.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureVs.cs" />
+    <Compile Include="BuiltIn\PositionNormalTextureTangentVsI.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureVsI.cs" />
     <Compile Include="BuiltIn\PositionNormalColorVsI.cs" />
     <Compile Include="BuiltIn\PositionNormalColorVs.cs" />
@@ -163,8 +168,10 @@
     <Compile Include="BuiltIn\PositionTexturePs.cs" />
     <Compile Include="BuiltIn\PositionTextureVs.cs" />
     <Compile Include="BuiltIn\PositionTextureVsI.cs" />
+    <Compile Include="BuiltIn\SkinnedPositionNormalTextureTangentVs.cs" />
     <Compile Include="BuiltIn\SkinnedPositionNormalTextureVs.cs" />
     <Compile Include="BuiltIn\SkinnedPositionNormalColorVs.cs" />
+    <Compile Include="BuiltIn\SkinnedPositionNormalTextureTangentVsI.cs" />
     <Compile Include="BuiltIn\SkinnedPositionNormalTextureVsI.cs" />
     <Compile Include="BuiltIn\SkinnedPositionNormalColorVsI.cs" />
     <Compile Include="BuiltIn\SkinnedPositionTextureVs.cs" />
@@ -172,6 +179,7 @@
     <Compile Include="Common\AnimationDrawInfo.cs" />
     <Compile Include="Common\AnimationShadowDrawInfo.cs" />
     <Compile Include="Common\BaseSceneObjectState.cs" />
+    <Compile Include="Common\DrawOptions.cs" />
     <Compile Include="Common\EngineConstantBuffer.cs" />
     <Compile Include="Common\IEnginePixelShader.cs" />
     <Compile Include="Common\IEngineVertexShader.cs" />
