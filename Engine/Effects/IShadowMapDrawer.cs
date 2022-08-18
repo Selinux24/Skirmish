@@ -45,44 +45,4 @@ namespace Engine.Effects
             MaterialShadowDrawInfo material,
             uint textureIndex);
     }
-
-    /// <summary>
-    /// Material draw information
-    /// </summary>
-    public struct MaterialShadowDrawInfo
-    {
-        /// <summary>
-        /// Empty
-        /// </summary>
-        public static readonly MaterialShadowDrawInfo Empty = new MaterialShadowDrawInfo();
-
-        /// <summary>
-        /// Material
-        /// </summary>
-        public IMeshMaterial Material { get; set; }
-    }
-
-    /// <summary>
-    /// Animation draw information
-    /// </summary>
-    public struct AnimationShadowDrawInfo
-    {
-        /// <summary>
-        /// Empty
-        /// </summary>
-        public static readonly AnimationShadowDrawInfo Empty = new AnimationShadowDrawInfo();
-
-        /// <summary>
-        /// First offset in the animation palette
-        /// </summary>
-        public uint Offset1 { get; set; }
-        /// <summary>
-        /// Second offset in the animation palette
-        /// </summary>
-        public uint Offset2 { get; set; }
-        /// <summary>
-        /// Interpolation amount between the offsets
-        /// </summary>
-        public float InterpolationAmount { get; set; }
-    }
 }

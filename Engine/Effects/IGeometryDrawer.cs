@@ -36,58 +36,10 @@ namespace Engine.Effects
         /// <summary>
         /// Update per model object data
         /// </summary>
-        /// <param name="animation">Animation information</param>
         /// <param name="material">Material information</param>
-        /// <param name="textureIndex">Texture index</param>
         /// <param name="tintColor">Tint color</param>
-        void UpdatePerObject(
-            AnimationDrawInfo animation,
-            MaterialDrawInfo material,
-            uint textureIndex,
-            Color4 tintColor);
-    }
-
-    /// <summary>
-    /// Material draw information
-    /// </summary>
-    public struct MaterialDrawInfo
-    {
-        /// <summary>
-        /// Empty
-        /// </summary>
-        public static readonly MaterialDrawInfo Empty = new MaterialDrawInfo();
-
-        /// <summary>
-        /// Material
-        /// </summary>
-        public IMeshMaterial Material { get; set; }
-        /// <summary>
-        /// Use anisotropic filtering
-        /// </summary>
-        public bool UseAnisotropic { get; set; }
-    }
-
-    /// <summary>
-    /// Animation draw information
-    /// </summary>
-    public struct AnimationDrawInfo
-    {
-        /// <summary>
-        /// Empty
-        /// </summary>
-        public static readonly AnimationDrawInfo Empty = new AnimationDrawInfo();
-
-        /// <summary>
-        /// First offset in the animation palette
-        /// </summary>
-        public uint Offset1 { get; set; }
-        /// <summary>
-        /// Second offset in the animation palette
-        /// </summary>
-        public uint Offset2 { get; set; }
-        /// <summary>
-        /// Interpolation amount between the offsets
-        /// </summary>
-        public float InterpolationAmount { get; set; }
+        /// <param name="textureIndex">Texture index</param>
+        /// <param name="animation">Animation information</param>
+        void UpdatePerObject(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation);
     }
 }

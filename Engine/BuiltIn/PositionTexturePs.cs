@@ -13,11 +13,19 @@ namespace Engine.BuiltIn
     public class PositionTexturePs : IDisposable
     {
         /// <summary>
-        /// Per frame spec data structure
+        /// Per frame data structure
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 16)]
-        public struct PerFrame : IBufferData
+        struct PerFrame : IBufferData
         {
+            public static PerFrame Build(uint channel)
+            {
+                return new PerFrame
+                {
+                    Channel = channel,
+                };
+            }
+
             /// <summary>
             /// Color output channel
             /// </summary>
@@ -102,16 +110,12 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
-        /// Sets per frame data
+        /// Writes per frame data
         /// </summary>
         /// <param name="channel">Color output channel</param>
-        public void SetVSPerFrame(uint channel)
+        public void WriteCBPerFrame(uint channel)
         {
-            var data = new PerFrame
-            {
-                Channel = channel,
-            };
-            cbPerFrame.WriteData(data);
+            cbPerFrame.WriteData(PerFrame.Build(channel));
         }
         /// <summary>
         /// Sets the diffuse map array

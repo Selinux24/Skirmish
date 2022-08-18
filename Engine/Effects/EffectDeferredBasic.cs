@@ -568,14 +568,14 @@ namespace Engine.Effects
         /// <inheritdoc/>
         public void UpdatePerObject()
         {
-            UpdatePerObject(AnimationDrawInfo.Empty, MaterialDrawInfo.Empty, 0, Color4.White);
+            UpdatePerObject(MaterialDrawInfo.Empty, Color4.White, 0, AnimationDrawInfo.Empty);
         }
         /// <inheritdoc/>
         public void UpdatePerObject(
-            AnimationDrawInfo animation,
             MaterialDrawInfo material,
+            Color4 tintColor,
             uint textureIndex,
-            Color4 tintColor)
+            AnimationDrawInfo animation)
         {
             AnimationOffset = animation.Offset1;
             AnimationOffset2 = animation.Offset2;

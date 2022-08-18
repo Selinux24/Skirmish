@@ -17,8 +17,18 @@ namespace Engine.BuiltIn
         /// Per instance data structure
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 32)]
-        public struct PerInstance : IBufferData
+        struct PerInstance : IBufferData
         {
+            public static PerInstance Build(MaterialDrawInfo material, Color4 tintColor, uint textureIndex)
+            {
+                return new PerInstance
+                {
+                    TintColor = tintColor,
+                    MaterialIndex = material.Material?.ResourceIndex ?? 0,
+                    TextureIndex = textureIndex,
+                };
+            }
+
             /// <summary>
             /// Tint color
             /// </summary>
@@ -110,20 +120,14 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
-        /// Sets per instance data
+        /// Writes per instance data
         /// </summary>
+        /// <param name="material">Material</param>
         /// <param name="tintColor">Tint color</param>
-        /// <param name="materialIndex">Material index</param>
         /// <param name="textureIndex">Texture index</param>
-        public void SetVSPerInstance(Color4 tintColor, uint materialIndex, uint textureIndex)
+        public void WriteCBPerInstance(MaterialDrawInfo material, Color4 tintColor, uint textureIndex)
         {
-            var data = new PerInstance
-            {
-                TintColor = tintColor,
-                MaterialIndex = materialIndex,
-                TextureIndex = textureIndex,
-            };
-            cbPerInstance.WriteData(data);
+            cbPerInstance.WriteData(PerInstance.Build(material, tintColor, textureIndex));
         }
 
         /// <summary>

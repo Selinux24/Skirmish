@@ -513,7 +513,7 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                effect.UpdatePerObject(AnimationDrawInfo.Empty, materialInfo, 0, Color4.White);
+                effect.UpdatePerObject(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {

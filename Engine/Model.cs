@@ -265,9 +265,9 @@ namespace Engine
             }
 
             int count = 0;
-            foreach (string meshName in DrawingData.Meshes.Keys)
+            foreach (var mesh in DrawingData.Meshes)
             {
-                count += DrawMeshShadow(context, effect, meshName);
+                count += DrawMeshShadow(context, mesh.Key, mesh.Value);
             }
         }
         /// <inheritdoc/>
@@ -296,37 +296,40 @@ namespace Engine
         /// Draws a mesh shadow
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Effect</param>
         /// <param name="meshName">Mesh name</param>
+        /// <param name="meshDict">Mesh dictionary</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMeshShadow(DrawContextShadows context, IShadowMapDrawer effect, string meshName)
+        private int DrawMeshShadow(DrawContextShadows context, string meshName, Dictionary<string, Mesh> meshDict)
         {
+            var effect = context.ShadowMap.GetEffect();
+            if (effect == null)
+            {
+                return 0;
+            }
+
             int count = 0;
 
             var graphics = Game.Graphics;
 
-            var meshDict = DrawingData.Meshes[meshName];
-
             var localTransform = GetTransformByName(meshName);
-
             effect.UpdatePerFrame(localTransform, context);
 
-            foreach (string materialName in meshDict.Keys)
+            var animationInfo = new AnimationShadowDrawInfo
             {
-                var mesh = meshDict[materialName];
+                Offset1 = AnimationOffset,
+                Offset2 = TransitionOffset,
+                InterpolationAmount = TransitionInterpolation,
+            };
+
+            foreach (var mat in meshDict)
+            {
+                var mesh = mat.Value;
                 if (!mesh.Ready)
                 {
                     continue;
                 }
 
-                var material = DrawingData.Materials[materialName];
-
-                var animationInfo = new AnimationShadowDrawInfo
-                {
-                    Offset1 = AnimationOffset,
-                    Offset2 = TransitionOffset,
-                    InterpolationAmount = TransitionInterpolation,
-                };
+                var material = DrawingData.Materials[mat.Key];
 
                 var materialInfo = new MaterialShadowDrawInfo
                 {
@@ -340,14 +343,14 @@ namespace Engine
                 var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
                 BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
 
-                count += mesh.Count;
-
                 for (int p = 0; p < technique.PassCount; p++)
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
                     mesh.Draw(graphics);
                 }
+
+                count += mesh.Count;
             }
 
             return count;
@@ -356,6 +359,8 @@ namespace Engine
         /// Draws a mesh
         /// </summary>
         /// <param name="context">Context</param>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="meshDict">Mesh dictionary</param>
         /// <returns>Returns the number of drawn triangles</returns>
         private int DrawMesh(DrawContext context, string meshName, Dictionary<string, Mesh> meshDict)
         {
@@ -364,6 +369,8 @@ namespace Engine
             var graphics = Game.Graphics;
 
             var localTransform = GetTransformByName(meshName);
+
+            BuiltInShaders.UpdatePerFrame(localTransform, context);
 
             foreach (var mat in meshDict)
             {
@@ -397,8 +404,7 @@ namespace Engine
                 var drawer = GetDrawer(context.DrawerMode, mesh.VertextType);
                 if (drawer != null)
                 {
-                    BuiltInShaders.UpdatePerFrame(localTransform, context);
-                    drawer.Update(animationInfo, materialInfo, TextureIndex, TintColor);
+                    drawer.Update(materialInfo, TintColor, TextureIndex, animationInfo);
 
                     BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
@@ -416,7 +422,7 @@ namespace Engine
                 }
 
                 effect.UpdatePerFrameFull(localTransform, context);
-                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex, TintColor);
+                effect.UpdatePerObject(materialInfo, TintColor, TextureIndex, animationInfo);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 

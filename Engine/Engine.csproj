@@ -153,6 +153,7 @@
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
     <Compile Include="BuiltIn\BuiltInShaders.cs" />
+    <Compile Include="BuiltIn\BuiltInShadersBuffers.cs" />
     <Compile Include="BuiltIn\PositionNormalTexturePs.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureVs.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureVsI.cs" />
@@ -168,11 +169,15 @@
     <Compile Include="BuiltIn\SkinnedPositionNormalColorVsI.cs" />
     <Compile Include="BuiltIn\SkinnedPositionTextureVs.cs" />
     <Compile Include="BuiltIn\SkinnedPositionTextureVsI.cs" />
+    <Compile Include="Common\AnimationDrawInfo.cs" />
+    <Compile Include="Common\AnimationShadowDrawInfo.cs" />
     <Compile Include="Common\BaseSceneObjectState.cs" />
     <Compile Include="Common\EngineConstantBuffer.cs" />
     <Compile Include="Common\IEnginePixelShader.cs" />
     <Compile Include="Common\IEngineVertexShader.cs" />
     <Compile Include="Common\ManipulatorControllerState.cs" />
+    <Compile Include="Common\MaterialDrawInfo.cs" />
+    <Compile Include="Common\MaterialShadowDrawInfo.cs" />
     <Compile Include="Common\ProcessedStages.cs" />
     <Compile Include="Common\CoarsePickingResult.cs" />
     <Compile Include="Content\FileArrayImageContent.cs" />
@@ -230,7 +235,7 @@
     <Compile Include="BuiltIn\PositionColorVsI.cs" />
     <Compile Include="BuiltIn\PositionColorVs.cs" />
     <Compile Include="Effects\EffectShadowFoliageState.cs" />
-    <Compile Include="Effects\IGeometryDrawer2.cs" />
+    <Compile Include="BuiltInEffects\IGeometryDrawer2.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />

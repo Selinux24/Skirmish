@@ -1,243 +1,15 @@
 ﻿using SharpDX;
-using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.BuiltInEffects;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Built-in shaders resource helper
     /// </summary>
-    public static class BuiltInShaders
+    internal static partial class BuiltInShaders
     {
-        /// <summary>
-        /// Global data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 16)]
-        struct VSGlobal : IBufferData
-        {
-            public static VSGlobal Build(uint materialPaletteWidth, uint animationPaletteWidth)
-            {
-                return new VSGlobal
-                {
-                    MaterialPaletteWidth = materialPaletteWidth,
-                    AnimationPaletteWidth = animationPaletteWidth
-                };
-            }
-
-            /// <summary>
-            /// Material palette width
-            /// </summary>
-            [FieldOffset(0)]
-            public uint MaterialPaletteWidth;
-            /// <summary>
-            /// Animation palette width
-            /// </summary>
-            [FieldOffset(4)]
-            public uint AnimationPaletteWidth;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(VSGlobal));
-            }
-        }
-        /// <summary>
-        /// Per-frame data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 128)]
-        struct VSPerFrame : IBufferData
-        {
-            public static VSPerFrame Build(Matrix localTransform, DrawContext context)
-            {
-                return new VSPerFrame
-                {
-                    World = Matrix.Transpose(localTransform),
-                    WorldViewProjection = Matrix.Transpose(localTransform * context.ViewProjection),
-                };
-            }
-
-            /// <summary>
-            /// World matrix
-            /// </summary>
-            [FieldOffset(0)]
-            public Matrix World;
-            /// <summary>
-            /// World view projection matrix
-            /// </summary>
-            [FieldOffset(64)]
-            public Matrix WorldViewProjection;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(VSPerFrame));
-            }
-        }
-        /// <summary>
-        /// Per frame data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 48)]
-        struct PSPerFrameNoLit : IBufferData
-        {
-            public static PSPerFrameNoLit Build(DrawContext context)
-            {
-                return new PSPerFrameNoLit
-                {
-                    EyePositionWorld = context.EyePosition,
-
-                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
-
-                    FogStart = context.Lights?.FogStart ?? 0,
-                    FogRange = context.Lights?.FogRange ?? 0,
-                };
-            }
-
-            /// <summary>
-            /// Eye position world
-            /// </summary>
-            [FieldOffset(0)]
-            public Vector3 EyePositionWorld;
-
-            /// <summary>
-            /// Fog color
-            /// </summary>
-            [FieldOffset(16)]
-            public Color4 FogColor;
-
-            /// <summary>
-            /// Fog start distance
-            /// </summary>
-            [FieldOffset(32)]
-            public float FogStart;
-            /// <summary>
-            /// Fog range distance
-            /// </summary>
-            [FieldOffset(36)]
-            public float FogRange;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PSPerFrameNoLit));
-            }
-        }
-        /// <summary>
-        /// Per frame data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 4176)]
-        struct PSPerFrameLit : IBufferData
-        {
-            public static PSPerFrameLit Build(DrawContext context)
-            {
-                var hemiLight = BufferLightHemispheric.Build(context.Lights?.GetVisibleHemisphericLight());
-                var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), out int dirLength);
-                var pointLights = BufferLightPoint.Build(context.Lights?.GetVisiblePointLights(), out int pointLength);
-                var spotLights = BufferLightSpot.Build(context.Lights?.GetVisibleSpotLights(), out int spotLength);
-
-                return new PSPerFrameLit
-                {
-                    EyePositionWorld = context.EyePosition,
-
-                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
-
-                    FogStart = context.Lights?.FogStart ?? 0,
-                    FogRange = context.Lights?.FogRange ?? 0,
-
-                    LevelOfDetail = context.LevelOfDetail,
-
-                    DirLightsCount = (uint)dirLength,
-                    PointLightsCount = (uint)pointLength,
-                    SpotLightsCount = (uint)spotLength,
-                    ShadowIntensity = context.Lights?.ShadowIntensity ?? 0f,
-
-                    HemiLight = hemiLight,
-                    DirLights = dirLights,
-                    PointLights = pointLights,
-                    SpotLights = spotLights,
-                };
-            }
-
-            /// <summary>
-            /// Eye position world
-            /// </summary>
-            [FieldOffset(0)]
-            public Vector3 EyePositionWorld;
-
-            /// <summary>
-            /// Fog color
-            /// </summary>
-            [FieldOffset(16)]
-            public Color4 FogColor;
-
-            /// <summary>
-            /// Fog start distance
-            /// </summary>
-            [FieldOffset(32)]
-            public float FogStart;
-            /// <summary>
-            /// Fog range distance
-            /// </summary>
-            [FieldOffset(36)]
-            public float FogRange;
-
-            /// <summary>
-            /// Level of detail values
-            /// </summary>
-            [FieldOffset(48)]
-            public Vector3 LevelOfDetail;
-
-            /// <summary>
-            /// Directional lights count
-            /// </summary>
-            [FieldOffset(64)]
-            public uint DirLightsCount;
-            /// <summary>
-            /// Point lights count
-            /// </summary>
-            [FieldOffset(68)]
-            public uint PointLightsCount;
-            /// <summary>
-            /// Spot lights count
-            /// </summary>
-            [FieldOffset(72)]
-            public uint SpotLightsCount;
-            /// <summary>
-            /// Shadow intensity
-            /// </summary>
-            [FieldOffset(76)]
-            public float ShadowIntensity;
-
-            /// <summary>
-            /// Hemispheric light
-            /// </summary>
-            [FieldOffset(80)]
-            public BufferLightHemispheric HemiLight;
-            /// <summary>
-            /// Directional lights
-            /// </summary>
-            [FieldOffset(112), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightDirectional.MAX)]
-            public BufferLightDirectional[] DirLights;
-            /// <summary>
-            /// Point lights
-            /// </summary>
-            [FieldOffset(592), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightPoint.MAX)]
-            public BufferLightPoint[] PointLights;
-            /// <summary>
-            /// Spot lights
-            /// </summary>
-            [FieldOffset(1872), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightSpot.MAX)]
-            public BufferLightSpot[] SpotLights;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PSPerFrameLit));
-            }
-        }
-
         /// <summary>
         /// Vertex shader global constant buffer
         /// </summary>
@@ -303,6 +75,10 @@ namespace Engine.BuiltIn
         /// Basic position color drawer
         /// </summary>
         public static BasicPositionColor BasicPositionColor { get; private set; }
+        /// <summary>
+        /// Skinned position color drawer
+        /// </summary>
+        public static SkinnedPositionColor SkinnedPositionColor { get; private set; }
 
         /// <summary>
         /// Position normal color pixel shader
@@ -329,6 +105,10 @@ namespace Engine.BuiltIn
         /// Basic position normal color drawer
         /// </summary>
         public static BasicPositionNormalColor BasicPositionNormalColor { get; private set; }
+        /// <summary>
+        /// Skinned position normal color drawer
+        /// </summary>
+        public static SkinnedPositionNormalColor SkinnedPositionNormalColor { get; private set; }
 
         /// <summary>
         /// Position texture pixel shader
@@ -355,6 +135,10 @@ namespace Engine.BuiltIn
         /// Basic position texture drawer
         /// </summary>
         public static BasicPositionTexture BasicPositionTexture { get; private set; }
+        /// <summary>
+        /// Skinned position texture drawer
+        /// </summary>
+        public static SkinnedPositionTexture SkinnedPositionTexture { get; private set; }
 
         /// <summary>
         /// Position normal texture pixel shader
@@ -381,6 +165,10 @@ namespace Engine.BuiltIn
         /// Basic position normal texture drawer
         /// </summary>
         public static BasicPositionNormalTexture BasicPositionNormalTexture { get; private set; }
+        /// <summary>
+        /// Skinned position normal texture drawer
+        /// </summary>
+        public static SkinnedPositionNormalTexture SkinnedPositionNormalTexture { get; private set; }
 
         /// <summary>
         /// Initializes pool
@@ -400,6 +188,7 @@ namespace Engine.BuiltIn
             PositionColorVsSkinnedI = new SkinnedPositionColorVsI(graphics);
 
             BasicPositionColor = new BasicPositionColor(graphics, PositionColorVs, PositionColorPs);
+            SkinnedPositionColor = new SkinnedPositionColor(graphics, PositionColorVsSkinned, PositionColorPs);
 
             PositionNormalColorPs = new PositionNormalColorPs(graphics);
             PositionNormalColorVs = new PositionNormalColorVs(graphics);
@@ -408,6 +197,7 @@ namespace Engine.BuiltIn
             PositionNormalColorVsSkinnedI = new SkinnedPositionNormalColorVsI(graphics);
 
             BasicPositionNormalColor = new BasicPositionNormalColor(graphics, PositionNormalColorVs, PositionNormalColorPs);
+            SkinnedPositionNormalColor = new SkinnedPositionNormalColor(graphics, PositionNormalColorVsSkinned, PositionNormalColorPs);
 
             PositionTexturePs = new PositionTexturePs(graphics);
             PositionTextureVs = new PositionTextureVs(graphics);
@@ -416,6 +206,7 @@ namespace Engine.BuiltIn
             PositionTextureVsSkinnedI = new SkinnedPositionTextureVsI(graphics);
 
             BasicPositionTexture = new BasicPositionTexture(graphics, PositionTextureVs, PositionTexturePs);
+            SkinnedPositionTexture = new SkinnedPositionTexture(graphics, PositionTextureVsSkinned, PositionTexturePs);
 
             PositionNormalTexturePs = new PositionNormalTexturePs(graphics);
             PositionNormalTextureVs = new PositionNormalTextureVs(graphics);
@@ -424,6 +215,7 @@ namespace Engine.BuiltIn
             PositionNormalTextureVsSkinnedI = new SkinnedPositionNormalTextureVsI(graphics);
 
             BasicPositionNormalTexture = new BasicPositionNormalTexture(graphics, PositionNormalTextureVs, PositionNormalTexturePs);
+            SkinnedPositionNormalTexture = new SkinnedPositionNormalTexture(graphics, PositionNormalTextureVsSkinned, PositionNormalTexturePs);
         }
         /// <summary>
         /// Dispose of used resources
@@ -497,6 +289,20 @@ namespace Engine.BuiltIn
             vsGlobalAnimationPalette = animationPalette;
 
             vsGlobalConstantBuffer?.WriteData(VSGlobal.Build(materialPaletteWidth, animationPaletteWidth));
+        }
+        /// <summary>
+        /// Updates per-frame data
+        /// </summary>
+        /// <param name="localTransform">Local transform</param>
+        /// <param name="context">Draw context</param>
+        public static void UpdatePerFrame(Matrix localTransform, DrawContextShadows context)
+        {
+            if (context == null)
+            {
+                return;
+            }
+
+            vsPerFrameConstantBuffer?.WriteData(VSPerFrame.Build(localTransform, context));
         }
         /// <summary>
         /// Updates per-frame data

@@ -21,6 +21,7 @@ cbuffer cbPSPerFrame : register(b0)
     PointLight gPointLights[MAX_LIGHTS_POINT];
     SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 };
+
 Texture2DArray<float> gShadowMapDir : register(t0);
 Texture2DArray<float> gShadowMapSpot : register(t1);
 TextureCubeArray<float> gShadowMapPoint : register(t2);

@@ -260,7 +260,7 @@ namespace Engine
             }
 
             BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
-            BuiltInShaders.BasicPositionColor.Update(new AnimationDrawInfo(), new MaterialDrawInfo { Material = MeshMaterial.DefaultPhong, UseAnisotropic = false }, 0, Color.White);
+            BuiltInShaders.BasicPositionColor.Update(MaterialDrawInfo.Empty, Color.White, 0, AnimationDrawInfo.Empty);
             BuiltInShaders.BasicPositionColor.Draw(BufferManager, vertexBuffer, drawCount, topology);
 
             Counters.InstancesPerFrame += dictionary.Count;

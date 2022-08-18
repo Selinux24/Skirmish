@@ -196,7 +196,7 @@ namespace Engine
                             UseAnisotropic = true,
                         };
 
-                        sceneryEffect.UpdatePerObject(AnimationDrawInfo.Empty, materialInfo, 0, Color4.White);
+                        sceneryEffect.UpdatePerObject(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
 
                         bufferManager.SetIndexBuffer(mesh.IndexBuffer);
                         bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);

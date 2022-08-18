@@ -17,8 +17,21 @@ namespace Engine.BuiltIn
         /// Per instance data structure
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 48)]
-        public struct PerInstance : IBufferData
+        struct PerInstance : IBufferData
         {
+            public static PerInstance Build(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
+            {
+                return new PerInstance
+                {
+                    TintColor = tintColor,
+                    MaterialIndex = material.Material?.ResourceIndex ?? 0,
+                    TextureIndex = textureIndex,
+                    AnimationOffset = animation.Offset1,
+                    AnimationOffset2 = animation.Offset2,
+                    AnimationInterpolation = animation.InterpolationAmount,
+                };
+            }
+
             /// <summary>
             /// Tint color
             /// </summary>
@@ -30,6 +43,11 @@ namespace Engine.BuiltIn
             /// </summary>
             [FieldOffset(16)]
             public uint MaterialIndex;
+            /// <summary>
+            /// Texture index
+            /// </summary>
+            [FieldOffset(20)]
+            public uint TextureIndex;
 
             /// <summary>
             /// Animation offset 1
@@ -121,24 +139,15 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
-        /// Sets per instance data
+        /// Writes per instance data
         /// </summary>
+        /// <param name="material">Material</param>
         /// <param name="tintColor">Tint color</param>
-        /// <param name="materialIndex">Material index</param>
-        /// <param name="animationOffset">Animation offset 1</param>
-        /// <param name="animationOffset2">Animation offset 2</param>
-        /// <param name="animationInterpolation">Animation interpolation value</param>
-        public void SetVSPerInstance(Color4 tintColor, uint materialIndex, uint animationOffset, uint animationOffset2, float animationInterpolation)
+        /// <param name="textureIndex">Texture index</param>
+        /// <param name="animation">Animation</param>
+        public void WriteCBPerInstance(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            var data = new PerInstance
-            {
-                TintColor = tintColor,
-                MaterialIndex = materialIndex,
-                AnimationOffset = animationOffset,
-                AnimationOffset2 = animationOffset2,
-                AnimationInterpolation = animationInterpolation,
-            };
-            cbPerInstance.WriteData(data);
+            cbPerInstance.WriteData(PerInstance.Build(material, tintColor, textureIndex, animation));
         }
 
         /// <summary>

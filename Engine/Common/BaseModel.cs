@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 namespace Engine.Common
 {
     using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Content;
     using Engine.Effects;
 
@@ -302,6 +303,20 @@ namespace Engine.Common
                 return null;
             }
 
+            bool skinned = SkinningData != null;
+            if (skinned)
+            {
+                return GetSkinnedDrawer(vertexType);
+            }
+
+            return GetStaticDrawer(vertexType);
+        }
+        /// <summary>
+        /// Gets a static drawer
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        private IGeometryDrawer2 GetStaticDrawer(VertexTypes vertexType)
+        {
             if (vertexType == VertexTypes.PositionColor)
             {
                 return BuiltInShaders.BasicPositionColor;
@@ -317,10 +332,38 @@ namespace Engine.Common
                 return BuiltInShaders.BasicPositionTexture;
             }
 
-            //if (vertexType == VertexTypes.PositionNormalTexture)
-            //{
-            //    return BuiltInShaders.BasicPositionNormalTexture;
-            //}
+            if (vertexType == VertexTypes.PositionNormalTexture)
+            {
+                return BuiltInShaders.BasicPositionNormalTexture;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Gets a skinned drawer
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        private IGeometryDrawer2 GetSkinnedDrawer(VertexTypes vertexType)
+        {
+            if (vertexType == VertexTypes.PositionColor)
+            {
+                return BuiltInShaders.SkinnedPositionColor;
+            }
+
+            if (vertexType == VertexTypes.PositionNormalColor)
+            {
+                return BuiltInShaders.SkinnedPositionNormalColor;
+            }
+
+            if (vertexType == VertexTypes.PositionTexture)
+            {
+                return BuiltInShaders.SkinnedPositionTexture;
+            }
+
+            if (vertexType == VertexTypes.PositionNormalTexture)
+            {
+                return BuiltInShaders.SkinnedPositionNormalTexture;
+            }
 
             return null;
         }

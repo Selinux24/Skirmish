@@ -6,7 +6,6 @@ namespace Engine.BuiltInEffects
 {
     using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Skinned position-texture drawer
@@ -42,71 +41,10 @@ namespace Engine.BuiltInEffects
         }
 
         /// <inheritdoc/>
-        public void Update(
-            AnimationDrawInfo animation,
-            MaterialDrawInfo material,
-            uint textureIndex,
-            Color4 tintColor)
+        public void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            vertexShader.SetVSPerInstance(
-                tintColor,
-                material.Material?.ResourceIndex ?? 0,
-                textureIndex,
-                animation.Offset1,
-                animation.Offset2,
-                animation.InterpolationAmount);
+            vertexShader.WriteCBPerInstance(material, tintColor, textureIndex, animation);
         }
-
-        /// <inheritdoc/>
-        public void DrawShadows(BufferManager bufferManager, IEnumerable<Mesh> meshes)
-        {
-            if (meshes?.Any() != true)
-            {
-                return;
-            }
-
-            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
-            Graphics.SetVertexShader(vertexShader.Shader);
-            Graphics.ClearPixelShader();
-
-            vertexShader.SetConstantBuffers();
-
-            foreach (var mesh in meshes)
-            {
-                // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, false))
-                {
-                    continue;
-                }
-
-                // Render the mesh.
-                mesh.Draw(Graphics);
-            }
-        }
-        /// <inheritdoc/>
-        public void DrawShadows(BufferManager bufferManager, BufferDescriptor vertexBuffer, int drawCount, Topology topology)
-        {
-            if (drawCount <= 0)
-            {
-                return;
-            }
-
-            // Set the vertex and pixel shaders that will be used to render this mesh shadow map.
-            Graphics.SetVertexShader(vertexShader.Shader);
-            Graphics.ClearPixelShader();
-
-            vertexShader.SetConstantBuffers();
-
-            // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(vertexShader.Shader, vertexBuffer, topology, false))
-            {
-                return;
-            }
-
-            // Render the primitives.
-            Graphics.Draw(drawCount, vertexBuffer.BufferOffset);
-        }
-
         /// <inheritdoc/>
         public void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes)
         {

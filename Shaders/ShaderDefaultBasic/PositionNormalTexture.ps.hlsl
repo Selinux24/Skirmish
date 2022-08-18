@@ -4,14 +4,7 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbGlobals : register(b0)
-{
-	uint gMaterialPaletteWidth;
-	float3 gLOD;
-};
-Texture2D gMaterialPalette : register(t0);
-
-cbuffer cbPSPerFrame : register(b1)
+cbuffer cbPSPerFrame : register(b0)
 {
 	float3 gEyePositionWorld;
 	float PAD11;
@@ -19,33 +12,45 @@ cbuffer cbPSPerFrame : register(b1)
 	float gFogStart;
 	float gFogRange;
 	float2 PAD12;
+	float3 gLOD;
+	float PAD13;
+	uint3 gLightCount;
+	float gShadowIntensity;
 	HemisphericLight gHemiLight;
 	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 	PointLight gPointLights[MAX_LIGHTS_POINT];
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
-	uint3 gLightCount;
-    float gShadowIntensity;
 };
-Texture2DArray<float> gShadowMapDir : register(t1);
-Texture2DArray<float> gShadowMapSpot : register(t2);
-TextureCubeArray<float> gShadowMapPoint : register(t3);
 
-cbuffer cbPSPerObject : register(b2)
+cbuffer cbPSPerObject : register(b1)
 {
 	bool gUseColorDiffuse;
 	bool3 PAD21;
 };
-Texture2DArray gDiffuseMapArray : register(t4);
+
+Texture2DArray<float> gShadowMapDir : register(t0);
+Texture2DArray<float> gShadowMapSpot : register(t1);
+TextureCubeArray<float> gShadowMapPoint : register(t2);
+Texture2DArray gDiffuseMapArray : register(t3);
 
 SamplerState SamplerDiffuse : register(s0);
+
+struct PSVertexPositionNormalTexture2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+	float2 tex : TEXCOORD0;
+	float4 tintColor : TINTCOLOR;
+	uint textureIndex : TEXTUREINDEX;
+	Material material : MATERIAL;
+};
 
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE
 **********************************************************************************************************/
-float4 main(PSVertexPositionNormalTexture input) : SV_TARGET
+float4 main(PSVertexPositionNormalTexture2 input) : SV_TARGET
 {
-	Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
-
 	float4 diffuseColor = 1;
 	if (gUseColorDiffuse == true)
 	{
@@ -55,7 +60,7 @@ float4 main(PSVertexPositionNormalTexture input) : SV_TARGET
 
 	ComputeLightsInput lInput;
 
-	lInput.material = material;
+	lInput.material = input.material;
 	lInput.objectPosition = input.positionWorld;
 	lInput.objectNormal = normalize(input.normalWorld);
 	lInput.objectDiffuseColor = diffuseColor;
