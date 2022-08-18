@@ -106,7 +106,7 @@ namespace Engine.Common
         /// <summary>
         /// Input layouts by vertex shaders
         /// </summary>
-        private readonly Dictionary<string, InputLayout> vertexShadersInputLayouts = new Dictionary<string, InputLayout>();
+        private readonly Dictionary<IEngineVertexShader, InputLayout> vertexShadersInputLayouts = new Dictionary<IEngineVertexShader, InputLayout>();
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -929,7 +929,7 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!vertexShadersInputLayouts.ContainsKey(descriptor.Id))
+            if (!vertexShadersInputLayouts.ContainsKey(vertexShader))
             {
                 // The vertex shader defines the input vertex data type
                 var signature = vertexShader.GetShaderBytecode();
@@ -938,11 +938,11 @@ namespace Engine.Common
                     vertexBufferDescriptor.Input.Where(i => i.Classification == InputClassification.PerVertexData).ToArray();
 
                 vertexShadersInputLayouts.Add(
-                    descriptor.Id,
+                    vertexShader,
                     game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
             }
 
-            game.Graphics.IAInputLayout = vertexShadersInputLayouts[descriptor.Id];
+            game.Graphics.IAInputLayout = vertexShadersInputLayouts[vertexShader];
             game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
             return true;
         }

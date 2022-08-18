@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
@@ -13,41 +12,10 @@ namespace Engine.BuiltIn
     public class PositionNormalTexturePs : IDisposable
     {
         /// <summary>
-        /// Per object data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 16)]
-        struct PerObject : IBufferData
-        {
-            public static PerObject Build(bool useColorDiffuse)
-            {
-                return new PerObject
-                {
-                    UseColorDiffuse = useColorDiffuse,
-                };
-            }
-
-            /// <summary>
-            /// Use color diffuse value
-            /// </summary>
-            [FieldOffset(0)]
-            public bool UseColorDiffuse;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PerObject));
-            }
-        }
-
-        /// <summary>
         /// Shader
         /// </summary>
         public readonly EnginePixelShader Shader;
 
-        /// <summary>
-        /// Per object constant buffer
-        /// </summary>
-        private readonly EngineConstantBuffer<PerObject> cbPerObject;
         /// <summary>
         /// Diffuse map resource view
         /// </summary>
@@ -76,8 +44,6 @@ namespace Engine.BuiltIn
             {
                 Shader = graphics.LoadPixelShader(nameof(PositionNormalTexturePs), bytes);
             }
-
-            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(PositionNormalTexturePs) + "." + nameof(PerObject));
         }
         /// <summary>
         /// Destructor
@@ -104,19 +70,9 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
-
-                cbPerObject?.Dispose();
             }
         }
 
-        /// <summary>
-        /// Writes per object data
-        /// </summary>
-        /// <param name="useColorDiffuse">Use color diffuse value</param>
-        public void WriteCBPerObject(bool useColorDiffuse)
-        {
-            cbPerObject.WriteData(PerObject.Build(useColorDiffuse));
-        }
         /// <summary>
         /// Sets the diffuse map array
         /// </summary>
@@ -134,7 +90,6 @@ namespace Engine.BuiltIn
             var cb = new[]
             {
                  BuiltInShaders.GetPSPerFrameLit(),
-                 cbPerObject,
             };
 
             Graphics.SetPixelShaderConstantBuffers(0, cb);

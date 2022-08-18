@@ -22,12 +22,6 @@ cbuffer cbPSPerFrame : register(b0)
 	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 };
 
-cbuffer cbPSPerObject : register(b1)
-{
-	bool gUseColorDiffuse;
-	bool3 PAD21;
-};
-
 Texture2DArray<float> gShadowMapDir : register(t0);
 Texture2DArray<float> gShadowMapSpot : register(t1);
 TextureCubeArray<float> gShadowMapPoint : register(t2);
@@ -51,19 +45,14 @@ POSITION NORMAL TEXTURE
 **********************************************************************************************************/
 float4 main(PSVertexPositionNormalTexture2 input) : SV_TARGET
 {
-	float4 diffuseColor = 1;
-	if (gUseColorDiffuse == true)
-	{
-		diffuseColor = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-		diffuseColor *= input.tintColor;
-	}
+    float4 diffuseColor = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
 	ComputeLightsInput lInput;
 
 	lInput.material = input.material;
 	lInput.objectPosition = input.positionWorld;
 	lInput.objectNormal = normalize(input.normalWorld);
-	lInput.objectDiffuseColor = diffuseColor;
+    lInput.objectDiffuseColor = diffuseColor * input.tintColor;
 
 	lInput.eyePosition = gEyePositionWorld;
 	lInput.levelOfDetailRanges = gLOD;

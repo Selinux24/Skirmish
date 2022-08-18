@@ -43,6 +43,8 @@ namespace Engine.BuiltInEffects
         public void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
             vertexShader.WriteCBPerInstance(material, tintColor, textureIndex);
+     
+            pixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
         }
         /// <inheritdoc/>
         public void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes)
