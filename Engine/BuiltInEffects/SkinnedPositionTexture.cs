@@ -25,6 +25,7 @@ namespace Engine.BuiltInEffects
             VertexShader.WriteCBPerInstance(material, tintColor, textureIndex, animation);
 
             PixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
+            PixelShader.SetDiffseSampler(BuiltInShaders.GetSamplerLinear());
         }
     }
 }

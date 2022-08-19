@@ -20,6 +20,10 @@ namespace Engine.BuiltIn
         /// Diffuse map resource view
         /// </summary>
         private EngineShaderResourceView diffuseMapArray;
+        /// <summary>
+        /// Diffuse sampler
+        /// </summary>
+        private EngineSamplerState samplerDiffuse;
 
         /// <summary>
         /// Graphics instance
@@ -82,6 +86,14 @@ namespace Engine.BuiltIn
         {
             this.diffuseMapArray = diffuseMapArray;
         }
+        /// <summary>
+        /// Sets the diffuse sampler state
+        /// </summary>
+        /// <param name="samplerDiffuse">Diffuse sampler</param>
+        public void SetDiffseSampler(EngineSamplerState samplerDiffuse)
+        {
+            this.samplerDiffuse = samplerDiffuse;
+        }
 
         /// <summary>
         /// Sets the pixel shader constant buffers
@@ -104,6 +116,8 @@ namespace Engine.BuiltIn
             };
 
             Graphics.SetPixelShaderResourceViews(0, rv);
+
+            Graphics.SetPixelShaderSampler(0, samplerDiffuse);
         }
     }
 }

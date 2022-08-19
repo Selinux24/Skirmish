@@ -23,6 +23,7 @@ namespace Engine.BuiltInEffects
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
             PixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
+            PixelShader.SetDiffseSampler(BuiltInShaders.GetSamplerLinear());
         }
     }
 }

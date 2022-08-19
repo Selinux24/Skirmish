@@ -960,6 +960,31 @@ namespace Engine
 
             deviceContext.VertexShader?.SetShaderResources(startSlot, resources.Length, resources);
         }
+        /// <summary>
+        /// Sets the specified sampler state in the current vertex shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="samplerState">Sampler</param>
+        public void SetVertexShaderSampler(int slot, EngineSamplerState samplerState)
+        {
+            deviceContext.VertexShader?.SetSampler(slot, samplerState?.GetSamplerState());
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current vertex shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="samplerStates">Samplers</param>
+        public void SetVertexShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        {
+            if (samplerStates?.Any() != true)
+            {
+                return;
+            }
+
+            var samplers = samplerStates.Select(r => r?.GetSamplerState()).ToArray();
+
+            deviceContext.VertexShader?.SetSamplers(startSlot, samplers.Length, samplers);
+        }
 
         /// <summary>
         /// Sets the pixel shader in the current device context
@@ -1027,6 +1052,31 @@ namespace Engine
             var resources = resourceViews.Select(r => r?.GetResource()).ToArray();
 
             deviceContext.PixelShader?.SetShaderResources(startSlot, resources.Length, resources);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current pixel shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="samplerState">Sampler</param>
+        public void SetPixelShaderSampler(int slot, EngineSamplerState samplerState)
+        {
+            deviceContext.PixelShader?.SetSampler(slot, samplerState?.GetSamplerState());
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current pixel shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="samplerStates">Samplers</param>
+        public void SetPixelShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        {
+            if (samplerStates?.Any() != true)
+            {
+                return;
+            }
+
+            var samplers = samplerStates.Select(r => r?.GetSamplerState()).ToArray();
+
+            deviceContext.PixelShader?.SetSamplers(startSlot, samplers.Length, samplers);
         }
 
         /// <summary>

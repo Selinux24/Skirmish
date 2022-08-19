@@ -21,9 +21,17 @@ namespace Engine.BuiltIn
         /// </summary>
         private EngineShaderResourceView diffuseMapArray;
         /// <summary>
+        /// Diffuse sampler
+        /// </summary>
+        private EngineSamplerState samplerDiffuse;
+        /// <summary>
         /// Normal map resource view
         /// </summary>
         private EngineShaderResourceView normalMapArray;
+        /// <summary>
+        /// Normal sampler
+        /// </summary>
+        private EngineSamplerState samplerNormal;
 
         /// <summary>
         /// Graphics instance
@@ -87,12 +95,28 @@ namespace Engine.BuiltIn
             this.diffuseMapArray = diffuseMapArray;
         }
         /// <summary>
+        /// Sets the diffuse sampler state
+        /// </summary>
+        /// <param name="samplerDiffuse">Diffuse sampler</param>
+        public void SetDiffseSampler(EngineSamplerState samplerDiffuse)
+        {
+            this.samplerDiffuse = samplerDiffuse;
+        }
+        /// <summary>
         /// Sets the normal map array
         /// </summary>
         /// <param name="normalMapArray">Normal map array</param>
         public void SetNormalMap(EngineShaderResourceView normalMapArray)
         {
             this.normalMapArray = normalMapArray;
+        }
+        /// <summary>
+        /// Sets the normal sampler state
+        /// </summary>
+        /// <param name="samplerNormal">Normal sampler</param>
+        public void SetNormalSampler(EngineSamplerState samplerNormal)
+        {
+            this.samplerNormal = samplerNormal;
         }
 
         /// <summary>
@@ -117,6 +141,14 @@ namespace Engine.BuiltIn
             };
 
             Graphics.SetPixelShaderResourceViews(0, rv);
+
+            var ss = new[]
+            {
+                samplerDiffuse,
+                samplerNormal,
+            };
+
+            Graphics.SetPixelShaderSamplers(0, ss);
         }
     }
 }

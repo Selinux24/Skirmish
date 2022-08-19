@@ -35,6 +35,19 @@ namespace Engine.BuiltIn
         private static readonly List<IBuiltInDrawer> drawers = new List<IBuiltInDrawer>();
 
         /// <summary>
+        /// Sampler point
+        /// </summary>
+        private static EngineSamplerState samplerPoint = null;
+        /// <summary>
+        /// Sampler linear
+        /// </summary>
+        private static EngineSamplerState samplerLinear = null;
+        /// <summary>
+        /// Sampler anisotropic
+        /// </summary>
+        private static EngineSamplerState samplerAnisotropic = null;
+
+        /// <summary>
         /// Material palette resource view
         /// </summary>
         private static EngineShaderResourceView vsGlobalMaterialPalette;
@@ -75,6 +88,13 @@ namespace Engine.BuiltIn
             pixelShaders.ForEach(ps => ps?.Dispose());
             pixelShaders.Clear();
             drawers.Clear();
+
+            samplerPoint?.Dispose();
+            samplerPoint = null;
+            samplerLinear?.Dispose();
+            samplerLinear = null;
+            samplerAnisotropic?.Dispose();
+            samplerAnisotropic = null;
         }
 
         /// <summary>
@@ -89,7 +109,7 @@ namespace Engine.BuiltIn
                 return cb;
             }
 
-            cb = new EngineConstantBuffer<T>(graphics, nameof(BuiltInShaders) + "." + nameof(T));
+            cb = new EngineConstantBuffer<T>(graphics, nameof(BuiltInShaders) + "." + typeof(T).Name);
             constantBuffers.Add(cb);
 
             return cb;
@@ -135,6 +155,49 @@ namespace Engine.BuiltIn
         public static T GetDrawer<T>() where T : IBuiltInDrawer
         {
             return (T)Activator.CreateInstance(typeof(T), graphics);
+        }
+
+        /// <summary>
+        /// Sampler point
+        /// </summary>
+        public static EngineSamplerState GetSamplerPoint()
+        {
+            if (samplerPoint != null)
+            {
+                return samplerPoint;
+            }
+
+            samplerPoint = EngineSamplerState.Point(graphics);
+
+            return samplerPoint;
+        }
+        /// <summary>
+        /// Sampler linear
+        /// </summary>
+        public static EngineSamplerState GetSamplerLinear()
+        {
+            if (samplerLinear != null)
+            {
+                return samplerLinear;
+            }
+
+            samplerLinear = EngineSamplerState.Linear(graphics);
+
+            return samplerLinear;
+        }
+        /// <summary>
+        /// Sampler anisotropic
+        /// </summary>
+        public static EngineSamplerState GetSamplerAnisotropic()
+        {
+            if (samplerAnisotropic != null)
+            {
+                return samplerAnisotropic;
+            }
+
+            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 4);
+
+            return samplerAnisotropic;
         }
 
         /// <summary>
