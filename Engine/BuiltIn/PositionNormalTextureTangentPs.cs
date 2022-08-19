@@ -9,12 +9,12 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position normal texture tangent pixel shader
     /// </summary>
-    public class PositionNormalTextureTangentPs : IDisposable
+    public class PositionNormalTextureTangentPs : IBuiltInPixelShader
     {
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EnginePixelShader Shader;
+        public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Diffuse map resource view
@@ -74,6 +74,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
             }
         }
 

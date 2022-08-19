@@ -9,12 +9,12 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position normal color pixel shader
     /// </summary>
-    public class PositionNormalColorPs : IDisposable
+    public class PositionNormalColorPs : IBuiltInPixelShader
     {
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EnginePixelShader Shader;
+        public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Graphics instance
@@ -65,6 +65,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
             }
         }
 

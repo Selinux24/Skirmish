@@ -40,5 +40,67 @@ namespace Engine.Common
         /// Start instance location in instanced buffer
         /// </summary>
         public int StartInstanceLocation { get; set; }
+
+        /// <summary>
+        /// Draw
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        public void Draw(Graphics graphics)
+        {
+            if (Instanced)
+            {
+                DrawInstanced(graphics);
+            }
+            else
+            {
+                DrawSingle(graphics);
+            }
+        }
+        /// <summary>
+        /// Draw single
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        private void DrawSingle(Graphics graphics)
+        {
+            if (Indexed)
+            {
+                graphics.DrawIndexed(
+                    IndexBuffer.Count,
+                    IndexBuffer.BufferOffset,
+                    VertexBuffer.BufferOffset);
+            }
+            else
+            {
+                int drawCount = DrawCount > 0 ? DrawCount : VertexBuffer.Count;
+
+                graphics.Draw(
+                    drawCount,
+                    VertexBuffer.BufferOffset);
+            }
+        }
+        /// <summary>
+        /// Draw instanced
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        private void DrawInstanced(Graphics graphics)
+        {
+            if (Indexed)
+            {
+                graphics.DrawIndexedInstanced(
+                    IndexBuffer.Count,
+                    InstanceCount,
+                    IndexBuffer.BufferOffset,
+                    VertexBuffer.BufferOffset, StartInstanceLocation);
+            }
+            else
+            {
+                int drawCount = DrawCount > 0 ? DrawCount : VertexBuffer.Count;
+
+                graphics.DrawInstanced(
+                    drawCount,
+                    InstanceCount,
+                    VertexBuffer.BufferOffset, StartInstanceLocation);
+            }
+        }
     }
 }

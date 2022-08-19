@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Instaced model
@@ -284,25 +284,16 @@ namespace Engine
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
-            var effect = context.ShadowMap.GetEffect();
-            if (effect == null)
-            {
-                return;
-            }
-
-            DrawShadows(context, effect);
+            DrawShadowsInstances(context);
         }
         /// <summary>
         /// Shadow drawing
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Drawer</param>
-        private void DrawShadows(DrawContextShadows context, IShadowMapDrawer effect)
+        private void DrawShadowsInstances(DrawContextShadows context)
         {
             int count = 0;
             int instanceCount = 0;
-
-            effect.UpdatePerFrame(Matrix.Identity, context);
 
             int maxCount = GetMaxCount();
 
@@ -329,21 +320,21 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(instancesTmp, lodInstances[0]) + InstancingBuffer.BufferOffset;
-                var length = Math.Min(maxCount, lodInstances.Length);
-                if (length <= 0)
+                var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances[0]) + InstancingBuffer.BufferOffset;
+                var instances = Math.Min(maxCount, lodInstances.Length);
+                if (instances <= 0)
                 {
                     continue;
                 }
 
-                maxCount -= length;
-                instanceCount += length;
+                maxCount -= instances;
+                instanceCount += instances;
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
                     UpdateIndependantTransforms(meshName);
 
-                    count += DrawShadowMesh(effect, drawingData, meshName, index, length);
+                    count += DrawShadowMesh(context, drawingData, meshName, instances, startInstanceLocation);
                     count *= instanceCount;
                 }
             }
@@ -351,15 +342,23 @@ namespace Engine
         /// <summary>
         /// Draws a mesh with a shadow map drawer
         /// </summary>
-        /// <param name="effect">Effect</param>
+        /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
         /// <param name="meshName">Mesh name</param>
-        /// <param name="index">Instance buffer index</param>
-        /// <param name="length">Instance buffer length</param>
+        /// <param name="instances">Instance buffer length</param>
+        /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawShadowMesh(IShadowMapDrawer effect, DrawingData drawingData, string meshName, int index, int length)
+        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, string meshName, int instances, int startInstanceLocation)
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {index} Length {length}.");
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instances}.");
+
+            var effect = context.ShadowMap.GetEffect();
+            if (effect == null)
+            {
+                return 0;
+            }
+
+            effect.UpdatePerFrame(Matrix.Identity, context);
 
             int count = 0;
 
@@ -404,8 +403,8 @@ namespace Engine
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {index} Length {length}");
-                    mesh.Draw(graphics, index, length);
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instances}");
+                    mesh.Draw(graphics, instances, startInstanceLocation);
                 }
             }
 
@@ -431,25 +430,18 @@ namespace Engine
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
-            var effect = GetEffect(context.DrawerMode);
-            if (effect == null)
-            {
-                return;
-            }
-
-            Draw(context, effect);
+            DrawInstances(context);
         }
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Geometry drawer</param>
-        private void Draw(DrawContext context, IGeometryDrawer effect)
+        private void DrawInstances(DrawContext context)
         {
             int count = 0;
             int instanceCount = 0;
 
-            effect.UpdatePerFrameFull(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
 
             int maxCount = GetMaxCount();
 
@@ -476,21 +468,21 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(instancesTmp, lodInstances.First()) + InstancingBuffer.BufferOffset;
-                var length = Math.Min(maxCount, lodInstances.Count());
-                if (length <= 0)
+                var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances.First()) + InstancingBuffer.BufferOffset;
+                var instances = Math.Min(maxCount, lodInstances.Count());
+                if (instances <= 0)
                 {
                     continue;
                 }
 
-                maxCount -= length;
-                instanceCount += length;
+                maxCount -= instances;
+                instanceCount += instances;
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
                     UpdateIndependantTransforms(meshName);
 
-                    count += DrawMesh(context, effect, drawingData, meshName, index, length);
+                    count += DrawMesh(context, drawingData, meshName, instances, startInstanceLocation);
                     count *= instanceCount;
                 }
             }
@@ -502,15 +494,14 @@ namespace Engine
         /// Draws a mesh with a geometry drawer
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Effect</param>
         /// <param name="drawingData">Drawing data</param>
         /// <param name="meshName">Mesh name</param>
-        /// <param name="index">Instance buffer index</param>
-        /// <param name="length">Instance buffer length</param>
+        /// <param name="instances">Instance buffer length</param>
+        /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, IGeometryDrawer effect, DrawingData drawingData, string meshName, int index, int length)
+        private int DrawMesh(DrawContext context, DrawingData drawingData, string meshName, int instances, int startInstanceLocation)
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {index} Length {length}. {context.DrawerMode}");
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instances}. {context.DrawerMode}");
 
             int count = 0;
 
@@ -544,6 +535,27 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
+                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, true);
+                if (drawer != null)
+                {
+                    drawer.Update(materialInfo, Color.White, 0, AnimationDrawInfo.Empty);
+
+                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
+
+                    drawer.Draw(BufferManager, new[] { mesh }, instances, startInstanceLocation);
+
+                    count += mesh.Count;
+
+                    continue;
+                }
+
+                var effect = GetEffect(context.DrawerMode);
+                if (effect == null)
+                {
+                    continue;
+                }
+
+                effect.UpdatePerFrameFull(Matrix.Identity, context);
                 effect.UpdatePerObject(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
@@ -563,8 +575,8 @@ namespace Engine
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {index} Length {length}");
-                    mesh.Draw(graphics, index, length);
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instances}");
+                    mesh.Draw(graphics, instances, startInstanceLocation);
                 }
             }
 

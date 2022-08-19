@@ -9,7 +9,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position normal texture instanced vertex shader
     /// </summary>
-    public class PositionNormalTextureVsI : IDisposable
+    public class PositionNormalTextureVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -19,7 +19,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EngineVertexShader Shader;
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor

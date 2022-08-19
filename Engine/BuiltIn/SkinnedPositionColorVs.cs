@@ -11,7 +11,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Skinned position color vertex shader
     /// </summary>
-    public class SkinnedPositionColorVs : IDisposable
+    public class SkinnedPositionColorVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -79,7 +79,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EngineVertexShader Shader;
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -127,6 +127,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
 
                 cbPerInstance?.Dispose();
             }

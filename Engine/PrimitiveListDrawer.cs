@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Primitive list drawer
@@ -259,9 +259,15 @@ namespace Engine
                 return;
             }
 
+            var drawer = BuiltInShaders.GetDrawer<BasicPositionColor>();
+            if (drawer == null)
+            {
+                return;
+            }
+
             BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
-            BuiltInShaders.BasicPositionColor.Update(MaterialDrawInfo.Empty, Color.White, 0, AnimationDrawInfo.Empty);
-            BuiltInShaders.BasicPositionColor.Draw(BufferManager, new DrawOptions
+            drawer.Update(MaterialDrawInfo.Empty, Color.White, 0, AnimationDrawInfo.Empty);
+            drawer.Draw(BufferManager, new DrawOptions
             {
                 VertexBuffer = vertexBuffer,
                 DrawCount = drawCount,

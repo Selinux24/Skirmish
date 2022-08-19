@@ -10,7 +10,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position texture pixel shader
     /// </summary>
-    public class PositionTexturePs : IDisposable
+    public class PositionTexturePs : IBuiltInPixelShader
     {
         /// <summary>
         /// Per frame data structure
@@ -42,7 +42,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EnginePixelShader Shader;
+        public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Per frame constant buffer
@@ -104,6 +104,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
 
                 cbPerFrame?.Dispose();
             }

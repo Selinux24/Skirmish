@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Engine constant buffer interface
     /// </summary>
-    public interface IEngineConstantBuffer
+    public interface IEngineConstantBuffer : IDisposable
     {
         /// <summary>
         /// Name
@@ -26,7 +26,7 @@ namespace Engine.Common
     /// Engine constant buffer
     /// </summary>
     /// <typeparam name="T">Type of fuffer</typeparam>
-    public class EngineConstantBuffer<T> : IEngineConstantBuffer, IDisposable where T : struct, IBufferData
+    public class EngineConstantBuffer<T> : IEngineConstantBuffer where T : struct, IBufferData
     {
         /// <summary>
         /// Graphics

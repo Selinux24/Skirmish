@@ -6,9 +6,9 @@ namespace Engine.BuiltInEffects
     using Engine.Common;
 
     /// <summary>
-    /// Geometry drawer interface
+    /// Built-in drawer interface
     /// </summary>
-    public interface IGeometryDrawer2
+    public interface IBuiltInDrawer
     {
         /// <summary>
         /// Update object data
@@ -23,7 +23,9 @@ namespace Engine.BuiltInEffects
         /// </summary>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="meshes">Mesh list</param>
-        void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes);
+        /// <param name="instances">Number of instances</param>
+        /// <param name="startInstanceLocation">Start instance location</param>
+        void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>

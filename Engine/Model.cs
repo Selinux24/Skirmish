@@ -246,6 +246,7 @@ namespace Engine
                 }
             }
         }
+
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
@@ -270,28 +271,6 @@ namespace Engine
             {
                 count += DrawMeshShadow(context, mesh.Key, mesh.Value);
             }
-        }
-        /// <inheritdoc/>
-        public override void Draw(DrawContext context)
-        {
-            if (!Visible)
-            {
-                return;
-            }
-
-            if (DrawingData == null)
-            {
-                return;
-            }
-
-            int count = 0;
-            foreach (var mesh in DrawingData.Meshes)
-            {
-                count += DrawMesh(context, mesh.Key, mesh.Value);
-            }
-
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += count;
         }
         /// <summary>
         /// Draws a mesh shadow
@@ -356,6 +335,29 @@ namespace Engine
 
             return count;
         }
+
+        /// <inheritdoc/>
+        public override void Draw(DrawContext context)
+        {
+            if (!Visible)
+            {
+                return;
+            }
+
+            if (DrawingData == null)
+            {
+                return;
+            }
+
+            int count = 0;
+            foreach (var mesh in DrawingData.Meshes)
+            {
+                count += DrawMesh(context, mesh.Key, mesh.Value);
+            }
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += count;
+        }
         /// <summary>
         /// Draws a mesh
         /// </summary>
@@ -373,6 +375,13 @@ namespace Engine
 
             BuiltInShaders.UpdatePerFrame(localTransform, context);
 
+            var animationInfo = new AnimationDrawInfo
+            {
+                Offset1 = AnimationOffset,
+                Offset2 = TransitionOffset,
+                InterpolationAmount = TransitionInterpolation,
+            };
+
             foreach (var mat in meshDict)
             {
                 var mesh = mat.Value;
@@ -389,20 +398,13 @@ namespace Engine
                     continue;
                 }
 
-                var animationInfo = new AnimationDrawInfo
-                {
-                    Offset1 = AnimationOffset,
-                    Offset2 = TransitionOffset,
-                    InterpolationAmount = TransitionInterpolation,
-                };
-
                 var materialInfo = new MaterialDrawInfo
                 {
                     Material = material,
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType);
+                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, false);
                 if (drawer != null)
                 {
                     drawer.Update(materialInfo, TintColor, TextureIndex, animationInfo);

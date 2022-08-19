@@ -9,7 +9,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Skinned position normal color instanced vertex shader
     /// </summary>
-    public class SkinnedPositionNormalColorVsI : IDisposable
+    public class SkinnedPositionNormalColorVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -19,7 +19,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EngineVertexShader Shader;
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -65,6 +65,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
             }
         }
 

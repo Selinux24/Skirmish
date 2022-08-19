@@ -9,7 +9,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position color instanced vertex shader
     /// </summary>
-    public class PositionColorVsI : IDisposable
+    public class PositionColorVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -19,7 +19,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EngineVertexShader Shader;
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -65,6 +65,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
             }
         }
 

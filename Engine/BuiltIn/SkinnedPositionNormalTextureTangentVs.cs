@@ -11,7 +11,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Skinned position normal texture tangent vertex shader
     /// </summary>
-    public class SkinnedPositionNormalTextureTangentVs : IDisposable
+    public class SkinnedPositionNormalTextureTangentVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -85,7 +85,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EngineVertexShader Shader;
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -133,6 +133,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
 
                 cbPerInstance?.Dispose();
             }

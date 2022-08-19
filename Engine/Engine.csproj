@@ -136,11 +136,14 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\BasicPositionNormalTextureTangentInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTextureTangent.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTexture.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalColor.cs" />
+    <Compile Include="BuiltInEffects\BuiltInDrawer.cs" />
+    <Compile Include="BuiltInEffects\SkinnedPositionNormalTextureTangentInstanced.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalTextureTangent.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalTexture.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalColor.cs" />
@@ -155,7 +158,9 @@
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
     <Compile Include="BuiltIn\BuiltInShaders.cs" />
-    <Compile Include="BuiltIn\BuiltInShadersBuffers.cs" />
+    <Compile Include="BuiltIn\BuiltInShaders.Buffers.cs" />
+    <Compile Include="BuiltIn\IBuiltInVertexShader.cs" />
+    <Compile Include="BuiltIn\IBuiltInPixelShader.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureTangentPs.cs" />
     <Compile Include="BuiltIn\PositionNormalTexturePs.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureTangentVs.cs" />
@@ -243,7 +248,7 @@
     <Compile Include="BuiltIn\PositionColorVsI.cs" />
     <Compile Include="BuiltIn\PositionColorVs.cs" />
     <Compile Include="Effects\EffectShadowFoliageState.cs" />
-    <Compile Include="BuiltInEffects\IGeometryDrawer2.cs" />
+    <Compile Include="BuiltInEffects\IBuiltInDrawer.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />

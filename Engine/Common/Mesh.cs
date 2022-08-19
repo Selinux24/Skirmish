@@ -178,9 +178,9 @@ namespace Engine.Common
         /// Draw mesh geometry
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="startInstanceLocation">Start instance location</param>
         /// <param name="count">Instance count</param>
-        public virtual void Draw(Graphics graphics, int startInstanceLocation, int count)
+        /// <param name="startInstanceLocation">Start instance location</param>
+        public virtual void Draw(Graphics graphics, int count, int startInstanceLocation)
         {
             if (count <= 0)
             {

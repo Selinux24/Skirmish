@@ -11,7 +11,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position normal texture vertex shader
     /// </summary>
-    public class PositionNormalTextureVs : IDisposable
+    public class PositionNormalTextureVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -66,7 +66,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EngineVertexShader Shader;
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -114,6 +114,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
 
                 cbPerInstance?.Dispose();
             }

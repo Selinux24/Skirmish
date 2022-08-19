@@ -9,12 +9,12 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position normal texture pixel shader
     /// </summary>
-    public class PositionNormalTexturePs : IDisposable
+    public class PositionNormalTexturePs : IBuiltInPixelShader
     {
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EnginePixelShader Shader;
+        public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Diffuse map resource view
@@ -70,6 +70,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
             }
         }
 

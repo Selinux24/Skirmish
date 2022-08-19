@@ -1,10 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.Common
 {
     /// <summary>
     /// Engine pixel shader interface
     /// </summary>
-    public interface IEnginePixelShader
+    public interface IEnginePixelShader : IDisposable
     {
         /// <summary>
         /// Name

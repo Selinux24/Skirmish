@@ -1,10 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.Common
 {
     /// <summary>
     /// Engine vertex shader interface
     /// </summary>
-    public interface IEngineVertexShader
+    public interface IEngineVertexShader : IDisposable
     {
         /// <summary>
         /// Name

@@ -11,7 +11,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position normal color vertex shader
     /// </summary>
-    public class PositionNormalColorVs : IDisposable
+    public class PositionNormalColorVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -60,7 +60,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Shader
         /// </summary>
-        public readonly EngineVertexShader Shader;
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -108,6 +108,7 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
+                Shader = null;
 
                 cbPerInstance?.Dispose();
             }
