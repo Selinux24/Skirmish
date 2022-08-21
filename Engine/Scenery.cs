@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
@@ -113,6 +115,7 @@ namespace Engine
                     DrawingData = null;
                 }
             }
+
             /// <summary>
             /// Draws the scenery patch shadows
             /// </summary>
@@ -161,11 +164,9 @@ namespace Engine
             /// Draws the scenery patch
             /// </summary>
             /// <param name="context">Context</param>
-            /// <param name="sceneryEffect">Scenery effect</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawScenery(DrawContext context, IGeometryDrawer sceneryEffect, BufferManager bufferManager)
+            public void DrawScenery(DrawContext context, BufferManager bufferManager)
             {
-                var graphics = Game.Graphics;
                 int count = 0;
 
                 foreach (string meshName in DrawingData.Meshes.Keys)
@@ -188,32 +189,142 @@ namespace Engine
                             continue;
                         }
 
-                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
-
-                        var materialInfo = new MaterialDrawInfo
+                        var sceneryDrawer = GetDrawer(context.DrawerMode, mesh.VertextType);
+                        if (sceneryDrawer != null)
                         {
-                            Material = material,
-                            UseAnisotropic = true,
-                        };
+                            DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material);
 
-                        sceneryEffect.UpdatePerObject(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
+                            continue;
+                        }
 
-                        bufferManager.SetIndexBuffer(mesh.IndexBuffer);
-                        bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+                        var sceneryEffect = GetEffect(context.DrawerMode);
+                        if (sceneryEffect != null)
+                        {
+                            DrawWithEffect(context, bufferManager, sceneryEffect, mesh, material);
+
+                            continue;
+                        }
 
                         count += mesh.Count;
-
-                        for (int p = 0; p < technique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(technique, p, 0);
-
-                            mesh.Draw(graphics);
-                        }
                     }
                 }
 
                 Counters.InstancesPerFrame++;
                 Counters.PrimitivesPerFrame += count;
+            }
+            /// <summary>
+            /// Draws the patch using the effects framework
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="sceneryEffect">Effect</param>
+            /// <param name="mesh">Mesh</param>
+            /// <param name="material">Material</param>
+            private void DrawWithEffect(DrawContext context, BufferManager bufferManager, IGeometryDrawer sceneryEffect, Mesh mesh, IMeshMaterial material)
+            {
+                var graphics = Game.Graphics;
+
+                sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
+
+                var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
+
+                var materialInfo = new MaterialDrawInfo
+                {
+                    Material = material,
+                    UseAnisotropic = true,
+                };
+
+                sceneryEffect.UpdatePerObject(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
+
+                bufferManager.SetIndexBuffer(mesh.IndexBuffer);
+                bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
+
+                for (int p = 0; p < technique.PassCount; p++)
+                {
+                    graphics.EffectPassApply(technique, p, 0);
+
+                    mesh.Draw(graphics);
+                }
+            }
+            /// <summary>
+            /// Draws the patch using shaders
+            /// </summary>
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="sceneryDrawer">Drawer</param>
+            /// <param name="mesh">Mesh</param>
+            /// <param name="material">Material</param>
+            private void DrawWithDrawer(BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            {
+                var materialInfo = new MaterialDrawInfo
+                {
+                    Material = material,
+                    UseAnisotropic = true,
+                };
+
+                sceneryDrawer.Update(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
+
+                bufferManager.SetIndexBuffer(mesh.IndexBuffer);
+
+                sceneryDrawer.Draw(bufferManager, new[] { mesh });
+            }
+
+            /// <summary>
+            /// Gets effect for rendering based on drawing mode
+            /// </summary>
+            /// <param name="mode">Drawing mode</param>
+            /// <returns>Returns the effect for rendering</returns>
+            private IGeometryDrawer GetEffect(DrawerModes mode)
+            {
+                if (mode.HasFlag(DrawerModes.Forward))
+                {
+                    return DrawerPool.EffectDefaultBasic;
+                }
+
+                if (mode.HasFlag(DrawerModes.Deferred))
+                {
+                    return DrawerPool.EffectDeferredBasic;
+                }
+
+                return null;
+            }
+            /// <summary>
+            /// Gets the drawing effect for the current instance
+            /// </summary>
+            /// <param name="mode">Drawing mode</param>
+            /// <param name="vertexType">Vertex type</param>
+            /// <returns>Returns the drawing effect</returns>
+            private IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType)
+            {
+                if (!mode.HasFlag(DrawerModes.Forward))
+                {
+                    return null;
+                }
+
+                switch (vertexType)
+                {
+                    case VertexTypes.PositionColor:
+                        return BuiltInShaders.GetDrawer<BasicPositionColor>();
+                    case VertexTypes.PositionTexture:
+                        return BuiltInShaders.GetDrawer<BasicPositionTexture>();
+                    case VertexTypes.PositionNormalColor:
+                        return BuiltInShaders.GetDrawer<BasicPositionNormalColor>();
+                    case VertexTypes.PositionNormalTexture:
+                        return BuiltInShaders.GetDrawer<BasicPositionNormalTexture>();
+                    case VertexTypes.PositionNormalTextureTangent:
+                        return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangent>();
+                    case VertexTypes.PositionColorSkinned:
+                        return BuiltInShaders.GetDrawer<SkinnedPositionColor>();
+                    case VertexTypes.PositionTextureSkinned:
+                        return BuiltInShaders.GetDrawer<SkinnedPositionTexture>();
+                    case VertexTypes.PositionNormalColorSkinned:
+                        return BuiltInShaders.GetDrawer<SkinnedPositionNormalColor>();
+                    case VertexTypes.PositionNormalTextureSkinned:
+                        return BuiltInShaders.GetDrawer<SkinnedPositionNormalTexture>();
+                    case VertexTypes.PositionNormalTextureTangentSkinned:
+                        return BuiltInShaders.GetDrawer<SkinnedPositionNormalTextureTangent>();
+                    default:
+                        return null;
+                }
             }
 
             /// <summary>
@@ -516,13 +627,7 @@ namespace Engine
                 return;
             }
 
-            var sceneryEffect = GetEffect(context.DrawerMode);
-            if (sceneryEffect == null)
-            {
-                return;
-            }
-
-            sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
 
             var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
             foreach (var nodeId in nodeIds)
@@ -531,31 +636,13 @@ namespace Engine
                 {
                     Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
 
-                    patchDictionary[nodeId]?.DrawScenery(context, sceneryEffect, BufferManager);
+                    patchDictionary[nodeId]?.DrawScenery(context, BufferManager);
                 }
                 else
                 {
                     Logger.WriteWarning(this, $"Scenery Draw {nodeId} without assigned patch. No draw method called");
                 }
             }
-        }
-        /// <summary>
-        /// Gets effect for rendering based on drawing mode
-        /// </summary>
-        /// <param name="mode">Drawing mode</param>
-        /// <returns>Returns the effect for rendering</returns>
-        private IGeometryDrawer GetEffect(DrawerModes mode)
-        {
-            if (mode.HasFlag(DrawerModes.Forward))
-            {
-                return DrawerPool.EffectDefaultBasic;
-            }
-            else if (mode.HasFlag(DrawerModes.Deferred))
-            {
-                return DrawerPool.EffectDeferredBasic;
-            }
-
-            return null;
         }
 
         /// <summary>

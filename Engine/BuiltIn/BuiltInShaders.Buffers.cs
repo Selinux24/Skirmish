@@ -263,8 +263,8 @@ namespace Engine.BuiltIn
                 {
                     return new BufferLightHemispheric()
                     {
-                        AmbientDown = Color4.White,
-                        AmbientUp = Color4.White,
+                        AmbientDown = Color3.White,
+                        AmbientUp = Color3.White,
                     };
                 }
             }
@@ -287,12 +287,12 @@ namespace Engine.BuiltIn
             /// Ambient Up
             /// </summary>
             [FieldOffset(0)]
-            public Color4 AmbientDown;
+            public Color3 AmbientDown;
             /// <summary>
             /// Ambient Down
             /// </summary>
             [FieldOffset(16)]
-            public Color4 AmbientUp;
+            public Color3 AmbientUp;
 
             /// <summary>
             /// Constructor
@@ -300,8 +300,8 @@ namespace Engine.BuiltIn
             /// <param name="light">Light</param>
             public BufferLightHemispheric(ISceneLightHemispheric light)
             {
-                AmbientDown = new Color4(light.AmbientDown, 0f);
-                AmbientUp = new Color4(light.AmbientUp, 0f);
+                AmbientDown = light.AmbientDown;
+                AmbientUp = light.AmbientUp;
             }
 
             /// <inheritdoc/>
@@ -363,13 +363,13 @@ namespace Engine.BuiltIn
             /// Diffuse color
             /// </summary>
             [FieldOffset(0)]
-            public Color4 DiffuseColor;
+            public Color3 DiffuseColor;
 
             /// <summary>
             /// Specular color
             /// </summary>
             [FieldOffset(16)]
-            public Color4 SpecularColor;
+            public Color3 SpecularColor;
 
             /// <summary>
             /// Light direction vector
@@ -412,14 +412,14 @@ namespace Engine.BuiltIn
             /// <param name="light">Light</param>
             public BufferLightDirectional(ISceneLightDirectional light)
             {
-                DiffuseColor = new Color4(light.DiffuseColor * light.Brightness, 0f);
-                SpecularColor = new Color4(light.SpecularColor * light.Brightness, 0f);
+                DiffuseColor = light.DiffuseColor * light.Brightness;
+                SpecularColor = light.SpecularColor * light.Brightness;
                 DirToLight = -light.Direction;
                 CastShadow = light.CastShadowsMarked ? 1 : 0;
                 ToCascadeOffsetX = light.ToCascadeOffsetX;
                 ToCascadeOffsetY = light.ToCascadeOffsetY;
                 ToCascadeScale = light.ToCascadeScale;
-                ToShadowSpace = Matrix.Transpose(light.ToShadowSpace);
+                ToShadowSpace = light.ToShadowSpace;
             }
 
             /// <inheritdoc/>
@@ -481,13 +481,13 @@ namespace Engine.BuiltIn
             /// Diffuse color
             /// </summary>
             [FieldOffset(0)]
-            public Color4 DiffuseColor;
+            public Color3 DiffuseColor;
 
             /// <summary>
             /// Specular color
             /// </summary>
             [FieldOffset(16)]
-            public Color4 SpecularColor;
+            public Color3 SpecularColor;
 
             /// <summary>
             /// Light position
@@ -546,8 +546,8 @@ namespace Engine.BuiltIn
             {
                 Position = light.Position;
                 Direction = light.Direction;
-                DiffuseColor = new Color4(light.DiffuseColor, 0f);
-                SpecularColor = new Color4(light.SpecularColor, 0f);
+                DiffuseColor = light.DiffuseColor;
+                SpecularColor = light.SpecularColor;
                 Intensity = light.Intensity;
                 Intensity = light.Intensity;
                 Angle = light.FallOffAngleRadians;
@@ -559,7 +559,7 @@ namespace Engine.BuiltIn
                 FromLightVP = Matrix.Identity;
                 if (light.FromLightVP?.Length > 0)
                 {
-                    FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
+                    FromLightVP = light.FromLightVP[0];
                 }
             }
 
@@ -622,13 +622,13 @@ namespace Engine.BuiltIn
             /// Diffuse color
             /// </summary>
             [FieldOffset(0)]
-            public Color4 DiffuseColor;
+            public Color3 DiffuseColor;
 
             /// <summary>
             /// Specular color
             /// </summary>
             [FieldOffset(16)]
-            public Color4 SpecularColor;
+            public Color3 SpecularColor;
 
             /// <summary>
             /// Light position
@@ -670,8 +670,8 @@ namespace Engine.BuiltIn
             public BufferLightPoint(ISceneLightPoint light)
             {
                 Position = light.Position;
-                DiffuseColor = new Color4(light.DiffuseColor, 0f);
-                SpecularColor = new Color4(light.SpecularColor, 0f);
+                DiffuseColor = light.DiffuseColor;
+                SpecularColor = light.SpecularColor;
                 Intensity = light.Intensity;
                 Radius = light.Radius;
                 CastShadow = light.CastShadowsMarked ? 1 : 0;
