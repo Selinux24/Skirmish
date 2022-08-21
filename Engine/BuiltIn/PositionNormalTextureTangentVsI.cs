@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SharpDX;
+using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
@@ -11,6 +13,45 @@ namespace Engine.BuiltIn
     /// </summary>
     public class PositionNormalTextureTangentVsI : IBuiltInVertexShader
     {
+        /// <summary>
+        /// Per object data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit, Size = 32)]
+        struct PerObject : IBufferData
+        {
+            public static PerObject Build(MaterialDrawInfo material, Color4 tintColor)
+            {
+                return new PerObject
+                {
+                    TintColor = tintColor,
+                    MaterialIndex = material.Material?.ResourceIndex ?? 0,
+                };
+            }
+
+            /// <summary>
+            /// Tint color
+            /// </summary>
+            [FieldOffset(0)]
+            public Color4 TintColor;
+
+            /// <summary>
+            /// Material index
+            /// </summary>
+            [FieldOffset(16)]
+            public uint MaterialIndex;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PerObject));
+            }
+        }
+
+        /// <summary>
+        /// Per object constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerObject> cbPerObject;
+
         /// <summary>
         /// Graphics instance
         /// </summary>
@@ -39,6 +80,8 @@ namespace Engine.BuiltIn
             {
                 Shader = graphics.LoadVertexShader(nameof(PositionNormalTextureTangentVsI), bytes);
             }
+
+            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(PositionNormalTextureTangentVsI) + "." + nameof(PerObject));
         }
         /// <summary>
         /// Destructor
@@ -66,7 +109,19 @@ namespace Engine.BuiltIn
             {
                 Shader?.Dispose();
                 Shader = null;
+
+                cbPerObject?.Dispose();
             }
+        }
+
+        /// <summary>
+        /// Writes per object data
+        /// </summary>
+        /// <param name="material">Material</param>
+        /// <param name="tintColor">Tint color</param>
+        public void WriteCBPerObject(MaterialDrawInfo material, Color4 tintColor)
+        {
+            cbPerObject.WriteData(PerObject.Build(material, tintColor));
         }
 
         /// <summary>
@@ -78,6 +133,7 @@ namespace Engine.BuiltIn
             {
                 BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
+                cbPerObject,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

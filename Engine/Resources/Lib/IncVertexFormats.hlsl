@@ -140,7 +140,7 @@ struct VSVertexPositionI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+	int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -153,7 +153,7 @@ struct VSVertexPositionColorI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -167,7 +167,7 @@ struct VSVertexPositionNormalColorI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -180,7 +180,7 @@ struct VSVertexPositionTextureI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -194,7 +194,7 @@ struct VSVertexPositionNormalTextureI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -209,7 +209,7 @@ struct VSVertexPositionNormalTextureTangentI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -227,7 +227,7 @@ struct VSVertexPositionSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -242,7 +242,7 @@ struct VSVertexPositionColorSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -258,7 +258,7 @@ struct VSVertexPositionNormalColorSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -273,7 +273,7 @@ struct VSVertexPositionTextureSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -289,7 +289,7 @@ struct VSVertexPositionNormalTextureSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;
@@ -306,7 +306,7 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
+    int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
 	uint animationOffsetB : ANIMATIONOFFSETB;
 	float animationInterpolation : ANIMATIONINTERPOLATION;

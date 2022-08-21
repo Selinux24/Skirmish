@@ -18,6 +18,13 @@ cbuffer cbVSPerFrame : register(b1)
 	float4x4 gWorldViewProjection;
 };
 
+cbuffer cbVSPerObject : register(b2)
+{
+    float4 gTintColor;
+    uint gMaterialIndex;
+    uint3 PAD21;
+};
+
 Texture2D gMaterialPalette : register(t0);
 Texture2D gAnimationPalette : register(t1);
 
@@ -36,9 +43,7 @@ POSITION TEXTURE
 PSVertexPositionTexture2 main(VSVertexPositionTextureSkinnedI input)
 {
 	PSVertexPositionTexture2 output = (PSVertexPositionTexture2)0;
-
-	Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
-
+	
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	ComputePositionWeights(
 		gAnimationPalette,
@@ -50,13 +55,15 @@ PSVertexPositionTexture2 main(VSVertexPositionTextureSkinnedI input)
 		input.boneIndices,
 		input.positionLocal,
 		positionL);
-
 	float4 instancePosition = mul(positionL, input.localTransform);
+
+    uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
+    Material material = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
 	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
 	output.positionWorld = mul(instancePosition, gWorld).xyz;
 	output.tex = input.tex;
-	output.tintColor = input.tintColor * material.Diffuse;
+    output.tintColor = input.tintColor * gTintColor * material.Diffuse;
 	output.textureIndex = input.textureIndex;
 
 	return output;

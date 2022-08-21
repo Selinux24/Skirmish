@@ -14,8 +14,15 @@ cbuffer cbVSGlobals : register(b0)
 
 cbuffer cbVSPerFrame : register(b1)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+    float4x4 gWorld;
+    float4x4 gWorldViewProjection;
+};
+
+cbuffer cbVSPerObject : register(b2)
+{
+    float4 gTintColor;
+    uint gMaterialIndex;
+    uint3 PAD21;
 };
 
 Texture2D gMaterialPalette : register(t0);
@@ -40,10 +47,10 @@ PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentS
 {
     PSVertexPositionNormalTextureTangent2 output = (PSVertexPositionNormalTextureTangent2) 0;
 
-	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
-	ComputePositionNormalTangentWeights(
+    float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
+    ComputePositionNormalTangentWeights(
 		gAnimationPalette,
 		input.animationOffset,
 		input.animationOffsetB,
@@ -57,20 +64,21 @@ PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentS
 		positionL,
 		normalL,
 		tangentL);
-	float4 instancePosition = mul(positionL, input.localTransform);
-	float3 instanceNormal = mul(normalL.xyz, (float3x3) input.localTransform);
-	float3 instanceTangent = mul(tangentL.xyz, (float3x3) input.localTransform);
+    float4 instancePosition = mul(positionL, input.localTransform);
+    float3 instanceNormal = mul(normalL.xyz, (float3x3) input.localTransform);
+    float3 instanceTangent = mul(tangentL.xyz, (float3x3) input.localTransform);
 
-    Material material = GetMaterialData(gMaterialPalette, input.materialIndex, gMaterialPaletteWidth);
+    uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
+    Material material = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
 
-	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.positionWorld = mul(instancePosition, gWorld).xyz;
-	output.normalWorld = normalize(mul(instanceNormal.xyz, (float3x3) gWorld));
-	output.tangentWorld = normalize(mul(instanceTangent.xyz, (float3x3) gWorld));
-	output.tex = input.tex;
-	output.tintColor = input.tintColor;
-	output.textureIndex = input.textureIndex;
+    output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
+    output.positionWorld = mul(instancePosition, gWorld).xyz;
+    output.normalWorld = normalize(mul(instanceNormal.xyz, (float3x3) gWorld));
+    output.tangentWorld = normalize(mul(instanceTangent.xyz, (float3x3) gWorld));
+    output.tex = input.tex;
+    output.tintColor = input.tintColor * gTintColor;
+    output.textureIndex = input.textureIndex;
     output.material = material;
 
-	return output;
+    return output;
 }

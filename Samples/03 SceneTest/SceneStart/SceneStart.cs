@@ -254,6 +254,8 @@ namespace SceneTest.SceneStart
                 res.ThrowExceptions();
             }
 
+            Lights.KeyLight.Direction = Vector3.ForwardLH;
+
             AudioManager.MasterVolume = 1f;
             AudioManager.Start();
 
