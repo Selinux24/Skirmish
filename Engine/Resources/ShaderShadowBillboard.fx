@@ -3,15 +3,15 @@
 
 cbuffer cbPerFrame : register(b0)
 {
-	float4x4 gWorldViewProjection;
-	float3 gEyePositionWorld;
-	float gStartRadius;
-	float gEndRadius;
+    float4x4 gWorldViewProjection;
+    float3 gEyePositionWorld;
+    float gStartRadius;
+    float gEndRadius;
     float3 gPAD01;
 };
 cbuffer cbPerObject : register(b1)
 {
-	uint gTextureCount;
+    uint gTextureCount;
     uint3 gPAD11;
 };
 Texture2DArray gTextureArray : register(t0);
@@ -19,12 +19,12 @@ Texture1D gTextureRandom : register(t1);
 
 GSVertexBillboard VSBillboard(VSVertexBillboard input)
 {
-	GSVertexBillboard output;
+    GSVertexBillboard output;
 
-	output.centerWorld = input.positionWorld;
-	output.sizeWorld = input.sizeWorld;
+    output.centerWorld = input.positionWorld;
+    output.sizeWorld = input.sizeWorld;
 
-	return output;
+    return output;
 }
 
 [maxvertexcount(4)]
@@ -62,29 +62,29 @@ void GSBillboard(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID,
 
 float4 PSBillboard(PSShadowMapBillboard input) : SV_Target
 {
-	float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
-	float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
+    float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
+    float4 textureColor = gTextureArray.Sample(SamplerLinear, uvw);
 
-	if (textureColor.a > 0.8f)
-	{
-		float depthValue = input.depth.z / input.depth.w;
+    if (textureColor.a > 0.8f)
+    {
+        float depthValue = input.depth.z / input.depth.w;
 
-		return float4(depthValue, depthValue, depthValue, 1.0f);
-	}
-	else
-	{
-		discard;
+        return float4(depthValue, depthValue, depthValue, 1.0f);
+    }
+    else
+    {
+        discard;
 
-		return 0.0f;
-	}
+        return 0.0f;
+    }
 }
 
 technique11 ShadowMapBillboard
 {
-	pass P0
-	{
-		SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
-		SetGeometryShader(CompileShader(gs_5_0, GSBillboard()));
-		SetPixelShader(CompileShader(ps_5_0, PSBillboard()));
-	}
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSBillboard()));
+        SetGeometryShader(CompileShader(gs_5_0, GSBillboard()));
+        SetPixelShader(CompileShader(ps_5_0, PSBillboard()));
+    }
 }

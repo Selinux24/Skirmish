@@ -720,7 +720,6 @@
     <Compile Include="ParticleSystemGpu.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectDefaultBillboard.cs" />
-    <Compile Include="Effects\EffectDefaultBasic.cs" />
     <Compile Include="Effects\EffectDefaultCubemap.cs" />
     <Compile Include="EngineForm.cs">
       <SubType>Form</SubType>

@@ -662,11 +662,11 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         if (input.spotLights[i].CastShadow == 1 && input.spotLights[i].MapIndex >= 0)
         {
             cShadowFactor = CalcSpotShadowFactor(
-                input.objectPosition, 
+                input.objectPosition,
                 input.minShadowIntensity,
-                input.spotLights[i].MapIndex, 
-                input.spotLights[i].FromLightVP, 
-                input.shadowMapSpot, 
+                input.spotLights[i].MapIndex,
+                input.spotLights[i].FromLightVP,
+                input.shadowMapSpot,
                 SHADOW_SAMPLES_HD);
         }
 
@@ -692,10 +692,10 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
         {
             float3 P = input.objectPosition - input.pointLights[i].Position;
             cShadowFactor = CalcPointShadowFactor(
-                P, 
+                P,
                 input.minShadowIntensity,
-                input.pointLights[i].MapIndex, 
-                input.pointLights[i].PerspectiveValues, 
+                input.pointLights[i].MapIndex,
+                input.pointLights[i].PerspectiveValues,
                 input.shadowMapPoint);
         }
 
@@ -754,11 +754,11 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         if (input.spotLights[i].CastShadow == 1 && input.spotLights[i].MapIndex >= 0)
         {
             cShadowFactor = CalcSpotShadowFactor(
-                input.objectPosition, 
+                input.objectPosition,
                 input.minShadowIntensity,
-                input.spotLights[i].MapIndex, 
-                input.spotLights[i].FromLightVP, 
-                input.shadowMapSpot, 
+                input.spotLights[i].MapIndex,
+                input.spotLights[i].FromLightVP,
+                input.shadowMapSpot,
                 SHADOW_SAMPLES_LD);
         }
 
@@ -782,10 +782,10 @@ inline float4 ComputeLightsLOD2(ComputeLightsInput input)
         {
             float3 P = input.objectPosition - input.pointLights[i].Position;
             cShadowFactor = CalcPointShadowFactor(
-                P, 
+                P,
                 input.minShadowIntensity,
-                input.pointLights[i].MapIndex, 
-                input.pointLights[i].PerspectiveValues, 
+                input.pointLights[i].MapIndex,
+                input.pointLights[i].PerspectiveValues,
                 input.shadowMapPoint);
         }
 

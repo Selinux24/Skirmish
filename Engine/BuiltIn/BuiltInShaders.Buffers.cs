@@ -419,7 +419,7 @@ namespace Engine.BuiltIn
                 ToCascadeOffsetX = light.ToCascadeOffsetX;
                 ToCascadeOffsetY = light.ToCascadeOffsetY;
                 ToCascadeScale = light.ToCascadeScale;
-                ToShadowSpace = light.ToShadowSpace;
+                ToShadowSpace = Matrix.Transpose(light.ToShadowSpace);
             }
 
             /// <inheritdoc/>
@@ -559,7 +559,7 @@ namespace Engine.BuiltIn
                 FromLightVP = Matrix.Identity;
                 if (light.FromLightVP?.Length > 0)
                 {
-                    FromLightVP = light.FromLightVP[0];
+                    FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
                 }
             }
 

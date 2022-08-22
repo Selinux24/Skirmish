@@ -3,7 +3,7 @@
 
 cbuffer cbPerFrame : register(b0)
 {
-	float4x4 gWorldViewProjection;
+    float4x4 gWorldViewProjection;
     float gTextureIndex;
 };
 
@@ -25,7 +25,7 @@ PSVertex VSTexture(VSVertex input)
 {
     PSVertex output = (PSVertex) 0;
 
-	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection).xyww;
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection).xyww;
     output.tex = input.tex;
 
     return output;

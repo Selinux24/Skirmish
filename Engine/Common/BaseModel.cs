@@ -270,11 +270,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing effect</returns>
         protected IGeometryDrawer GetEffect(DrawerModes mode)
         {
-            if (mode.HasFlag(DrawerModes.Forward))
-            {
-                return DrawerPool.EffectDefaultBasic;
-            }
-            else if (mode.HasFlag(DrawerModes.Deferred))
+            if (mode.HasFlag(DrawerModes.Deferred))
             {
                 return DrawerPool.EffectDeferredBasic;
             }

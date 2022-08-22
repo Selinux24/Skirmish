@@ -3,7 +3,7 @@
 
 SamplerState SamplerPointText
 {
-	Filter = MIN_MAG_MIP_POINT;
+    Filter = MIN_MAG_MIP_POINT;
     AddressU = CLAMP;
     AddressV = CLAMP;
 };
@@ -17,13 +17,13 @@ SamplerState SamplerLinearText
 
 cbuffer cbPerFrame : register(b0)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
-	float gAlpha;
-	bool gUseColor;
-	float2 gResolution;
-	float4 gRectangle;
-	bool gUseRect;
+    float4x4 gWorld;
+    float4x4 gWorldViewProjection;
+    float gAlpha;
+    bool gUseColor;
+    float2 gResolution;
+    float4 gRectangle;
+    bool gUseRect;
     bool gFineSampling;
 };
 
@@ -51,42 +51,42 @@ float4 MapFont(float4 litColor, float4 color)
 
 PSVertexFont VSFont(VSVertexFont input)
 {
-	PSVertexFont output = (PSVertexFont)0;
+    PSVertexFont output = (PSVertexFont) 0;
 
-	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-	output.positionWorld = output.positionHomogeneous.xyz;
-	output.tex = input.tex;
-	output.color = input.color;
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+    output.positionWorld = output.positionHomogeneous.xyz;
+    output.tex = input.tex;
+    output.color = input.color;
 
-	return output;
+    return output;
 }
 
 float4 PSFont(PSVertexFont input) : SV_TARGET
 {
-    float4 litColor = gFineSampling ? 
+    float4 litColor = gFineSampling ?
 		gTexture.Sample(SamplerLinearText, input.tex) :
 		gTexture.Sample(SamplerPointText, input.tex);
 	
-	if (!gUseRect)
-	{
-		return MapFont(litColor, input.color);
-	}
+    if (!gUseRect)
+    {
+        return MapFont(litColor, input.color);
+    }
 
     float2 pixel = MapUVToScreenPixel(input.positionWorld.xy, gResolution);
     if (PixelIntoRectangle(pixel, gRectangle))
-	{
-		return MapFont(litColor, input.color);
-	}
+    {
+        return MapFont(litColor, input.color);
+    }
 
-	return 0;
+    return 0;
 }
 
 technique11 FontDrawer
 {
-	pass P0
-	{
-		SetVertexShader(CompileShader(vs_5_0, VSFont()));
-		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_5_0, PSFont()));
-	}
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSFont()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSFont()));
+    }
 }

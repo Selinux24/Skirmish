@@ -7,14 +7,14 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbPerFrame : register(b0)
 {
-	float4x4 gWorldViewProjection;
-	float4 gSphereRadii;
-	float4 gScatteringCoeffs;
-	float4 gInvWaveLength;
-	float4 gMisc;
-	float4 gBackColor;
-	float3 gLightDirection;
-	float gHDRExposure;
+    float4x4 gWorldViewProjection;
+    float4 gSphereRadii;
+    float4 gScatteringCoeffs;
+    float4 gInvWaveLength;
+    float4 gMisc;
+    float4 gBackColor;
+    float3 gLightDirection;
+    float gHDRExposure;
 };
 
 inline PSVertexSkyScattering VertexPass(VSVertexPosition input, uint samples)
@@ -54,7 +54,7 @@ PSVertexSkyScattering VSScattering8(VSVertexPosition input)
 
 float4 PSScattering(PSVertexSkyScattering input) : SV_TARGET
 {
-	return HDR(pixelPhase(gLightDirection, input.direction, input.colorR, input.colorM), gHDRExposure);
+    return HDR(pixelPhase(gLightDirection, input.direction, input.colorR, input.colorM), gHDRExposure);
 }
 
 /**********************************************************************************************************
@@ -62,12 +62,12 @@ EFFECTS
 **********************************************************************************************************/
 technique11 SkyScatteringLow
 {
-	pass P0
-	{
-		SetVertexShader(CompileShader(vs_5_0, VSScattering2()));
-		SetGeometryShader(NULL);
-		SetPixelShader(CompileShader(ps_5_0, PSScattering()));
-	}
+    pass P0
+    {
+        SetVertexShader(CompileShader(vs_5_0, VSScattering2()));
+        SetGeometryShader(NULL);
+        SetPixelShader(CompileShader(ps_5_0, PSScattering()));
+    }
 }
 
 technique11 SkyScatteringMedium

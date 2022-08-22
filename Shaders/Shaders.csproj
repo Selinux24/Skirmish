@@ -94,9 +94,6 @@
     <EffectShader Include="Lib\IncVertexFormats.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Resources\ShaderDefaultBasic.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Resources\ShaderDefaultBillboard.fx" />
   </ItemGroup>
   <ItemGroup>

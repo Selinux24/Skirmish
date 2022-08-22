@@ -275,11 +275,6 @@ namespace Engine
             /// <returns>Returns the effect for rendering</returns>
             private IGeometryDrawer GetEffect(DrawerModes mode)
             {
-                if (mode.HasFlag(DrawerModes.Forward))
-                {
-                    return DrawerPool.EffectDefaultBasic;
-                }
-
                 if (mode.HasFlag(DrawerModes.Deferred))
                 {
                     return DrawerPool.EffectDeferredBasic;

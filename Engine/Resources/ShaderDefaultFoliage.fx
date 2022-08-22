@@ -11,24 +11,24 @@ Texture1D gTextureRandom : register(t1);
 
 cbuffer cbPerFrame : register(b1)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
-	HemisphericLight gPSHemiLight;
-	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
-	PointLight gPointLights[MAX_LIGHTS_POINT];
-	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
-	uint3 gLightCount;
+    float4x4 gWorld;
+    float4x4 gWorldViewProjection;
+    HemisphericLight gPSHemiLight;
+    DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+    PointLight gPointLights[MAX_LIGHTS_POINT];
+    SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+    uint3 gLightCount;
     float gShadowIntensity;
-	float4 gFogColor;
-	float gFogStart;
-	float gFogRange;
-	float gStartRadius;
-	float gEndRadius;
+    float4 gFogColor;
+    float gFogStart;
+    float gFogRange;
+    float gStartRadius;
+    float gEndRadius;
     float3 gWindDirection;
-	float gWindStrength;
-	float3 gDelta;
-	float gTotalTime;
-	float3 gEyePositionWorld;
+    float gWindStrength;
+    float3 gDelta;
+    float gTotalTime;
+    float3 gEyePositionWorld;
     float PAD11;
     uint gMaterialIndex;
     uint gTextureCount;
@@ -254,29 +254,29 @@ float4 PSFoliage(PSVertexBillboard input) : SV_Target
     ComputeLightsInput lInput;
 
     lInput.material = material;
-	lInput.objectPosition = input.positionWorld;
-	lInput.objectNormal = normalWorld;
+    lInput.objectPosition = input.positionWorld;
+    lInput.objectNormal = normalWorld;
     lInput.objectDiffuseColor = diffuseColor;
 
-	lInput.eyePosition = gEyePositionWorld;
-	lInput.levelOfDetailRanges = gLOD;
+    lInput.eyePosition = gEyePositionWorld;
+    lInput.levelOfDetailRanges = gLOD;
 
-	lInput.hemiLight = gPSHemiLight;
-	lInput.dirLights = gDirLights;
+    lInput.hemiLight = gPSHemiLight;
+    lInput.dirLights = gDirLights;
     lInput.pointLights = gPointLights;
     lInput.spotLights = gSpotLights;
     lInput.dirLightsCount = gLightCount.x;
     lInput.pointLightsCount = gLightCount.y;
     lInput.spotLightsCount = gLightCount.z;
 
-	lInput.shadowMapDir = gShadowMapDir;
+    lInput.shadowMapDir = gShadowMapDir;
     lInput.shadowMapPoint = gShadowMapPoint;
-	lInput.shadowMapSpot = gShadowMapSpot;
+    lInput.shadowMapSpot = gShadowMapSpot;
     lInput.minShadowIntensity = gShadowIntensity;
 
-	lInput.fogStart = gFogStart;
-	lInput.fogRange = gFogRange;
-	lInput.fogColor = gFogColor;
+    lInput.fogStart = gFogStart;
+    lInput.fogRange = gFogRange;
+    lInput.fogColor = gFogColor;
 
     return ComputeLights(lInput);
 }
