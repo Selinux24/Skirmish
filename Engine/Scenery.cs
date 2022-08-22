@@ -627,16 +627,16 @@ namespace Engine
             var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
             foreach (var nodeId in nodeIds)
             {
-                if (patchDictionary.ContainsKey(nodeId))
-                {
-                    Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
-
-                    patchDictionary[nodeId]?.DrawScenery(context, BufferManager);
-                }
-                else
+                if (!patchDictionary.ContainsKey(nodeId))
                 {
                     Logger.WriteWarning(this, $"Scenery Draw {nodeId} without assigned patch. No draw method called");
+
+                    continue;
                 }
+
+                Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
+
+                patchDictionary[nodeId]?.DrawScenery(context, BufferManager);
             }
         }
 

@@ -24,8 +24,12 @@ namespace Engine.BuiltInEffects
         {
             VertexShader.WriteCBPerObject(material, tintColor);
 
+            var sampler = material.UseAnisotropic ?
+                BuiltInShaders.GetSamplerAnisotropic() :
+                BuiltInShaders.GetSamplerLinear();
+
             PixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
-            PixelShader.SetDiffseSampler(BuiltInShaders.GetSamplerLinear());
+            PixelShader.SetDiffseSampler(sampler);
         }
     }
 }
