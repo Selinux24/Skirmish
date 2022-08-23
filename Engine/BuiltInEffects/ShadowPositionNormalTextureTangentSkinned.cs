@@ -6,15 +6,15 @@ namespace Engine.BuiltInEffects
     using Engine.Common;
 
     /// <summary>
-    /// Skinned position-normal-color drawer
+    /// Shadow Skinned position-normal-texture-tangent drawer
     /// </summary>
-    public class SkinnedPositionNormalColor : BuiltInDrawer<SkinnedPositionNormalColorVs, PositionNormalColorPs>
+    public class ShadowPositionNormalTextureTangentSkinned : BuiltInDrawer<ShadowSkinnedPositionNormalTextureTangentVs, EmptyPs>
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public SkinnedPositionNormalColor(Graphics graphics) : base(graphics)
+        public ShadowPositionNormalTextureTangentSkinned(Graphics graphics) : base(graphics)
         {
 
         }
@@ -22,7 +22,7 @@ namespace Engine.BuiltInEffects
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(material, tintColor, animation);
+            VertexShader.WriteCBPerInstance(textureIndex, animation);
         }
     }
 }

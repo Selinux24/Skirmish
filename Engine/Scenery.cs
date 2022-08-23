@@ -308,15 +308,15 @@ namespace Engine
                     case VertexTypes.PositionNormalTextureTangent:
                         return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangent>();
                     case VertexTypes.PositionColorSkinned:
-                        return BuiltInShaders.GetDrawer<SkinnedPositionColor>();
+                        return BuiltInShaders.GetDrawer<BasicPositionColorSkinned>();
                     case VertexTypes.PositionTextureSkinned:
-                        return BuiltInShaders.GetDrawer<SkinnedPositionTexture>();
+                        return BuiltInShaders.GetDrawer<BasicPositionTextureSkinned>();
                     case VertexTypes.PositionNormalColorSkinned:
-                        return BuiltInShaders.GetDrawer<SkinnedPositionNormalColor>();
+                        return BuiltInShaders.GetDrawer<BasicPositionNormalColorSkinned>();
                     case VertexTypes.PositionNormalTextureSkinned:
-                        return BuiltInShaders.GetDrawer<SkinnedPositionNormalTexture>();
+                        return BuiltInShaders.GetDrawer<BasicPositionNormalTextureSkinned>();
                     case VertexTypes.PositionNormalTextureTangentSkinned:
-                        return BuiltInShaders.GetDrawer<SkinnedPositionNormalTextureTangent>();
+                        return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangentSkinned>();
                     default:
                         return null;
                 }

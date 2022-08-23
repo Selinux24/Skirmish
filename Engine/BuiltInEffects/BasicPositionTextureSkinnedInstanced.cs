@@ -8,13 +8,13 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Skinned position-texture instanced drawer
     /// </summary>
-    public class SkinnedPositionTextureInstanced : BuiltInDrawer<SkinnedPositionTextureVsI, PositionTexturePs>
+    public class BasicPositionTextureSkinnedInstanced : BuiltInDrawer<SkinnedPositionTextureVsI, PositionTexturePs>
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public SkinnedPositionTextureInstanced(Graphics graphics) : base(graphics)
+        public BasicPositionTextureSkinnedInstanced(Graphics graphics) : base(graphics)
         {
 
         }

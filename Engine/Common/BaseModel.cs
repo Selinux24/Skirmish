@@ -89,22 +89,21 @@ namespace Engine.Common
                 throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
             }
 
-            var geo = await description.Content.ReadModelContent();
-            if (!geo.Any())
-            {
-                throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(description));
-            }
-
-            await InitializeGeometryInternal(geo, description, instancingBuffer);
+            await InitializeGeometryInternal(description, instancingBuffer);
         }
         /// <summary>
         /// Initializes model geometry
         /// </summary>
-        /// <param name="geo">Geometry collection</param>
         /// <param name="description">Description</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        private async Task InitializeGeometryInternal(IEnumerable<ContentData> geo, T description, BufferDescriptor instancingBuffer = null)
+        private async Task InitializeGeometryInternal(T description, BufferDescriptor instancingBuffer = null)
         {
+            var geo = await description.Content.ReadModelContent();
+            if (!geo.Any())
+            {
+                throw new EngineException("Bad content description file. The resource file does not generate any geometry.");
+            }
+
             var desc = new DrawingDataDescription()
             {
                 Instanced = description.Instanced,
@@ -326,15 +325,15 @@ namespace Engine.Common
                 case VertexTypes.PositionNormalTextureTangent:
                     return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangent>();
                 case VertexTypes.PositionColorSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionColor>();
+                    return BuiltInShaders.GetDrawer<BasicPositionColorSkinned>();
                 case VertexTypes.PositionTextureSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionTexture>();
+                    return BuiltInShaders.GetDrawer<BasicPositionTextureSkinned>();
                 case VertexTypes.PositionNormalColorSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionNormalColor>();
+                    return BuiltInShaders.GetDrawer<BasicPositionNormalColorSkinned>();
                 case VertexTypes.PositionNormalTextureSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionNormalTexture>();
+                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureSkinned>();
                 case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionNormalTextureTangent>();
+                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangentSkinned>();
                 default:
                     return null;
             }
@@ -358,15 +357,15 @@ namespace Engine.Common
                 case VertexTypes.PositionNormalTextureTangent:
                     return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangentInstanced>();
                 case VertexTypes.PositionColorSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionColorInstanced>();
+                    return BuiltInShaders.GetDrawer<BasicPositionColorSkinnedInstanced>();
                 case VertexTypes.PositionTextureSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionTextureInstanced>();
+                    return BuiltInShaders.GetDrawer<BasicPositionTextureSkinnedInstanced>();
                 case VertexTypes.PositionNormalColorSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionNormalColorInstanced>();
+                    return BuiltInShaders.GetDrawer<BasicPositionNormalColorSkinnedInstanced>();
                 case VertexTypes.PositionNormalTextureSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionNormalTextureInstanced>();
+                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureSkinnedInstanced>();
                 case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return BuiltInShaders.GetDrawer<SkinnedPositionNormalTextureTangentInstanced>();
+                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangentSkinnedInstanced>();
                 default:
                     return null;
             }

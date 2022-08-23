@@ -6,15 +6,15 @@ namespace Engine.BuiltInEffects
     using Engine.Common;
 
     /// <summary>
-    /// Skinned position-normal-texture-tangent drawer
+    /// Skinned position-texture drawer
     /// </summary>
-    public class SkinnedPositionNormalTextureTangent : BuiltInDrawer<SkinnedPositionNormalTextureTangentVs, PositionNormalTextureTangentPs>
+    public class BasicPositionTextureSkinned : BuiltInDrawer<SkinnedPositionTextureVs, PositionTexturePs>
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public SkinnedPositionNormalTextureTangent(Graphics graphics) : base(graphics)
+        public BasicPositionTextureSkinned(Graphics graphics) : base(graphics)
         {
 
         }
@@ -30,8 +30,6 @@ namespace Engine.BuiltInEffects
 
             PixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
             PixelShader.SetDiffseSampler(sampler);
-            PixelShader.SetNormalMap(material.Material?.NormalMap);
-            PixelShader.SetNormalSampler(sampler);
         }
     }
 }

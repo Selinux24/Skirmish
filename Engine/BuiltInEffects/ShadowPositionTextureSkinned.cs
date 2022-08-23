@@ -6,15 +6,15 @@ namespace Engine.BuiltInEffects
     using Engine.Common;
 
     /// <summary>
-    /// Skinned position-color instanced drawer
+    /// Shadow Skinned position-texture drawer
     /// </summary>
-    public class SkinnedPositionColorInstanced : BuiltInDrawer<SkinnedPositionColorVsI, PositionColorPs>
+    public class ShadowPositionTextureSkinned : BuiltInDrawer<ShadowSkinnedPositionTextureVs, EmptyPs>
     {
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public SkinnedPositionColorInstanced(Graphics graphics) : base(graphics)
+        public ShadowPositionTextureSkinned(Graphics graphics) : base(graphics)
         {
 
         }
@@ -22,7 +22,7 @@ namespace Engine.BuiltInEffects
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerObject(material, tintColor);
+            VertexShader.WriteCBPerInstance(textureIndex, animation);
         }
     }
 }
