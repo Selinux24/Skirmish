@@ -349,17 +349,9 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
-            var effect = context.ShadowMap.GetEffect();
-            if (effect == null)
-            {
-                return 0;
-            }
-
-            effect.UpdatePerFrame(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
 
             int count = 0;
-
-            var graphics = Game.Graphics;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -374,14 +366,18 @@ namespace Engine
 
                 var material = drawingData.Materials[materialName];
 
-                count += mesh.Count;
+                var drawer = context.ShadowMap.GetDrawer(mesh.VertextType, true, material.Material.IsTransparent);
+                if (drawer == null)
+                {
+                    continue;
+                }
 
-                var materialInfo = new MaterialShadowDrawInfo
+                var materialInfo = new MaterialDrawInfo
                 {
                     Material = material,
                 };
 
-                effect.UpdatePerObject(AnimationShadowDrawInfo.Empty, materialInfo, 0);
+                drawer.Update(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {
@@ -389,20 +385,10 @@ namespace Engine
                     continue;
                 }
 
-                var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
-                if (!BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology))
-                {
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => InputAssembler not set");
-                    continue;
-                }
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
+                drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation);
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
-                    mesh.Draw(graphics, instancesToDraw, startInstanceLocation);
-                }
+                count += mesh.Count;
             }
 
             return count;
@@ -500,9 +486,9 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
-            int count = 0;
+            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
 
-            var graphics = Game.Graphics;
+            int count = 0;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -524,7 +510,11 @@ namespace Engine
                     continue;
                 }
 
-                count += mesh.Count;
+                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, true);
+                if (drawer == null)
+                {
+                    continue;
+                }
 
                 var materialInfo = new MaterialDrawInfo
                 {
@@ -532,28 +522,7 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, true);
-                if (drawer != null)
-                {
-                    drawer.Update(materialInfo, Color.White, 0, AnimationDrawInfo.Empty);
-
-                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                    drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation);
-
-                    count += mesh.Count;
-
-                    continue;
-                }
-
-                var effect = GetEffect(context.DrawerMode);
-                if (effect == null)
-                {
-                    continue;
-                }
-
-                effect.UpdatePerFrameFull(Matrix.Identity, context);
-                effect.UpdatePerObject(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
+                drawer.Update(materialInfo, Color.White, 0, AnimationDrawInfo.Empty);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {
@@ -561,20 +530,10 @@ namespace Engine
                     continue;
                 }
 
-                var technique = effect.GetTechnique(mesh.VertextType, true);
-                if (!BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology))
-                {
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => InputAssembler not set");
-                    continue;
-                }
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
+                drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation);
 
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
-                    mesh.Draw(graphics, instancesToDraw, startInstanceLocation);
-                }
+                count += mesh.Count;
             }
 
             return count;

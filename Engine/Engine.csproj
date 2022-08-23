@@ -723,7 +723,6 @@
     <Compile Include="UI\UITextureRenderer.cs" />
     <Compile Include="Curve.cs" />
     <Compile Include="Effects\DrawerPool.cs" />
-    <Compile Include="Effects\EffectShadowBasic.cs" />
     <Compile Include="Headings.cs" />
     <Compile Include="Line3D.cs" />
     <Compile Include="Common\VertexGpuParticle.cs" />

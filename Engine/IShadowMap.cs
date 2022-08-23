@@ -52,9 +52,10 @@ namespace Engine
         /// Gets the drawer to draw this shadow map
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
+        /// <param name="instanced">Use instancing data</param>
         /// <param name="useTextureAlpha">Uses alpha channel</param>
         /// <returns>Returns a drawer</returns>
-        IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool useTextureAlpha);
+        IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
 
         /// <summary>
         /// Update shadow map globals

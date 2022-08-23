@@ -111,7 +111,7 @@ namespace Engine
         /// <inheritdoc/>
         public abstract IShadowMapDrawer GetEffect();
         /// <inheritdoc/>
-        public abstract IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool useTextureAlpha);
+        public abstract IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
 
         /// <inheritdoc/>
         public abstract void UpdateGlobals();

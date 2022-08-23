@@ -269,7 +269,7 @@ namespace Engine
             int count = 0;
             foreach (var mesh in DrawingData.Meshes)
             {
-                count += DrawMeshShadow(context, mesh.Key, mesh.Value);
+                count += DrawShadowMesh(context, mesh.Key, mesh.Value);
             }
         }
         /// <summary>
@@ -279,14 +279,13 @@ namespace Engine
         /// <param name="meshName">Mesh name</param>
         /// <param name="meshDict">Mesh dictionary</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMeshShadow(DrawContextShadows context, string meshName, Dictionary<string, Mesh> meshDict)
+        private int DrawShadowMesh(DrawContextShadows context, string meshName, Dictionary<string, Mesh> meshDict)
         {
+            Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.");
+
             int count = 0;
 
-            var graphics = Game.Graphics;
-
             var localTransform = GetTransformByName(meshName);
-
             BuiltInShaders.UpdatePerFrame(localTransform, context);
 
             var animationInfo = new AnimationDrawInfo
@@ -296,31 +295,37 @@ namespace Engine
                 InterpolationAmount = TransitionInterpolation,
             };
 
-            foreach (var mat in meshDict)
+            foreach (string materialName in meshDict.Keys)
             {
-                var mesh = mat.Value;
+                var mesh = meshDict[materialName];
                 if (!mesh.Ready)
                 {
+                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
                     continue;
                 }
 
-                var material = DrawingData.Materials[mat.Key];
+                var material = DrawingData.Materials[materialName];
+
+                var drawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
+                if (drawer == null)
+                {
+                    continue;
+                }
 
                 var materialInfo = new MaterialDrawInfo
                 {
                     Material = material,
                 };
 
-                var drawer = context.ShadowMap.GetDrawer(mesh.VertextType, material.Material.IsTransparent);
-                if (drawer == null)
+                drawer.Update(materialInfo, Color4.White, TextureIndex, animationInfo);
+
+                if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {
+                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => IndexBuffer not set");
                     continue;
                 }
 
-                drawer.Update(materialInfo, Color4.White, TextureIndex, animationInfo);
-
-                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
+                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName}.");
                 drawer.Draw(BufferManager, new[] { mesh });
 
                 count += mesh.Count;
@@ -360,12 +365,11 @@ namespace Engine
         /// <returns>Returns the number of drawn triangles</returns>
         private int DrawMesh(DrawContext context, string meshName, Dictionary<string, Mesh> meshDict)
         {
+            Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.");
+
             int count = 0;
 
-            var graphics = Game.Graphics;
-
             var localTransform = GetTransformByName(meshName);
-
             BuiltInShaders.UpdatePerFrame(localTransform, context);
 
             var animationInfo = new AnimationDrawInfo
@@ -375,18 +379,26 @@ namespace Engine
                 InterpolationAmount = TransitionInterpolation,
             };
 
-            foreach (var mat in meshDict)
+            foreach (string materialName in meshDict.Keys)
             {
-                var mesh = mat.Value;
+                var mesh = meshDict[materialName];
                 if (!mesh.Ready)
                 {
+                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
                     continue;
                 }
 
-                var material = DrawingData.Materials[mat.Key];
+                var material = DrawingData.Materials[materialName];
 
                 bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
+                {
+                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
+                    continue;
+                }
+
+                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, false);
+                if (drawer == null)
                 {
                     continue;
                 }
@@ -397,40 +409,16 @@ namespace Engine
                     UseAnisotropic = UseAnisotropicFiltering,
                 };
 
-                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, false);
-                if (drawer != null)
+                drawer.Update(materialInfo, TintColor, TextureIndex, animationInfo);
+
+                if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {
-                    drawer.Update(materialInfo, TintColor, TextureIndex, animationInfo);
-
-                    BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                    drawer.Draw(BufferManager, new[] { mesh });
-
-                    count += mesh.Count;
-
+                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => IndexBuffer not set");
                     continue;
                 }
 
-                var effect = GetEffect(context.DrawerMode);
-                if (effect == null)
-                {
-                    continue;
-                }
-
-                effect.UpdatePerFrameFull(localTransform, context);
-                effect.UpdatePerObject(materialInfo, TintColor, TextureIndex, animationInfo);
-
-                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                var technique = effect.GetTechnique(mesh.VertextType, false);
-                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    mesh.Draw(graphics);
-                }
+                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName}.");
+                drawer.Draw(BufferManager, new[] { mesh });
 
                 count += mesh.Count;
             }

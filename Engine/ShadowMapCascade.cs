@@ -81,7 +81,7 @@ namespace Engine
             return DrawerPool.EffectShadowCascade;
         }
         /// <inheritdoc/>
-        public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool useTextureAlpha)
+        public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
         {
             return null;
         }

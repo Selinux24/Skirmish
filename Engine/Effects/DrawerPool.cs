@@ -90,10 +90,6 @@ namespace Engine.Effects
         /// </summary>
         public static EffectShadowFoliage EffectShadowFoliage { get; private set; }
         /// <summary>
-        /// Shadows effect
-        /// </summary>
-        public static EffectShadowBasic EffectShadowBasic { get; private set; }
-        /// <summary>
         /// Terrain drawing effect
         /// </summary>
         public static EffectShadowTerrain EffectShadowTerrain { get; private set; }
@@ -139,7 +135,6 @@ namespace Engine.Effects
 
             EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(graphics, Resources.ShaderShadowBillboardCso, Resources.ShaderShadowBillboardFx);
             EffectShadowFoliage = CreateEffect<EffectShadowFoliage>(graphics, Resources.ShaderShadowFoliageCso, Resources.ShaderShadowFoliageFx);
-            EffectShadowBasic = CreateEffect<EffectShadowBasic>(graphics, Resources.ShaderShadowBasicCso, Resources.ShaderShadowBasicFx);
             EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainCso, Resources.ShaderShadowTerrainFx);
             EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointCso, Resources.ShaderShadowPointFx);
             EffectShadowCascade = CreateEffect<EffectShadowCascade>(graphics, Resources.ShaderShadowCascadeCso, Resources.ShaderShadowCascadeFx);
@@ -192,8 +187,6 @@ namespace Engine.Effects
             EffectShadowBillboard = null;
             EffectShadowFoliage?.Dispose();
             EffectShadowFoliage = null;
-            EffectShadowBasic?.Dispose();
-            EffectShadowBasic = null;
             EffectShadowTerrain?.Dispose();
             EffectShadowTerrain = null;
             EffectShadowPoint?.Dispose();
@@ -254,8 +247,6 @@ namespace Engine.Effects
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
             EffectShadowCascade.UpdateGlobals(animationPalette, animationPaletteWidth);
-
-            EffectShadowBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
 
             EffectShadowPoint.UpdateGlobals(animationPalette, animationPaletteWidth);
         }
