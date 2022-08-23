@@ -126,7 +126,11 @@ namespace Engine.BuiltIn
         {
             var cb = new[]
             {
-                 BuiltInShaders.GetPSPerFrameLit(),
+                BuiltInShaders.GetPSPerFrameLit(),
+                BuiltInShaders.GetPSHemispheric(),
+                BuiltInShaders.GetPSDirectionals(),
+                BuiltInShaders.GetPSSpots(),
+                BuiltInShaders.GetPSPoints(),
             };
 
             Graphics.SetPixelShaderConstantBuffers(0, cb);

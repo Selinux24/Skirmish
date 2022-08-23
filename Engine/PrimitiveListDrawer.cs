@@ -265,7 +265,7 @@ namespace Engine
                 return;
             }
 
-            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
             drawer.Update(MaterialDrawInfo.Empty, Color.White, 0, AnimationDrawInfo.Empty);
             drawer.Draw(BufferManager, new DrawOptions
             {

@@ -194,6 +194,8 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawResultComponents(DrawContext context, int index, IEnumerable<IDrawable> components)
         {
+            BuiltIn.BuiltInShaders.UpdatePerFrame(context);
+
             //Save current drawer mode
             var mode = context.DrawerMode;
 #if DEBUG

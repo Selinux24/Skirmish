@@ -62,7 +62,7 @@ namespace Tanks
                 return;
             }
 
-            trees.ForEach(controller => controller.Update(gameTime));
+            trees.ForEach(controller => controller.UpdateController(gameTime));
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Tanks
             /// Updates the controller
             /// </summary>
             /// <param name="gameTime">Game time</param>
-            void Update(GameTime gameTime);
+            void UpdateController(GameTime gameTime);
         }
 
         /// <summary>
@@ -113,7 +113,7 @@ namespace Tanks
             /// Updates the controller
             /// </summary>
             /// <param name="gameTime">Game time</param>
-            public void Update(GameTime gameTime)
+            public void UpdateController(GameTime gameTime)
             {
                 if (!Active)
                 {
@@ -155,7 +155,7 @@ namespace Tanks
             /// Updates the controller
             /// </summary>
             /// <param name="gameTime">Game time</param>
-            public void Update(GameTime gameTime)
+            public void UpdateController(GameTime gameTime)
             {
                 if (!Active)
                 {

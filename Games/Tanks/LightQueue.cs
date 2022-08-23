@@ -40,7 +40,7 @@ namespace Tanks
             /// Updates the internal tweener state
             /// </summary>
             /// <param name="gameTime">Game time</param>
-            public void Update(GameTime gameTime)
+            public void UpdateTweener(GameTime gameTime)
             {
                 float deltaTime = gameTime.TotalSeconds - ActivationTime;
                 if (deltaTime > MaxDuration)
@@ -137,7 +137,7 @@ namespace Tanks
 
             lightTweeners.RemoveAll(l => !l.Active);
 
-            lightTweeners.ForEach(l => l.Update(gameTime));
+            lightTweeners.ForEach(l => l.UpdateTweener(gameTime));
         }
     }
 

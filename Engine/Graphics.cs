@@ -450,6 +450,7 @@ namespace Engine
                     using (var tmpDevice = new Device(adapter, creationFlags, FeatureLevel.Level_11_1, FeatureLevel.Level_11_0))
                     {
                         device = tmpDevice.QueryInterface<Device3>();
+                        device.DebugName = "GraphicsDevice";
                     }
                 }
 
@@ -483,10 +484,12 @@ namespace Engine
                 using (var tmpSwapChain = new SwapChain1(factory, device, form.Handle, ref desc, fsdesc))
                 {
                     swapChain = tmpSwapChain.QueryInterface<SwapChain4>();
+                    swapChain.DebugName = "GraphicsSwapChain";
                 }
             }
 
             deviceContext = device.ImmediateContext3;
+            deviceContext.DebugName = "Immediate";
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -2680,7 +2683,7 @@ namespace Engine
                     },
                 };
 
-                return new EngineDepthStencilView(name, new DepthStencilView(device, texture, description));
+                return new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, texture, description));
             }
         }
         /// <summary>
@@ -2708,8 +2711,8 @@ namespace Engine
 
                 var rt = CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription);
 
-                var rtv = new EngineRenderTargetView(name, rt.RenderTarget);
-                var srv = new EngineShaderResourceView(name, rt.ShaderResource);
+                var rtv = new EngineRenderTargetView($"{name}.RTV", rt.RenderTarget);
+                var srv = new EngineShaderResourceView($"{name}.SRV", rt.ShaderResource);
 
                 return (rtv, srv);
             }
@@ -2742,7 +2745,7 @@ namespace Engine
                     sampleDescription = CurrentSampleDescription;
                 }
 
-                var rtv = new EngineRenderTargetView(name);
+                var rtv = new EngineRenderTargetView($"{name}.RTV");
                 var srv = new EngineShaderResourceView[arraySize];
 
                 for (int i = 0; i < arraySize; i++)
@@ -2750,7 +2753,7 @@ namespace Engine
                     var rt = CreateRenderTargetTexture(format, width, height, multiSampled, sampleDescription);
 
                     rtv.Add(rt.RenderTarget);
-                    srv[i] = new EngineShaderResourceView(name, rt.ShaderResource);
+                    srv[i] = new EngineShaderResourceView($"{name}.SRV", rt.ShaderResource);
                 }
 
                 return (rtv, srv);
@@ -2856,7 +2859,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2868,7 +2871,7 @@ namespace Engine
                         MostDetailedMip = 0
                     },
                 };
-                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -2913,7 +2916,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -2925,7 +2928,7 @@ namespace Engine
                         MostDetailedMip = 0
                     },
                 };
-                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -2974,7 +2977,7 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
+                    dsv[i] = new EngineDepthStencilView($"{name}_{i}.DSV", new DepthStencilView(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
@@ -2990,7 +2993,7 @@ namespace Engine
                         PlaneSlice = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -3035,7 +3038,7 @@ namespace Engine
                         MipSlice = 0,
                     },
                 };
-                var dsv = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
+                var dsv = new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, depthMap, dsDescription));
 
                 var rvDescription = new ShaderResourceViewDescription1
                 {
@@ -3047,7 +3050,7 @@ namespace Engine
                         MostDetailedMip = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }
@@ -3096,7 +3099,7 @@ namespace Engine
                             MipSlice = 0,
                         },
                     };
-                    dsv[i] = new EngineDepthStencilView(name, new DepthStencilView(device, depthMap, dsDescription));
+                    dsv[i] = new EngineDepthStencilView($"{name}_{i}.DSV", new DepthStencilView(device, depthMap, dsDescription));
                 }
 
                 var rvDescription = new ShaderResourceViewDescription1
@@ -3111,7 +3114,7 @@ namespace Engine
                         First2DArrayFace = 0,
                     },
                 };
-                var srv = new EngineShaderResourceView(name, new ShaderResourceView1(device, depthMap, rvDescription));
+                var srv = new EngineShaderResourceView($"{name}.SRV", new ShaderResourceView1(device, depthMap, rvDescription));
 
                 return (dsv, srv);
             }

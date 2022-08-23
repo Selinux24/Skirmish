@@ -74,7 +74,16 @@ namespace Engine.BuiltIn
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrameLit());
+            var cb = new[]
+            {
+                BuiltInShaders.GetPSPerFrameLit(),
+                BuiltInShaders.GetPSHemispheric(),
+                BuiltInShaders.GetPSDirectionals(),
+                BuiltInShaders.GetPSSpots(),
+                BuiltInShaders.GetPSPoints(),
+            };
+
+            Graphics.SetPixelShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {

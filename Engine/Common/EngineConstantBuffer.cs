@@ -40,6 +40,10 @@ namespace Engine.Common
         /// Data stream to update the buffer in memory
         /// </summary>
         private readonly DataStream dataStream;
+        /// <summary>
+        /// Current data value
+        /// </summary>
+        private T currentData;
 
         /// <summary>
         /// Name
@@ -94,7 +98,14 @@ namespace Engine.Common
         /// <param name="data">Data</param>
         public void WriteData(T data)
         {
+            if (data.Equals(currentData))
+            {
+                return;
+            }
+
             graphics.UpdateConstantBuffer(dataStream, buffer, data);
+
+            currentData = data;
         }
 
         /// <summary>

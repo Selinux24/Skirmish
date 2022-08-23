@@ -286,7 +286,7 @@ namespace Engine
             int count = 0;
 
             var localTransform = GetTransformByName(meshName);
-            BuiltInShaders.UpdatePerFrame(localTransform, context);
+            BuiltInShaders.UpdatePerObject(localTransform, context.ViewProjection);
 
             var animationInfo = new AnimationDrawInfo
             {
@@ -370,7 +370,7 @@ namespace Engine
             int count = 0;
 
             var localTransform = GetTransformByName(meshName);
-            BuiltInShaders.UpdatePerFrame(localTransform, context);
+            BuiltInShaders.UpdatePerObject(localTransform, context.ViewProjection);
 
             var animationInfo = new AnimationDrawInfo
             {

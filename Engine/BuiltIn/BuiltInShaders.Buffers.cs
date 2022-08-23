@@ -47,6 +47,9 @@ namespace Engine.BuiltIn
                 return Marshal.SizeOf(typeof(VSGlobal));
             }
         }
+
+
+
         /// <summary>
         /// Per-frame data structure
         /// </summary>
@@ -84,6 +87,9 @@ namespace Engine.BuiltIn
                 return Marshal.SizeOf(typeof(VSPerFrame));
             }
         }
+
+
+
         /// <summary>
         /// Per frame data structure
         /// </summary>
@@ -141,25 +147,15 @@ namespace Engine.BuiltIn
                 return Marshal.SizeOf(typeof(PSPerFrameNoLit));
             }
         }
+
+
+
         /// <summary>
         /// Per frame data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 4176)]
+        [StructLayout(LayoutKind.Explicit, Size = 60)]
         struct PSPerFrameLit : IBufferData
         {
-            /// <summary>
-            /// Maximum directional lights
-            /// </summary>
-            public const int MaxDirectional = 3;
-            /// <summary>
-            /// Maximum point lights
-            /// </summary>
-            public const int MaxPoints = 16;
-            /// <summary>
-            /// Maximum spot lights
-            /// </summary>
-            public const int MaxSpots = 16;
-
             /// <summary>
             /// Builds the main pixel shader Per-Frame buffer with lighting
             /// </summary>
@@ -171,11 +167,6 @@ namespace Engine.BuiltIn
                     return new PSPerFrameLit();
                 }
 
-                var hemiLight = BufferLightHemispheric.Build(context.Lights?.GetVisibleHemisphericLight());
-                var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), MaxDirectional, out int dirLength);
-                var pointLights = BufferLightPoint.Build(context.Lights?.GetVisiblePointLights(), MaxPoints, out int pointLength);
-                var spotLights = BufferLightSpot.Build(context.Lights?.GetVisibleSpotLights(), MaxSpots, out int spotLength);
-
                 return new PSPerFrameLit
                 {
                     EyePositionWorld = context.EyePosition,
@@ -186,16 +177,7 @@ namespace Engine.BuiltIn
                     FogRange = context.Lights?.FogRange ?? 0,
 
                     LevelOfDetail = context.LevelOfDetail,
-
-                    DirLightsCount = (uint)dirLength,
-                    PointLightsCount = (uint)pointLength,
-                    SpotLightsCount = (uint)spotLength,
                     ShadowIntensity = context.Lights?.ShadowIntensity ?? 0f,
-
-                    HemiLight = hemiLight,
-                    DirLights = dirLights.ToArray(),
-                    PointLights = pointLights.ToArray(),
-                    SpotLights = spotLights.ToArray(),
                 };
             }
 
@@ -227,48 +209,11 @@ namespace Engine.BuiltIn
             /// </summary>
             [FieldOffset(48)]
             public Vector3 LevelOfDetail;
-
-            /// <summary>
-            /// Directional lights count
-            /// </summary>
-            [FieldOffset(64)]
-            public uint DirLightsCount;
-            /// <summary>
-            /// Point lights count
-            /// </summary>
-            [FieldOffset(68)]
-            public uint PointLightsCount;
-            /// <summary>
-            /// Spot lights count
-            /// </summary>
-            [FieldOffset(72)]
-            public uint SpotLightsCount;
             /// <summary>
             /// Shadow intensity
             /// </summary>
-            [FieldOffset(76)]
+            [FieldOffset(60)]
             public float ShadowIntensity;
-
-            /// <summary>
-            /// Hemispheric light
-            /// </summary>
-            [FieldOffset(80)]
-            public BufferLightHemispheric HemiLight;
-            /// <summary>
-            /// Directional lights
-            /// </summary>
-            [FieldOffset(112), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxDirectional)]
-            public BufferLightDirectional[] DirLights;
-            /// <summary>
-            /// Point lights
-            /// </summary>
-            [FieldOffset(592), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxPoints)]
-            public BufferLightPoint[] PointLights;
-            /// <summary>
-            /// Spot lights
-            /// </summary>
-            [FieldOffset(1872), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxSpots)]
-            public BufferLightSpot[] SpotLights;
 
             /// <inheritdoc/>
             public int GetStride()
@@ -276,6 +221,9 @@ namespace Engine.BuiltIn
                 return Marshal.SizeOf(typeof(PSPerFrameLit));
             }
         }
+
+
+
         /// <summary>
         /// Hemispheric light buffer
         /// </summary>
@@ -313,6 +261,46 @@ namespace Engine.BuiltIn
                 return Marshal.SizeOf(typeof(BufferLightHemispheric));
             }
         }
+        /// <summary>
+        /// Per frame data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit, Size = 32)]
+        struct PSHemispheric : IBufferData
+        {
+            /// <summary>
+            /// Builds the main pixel shader Per-Frame buffer with lighting
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            public static PSHemispheric Build(DrawContext context)
+            {
+                if (context == null)
+                {
+                    return new PSHemispheric();
+                }
+
+                var hemiLight = BufferLightHemispheric.Build(context.Lights?.GetVisibleHemisphericLight());
+
+                return new PSHemispheric
+                {
+                    HemiLight = hemiLight,
+                };
+            }
+
+            /// <summary>
+            /// Hemispheric light
+            /// </summary>
+            [FieldOffset(0)]
+            public BufferLightHemispheric HemiLight;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PSHemispheric));
+            }
+        }
+
+
+
         /// <summary>
         /// Directional light buffer
         /// </summary>
@@ -414,6 +402,57 @@ namespace Engine.BuiltIn
                 return Marshal.SizeOf(typeof(BufferLightDirectional));
             }
         }
+        /// <summary>
+        /// Per frame data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit, Size = 16 + (160 * MaxDirectional))]
+        struct PSDirectional : IBufferData
+        {
+            /// <summary>
+            /// Maximum directional lights
+            /// </summary>
+            public const int MaxDirectional = 3;
+
+            /// <summary>
+            /// Builds the main pixel shader Per-Frame buffer with lighting
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            public static PSDirectional Build(DrawContext context)
+            {
+                if (context == null)
+                {
+                    return new PSDirectional();
+                }
+
+                var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), MaxDirectional, out int dirLength);
+
+                return new PSDirectional
+                {
+                    DirLightsCount = (uint)dirLength,
+                    DirLights = dirLights.ToArray(),
+                };
+            }
+
+            /// <summary>
+            /// Directional lights count
+            /// </summary>
+            [FieldOffset(0)]
+            public uint DirLightsCount;
+            /// <summary>
+            /// Directional lights
+            /// </summary>
+            [FieldOffset(16), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxDirectional)]
+            public BufferLightDirectional[] DirLights;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PSDirectional));
+            }
+        }
+
+
+
         /// <summary>
         /// Spot light buffer
         /// </summary>
@@ -532,6 +571,57 @@ namespace Engine.BuiltIn
             }
         }
         /// <summary>
+        /// Per frame data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit, Size = 16 + (144 * MaxSpots))]
+        struct PSSpots : IBufferData
+        {
+            /// <summary>
+            /// Maximum spot lights
+            /// </summary>
+            public const int MaxSpots = 16;
+
+            /// <summary>
+            /// Builds the main pixel shader Per-Frame buffer with lighting
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            public static PSSpots Build(DrawContext context)
+            {
+                if (context == null)
+                {
+                    return new PSSpots();
+                }
+
+                var spotLights = BufferLightSpot.Build(context.Lights?.GetVisibleSpotLights(), MaxSpots, out int spotLength);
+
+                return new PSSpots
+                {
+                    SpotLightsCount = (uint)spotLength,
+                    SpotLights = spotLights.ToArray(),
+                };
+            }
+
+            /// <summary>
+            /// Spot lights count
+            /// </summary>
+            [FieldOffset(0)]
+            public uint SpotLightsCount;
+            /// <summary>
+            /// Spot lights
+            /// </summary>
+            [FieldOffset(16), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxSpots)]
+            public BufferLightSpot[] SpotLights;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PSSpots));
+            }
+        }
+
+
+
+        /// <summary>
         /// Point light buffer
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 80)]
@@ -630,6 +720,54 @@ namespace Engine.BuiltIn
             public int GetStride()
             {
                 return Marshal.SizeOf(typeof(BufferLightPoint));
+            }
+        }
+        /// <summary>
+        /// Per frame data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit, Size = 16 + (80 * MaxPoints))]
+        struct PSPoints : IBufferData
+        {
+            /// <summary>
+            /// Maximum point lights
+            /// </summary>
+            public const int MaxPoints = 16;
+
+            /// <summary>
+            /// Builds the main pixel shader Per-Frame buffer with lighting
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            public static PSPoints Build(DrawContext context)
+            {
+                if (context == null)
+                {
+                    return new PSPoints();
+                }
+
+                var pointLights = BufferLightPoint.Build(context.Lights?.GetVisiblePointLights(), MaxPoints, out int pointLength);
+
+                return new PSPoints
+                {
+                    PointLightsCount = (uint)pointLength,
+                    PointLights = pointLights.ToArray(),
+                };
+            }
+
+            /// <summary>
+            /// Point lights count
+            /// </summary>
+            [FieldOffset(0)]
+            public uint PointLightsCount;
+            /// <summary>
+            /// Point lights
+            /// </summary>
+            [FieldOffset(16), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxPoints)]
+            public BufferLightPoint[] PointLights;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PSPoints));
             }
         }
     }

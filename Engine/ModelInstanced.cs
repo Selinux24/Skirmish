@@ -349,7 +349,7 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
-            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
 
             int count = 0;
 
@@ -424,7 +424,7 @@ namespace Engine
             int count = 0;
             int instanceCount = 0;
 
-            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
 
             int maxCount = GetMaxCount();
 
@@ -486,7 +486,7 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
-            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
 
             int count = 0;
 

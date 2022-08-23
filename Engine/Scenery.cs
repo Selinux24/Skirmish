@@ -622,7 +622,7 @@ namespace Engine
                 return;
             }
 
-            BuiltInShaders.UpdatePerFrame(Matrix.Identity, context);
+            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
 
             var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
             foreach (var nodeId in nodeIds)

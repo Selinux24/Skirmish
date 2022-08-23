@@ -248,42 +248,44 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Updates per-frame data
         /// </summary>
-        /// <param name="localTransform">Local transform</param>
         /// <param name="context">Draw context</param>
-        public static void UpdatePerFrame(Matrix localTransform, DrawContext context)
+        public static void UpdatePerFrame(DrawContext context)
         {
             if (context == null)
             {
                 return;
             }
-
-            var vsPerFrame = GetConstantBuffer<VSPerFrame>();
-            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, context.ViewProjection));
 
             var psPerFrameNoLit = GetConstantBuffer<PSPerFrameNoLit>();
             psPerFrameNoLit?.WriteData(PSPerFrameNoLit.Build(context));
 
             var psPerFrameLit = GetConstantBuffer<PSPerFrameLit>();
             psPerFrameLit?.WriteData(PSPerFrameLit.Build(context));
+
+            var psHemispheric = GetConstantBuffer<PSHemispheric>();
+            psHemispheric?.WriteData(PSHemispheric.Build(context));
+            var psDirectionals = GetConstantBuffer<PSDirectional>();
+            psDirectionals?.WriteData(PSDirectional.Build(context));
+            var psSpots = GetConstantBuffer<PSSpots>();
+            psSpots?.WriteData(PSSpots.Build(context));
+            var psPoints = GetConstantBuffer<PSPoints>();
+            psPoints?.WriteData(PSPoints.Build(context));
+
             psPerFrameLitShadowMapDir = context.ShadowMapDirectional?.Texture;
             psPerFrameLitShadowMapSpot = context.ShadowMapSpot?.Texture;
             psPerFrameLitShadowMapPoint = context.ShadowMapPoint?.Texture;
         }
         /// <summary>
-        /// Updates per-frame data
+        /// Updates per-object data
         /// </summary>
         /// <param name="localTransform">Local transform</param>
-        /// <param name="context">Draw context</param>
-        public static void UpdatePerFrame(Matrix localTransform, DrawContextShadows context)
+        /// <param name="viewProjection">View projection matrix</param>
+        public static void UpdatePerObject(Matrix localTransform, Matrix viewProjection)
         {
-            if (context == null)
-            {
-                return;
-            }
-
             var vsPerFrame = GetConstantBuffer<VSPerFrame>();
-            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, context.ViewProjection));
+            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, viewProjection));
         }
+
         /// <summary>
         /// Gets the built-in per frame pixel shader constant buffer
         /// </summary>
@@ -297,6 +299,34 @@ namespace Engine.BuiltIn
         public static IEngineConstantBuffer GetPSPerFrameLit()
         {
             return GetConstantBuffer<PSPerFrameLit>();
+        }
+        /// <summary>
+        /// Gets the built-in hemispheric light pixel shader constant buffer
+        /// </summary>
+        public static IEngineConstantBuffer GetPSHemispheric()
+        {
+            return GetConstantBuffer<PSHemispheric>();
+        }
+        /// <summary>
+        /// Gets the built-in directional lights pixel shader constant buffer
+        /// </summary>
+        public static IEngineConstantBuffer GetPSDirectionals()
+        {
+            return GetConstantBuffer<PSDirectional>();
+        }
+        /// <summary>
+        /// Gets the built-in spot lights pixel shader constant buffer
+        /// </summary>
+        public static IEngineConstantBuffer GetPSSpots()
+        {
+            return GetConstantBuffer<PSSpots>();
+        }
+        /// <summary>
+        /// Gets the built-in point lights pixel shader constant buffer
+        /// </summary>
+        public static IEngineConstantBuffer GetPSPoints()
+        {
+            return GetConstantBuffer<PSPoints>();
         }
         /// <summary>
         /// Gets the built-in global pixel shader directional shadow map

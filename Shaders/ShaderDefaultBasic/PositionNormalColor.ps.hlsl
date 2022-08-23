@@ -4,7 +4,7 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPSPerFrame : register(b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float3 gEyePositionWorld;
 	float PAD11;
@@ -13,13 +13,30 @@ cbuffer cbPSPerFrame : register(b0)
 	float gFogRange;
 	float2 PAD12;
     float3 gLOD;
-    float PAD13;
-	uint3 gLightCount;
 	float gShadowIntensity;
+};
+
+cbuffer cbHemispheric : register(b1)
+{
     HemisphericLight gHemiLight;
+};
+
+cbuffer cbDirectionals : register(b2)
+{
+    uint gDirLightsCount;
     DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
-    PointLight gPointLights[MAX_LIGHTS_POINT];
+};
+
+cbuffer cbSpots : register(b3)
+{
+    uint gSpotLightsCount;
     SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+};
+
+cbuffer cbPoints : register(b4)
+{
+    uint gPointLightsCount;
+    PointLight gPointLights[MAX_LIGHTS_POINT];
 };
 
 Texture2DArray<float> gShadowMapDir : register(t0);
@@ -50,13 +67,16 @@ float4 main(PSVertexPositionNormalColor2 input) : SV_TARGET
 	lInput.eyePosition = gEyePositionWorld;
 	lInput.levelOfDetailRanges = gLOD;
 
-	lInput.hemiLight = gHemiLight;
-	lInput.dirLights = gDirLights;
-	lInput.pointLights = gPointLights;
-	lInput.spotLights = gSpotLights;
-	lInput.dirLightsCount = gLightCount.x;
-	lInput.pointLightsCount = gLightCount.y;
-	lInput.spotLightsCount = gLightCount.z;
+    lInput.hemiLight = gHemiLight;
+    
+    lInput.dirLightsCount = gDirLightsCount;
+    lInput.dirLights = gDirLights;
+	
+    lInput.pointLightsCount = gPointLightsCount;
+    lInput.pointLights = gPointLights;
+	
+    lInput.spotLightsCount = gSpotLightsCount;
+    lInput.spotLights = gSpotLights;
 
 	lInput.shadowMapDir = gShadowMapDir;
 	lInput.shadowMapPoint = gShadowMapPoint;
