@@ -136,6 +136,8 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\ShadowPositionColorInstanced.cs" />
+    <Compile Include="BuiltInEffects\ShadowPositionColor.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTextureTangentInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTextureTangent.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalTexture.cs" />
@@ -143,6 +145,8 @@
     <Compile Include="BuiltInEffects\BasicPositionNormalColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionNormalColor.cs" />
     <Compile Include="BuiltInEffects\BuiltInDrawer.cs" />
+    <Compile Include="BuiltInEffects\ShadowSkinnedPositionColor.cs" />
+    <Compile Include="BuiltInEffects\ShadowSkinnedPositionNormalColorInstanced.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalTextureTangentInstanced.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalTextureTangent.cs" />
     <Compile Include="BuiltInEffects\SkinnedPositionNormalTexture.cs" />
@@ -161,6 +165,7 @@
     <Compile Include="BuiltIn\BuiltInShaders.Buffers.cs" />
     <Compile Include="BuiltIn\IBuiltInVertexShader.cs" />
     <Compile Include="BuiltIn\IBuiltInPixelShader.cs" />
+    <Compile Include="BuiltIn\EmptyPs.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureTangentPs.cs" />
     <Compile Include="BuiltIn\PositionNormalTexturePs.cs" />
     <Compile Include="BuiltIn\PositionNormalTextureTangentVs.cs" />
@@ -173,6 +178,27 @@
     <Compile Include="BuiltIn\PositionTexturePs.cs" />
     <Compile Include="BuiltIn\PositionTextureVs.cs" />
     <Compile Include="BuiltIn\PositionTextureVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowTextureDefaultPs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionColorVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionColorVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionNormalColorVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionNormalColorVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionNormalTextureTangentVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionNormalTextureTangentVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionNormalTextureVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionNormalTextureVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionTextureVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowPositionTextureVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionColorVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionColorVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionNormalColorVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionNormalColorVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionNormalTextureTangentVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionNormalTextureTangentVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionNormalTextureVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionNormalTextureVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionTextureVs.cs" />
+    <Compile Include="BuiltIn\Shadows\ShadowSkinnedPositionTextureVsI.cs" />
     <Compile Include="BuiltIn\SkinnedPositionNormalTextureTangentVs.cs" />
     <Compile Include="BuiltIn\SkinnedPositionNormalTextureVs.cs" />
     <Compile Include="BuiltIn\SkinnedPositionNormalColorVs.cs" />
@@ -284,6 +310,11 @@
     <Compile Include="Position4.cs" />
     <Compile Include="Position3.cs" />
     <Compile Include="Matrix4X4.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="SceneLightDirectionalState.cs" />
     <Compile Include="SceneLightHemisphericState.cs" />
     <Compile Include="SceneLightPointState.cs" />
@@ -312,11 +343,6 @@
     <Compile Include="PostProcessing\PostProcessVignetteParams.cs" />
     <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenCollection.cs" />
     <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenExtensions.cs" />
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
     <Compile Include="RenderPass.cs" />
     <Compile Include="RotationQ.cs" />
     <Compile Include="Scale3.cs" />
@@ -809,6 +835,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\Lib\" />
+    <Folder Include="Resources\Shadows\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

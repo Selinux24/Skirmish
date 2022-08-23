@@ -242,6 +242,69 @@
   <ItemGroup>
     <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionColor.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionColorI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionColorSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionColorSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalColor.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalColorI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalColorSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalColorSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTexture.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangent.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangentI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangentSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionTexture.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionTextureI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionTextureSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderShadowBasic\PositionTextureSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ShaderShadowBasic\TextureDefault.ps.hlsl" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>del /Q /F "$(SolutionDir)Engine\Resources\*.*"
@@ -251,6 +314,8 @@ copy /Y "$(ProjectDir)Resources\*.fx" "$(SolutionDir)Engine\Resources\*.fx"
 copy /Y "$(TargetDir)Resources\*.cso" "$(SolutionDir)Engine\Resources\*.cso"
 copy /Y "$(ProjectDir)ShaderDefaultBasic\*.hlsl" "$(SolutionDir)Engine\Resources\*.hlsl"
 copy /Y "$(TargetDir)ShaderDefaultBasic\*.cso" "$(SolutionDir)Engine\Resources\*.cso"
+copy /Y "$(ProjectDir)ShaderShadowBasic\*.hlsl" "$(SolutionDir)Engine\Resources\Shadows\*.hlsl"
+copy /Y "$(TargetDir)ShaderShadowBasic\*.cso" "$(SolutionDir)Engine\Resources\Shadows\*.cso"
 </PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

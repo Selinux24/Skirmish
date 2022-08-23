@@ -448,4 +448,130 @@
   <data name="Vs_PositionTexture_Skinned_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\PositionTextureSkinnedI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Vs_ShadowPositionColor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColor.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionColor_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColor.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionColor_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColorI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionColor_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColorI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionColor_Skinned_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColorSkinnedI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionColor_Skinned_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColorSkinnedI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionColor_Skinned" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColorSkinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionColor_Skinned_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionColorSkinned.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColor.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColor.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColorI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColorI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor_Skinned" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColorSkinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor_Skinned_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColorSkinned.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor_Skinned_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColorSkinnedI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalColor_Skinned_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalColorSkinnedI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangent.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangent.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangentI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangentI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent_Skinned" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangentSkinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent_Skinned_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangentSkinned.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent_Skinned_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangentSkinnedI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTextureTangent_Skinned_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureTangentSkinnedI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTexture.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture_Skinned" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureSkinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture_Skinned_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureSkinned.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture_Skinned_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureSkinnedI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionNormalTexture_Skinned_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionNormalTextureSkinnedI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTexture.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTextureI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTextureI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture_Skinned" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTextureSkinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture_Skinned_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTextureSkinned.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture_Skinned_I" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTextureSkinnedI.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_ShadowPositionTexture_Skinned_I_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\PositionTextureSkinnedI.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_ShadowTextureDefault" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\TextureDefault.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_ShadowTextureDefault_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Shadows\TextureDefault.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
