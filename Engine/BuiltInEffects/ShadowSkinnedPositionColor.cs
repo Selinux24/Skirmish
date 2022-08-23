@@ -3,7 +3,6 @@
 namespace Engine.BuiltInEffects
 {
     using Engine.BuiltIn;
-    using Engine.BuiltIn.Shadows;
     using Engine.Common;
 
     /// <summary>

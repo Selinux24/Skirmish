@@ -31,7 +31,7 @@ namespace Engine.BuiltInEffects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public BuiltInDrawer(Graphics graphics)
+        protected BuiltInDrawer(Graphics graphics)
         {
             Graphics = graphics;
             VertexShader = BuiltInShaders.GetVertexShader<VS>();

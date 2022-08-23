@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Pixel shader description
     /// </summary>
-    public class EnginePixelShader : IDisposable, IEnginePixelShader
+    public class EnginePixelShader : IEnginePixelShader
     {
         /// <summary>
         /// Pixel shader

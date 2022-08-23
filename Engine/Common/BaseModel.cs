@@ -89,6 +89,22 @@ namespace Engine.Common
                 throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
             }
 
+            var geo = await description.Content.ReadModelContent();
+            if (!geo.Any())
+            {
+                throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(description));
+            }
+
+            await InitializeGeometryInternal(geo, description, instancingBuffer);
+        }
+        /// <summary>
+        /// Initializes model geometry
+        /// </summary>
+        /// <param name="geo">Geometry collection</param>
+        /// <param name="description">Description</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        private async Task InitializeGeometryInternal(IEnumerable<ContentData> geo, T description, BufferDescriptor instancingBuffer = null)
+        {
             var desc = new DrawingDataDescription()
             {
                 Instanced = description.Instanced,
@@ -99,12 +115,6 @@ namespace Engine.Common
 
                 TextureCount = TextureCount,
             };
-
-            var geo = await description.Content.ReadModelContent();
-            if (!geo.Any())
-            {
-                throw new ArgumentException("Bad content description file. The resource file does not generate any geometry.", nameof(description));
-            }
 
             if (geo.Count() == 1)
             {

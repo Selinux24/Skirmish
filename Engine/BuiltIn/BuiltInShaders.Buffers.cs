@@ -16,6 +16,11 @@ namespace Engine.BuiltIn
         [StructLayout(LayoutKind.Explicit, Size = 16)]
         struct VSGlobal : IBufferData
         {
+            /// <summary>
+            /// Builds the main vertex shader global buffer
+            /// </summary>
+            /// <param name="materialPaletteWidth">Global material palette width</param>
+            /// <param name="animationPaletteWidth">Global animation palette width</param>
             public static VSGlobal Build(uint materialPaletteWidth, uint animationPaletteWidth)
             {
                 return new VSGlobal
@@ -48,16 +53,18 @@ namespace Engine.BuiltIn
         [StructLayout(LayoutKind.Explicit, Size = 128)]
         struct VSPerFrame : IBufferData
         {
+            /// <summary>
+            /// Builds the main vertex shader Per-Frame buffer
+            /// </summary>
+            /// <param name="localTransform">Local transform</param>
+            /// <param name="context">Draw context</param>
             public static VSPerFrame Build(Matrix localTransform, DrawContext context)
             {
-                return new VSPerFrame
+                if (context == null)
                 {
-                    World = Matrix.Transpose(localTransform),
-                    WorldViewProjection = Matrix.Transpose(localTransform * context.ViewProjection),
-                };
-            }
-            public static VSPerFrame Build(Matrix localTransform, DrawContextShadows context)
-            {
+                    return new VSPerFrame();
+                }
+
                 return new VSPerFrame
                 {
                     World = Matrix.Transpose(localTransform),
@@ -88,8 +95,17 @@ namespace Engine.BuiltIn
         [StructLayout(LayoutKind.Explicit, Size = 48)]
         struct PSPerFrameNoLit : IBufferData
         {
+            /// <summary>
+            /// Builds the main pixel shader Per-Frame buffer without lighting
+            /// </summary>
+            /// <param name="context">Draw context</param>
             public static PSPerFrameNoLit Build(DrawContext context)
             {
+                if (context == null)
+                {
+                    return new PSPerFrameNoLit();
+                }
+
                 return new PSPerFrameNoLit
                 {
                     EyePositionWorld = context.EyePosition,
@@ -136,12 +152,34 @@ namespace Engine.BuiltIn
         [StructLayout(LayoutKind.Explicit, Size = 4176)]
         struct PSPerFrameLit : IBufferData
         {
+            /// <summary>
+            /// Maximum directional lights
+            /// </summary>
+            public const int MaxDirectional = 3;
+            /// <summary>
+            /// Maximum point lights
+            /// </summary>
+            public const int MaxPoints = 16;
+            /// <summary>
+            /// Maximum spot lights
+            /// </summary>
+            public const int MaxSpots = 16;
+
+            /// <summary>
+            /// Builds the main pixel shader Per-Frame buffer with lighting
+            /// </summary>
+            /// <param name="context">Draw context</param>
             public static PSPerFrameLit Build(DrawContext context)
             {
+                if (context == null)
+                {
+                    return new PSPerFrameLit();
+                }
+
                 var hemiLight = BufferLightHemispheric.Build(context.Lights?.GetVisibleHemisphericLight());
-                var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), out int dirLength);
-                var pointLights = BufferLightPoint.Build(context.Lights?.GetVisiblePointLights(), out int pointLength);
-                var spotLights = BufferLightSpot.Build(context.Lights?.GetVisibleSpotLights(), out int spotLength);
+                var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), MaxDirectional, out int dirLength);
+                var pointLights = BufferLightPoint.Build(context.Lights?.GetVisiblePointLights(), MaxPoints, out int pointLength);
+                var spotLights = BufferLightSpot.Build(context.Lights?.GetVisibleSpotLights(), MaxSpots, out int spotLength);
 
                 return new PSPerFrameLit
                 {
@@ -160,9 +198,9 @@ namespace Engine.BuiltIn
                     ShadowIntensity = context.Lights?.ShadowIntensity ?? 0f,
 
                     HemiLight = hemiLight,
-                    DirLights = dirLights,
-                    PointLights = pointLights,
-                    SpotLights = spotLights,
+                    DirLights = dirLights.ToArray(),
+                    PointLights = pointLights.ToArray(),
+                    SpotLights = spotLights.ToArray(),
                 };
             }
 
@@ -224,17 +262,17 @@ namespace Engine.BuiltIn
             /// <summary>
             /// Directional lights
             /// </summary>
-            [FieldOffset(112), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightDirectional.MAX)]
+            [FieldOffset(112), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxDirectional)]
             public BufferLightDirectional[] DirLights;
             /// <summary>
             /// Point lights
             /// </summary>
-            [FieldOffset(592), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightPoint.MAX)]
+            [FieldOffset(592), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxPoints)]
             public BufferLightPoint[] PointLights;
             /// <summary>
             /// Spot lights
             /// </summary>
-            [FieldOffset(1872), MarshalAs(UnmanagedType.ByValArray, SizeConst = BufferLightSpot.MAX)]
+            [FieldOffset(1872), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxSpots)]
             public BufferLightSpot[] SpotLights;
 
             /// <inheritdoc/>
@@ -250,37 +288,17 @@ namespace Engine.BuiltIn
         struct BufferLightHemispheric : IBufferData
         {
             /// <summary>
-            /// Maximum light count
-            /// </summary>
-            public const int MAX = 1;
-
-            /// <summary>
-            /// Default hemispheric light
-            /// </summary>
-            public static BufferLightHemispheric Default
-            {
-                get
-                {
-                    return new BufferLightHemispheric()
-                    {
-                        AmbientDown = Color3.White,
-                        AmbientUp = Color3.White,
-                    };
-                }
-            }
-            /// <summary>
             /// Builds a hemispheric light buffer
             /// </summary>
             /// <param name="light">Light</param>
             /// <returns>Returns the new buffer</returns>
             public static BufferLightHemispheric Build(ISceneLightHemispheric light)
             {
-                if (light != null)
+                return new BufferLightHemispheric
                 {
-                    return new BufferLightHemispheric(light);
-                }
-
-                return Default;
+                    AmbientDown = light?.AmbientDown ?? Color3.Black,
+                    AmbientUp = light?.AmbientUp ?? Color3.Black,
+                };
             }
 
             /// <summary>
@@ -293,16 +311,6 @@ namespace Engine.BuiltIn
             /// </summary>
             [FieldOffset(16)]
             public Color3 AmbientUp;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="light">Light</param>
-            public BufferLightHemispheric(ISceneLightHemispheric light)
-            {
-                AmbientDown = light.AmbientDown;
-                AmbientUp = light.AmbientUp;
-            }
 
             /// <inheritdoc/>
             public int GetStride()
@@ -317,44 +325,43 @@ namespace Engine.BuiltIn
         struct BufferLightDirectional : IBufferData
         {
             /// <summary>
-            /// Maximum light count
-            /// </summary>
-            public const int MAX = 3;
-
-            /// <summary>
-            /// Default buffer collection
-            /// </summary>
-            public static BufferLightDirectional[] Default
-            {
-                get
-                {
-                    return new BufferLightDirectional[MAX];
-                }
-            }
-            /// <summary>
             /// Builds a light buffer collection
             /// </summary>
             /// <param name="lights">Light list</param>
+            /// <param name="maxLights">Maximum lights</param>
             /// <param name="lightCount">Returns the assigned light count</param>
             /// <returns>Returns a light buffer collection</returns>
-            public static BufferLightDirectional[] Build(IEnumerable<ISceneLightDirectional> lights, out int lightCount)
+            public static IEnumerable<BufferLightDirectional> Build(IEnumerable<ISceneLightDirectional> lights, int maxLights, out int lightCount)
             {
-                if (!lights.Any())
+                if (lights?.Any() != true)
                 {
                     lightCount = 0;
 
-                    return Default;
+                    return new BufferLightDirectional[maxLights];
                 }
 
-                var bDirLights = Default;
+                var bDirLights = new BufferLightDirectional[maxLights];
 
-                var dir = lights.ToArray();
-                for (int i = 0; i < Math.Min(dir.Length, MAX); i++)
+                for (int i = 0; i < Math.Min(lights.Count(), maxLights); i++)
                 {
-                    bDirLights[i] = new BufferLightDirectional(dir[i]);
+                    var light = lights.ElementAt(i);
+
+                    var brightness = light?.Brightness ?? 0;
+
+                    bDirLights[i] = new BufferLightDirectional
+                    {
+                        DiffuseColor = (light?.DiffuseColor ?? Color3.Black) * brightness,
+                        SpecularColor = (light?.SpecularColor ?? Color3.Black) * brightness,
+                        DirToLight = -light?.Direction ?? Vector3.Zero,
+                        CastShadow = light?.CastShadowsMarked ?? false ? 1 : 0,
+                        ToCascadeOffsetX = light?.ToCascadeOffsetX ?? Vector4.Zero,
+                        ToCascadeOffsetY = light?.ToCascadeOffsetY ?? Vector4.Zero,
+                        ToCascadeScale = light?.ToCascadeScale ?? Vector4.Zero,
+                        ToShadowSpace = Matrix.Transpose(light?.ToShadowSpace ?? Matrix.Zero),
+                    };
                 }
 
-                lightCount = Math.Min(dir.Length, MAX);
+                lightCount = Math.Min(lights.Count(), maxLights);
 
                 return bDirLights;
             }
@@ -406,22 +413,6 @@ namespace Engine.BuiltIn
             [FieldOffset(96)]
             public Matrix ToShadowSpace;
 
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="light">Light</param>
-            public BufferLightDirectional(ISceneLightDirectional light)
-            {
-                DiffuseColor = light.DiffuseColor * light.Brightness;
-                SpecularColor = light.SpecularColor * light.Brightness;
-                DirToLight = -light.Direction;
-                CastShadow = light.CastShadowsMarked ? 1 : 0;
-                ToCascadeOffsetX = light.ToCascadeOffsetX;
-                ToCascadeOffsetY = light.ToCascadeOffsetY;
-                ToCascadeScale = light.ToCascadeScale;
-                ToShadowSpace = Matrix.Transpose(light.ToShadowSpace);
-            }
-
             /// <inheritdoc/>
             public int GetStride()
             {
@@ -435,44 +426,45 @@ namespace Engine.BuiltIn
         struct BufferLightSpot : IBufferData
         {
             /// <summary>
-            /// Maximum light count
-            /// </summary>
-            public const int MAX = 16;
-
-            /// <summary>
-            /// Default buffer collection
-            /// </summary>
-            public static BufferLightSpot[] Default
-            {
-                get
-                {
-                    return new BufferLightSpot[MAX];
-                }
-            }
-            /// <summary>
             /// Builds a light buffer collection
             /// </summary>
             /// <param name="lights">Light list</param>
+            /// <param name="maxLights">Maximum lights</param>
             /// <param name="lightCount">Returns the assigned light count</param>
             /// <returns>Returns a light buffer collection</returns>
-            public static BufferLightSpot[] Build(IEnumerable<ISceneLightSpot> lights, out int lightCount)
+            public static IEnumerable<BufferLightSpot> Build(IEnumerable<ISceneLightSpot> lights, int maxLights, out int lightCount)
             {
-                if (!lights.Any())
+                if (lights?.Any() != true)
                 {
                     lightCount = 0;
 
-                    return Default;
+                    return new BufferLightSpot[maxLights];
                 }
 
-                var bSpotLights = Default;
+                var bSpotLights = new BufferLightSpot[maxLights];
 
-                var spot = lights.ToArray();
-                for (int i = 0; i < Math.Min(spot.Length, MAX); i++)
+                var spots = lights.ToArray();
+                for (int i = 0; i < Math.Min(spots.Length, maxLights); i++)
                 {
-                    bSpotLights[i] = new BufferLightSpot(spot[i]);
+                    var light = spots[i];
+
+                    bSpotLights[i] = new BufferLightSpot
+                    {
+                        Position = light?.Position ?? Vector3.Zero,
+                        Direction = light?.Direction ?? Vector3.Zero,
+                        DiffuseColor = light?.DiffuseColor ?? Color3.Black,
+                        SpecularColor = light?.SpecularColor ?? Color3.Black,
+                        Intensity = light?.Intensity ?? 0,
+                        Angle = light?.FallOffAngleRadians ?? 0,
+                        Radius = light?.Radius ?? 0,
+                        CastShadow = light?.CastShadowsMarked ?? false ? 1 : 0,
+                        MapIndex = light?.ShadowMapIndex ?? -1,
+                        MapCount = light?.ShadowMapCount ?? 0,
+                        FromLightVP = light?.FromLightVP?.Any() == true ? Matrix.Transpose(light.FromLightVP.First()) : Matrix.Zero,
+                    };
                 }
 
-                lightCount = Math.Min(spot.Length, MAX);
+                lightCount = Math.Min(spots.Length, maxLights);
 
                 return bSpotLights;
             }
@@ -538,31 +530,6 @@ namespace Engine.BuiltIn
             [FieldOffset(80)]
             public Matrix FromLightVP;
 
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="light">Light</param>
-            public BufferLightSpot(ISceneLightSpot light)
-            {
-                Position = light.Position;
-                Direction = light.Direction;
-                DiffuseColor = light.DiffuseColor;
-                SpecularColor = light.SpecularColor;
-                Intensity = light.Intensity;
-                Intensity = light.Intensity;
-                Angle = light.FallOffAngleRadians;
-                Radius = light.Radius;
-                CastShadow = light.CastShadowsMarked ? 1 : 0;
-                MapIndex = light.ShadowMapIndex;
-                MapCount = light.ShadowMapCount;
-
-                FromLightVP = Matrix.Identity;
-                if (light.FromLightVP?.Length > 0)
-                {
-                    FromLightVP = Matrix.Transpose(light.FromLightVP[0]);
-                }
-            }
-
             /// <inheritdoc/>
             public int GetStride()
             {
@@ -576,44 +543,45 @@ namespace Engine.BuiltIn
         struct BufferLightPoint : IBufferData
         {
             /// <summary>
-            /// Maximum light count
-            /// </summary>
-            public const int MAX = 16;
-
-            /// <summary>
-            /// Default buffer collection
-            /// </summary>
-            public static BufferLightPoint[] Default
-            {
-                get
-                {
-                    return new BufferLightPoint[MAX];
-                }
-            }
-            /// <summary>
             /// Builds a light buffer collection
             /// </summary>
             /// <param name="lights">Light list</param>
+            /// <param name="maxLights">Maximum lights</param>
             /// <param name="lightCount">Returns the assigned light count</param>
             /// <returns>Returns a light buffer collection</returns>
-            public static BufferLightPoint[] Build(IEnumerable<ISceneLightPoint> lights, out int lightCount)
+            public static IEnumerable<BufferLightPoint> Build(IEnumerable<ISceneLightPoint> lights, int maxLights, out int lightCount)
             {
-                if (!lights.Any())
+                if (lights?.Any() != true)
                 {
                     lightCount = 0;
 
-                    return Default;
+                    return new BufferLightPoint[maxLights];
                 }
 
-                var bPointLights = Default;
+                var bPointLights = new BufferLightPoint[maxLights];
 
-                var point = lights.ToArray();
-                for (int i = 0; i < Math.Min(point.Length, MAX); i++)
+                var points = lights.ToArray();
+                for (int i = 0; i < Math.Min(points.Length, maxLights); i++)
                 {
-                    bPointLights[i] = new BufferLightPoint(point[i]);
+                    var light = points[i];
+
+                    float radius = light?.Radius ?? 0;
+                    var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius + 0.1f);
+
+                    bPointLights[i] = new BufferLightPoint
+                    {
+                        Position = light?.Position ?? Vector3.Zero,
+                        DiffuseColor = light?.DiffuseColor ?? Color3.Black,
+                        SpecularColor = light?.SpecularColor ?? Color3.Black,
+                        Intensity = light?.Intensity ?? 0,
+                        Radius = light?.Radius ?? 0,
+                        CastShadow = light?.CastShadowsMarked ?? false ? 1 : 0,
+                        MapIndex = light?.ShadowMapIndex ?? -1,
+                        PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]),
+                    };
                 }
 
-                lightCount = Math.Min(point.Length, MAX);
+                lightCount = Math.Min(points.Length, maxLights);
 
                 return bPointLights;
             }
@@ -662,24 +630,6 @@ namespace Engine.BuiltIn
             /// </summary>
             [FieldOffset(64)]
             public int MapIndex;
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            /// <param name="light">Light</param>
-            public BufferLightPoint(ISceneLightPoint light)
-            {
-                Position = light.Position;
-                DiffuseColor = light.DiffuseColor;
-                SpecularColor = light.SpecularColor;
-                Intensity = light.Intensity;
-                Radius = light.Radius;
-                CastShadow = light.CastShadowsMarked ? 1 : 0;
-                MapIndex = light.ShadowMapIndex;
-
-                var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, Radius + 0.1f);
-                PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]);
-            }
 
             /// <inheritdoc/>
             public int GetStride()

@@ -100,11 +100,8 @@ namespace Engine
         {
             if (disposing)
             {
-                if (InstancingBuffer != null)
-                {
-                    BufferManager.RemoveInstancingData(InstancingBuffer);
-                    InstancingBuffer = null;
-                }
+                BufferManager.RemoveInstancingData(InstancingBuffer);
+                InstancingBuffer = null;
             }
 
             base.Dispose(disposing);
@@ -321,20 +318,20 @@ namespace Engine
                 }
 
                 var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances[0]) + InstancingBuffer.BufferOffset;
-                var instances = Math.Min(maxCount, lodInstances.Length);
-                if (instances <= 0)
+                var instancesToDraw = Math.Min(maxCount, lodInstances.Length);
+                if (instancesToDraw <= 0)
                 {
                     continue;
                 }
 
-                maxCount -= instances;
-                instanceCount += instances;
+                maxCount -= instancesToDraw;
+                instanceCount += instancesToDraw;
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
                     UpdateIndependantTransforms(meshName);
 
-                    count += DrawShadowMesh(context, drawingData, meshName, instances, startInstanceLocation);
+                    count += DrawShadowMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;
                 }
             }
@@ -345,12 +342,12 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
         /// <param name="meshName">Mesh name</param>
-        /// <param name="instances">Instance buffer length</param>
+        /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, string meshName, int instances, int startInstanceLocation)
+        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, string meshName, int instancesToDraw, int startInstanceLocation)
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instances}.");
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
             var effect = context.ShadowMap.GetEffect();
             if (effect == null)
@@ -403,8 +400,8 @@ namespace Engine
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instances}");
-                    mesh.Draw(graphics, instances, startInstanceLocation);
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
+                    mesh.Draw(graphics, instancesToDraw, startInstanceLocation);
                 }
             }
 
@@ -469,20 +466,20 @@ namespace Engine
                 }
 
                 var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances.First()) + InstancingBuffer.BufferOffset;
-                var instances = Math.Min(maxCount, lodInstances.Count());
-                if (instances <= 0)
+                var instancesToDraw = Math.Min(maxCount, lodInstances.Count());
+                if (instancesToDraw <= 0)
                 {
                     continue;
                 }
 
-                maxCount -= instances;
-                instanceCount += instances;
+                maxCount -= instancesToDraw;
+                instanceCount += instancesToDraw;
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
                     UpdateIndependantTransforms(meshName);
 
-                    count += DrawMesh(context, drawingData, meshName, instances, startInstanceLocation);
+                    count += DrawMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;
                 }
             }
@@ -496,12 +493,12 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
         /// <param name="meshName">Mesh name</param>
-        /// <param name="instances">Instance buffer length</param>
+        /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, DrawingData drawingData, string meshName, int instances, int startInstanceLocation)
+        private int DrawMesh(DrawContext context, DrawingData drawingData, string meshName, int instancesToDraw, int startInstanceLocation)
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instances}. {context.DrawerMode}");
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
             int count = 0;
 
@@ -542,7 +539,7 @@ namespace Engine
 
                     BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
-                    drawer.Draw(BufferManager, new[] { mesh }, instances, startInstanceLocation);
+                    drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation);
 
                     count += mesh.Count;
 
@@ -575,8 +572,8 @@ namespace Engine
                 {
                     graphics.EffectPassApply(technique, p, 0);
 
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instances}");
-                    mesh.Draw(graphics, instances, startInstanceLocation);
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
+                    mesh.Draw(graphics, instancesToDraw, startInstanceLocation);
                 }
             }
 

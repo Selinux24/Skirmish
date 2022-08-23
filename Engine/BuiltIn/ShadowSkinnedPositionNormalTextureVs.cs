@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal texture tangent vertex shader
+    /// Skinned position normal texture vertex shader
     /// </summary>
-    public class ShadowPositionNormalTextureTangentVs : IBuiltInVertexShader
+    public class ShadowSkinnedPositionNormalTextureVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -18,11 +18,14 @@ namespace Engine.BuiltIn.Shadows
         [StructLayout(LayoutKind.Explicit, Size = 16)]
         struct PerInstance : IBufferData
         {
-            public static PerInstance Build(uint textureIndex)
+            public static PerInstance Build(uint textureIndex, AnimationDrawInfo animation)
             {
                 return new PerInstance
                 {
                     TextureIndex = textureIndex,
+                    AnimationOffset = animation.Offset1,
+                    AnimationOffset2 = animation.Offset2,
+                    AnimationInterpolation = animation.InterpolationAmount,
                 };
             }
 
@@ -31,6 +34,21 @@ namespace Engine.BuiltIn.Shadows
             /// </summary>
             [FieldOffset(0)]
             public uint TextureIndex;
+            /// <summary>
+            /// Animation offset 1
+            /// </summary>
+            [FieldOffset(4)]
+            public uint AnimationOffset;
+            /// <summary>
+            /// Animation offset 2
+            /// </summary>
+            [FieldOffset(8)]
+            public uint AnimationOffset2;
+            /// <summary>
+            /// Animation interpolation value
+            /// </summary>
+            [FieldOffset(12)]
+            public float AnimationInterpolation;
 
             /// <inheritdoc/>
             public int GetStride()
@@ -58,27 +76,27 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowPositionNormalTextureTangentVs(Graphics graphics)
+        public ShadowSkinnedPositionNormalTextureVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalTextureTangent_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalTextureTangent_Cso ?? Resources.Vs_ShadowPositionNormalTextureTangent;
+            bool compile = Resources.Vs_ShadowPositionNormalTexture_Skinned_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionNormalTexture_Skinned_Cso ?? Resources.Vs_ShadowPositionNormalTexture_Skinned;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalTextureTangentVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalTextureVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalTextureTangentVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalTextureVs), bytes);
             }
 
-            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowPositionNormalTextureTangentVs) + "." + nameof(PerInstance));
+            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowSkinnedPositionNormalTextureVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowPositionNormalTextureTangentVs()
+        ~ShadowSkinnedPositionNormalTextureVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -109,12 +127,11 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Writes per instance data
         /// </summary>
-        /// <param name="material">Material</param>
-        /// <param name="tintColor">Tint color</param>
         /// <param name="textureIndex">Texture index</param>
-        public void WriteCBPerInstance(uint textureIndex)
+        /// <param name="animation">Animation</param>
+        public void WriteCBPerInstance(uint textureIndex, AnimationDrawInfo animation)
         {
-            cbPerInstance.WriteData(PerInstance.Build(textureIndex));
+            cbPerInstance.WriteData(PerInstance.Build(textureIndex, animation));
         }
 
         /// <summary>
@@ -124,11 +141,19 @@ namespace Engine.BuiltIn.Shadows
         {
             var cb = new[]
             {
+                BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
                 cbPerInstance,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            var rv = new[]
+            {
+                BuiltInShaders.GetAnimationPalette(),
+            };
+
+            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

@@ -1,54 +1,49 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Shadow transparent texture pixel shader
+    /// Skinned position normal texture instanced vertex shader
     /// </summary>
-    public class ShadowTextureDefaultPs : IBuiltInPixelShader
+    public class ShadowSkinnedPositionNormalTextureVsI : IBuiltInVertexShader
     {
-        /// <summary>
-        /// Shader
-        /// </summary>
-        public EnginePixelShader Shader { get; private set; }
-
-        /// <summary>
-        /// Diffuse map resource view
-        /// </summary>
-        private EngineShaderResourceView diffuseMapArray;
-
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
         /// <summary>
+        /// Shader
+        /// </summary>
+        public EngineVertexShader Shader { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowTextureDefaultPs(Graphics graphics)
+        public ShadowSkinnedPositionNormalTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_ShadowTextureDefault_Cso == null;
-            var bytes = Resources.Ps_ShadowTextureDefault_Cso ?? Resources.Ps_ShadowTextureDefault;
+            bool compile = Resources.Vs_ShadowPositionNormalTexture_Skinned_I_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionNormalTexture_Skinned_I_Cso ?? Resources.Vs_ShadowPositionNormalTexture_Skinned_I;
             if (compile)
             {
-                Shader = graphics.CompilePixelShader(nameof(ShadowTextureDefaultPs), "main", bytes, HelperShaders.PSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadPixelShader(nameof(ShadowTextureDefaultPs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalTextureVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowTextureDefaultPs()
+        ~ShadowSkinnedPositionNormalTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -75,25 +70,24 @@ namespace Engine.BuiltIn.Shadows
         }
 
         /// <summary>
-        /// Sets the diffuse map array
-        /// </summary>
-        /// <param name="diffuseMapArray">Diffuse map array</param>
-        public void SetDiffuseMap(EngineShaderResourceView diffuseMapArray)
-        {
-            this.diffuseMapArray = diffuseMapArray;
-        }
-
-        /// <summary>
-        /// Sets the pixel shader constant buffers
+        /// Sets the vertex shader constant buffers
         /// </summary>
         public void SetConstantBuffers()
         {
-            var rv = new[]
+            var cb = new[]
             {
-                diffuseMapArray,
+                BuiltInShaders.GetVSGlobal(),
+                BuiltInShaders.GetVSPerFrame(),
             };
 
-            Graphics.SetPixelShaderResourceViews(0, rv);
+            Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            var rv = new[]
+            {
+                BuiltInShaders.GetAnimationPalette(),
+            };
+
+            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

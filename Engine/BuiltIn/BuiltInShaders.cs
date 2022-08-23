@@ -238,21 +238,6 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
-        /// Updates per-frame data
-        /// </summary>
-        /// <param name="localTransform">Local transform</param>
-        /// <param name="context">Draw context</param>
-        public static void UpdatePerFrame(Matrix localTransform, DrawContextShadows context)
-        {
-            if (context == null)
-            {
-                return;
-            }
-
-            var vsPerFrame = GetConstantBuffer<VSPerFrame>();
-            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, context));
-        }
-        /// <summary>
         /// Gets the built-in per frame vertex shader constant buffer
         /// </summary>
         public static IEngineConstantBuffer GetVSPerFrame()

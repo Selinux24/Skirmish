@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position color instanced vertex shader
+    /// Skinned position normal color instanced vertex shader
     /// </summary>
-    public class ShadowSkinnedPositionColorVsI : IBuiltInVertexShader
+    public class ShadowSkinnedPositionNormalColorVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowSkinnedPositionColorVsI(Graphics graphics)
+        public ShadowSkinnedPositionNormalColorVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionColor_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionColor_Skinned_I_Cso ?? Resources.Vs_ShadowPositionColor_Skinned_I;
+            bool compile = Resources.Vs_ShadowPositionNormalColor_Skinned_I_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionNormalColor_Skinned_I_Cso ?? Resources.Vs_ShadowPositionNormalColor_Skinned_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionColorVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalColorVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionColorVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalColorVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowSkinnedPositionColorVsI()
+        ~ShadowSkinnedPositionNormalColorVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

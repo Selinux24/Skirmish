@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal color vertex shader
+    /// Position normal texture instanced vertex shader
     /// </summary>
-    public class ShadowPositionNormalColorVs : IBuiltInVertexShader
+    public class ShadowPositionNormalTextureVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowPositionNormalColorVs(Graphics graphics)
+        public ShadowPositionNormalTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalColor_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalColor_Cso ?? Resources.Vs_ShadowPositionNormalColor;
+            bool compile = Resources.Vs_ShadowPositionNormalTexture_I_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionNormalTexture_I_Cso ?? Resources.Vs_ShadowPositionNormalTexture_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalColorVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalColorVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalTextureVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowPositionNormalColorVs()
+        ~ShadowPositionNormalTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

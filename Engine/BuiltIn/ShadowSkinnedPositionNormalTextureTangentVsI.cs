@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Position color vertex shader
+    /// Skinned position normal texture tangent instanced vertex shader
     /// </summary>
-    public class ShadowPositionColorVs : IBuiltInVertexShader
+    public class ShadowSkinnedPositionNormalTextureTangentVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowPositionColorVs(Graphics graphics)
+        public ShadowSkinnedPositionNormalTextureTangentVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionColor_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionColor_Cso ?? Resources.Vs_ShadowPositionColor;
+            bool compile = Resources.Vs_ShadowPositionNormalTextureTangent_Skinned_I_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionNormalTextureTangent_Skinned_I_Cso ?? Resources.Vs_ShadowPositionNormalTextureTangent_Skinned_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionColorVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalTextureTangentVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionColorVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalTextureTangentVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowPositionColorVs()
+        ~ShadowSkinnedPositionNormalTextureTangentVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -76,10 +76,18 @@ namespace Engine.BuiltIn.Shadows
         {
             var cb = new[]
             {
+                BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            var rv = new[]
+            {
+                BuiltInShaders.GetAnimationPalette(),
+            };
+
+            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

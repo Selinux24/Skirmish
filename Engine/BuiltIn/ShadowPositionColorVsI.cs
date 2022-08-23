@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal texture instanced vertex shader
+    /// Position color instanced vertex shader
     /// </summary>
-    public class ShadowPositionNormalTextureVsI : IBuiltInVertexShader
+    public class ShadowPositionColorVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowPositionNormalTextureVsI(Graphics graphics)
+        public ShadowPositionColorVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalTexture_I_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalTexture_I_Cso ?? Resources.Vs_ShadowPositionNormalTexture_I;
+            bool compile = Resources.Vs_ShadowPositionColor_I_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionColor_I_Cso ?? Resources.Vs_ShadowPositionColor_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowPositionColorVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalTextureVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowPositionColorVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowPositionNormalTextureVsI()
+        ~ShadowPositionColorVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

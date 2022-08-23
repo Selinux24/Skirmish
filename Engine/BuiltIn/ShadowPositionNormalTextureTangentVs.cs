@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal texture vertex shader
+    /// Position normal texture tangent vertex shader
     /// </summary>
-    public class ShadowPositionNormalTextureVs : IBuiltInVertexShader
+    public class ShadowPositionNormalTextureTangentVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -58,27 +58,27 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowPositionNormalTextureVs(Graphics graphics)
+        public ShadowPositionNormalTextureTangentVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalTexture_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalTexture_Cso ?? Resources.Vs_ShadowPositionNormalTexture;
+            bool compile = Resources.Vs_ShadowPositionNormalTextureTangent_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionNormalTextureTangent_Cso ?? Resources.Vs_ShadowPositionNormalTextureTangent;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalTextureVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalTextureTangentVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalTextureVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalTextureTangentVs), bytes);
             }
 
-            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowPositionNormalTextureVs) + "." + nameof(PerInstance));
+            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowPositionNormalTextureTangentVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowPositionNormalTextureVs()
+        ~ShadowPositionNormalTextureTangentVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

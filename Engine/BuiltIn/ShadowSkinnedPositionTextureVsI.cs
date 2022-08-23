@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position normal texture instanced vertex shader
+    /// Skinned position texture instanced vertex shader 
     /// </summary>
-    public class ShadowSkinnedPositionNormalTextureVsI : IBuiltInVertexShader
+    public class ShadowSkinnedPositionTextureVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowSkinnedPositionNormalTextureVsI(Graphics graphics)
+        public ShadowSkinnedPositionTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalTexture_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalTexture_Skinned_I_Cso ?? Resources.Vs_ShadowPositionNormalTexture_Skinned_I;
+            bool compile = Resources.Vs_ShadowPositionTexture_Skinned_I_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionTexture_Skinned_I_Cso ?? Resources.Vs_ShadowPositionTexture_Skinned_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalTextureVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionTextureVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowSkinnedPositionNormalTextureVsI()
+        ~ShadowSkinnedPositionTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

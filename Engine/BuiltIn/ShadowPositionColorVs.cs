@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal color instanced vertex shader
+    /// Position color vertex shader
     /// </summary>
-    public class ShadowPositionNormalColorVsI : IBuiltInVertexShader
+    public class ShadowPositionColorVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowPositionNormalColorVsI(Graphics graphics)
+        public ShadowPositionColorVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalColor_I_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalColor_I_Cso ?? Resources.Vs_ShadowPositionNormalColor_I;
+            bool compile = Resources.Vs_ShadowPositionColor_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionColor_Cso ?? Resources.Vs_ShadowPositionColor;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalColorVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowPositionColorVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalColorVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowPositionColorVs), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowPositionNormalColorVsI()
+        ~ShadowPositionColorVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

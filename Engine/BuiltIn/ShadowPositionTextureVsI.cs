@@ -1,15 +1,15 @@
 ﻿using System;
 
-namespace Engine.BuiltIn.Shadows
+namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position normal color instanced vertex shader
+    /// Position texture instanced vertex shader
     /// </summary>
-    public class ShadowSkinnedPositionNormalColorVsI : IBuiltInVertexShader
+    public class ShadowPositionTextureVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public ShadowSkinnedPositionNormalColorVsI(Graphics graphics)
+        public ShadowPositionTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalColor_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalColor_Skinned_I_Cso ?? Resources.Vs_ShadowPositionNormalColor_Skinned_I;
+            bool compile = Resources.Vs_ShadowPositionTexture_I_Cso == null;
+            var bytes = Resources.Vs_ShadowPositionTexture_I_Cso ?? Resources.Vs_ShadowPositionTexture_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalColorVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(ShadowPositionTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalColorVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(ShadowPositionTextureVsI), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~ShadowSkinnedPositionNormalColorVsI()
+        ~ShadowPositionTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -76,18 +76,10 @@ namespace Engine.BuiltIn.Shadows
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
-
-            var rv = new[]
-            {
-                BuiltInShaders.GetAnimationPalette(),
-            };
-
-            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

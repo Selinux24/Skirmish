@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Vertex shader description
     /// </summary>
-    public class EngineVertexShader : IDisposable, IEngineVertexShader
+    public class EngineVertexShader : IEngineVertexShader
     {
         /// <summary>
         /// Vertex shader
