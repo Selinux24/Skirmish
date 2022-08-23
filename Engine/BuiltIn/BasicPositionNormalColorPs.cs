@@ -7,9 +7,9 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Position color pixel shader
+    /// Position normal color pixel shader
     /// </summary>
-    public class PositionColorPs : IBuiltInPixelShader
+    public class BasicPositionNormalColorPs : IBuiltInPixelShader
     {
         /// <summary>
         /// Shader
@@ -25,25 +25,25 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorPs(Graphics graphics)
+        public BasicPositionNormalColorPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionColor_Cso == null;
-            var bytes = Resources.Ps_PositionColor_Cso ?? Resources.Ps_PositionColor;
+            bool compile = Resources.Ps_PositionNormalColor_Cso == null;
+            var bytes = Resources.Ps_PositionNormalColor_Cso ?? Resources.Ps_PositionNormalColor;
             if (compile)
             {
-                Shader = graphics.CompilePixelShader(nameof(PositionColorPs), "main", bytes, HelperShaders.PSProfile);
+                Shader = graphics.CompilePixelShader(nameof(BasicPositionNormalColorPs), "main", bytes, HelperShaders.PSProfile);
             }
             else
             {
-                Shader = graphics.LoadPixelShader(nameof(PositionColorPs), bytes);
+                Shader = graphics.LoadPixelShader(nameof(BasicPositionNormalColorPs), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorPs()
+        ~BasicPositionNormalColorPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -74,7 +74,16 @@ namespace Engine.BuiltIn
         /// </summary>
         public void SetConstantBuffers()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrameNoLit());
+            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrameLit());
+
+            var rv = new[]
+            {
+                BuiltInShaders.GetPSPerFrameLitShadowMapDir(),
+                BuiltInShaders.GetPSPerFrameLitShadowMapSpot(),
+                BuiltInShaders.GetPSPerFrameLitShadowMapPoint(),
+            };
+
+            Graphics.SetPixelShaderResourceViews(0, rv);
         }
     }
 }

@@ -9,9 +9,9 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position normal texture tangent vertex shader
+    /// Skinned position normal texture vertex shader
     /// </summary>
-    public class SkinnedPositionNormalTextureTangentVs : IBuiltInVertexShader
+    public class BasicPositionNormalTextureSkinnedVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -91,27 +91,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionNormalTextureTangentVs(Graphics graphics)
+        public BasicPositionNormalTextureSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionNormalTextureTangent_Skinned_Cso == null;
-            var bytes = Resources.Vs_PositionNormalTextureTangent_Skinned_Cso ?? Resources.Vs_PositionNormalTextureTangent_Skinned;
+            bool compile = Resources.Vs_PositionNormalTexture_Skinned_Cso == null;
+            var bytes = Resources.Vs_PositionNormalTexture_Skinned_Cso ?? Resources.Vs_PositionNormalTexture_Skinned;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionNormalTextureTangentVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionNormalTextureSkinnedVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionNormalTextureTangentVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionNormalTextureSkinnedVs), bytes);
             }
 
-            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(SkinnedPositionNormalTextureTangentVs) + "." + nameof(PerInstance));
+            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(BasicPositionNormalTextureSkinnedVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionNormalTextureTangentVs()
+        ~BasicPositionNormalTextureSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

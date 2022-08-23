@@ -9,9 +9,9 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position normal texture instanced vertex shader
+    /// Position normal texture instanced vertex shader
     /// </summary>
-    public class SkinnedPositionNormalTextureVsI : IBuiltInVertexShader
+    public class BasicPositionNormalTextureVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Per object data structure
@@ -66,27 +66,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionNormalTextureVsI(Graphics graphics)
+        public BasicPositionNormalTextureVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionNormalTexture_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_PositionNormalTexture_Skinned_I_Cso ?? Resources.Vs_PositionNormalTexture_Skinned_I;
+            bool compile = Resources.Vs_PositionNormalTexture_I_Cso == null;
+            var bytes = Resources.Vs_PositionNormalTexture_I_Cso ?? Resources.Vs_PositionNormalTexture_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionNormalTextureVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionNormalTextureVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionNormalTextureVsI), bytes);
             }
-       
-            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(SkinnedPositionNormalTextureVsI) + "." + nameof(PerObject));
+
+            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(BasicPositionNormalTextureVsI) + "." + nameof(PerObject));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionNormalTextureVsI()
+        ~BasicPositionNormalTextureVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -109,7 +109,7 @@ namespace Engine.BuiltIn
             {
                 Shader?.Dispose();
                 Shader = null;
-         
+
                 cbPerObject?.Dispose();
             }
         }
@@ -138,13 +138,7 @@ namespace Engine.BuiltIn
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
 
-            var rv = new[]
-            {
-                BuiltInShaders.GetMaterialPalette(),
-                BuiltInShaders.GetAnimationPalette(),
-            };
-
-            Graphics.SetVertexShaderResourceViews(0, rv);
+            Graphics.SetVertexShaderResourceView(0, BuiltInShaders.GetMaterialPalette());
         }
     }
 }

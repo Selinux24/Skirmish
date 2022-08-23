@@ -281,20 +281,15 @@ namespace Engine
         /// <returns>Returns the number of drawn triangles</returns>
         private int DrawMeshShadow(DrawContextShadows context, string meshName, Dictionary<string, Mesh> meshDict)
         {
-            var effect = context.ShadowMap.GetEffect();
-            if (effect == null)
-            {
-                return 0;
-            }
-
             int count = 0;
 
             var graphics = Game.Graphics;
 
             var localTransform = GetTransformByName(meshName);
-            effect.UpdatePerFrame(localTransform, context);
 
-            var animationInfo = new AnimationShadowDrawInfo
+            BuiltInShaders.UpdatePerFrame(localTransform, context);
+
+            var animationInfo = new AnimationDrawInfo
             {
                 Offset1 = AnimationOffset,
                 Offset2 = TransitionOffset,
@@ -311,24 +306,22 @@ namespace Engine
 
                 var material = DrawingData.Materials[mat.Key];
 
-                var materialInfo = new MaterialShadowDrawInfo
+                var materialInfo = new MaterialDrawInfo
                 {
                     Material = material,
                 };
 
-                effect.UpdatePerObject(animationInfo, materialInfo, TextureIndex);
+                var drawer = context.ShadowMap.GetDrawer(mesh.VertextType, material.Material.IsTransparent);
+                if (drawer == null)
+                {
+                    continue;
+                }
+
+                drawer.Update(materialInfo, Color4.White, TextureIndex, animationInfo);
 
                 BufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
-                var technique = effect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
-                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    mesh.Draw(graphics);
-                }
+                drawer.Draw(BufferManager, new[] { mesh });
 
                 count += mesh.Count;
             }

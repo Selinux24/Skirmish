@@ -1,6 +1,8 @@
 ﻿
 namespace Engine
 {
+    using Engine.BuiltInEffects;
+    using Engine.Common;
     using Engine.Effects;
 
     /// <summary>
@@ -77,6 +79,11 @@ namespace Engine
         public override IShadowMapDrawer GetEffect()
         {
             return DrawerPool.EffectShadowCascade;
+        }
+        /// <inheritdoc/>
+        public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool useTextureAlpha)
+        {
+            return null;
         }
 
         /// <inheritdoc/>

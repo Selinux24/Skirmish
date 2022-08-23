@@ -57,18 +57,13 @@ namespace Engine.BuiltIn
             /// Builds the main vertex shader Per-Frame buffer
             /// </summary>
             /// <param name="localTransform">Local transform</param>
-            /// <param name="context">Draw context</param>
-            public static VSPerFrame Build(Matrix localTransform, DrawContext context)
+            /// <param name="viewProjection">View-projection transform</param>
+            public static VSPerFrame Build(Matrix localTransform, Matrix viewProjection)
             {
-                if (context == null)
-                {
-                    return new VSPerFrame();
-                }
-
                 return new VSPerFrame
                 {
                     World = Matrix.Transpose(localTransform),
-                    WorldViewProjection = Matrix.Transpose(localTransform * context.ViewProjection),
+                    WorldViewProjection = Matrix.Transpose(localTransform * viewProjection),
                 };
             }
 

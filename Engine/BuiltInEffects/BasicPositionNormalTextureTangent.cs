@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Basic position-normal-texture-tangent drawer
     /// </summary>
-    public class BasicPositionNormalTextureTangent : BuiltInDrawer<PositionNormalTextureTangentVs, PositionNormalTextureTangentPs>
+    public class BasicPositionNormalTextureTangent : BuiltInDrawer<BasicPositionNormalTextureTangentVs, BasicPositionNormalTextureTangentPs>
     {
         /// <summary>
         /// Constructor

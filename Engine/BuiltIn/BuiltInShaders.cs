@@ -258,7 +258,7 @@ namespace Engine.BuiltIn
             }
 
             var vsPerFrame = GetConstantBuffer<VSPerFrame>();
-            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, context));
+            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, context.ViewProjection));
 
             var psPerFrameNoLit = GetConstantBuffer<PSPerFrameNoLit>();
             psPerFrameNoLit?.WriteData(PSPerFrameNoLit.Build(context));
@@ -268,6 +268,21 @@ namespace Engine.BuiltIn
             psPerFrameLitShadowMapDir = context.ShadowMapDirectional?.Texture;
             psPerFrameLitShadowMapSpot = context.ShadowMapSpot?.Texture;
             psPerFrameLitShadowMapPoint = context.ShadowMapPoint?.Texture;
+        }
+        /// <summary>
+        /// Updates per-frame data
+        /// </summary>
+        /// <param name="localTransform">Local transform</param>
+        /// <param name="context">Draw context</param>
+        public static void UpdatePerFrame(Matrix localTransform, DrawContextShadows context)
+        {
+            if (context == null)
+            {
+                return;
+            }
+
+            var vsPerFrame = GetConstantBuffer<VSPerFrame>();
+            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, context.ViewProjection));
         }
         /// <summary>
         /// Gets the built-in per frame pixel shader constant buffer

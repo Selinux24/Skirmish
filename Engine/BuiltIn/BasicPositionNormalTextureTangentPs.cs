@@ -7,9 +7,9 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal texture pixel shader
+    /// Position normal texture tangent pixel shader
     /// </summary>
-    public class PositionNormalTexturePs : IBuiltInPixelShader
+    public class BasicPositionNormalTextureTangentPs : IBuiltInPixelShader
     {
         /// <summary>
         /// Shader
@@ -24,6 +24,14 @@ namespace Engine.BuiltIn
         /// Diffuse sampler
         /// </summary>
         private EngineSamplerState samplerDiffuse;
+        /// <summary>
+        /// Normal map resource view
+        /// </summary>
+        private EngineShaderResourceView normalMapArray;
+        /// <summary>
+        /// Normal sampler
+        /// </summary>
+        private EngineSamplerState samplerNormal;
 
         /// <summary>
         /// Graphics instance
@@ -34,25 +42,25 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionNormalTexturePs(Graphics graphics)
+        public BasicPositionNormalTextureTangentPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionNormalTexture_Cso == null;
-            var bytes = Resources.Ps_PositionNormalTexture_Cso ?? Resources.Ps_PositionNormalTexture;
+            bool compile = Resources.Ps_PositionNormalTextureTangent_Cso == null;
+            var bytes = Resources.Ps_PositionNormalTextureTangent_Cso ?? Resources.Ps_PositionNormalTextureTangent;
             if (compile)
             {
-                Shader = graphics.CompilePixelShader(nameof(PositionNormalTexturePs), "main", bytes, HelperShaders.PSProfile);
+                Shader = graphics.CompilePixelShader(nameof(BasicPositionNormalTextureTangentPs), "main", bytes, HelperShaders.PSProfile);
             }
             else
             {
-                Shader = graphics.LoadPixelShader(nameof(PositionNormalTexturePs), bytes);
+                Shader = graphics.LoadPixelShader(nameof(BasicPositionNormalTextureTangentPs), bytes);
             }
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionNormalTexturePs()
+        ~BasicPositionNormalTextureTangentPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -94,6 +102,22 @@ namespace Engine.BuiltIn
         {
             this.samplerDiffuse = samplerDiffuse;
         }
+        /// <summary>
+        /// Sets the normal map array
+        /// </summary>
+        /// <param name="normalMapArray">Normal map array</param>
+        public void SetNormalMap(EngineShaderResourceView normalMapArray)
+        {
+            this.normalMapArray = normalMapArray;
+        }
+        /// <summary>
+        /// Sets the normal sampler state
+        /// </summary>
+        /// <param name="samplerNormal">Normal sampler</param>
+        public void SetNormalSampler(EngineSamplerState samplerNormal)
+        {
+            this.samplerNormal = samplerNormal;
+        }
 
         /// <summary>
         /// Sets the pixel shader constant buffers
@@ -113,11 +137,18 @@ namespace Engine.BuiltIn
                 BuiltInShaders.GetPSPerFrameLitShadowMapSpot(),
                 BuiltInShaders.GetPSPerFrameLitShadowMapPoint(),
                 diffuseMapArray,
+                normalMapArray,
             };
 
             Graphics.SetPixelShaderResourceViews(0, rv);
 
-            Graphics.SetPixelShaderSampler(0, samplerDiffuse);
+            var ss = new[]
+            {
+                samplerDiffuse,
+                samplerNormal,
+            };
+
+            Graphics.SetPixelShaderSamplers(0, ss);
         }
     }
 }

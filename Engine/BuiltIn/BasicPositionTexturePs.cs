@@ -10,7 +10,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Position texture pixel shader
     /// </summary>
-    public class PositionTexturePs : IBuiltInPixelShader
+    public class BasicPositionTexturePs : IBuiltInPixelShader
     {
         /// <summary>
         /// Per frame data structure
@@ -66,7 +66,7 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionTexturePs(Graphics graphics)
+        public BasicPositionTexturePs(Graphics graphics)
         {
             Graphics = graphics;
 
@@ -74,19 +74,19 @@ namespace Engine.BuiltIn
             var bytes = Resources.Ps_PositionTexture_Cso ?? Resources.Ps_PositionTexture;
             if (compile)
             {
-                Shader = graphics.CompilePixelShader(nameof(PositionTexturePs), "main", bytes, HelperShaders.PSProfile);
+                Shader = graphics.CompilePixelShader(nameof(BasicPositionTexturePs), "main", bytes, HelperShaders.PSProfile);
             }
             else
             {
-                Shader = graphics.LoadPixelShader(nameof(PositionTexturePs), bytes);
+                Shader = graphics.LoadPixelShader(nameof(BasicPositionTexturePs), bytes);
             }
 
-            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(PositionTexturePs) + "." + nameof(PerFrame));
+            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(BasicPositionTexturePs) + "." + nameof(PerFrame));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionTexturePs()
+        ~BasicPositionTexturePs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

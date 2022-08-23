@@ -82,14 +82,14 @@ namespace Engine.Common
         /// </summary>
         /// <param name="description">Description</param>
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
-        protected async Task InitializeGeometry(T description, BufferDescriptor instancingBuffer = null)
+        protected Task InitializeGeometry(T description, BufferDescriptor instancingBuffer = null)
         {
             if (description?.Content == null)
             {
                 throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
             }
 
-            await InitializeGeometryInternal(description, instancingBuffer);
+            return InitializeGeometryInternal(description, instancingBuffer);
         }
         /// <summary>
         /// Initializes model geometry

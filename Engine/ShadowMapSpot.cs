@@ -2,6 +2,9 @@
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
+    using Engine.Common;
     using Engine.Effects;
 
     /// <summary>
@@ -48,6 +51,53 @@ namespace Engine
         public override IShadowMapDrawer GetEffect()
         {
             return DrawerPool.EffectShadowBasic;
+        }
+        /// <inheritdoc/>
+        public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool useTextureAlpha)
+        {
+            switch (vertexType)
+            {
+                case VertexTypes.Unknown:
+                    return null;
+                case VertexTypes.Billboard:
+                    return null;
+                case VertexTypes.Font:
+                    return null;
+                case VertexTypes.CPUParticle:
+                    return null;
+                case VertexTypes.GPUParticle:
+                    return null;
+                case VertexTypes.Terrain:
+                    return null;
+                case VertexTypes.Decal:
+                    return null;
+                case VertexTypes.Position:
+                    return null;
+                case VertexTypes.PositionColor:
+                    return BuiltInShaders.GetDrawer<ShadowPositionColor>();
+                case VertexTypes.PositionTexture:
+                    return BuiltInShaders.GetDrawer<ShadowPositionTexture>();
+                case VertexTypes.PositionNormalColor:
+                    return BuiltInShaders.GetDrawer<ShadowPositionNormalColor>();
+                case VertexTypes.PositionNormalTexture:
+                    return BuiltInShaders.GetDrawer<ShadowPositionNormalTexture>();
+                case VertexTypes.PositionNormalTextureTangent:
+                    return BuiltInShaders.GetDrawer<ShadowPositionNormalTextureTangent>();
+                case VertexTypes.PositionSkinned:
+                    return null;
+                case VertexTypes.PositionColorSkinned:
+                    return BuiltInShaders.GetDrawer<ShadowPositionColorSkinned>();
+                case VertexTypes.PositionTextureSkinned:
+                    return BuiltInShaders.GetDrawer<ShadowPositionTextureSkinned>();
+                case VertexTypes.PositionNormalColorSkinned:
+                    return BuiltInShaders.GetDrawer<ShadowPositionNormalColorSkinned>();
+                case VertexTypes.PositionNormalTextureSkinned:
+                    return BuiltInShaders.GetDrawer<ShadowPositionNormalTextureSkinned>();
+                case VertexTypes.PositionNormalTextureTangentSkinned:
+                    return BuiltInShaders.GetDrawer<ShadowPositionNormalTextureTangentSkinned>();
+                default:
+                    return null;
+            }
         }
 
         /// <inheritdoc/>

@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Engine
 {
+    using Engine.BuiltInEffects;
     using Engine.Common;
     using Engine.Effects;
 
@@ -30,25 +31,15 @@ namespace Engine
         /// Name
         /// </summary>
         public string Name { get; protected set; }
-        /// <summary>
-        /// Cube deph map texture
-        /// </summary>
+        /// <inheritdoc/>
         public EngineShaderResourceView Texture { get; protected set; }
-        /// <summary>
-        /// To shadow view*projection matrix
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix ToShadowMatrix { get; set; } = Matrix.Identity;
-        /// <summary>
-        /// Light position
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 LightPosition { get; set; } = Vector3.Zero;
-        /// <summary>
-        /// From light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix[] FromLightViewProjectionArray { get; set; }
-        /// <summary>
-        /// Gets or sets the high resolution map flag (if available)
-        /// </summary>
+        /// <inheritdoc/>
         public virtual bool HighResolutionMap { get; set; }
 
         /// <summary>
@@ -75,9 +66,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -105,26 +94,9 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Updates the from light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public abstract void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
-        /// <summary>
-        /// Gets the effect to draw this shadow map
-        /// </summary>
-        /// <returns>Returns an effect</returns>
-        public abstract IShadowMapDrawer GetEffect();
-
-        /// <summary>
-        /// Update shadow map globals
-        /// </summary>
-        public abstract void UpdateGlobals();
-
-        /// <summary>
-        /// Binds the shadow map data to graphics
-        /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="index">Array index</param>
+        /// <inheritdoc/>
         public void Bind(Graphics graphics, int index)
         {
             //Set shadow mapper viewport
@@ -136,5 +108,12 @@ namespace Engine
                 DepthMap.ElementAtOrDefault(index), true, false,
                 true);
         }
+        /// <inheritdoc/>
+        public abstract IShadowMapDrawer GetEffect();
+        /// <inheritdoc/>
+        public abstract IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool useTextureAlpha);
+
+        /// <inheritdoc/>
+        public abstract void UpdateGlobals();
     }
 }

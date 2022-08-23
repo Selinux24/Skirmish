@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Basic position-color drawer
     /// </summary>
-    public class BasicPositionColor : BuiltInDrawer<PositionColorVs, PositionColorPs>
+    public class BasicPositionColor : BuiltInDrawer<BasicPositionColorVs, BasicPositionColorPs>
     {
         /// <summary>
         /// Constructor

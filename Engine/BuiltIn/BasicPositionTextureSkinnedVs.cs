@@ -9,9 +9,9 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position normal texture vertex shader
+    /// Skinned position texture vertex shader
     /// </summary>
-    public class SkinnedPositionNormalTextureVs : IBuiltInVertexShader
+    public class BasicPositionTextureSkinnedVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
@@ -91,27 +91,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionNormalTextureVs(Graphics graphics)
+        public BasicPositionTextureSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionNormalTexture_Skinned_Cso == null;
-            var bytes = Resources.Vs_PositionNormalTexture_Skinned_Cso ?? Resources.Vs_PositionNormalTexture_Skinned;
+            bool compile = Resources.Vs_PositionTexture_Skinned_Cso == null;
+            var bytes = Resources.Vs_PositionTexture_Skinned_Cso ?? Resources.Vs_PositionTexture_Skinned;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionNormalTextureVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionTextureSkinnedVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionNormalTextureVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionTextureSkinnedVs), bytes);
             }
 
-            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(SkinnedPositionNormalTextureVs) + "." + nameof(PerInstance));
+            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(BasicPositionTextureSkinnedVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionNormalTextureVs()
+        ~BasicPositionTextureSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Basic position-color instanced drawer
     /// </summary>
-    public class BasicPositionColorInstanced : BuiltInDrawer<PositionColorVsI, PositionColorPs>
+    public class BasicPositionColorInstanced : BuiltInDrawer<BasicPositionColorVsI, BasicPositionColorPs>
     {
         /// <summary>
         /// Constructor

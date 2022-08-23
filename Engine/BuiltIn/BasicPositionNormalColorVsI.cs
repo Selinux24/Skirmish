@@ -9,9 +9,9 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Position normal texture tangent instanced vertex shader
+    /// Position normal color instanced vertex shader
     /// </summary>
-    public class PositionNormalTextureTangentVsI : IBuiltInVertexShader
+    public class BasicPositionNormalColorVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Per object data structure
@@ -66,27 +66,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionNormalTextureTangentVsI(Graphics graphics)
+        public BasicPositionNormalColorVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionNormalTextureTangent_I_Cso == null;
-            var bytes = Resources.Vs_PositionNormalTextureTangent_I_Cso ?? Resources.Vs_PositionNormalTextureTangent_I;
+            bool compile = Resources.Vs_PositionNormalColor_I_Cso == null;
+            var bytes = Resources.Vs_PositionNormalColor_I_Cso ?? Resources.Vs_PositionNormalColor_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionNormalColorVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionNormalTextureTangentVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionNormalColorVsI), bytes);
             }
 
-            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(PositionNormalTextureTangentVsI) + "." + nameof(PerObject));
+            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(BasicPositionNormalColorVsI) + "." + nameof(PerObject));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionNormalTextureTangentVsI()
+        ~BasicPositionNormalColorVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

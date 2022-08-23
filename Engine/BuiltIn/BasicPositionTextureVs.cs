@@ -9,26 +9,23 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position texture vertex shader
+    /// Position texture vertex shader
     /// </summary>
-    public class SkinnedPositionTextureVs : IBuiltInVertexShader
+    public class BasicPositionTextureVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per instance data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 48)]
+        [StructLayout(LayoutKind.Explicit, Size = 32)]
         struct PerInstance : IBufferData
         {
-            public static PerInstance Build(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
+            public static PerInstance Build(MaterialDrawInfo material, Color4 tintColor, uint textureIndex)
             {
                 return new PerInstance
                 {
                     TintColor = tintColor,
                     MaterialIndex = material.Material?.ResourceIndex ?? 0,
                     TextureIndex = textureIndex,
-                    AnimationOffset = animation.Offset1,
-                    AnimationOffset2 = animation.Offset2,
-                    AnimationInterpolation = animation.InterpolationAmount,
                 };
             }
 
@@ -48,22 +45,6 @@ namespace Engine.BuiltIn
             /// </summary>
             [FieldOffset(20)]
             public uint TextureIndex;
-
-            /// <summary>
-            /// Animation offset 1
-            /// </summary>
-            [FieldOffset(32)]
-            public uint AnimationOffset;
-            /// <summary>
-            /// Animation offset 2
-            /// </summary>
-            [FieldOffset(36)]
-            public uint AnimationOffset2;
-            /// <summary>
-            /// Animation interpolation value
-            /// </summary>
-            [FieldOffset(40)]
-            public float AnimationInterpolation;
 
             /// <inheritdoc/>
             public int GetStride()
@@ -91,27 +72,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionTextureVs(Graphics graphics)
+        public BasicPositionTextureVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionTexture_Skinned_Cso == null;
-            var bytes = Resources.Vs_PositionTexture_Skinned_Cso ?? Resources.Vs_PositionTexture_Skinned;
+            bool compile = Resources.Vs_PositionTexture_Cso == null;
+            var bytes = Resources.Vs_PositionTexture_Cso ?? Resources.Vs_PositionTexture;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionTextureVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionTextureVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionTextureVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionTextureVs), bytes);
             }
 
-            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(SkinnedPositionTextureVs) + "." + nameof(PerInstance));
+            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(BasicPositionTextureVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionTextureVs()
+        ~BasicPositionTextureVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -145,10 +126,9 @@ namespace Engine.BuiltIn
         /// <param name="material">Material</param>
         /// <param name="tintColor">Tint color</param>
         /// <param name="textureIndex">Texture index</param>
-        /// <param name="animation">Animation</param>
-        public void WriteCBPerInstance(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
+        public void WriteCBPerInstance(MaterialDrawInfo material, Color4 tintColor, uint textureIndex)
         {
-            cbPerInstance.WriteData(PerInstance.Build(material, tintColor, textureIndex, animation));
+            cbPerInstance.WriteData(PerInstance.Build(material, tintColor, textureIndex));
         }
 
         /// <summary>
@@ -165,13 +145,7 @@ namespace Engine.BuiltIn
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
 
-            var rv = new[]
-            {
-                BuiltInShaders.GetMaterialPalette(),
-                BuiltInShaders.GetAnimationPalette(),
-            };
-
-            Graphics.SetVertexShaderResourceViews(0, rv);
+            Graphics.SetVertexShaderResourceView(0, BuiltInShaders.GetMaterialPalette());
         }
     }
 }

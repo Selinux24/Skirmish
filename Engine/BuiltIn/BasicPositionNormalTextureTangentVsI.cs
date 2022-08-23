@@ -9,9 +9,9 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position color instanced vertex shader
+    /// Position normal texture tangent instanced vertex shader
     /// </summary>
-    public class SkinnedPositionColorVsI : IBuiltInVertexShader
+    public class BasicPositionNormalTextureTangentVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Per object data structure
@@ -66,27 +66,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionColorVsI(Graphics graphics)
+        public BasicPositionNormalTextureTangentVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_PositionColor_Skinned_I_Cso ?? Resources.Vs_PositionColor_Skinned_I;
+            bool compile = Resources.Vs_PositionNormalTextureTangent_I_Cso == null;
+            var bytes = Resources.Vs_PositionNormalTextureTangent_I_Cso ?? Resources.Vs_PositionNormalTextureTangent_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionColorVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionNormalTextureTangentVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionColorVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionNormalTextureTangentVsI), bytes);
             }
 
-            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(SkinnedPositionColorVsI) + "." + nameof(PerObject));
+            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(BasicPositionNormalTextureTangentVsI) + "." + nameof(PerObject));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionColorVsI()
+        ~BasicPositionNormalTextureTangentVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -138,13 +138,7 @@ namespace Engine.BuiltIn
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
 
-            var rv = new[]
-            {
-                BuiltInShaders.GetMaterialPalette(),
-                BuiltInShaders.GetAnimationPalette(),
-            };
-
-            Graphics.SetVertexShaderResourceViews(0, rv);
+            Graphics.SetVertexShaderResourceView(0, BuiltInShaders.GetMaterialPalette());
         }
     }
 }

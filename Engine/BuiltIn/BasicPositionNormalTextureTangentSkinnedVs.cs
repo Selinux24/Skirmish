@@ -9,22 +9,26 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Skinned position texture instanced vertex shader 
+    /// Skinned position normal texture tangent vertex shader
     /// </summary>
-    public class SkinnedPositionTextureVsI : IBuiltInVertexShader
+    public class BasicPositionNormalTextureTangentSkinnedVs : IBuiltInVertexShader
     {
         /// <summary>
-        /// Per object data structure
+        /// Per instance data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 32)]
-        struct PerObject : IBufferData
+        [StructLayout(LayoutKind.Explicit, Size = 48)]
+        struct PerInstance : IBufferData
         {
-            public static PerObject Build(MaterialDrawInfo material, Color4 tintColor)
+            public static PerInstance Build(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
             {
-                return new PerObject
+                return new PerInstance
                 {
                     TintColor = tintColor,
                     MaterialIndex = material.Material?.ResourceIndex ?? 0,
+                    TextureIndex = textureIndex,
+                    AnimationOffset = animation.Offset1,
+                    AnimationOffset2 = animation.Offset2,
+                    AnimationInterpolation = animation.InterpolationAmount,
                 };
             }
 
@@ -39,18 +43,39 @@ namespace Engine.BuiltIn
             /// </summary>
             [FieldOffset(16)]
             public uint MaterialIndex;
+            /// <summary>
+            /// Texture index
+            /// </summary>
+            [FieldOffset(20)]
+            public uint TextureIndex;
+
+            /// <summary>
+            /// Animation offset 1
+            /// </summary>
+            [FieldOffset(32)]
+            public uint AnimationOffset;
+            /// <summary>
+            /// Animation offset 2
+            /// </summary>
+            [FieldOffset(36)]
+            public uint AnimationOffset2;
+            /// <summary>
+            /// Animation interpolation value
+            /// </summary>
+            [FieldOffset(40)]
+            public float AnimationInterpolation;
 
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerObject));
+                return Marshal.SizeOf(typeof(PerInstance));
             }
         }
 
         /// <summary>
-        /// Per object constant buffer
+        /// Per instance constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerObject> cbPerObject;
+        private readonly EngineConstantBuffer<PerInstance> cbPerInstance;
 
         /// <summary>
         /// Graphics instance
@@ -66,27 +91,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionTextureVsI(Graphics graphics)
+        public BasicPositionNormalTextureTangentSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionTexture_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_PositionTexture_Skinned_I_Cso ?? Resources.Vs_PositionTexture_Skinned_I;
+            bool compile = Resources.Vs_PositionNormalTextureTangent_Skinned_Cso == null;
+            var bytes = Resources.Vs_PositionNormalTextureTangent_Skinned_Cso ?? Resources.Vs_PositionNormalTextureTangent_Skinned;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(SkinnedPositionTextureVsI), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionNormalTextureTangentSkinnedVs), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(SkinnedPositionTextureVsI), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionNormalTextureTangentSkinnedVs), bytes);
             }
 
-            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(SkinnedPositionTextureVsI) + "." + nameof(PerObject));
+            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(BasicPositionNormalTextureTangentSkinnedVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionTextureVsI()
+        ~BasicPositionNormalTextureTangentSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -110,18 +135,20 @@ namespace Engine.BuiltIn
                 Shader?.Dispose();
                 Shader = null;
 
-                cbPerObject?.Dispose();
+                cbPerInstance?.Dispose();
             }
         }
 
         /// <summary>
-        /// Writes per object data
+        /// Writes per instance data
         /// </summary>
         /// <param name="material">Material</param>
         /// <param name="tintColor">Tint color</param>
-        public void WriteCBPerObject(MaterialDrawInfo material, Color4 tintColor)
+        /// <param name="textureIndex">Texture index</param>
+        /// <param name="animation">Animation</param>
+        public void WriteCBPerInstance(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            cbPerObject.WriteData(PerObject.Build(material, tintColor));
+            cbPerInstance.WriteData(PerInstance.Build(material, tintColor, textureIndex, animation));
         }
 
         /// <summary>
@@ -133,7 +160,7 @@ namespace Engine.BuiltIn
             {
                 BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
-                cbPerObject,
+                cbPerInstance,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

@@ -899,7 +899,7 @@ namespace Engine
         /// <param name="vertexShader">Vertex shader</param>
         public void SetVertexShader(EngineVertexShader vertexShader)
         {
-            deviceContext.VertexShader.Set(vertexShader.GetShader());
+            deviceContext.VertexShader.Set(vertexShader?.GetShader());
         }
         /// <summary>
         /// Removes the vertex shader from the current device context
@@ -992,7 +992,7 @@ namespace Engine
         /// <param name="pixelShader">Pixel shader</param>
         public void SetPixelShader(EnginePixelShader pixelShader)
         {
-            deviceContext.PixelShader.Set(pixelShader.GetShader());
+            deviceContext.PixelShader.Set(pixelShader?.GetShader());
         }
         /// <summary>
         /// Removes the vertex shader from the current device context

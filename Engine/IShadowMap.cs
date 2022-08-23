@@ -3,6 +3,7 @@ using System;
 
 namespace Engine
 {
+    using Engine.BuiltInEffects;
     using Engine.Common;
     using Engine.Effects;
 
@@ -47,6 +48,13 @@ namespace Engine
         /// </summary>
         /// <returns>Returns an effect</returns>
         IShadowMapDrawer GetEffect();
+        /// <summary>
+        /// Gets the drawer to draw this shadow map
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="useTextureAlpha">Uses alpha channel</param>
+        /// <returns>Returns a drawer</returns>
+        IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool useTextureAlpha);
 
         /// <summary>
         /// Update shadow map globals

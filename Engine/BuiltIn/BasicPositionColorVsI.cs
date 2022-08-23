@@ -9,23 +9,22 @@ namespace Engine.BuiltIn
     using Engine.Properties;
 
     /// <summary>
-    /// Position texture vertex shader
+    /// Position color instanced vertex shader
     /// </summary>
-    public class PositionTextureVs : IBuiltInVertexShader
+    public class BasicPositionColorVsI : IBuiltInVertexShader
     {
         /// <summary>
-        /// Per instance data structure
+        /// Per object data structure
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 32)]
-        struct PerInstance : IBufferData
+        struct PerObject : IBufferData
         {
-            public static PerInstance Build(MaterialDrawInfo material, Color4 tintColor, uint textureIndex)
+            public static PerObject Build(MaterialDrawInfo material, Color4 tintColor)
             {
-                return new PerInstance
+                return new PerObject
                 {
                     TintColor = tintColor,
                     MaterialIndex = material.Material?.ResourceIndex ?? 0,
-                    TextureIndex = textureIndex,
                 };
             }
 
@@ -40,23 +39,18 @@ namespace Engine.BuiltIn
             /// </summary>
             [FieldOffset(16)]
             public uint MaterialIndex;
-            /// <summary>
-            /// Texture index
-            /// </summary>
-            [FieldOffset(20)]
-            public uint TextureIndex;
 
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(PerInstance));
+                return Marshal.SizeOf(typeof(PerObject));
             }
         }
 
         /// <summary>
-        /// Per instance constant buffer
+        /// Per object constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerInstance> cbPerInstance;
+        private readonly EngineConstantBuffer<PerObject> cbPerObject;
 
         /// <summary>
         /// Graphics instance
@@ -72,27 +66,27 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionTextureVs(Graphics graphics)
+        public BasicPositionColorVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionTexture_Cso == null;
-            var bytes = Resources.Vs_PositionTexture_Cso ?? Resources.Vs_PositionTexture;
+            bool compile = Resources.Vs_PositionColor_I_Cso == null;
+            var bytes = Resources.Vs_PositionColor_I_Cso ?? Resources.Vs_PositionColor_I;
             if (compile)
             {
-                Shader = graphics.CompileVertexShader(nameof(PositionTextureVs), "main", bytes, HelperShaders.VSProfile);
+                Shader = graphics.CompileVertexShader(nameof(BasicPositionColorVsI), "main", bytes, HelperShaders.VSProfile);
             }
             else
             {
-                Shader = graphics.LoadVertexShader(nameof(PositionTextureVs), bytes);
+                Shader = graphics.LoadVertexShader(nameof(BasicPositionColorVsI), bytes);
             }
 
-            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(PositionTextureVs) + "." + nameof(PerInstance));
+            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(BasicPositionColorVsI) + "." + nameof(PerObject));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionTextureVs()
+        ~BasicPositionColorVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -116,19 +110,18 @@ namespace Engine.BuiltIn
                 Shader?.Dispose();
                 Shader = null;
 
-                cbPerInstance?.Dispose();
+                cbPerObject?.Dispose();
             }
         }
 
         /// <summary>
-        /// Writes per instance data
+        /// Writes per object data
         /// </summary>
         /// <param name="material">Material</param>
         /// <param name="tintColor">Tint color</param>
-        /// <param name="textureIndex">Texture index</param>
-        public void WriteCBPerInstance(MaterialDrawInfo material, Color4 tintColor, uint textureIndex)
+        public void WriteCBPerObject(MaterialDrawInfo material, Color4 tintColor)
         {
-            cbPerInstance.WriteData(PerInstance.Build(material, tintColor, textureIndex));
+            cbPerObject.WriteData(PerObject.Build(material, tintColor));
         }
 
         /// <summary>
@@ -140,7 +133,7 @@ namespace Engine.BuiltIn
             {
                 BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
-                cbPerInstance,
+                cbPerObject,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
