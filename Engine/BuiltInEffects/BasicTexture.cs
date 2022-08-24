@@ -7,7 +7,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Cubemap drawer
     /// </summary>
-    public class BasicTexture : BuiltInDrawer<TextureVs, TexturePs>
+    public class BasicTexture : BuiltInDrawer<TextureVs, EmptyGs, TexturePs>
     {
         /// <summary>
         /// Constructor

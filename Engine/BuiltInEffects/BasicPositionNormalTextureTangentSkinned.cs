@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Skinned position-normal-texture-tangent drawer
     /// </summary>
-    public class BasicPositionNormalTextureTangentSkinned : BuiltInDrawer<BasicPositionNormalTextureTangentSkinnedVs, BasicPositionNormalTextureTangentPs>
+    public class BasicPositionNormalTextureTangentSkinned : BuiltInDrawer<BasicPositionNormalTextureTangentSkinnedVs, EmptyGs, BasicPositionNormalTextureTangentPs>
     {
         /// <summary>
         /// Constructor

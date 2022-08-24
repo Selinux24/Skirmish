@@ -990,6 +990,99 @@ namespace Engine
         }
 
         /// <summary>
+        /// Sets the geometry shader in the current device context
+        /// </summary>
+        /// <param name="geometryShader">Geometry shader</param>
+        public void SetGeometryShader(EngineGeometryShader geometryShader)
+        {
+            deviceContext.GeometryShader.Set(geometryShader?.GetShader());
+        }
+        /// <summary>
+        /// Removes the geometry shader from the current device context
+        /// </summary>
+        public void ClearGeometryShader()
+        {
+            device.ImmediateContext3.GeometryShader.Set(null);
+        }
+        /// <summary>
+        /// Sets the constant buffer to the current geometry shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="slot">Slot</param>
+        /// <param name="buffer">Buffer</param>
+        public void SetGeometryShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        {
+            deviceContext.GeometryShader?.SetConstantBuffer(slot, buffer?.GetBuffer());
+        }
+        /// <summary>
+        /// Sets the constant buffer list to the current geometry shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="bufferList">Buffer list</param>
+        public void SetGeometryShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        {
+            if (bufferList?.Any() != true)
+            {
+                return;
+            }
+
+            var buffers = bufferList.Select(b => b?.GetBuffer()).ToArray();
+
+            deviceContext.GeometryShader?.SetConstantBuffers(startSlot, buffers.Length, buffers);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current geometry shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetGeometryShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        {
+            deviceContext.GeometryShader?.SetShaderResource(slot, resourceView?.GetResource());
+        }
+        /// <summary>
+        /// Sets the specified resource in the current geometry shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetGeometryShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        {
+            if (resourceViews?.Any() != true)
+            {
+                return;
+            }
+
+            var resources = resourceViews.Select(r => r?.GetResource()).ToArray();
+
+            deviceContext.GeometryShader?.SetShaderResources(startSlot, resources.Length, resources);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current geometry shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="samplerState">Sampler</param>
+        public void SetGeometryShaderSampler(int slot, EngineSamplerState samplerState)
+        {
+            deviceContext.GeometryShader?.SetSampler(slot, samplerState?.GetSamplerState());
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current geometry shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="samplerStates">Samplers</param>
+        public void SetGeometryShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        {
+            if (samplerStates?.Any() != true)
+            {
+                return;
+            }
+
+            var samplers = samplerStates.Select(r => r?.GetSamplerState()).ToArray();
+
+            deviceContext.GeometryShader?.SetSamplers(startSlot, samplers.Length, samplers);
+        }
+
+        /// <summary>
         /// Sets the pixel shader in the current device context
         /// </summary>
         /// <param name="pixelShader">Pixel shader</param>
@@ -998,7 +1091,7 @@ namespace Engine
             deviceContext.PixelShader.Set(pixelShader?.GetShader());
         }
         /// <summary>
-        /// Removes the vertex shader from the current device context
+        /// Removes the pixel shader from the current device context
         /// </summary>
         public void ClearPixelShader()
         {

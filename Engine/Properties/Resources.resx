@@ -163,12 +163,6 @@
   <data name="ShaderDefaultTerrainCso" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderdefaultterrain.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderDefaultSkyScatteringFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderdefaultskyscattering.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderDefaultSkyScatteringCso" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderdefaultskyscattering.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderDefaultCPUParticlesFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderDefaultcpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -582,5 +576,17 @@
   </data>
   <data name="Ps_Texture_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Texture.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_SkyScattering" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SkyScattering.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_SkyScattering_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SkyScattering.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_SkyScattering" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SkyScattering.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_SkyScattering_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SkyScattering.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

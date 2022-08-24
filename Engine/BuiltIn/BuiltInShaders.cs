@@ -26,6 +26,10 @@ namespace Engine.BuiltIn
         /// </summary>
         private static readonly List<IBuiltInVertexShader> vertexShaders = new List<IBuiltInVertexShader>();
         /// <summary>
+        /// Geometry shader list
+        /// </summary>
+        private static readonly List<IBuiltInGeometryShader> geometryShaders = new List<IBuiltInGeometryShader>();
+        /// <summary>
         /// Pixel shader list
         /// </summary>
         private static readonly List<IBuiltInPixelShader> pixelShaders = new List<IBuiltInPixelShader>();
@@ -93,8 +97,11 @@ namespace Engine.BuiltIn
             constantBuffers.Clear();
             vertexShaders.ForEach(vs => vs?.Dispose());
             vertexShaders.Clear();
+            geometryShaders.ForEach(gs => gs?.Dispose());
+            geometryShaders.Clear();
             pixelShaders.ForEach(ps => ps?.Dispose());
             pixelShaders.Clear();
+            drawers.OfType<IDisposable>().ToList().ForEach(dr => dr?.Dispose());
             drawers.Clear();
 
             samplerPoint?.Dispose();
@@ -144,6 +151,23 @@ namespace Engine.BuiltIn
             return vs;
         }
         /// <summary>
+        /// Gets or creates a built-in geometry shader
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        public static T GetGeometryShader<T>() where T : IBuiltInGeometryShader
+        {
+            T gs = geometryShaders.OfType<T>().FirstOrDefault();
+            if (gs != null)
+            {
+                return gs;
+            }
+
+            gs = (T)Activator.CreateInstance(typeof(T), graphics);
+            geometryShaders.Add(gs);
+
+            return gs;
+        }
+        /// <summary>
         /// Gets or creates a built-in pixel shader
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
@@ -166,7 +190,16 @@ namespace Engine.BuiltIn
         /// <typeparam name="T">Drawer type</typeparam>
         public static T GetDrawer<T>() where T : IBuiltInDrawer
         {
-            return (T)Activator.CreateInstance(typeof(T), graphics);
+            T dr = drawers.OfType<T>().FirstOrDefault();
+            if (dr != null)
+            {
+                return dr;
+            }
+
+            dr = (T)Activator.CreateInstance(typeof(T), graphics);
+            drawers.Add(dr);
+
+            return dr;
         }
 
         /// <summary>

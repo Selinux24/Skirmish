@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
     using Engine.Effects;
 
@@ -328,17 +330,15 @@ namespace Engine
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            var effect = DrawerPool.EffectDefaultSkyScattering;
-            var technique = GetScatteringTechnique(effect);
+            var drawer = BuiltInShaders.GetDrawer<BasicSkyScattering>();
 
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
-
-            effect.UpdatePerFrame(
+            BuiltInShaders.UpdatePerObject(
                 Matrix.Translation(context.EyePosition),
-                context.ViewProjection,
+                context.ViewProjection);
+
+            drawer.Update(
                 keyLight.Direction,
-                new EffectSkyScatterState
+                new BasicSkyScatteringState
                 {
                     PlanetRadius = PlanetRadius,
                     PlanetAtmosphereRadius = PlanetAtmosphereRadius,
@@ -354,39 +354,18 @@ namespace Engine
                     RayleighScaleDepth = RayleighScaleDepth,
                     BackColor = context.Lights.FogColor,
                     HdrExposure = HDRExposure,
+                    Samples = (uint)Resolution,
                 });
 
-            var graphics = Game.Graphics;
+            BufferManager.SetIndexBuffer(indexBuffer);
 
-            for (int p = 0; p < technique.PassCount; p++)
+            drawer.Draw(BufferManager, new DrawOptions
             {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(indexBuffer.Count, indexBuffer.BufferOffset, vertexBuffer.BufferOffset);
-            }
-        }
-        /// <summary>
-        /// Gets the sky scatterfing effect technique base on resolution
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        /// <returns>Returns the sky scatterfing effect technique</returns>
-        private EngineEffectTechnique GetScatteringTechnique(EffectDefaultSkyScattering effect)
-        {
-            EngineEffectTechnique technique;
-            if (Resolution == SkyScatteringResolutions.High)
-            {
-                technique = effect.SkyScatteringHigh;
-            }
-            else if (Resolution == SkyScatteringResolutions.Medium)
-            {
-                technique = effect.SkyScatteringMedium;
-            }
-            else
-            {
-                technique = effect.SkyScatteringLow;
-            }
-
-            return technique;
+                Indexed = true,
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            });
         }
 
         /// <summary>

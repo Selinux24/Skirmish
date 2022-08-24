@@ -6,7 +6,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow position-texture instanced drawer
     /// </summary>
-    public class ShadowPositionTextureInstanced : BuiltInDrawer<ShadowPositionTextureVsI, EmptyPs>
+    public class ShadowPositionTextureInstanced : BuiltInDrawer<ShadowPositionTextureVsI, EmptyGs, EmptyPs>
     {
         /// <summary>
         /// Constructor

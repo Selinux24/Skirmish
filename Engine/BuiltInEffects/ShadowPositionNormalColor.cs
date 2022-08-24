@@ -6,7 +6,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow position-normal-color drawer
     /// </summary>
-    public class ShadowPositionNormalColor : BuiltInDrawer<ShadowPositionNormalColorVs, EmptyPs>
+    public class ShadowPositionNormalColor : BuiltInDrawer<ShadowPositionNormalColorVs, EmptyGs, EmptyPs>
     {
         /// <summary>
         /// Constructor

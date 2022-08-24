@@ -10,8 +10,9 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Built-in drawer class
     /// </summary>
-    public abstract class BuiltInDrawer<VS, PS> : IBuiltInDrawer
+    public abstract class BuiltInDrawer<VS, GS, PS> : IBuiltInDrawer
         where VS : IBuiltInVertexShader
+        where GS : IBuiltInGeometryShader
         where PS : IBuiltInPixelShader
     {
         /// <summary>
@@ -22,6 +23,10 @@ namespace Engine.BuiltInEffects
         /// Vertex shader
         /// </summary>
         protected readonly VS VertexShader;
+        /// <summary>
+        /// Geometry shader
+        /// </summary>
+        protected readonly GS GeometryShader;
         /// <summary>
         /// Pixel shader
         /// </summary>
@@ -35,6 +40,7 @@ namespace Engine.BuiltInEffects
         {
             Graphics = graphics;
             VertexShader = BuiltInShaders.GetVertexShader<VS>();
+            GeometryShader = BuiltInShaders.GetGeometryShader<GS>();
             PixelShader = BuiltInShaders.GetPixelShader<PS>();
         }
 
@@ -53,9 +59,11 @@ namespace Engine.BuiltInEffects
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
             Graphics.SetVertexShader(VertexShader.Shader);
+            Graphics.SetGeometryShader(GeometryShader.Shader);
             Graphics.SetPixelShader(PixelShader.Shader);
 
             VertexShader.SetShaderResources();
+            GeometryShader.SetShaderResources();
             PixelShader.SetShaderResources();
 
             bool instanced = instances > 0;
@@ -84,9 +92,11 @@ namespace Engine.BuiltInEffects
         {
             // Set the vertex and pixel shaders that will be used to render this mesh.
             Graphics.SetVertexShader(VertexShader.Shader);
+            Graphics.SetGeometryShader(GeometryShader.Shader);
             Graphics.SetPixelShader(PixelShader.Shader);
 
             VertexShader.SetShaderResources();
+            GeometryShader.SetShaderResources();
             PixelShader.SetShaderResources();
 
             // Set the vertex input layout.

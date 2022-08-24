@@ -313,6 +313,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] Ps_SkyScattering {
+            get {
+                object obj = ResourceManager.GetObject("Ps_SkyScattering", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_SkyScattering_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_SkyScattering_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] Ps_Texture {
             get {
                 object obj = ResourceManager.GetObject("Ps_Texture", resourceCulture);
@@ -466,26 +486,6 @@ namespace Engine.Properties {
         internal static byte[] ShaderDefaultGPUParticlesFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultGPUParticlesFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderDefaultSkyScatteringCso {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultSkyScatteringCso", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderDefaultSkyScatteringFx {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultSkyScatteringFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -1586,6 +1586,26 @@ namespace Engine.Properties {
         internal static byte[] Vs_ShadowPositionTexture_Skinned_I_Cso {
             get {
                 object obj = ResourceManager.GetObject("Vs_ShadowPositionTexture_Skinned_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_SkyScattering {
+            get {
+                object obj = ResourceManager.GetObject("Vs_SkyScattering", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_SkyScattering_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_SkyScattering_Cso", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -136,6 +136,7 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\BasicSkyScattering.cs" />
     <Compile Include="BuiltInEffects\BasicTexture.cs" />
     <Compile Include="BuiltInEffects\BasicCubemap.cs" />
     <Compile Include="BuiltInEffects\ShadowPositionTextureSkinned.cs" />
@@ -179,8 +180,12 @@
     <Compile Include="BuiltInEffects\BasicPositionTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
+    <Compile Include="BuiltIn\EmptyGs.cs" />
+    <Compile Include="BuiltIn\IBuiltInGeometryShader.cs" />
+    <Compile Include="BuiltIn\SkyScatteringPs.cs" />
     <Compile Include="BuiltIn\TexturePs.cs" />
     <Compile Include="BuiltIn\CubemapPs.cs" />
+    <Compile Include="BuiltIn\SkyScatteringVs.cs" />
     <Compile Include="BuiltIn\TextureVs.cs" />
     <Compile Include="BuiltIn\CubemapVs.cs" />
     <Compile Include="BuiltIn\BuiltInShaders.cs" />
@@ -234,7 +239,9 @@
     <Compile Include="Common\BaseSceneObjectState.cs" />
     <Compile Include="Common\DrawOptions.cs" />
     <Compile Include="Common\EngineConstantBuffer.cs" />
+    <Compile Include="Common\EngineGeometryShader.cs" />
     <Compile Include="Common\IEnginePixelShader.cs" />
+    <Compile Include="Common\IEngineGeometryShader.cs" />
     <Compile Include="Common\IEngineVertexShader.cs" />
     <Compile Include="Common\ManipulatorControllerState.cs" />
     <Compile Include="Common\MaterialDrawInfo.cs" />
@@ -428,7 +435,7 @@
     <Compile Include="Effects\EffectFoliageState.cs" />
     <Compile Include="Effects\EffectParticleState.cs" />
     <Compile Include="Effects\EffectShadowBase.cs" />
-    <Compile Include="Effects\EffectSkyScatterState.cs" />
+    <Compile Include="BuiltInEffects\BasicSkyScatteringState.cs" />
     <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="Effects\EffectWaterState.cs" />
     <Compile Include="FrameStatsForward.cs" />
@@ -498,7 +505,6 @@
     <Compile Include="Effects\EffectShadowBillboard.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
     <Compile Include="Effects\EffectShadowTerrain.cs" />
-    <Compile Include="Effects\EffectDefaultSkyScattering.cs" />
     <Compile Include="Effects\IGeometryDrawer.cs" />
     <Compile Include="Effects\IShadowMapDrawer.cs" />
     <Compile Include="FoliageMap.cs" />

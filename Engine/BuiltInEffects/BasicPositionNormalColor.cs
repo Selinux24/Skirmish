@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Basic position-normal-color drawer
     /// </summary>
-    public class BasicPositionNormalColor : BuiltInDrawer<BasicPositionNormalColorVs, BasicPositionNormalColorPs>
+    public class BasicPositionNormalColor : BuiltInDrawer<BasicPositionNormalColorVs, EmptyGs, BasicPositionNormalColorPs>
     {
         /// <summary>
         /// Constructor

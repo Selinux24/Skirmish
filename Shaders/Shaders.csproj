@@ -112,9 +112,6 @@
     <EffectShader Include="Resources\ShaderDefaultGPUParticles.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Resources\ShaderDefaultSkyScattering.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Resources\ShaderDefaultSprite.fx" />
   </ItemGroup>
   <ItemGroup>
@@ -307,6 +304,12 @@
   </ItemGroup>
   <ItemGroup>
     <PixelShader Include="ShaderDefaultBasic\Texture.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ShaderDefaultBasic\SkyScattering.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\SkyScattering.vs.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

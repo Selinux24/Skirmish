@@ -6,7 +6,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow Skinned position-color instanced drawer
     /// </summary>
-    public class ShadowPositionColorSkinnedInstanced : BuiltInDrawer<ShadowSkinnedPositionColorVsI, EmptyPs>
+    public class ShadowPositionColorSkinnedInstanced : BuiltInDrawer<ShadowSkinnedPositionColorVsI, EmptyGs, EmptyPs>
     {
         /// <summary>
         /// Constructor

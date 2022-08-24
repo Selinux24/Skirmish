@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow Skinned position-normal-texture drawer
     /// </summary>
-    public class ShadowPositionNormalTextureSkinned : BuiltInDrawer<ShadowSkinnedPositionNormalTextureVs, EmptyPs>
+    public class ShadowPositionNormalTextureSkinned : BuiltInDrawer<ShadowSkinnedPositionNormalTextureVs, EmptyGs, EmptyPs>
     {
         /// <summary>
         /// Constructor

@@ -40,10 +40,6 @@ namespace Engine.Effects
         /// </summary>
         public static EffectDefaultTerrain EffectDefaultTerrain { get; private set; }
         /// <summary>
-        /// Sky scattering effect
-        /// </summary>
-        public static EffectDefaultSkyScattering EffectDefaultSkyScattering { get; private set; }
-        /// <summary>
         /// CPU Particles drawing effect
         /// </summary>
         public static EffectDefaultCpuParticles EffectDefaultCPUParticles { get; private set; }
@@ -113,7 +109,6 @@ namespace Engine.Effects
             EffectDefaultFoliage = CreateEffect<EffectDefaultFoliage>(graphics, Resources.ShaderDefaultFoliageCso, Resources.ShaderDefaultFoliageFx);
             EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsCso, Resources.ShaderDefaultCloudsFx);
             EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(graphics, Resources.ShaderDefaultTerrainCso, Resources.ShaderDefaultTerrainFx);
-            EffectDefaultSkyScattering = CreateEffect<EffectDefaultSkyScattering>(graphics, Resources.ShaderDefaultSkyScatteringCso, Resources.ShaderDefaultSkyScatteringFx);
             EffectDefaultCPUParticles = CreateEffect<EffectDefaultCpuParticles>(graphics, Resources.ShaderDefaultCPUParticlesCso, Resources.ShaderDefaultCPUParticlesFx);
             EffectDefaultGPUParticles = CreateEffect<EffectDefaultGpuParticles>(graphics, Resources.ShaderDefaultGPUParticlesCso, Resources.ShaderDefaultGPUParticlesFx);
             EffectDefaultWater = CreateEffect<EffectDefaultWater>(graphics, Resources.ShaderDefaultWaterCso, Resources.ShaderDefaultWaterFx);
@@ -151,8 +146,6 @@ namespace Engine.Effects
             EffectDefaultClouds = null;
             EffectDefaultTerrain?.Dispose();
             EffectDefaultTerrain = null;
-            EffectDefaultSkyScattering?.Dispose();
-            EffectDefaultSkyScattering = null;
             EffectDefaultCPUParticles?.Dispose();
             EffectDefaultCPUParticles = null;
             EffectDefaultGPUParticles?.Dispose();

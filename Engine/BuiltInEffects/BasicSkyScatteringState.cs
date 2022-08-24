@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 
-namespace Engine.Effects
+namespace Engine.BuiltInEffects
 {
     /// <summary>
     /// Effect sky scatter state
     /// </summary>
-    public struct EffectSkyScatterState
+    public struct BasicSkyScatteringState
     {
         /// <summary>
         /// Planet radius
@@ -63,5 +63,9 @@ namespace Engine.Effects
         /// HDR exposure
         /// </summary>
         public float HdrExposure { get; set; }
+        /// <summary>
+        /// Number of samples
+        /// </summary>
+        public uint Samples { get; set; }
     }
 }

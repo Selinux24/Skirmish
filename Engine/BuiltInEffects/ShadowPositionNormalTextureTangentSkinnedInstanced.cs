@@ -6,7 +6,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow Skinned position-normal-texture-tangent instanced drawer
     /// </summary>
-    public class ShadowPositionNormalTextureTangentSkinnedInstanced : BuiltInDrawer<ShadowSkinnedPositionNormalTextureTangentVsI, EmptyPs>
+    public class ShadowPositionNormalTextureTangentSkinnedInstanced : BuiltInDrawer<ShadowSkinnedPositionNormalTextureTangentVsI, EmptyGs, EmptyPs>
     {
         /// <summary>
         /// Constructor

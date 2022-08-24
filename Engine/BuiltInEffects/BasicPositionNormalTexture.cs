@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Basic position-normal-texture drawer
     /// </summary>
-    public class BasicPositionNormalTexture : BuiltInDrawer<BasicPositionNormalTextureVs, BasicPositionNormalTexturePs>
+    public class BasicPositionNormalTexture : BuiltInDrawer<BasicPositionNormalTextureVs, EmptyGs, BasicPositionNormalTexturePs>
     {
         /// <summary>
         /// Constructor

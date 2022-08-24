@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Skinned position-color instanced drawer
     /// </summary>
-    public class BasicPositionColorSkinnedInstanced : BuiltInDrawer<BasicPositionColorSkinnedVsI, BasicPositionColorPs>
+    public class BasicPositionColorSkinnedInstanced : BuiltInDrawer<BasicPositionColorSkinnedVsI, EmptyGs, BasicPositionColorPs>
     {
         /// <summary>
         /// Constructor
