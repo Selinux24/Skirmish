@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Cube-map drawer
@@ -170,7 +171,7 @@ namespace Engine
 
             local = Manipulator.LocalTransform;
         }
-        
+
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
@@ -192,77 +193,60 @@ namespace Engine
 
             if (textureCubic)
             {
-                DrawCubic(context);
+                DrawCubic();
             }
             else
             {
-                DrawPlain(context);
+                DrawPlain();
             }
         }
         /// <summary>
         /// Draws the cubic texture
         /// </summary>
-        /// <param name="context">Draw context</param>
-        private void DrawCubic(DrawContext context)
+        private void DrawCubic()
         {
-            var effect = DrawerPool.EffectDefaultCubemap;
-            var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
+            var drawer = BuiltInShaders.GetDrawer<BasicCubemap>();
+            if (drawer == null)
+            {
+                return;
+            }
 
             BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(local, context.ViewProjection);
-            effect.UpdatePerObject(texture);
+            drawer.Update(texture);
 
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
+            drawer.Draw(BufferManager, new DrawOptions
             {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
-            }
+                Indexed = true,
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            });
         }
         /// <summary>
         /// Draws the plain texture
         /// </summary>
-        /// <param name="context">Draw context</param>
-        private void DrawPlain(DrawContext context)
+        private void DrawPlain()
         {
-            var effect = DrawerPool.EffectDefaultTexture;
-            var technique = DrawerPool.EffectDefaultTexture.SimpleTexture;
+            var drawer = BuiltInShaders.GetDrawer<BasicTexture>();
+            if (drawer == null)
+            {
+                return;
+            }
 
             BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(local, context.ViewProjection);
-            effect.UpdatePerObject(TextureIndex, texture);
+            drawer.Update(texture, TextureIndex);
 
-            var graphics = Game.Graphics;
+            Game.Graphics.SetRasterizerCullNone();
 
-            graphics.SetRasterizerCullNone();
-
-            for (int p = 0; p < technique.PassCount; p++)
+            drawer.Draw(BufferManager, new DrawOptions
             {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
-            }
-        }
-
-        /// <summary>
-        /// Set the instance texture
-        /// </summary>
-        /// <param name="texture">Texture</param>
-        public void SetTexture(EngineShaderResourceView texture)
-        {
-            this.texture = texture;
+                Indexed = true,
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            });
         }
 
         /// <inheritdoc/>

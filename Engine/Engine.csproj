@@ -136,6 +136,8 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\BasicTexture.cs" />
+    <Compile Include="BuiltInEffects\BasicCubemap.cs" />
     <Compile Include="BuiltInEffects\ShadowPositionTextureSkinned.cs" />
     <Compile Include="BuiltInEffects\ShadowPositionTextureSkinnedInstanced.cs" />
     <Compile Include="BuiltInEffects\ShadowPositionNormalTextureTangentSkinned.cs" />
@@ -177,6 +179,10 @@
     <Compile Include="BuiltInEffects\BasicPositionTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
+    <Compile Include="BuiltIn\TexturePs.cs" />
+    <Compile Include="BuiltIn\CubemapPs.cs" />
+    <Compile Include="BuiltIn\TextureVs.cs" />
+    <Compile Include="BuiltIn\CubemapVs.cs" />
     <Compile Include="BuiltIn\BuiltInShaders.cs" />
     <Compile Include="BuiltIn\BuiltInShaders.Buffers.cs" />
     <Compile Include="BuiltIn\IBuiltInVertexShader.cs" />
@@ -309,7 +315,6 @@
     <Compile Include="ColorRgba.cs" />
     <Compile Include="Content\Persistence\ParticleEmitterFile.cs" />
     <Compile Include="Content\Persistence\ParticleSystemFile.cs" />
-    <Compile Include="Effects\EffectDefaultTexture.cs" />
     <Compile Include="Effects\IDrawerPostProcess.cs" />
     <Compile Include="GameEnvironmentState.cs" />
     <Compile Include="IModelHasParts.cs" />
@@ -761,7 +766,6 @@
     <Compile Include="ParticleSystemGpu.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectDefaultBillboard.cs" />
-    <Compile Include="Effects\EffectDefaultCubemap.cs" />
     <Compile Include="EngineForm.cs">
       <SubType>Form</SubType>
     </Compile>

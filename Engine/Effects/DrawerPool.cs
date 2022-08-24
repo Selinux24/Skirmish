@@ -24,14 +24,6 @@ namespace Engine.Effects
         /// </summary>
         public static EffectDefaultFont EffectDefaultFont { get; private set; }
         /// <summary>
-        /// Cube map effect
-        /// </summary>
-        public static EffectDefaultCubemap EffectDefaultCubemap { get; private set; }
-        /// <summary>
-        /// Simple texture effect
-        /// </summary>
-        public static EffectDefaultTexture EffectDefaultTexture { get; private set; }
-        /// <summary>
         /// Billboards effect
         /// </summary>
         public static EffectDefaultBillboard EffectDefaultBillboard { get; private set; }
@@ -117,8 +109,6 @@ namespace Engine.Effects
 
             EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(graphics, Resources.ShaderDefaultSpriteCso, Resources.ShaderDefaultSpriteCso);
             EffectDefaultFont = CreateEffect<EffectDefaultFont>(graphics, Resources.ShaderDefaultFontCso, Resources.ShaderDefaultFontCso);
-            EffectDefaultCubemap = CreateEffect<EffectDefaultCubemap>(graphics, Resources.ShaderDefaultCubemapCso, Resources.ShaderDefaultCubemapFx);
-            EffectDefaultTexture = CreateEffect<EffectDefaultTexture>(graphics, Resources.ShaderDefaultTextureCso, Resources.ShaderDefaultTextureFx);
             EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(graphics, Resources.ShaderDefaultBillboardCso, Resources.ShaderDefaultBillboardFx);
             EffectDefaultFoliage = CreateEffect<EffectDefaultFoliage>(graphics, Resources.ShaderDefaultFoliageCso, Resources.ShaderDefaultFoliageFx);
             EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsCso, Resources.ShaderDefaultCloudsFx);
@@ -153,10 +143,6 @@ namespace Engine.Effects
             EffectDefaultSprite = null;
             EffectDefaultFont?.Dispose();
             EffectDefaultFont = null;
-            EffectDefaultCubemap?.Dispose();
-            EffectDefaultCubemap = null;
-            EffectDefaultTexture?.Dispose();
-            EffectDefaultTexture = null;
             EffectDefaultBillboard?.Dispose();
             EffectDefaultBillboard = null;
             EffectDefaultFoliage?.Dispose();

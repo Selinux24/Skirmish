@@ -139,12 +139,6 @@
   <data name="ShaderDefaultFontCso" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderDefaultfont.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderDefaultCubemapFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\ShaderDefaultCubemap.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderDefaultCubemapCso" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderDefaultcubemap.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderDefaultBillboardFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\ShaderDefaultBillboard.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -258,12 +252,6 @@
   </data>
   <data name="ShaderDefaultDecalsCso" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\resources\shaderdefaultdecal.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderDefaultTextureFx" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderdefaulttexture.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderDefaultTextureCso" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\resources\shaderdefaulttexture.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="IncAnimation" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Lib\IncAnimation.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -570,5 +558,29 @@
   </data>
   <data name="Ps_ShadowTextureDefault_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Shadows\TextureDefault.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_Cubemap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Cubemap.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_Cubemap_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Cubemap.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_Cubemap" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Cubemap.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_Cubemap_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Cubemap.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_Texture" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Texture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_Texture_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Texture.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_Texture" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Texture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_Texture_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Texture.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

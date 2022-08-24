@@ -100,9 +100,6 @@
     <EffectShader Include="Resources\ShaderDefaultCPUParticles.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Resources\ShaderDefaultCubemap.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Resources\ShaderDefaultDecal.fx" />
   </ItemGroup>
   <ItemGroup>
@@ -122,9 +119,6 @@
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Resources\ShaderDefaultTerrain.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Resources\ShaderDefaultTexture.fx" />
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Resources\ShaderDefaultWater.fx" />
@@ -301,6 +295,18 @@
   </ItemGroup>
   <ItemGroup>
     <PixelShader Include="ShaderShadowBasic\TextureDefault.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\Cubemap.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ShaderDefaultBasic\Cubemap.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\Texture.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ShaderDefaultBasic\Texture.ps.hlsl" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

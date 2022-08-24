@@ -173,6 +173,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] Ps_Cubemap {
+            get {
+                object obj = ResourceManager.GetObject("Ps_Cubemap", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_Cubemap_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_Cubemap_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] Ps_PositionColor {
             get {
                 object obj = ResourceManager.GetObject("Ps_PositionColor", resourceCulture);
@@ -293,6 +313,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] Ps_Texture {
+            get {
+                object obj = ResourceManager.GetObject("Ps_Texture", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_Texture_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_Texture_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] ShaderDefaultBillboardCso {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultBillboardCso", resourceCulture);
@@ -346,26 +386,6 @@ namespace Engine.Properties {
         internal static byte[] ShaderDefaultCPUParticlesFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultCPUParticlesFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderDefaultCubemapCso {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultCubemapCso", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderDefaultCubemapFx {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultCubemapFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -506,26 +526,6 @@ namespace Engine.Properties {
         internal static byte[] ShaderDefaultTerrainFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultTerrainFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderDefaultTextureCso {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultTextureCso", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderDefaultTextureFx {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultTextureFx", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -766,6 +766,26 @@ namespace Engine.Properties {
         internal static byte[] ShaderShadowTerrainFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowTerrainFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_Cubemap {
+            get {
+                object obj = ResourceManager.GetObject("Vs_Cubemap", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_Cubemap_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_Cubemap_Cso", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -1566,6 +1586,26 @@ namespace Engine.Properties {
         internal static byte[] Vs_ShadowPositionTexture_Skinned_I_Cso {
             get {
                 object obj = ResourceManager.GetObject("Vs_ShadowPositionTexture_Skinned_I_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_Texture {
+            get {
+                object obj = ResourceManager.GetObject("Vs_Texture", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_Texture_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_Texture_Cso", resourceCulture);
                 return ((byte[])(obj));
             }
         }
