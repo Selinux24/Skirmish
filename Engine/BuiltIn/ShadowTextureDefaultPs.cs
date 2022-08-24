@@ -11,9 +11,7 @@ namespace Engine.BuiltIn
     /// </summary>
     public class ShadowTextureDefaultPs : IBuiltInPixelShader
     {
-        /// <summary>
-        /// Shader
-        /// </summary>
+        /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
@@ -53,9 +51,7 @@ namespace Engine.BuiltIn
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -83,10 +79,8 @@ namespace Engine.BuiltIn
             this.diffuseMapArray = diffuseMapArray;
         }
 
-        /// <summary>
-        /// Sets the pixel shader constant buffers
-        /// </summary>
-        public void SetConstantBuffers()
+        /// <inheritdoc/>
+        public void SetShaderResources()
         {
             var rv = new[]
             {

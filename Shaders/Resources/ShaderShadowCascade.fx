@@ -31,6 +31,13 @@ cbuffer cbPSPerInstance : register(b5)
     uint3 PAD51;
 };
 
+SamplerState SamplerLinear : register(s0)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 PSShadowMapPosition VSSMPositionColor(VSVertexPositionColor input)
 {
     PSShadowMapPosition output = (PSShadowMapPosition) 0;

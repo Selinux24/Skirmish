@@ -32,6 +32,13 @@ cbuffer cbFixed : register(b1)
 
 Texture2DArray gTextureArray : register(t0);
 
+SamplerState SamplerPointParticle : register(s0)
+{
+    Filter = MIN_MAG_MIP_POINT;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+};
+
 float3 ComputeParticlePosition(float3 position, float3 velocity, float age, float normalizedAge)
 {
     float startVelocity = length(velocity);

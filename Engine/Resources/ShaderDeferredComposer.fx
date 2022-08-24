@@ -43,6 +43,17 @@ Texture2DArray<float> gShadowMapDir : register(t5);
 Texture2DArray<float> gShadowMapSpot : register(t6);
 TextureCubeArray<float> gShadowMapPoint : register(t7);
 
+SamplerState SamplerPoint : register(s0)
+{
+    Filter = MIN_MAG_MIP_POINT;
+};
+SamplerState SamplerLinear : register(s1)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 struct PSLightInput
 {
     float4 positionHomogeneous : SV_POSITION;

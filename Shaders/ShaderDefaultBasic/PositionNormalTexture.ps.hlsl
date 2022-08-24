@@ -46,17 +46,6 @@ Texture2DArray gDiffuseMapArray : register(t3);
 
 SamplerState SamplerDiffuse : register(s0);
 
-struct PSVertexPositionNormalTexture2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float2 tex : TEXCOORD0;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
-	Material material : MATERIAL;
-};
-
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE
 **********************************************************************************************************/

@@ -17,15 +17,15 @@
 
 struct Material
 {
-    float4 Diffuse : Diffuse;
-    float3 Specular : Specular;
-    float Shininess : Shininess;
-    float3 Emissive : Emissive;
-    float Metallic : Metallic;
-    float3 Ambient : Ambient;
-    float Roughness : Roughness;
+    float4 Diffuse : DIFFUSE;
+    float3 Specular : SPECULAR;
+    float Shininess : SHININESS;
+    float3 Emissive : EMISSIVE;
+    float Metallic : METALLIC;
+    float3 Ambient : AMBIENT;
+    float Roughness : ROUGHNESS;
     
-    uint Algorithm : Algorithm;
+    uint Algorithm : ALGORITHM;
 };
 
 Texture2D CookTorranceTexRoughness;

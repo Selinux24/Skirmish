@@ -23,7 +23,7 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPSPerFrame : register(b0)
+cbuffer cbPerFrame : register(b0)
 {
 	float3 gEyePositionWorld;
 	float PAD11;
@@ -31,9 +31,11 @@ cbuffer cbPSPerFrame : register(b0)
 	float gFogStart;
 	float gFogRange;
 	float2 PAD12;
+	float3 gLOD;
+	float gShadowIntensity;
 };
 
-cbuffer cbPSPerFrame2 : register(b1)
+cbuffer cbPerFrame2 : register(b1)
 {
 	uint gChannel;
 	uint3 PAD21;
@@ -42,15 +44,6 @@ cbuffer cbPSPerFrame2 : register(b1)
 Texture2DArray gDiffuseMapArray : register(t0);
 
 SamplerState SamplerDiffuse : register(s0);
-
-struct PSVertexPositionTexture2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float2 tex : TEXCOORD0;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
-};
 
 /**********************************************************************************************************
 POSITION TEXTURE

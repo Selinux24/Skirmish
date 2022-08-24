@@ -4,21 +4,16 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbPSPerFrame : register(b0)
+cbuffer cbPerFrame : register(b0)
 {
-	float3 gEyePositionWorld;
-	float PAD11;
-	float4 gFogColor;
-	float gFogStart;
-	float gFogRange;
-	float2 PAD12;
-};
-
-struct PSVertexPositionColor2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float4 color : COLOR0;
+    float3 gEyePositionWorld;
+    float PAD11;
+    float4 gFogColor;
+    float gFogStart;
+    float gFogRange;
+    float2 PAD12;
+    float3 gLOD;
+    float gShadowIntensity;
 };
 
 /**********************************************************************************************************

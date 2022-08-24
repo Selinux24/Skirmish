@@ -82,9 +82,6 @@
     <EffectShader Include="Lib\IncMaterials.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncPostProcessing.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Lib\IncScattering.hlsl" />
   </ItemGroup>
   <ItemGroup>

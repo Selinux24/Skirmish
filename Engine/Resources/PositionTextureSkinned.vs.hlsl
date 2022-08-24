@@ -33,15 +33,6 @@ cbuffer cbVSPerInstance : register(b2)
 Texture2D gMaterialPalette : register(t0);
 Texture2D gAnimationPalette : register(t1);
 
-struct PSVertexPositionTexture2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float2 tex : TEXCOORD0;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
-};
-
 /**********************************************************************************************************
 POSITION TEXTURE
 **********************************************************************************************************/

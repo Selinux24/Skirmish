@@ -82,9 +82,7 @@ namespace Engine.BuiltIn
         /// </summary>
         protected Graphics Graphics = null;
 
-        /// <summary>
-        /// Shader
-        /// </summary>
+        /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
@@ -116,9 +114,7 @@ namespace Engine.BuiltIn
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -151,10 +147,8 @@ namespace Engine.BuiltIn
             cbPerInstance.WriteData(PerInstance.Build(material, tintColor, textureIndex, animation));
         }
 
-        /// <summary>
-        /// Sets the vertex shader constant buffers
-        /// </summary>
-        public void SetConstantBuffers()
+        /// <inheritdoc/>
+        public void SetShaderResources()
         {
             var cb = new[]
             {

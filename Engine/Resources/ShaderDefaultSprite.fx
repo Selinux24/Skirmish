@@ -28,6 +28,13 @@ cbuffer cbPerObject : register(b1)
 
 Texture2DArray gTextureArray : register(t0);
 
+SamplerState SamplerLinear : register(s0)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 float MapScreenCoordX(float x, float4 rectPixels, float2 screenPixels)
 {
     float p = 0.5 * x + 0.5;

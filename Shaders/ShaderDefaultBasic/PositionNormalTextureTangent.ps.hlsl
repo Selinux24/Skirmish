@@ -48,18 +48,6 @@ Texture2DArray gNormalMapArray : register(t4);
 SamplerState SamplerDiffuse : register(s0);
 SamplerState SamplerNormal : register(s1);
 
-struct PSVertexPositionNormalTextureTangent2
-{
-    float4 positionHomogeneous : SV_POSITION;
-    float3 positionWorld : POSITION;
-    float3 normalWorld : NORMAL;
-    float3 tangentWorld : TANGENT;
-    float2 tex : TEXCOORD0;
-    float4 tintColor : TINTCOLOR;
-    uint textureIndex : TEXTUREINDEX;
-    Material material : MATERIAL;
-};
-
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE
 **********************************************************************************************************/

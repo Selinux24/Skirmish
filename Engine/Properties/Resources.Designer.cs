@@ -133,16 +133,6 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] IncPostProcessing {
-            get {
-                object obj = ResourceManager.GetObject("IncPostProcessing", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         internal static byte[] IncQuaternion {
             get {
                 object obj = ResourceManager.GetObject("IncQuaternion", resourceCulture);

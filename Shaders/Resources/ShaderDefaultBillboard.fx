@@ -37,6 +37,13 @@ TextureCubeArray<float> gShadowMapPoint : register(t4);
 Texture2DArray gTextureArray : register(t5);
 Texture2DArray gNormalMapArray : register(t6);
 
+SamplerState SamplerLinear : register(s0)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 GSVertexBillboard VSBillboard(VSVertexBillboard input)
 {
     GSVertexBillboard output;

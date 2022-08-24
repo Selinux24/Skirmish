@@ -25,13 +25,6 @@ cbuffer cbVSPerInstance : register(b2)
 
 Texture2D gMaterialPalette : register(t0);
 
-struct PSVertexPositionColor2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float4 color : COLOR0;
-};
-
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/

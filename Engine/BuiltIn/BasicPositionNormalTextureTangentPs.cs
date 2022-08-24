@@ -11,9 +11,7 @@ namespace Engine.BuiltIn
     /// </summary>
     public class BasicPositionNormalTextureTangentPs : IBuiltInPixelShader
     {
-        /// <summary>
-        /// Shader
-        /// </summary>
+        /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
@@ -65,9 +63,7 @@ namespace Engine.BuiltIn
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -119,14 +115,12 @@ namespace Engine.BuiltIn
             this.samplerNormal = samplerNormal;
         }
 
-        /// <summary>
-        /// Sets the pixel shader constant buffers
-        /// </summary>
-        public void SetConstantBuffers()
+        /// <inheritdoc/>
+        public void SetShaderResources()
         {
             var cb = new[]
             {
-                BuiltInShaders.GetPSPerFrameLit(),
+                BuiltInShaders.GetPSPerFrame(),
                 BuiltInShaders.GetPSHemispheric(),
                 BuiltInShaders.GetPSDirectionals(),
                 BuiltInShaders.GetPSSpots(),

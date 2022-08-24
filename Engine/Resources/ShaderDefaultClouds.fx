@@ -27,6 +27,20 @@ cbuffer cbPerFramePerturbed : register(b2)
     float2 PAD2;
 };
 
+SamplerState SamplerLinear : register(s0)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+SamplerState SamplerAnisotropic : register(s1)
+{
+    Filter = ANISOTROPIC;
+    MaxAnisotropy = 4;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 PSVertexPositionTexture VSClouds(VSVertexPositionTexture input)
 {
     PSVertexPositionTexture output = (PSVertexPositionTexture) 0;
@@ -37,6 +51,57 @@ PSVertexPositionTexture VSClouds(VSVertexPositionTexture input)
     output.textureIndex = 0;
 
     return output;
+}
+
+inline float RandomScalar(float seed, Texture1D rndTex)
+{
+    return rndTex.SampleLevel(SamplerLinear, seed, 0).x;
+}
+inline float2 RandomVector2(float seed, Texture1D rndTex)
+{
+    return rndTex.SampleLevel(SamplerLinear, seed, 0).xy;
+}
+inline float3 RandomVector3(float seed, Texture1D rndTex)
+{
+    return rndTex.SampleLevel(SamplerLinear, seed, 0).xyz;
+}
+inline float4 RandomVector4(float seed, Texture1D rndTex)
+{
+    return rndTex.SampleLevel(SamplerLinear, seed, 0);
+}
+
+inline float RandomScalar(float min, float max, float seed, Texture1D rndTex)
+{
+    float r = rndTex.SampleLevel(SamplerLinear, seed, 0).x;
+
+    return roll(r, min, max);
+}
+inline float2 RandomVector2(float min, float max, float seed, Texture1D rndTex)
+{
+    float2 r = rndTex.SampleLevel(SamplerLinear, seed, 0).xy;
+    r.x = roll(r.x, min, max);
+    r.y = roll(r.y, min, max);
+
+    return r;
+}
+inline float3 RandomVector3(float min, float max, float seed, Texture1D rndTex)
+{
+    float3 r = rndTex.SampleLevel(SamplerLinear, seed, 0).xyz;
+    r.x = roll(r.x, min, max);
+    r.y = roll(r.y, min, max);
+    r.z = roll(r.z, min, max);
+
+    return r;
+}
+inline float4 RandomVector4(float min, float max, float seed, Texture1D rndTex)
+{
+    float4 r = rndTex.SampleLevel(SamplerLinear, seed, 0);
+    r.x = roll(r.x, min, max);
+    r.y = roll(r.y, min, max);
+    r.z = roll(r.z, min, max);
+    r.w = roll(r.w, min, max);
+
+    return r;
 }
 
 float4 PSClouds(PSVertexPositionTexture input) : SV_TARGET

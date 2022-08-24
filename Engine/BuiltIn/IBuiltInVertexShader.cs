@@ -15,8 +15,8 @@ namespace Engine.BuiltIn
         EngineVertexShader Shader { get; }
 
         /// <summary>
-        /// Sets the shader constant buffers
+        /// Sets the shader resources
         /// </summary>
-        void SetConstantBuffers();
+        void SetShaderResources();
     }
 }

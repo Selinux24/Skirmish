@@ -93,81 +93,21 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Per frame data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 48)]
-        struct PSPerFrameNoLit : IBufferData
-        {
-            /// <summary>
-            /// Builds the main pixel shader Per-Frame buffer without lighting
-            /// </summary>
-            /// <param name="context">Draw context</param>
-            public static PSPerFrameNoLit Build(DrawContext context)
-            {
-                if (context == null)
-                {
-                    return new PSPerFrameNoLit();
-                }
-
-                return new PSPerFrameNoLit
-                {
-                    EyePositionWorld = context.EyePosition,
-
-                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
-
-                    FogStart = context.Lights?.FogStart ?? 0,
-                    FogRange = context.Lights?.FogRange ?? 0,
-                };
-            }
-
-            /// <summary>
-            /// Eye position world
-            /// </summary>
-            [FieldOffset(0)]
-            public Vector3 EyePositionWorld;
-
-            /// <summary>
-            /// Fog color
-            /// </summary>
-            [FieldOffset(16)]
-            public Color4 FogColor;
-
-            /// <summary>
-            /// Fog start distance
-            /// </summary>
-            [FieldOffset(32)]
-            public float FogStart;
-            /// <summary>
-            /// Fog range distance
-            /// </summary>
-            [FieldOffset(36)]
-            public float FogRange;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PSPerFrameNoLit));
-            }
-        }
-
-
-
-        /// <summary>
-        /// Per frame data structure
-        /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 60)]
-        struct PSPerFrameLit : IBufferData
+        struct PSPerFrame : IBufferData
         {
             /// <summary>
-            /// Builds the main pixel shader Per-Frame buffer with lighting
+            /// Builds the main pixel shader Per-Frame buffer
             /// </summary>
             /// <param name="context">Draw context</param>
-            public static PSPerFrameLit Build(DrawContext context)
+            public static PSPerFrame Build(DrawContext context)
             {
                 if (context == null)
                 {
-                    return new PSPerFrameLit();
+                    return new PSPerFrame();
                 }
 
-                return new PSPerFrameLit
+                return new PSPerFrame
                 {
                     EyePositionWorld = context.EyePosition,
 
@@ -218,7 +158,7 @@ namespace Engine.BuiltIn
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(PSPerFrameLit));
+                return Marshal.SizeOf(typeof(PSPerFrame));
             }
         }
 

@@ -283,9 +283,6 @@
   <data name="IncMatrix" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Lib\IncMatrix.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="IncPostProcessing" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\Lib\IncPostProcessing.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="IncQuaternion" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\Lib\IncQuaternion.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

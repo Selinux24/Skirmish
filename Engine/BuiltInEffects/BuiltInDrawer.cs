@@ -55,8 +55,8 @@ namespace Engine.BuiltInEffects
             Graphics.SetVertexShader(VertexShader.Shader);
             Graphics.SetPixelShader(PixelShader.Shader);
 
-            VertexShader.SetConstantBuffers();
-            PixelShader.SetConstantBuffers();
+            VertexShader.SetShaderResources();
+            PixelShader.SetShaderResources();
 
             bool instanced = instances > 0;
 
@@ -86,8 +86,8 @@ namespace Engine.BuiltInEffects
             Graphics.SetVertexShader(VertexShader.Shader);
             Graphics.SetPixelShader(PixelShader.Shader);
 
-            VertexShader.SetConstantBuffers();
-            PixelShader.SetConstantBuffers();
+            VertexShader.SetShaderResources();
+            PixelShader.SetShaderResources();
 
             // Set the vertex input layout.
             if (!bufferManager.SetInputAssembler(VertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))

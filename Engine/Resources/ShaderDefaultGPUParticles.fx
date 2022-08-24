@@ -42,6 +42,13 @@ cbuffer cbFixed : register(b2)
 
 Texture2DArray gTextureArray : register(t0);
 
+SamplerState SamplerPointParticle : register(s0)
+{
+    Filter = MIN_MAG_MIP_POINT;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+};
+
 /***********************************************************
  * STREAM OUT                                              *
  ***********************************************************/

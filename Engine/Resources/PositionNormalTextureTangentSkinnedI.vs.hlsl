@@ -28,18 +28,6 @@ cbuffer cbVSPerObject : register(b2)
 Texture2D gMaterialPalette : register(t0);
 Texture2D gAnimationPalette : register(t1);
 
-struct PSVertexPositionNormalTextureTangent2
-{
-    float4 positionHomogeneous : SV_POSITION;
-    float3 positionWorld : POSITION;
-    float3 normalWorld : NORMAL;
-    float3 tangentWorld : TANGENT;
-    float2 tex : TEXCOORD0;
-    float4 tintColor : TINTCOLOR;
-    uint textureIndex : TEXTUREINDEX;
-    Material material : MATERIAL;
-};
-
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE TANGENT
 **********************************************************************************************************/

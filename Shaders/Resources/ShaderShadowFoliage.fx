@@ -22,6 +22,17 @@ cbuffer cbPerObject : register(b1)
 Texture2DArray gTextureArray : register(t0);
 Texture1D gTextureRandom : register(t1);
 
+SamplerState SamplerPoint : register(s0)
+{
+    Filter = MIN_MAG_MIP_POINT;
+};
+SamplerState SamplerLinear : register(s1)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 GSVertexBillboard VSFoliage(VSVertexBillboard input)
 {
     GSVertexBillboard output;

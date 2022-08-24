@@ -12,45 +12,36 @@ cbuffer cbPerFrame : register(b0)
 	float gFogStart;
 	float gFogRange;
 	float2 PAD12;
-    float3 gLOD;
+	float3 gLOD;
 	float gShadowIntensity;
 };
 
 cbuffer cbHemispheric : register(b1)
 {
-    HemisphericLight gHemiLight;
+	HemisphericLight gHemiLight;
 };
 
 cbuffer cbDirectionals : register(b2)
 {
-    uint gDirLightsCount;
-    DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+	uint gDirLightsCount;
+	DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
 };
 
 cbuffer cbSpots : register(b3)
 {
-    uint gSpotLightsCount;
-    SpotLight gSpotLights[MAX_LIGHTS_SPOT];
+	uint gSpotLightsCount;
+	SpotLight gSpotLights[MAX_LIGHTS_SPOT];
 };
 
 cbuffer cbPoints : register(b4)
 {
-    uint gPointLightsCount;
-    PointLight gPointLights[MAX_LIGHTS_POINT];
+	uint gPointLightsCount;
+	PointLight gPointLights[MAX_LIGHTS_POINT];
 };
 
 Texture2DArray<float> gShadowMapDir : register(t0);
 Texture2DArray<float> gShadowMapSpot : register(t1);
 TextureCubeArray<float> gShadowMapPoint : register(t2);
-
-struct PSVertexPositionNormalColor2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float4 color : COLOR0;
-	Material material : MATERIAL;
-};
 
 /**********************************************************************************************************
 POSITION NORMAL COLOR
@@ -67,16 +58,16 @@ float4 main(PSVertexPositionNormalColor2 input) : SV_TARGET
 	lInput.eyePosition = gEyePositionWorld;
 	lInput.levelOfDetailRanges = gLOD;
 
-    lInput.hemiLight = gHemiLight;
-    
-    lInput.dirLightsCount = gDirLightsCount;
-    lInput.dirLights = gDirLights;
-	
-    lInput.pointLightsCount = gPointLightsCount;
-    lInput.pointLights = gPointLights;
-	
-    lInput.spotLightsCount = gSpotLightsCount;
-    lInput.spotLights = gSpotLights;
+	lInput.hemiLight = gHemiLight;
+
+	lInput.dirLightsCount = gDirLightsCount;
+	lInput.dirLights = gDirLights;
+
+	lInput.pointLightsCount = gPointLightsCount;
+	lInput.pointLights = gPointLights;
+
+	lInput.spotLightsCount = gSpotLightsCount;
+	lInput.spotLights = gSpotLights;
 
 	lInput.shadowMapDir = gShadowMapDir;
 	lInput.shadowMapPoint = gShadowMapPoint;

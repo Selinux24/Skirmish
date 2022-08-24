@@ -67,6 +67,26 @@ struct SpotLight
     float4x4 FromLightVP;
 };
 
+SamplerComparisonState SamplerComparisonLessEqual : register(s10)
+{
+    Filter = COMPARISON_MIN_MAG_MIP_LINEAR;
+    AddressU = BORDER;
+    AddressV = BORDER;
+    BorderColor = float4(1, 1, 1, 1);
+
+    ComparisonFunc = LESS_EQUAL;
+};
+SamplerComparisonState PCFSampler : register(s11)
+{
+    Filter = COMPARISON_MIN_MAG_MIP_LINEAR;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+    AddressW = CLAMP;
+    MaxAnisotropy = 1;
+
+    ComparisonFunc = LESS_EQUAL;
+};
+
 static float2 poissonDisk[MaxSampleCount] =
 {
     float2(0.2770745f, 0.6951455f),
@@ -458,7 +478,13 @@ inline ComputeLightsOutput ComputeSpotLightLOD1(ComputeSpotLightsInput input)
     [flatten]
     if (input.spotLight.CastShadow == 1 && input.spotLight.MapIndex >= 0)
     {
-        cShadowFactor = CalcSpotShadowFactor(input.pPosition, input.minShadowIntensity, input.spotLight.MapIndex, input.spotLight.FromLightVP, input.shadowMap, SHADOW_SAMPLES_HD);
+        cShadowFactor = CalcSpotShadowFactor(
+            input.pPosition, 
+            input.minShadowIntensity, 
+            input.spotLight.MapIndex, 
+            input.spotLight.FromLightVP, 
+            input.shadowMap, 
+            SHADOW_SAMPLES_HD);
     }
 
     float attenuation = CalcSphericAttenuation(input.spotLight.Intensity, input.spotLight.Radius, D);
@@ -481,7 +507,13 @@ inline ComputeLightsOutput ComputeSpotLightLOD2(ComputeSpotLightsInput input)
     [flatten]
     if (input.spotLight.CastShadow == 1 && input.spotLight.MapIndex >= 0)
     {
-        cShadowFactor = CalcSpotShadowFactor(input.pPosition, input.minShadowIntensity, input.spotLight.MapIndex, input.spotLight.FromLightVP, input.shadowMap, SHADOW_SAMPLES_LD);
+        cShadowFactor = CalcSpotShadowFactor(
+            input.pPosition, 
+            input.minShadowIntensity, 
+            input.spotLight.MapIndex, 
+            input.spotLight.FromLightVP, 
+            input.shadowMap, 
+            SHADOW_SAMPLES_LD);
     }
 
     float attenuation = CalcSphericAttenuation(input.spotLight.Intensity, input.spotLight.Radius, D);
@@ -669,7 +701,7 @@ inline float4 ComputeLightsLOD1(ComputeLightsInput input)
                 input.shadowMapSpot,
                 SHADOW_SAMPLES_HD);
         }
-
+        
         float3 L = input.spotLights[i].Position - input.objectPosition;
         float D = length(L);
         L /= D;

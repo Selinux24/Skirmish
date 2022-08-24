@@ -8,6 +8,13 @@ cbuffer cbPerFrame : register(b0)
 
 TextureCube gCubemap : register(t0);
 
+SamplerState SamplerLinear : register(s0)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 PSVertexPosition VSCubic(VSVertexPosition input)
 {
     PSVertexPosition output;

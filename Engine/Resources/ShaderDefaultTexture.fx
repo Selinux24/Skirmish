@@ -9,6 +9,13 @@ cbuffer cbPerFrame : register(b0)
 
 Texture2DArray gTexture : register(t0);
 
+SamplerState SamplerLinear : register(s0)
+{
+    Filter = MIN_MAG_MIP_LINEAR;
+    AddressU = WRAP;
+    AddressV = WRAP;
+};
+
 struct VSVertex
 {
     float3 positionLocal : POSITION;

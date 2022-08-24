@@ -256,11 +256,8 @@ namespace Engine.BuiltIn
                 return;
             }
 
-            var psPerFrameNoLit = GetConstantBuffer<PSPerFrameNoLit>();
-            psPerFrameNoLit?.WriteData(PSPerFrameNoLit.Build(context));
-
-            var psPerFrameLit = GetConstantBuffer<PSPerFrameLit>();
-            psPerFrameLit?.WriteData(PSPerFrameLit.Build(context));
+            var psPerFrame = GetConstantBuffer<PSPerFrame>();
+            psPerFrame?.WriteData(PSPerFrame.Build(context));
 
             var psHemispheric = GetConstantBuffer<PSHemispheric>();
             psHemispheric?.WriteData(PSHemispheric.Build(context));
@@ -289,16 +286,9 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Gets the built-in per frame pixel shader constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetPSPerFrameNoLit()
+        public static IEngineConstantBuffer GetPSPerFrame()
         {
-            return GetConstantBuffer<PSPerFrameNoLit>();
-        }
-        /// <summary>
-        /// Gets the built-in per frame with lights pixel shader constant buffer
-        /// </summary>
-        public static IEngineConstantBuffer GetPSPerFrameLit()
-        {
-            return GetConstantBuffer<PSPerFrameLit>();
+            return GetConstantBuffer<PSPerFrame>();
         }
         /// <summary>
         /// Gets the built-in hemispheric light pixel shader constant buffer

@@ -36,6 +36,13 @@ float4 ComputeParticleRotation(float rotation)
     return rotationMatrix;
 }
 
+SamplerState SamplerPointParticle : register(s0)
+{
+    Filter = MIN_MAG_MIP_POINT;
+    AddressU = CLAMP;
+    AddressV = CLAMP;
+};
+
 GSDecal VSDecals(VSVertexDecal input)
 {
     GSDecal output;

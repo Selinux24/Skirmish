@@ -1,6 +1,8 @@
 #ifndef __VERTEXFORMATS_INCLUDED__
 #define __VERTEXFORMATS_INCLUDED__
 
+#include "IncMaterials.hlsl"
+
 /*
 BASIC VS INPUTS
 */
@@ -401,6 +403,12 @@ struct PSVertexPositionColor
 	float4 color : COLOR0;
 	uint materialIndex : MATERIALINDEX;
 };
+struct PSVertexPositionColor2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float4 color : COLOR0;
+};
 struct PSVertexPositionNormalColor
 {
 	float4 positionHomogeneous : SV_POSITION;
@@ -408,6 +416,14 @@ struct PSVertexPositionNormalColor
 	float3 normalWorld : NORMAL;
 	float4 color : COLOR0;
 	uint materialIndex : MATERIALINDEX;
+};
+struct PSVertexPositionNormalColor2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+	float4 color : COLOR0;
+	Material material;
 };
 struct PSVertexPositionTexture
 {
@@ -417,6 +433,14 @@ struct PSVertexPositionTexture
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
 	uint materialIndex : MATERIALINDEX;
+};
+struct PSVertexPositionTexture2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float2 tex : TEXCOORD0;
+	float4 tintColor : TINTCOLOR;
+	uint textureIndex : TEXTUREINDEX;
 };
 struct PSVertexPositionNormalTexture
 {
@@ -428,6 +452,16 @@ struct PSVertexPositionNormalTexture
 	uint textureIndex : TEXTUREINDEX;
 	uint materialIndex : MATERIALINDEX;
 };
+struct PSVertexPositionNormalTexture2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+	float2 tex : TEXCOORD0;
+	float4 tintColor : TINTCOLOR;
+	uint textureIndex : TEXTUREINDEX;
+	Material material;
+};
 struct PSVertexPositionNormalTextureTangent
 {
 	float4 positionHomogeneous : SV_POSITION;
@@ -438,6 +472,17 @@ struct PSVertexPositionNormalTextureTangent
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
 	uint materialIndex : MATERIALINDEX;
+};
+struct PSVertexPositionNormalTextureTangent2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+	float3 tangentWorld : TANGENT;
+	float2 tex : TEXCOORD0;
+	float4 tintColor : TINTCOLOR;
+	uint textureIndex : TEXTUREINDEX;
+	Material material;
 };
 struct PSVertexTerrain
 {
