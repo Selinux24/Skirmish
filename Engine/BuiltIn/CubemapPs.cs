@@ -97,6 +97,8 @@ namespace Engine.BuiltIn
             Graphics.SetPixelShaderResourceView(0, cubemap);
 
             Graphics.SetPixelShaderSampler(0, sampler);
+
+            Graphics.SetPixelShaderSampler(0, BuiltInShaders.GetSamplerLinear());
         }
     }
 }

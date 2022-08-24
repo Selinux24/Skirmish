@@ -191,6 +191,8 @@ namespace Engine
                 return;
             }
 
+            BuiltInShaders.UpdatePerObject(local, context.ViewProjection);
+
             if (textureCubic)
             {
                 DrawCubic();

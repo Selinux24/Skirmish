@@ -87,6 +87,14 @@ namespace Engine.BuiltIn
             };
 
             Graphics.SetPixelShaderResourceViews(0, rv);
+
+            var ss = new[]
+            {
+                BuiltInShaders.GetSamplerComparisonLessEqualBorder(),
+                BuiltInShaders.GetSamplerComparisonLessEqualClamp(),
+            };
+
+            Graphics.SetPixelShaderSamplers(10, ss);
         }
     }
 }

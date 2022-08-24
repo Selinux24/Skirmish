@@ -80,6 +80,8 @@ namespace Engine.BuiltIn
             }
 
             cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(BasicPositionTexturePs) + "." + nameof(PerFrame));
+
+            samplerDiffuse = BuiltInShaders.GetSamplerLinear();
         }
         /// <summary>
         /// Destructor

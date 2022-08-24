@@ -54,6 +54,9 @@ namespace Engine.BuiltIn
             {
                 Shader = graphics.LoadPixelShader(nameof(BasicPositionNormalTextureTangentPs), bytes);
             }
+
+            samplerDiffuse = BuiltInShaders.GetSamplerLinear();
+            samplerNormal = BuiltInShaders.GetSamplerLinear();
         }
         /// <summary>
         /// Destructor
@@ -147,6 +150,14 @@ namespace Engine.BuiltIn
             };
 
             Graphics.SetPixelShaderSamplers(0, ss);
+
+            ss = new[]
+            {
+                BuiltInShaders.GetSamplerComparisonLessEqualBorder(),
+                BuiltInShaders.GetSamplerComparisonLessEqualClamp(),
+            };
+
+            Graphics.SetPixelShaderSamplers(10, ss);
         }
     }
 }

@@ -46,6 +46,14 @@ namespace Engine.BuiltIn
         /// Sampler anisotropic
         /// </summary>
         private static EngineSamplerState samplerAnisotropic = null;
+        /// <summary>
+        /// Sampler comparison less equal
+        /// </summary>
+        private static EngineSamplerState samplerComparisonLessEqualBorder = null;
+        /// <summary>
+        /// Sampler comparison less equal
+        /// </summary>
+        private static EngineSamplerState samplerComparisonLessEqualClamp = null;
 
         /// <summary>
         /// Material palette resource view
@@ -95,6 +103,10 @@ namespace Engine.BuiltIn
             samplerLinear = null;
             samplerAnisotropic?.Dispose();
             samplerAnisotropic = null;
+            samplerComparisonLessEqualBorder?.Dispose();
+            samplerComparisonLessEqualBorder = null;
+            samplerComparisonLessEqualClamp?.Dispose();
+            samplerComparisonLessEqualClamp = null;
         }
 
         /// <summary>
@@ -167,7 +179,7 @@ namespace Engine.BuiltIn
                 return samplerPoint;
             }
 
-            samplerPoint = EngineSamplerState.Point(graphics);
+            samplerPoint = EngineSamplerState.Point(graphics, nameof(BuiltInShaders));
 
             return samplerPoint;
         }
@@ -181,7 +193,7 @@ namespace Engine.BuiltIn
                 return samplerLinear;
             }
 
-            samplerLinear = EngineSamplerState.Linear(graphics);
+            samplerLinear = EngineSamplerState.Linear(graphics, nameof(BuiltInShaders));
 
             return samplerLinear;
         }
@@ -195,9 +207,37 @@ namespace Engine.BuiltIn
                 return samplerAnisotropic;
             }
 
-            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 4);
+            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, nameof(BuiltInShaders), 4);
 
             return samplerAnisotropic;
+        }
+        /// <summary>
+        /// Sampler comparison less equal
+        /// </summary>
+        public static EngineSamplerState GetSamplerComparisonLessEqualBorder()
+        {
+            if (samplerComparisonLessEqualBorder != null)
+            {
+                return samplerComparisonLessEqualBorder;
+            }
+
+            samplerComparisonLessEqualBorder = EngineSamplerState.ComparisonLessEqualBorder(graphics, nameof(BuiltInShaders));
+
+            return samplerComparisonLessEqualBorder;
+        }
+        /// <summary>
+        /// Sampler comparison less equal
+        /// </summary>
+        public static EngineSamplerState GetSamplerComparisonLessEqualClamp()
+        {
+            if (samplerComparisonLessEqualClamp != null)
+            {
+                return samplerComparisonLessEqualClamp;
+            }
+
+            samplerComparisonLessEqualClamp = EngineSamplerState.ComparisonLessEqualClamp(graphics, nameof(BuiltInShaders));
+
+            return samplerComparisonLessEqualClamp;
         }
 
         /// <summary>

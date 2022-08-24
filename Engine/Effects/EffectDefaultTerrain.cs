@@ -721,9 +721,9 @@ namespace Engine.Effects
             samplerNormalVar = Effect.GetVariableSampler("SamplerNormal");
 
             //Initialize states
-            samplerPoint = EngineSamplerState.Point(graphics);
-            samplerLinear = EngineSamplerState.Linear(graphics);
-            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, 8);
+            samplerPoint = EngineSamplerState.Point(graphics, nameof(EffectDefaultTerrain));
+            samplerLinear = EngineSamplerState.Linear(graphics, nameof(EffectDefaultTerrain));
+            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, nameof(EffectDefaultTerrain), 8);
         }
         /// <summary>
         /// Destructor

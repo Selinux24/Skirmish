@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.Common
 {
@@ -24,26 +25,26 @@ namespace Engine.Common
         /// </summary>
         /// <param name="graphics">Graphics</param>
         /// <returns>Returns the point sampler state</returns>
-        public static EngineSamplerState Point(Graphics graphics)
+        public static EngineSamplerState Point(Graphics graphics, string name)
         {
             var desc = SamplerStateDescription.Default();
             desc.Filter = Filter.MinMagMipPoint;
 
-            return graphics.CreateSamplerState(nameof(Point), desc);
+            return graphics.CreateSamplerState($"{name}.{nameof(Point)}", desc);
         }
         /// <summary>
         /// Creates a linear sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
         /// <returns>Creates the linear sampler state</returns>
-        public static EngineSamplerState Linear(Graphics graphics)
+        public static EngineSamplerState Linear(Graphics graphics, string name)
         {
             var desc = SamplerStateDescription.Default();
             desc.Filter = Filter.MinMagMipLinear;
             desc.AddressU = TextureAddressMode.Wrap;
             desc.AddressV = TextureAddressMode.Wrap;
 
-            return graphics.CreateSamplerState(nameof(Linear), desc);
+            return graphics.CreateSamplerState($"{name}.{nameof(Linear)}", desc);
         }
         /// <summary>
         /// Creates a anisotropic sampler state
@@ -51,7 +52,7 @@ namespace Engine.Common
         /// <param name="graphics">Graphics</param>
         /// <param name="maxAnisotropic">Maximum anisotropic</param>
         /// <returns>Creates the anisotropic sampler state</returns>
-        public static EngineSamplerState Anisotropic(Graphics graphics, int maxAnisotropic)
+        public static EngineSamplerState Anisotropic(Graphics graphics, string name, int maxAnisotropic)
         {
             var desc = SamplerStateDescription.Default();
             desc.Filter = Filter.Anisotropic;
@@ -59,7 +60,39 @@ namespace Engine.Common
             desc.AddressU = TextureAddressMode.Wrap;
             desc.AddressV = TextureAddressMode.Wrap;
 
-            return graphics.CreateSamplerState(nameof(Anisotropic), desc);
+            return graphics.CreateSamplerState($"{name}.{nameof(Anisotropic)}_{maxAnisotropic}", desc);
+        }
+        /// <summary>
+        /// Creates a ComparisonLessEqualBorder sampler state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Returns the ComparisonLessEqual sampler state</returns>
+        public static EngineSamplerState ComparisonLessEqualBorder(Graphics graphics, string name)
+        {
+            var desc = SamplerStateDescription.Default();
+            desc.Filter = Filter.ComparisonMinMagMipLinear;
+            desc.AddressU = TextureAddressMode.Border;
+            desc.AddressV = TextureAddressMode.Border;
+            desc.BorderColor = Color4.White;
+            desc.ComparisonFunction = Comparison.LessEqual;
+
+            return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualBorder)}", desc);
+        }
+        /// <summary>
+        /// Creates a ComparisonLessEqualClamp sampler state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <returns>Returns the ComparisonLessEqual sampler state</returns>
+        public static EngineSamplerState ComparisonLessEqualClamp(Graphics graphics, string name)
+        {
+            var desc = SamplerStateDescription.Default();
+            desc.Filter = Filter.ComparisonMinMagMipLinear;
+            desc.AddressU = TextureAddressMode.Clamp;
+            desc.AddressV = TextureAddressMode.Clamp;
+            desc.AddressW = TextureAddressMode.Clamp;
+            desc.ComparisonFunction = Comparison.LessEqual;
+
+            return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualClamp)}", desc);
         }
 
         /// <summary>
