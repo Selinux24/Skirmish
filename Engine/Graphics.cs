@@ -1223,7 +1223,7 @@ namespace Engine
         {
             if (depthStencilWRzBufferEnabled == null)
             {
-                depthStencilWRzBufferEnabled = EngineDepthStencilState.WRzBufferEnabled(this);
+                depthStencilWRzBufferEnabled = EngineDepthStencilState.WRzBufferEnabled(this, nameof(Graphics));
             }
 
             SetDepthStencilState(depthStencilWRzBufferEnabled);
@@ -1235,7 +1235,7 @@ namespace Engine
         {
             if (depthStencilWRzBufferDisabled == null)
             {
-                depthStencilWRzBufferDisabled = EngineDepthStencilState.WRzBufferDisabled(this);
+                depthStencilWRzBufferDisabled = EngineDepthStencilState.WRzBufferDisabled(this, nameof(Graphics));
             }
 
             SetDepthStencilState(depthStencilWRzBufferDisabled);
@@ -1247,7 +1247,7 @@ namespace Engine
         {
             if (depthStencilRDzBufferEnabled == null)
             {
-                depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this);
+                depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this, nameof(Graphics));
             }
 
             SetDepthStencilState(depthStencilRDzBufferEnabled);
@@ -1259,7 +1259,7 @@ namespace Engine
         {
             if (depthStencilRDzBufferDisabled == null)
             {
-                depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this);
+                depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this, nameof(Graphics));
             }
 
             SetDepthStencilState(depthStencilRDzBufferDisabled);
@@ -1271,7 +1271,7 @@ namespace Engine
         {
             if (depthStencilNone == null)
             {
-                depthStencilNone = EngineDepthStencilState.None(this);
+                depthStencilNone = EngineDepthStencilState.None(this, nameof(Graphics));
             }
 
             SetDepthStencilState(depthStencilNone);
@@ -1283,7 +1283,7 @@ namespace Engine
         {
             if (depthStencilShadowMapping == null)
             {
-                depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this);
+                depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this, nameof(Graphics));
             }
 
             SetDepthStencilState(depthStencilShadowMapping);
@@ -1369,7 +1369,7 @@ namespace Engine
         {
             if (rasterizerDefault == null)
             {
-                rasterizerDefault = EngineRasterizerState.Default(this);
+                rasterizerDefault = EngineRasterizerState.Default(this, nameof(Graphics));
             }
 
             SetRasterizerState(rasterizerDefault);
@@ -1381,7 +1381,7 @@ namespace Engine
         {
             if (rasterizerWireframe == null)
             {
-                rasterizerWireframe = EngineRasterizerState.Wireframe(this);
+                rasterizerWireframe = EngineRasterizerState.Wireframe(this, nameof(Graphics));
             }
 
             SetRasterizerState(rasterizerWireframe);
@@ -1393,7 +1393,7 @@ namespace Engine
         {
             if (rasterizerNoCull == null)
             {
-                rasterizerNoCull = EngineRasterizerState.NoCull(this);
+                rasterizerNoCull = EngineRasterizerState.NoCull(this, nameof(Graphics));
             }
 
             SetRasterizerState(rasterizerNoCull);
@@ -1405,7 +1405,7 @@ namespace Engine
         {
             if (rasterizerCullFrontFace == null)
             {
-                rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this);
+                rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this, nameof(Graphics));
             }
 
             SetRasterizerState(rasterizerCullFrontFace);
@@ -1417,7 +1417,7 @@ namespace Engine
         {
             if (rasterizerShadowMapping == null)
             {
-                rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this);
+                rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this, nameof(Graphics));
             }
 
             SetRasterizerState(rasterizerShadowMapping);
@@ -1595,9 +1595,9 @@ namespace Engine
         /// </summary>
         /// <param name="description">Description</param>
         /// <returns>Returns a new rasterizer state</returns>
-        internal EngineRasterizerState CreateRasterizerState(string name, RasterizerStateDescription2 description)
+        internal EngineRasterizerState CreateRasterizerState(string name, EngineRasterizerStateDescription description)
         {
-            return new EngineRasterizerState(name, new RasterizerState2(device, description));
+            return new EngineRasterizerState(name, new RasterizerState2(device, (RasterizerStateDescription2)description));
         }
         /// <summary>
         /// Creates a new depth stencil state
@@ -1606,9 +1606,9 @@ namespace Engine
         /// <param name="description">Description</param>
         /// <param name="stencilRef">Stencil reference</param>
         /// <returns>Returns a new depth stencil state</returns>
-        internal EngineDepthStencilState CreateDepthStencilState(string name, DepthStencilStateDescription description, int stencilRef)
+        internal EngineDepthStencilState CreateDepthStencilState(string name, EngineDepthStencilStateDescription description, int stencilRef)
         {
-            return new EngineDepthStencilState(name, new DepthStencilState(device, description), stencilRef);
+            return new EngineDepthStencilState(name, new DepthStencilState(device, (DepthStencilStateDescription)description), stencilRef);
         }
 
         /// <summary>
@@ -3349,6 +3349,146 @@ namespace Engine
         }
 
         /// <summary>
+        /// Loads a geometry shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns geometry shader description</returns>
+        internal EngineGeometryShader CompileGeometryShader(
+            string name,
+            string entryPoint,
+            string filename,
+            string profile)
+        {
+            var res = CompileGeometryShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a geometry shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns geometry shader description</returns>
+        internal EngineGeometryShader CompileGeometryShader(
+            string name,
+            string entryPoint,
+            string filename,
+            string profile,
+            out string compilationErrors)
+        {
+            return CompileGeometryShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a geometry shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns geometry shader description</returns>
+        internal EngineGeometryShader CompileGeometryShader(
+            string name,
+            string entryPoint,
+            byte[] byteCode,
+            string profile)
+        {
+            var res = CompileGeometryShader(
+                name,
+                entryPoint,
+                byteCode,
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a geometry shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns geometry shader description</returns>
+        internal EngineGeometryShader CompileGeometryShader(
+            string name,
+            string entryPoint,
+            byte[] byteCode,
+            string profile,
+            out string compilationErrors)
+        {
+            compilationErrors = null;
+
+            using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
+            using (CompilationResult cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                profile,
+                ShaderFlags.EnableStrictness,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                if (cmpResult.HasErrors)
+                {
+                    compilationErrors = cmpResult.Message;
+                }
+
+                return new EngineGeometryShader(name, new GeometryShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
+            }
+        }
+        /// <summary>
+        /// Loads a geometry shader from pre-compiled file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded shader</returns>
+        internal EngineGeometryShader LoadGeometryShader(
+            string name,
+            byte[] bytes)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var effectCode = ShaderBytecode.FromStream(ms))
+                {
+                    var shader = new GeometryShader(
+                        device,
+                        effectCode.Data);
+
+                    return new EngineGeometryShader(name, shader, effectCode);
+                }
+            }
+        }
+
+        /// <summary>
         /// Loads a pixel shader from file
         /// </summary>
         /// <param name="name">Name</param>
@@ -3553,9 +3693,9 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="description">Sampler description</param>
         /// <returns>Returns the new sampler state</returns>
-        internal EngineSamplerState CreateSamplerState(string name, SamplerStateDescription description)
+        internal EngineSamplerState CreateSamplerState(string name, EngineSamplerStateDescription description)
         {
-            return new EngineSamplerState(name, new SamplerState(device, description));
+            return new EngineSamplerState(name, new SamplerState(device, (SamplerStateDescription)description));
         }
 
         /// <summary>

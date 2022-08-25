@@ -111,16 +111,16 @@ namespace Engine
             combineLightsInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredCombineLights", DrawerPool.EffectDeferredComposer.DeferredCombineLights.GetSignature(), VertexPosition.Input(BufferSlot));
 
             //Stencil pass rasterizer state
-            rasterizerStencilPass = EngineRasterizerState.StencilPass(graphics);
+            rasterizerStencilPass = EngineRasterizerState.StencilPass(graphics, nameof(SceneRendererDeferredLights));
 
             //Counter clockwise cull rasterizer state
-            rasterizerLightingPass = EngineRasterizerState.LightingPass(graphics);
+            rasterizerLightingPass = EngineRasterizerState.LightingPass(graphics, nameof(SceneRendererDeferredLights));
 
             //Depth-stencil state for volume marking (Value != 0 if object is inside of the current drawing volume)
-            depthStencilVolumeMarking = EngineDepthStencilState.VolumeMarking(graphics);
+            depthStencilVolumeMarking = EngineDepthStencilState.VolumeMarking(graphics, nameof(SceneRendererDeferredLights));
 
             //Depth-stencil state for volume drawing (Process pixels if stencil value != stencil reference)
-            depthStencilVolumeDrawing = EngineDepthStencilState.VolumeDrawing(graphics);
+            depthStencilVolumeDrawing = EngineDepthStencilState.VolumeDrawing(graphics, nameof(SceneRendererDeferredLights));
         }
         /// <summary>
         /// Destructor

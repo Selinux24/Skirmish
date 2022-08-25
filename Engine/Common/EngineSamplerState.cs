@@ -3,7 +3,7 @@ using System;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using SamplerState = SharpDX.Direct3D11.SamplerState;
 
     /// <summary>
     /// Engine sampler state
@@ -24,10 +24,11 @@ namespace Engine.Common
         /// Creates a point sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the point sampler state</returns>
         public static EngineSamplerState Point(Graphics graphics, string name)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.MinMagMipPoint;
 
             return graphics.CreateSamplerState($"{name}.{nameof(Point)}", desc);
@@ -36,10 +37,11 @@ namespace Engine.Common
         /// Creates a linear sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the linear sampler state</returns>
         public static EngineSamplerState Linear(Graphics graphics, string name)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.MinMagMipLinear;
             desc.AddressU = TextureAddressMode.Wrap;
             desc.AddressV = TextureAddressMode.Wrap;
@@ -50,11 +52,12 @@ namespace Engine.Common
         /// Creates a anisotropic sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <param name="maxAnisotropic">Maximum anisotropic</param>
         /// <returns>Creates the anisotropic sampler state</returns>
         public static EngineSamplerState Anisotropic(Graphics graphics, string name, int maxAnisotropic)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.Anisotropic;
             desc.MaximumAnisotropy = maxAnisotropic;
             desc.AddressU = TextureAddressMode.Wrap;
@@ -66,10 +69,11 @@ namespace Engine.Common
         /// Creates a ComparisonLessEqualBorder sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the ComparisonLessEqual sampler state</returns>
         public static EngineSamplerState ComparisonLessEqualBorder(Graphics graphics, string name)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.ComparisonMinMagMipLinear;
             desc.AddressU = TextureAddressMode.Border;
             desc.AddressV = TextureAddressMode.Border;
@@ -82,10 +86,11 @@ namespace Engine.Common
         /// Creates a ComparisonLessEqualClamp sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the ComparisonLessEqual sampler state</returns>
         public static EngineSamplerState ComparisonLessEqualClamp(Graphics graphics, string name)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.ComparisonMinMagMipLinear;
             desc.AddressU = TextureAddressMode.Clamp;
             desc.AddressV = TextureAddressMode.Clamp;
@@ -93,6 +98,17 @@ namespace Engine.Common
             desc.ComparisonFunction = Comparison.LessEqual;
 
             return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualClamp)}", desc);
+        }
+        /// <summary>
+        /// Creates a sampler state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Sampler description</param>
+        /// <returns></returns>
+        public static EngineSamplerState Create(Graphics graphics, string name, EngineSamplerStateDescription description)
+        {
+            return graphics.CreateSamplerState(name, description);
         }
 
         /// <summary>
@@ -104,7 +120,6 @@ namespace Engine.Common
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A sampler state name must be specified.");
             state = samplerState ?? throw new ArgumentNullException(nameof(samplerState), "A sampler state must be specified.");
-
             state.DebugName = name;
         }
         /// <summary>

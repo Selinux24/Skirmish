@@ -311,6 +311,15 @@
   <ItemGroup>
     <VertexShader Include="ShaderDefaultBasic\SkyScattering.vs.hlsl" />
   </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ShaderDefaultBasic\CPUParticles.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <GeometryShader Include="ShaderDefaultBasic\CPUParticles.gs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShaderDefaultBasic\CPUParticles.vs.hlsl" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>del /Q /F "$(SolutionDir)Engine\Resources\*.*"

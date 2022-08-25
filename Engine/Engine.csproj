@@ -137,6 +137,7 @@
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
     <Compile Include="BuiltInEffects\BasicSkyScattering.cs" />
+    <Compile Include="BuiltInEffects\BasicCPUParticles.cs" />
     <Compile Include="BuiltInEffects\BasicTexture.cs" />
     <Compile Include="BuiltInEffects\BasicCubemap.cs" />
     <Compile Include="BuiltInEffects\ShadowPositionTextureSkinned.cs" />
@@ -180,6 +181,9 @@
     <Compile Include="BuiltInEffects\BasicPositionTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
+    <Compile Include="BuiltIn\BasicCPUParticlesGS.cs" />
+    <Compile Include="BuiltIn\BasicCPUParticlesVs.cs" />
+    <Compile Include="BuiltIn\BasicCPUParticlesPs.cs" />
     <Compile Include="BuiltIn\EmptyGs.cs" />
     <Compile Include="BuiltIn\IBuiltInGeometryShader.cs" />
     <Compile Include="BuiltIn\SkyScatteringPs.cs" />
@@ -239,7 +243,10 @@
     <Compile Include="Common\BaseSceneObjectState.cs" />
     <Compile Include="Common\DrawOptions.cs" />
     <Compile Include="Common\EngineConstantBuffer.cs" />
+    <Compile Include="Common\EngineDepthStencilStateDescription.cs" />
     <Compile Include="Common\EngineGeometryShader.cs" />
+    <Compile Include="Common\EngineRasterizerStateDescription.cs" />
+    <Compile Include="Common\EngineSamplerStateDescription.cs" />
     <Compile Include="Common\IEnginePixelShader.cs" />
     <Compile Include="Common\IEngineGeometryShader.cs" />
     <Compile Include="Common\IEngineVertexShader.cs" />
@@ -302,6 +309,7 @@
     <Compile Include="BuiltIn\BasicPositionColorSkinnedVs.cs" />
     <Compile Include="BuiltIn\BasicPositionColorVsI.cs" />
     <Compile Include="BuiltIn\BasicPositionColorVs.cs" />
+    <Compile Include="Effects\EffectDefaultCPUParticles.cs" />
     <Compile Include="Effects\EffectShadowFoliageState.cs" />
     <Compile Include="BuiltInEffects\IBuiltInDrawer.cs" />
     <Compile Include="IInstacingData.cs" />
@@ -556,7 +564,6 @@
     <Compile Include="ParticleSystemParams.cs" />
     <Compile Include="ParticleSystemTypes.cs" />
     <Compile Include="ParticleTypes.cs" />
-    <Compile Include="Effects\EffectDefaultCpuParticles.cs" />
     <Compile Include="ParticleEmitter.cs" />
     <Compile Include="PathFinding\GraphArea.cs" />
     <Compile Include="PathFinding\GraphAreaTypes.cs" />

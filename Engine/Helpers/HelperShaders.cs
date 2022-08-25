@@ -11,6 +11,10 @@ namespace Engine.Helpers
         /// </summary>
         public static string VSProfile { get; set; } = "vs_5_0";
         /// <summary>
+        /// Geometry shader profile
+        /// </summary>
+        public static string GSProfile { get; set; } = "gs_5_0";
+        /// <summary>
         /// Pixel shader profile
         /// </summary>
         public static string PSProfile { get; set; } = "ps_5_0";

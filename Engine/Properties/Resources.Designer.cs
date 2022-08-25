@@ -73,6 +73,26 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        internal static byte[] Gs_CPUParticles {
+            get {
+                object obj = ResourceManager.GetObject("Gs_CPUParticles", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Gs_CPUParticles_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Gs_CPUParticles_Cso", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         internal static byte[] IncAnimation {
             get {
                 object obj = ResourceManager.GetObject("IncAnimation", resourceCulture);
@@ -166,6 +186,26 @@ namespace Engine.Properties {
         internal static byte[] IncVertexFormats {
             get {
                 object obj = ResourceManager.GetObject("IncVertexFormats", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_CPUParticles {
+            get {
+                object obj = ResourceManager.GetObject("Ps_CPUParticles", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Ps_CPUParticles_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Ps_CPUParticles_Cso", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -766,6 +806,26 @@ namespace Engine.Properties {
         internal static byte[] ShaderShadowTerrainFx {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowTerrainFx", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_CPUParticles {
+            get {
+                object obj = ResourceManager.GetObject("Vs_CPUParticles", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        internal static byte[] Vs_CPUParticles_Cso {
+            get {
+                object obj = ResourceManager.GetObject("Vs_CPUParticles_Cso", resourceCulture);
                 return ((byte[])(obj));
             }
         }

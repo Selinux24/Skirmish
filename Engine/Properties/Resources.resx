@@ -589,4 +589,22 @@
   <data name="Ps_SkyScattering_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\SkyScattering.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Vs_CPUParticles" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CPUParticles.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Vs_CPUParticles_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CPUParticles.vs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Gs_CPUParticles" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CPUParticles.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Gs_CPUParticles_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CPUParticles.gs.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_CPUParticles" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CPUParticles.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Ps_CPUParticles_Cso" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\CPUParticles.ps.cso;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>
