@@ -866,6 +866,7 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Resources\CascadeShadows\" />
     <Folder Include="Resources\Lib\" />
     <Folder Include="Resources\Shadows\" />
   </ItemGroup>

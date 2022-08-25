@@ -693,26 +693,6 @@ namespace Engine.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        internal static byte[] ShaderShadowBasicCso {
-            get {
-                object obj = ResourceManager.GetObject("ShaderShadowBasicCso", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        internal static byte[] ShaderShadowBasicFx {
-            get {
-                object obj = ResourceManager.GetObject("ShaderShadowBasicFx", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         internal static byte[] ShaderShadowBillboardCso {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowBillboardCso", resourceCulture);
