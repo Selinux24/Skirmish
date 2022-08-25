@@ -779,9 +779,7 @@
     <Compile Include="ParticleSystemGpu.cs" />
     <Compile Include="Cubemap.cs" />
     <Compile Include="Effects\EffectDefaultBillboard.cs" />
-    <Compile Include="EngineForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
+    <Compile Include="EngineForm.cs" />
     <Compile Include="ModelInstanced.cs" />
     <Compile Include="SceneLightDirectional.cs" />
     <Compile Include="SceneLightPoint.cs" />
@@ -865,11 +863,10 @@
       <Version>4.2.0</Version>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\Shaders\Shaders.csproj">
+    <ProjectReference Include="..\Engine.Shaders\Engine.Shaders.csproj">
       <Project>{f366139b-499b-4557-b1e6-3e74a8f64f74}</Project>
-      <Name>Shaders</Name>
+      <Name>Engine.Shaders</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

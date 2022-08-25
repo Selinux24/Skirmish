@@ -1,4 +1,4 @@
-﻿using Shaders.Properties;
+﻿using Engine.Shaders.Properties;
 using SharpDX;
 using System;
 using System.Runtime.InteropServices;

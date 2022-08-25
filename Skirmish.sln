@@ -45,8 +45,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Z Game Logic", "Samples\Z G
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Content.OnePageDungeon", "Engine.Content.OnePageDungeon\Engine.Content.OnePageDungeon.csproj", "{51447110-6F70-4C88-ACF0-070DAF4D3B18}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shaders", "Shaders\Shaders.csproj", "{F366139B-499B-4557-B1E6-3E74A8F64F74}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Games", "Games", "{8304C9ED-A66A-4217-8FD2-404396F077D3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanks", "Games\Tanks\Tanks.csproj", "{87B4A2CA-F402-465D-ACA5-581A55A59969}"
@@ -54,6 +52,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EB142A8F-E8BB-4647-88CA-6A91804D5F6A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTests", "Tests\EngineTests\EngineTests.csproj", "{9861580E-7A45-413A-971B-4DCAC955A9FF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Engine.Shaders", "Engine.Shaders\Engine.Shaders.csproj", "{F366139B-499B-4557-B1E6-3E74A8F64F74}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -281,18 +281,6 @@ Global
 		{51447110-6F70-4C88-ACF0-070DAF4D3B18}.Release|x64.Build.0 = Release|x64
 		{51447110-6F70-4C88-ACF0-070DAF4D3B18}.Release|x86.ActiveCfg = Release|x86
 		{51447110-6F70-4C88-ACF0-070DAF4D3B18}.Release|x86.Build.0 = Release|x86
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x64.ActiveCfg = Debug|x64
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x64.Build.0 = Debug|x64
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x86.ActiveCfg = Debug|x86
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x86.Build.0 = Debug|x86
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x64.ActiveCfg = Release|x64
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x64.Build.0 = Release|x64
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x86.ActiveCfg = Release|x86
-		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x86.Build.0 = Release|x86
 		{87B4A2CA-F402-465D-ACA5-581A55A59969}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{87B4A2CA-F402-465D-ACA5-581A55A59969}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{87B4A2CA-F402-465D-ACA5-581A55A59969}.Debug|x64.ActiveCfg = Debug|x64
@@ -317,6 +305,18 @@ Global
 		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|x64.Build.0 = Release|x64
 		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|x86.ActiveCfg = Release|x86
 		{9861580E-7A45-413A-971B-4DCAC955A9FF}.Release|x86.Build.0 = Release|x86
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x64.ActiveCfg = Debug|x64
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x64.Build.0 = Debug|x64
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x86.ActiveCfg = Debug|x86
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Debug|x86.Build.0 = Debug|x86
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x64.ActiveCfg = Release|x64
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x64.Build.0 = Release|x64
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x86.ActiveCfg = Release|x86
+		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

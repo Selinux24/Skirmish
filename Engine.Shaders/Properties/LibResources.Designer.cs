@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Shaders.Properties {
+namespace Engine.Shaders.Properties {
     using System;
     
     
@@ -39,7 +39,7 @@ namespace Shaders.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Shaders.Properties.LibResources", typeof(LibResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Engine.Shaders.Properties.LibResources", typeof(LibResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;

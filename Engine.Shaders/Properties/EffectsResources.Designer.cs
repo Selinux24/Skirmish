@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Shaders.Properties {
+namespace Engine.Shaders.Properties {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace Shaders.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class ShaderDefaultBasicResources {
+    public class EffectsResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ShaderDefaultBasicResources() {
+        internal EffectsResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Shaders.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Shaders.Properties.ShaderDefaultBasicResources", typeof(ShaderDefaultBasicResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Engine.Shaders.Properties.EffectsResources", typeof(EffectsResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] CPUParticles_gs {
+        public static byte[] ShaderDefaultBillboard {
             get {
-                object obj = ResourceManager.GetObject("CPUParticles_gs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultBillboard", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] CPUParticles_ps {
+        public static byte[] ShaderDefaultClouds {
             get {
-                object obj = ResourceManager.GetObject("CPUParticles_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultClouds", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] CPUParticles_vs {
+        public static byte[] ShaderDefaultCPUParticles {
             get {
-                object obj = ResourceManager.GetObject("CPUParticles_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultCPUParticles", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] Cubemap_ps {
+        public static byte[] ShaderDefaultDecal {
             get {
-                object obj = ResourceManager.GetObject("Cubemap_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultDecal", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] Cubemap_vs {
+        public static byte[] ShaderDefaultFoliage {
             get {
-                object obj = ResourceManager.GetObject("Cubemap_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultFoliage", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -113,9 +113,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionColor_ps {
+        public static byte[] ShaderDefaultFont {
             get {
-                object obj = ResourceManager.GetObject("PositionColor_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultFont", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -123,9 +123,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionColor_vs {
+        public static byte[] ShaderDefaultGPUParticles {
             get {
-                object obj = ResourceManager.GetObject("PositionColor_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultGPUParticles", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -133,9 +133,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionColorI_vs {
+        public static byte[] ShaderDefaultSprite {
             get {
-                object obj = ResourceManager.GetObject("PositionColorI_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultSprite", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -143,9 +143,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionColorSkinned_vs {
+        public static byte[] ShaderDefaultTerrain {
             get {
-                object obj = ResourceManager.GetObject("PositionColorSkinned_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultTerrain", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -153,9 +153,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionColorSkinnedI_vs {
+        public static byte[] ShaderDefaultWater {
             get {
-                object obj = ResourceManager.GetObject("PositionColorSkinnedI_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDefaultWater", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -163,9 +163,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalColor_ps {
+        public static byte[] ShaderDeferredBasic {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalColor_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDeferredBasic", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -173,9 +173,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalColor_vs {
+        public static byte[] ShaderDeferredComposer {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalColor_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDeferredComposer", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -183,9 +183,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalColorI_vs {
+        public static byte[] ShaderDeferredTerrain {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalColorI_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderDeferredTerrain", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -193,9 +193,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalColorSkinned_vs {
+        public static byte[] ShaderLightCapsule {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalColorSkinned_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderLightCapsule", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -203,9 +203,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalColorSkinnedI_vs {
+        public static byte[] ShaderLightDirectional {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalColorSkinnedI_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderLightDirectional", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -213,9 +213,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTexture_ps {
+        public static byte[] ShaderLightEmissive {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTexture_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderLightEmissive", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -223,9 +223,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTexture_vs {
+        public static byte[] ShaderLightPoint {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTexture_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderLightPoint", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -233,9 +233,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureI_vs {
+        public static byte[] ShaderLightSpot {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureI_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderLightSpot", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -243,9 +243,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureSkinned_vs {
+        public static byte[] ShaderNull {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureSkinned_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderNull", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -253,9 +253,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureSkinnedI_vs {
+        public static byte[] ShaderPostProcess {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureSkinnedI_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderPostProcess", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -263,9 +263,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureTangent_ps {
+        public static byte[] ShaderShadowBillboard {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangent_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderShadowBillboard", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -273,9 +273,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureTangent_vs {
+        public static byte[] ShaderShadowCascade {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangent_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderShadowCascade", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -283,9 +283,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureTangentI_vs {
+        public static byte[] ShaderShadowFoliage {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangentI_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderShadowFoliage", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -293,9 +293,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureTangentSkinned_vs {
+        public static byte[] ShaderShadowPoints {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangentSkinned_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderShadowPoints", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -303,99 +303,9 @@ namespace Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureTangentSkinnedI_vs {
+        public static byte[] ShaderShadowTerrain {
             get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangentSkinnedI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTexture_ps {
-            get {
-                object obj = ResourceManager.GetObject("PositionTexture_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTexture_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTexture_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTextureI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTextureI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTextureSkinned_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTextureSkinned_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTextureSkinnedI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTextureSkinnedI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] SkyScattering_ps {
-            get {
-                object obj = ResourceManager.GetObject("SkyScattering_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] SkyScattering_vs {
-            get {
-                object obj = ResourceManager.GetObject("SkyScattering_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Texture_ps {
-            get {
-                object obj = ResourceManager.GetObject("Texture_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Texture_vs {
-            get {
-                object obj = ResourceManager.GetObject("Texture_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShaderShadowTerrain", resourceCulture);
                 return ((byte[])(obj));
             }
         }

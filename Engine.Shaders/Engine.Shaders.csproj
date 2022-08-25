@@ -7,8 +7,8 @@
     <ProjectGuid>{F366139B-499B-4557-B1E6-3E74A8F64F74}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Shaders</RootNamespace>
-    <AssemblyName>Shaders</AssemblyName>
+    <RootNamespace>Engine.Shaders</RootNamespace>
+    <AssemblyName>Engine.Shaders</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -20,7 +20,7 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Shaders.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Engine.Shaders.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
@@ -101,7 +101,7 @@
     <VertexShader Include="ShaderDefaultBasic\PositionNormalTexture.vs.hlsl" />
     <PixelShader Include="ShaderDefaultBasic\PositionNormalTextureTangent.ps.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureTangent.vs.hlsl" />
-    <None Include="Shaders.snk" />
+    <None Include="Engine.Shaders.snk" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
