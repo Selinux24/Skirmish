@@ -91,6 +91,10 @@ namespace Engine
         /// Depth stencil state for volume drawing
         /// </summary>
         private EngineDepthStencilState depthStencilVolumeDrawing = null;
+        /// <summary>
+        /// Composer effect
+        /// </summary>
+        private readonly EffectDeferredComposer composer = null;
 
         /// <summary>
         /// Graphics
@@ -105,10 +109,11 @@ namespace Engine
         {
             Graphics = graphics;
 
-            globalLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredDirectionalLight", DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            pointLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredPointLight", DrawerPool.EffectDeferredComposer.DeferredPointLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            spotLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredSpotLight", DrawerPool.EffectDeferredComposer.DeferredSpotLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            combineLightsInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredCombineLights", DrawerPool.EffectDeferredComposer.DeferredCombineLights.GetSignature(), VertexPosition.Input(BufferSlot));
+            composer = DrawerPool.GetEffect<EffectDeferredComposer>();
+            globalLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredDirectionalLight", composer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
+            pointLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredPointLight", composer.DeferredPointLight.GetSignature(), VertexPosition.Input(BufferSlot));
+            spotLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredSpotLight", composer.DeferredSpotLight.GetSignature(), VertexPosition.Input(BufferSlot));
+            combineLightsInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredCombineLights", composer.DeferredCombineLights.GetSignature(), VertexPosition.Input(BufferSlot));
 
             //Stencil pass rasterizer state
             rasterizerStencilPass = EngineRasterizerState.StencilPass(graphics, nameof(SceneRendererDeferredLights));

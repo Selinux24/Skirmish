@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Cubemap pixel shader
@@ -68,16 +68,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_Texture_Cso == null;
-            var bytes = Resources.Ps_Texture_Cso ?? Resources.Ps_Texture;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(TexturePs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(TexturePs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(TexturePs), "main", ShaderDefaultBasicResources.Texture_ps, HelperShaders.PSProfile);
 
             cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(TexturePs) + "." + nameof(PerFrame));
         }

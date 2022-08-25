@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position normal texture tangent pixel shader
@@ -44,16 +44,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionNormalTextureTangent_Cso == null;
-            var bytes = Resources.Ps_PositionNormalTextureTangent_Cso ?? Resources.Ps_PositionNormalTextureTangent;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(BasicPositionNormalTextureTangentPs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(BasicPositionNormalTextureTangentPs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(BasicPositionNormalTextureTangentPs), "main", ShaderDefaultBasicResources.PositionNormalTextureTangent_ps, HelperShaders.PSProfile);
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
             samplerNormal = BuiltInShaders.GetSamplerLinear();

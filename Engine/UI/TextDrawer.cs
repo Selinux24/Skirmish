@@ -80,6 +80,10 @@ namespace Engine.UI
         /// Update internals flag
         /// </summary>
         private bool updateInternals = false;
+        /// <summary>
+        /// Effect
+        /// </summary>
+        private readonly EffectDefaultFont drawEffect;
 
         /// <summary>
         /// Manipulator
@@ -257,7 +261,7 @@ namespace Engine.UI
         public TextDrawer(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-
+            drawEffect = DrawerPool.GetEffect<EffectDefaultFont>();
         }
         /// <summary>
         /// Destructor
@@ -432,8 +436,7 @@ namespace Engine.UI
 
             BufferManager.SetIndexBuffer(indexBuffer);
 
-            var effect = DrawerPool.EffectDefaultFont;
-            var technique = effect.FontDrawer;
+            var technique = drawEffect.FontDrawer;
 
             BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
@@ -442,13 +445,13 @@ namespace Engine.UI
                 //Draw with shadows
                 int offset = indexDrawCount / 2;
                 int count = indexDrawCount / 2;
-                DrawText(effect, technique, ShadowManipulator.LocalTransform, UseTextureColor, offset, count);
-                DrawText(effect, technique, Manipulator.LocalTransform, UseTextureColor, 0, count);
+                DrawText(drawEffect, technique, ShadowManipulator.LocalTransform, UseTextureColor, offset, count);
+                DrawText(drawEffect, technique, Manipulator.LocalTransform, UseTextureColor, 0, count);
             }
             else
             {
                 //Draw fore color only
-                DrawText(effect, technique, Manipulator.LocalTransform, UseTextureColor, 0, indexDrawCount);
+                DrawText(drawEffect, technique, Manipulator.LocalTransform, UseTextureColor, 0, indexDrawCount);
             }
         }
         /// <summary>

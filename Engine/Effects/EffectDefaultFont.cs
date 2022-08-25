@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -202,10 +203,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectDefaultFont(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectDefaultFont(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderDefaultFont, true)
         {
             FontDrawer = Effect.GetTechniqueByName("FontDrawer");
 

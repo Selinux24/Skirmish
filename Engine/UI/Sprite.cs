@@ -30,6 +30,10 @@ namespace Engine.UI
         /// Sprite texture
         /// </summary>
         private EngineShaderResourceView spriteTexture = null;
+        /// <summary>
+        /// Effect
+        /// </summary>
+        private readonly EffectDefaultSprite drawEffect;
 
         /// <summary>
         /// First color
@@ -101,7 +105,7 @@ namespace Engine.UI
         public Sprite(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-
+            drawEffect = DrawerPool.GetEffect<EffectDefaultSprite>();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -219,15 +223,14 @@ namespace Engine.UI
         /// </summary>
         private void Draw()
         {
-            var effect = DrawerPool.EffectDefaultSprite;
-            var technique = effect.GetTechnique(
+            var technique = drawEffect.GetTechnique(
                 Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
                 ColorChannels.All);
 
             if (!BufferManager.SetIndexBuffer(indexBuffer)) return;
             if (!BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList)) return;
 
-            effect.UpdatePerFrame(
+            drawEffect.UpdatePerFrame(
                 GetTransform(),
                 viewProjection,
                 Game.Form.RenderRectangle.BottomRight);
@@ -235,7 +238,7 @@ namespace Engine.UI
             var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
             color.Alpha *= Alpha;
 
-            effect.UpdatePerObject(color, spriteTexture, TextureIndex);
+            drawEffect.UpdatePerObject(color, spriteTexture, TextureIndex);
 
             var graphics = Game.Graphics;
 
@@ -257,8 +260,7 @@ namespace Engine.UI
         /// </summary>
         private void DrawPct()
         {
-            var effect = DrawerPool.EffectDefaultSprite;
-            var technique = effect.GetTechniquePct(
+            var technique = drawEffect.GetTechniquePct(
                 Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor);
 
             Counters.InstancesPerFrame++;
@@ -267,7 +269,7 @@ namespace Engine.UI
             BufferManager.SetIndexBuffer(indexBuffer);
             BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(
+            drawEffect.UpdatePerFrame(
                 GetTransform(),
                 viewProjection,
                 Game.Form.RenderRectangle.BottomRight);
@@ -283,7 +285,7 @@ namespace Engine.UI
                 DrawDirection,
                 GetRenderArea(true));
 
-            effect.UpdatePerObjectPct(
+            drawEffect.UpdatePerObjectPct(
                 parameters,
                 spriteTexture,
                 TextureIndex);

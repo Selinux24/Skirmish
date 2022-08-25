@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position normal texture pixel shader
@@ -36,16 +36,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionNormalTexture_Cso == null;
-            var bytes = Resources.Ps_PositionNormalTexture_Cso ?? Resources.Ps_PositionNormalTexture;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(BasicPositionNormalTexturePs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(BasicPositionNormalTexturePs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(BasicPositionNormalTexturePs), "main", ShaderDefaultBasicResources.PositionNormalTexture_ps, HelperShaders.PSProfile);
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
         }

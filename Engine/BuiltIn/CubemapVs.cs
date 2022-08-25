@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Cubemap vertex shader
@@ -27,16 +27,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_Cubemap_Cso == null;
-            var bytes = Resources.Vs_Cubemap_Cso ?? Resources.Vs_Cubemap;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(CubemapVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(CubemapVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(CubemapVs), "main", ShaderDefaultBasicResources.Cubemap_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

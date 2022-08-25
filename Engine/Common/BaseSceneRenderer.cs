@@ -279,7 +279,7 @@ namespace Engine.Common
 
             postProcessingTarget1 = new RenderTarget(scene.Game, "PostProcessingTarget1", targetFormat, false, 1);
             postProcessingTarget2 = new RenderTarget(scene.Game, "PostProcessingTarget2", targetFormat, false, 1);
-            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.EffectPostProcess);
+            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.GetEffect<EffectPostProcess>());
         }
         /// <summary>
         /// Destructor

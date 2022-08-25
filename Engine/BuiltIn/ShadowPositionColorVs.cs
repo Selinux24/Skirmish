@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position color vertex shader
@@ -27,16 +27,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionColor_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionColor_Cso ?? Resources.Vs_ShadowPositionColor;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionColorVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionColorVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(ShadowPositionColorVs), "main", ShaderShadowBasicResources.PositionColor_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -272,10 +273,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectDefaultWater(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectDefaultWater(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderDefaultWater, true)
         {
             Water = Effect.GetTechniqueByName("Water");
 

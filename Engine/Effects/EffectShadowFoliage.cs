@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -249,10 +250,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectShadowFoliage(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectShadowFoliage(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderShadowFoliage, true)
         {
             ShadowMapFoliage4 = Effect.GetTechniqueByName("ShadowMapFoliage4");
             ShadowMapFoliage8 = Effect.GetTechniqueByName("ShadowMapFoliage8");

@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// CPU particles vertex shader
@@ -32,16 +32,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_CPUParticles_Cso == null;
-            var bytes = Resources.Vs_CPUParticles_Cso ?? Resources.Vs_CPUParticles;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(BasicCPUParticlesVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(BasicCPUParticlesVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(BasicCPUParticlesVs), "main", ShaderDefaultBasicResources.CPUParticles_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

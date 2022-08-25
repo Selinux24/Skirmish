@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 using System;
 using System.Runtime.InteropServices;
 
@@ -6,7 +7,6 @@ namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Skinned position color vertex shader
@@ -87,16 +87,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_Skinned_Cso == null;
-            var bytes = Resources.Vs_PositionColor_Skinned_Cso ?? Resources.Vs_PositionColor_Skinned;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(BasicPositionColorSkinnedVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(BasicPositionColorSkinnedVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(BasicPositionColorSkinnedVs), "main", ShaderDefaultBasicResources.PositionColorSkinned_vs, HelperShaders.VSProfile);
 
             cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(BasicPositionColorSkinnedVs) + "." + nameof(PerInstance));
         }

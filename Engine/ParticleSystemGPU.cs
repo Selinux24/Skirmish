@@ -68,6 +68,10 @@ namespace Engine
         /// Particle parameters
         /// </summary>
         private ParticleSystemParams parameters;
+        /// <summary>
+        /// Effect
+        /// </summary>
+        private EffectDefaultGpuParticles drawEffect;
 
         /// <summary>
         /// Game instance
@@ -254,10 +258,10 @@ namespace Engine
             drawingBinding = new[] { new VertexBufferBinding(drawingBuffer, inputStride, 0) };
             streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
 
-            var effect = DrawerPool.EffectDefaultGPUParticles;
-            streamOutInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.ParticleStreamOut", effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            rotatingInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.RotationDraw", effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            nonRotatingInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.NonRotationDraw", effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            drawEffect = DrawerPool.GetEffect<EffectDefaultGpuParticles>();
+            streamOutInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.ParticleStreamOut", drawEffect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            rotatingInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.RotationDraw", drawEffect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
+            nonRotatingInputLayout = Game.Graphics.CreateInputLayout("EffectDefaultGPUParticles.NonRotationDraw", drawEffect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
         }
 
         /// <summary>
@@ -283,8 +287,6 @@ namespace Engine
                 return;
             }
 
-            var effect = DrawerPool.EffectDefaultGPUParticles;
-
             #region Per frame update
 
             var state = new EffectParticleState
@@ -307,7 +309,7 @@ namespace Engine
                 RotateSpeed = parameters.RotateSpeed,
             };
 
-            effect.UpdatePerFrame(
+            drawEffect.UpdatePerFrame(
                 context.ViewProjection,
                 context.EyePosition,
                 state,
@@ -316,11 +318,11 @@ namespace Engine
 
             #endregion
 
-            StreamOut(effect);
+            StreamOut(drawEffect);
 
             ToggleBuffers();
 
-            Draw(effect, context.DrawerMode);
+            Draw(drawEffect, context.DrawerMode);
         }
 
         /// <summary>

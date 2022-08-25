@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -391,10 +392,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectDeferredBasic(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectDeferredBasic(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderDeferredBasic, true)
         {
             PositionColor = Effect.GetTechniqueByName("PositionColor");
             PositionColorSkinned = Effect.GetTechniqueByName("PositionColorSkinned");

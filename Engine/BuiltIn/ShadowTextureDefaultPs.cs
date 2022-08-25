@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Shadow transparent texture pixel shader
@@ -32,16 +32,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_ShadowTextureDefault_Cso == null;
-            var bytes = Resources.Ps_ShadowTextureDefault_Cso ?? Resources.Ps_ShadowTextureDefault;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(ShadowTextureDefaultPs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(ShadowTextureDefaultPs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(ShadowTextureDefaultPs), "main", ShaderShadowBasicResources.TextureDefault_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

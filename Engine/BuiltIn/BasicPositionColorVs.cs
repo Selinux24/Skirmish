@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 using System;
 using System.Runtime.InteropServices;
 
@@ -6,7 +7,6 @@ namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position color vertex shader
@@ -68,16 +68,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionColor_Cso == null;
-            var bytes = Resources.Vs_PositionColor_Cso ?? Resources.Vs_PositionColor;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(BasicPositionColorVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(BasicPositionColorVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(BasicPositionColorVs), "main", ShaderDefaultBasicResources.PositionColor_vs, HelperShaders.VSProfile);
 
             cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(BasicPositionColorVs) + "." + nameof(PerInstance));
         }

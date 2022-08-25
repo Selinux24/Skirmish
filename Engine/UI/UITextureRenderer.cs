@@ -25,6 +25,10 @@ namespace Engine.UI
         /// View * projection for 2D projection
         /// </summary>
         private Matrix viewProjection;
+        /// <summary>
+        /// Effect
+        /// </summary>
+        private readonly EffectDefaultSprite drawEffect;
 
         /// <summary>
         /// Texture
@@ -58,7 +62,7 @@ namespace Engine.UI
         public UITextureRenderer(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-
+            drawEffect = DrawerPool.GetEffect<EffectDefaultSprite>();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -127,8 +131,7 @@ namespace Engine.UI
                 return;
             }
 
-            var effect = DrawerPool.EffectDefaultSprite;
-            var technique = effect.GetTechnique(
+            var technique = drawEffect.GetTechnique(
                 VertexTypes.PositionTexture,
                 Channels);
 
@@ -138,12 +141,12 @@ namespace Engine.UI
             BufferManager.SetIndexBuffer(indexBuffer);
             BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(
+            drawEffect.UpdatePerFrame(
                 Manipulator.LocalTransform,
                 viewProjection,
                 Game.Form.RenderRectangle.BottomRight);
 
-            effect.UpdatePerObject(
+            drawEffect.UpdatePerObject(
                 Color4.White,
                 Texture,
                 TextureIndex);

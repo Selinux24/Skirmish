@@ -76,7 +76,7 @@ namespace Engine
         /// <inheritdoc/>
         public override IShadowMapDrawer GetEffect()
         {
-            return DrawerPool.EffectShadowPoint;
+            return DrawerPool.GetEffect<EffectShadowPoint>();
         }
         /// <inheritdoc/>
         public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)

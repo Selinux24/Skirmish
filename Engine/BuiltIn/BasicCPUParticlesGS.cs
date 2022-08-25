@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// CPU particles geometry shader
@@ -32,16 +32,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Gs_CPUParticles_Cso == null;
-            var bytes = Resources.Gs_CPUParticles_Cso ?? Resources.Gs_CPUParticles;
-            if (compile)
-            {
-                Shader = graphics.CompileGeometryShader(nameof(BasicCPUParticlesGS), "main", bytes, HelperShaders.GSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadGeometryShader(nameof(BasicCPUParticlesGS), bytes);
-            }
+            Shader = graphics.CompileGeometryShader(nameof(BasicCPUParticlesGS), "main", ShaderDefaultBasicResources.CPUParticles_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor

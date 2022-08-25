@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -332,10 +333,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectDefaultSprite(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectDefaultSprite(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderDefaultSprite, true)
         {
             PositionColor = Effect.GetTechniqueByName("PositionColor");
             PositionColorPct = Effect.GetTechniqueByName("PositionColorPct");

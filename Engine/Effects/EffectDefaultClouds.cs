@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -228,10 +229,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectDefaultClouds(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectDefaultClouds(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderDefaultClouds, true)
         {
             CloudsStatic = Effect.GetTechniqueByName("CloudsStatic");
             CloudsPerturbed = Effect.GetTechniqueByName("CloudsPerturbed");

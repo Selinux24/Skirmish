@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Skinned position color instanced vertex shader
@@ -27,16 +27,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionColor_Skinned_I_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionColor_Skinned_I_Cso ?? Resources.Vs_ShadowPositionColor_Skinned_I;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionColorVsI), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionColorVsI), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionColorVsI), "main", ShaderShadowBasicResources.PositionColorSkinnedI_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

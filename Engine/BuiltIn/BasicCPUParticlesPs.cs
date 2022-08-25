@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// CPU particles pixel shader
@@ -40,16 +40,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionTexture_Cso == null;
-            var bytes = Resources.Ps_PositionTexture_Cso ?? Resources.Ps_PositionTexture;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(BasicCPUParticlesPs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(BasicCPUParticlesPs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(BasicCPUParticlesPs), "main", ShaderDefaultBasicResources.CPUParticles_ps, HelperShaders.PSProfile);
 
             var samplerDesc = new EngineSamplerStateDescription
             {

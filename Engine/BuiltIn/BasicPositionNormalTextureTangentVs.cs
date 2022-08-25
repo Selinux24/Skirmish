@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 using System;
 using System.Runtime.InteropServices;
 
@@ -6,7 +7,6 @@ namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position normal texture tangent vertex shader
@@ -74,16 +74,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_PositionNormalTextureTangent_Cso == null;
-            var bytes = Resources.Vs_PositionNormalTextureTangent_Cso ?? Resources.Vs_PositionNormalTextureTangent;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(BasicPositionNormalTextureTangentVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(BasicPositionNormalTextureTangentVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(BasicPositionNormalTextureTangentVs), "main", ShaderDefaultBasicResources.PositionNormalTextureTangent_vs, HelperShaders.VSProfile);
 
             cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(BasicPositionNormalTextureTangentVs) + "." + nameof(PerInstance));
         }

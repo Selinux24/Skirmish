@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position texture pixel shader
@@ -68,16 +68,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionTexture_Cso == null;
-            var bytes = Resources.Ps_PositionTexture_Cso ?? Resources.Ps_PositionTexture;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(BasicPositionTexturePs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(BasicPositionTexturePs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(BasicPositionTexturePs), "main", ShaderDefaultBasicResources.PositionTexture_ps, HelperShaders.PSProfile);
 
             cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(BasicPositionTexturePs) + "." + nameof(PerFrame));
 

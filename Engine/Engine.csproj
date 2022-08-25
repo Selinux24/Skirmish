@@ -865,10 +865,12 @@
       <Version>4.2.0</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
-    <Folder Include="Resources\CascadeShadows\" />
-    <Folder Include="Resources\Lib\" />
-    <Folder Include="Resources\Shadows\" />
+    <ProjectReference Include="..\Shaders\Shaders.csproj">
+      <Project>{f366139b-499b-4557-b1e6-3e74a8f64f74}</Project>
+      <Name>Shaders</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

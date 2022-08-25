@@ -844,7 +844,7 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueTerrainDefault(DrawContext context)
         {
-            var effect = DrawerPool.EffectDefaultTerrain;
+            var effect = DrawerPool.GetEffect<EffectDefaultTerrain>();
 
             effect.UpdatePerFrame(
                 textureResolution,
@@ -880,7 +880,7 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueTerrainDeferred(DrawContext context)
         {
-            var effect = DrawerPool.EffectDeferredTerrain;
+            var effect = DrawerPool.GetEffect<EffectDeferredTerrain>();
 
             effect.UpdatePerFrame(
                 context.ViewProjection,
@@ -916,7 +916,7 @@ namespace Engine
         /// <returns>Returns the selected technique</returns>
         private EngineEffectTechnique SetTechniqueTerrainShadowMap(DrawContextShadows context)
         {
-            var effect = DrawerPool.EffectShadowTerrain;
+            var effect = DrawerPool.GetEffect<EffectShadowTerrain>();
 
             effect.UpdatePerFrame(context.ViewProjection);
 

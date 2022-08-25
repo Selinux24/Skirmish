@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Skinned position normal texture tangent vertex shader
@@ -78,16 +78,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalTextureTangent_Skinned_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalTextureTangent_Skinned_Cso ?? Resources.Vs_ShadowPositionNormalTextureTangent_Skinned;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalTextureTangentVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalTextureTangentVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalTextureTangentVs), "main", ShaderShadowBasicResources.PositionNormalTextureTangentSkinned_vs, HelperShaders.VSProfile);
 
             cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowSkinnedPositionNormalTextureTangentVs) + "." + nameof(PerInstance));
         }

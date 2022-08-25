@@ -39,6 +39,10 @@ namespace Engine
         /// Particle parameters
         /// </summary>
         private ParticleSystemParams parameters;
+        /// <summary>
+        /// Effect
+        /// </summary>
+        private EffectDefaultCpuParticles drawEffect;
 
         /// <summary>
         /// Game instance
@@ -106,9 +110,10 @@ namespace Engine
             var vParticles = new VertexCpuParticle[maxConcurrentParticles];
             float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
+            var effect = DrawerPool.GetEffect<EffectDefaultCpuParticles>();
             var pBuffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, true);
-            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.RotationDraw", DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
-            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.NonRotationDraw", DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.RotationDraw", effect.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.NonRotationDraw", effect.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
 
             return new ParticleSystemCpu
             {
@@ -116,6 +121,7 @@ namespace Engine
                 Name = name,
 
                 parameters = pParameters,
+                drawEffect = effect,
 
                 Texture = texture,
                 TextureCount = textureCount,
@@ -204,8 +210,7 @@ namespace Engine
 
             var rot = parameters.RotateSpeed != Vector2.Zero;
 
-            var effect = DrawerPool.EffectDefaultCPUParticles;
-            var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
+            var technique = rot ? drawEffect.RotationDraw : drawEffect.NonRotationDraw;
 
             var mode = context.DrawerMode;
             if (!mode.HasFlag(DrawerModes.ShadowMap))
@@ -237,7 +242,7 @@ namespace Engine
                 RotateSpeed = parameters.RotateSpeed,
             };
 
-            effect.UpdatePerFrame(
+            drawEffect.UpdatePerFrame(
                 context.ViewProjection,
                 context.EyePosition,
                 state,

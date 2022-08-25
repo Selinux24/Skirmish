@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Skinned position normal color vertex shader
@@ -72,16 +72,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalColor_Skinned_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalColor_Skinned_Cso ?? Resources.Vs_ShadowPositionNormalColor_Skinned;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalColorVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(ShadowSkinnedPositionNormalColorVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(ShadowSkinnedPositionNormalColorVs), "main", ShaderShadowBasicResources.PositionNormalColorSkinned_vs, HelperShaders.VSProfile);
 
             cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowSkinnedPositionNormalColorVs) + "." + nameof(PerInstance));
         }

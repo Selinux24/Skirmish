@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -308,10 +309,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectDefaultCpuParticles(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectDefaultCpuParticles(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderDefaultCPUParticles, true)
         {
             NonRotationDraw = Effect.GetTechniqueByName("NonRotationParticle");
             RotationDraw = Effect.GetTechniqueByName("RotationParticle");

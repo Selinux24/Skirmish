@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position texture vertex shader
@@ -60,16 +60,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionTexture_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionTexture_Cso ?? Resources.Vs_ShadowPositionTexture;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionTextureVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionTextureVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(ShadowPositionTextureVs), "main", ShaderShadowBasicResources.PositionTexture_vs, HelperShaders.VSProfile);
 
             cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowPositionTextureVs) + "." + nameof(PerInstance));
         }

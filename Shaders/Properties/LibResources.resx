@@ -118,7 +118,34 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="engine" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\engine.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="IncAnimation" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incanimation.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncGBufferLights" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incgbufferlights.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncHelpers" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\inchelpers.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncLights" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\inclights.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncMaterials" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incmaterials.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncMatrix" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incmatrix.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncQuaternion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incquaternion.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncScattering" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incscattering.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incterrain.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="IncVertexFormats" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incvertexformats.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

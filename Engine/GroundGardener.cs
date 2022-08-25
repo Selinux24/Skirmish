@@ -920,7 +920,7 @@ namespace Engine
         {
             var channelData = foliageMapChannels[channel];
 
-            var effect = DrawerPool.EffectDefaultFoliage;
+            var effect = DrawerPool.GetEffect<EffectDefaultFoliage>();
 
             effect.UpdatePerFrame(
                 context,
@@ -955,7 +955,7 @@ namespace Engine
         {
             var channelData = foliageMapChannels[channel];
 
-            var effect = DrawerPool.EffectShadowFoliage;
+            var effect = DrawerPool.GetEffect<EffectShadowFoliage>();
 
             effect.UpdatePerFrame(
                 context,

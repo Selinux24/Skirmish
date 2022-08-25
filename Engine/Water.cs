@@ -139,8 +139,8 @@ namespace Engine
                 return;
             }
 
-            var effect = DrawerPool.EffectDefaultWater;
-            var technique = DrawerPool.EffectDefaultWater.Water;
+            var effect = DrawerPool.GetEffect<EffectDefaultWater>();
+            var technique = effect.Water;
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;

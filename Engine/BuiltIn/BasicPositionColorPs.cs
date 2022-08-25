@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position color pixel shader
@@ -27,16 +27,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_PositionColor_Cso == null;
-            var bytes = Resources.Ps_PositionColor_Cso ?? Resources.Ps_PositionColor;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(BasicPositionColorPs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(BasicPositionColorPs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(BasicPositionColorPs), "main", ShaderDefaultBasicResources.PositionColor_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

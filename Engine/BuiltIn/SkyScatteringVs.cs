@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Sky scatering vertex shader
@@ -32,16 +32,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_SkyScattering_Cso == null;
-            var bytes = Resources.Vs_SkyScattering_Cso ?? Resources.Vs_SkyScattering;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(SkyScatteringVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(SkyScatteringVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(SkyScatteringVs), "main", ShaderDefaultBasicResources.SkyScattering_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

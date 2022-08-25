@@ -277,7 +277,7 @@ namespace Engine
             {
                 if (mode.HasFlag(DrawerModes.Deferred))
                 {
-                    return DrawerPool.EffectDeferredBasic;
+                    return DrawerPool.GetEffect<EffectDeferredBasic>();
                 }
 
                 return null;

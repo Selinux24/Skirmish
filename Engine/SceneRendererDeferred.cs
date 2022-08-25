@@ -44,6 +44,10 @@ namespace Engine
         /// Light drawer
         /// </summary>
         private SceneRendererDeferredLights lightDrawer = null;
+        /// <summary>
+        /// Composer effect
+        /// </summary>
+        private readonly EffectDeferredComposer composer;
 
         /// <summary>
         /// Blend state for deferred lighting blending
@@ -105,6 +109,8 @@ namespace Engine
             lightDrawer = new SceneRendererDeferredLights(scene.Game.Graphics);
 
             UpdateRectangleAndView();
+
+            composer = DrawerPool.GetEffect<EffectDeferredComposer>();
 
             geometryBuffer = new RenderTarget(scene.Game, "GeometryBuffer", Format.R32G32B32A32_Float, false, 3);
             lightBuffer = new RenderTarget(scene.Game, "LightBuffer", Format.R32G32B32A32_Float, false, 1);
@@ -492,13 +498,11 @@ namespace Engine
 #if DEBUG
             Stopwatch swPrepare = Stopwatch.StartNew();
 #endif
-            var effect = DrawerPool.EffectDeferredComposer;
-
             var directionalLights = context.Lights.GetVisibleDirectionalLights();
             var spotLights = context.Lights.GetVisibleSpotLights();
             var pointLights = context.Lights.GetVisiblePointLights();
 
-            effect.UpdatePerFrame(
+            composer.UpdatePerFrame(
                 ViewProjection,
                 context.EyePosition,
                 GeometryMap.ElementAtOrDefault(0),
@@ -524,11 +528,11 @@ namespace Engine
 
                 foreach (var light in directionalLights)
                 {
-                    effect.UpdatePerLight(
+                    composer.UpdatePerLight(
                         light,
                         context.ShadowMapDirectional);
 
-                    lightDrawer.DrawDirectional(graphics, effect);
+                    lightDrawer.DrawDirectional(graphics, composer);
                 }
             }
 #if DEBUG
@@ -547,13 +551,13 @@ namespace Engine
                 foreach (var light in pointLights)
                 {
                     //Draw Pass
-                    effect.UpdatePerLight(
+                    composer.UpdatePerLight(
                         light,
                         light.Local,
                         context.ViewProjection,
                         context.ShadowMapPoint);
 
-                    lightDrawer.DrawPoint(graphics, effect);
+                    lightDrawer.DrawPoint(graphics, composer);
                 }
             }
 #if DEBUG
@@ -572,13 +576,13 @@ namespace Engine
                 foreach (var light in spotLights)
                 {
                     //Draw Pass
-                    effect.UpdatePerLight(
+                    composer.UpdatePerLight(
                         light,
                         light.Local,
                         context.ViewProjection,
                         context.ShadowMapSpot);
 
-                    lightDrawer.DrawSpot(graphics, effect);
+                    lightDrawer.DrawSpot(graphics, composer);
                 }
             }
 #if DEBUG
@@ -619,9 +623,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swInit = Stopwatch.StartNew();
 #endif
-                var effect = DrawerPool.EffectDeferredComposer;
-
-                effect.UpdateComposer(
+                composer.UpdateComposer(
                     ViewProjection,
                     GeometryMap.ElementAtOrDefault(2),
                     LightMap.ElementAtOrDefault(0),
@@ -640,7 +642,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                lightDrawer.DrawResult(graphics, effect);
+                lightDrawer.DrawResult(graphics, composer);
 #if DEBUG
                 swDraw.Stop();
 

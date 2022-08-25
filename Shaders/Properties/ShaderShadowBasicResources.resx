@@ -118,7 +118,67 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="engine" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\engine.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="PositionColorI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positioncolori.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionColorSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positioncolorskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionColorSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positioncolorskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionColor_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positioncolor.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalColorI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormalcolori.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalColorSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormalcolorskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalColorSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormalcolorskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalColor_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormalcolor.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltexturei.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltextureskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltextureskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureTangentI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltexturetangenti.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureTangentSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltexturetangentskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureTangentSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltexturetangentskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureTangent_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltexturetangent.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTexture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positionnormaltexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positiontexturei.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positiontextureskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positiontextureskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTexture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\positiontexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="TextureDefault_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowbasic\texturedefault.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

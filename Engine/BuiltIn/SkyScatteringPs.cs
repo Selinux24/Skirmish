@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Sky scatering pixel shader
@@ -32,16 +32,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Ps_SkyScattering_Cso == null;
-            var bytes = Resources.Ps_SkyScattering_Cso ?? Resources.Ps_SkyScattering;
-            if (compile)
-            {
-                Shader = graphics.CompilePixelShader(nameof(SkyScatteringPs), "main", bytes, HelperShaders.PSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadPixelShader(nameof(SkyScatteringPs), bytes);
-            }
+            Shader = graphics.CompilePixelShader(nameof(SkyScatteringPs), "main", ShaderDefaultBasicResources.SkyScattering_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

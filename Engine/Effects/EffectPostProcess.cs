@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Shaders.Properties;
+using SharpDX;
 
 namespace Engine.Effects
 {
@@ -346,10 +347,8 @@ namespace Engine.Effects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect code</param>
-        /// <param name="compile">Compile code</param>
-        public EffectPostProcess(Graphics graphics, byte[] effect, bool compile)
-            : base(graphics, effect, compile)
+        public EffectPostProcess(Graphics graphics)
+            : base(graphics, EffectsResources.ShaderPostProcess, true)
         {
             Empty = Effect.GetTechniqueByName("Empty");
             Combine = Effect.GetTechniqueByName("Combine");
@@ -388,38 +387,44 @@ namespace Engine.Effects
         /// <param name="effect">Effect enum</param>
         public EngineEffectTechnique GetTechnique(PostProcessingEffects effect)
         {
+            var effectPostProcess = DrawerPool.GetEffect<EffectPostProcess>();
+            if (effectPostProcess == null)
+            {
+                return null;
+            }
+
             EngineEffectTechnique technique;
             switch (effect)
             {
                 case PostProcessingEffects.Combine:
-                    technique = DrawerPool.EffectPostProcess.Combine;
+                    technique = effectPostProcess.Combine;
                     break;
                 case PostProcessingEffects.Grayscale:
-                    technique = DrawerPool.EffectPostProcess.Grayscale;
+                    technique = effectPostProcess.Grayscale;
                     break;
                 case PostProcessingEffects.Sepia:
-                    technique = DrawerPool.EffectPostProcess.Sepia;
+                    technique = effectPostProcess.Sepia;
                     break;
                 case PostProcessingEffects.Vignette:
-                    technique = DrawerPool.EffectPostProcess.Vignette;
+                    technique = effectPostProcess.Vignette;
                     break;
                 case PostProcessingEffects.Blur:
-                    technique = DrawerPool.EffectPostProcess.Blur;
+                    technique = effectPostProcess.Blur;
                     break;
                 case PostProcessingEffects.BlurVignette:
-                    technique = DrawerPool.EffectPostProcess.BlurVignette;
+                    technique = effectPostProcess.BlurVignette;
                     break;
                 case PostProcessingEffects.Bloom:
-                    technique = DrawerPool.EffectPostProcess.Bloom;
+                    technique = effectPostProcess.Bloom;
                     break;
                 case PostProcessingEffects.Grain:
-                    technique = DrawerPool.EffectPostProcess.Grain;
+                    technique = effectPostProcess.Grain;
                     break;
                 case PostProcessingEffects.ToneMapping:
-                    technique = DrawerPool.EffectPostProcess.ToneMapping;
+                    technique = effectPostProcess.ToneMapping;
                     break;
                 default:
-                    technique = DrawerPool.EffectPostProcess.Empty;
+                    technique = effectPostProcess.Empty;
                     break;
             }
 

@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Shaders.Properties;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
     using Engine.Helpers;
-    using Engine.Properties;
 
     /// <summary>
     /// Position normal texture tangent vertex shader
@@ -60,16 +60,7 @@ namespace Engine.BuiltIn
         {
             Graphics = graphics;
 
-            bool compile = Resources.Vs_ShadowPositionNormalTextureTangent_Cso == null;
-            var bytes = Resources.Vs_ShadowPositionNormalTextureTangent_Cso ?? Resources.Vs_ShadowPositionNormalTextureTangent;
-            if (compile)
-            {
-                Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalTextureTangentVs), "main", bytes, HelperShaders.VSProfile);
-            }
-            else
-            {
-                Shader = graphics.LoadVertexShader(nameof(ShadowPositionNormalTextureTangentVs), bytes);
-            }
+            Shader = graphics.CompileVertexShader(nameof(ShadowPositionNormalTextureTangentVs), "main", ShaderShadowBasicResources.PositionNormalTextureTangent_vs, HelperShaders.VSProfile);
 
             cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(ShadowPositionNormalTextureTangentVs) + "." + nameof(PerInstance));
         }

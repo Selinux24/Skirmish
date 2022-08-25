@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Effects
 {
     using Engine.Common;
-    using Engine.Properties;
 
     /// <summary>
     /// Pool of drawers
@@ -11,89 +12,13 @@ namespace Engine.Effects
     static class DrawerPool
     {
         /// <summary>
-        /// Null effect
+        /// Graphics
         /// </summary>
-        public static EffectNull EffectNull { get; private set; }
-
+        private static Graphics graphics;
         /// <summary>
-        /// Sprite effect
+        /// Effect list
         /// </summary>
-        public static EffectDefaultSprite EffectDefaultSprite { get; private set; }
-        /// <summary>
-        /// Font drawing effect
-        /// </summary>
-        public static EffectDefaultFont EffectDefaultFont { get; private set; }
-        /// <summary>
-        /// Billboards effect
-        /// </summary>
-        public static EffectDefaultBillboard EffectDefaultBillboard { get; private set; }
-        /// <summary>
-        /// Foliage effect
-        /// </summary>
-        public static EffectDefaultFoliage EffectDefaultFoliage { get; private set; }
-        /// <summary>
-        /// Clouds effect
-        /// </summary>
-        public static EffectDefaultClouds EffectDefaultClouds { get; private set; }
-        /// <summary>
-        /// Terrain drawing effect
-        /// </summary>
-        public static EffectDefaultTerrain EffectDefaultTerrain { get; private set; }
-        /// <summary>
-        /// CPU Particles drawing effect
-        /// </summary>
-        public static EffectDefaultCpuParticles EffectDefaultCPUParticles { get; private set; }
-        /// <summary>
-        /// GPU Particles drawing effect
-        /// </summary>
-        public static EffectDefaultGpuParticles EffectDefaultGPUParticles { get; private set; }
-        /// <summary>
-        /// Water drawing effect
-        /// </summary>
-        public static EffectDefaultWater EffectDefaultWater { get; private set; }
-        /// <summary>
-        /// Decals drawing effect
-        /// </summary>
-        public static EffectDefaultDecals EffectDefaultDecals { get; private set; }
-
-        /// <summary>
-        /// Deferred lightning effect
-        /// </summary>
-        public static EffectDeferredComposer EffectDeferredComposer { get; private set; }
-        /// <summary>
-        /// Geometry Buffer effect
-        /// </summary>
-        public static EffectDeferredBasic EffectDeferredBasic { get; private set; }
-        /// <summary>
-        /// Terrain drawing effect
-        /// </summary>
-        public static EffectDeferredTerrain EffectDeferredTerrain { get; private set; }
-
-        /// <summary>
-        /// Billboard shadows effect
-        /// </summary>
-        public static EffectShadowBillboard EffectShadowBillboard { get; private set; }
-        /// <summary>
-        /// Foliage shadows effect
-        /// </summary>
-        public static EffectShadowFoliage EffectShadowFoliage { get; private set; }
-        /// <summary>
-        /// Terrain drawing effect
-        /// </summary>
-        public static EffectShadowTerrain EffectShadowTerrain { get; private set; }
-        /// <summary>
-        /// Point shadows effect
-        /// </summary>
-        public static EffectShadowPoint EffectShadowPoint { get; private set; }
-        /// <summary>
-        /// Cascade shadows effect
-        /// </summary>
-        public static EffectShadowCascade EffectShadowCascade { get; private set; }
-
-        /// <summary>
-        /// Post-processing effect
-        /// </summary>
-        public static EffectPostProcess EffectPostProcess { get; private set; }
+        private static readonly List<IDrawer> effects = new List<IDrawer>();
 
         /// <summary>
         /// Initializes pool
@@ -101,80 +26,15 @@ namespace Engine.Effects
         /// <param name="graphics">Device</param>
         public static void Initialize(Graphics graphics)
         {
-            EffectNull = CreateEffect<EffectNull>(graphics, Resources.ShaderNullCso, Resources.ShaderNullFx);
-
-            EffectDefaultSprite = CreateEffect<EffectDefaultSprite>(graphics, Resources.ShaderDefaultSpriteCso, Resources.ShaderDefaultSpriteCso);
-            EffectDefaultFont = CreateEffect<EffectDefaultFont>(graphics, Resources.ShaderDefaultFontCso, Resources.ShaderDefaultFontCso);
-            EffectDefaultBillboard = CreateEffect<EffectDefaultBillboard>(graphics, Resources.ShaderDefaultBillboardCso, Resources.ShaderDefaultBillboardFx);
-            EffectDefaultFoliage = CreateEffect<EffectDefaultFoliage>(graphics, Resources.ShaderDefaultFoliageCso, Resources.ShaderDefaultFoliageFx);
-            EffectDefaultClouds = CreateEffect<EffectDefaultClouds>(graphics, Resources.ShaderDefaultCloudsCso, Resources.ShaderDefaultCloudsFx);
-            EffectDefaultTerrain = CreateEffect<EffectDefaultTerrain>(graphics, Resources.ShaderDefaultTerrainCso, Resources.ShaderDefaultTerrainFx);
-            EffectDefaultCPUParticles = CreateEffect<EffectDefaultCpuParticles>(graphics, Resources.ShaderDefaultCPUParticlesCso, Resources.ShaderDefaultCPUParticlesFx);
-            EffectDefaultGPUParticles = CreateEffect<EffectDefaultGpuParticles>(graphics, Resources.ShaderDefaultGPUParticlesCso, Resources.ShaderDefaultGPUParticlesFx);
-            EffectDefaultWater = CreateEffect<EffectDefaultWater>(graphics, Resources.ShaderDefaultWaterCso, Resources.ShaderDefaultWaterFx);
-            EffectDefaultDecals = CreateEffect<EffectDefaultDecals>(graphics, Resources.ShaderDefaultDecalsCso, Resources.ShaderDefaultDecalsFx);
-
-            EffectDeferredComposer = CreateEffect<EffectDeferredComposer>(graphics, Resources.ShaderDeferredComposerCso, Resources.ShaderDeferredComposerFx);
-            EffectDeferredBasic = CreateEffect<EffectDeferredBasic>(graphics, Resources.ShaderDeferredBasicCso, Resources.ShaderDeferredBasicCso);
-            EffectDeferredTerrain = CreateEffect<EffectDeferredTerrain>(graphics, Resources.ShaderDeferredTerrainCso, Resources.ShaderDeferredTerrainFx);
-
-            EffectShadowBillboard = CreateEffect<EffectShadowBillboard>(graphics, Resources.ShaderShadowBillboardCso, Resources.ShaderShadowBillboardFx);
-            EffectShadowFoliage = CreateEffect<EffectShadowFoliage>(graphics, Resources.ShaderShadowFoliageCso, Resources.ShaderShadowFoliageFx);
-            EffectShadowTerrain = CreateEffect<EffectShadowTerrain>(graphics, Resources.ShaderShadowTerrainCso, Resources.ShaderShadowTerrainFx);
-            EffectShadowPoint = CreateEffect<EffectShadowPoint>(graphics, Resources.ShaderShadowPointCso, Resources.ShaderShadowPointFx);
-            EffectShadowCascade = CreateEffect<EffectShadowCascade>(graphics, Resources.ShaderShadowCascadeCso, Resources.ShaderShadowCascadeFx);
-
-            EffectPostProcess = CreateEffect<EffectPostProcess>(graphics, Resources.ShaderPostProcessCso, Resources.ShaderPostProcessFx);
+            DrawerPool.graphics = graphics;
         }
         /// <summary>
         /// Dispose of used resources
         /// </summary>
         public static void DisposeResources()
         {
-            EffectNull?.Dispose();
-            EffectNull = null;
-
-            EffectDefaultSprite?.Dispose();
-            EffectDefaultSprite = null;
-            EffectDefaultFont?.Dispose();
-            EffectDefaultFont = null;
-            EffectDefaultBillboard?.Dispose();
-            EffectDefaultBillboard = null;
-            EffectDefaultFoliage?.Dispose();
-            EffectDefaultFoliage = null;
-            EffectDefaultClouds?.Dispose();
-            EffectDefaultClouds = null;
-            EffectDefaultTerrain?.Dispose();
-            EffectDefaultTerrain = null;
-            EffectDefaultCPUParticles?.Dispose();
-            EffectDefaultCPUParticles = null;
-            EffectDefaultGPUParticles?.Dispose();
-            EffectDefaultGPUParticles = null;
-            EffectDefaultWater?.Dispose();
-            EffectDefaultWater = null;
-            EffectDefaultDecals?.Dispose();
-            EffectDefaultDecals = null;
-
-            EffectDeferredComposer?.Dispose();
-            EffectDeferredComposer = null;
-            EffectDeferredBasic?.Dispose();
-            EffectDeferredBasic = null;
-            EffectDeferredTerrain?.Dispose();
-            EffectDeferredTerrain = null;
-
-            EffectShadowBillboard?.Dispose();
-            EffectShadowBillboard = null;
-            EffectShadowFoliage?.Dispose();
-            EffectShadowFoliage = null;
-            EffectShadowTerrain?.Dispose();
-            EffectShadowTerrain = null;
-            EffectShadowPoint?.Dispose();
-            EffectShadowPoint = null;
-            EffectShadowCascade?.Dispose();
-            EffectShadowCascade = null;
-
-            EffectPostProcess?.Dispose();
-            EffectPostProcess = null;
+            effects.ForEach(ef => ef?.Dispose());
+            effects.Clear();
         }
 
         /// <summary>
@@ -185,16 +45,30 @@ namespace Engine.Effects
         /// <param name="resCso">Compiled resource</param>
         /// <param name="resFx">Source code resource</param>
         /// <returns>Returns the new generated effect instance</returns>
-        private static T CreateEffect<T>(Graphics graphics, byte[] resCso, byte[] resFx) where T : Drawer
+        private static T CreateEffect<T>() where T : Drawer
         {
-            bool compile = resCso == null;
-            var res = resCso ?? resFx;
-
-            var effect = (T)Activator.CreateInstance(typeof(T), graphics, res, compile);
+            var effect = (T)Activator.CreateInstance(typeof(T), graphics);
 
             effect.Optimize();
 
             return effect;
+        }
+        /// <summary>
+        /// Gets or create an effect
+        /// </summary>
+        /// <typeparam name="T">Type of effect</typeparam>
+        public static T GetEffect<T>() where T : Drawer
+        {
+            var ef = effects.OfType<T>().FirstOrDefault();
+            if (ef != null)
+            {
+                return ef;
+            }
+
+            ef = CreateEffect<T>();
+            effects.Add(ef);
+
+            return ef;
         }
 
         /// <summary>
@@ -208,26 +82,26 @@ namespace Engine.Effects
             EngineShaderResourceView materialPalette, uint materialPaletteWidth,
             EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
-            EffectDefaultBillboard.UpdateGlobals(
+            GetEffect<EffectDefaultBillboard>().UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
-            EffectDefaultFoliage.UpdateGlobals(
+            GetEffect<EffectDefaultFoliage>().UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
-            EffectDefaultTerrain.UpdateGlobals(
+            GetEffect<EffectDefaultTerrain>().UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
-            EffectDeferredBasic.UpdateGlobals(animationPalette, animationPaletteWidth);
-            EffectDeferredComposer.UpdateGlobals(
+            GetEffect<EffectDeferredBasic>().UpdateGlobals(animationPalette, animationPaletteWidth);
+            GetEffect<EffectDeferredComposer>().UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
-            EffectShadowCascade.UpdateGlobals(animationPalette, animationPaletteWidth);
+            GetEffect<EffectShadowCascade>().UpdateGlobals(animationPalette, animationPaletteWidth);
 
-            EffectShadowPoint.UpdateGlobals(animationPalette, animationPaletteWidth);
+            GetEffect<EffectShadowPoint>().UpdateGlobals(animationPalette, animationPaletteWidth);
         }
     }
 }

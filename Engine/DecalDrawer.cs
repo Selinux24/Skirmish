@@ -40,6 +40,10 @@ namespace Engine
         /// Current decal count
         /// </summary>
         private int currentDecals;
+        /// <summary>
+        /// Effect
+        /// </summary>
+        private EffectDefaultDecals drawEffect;
 
         /// <summary>
         /// Decal texture
@@ -110,13 +114,15 @@ namespace Engine
             decals = new VertexDecal[MaxDecalCount];
             buffer = new EngineBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, true);
 
+            drawEffect = DrawerPool.GetEffect<EffectDefaultDecals>();
+
             if (RotateDecals)
             {
-                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.Decal", DrawerPool.EffectDefaultDecals.Decal.GetSignature(), VertexDecal.Input(BufferSlot)));
+                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.Decal", drawEffect.Decal.GetSignature(), VertexDecal.Input(BufferSlot)));
             }
             else
             {
-                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.DecalRotated", DrawerPool.EffectDefaultDecals.DecalRotated.GetSignature(), VertexDecal.Input(BufferSlot)));
+                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.DecalRotated", drawEffect.DecalRotated.GetSignature(), VertexDecal.Input(BufferSlot)));
             }
         }
 
@@ -159,8 +165,7 @@ namespace Engine
                 return;
             }
 
-            var effect = DrawerPool.EffectDefaultDecals;
-            var technique = RotateDecals ? effect.DecalRotated : effect.Decal;
+            var technique = RotateDecals ? drawEffect.DecalRotated : drawEffect.Decal;
 
             var mode = context.DrawerMode;
             if (!mode.HasFlag(DrawerModes.ShadowMap))
@@ -178,7 +183,7 @@ namespace Engine
             graphics.SetDepthStencilRDZEnabled();
             graphics.SetBlendState(BlendMode);
 
-            effect.UpdatePerFrame(
+            drawEffect.UpdatePerFrame(
                 context.ViewProjection,
                 context.GameTime.TotalSeconds,
                 TintColor,

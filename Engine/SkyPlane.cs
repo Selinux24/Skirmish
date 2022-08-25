@@ -61,6 +61,10 @@ namespace Engine
         /// Clouds color
         /// </summary>
         private Color3 color;
+        /// <summary>
+        /// Effect
+        /// </summary>
+        private readonly EffectDefaultClouds drawEffect;
 
         /// <summary>
         /// First layer translation
@@ -150,7 +154,7 @@ namespace Engine
         public SkyPlane(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-
+            drawEffect = DrawerPool.GetEffect<EffectDefaultClouds>();
         }
         /// <summary>
         /// Destructor
@@ -248,13 +252,12 @@ namespace Engine
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            var effect = DrawerPool.EffectDefaultClouds;
-            var technique = skyMode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
+            var technique = skyMode == SkyPlaneModes.Static ? drawEffect.CloudsStatic : drawEffect.CloudsPerturbed;
 
             BufferManager.SetIndexBuffer(indexBuffer);
             BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
 
-            effect.UpdatePerFrame(
+            drawEffect.UpdatePerFrame(
                 rotation * Matrix.Translation(context.EyePosition),
                 context.ViewProjection,
                 brightness,
@@ -265,13 +268,13 @@ namespace Engine
 
             if (skyMode == SkyPlaneModes.Static)
             {
-                effect.UpdatePerFrameStatic(
+                drawEffect.UpdatePerFrameStatic(
                     firstLayerTranslation,
                     secondLayerTranslation);
             }
             else
             {
-                effect.UpdatePerFramePerturbed(
+                drawEffect.UpdatePerFramePerturbed(
                     translation,
                     PerturbationScale);
             }
