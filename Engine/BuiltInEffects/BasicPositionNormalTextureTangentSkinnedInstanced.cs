@@ -8,30 +8,36 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Skinned position-normal-texture-tangent instanced drawer
     /// </summary>
-    public class BasicPositionNormalTextureTangentSkinnedInstanced : BuiltInDrawer<BasicPositionNormalTextureTangentSkinnedVsI, EmptyGs, BasicPositionNormalTextureTangentPs>
+    public class BasicPositionNormalTextureTangentSkinnedInstanced : BuiltInDrawer
     {
+        private readonly EngineSamplerState linear;
+        private readonly EngineSamplerState anisotropic;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
         public BasicPositionNormalTextureTangentSkinnedInstanced(Graphics graphics) : base(graphics)
         {
+            SetVertexShader<BasicPositionNormalTextureTangentSkinnedVsI>();
+            SetPixelShader<BasicPositionNormalTextureTangentPs>();
 
+            linear = BuiltInShaders.GetSamplerLinear();
+            anisotropic = BuiltInShaders.GetSamplerAnisotropic();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerObject(material, tintColor);
+            var vertexShader = GetVertexShader<BasicPositionNormalTextureTangentSkinnedVsI>();
+            vertexShader?.WriteCBPerObject(material, tintColor);
 
-            var sampler = material.UseAnisotropic ?
-                BuiltInShaders.GetSamplerAnisotropic() :
-                BuiltInShaders.GetSamplerLinear();
-
-            PixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
-            PixelShader.SetDiffseSampler(sampler);
-            PixelShader.SetNormalMap(material.Material?.NormalMap);
-            PixelShader.SetNormalSampler(sampler);
+            var sampler = material.UseAnisotropic ? anisotropic : linear;
+            var pixelShader = GetPixelShader<BasicPositionNormalTextureTangentPs>();
+            pixelShader?.SetDiffuseMap(material.Material?.DiffuseTexture);
+            pixelShader?.SetDiffseSampler(sampler);
+            pixelShader?.SetNormalMap(material.Material?.DiffuseTexture);
+            pixelShader?.SetNormalSampler(sampler);
         }
     }
 }

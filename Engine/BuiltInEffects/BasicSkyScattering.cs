@@ -6,13 +6,14 @@ namespace Engine.BuiltInEffects
 {
     using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Sky scattering drawer
     /// </summary>
-    public class BasicSkyScattering : BuiltInDrawer<SkyScatteringVs, EmptyGs, SkyScatteringPs>, IDisposable
+    public class BasicSkyScattering : BuiltInDrawer
     {
+        #region
+
         /// <summary>
         /// Per object data structure
         /// </summary>
@@ -98,6 +99,8 @@ namespace Engine.BuiltInEffects
             }
         }
 
+        #endregion
+
         /// <summary>
         /// Per object constant buffer
         /// </summary>
@@ -109,6 +112,9 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public BasicSkyScattering(Graphics graphics) : base(graphics)
         {
+            SetVertexShader<SkyScatteringVs>();
+            SetPixelShader<SkyScatteringPs>();
+
             cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(BasicSkyScattering) + "." + nameof(PerObject));
         }
         /// <summary>
@@ -145,9 +151,11 @@ namespace Engine.BuiltInEffects
         {
             cbPerObject.WriteData(PerObject.Build(lightDirection, state));
 
-            VertexShader.SetPerObjectConstantBuffer(cbPerObject);
+            var vertexShader = GetVertexShader<SkyScatteringVs>();
+            vertexShader?.SetPerObjectConstantBuffer(cbPerObject);
 
-            PixelShader.SetPerObjectConstantBuffer(cbPerObject);
+            var pixelShader = GetPixelShader<SkyScatteringPs>();
+            pixelShader?.SetPerObjectConstantBuffer(cbPerObject);
         }
     }
 }

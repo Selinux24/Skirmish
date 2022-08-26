@@ -1,43 +1,35 @@
-﻿using Engine.Shaders.Properties;
-using System;
+﻿using System;
 
 namespace Engine.BuiltIn
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
-    /// CPU particles geometry shader
+    /// Empty vertex shader
     /// </summary>
-    public class BasicCpuParticlesGS : IBuiltInGeometryShader
+    public class EmptyVs : IBuiltInVertexShader
     {
-        /// <summary>
-        /// Per emitter constant buffer
-        /// </summary>
-        private IEngineConstantBuffer cbPerEmitter;
+        /// <inheritdoc/>
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
-        /// <inheritdoc/>
-        public EngineGeometryShader Shader { get; private set; }
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public BasicCpuParticlesGS(Graphics graphics)
+        public EmptyVs(Graphics graphics)
         {
             Graphics = graphics;
-
-            Shader = graphics.CompileGeometryShader(nameof(BasicCpuParticlesGS), "main", ShaderDefaultBasicResources.CPUParticles_gs, HelperShaders.GSProfile);
+            Shader = null;
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~BasicCpuParticlesGS()
+        ~EmptyVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -61,24 +53,10 @@ namespace Engine.BuiltIn
             }
         }
 
-        /// <summary>
-        /// Sets per emitter constant buffer
-        /// </summary>
-        public void SetPerEmitterConstantBuffer(IEngineConstantBuffer constantBuffer)
-        {
-            cbPerEmitter = constantBuffer;
-        }
-
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            var cb = new[]
-            {
-                BuiltInShaders.GetVSPerFrame(),
-                cbPerEmitter,
-            };
-
-            Graphics.SetGeometryShaderConstantBuffers(0, cb);
+            // Empty shader
         }
     }
 }

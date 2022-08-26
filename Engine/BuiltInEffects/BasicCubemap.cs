@@ -7,7 +7,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Cubemap drawer
     /// </summary>
-    public class BasicCubemap : BuiltInDrawer<CubemapVs, EmptyGs, CubemapPs>
+    public class BasicCubemap : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -15,7 +15,8 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public BasicCubemap(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<CubemapVs>();
+            SetPixelShader<CubemapPs>();
         }
 
         /// <summary>
@@ -24,8 +25,10 @@ namespace Engine.BuiltInEffects
         /// <param name="cubemap">Cubemap texture</param>
         public void Update(EngineShaderResourceView cubemap)
         {
-            PixelShader.SetCubemap(cubemap);
-            PixelShader.SetCubemapSampler(BuiltInShaders.GetSamplerLinear());
+            var pixelShader = GetPixelShader<CubemapPs>();
+
+            pixelShader?.SetCubemap(cubemap);
+            pixelShader?.SetCubemapSampler(BuiltInShaders.GetSamplerLinear());
         }
     }
 }

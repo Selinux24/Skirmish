@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Skinned position-normal-color drawer
     /// </summary>
-    public class BasicPositionNormalColorSkinned : BuiltInDrawer<BasicPositionNormalColorSkinnedVs, EmptyGs, BasicPositionNormalColorPs>
+    public class BasicPositionNormalColorSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,16 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public BasicPositionNormalColorSkinned(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<BasicPositionNormalColorSkinnedVs>();
+            SetPixelShader<BasicPositionNormalColorPs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(material, tintColor, animation);
+            var vertexShader = GetVertexShader<BasicPositionNormalColorSkinnedVs>();
+
+            vertexShader?.WriteCBPerInstance(material, tintColor, animation);
         }
     }
 }

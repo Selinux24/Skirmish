@@ -9,7 +9,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// CPU particles pixel shader
     /// </summary>
-    public class BasicCPUParticlesPs : IBuiltInPixelShader
+    public class BasicCpuParticlesPs : IBuiltInPixelShader
     {
         /// <summary>
         /// Per frame constant buffer
@@ -36,11 +36,11 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public BasicCPUParticlesPs(Graphics graphics)
+        public BasicCpuParticlesPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(BasicCPUParticlesPs), "main", ShaderDefaultBasicResources.CPUParticles_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(BasicCpuParticlesPs), "main", ShaderDefaultBasicResources.CPUParticles_ps, HelperShaders.PSProfile);
 
             var samplerDesc = new EngineSamplerStateDescription
             {
@@ -48,13 +48,13 @@ namespace Engine.BuiltIn
                 AddressU = TextureAddressMode.Clamp,
                 AddressV = TextureAddressMode.Clamp,
             };
-            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(BasicCPUParticlesPs)}.ParticlesSampler", samplerDesc);
-            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(BasicCPUParticlesPs)}.ParticlesSampler", samplerDesc);
+            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(BasicCpuParticlesPs)}.ParticlesSampler", samplerDesc);
+            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(BasicCpuParticlesPs)}.ParticlesSampler", samplerDesc);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~BasicCPUParticlesPs()
+        ~BasicCpuParticlesPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

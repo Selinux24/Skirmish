@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow Skinned position-normal-texture drawer
     /// </summary>
-    public class ShadowPositionNormalTextureSkinned : BuiltInDrawer<ShadowSkinnedPositionNormalTextureVs, EmptyGs, EmptyPs>
+    public class ShadowPositionNormalTextureSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,14 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public ShadowPositionNormalTextureSkinned(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<ShadowSkinnedPositionNormalTextureVs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(textureIndex, animation);
+            var vertexShader = GetVertexShader<ShadowSkinnedPositionNormalTextureVs>();
+            vertexShader?.WriteCBPerInstance(textureIndex, animation);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow skinned position-color drawer
     /// </summary>
-    public class ShadowPositionColorSkinned : BuiltInDrawer<ShadowSkinnedPositionColorVs, EmptyGs, EmptyPs>
+    public class ShadowPositionColorSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -18,13 +18,14 @@ namespace Engine.BuiltInEffects
         /// <param name="positionColorPs">Position color pixel shader</param>
         public ShadowPositionColorSkinned(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<ShadowSkinnedPositionColorVs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(animation);
+            var vertexShader = GetVertexShader<ShadowSkinnedPositionColorVs>();
+            vertexShader?.WriteCBPerInstance(animation);
         }
     }
 }

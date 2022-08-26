@@ -6,7 +6,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow position-normal-color drawer
     /// </summary>
-    public class ShadowPositionNormalColor : BuiltInDrawer<ShadowPositionNormalColorVs, EmptyGs, EmptyPs>
+    public class ShadowPositionNormalColor : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -14,7 +14,7 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public ShadowPositionNormalColor(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<ShadowPositionNormalColorVs>();
         }
     }
 }

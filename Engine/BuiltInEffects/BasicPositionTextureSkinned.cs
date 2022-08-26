@@ -8,28 +8,34 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Skinned position-texture drawer
     /// </summary>
-    public class BasicPositionTextureSkinned : BuiltInDrawer<BasicPositionTextureSkinnedVs, EmptyGs, BasicPositionTexturePs>
+    public class BasicPositionTextureSkinned : BuiltInDrawer
     {
+        private readonly EngineSamplerState linear;
+        private readonly EngineSamplerState anisotropic;
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
         public BasicPositionTextureSkinned(Graphics graphics) : base(graphics)
         {
+            SetVertexShader<BasicPositionTextureSkinnedVs>();
+            SetPixelShader<BasicPositionTexturePs>();
 
+            linear = BuiltInShaders.GetSamplerLinear();
+            anisotropic = BuiltInShaders.GetSamplerAnisotropic();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(material, tintColor, textureIndex, animation);
+            var vertexShader = GetVertexShader<BasicPositionTextureSkinnedVs>();
+            vertexShader?.WriteCBPerInstance(material, tintColor, textureIndex, animation);
 
-            var sampler = material.UseAnisotropic ?
-                BuiltInShaders.GetSamplerAnisotropic() :
-                BuiltInShaders.GetSamplerLinear();
-
-            PixelShader.SetDiffuseMap(material.Material?.DiffuseTexture);
-            PixelShader.SetDiffseSampler(sampler);
+            var sampler = material.UseAnisotropic ? anisotropic : linear;
+            var pixelShader = GetPixelShader<BasicPositionTexturePs>();
+            pixelShader?.SetDiffuseMap(material.Material?.DiffuseTexture);
+            pixelShader?.SetDiffseSampler(sampler);
         }
     }
 }

@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow Skinned position-normal-texture-tangent drawer
     /// </summary>
-    public class ShadowPositionNormalTextureTangentSkinned : BuiltInDrawer<ShadowSkinnedPositionNormalTextureTangentVs, EmptyGs, EmptyPs>
+    public class ShadowPositionNormalTextureTangentSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,14 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public ShadowPositionNormalTextureTangentSkinned(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<ShadowSkinnedPositionNormalTextureTangentVs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(textureIndex, animation);
+            var vertexShader = GetVertexShader<ShadowSkinnedPositionNormalTextureTangentVs>();
+            vertexShader?.WriteCBPerInstance(textureIndex, animation);
         }
     }
 }

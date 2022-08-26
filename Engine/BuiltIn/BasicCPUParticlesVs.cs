@@ -9,7 +9,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// CPU particles vertex shader
     /// </summary>
-    public class BasicCPUParticlesVs : IBuiltInVertexShader
+    public class BasicCpuParticlesVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per emitter constant buffer
@@ -28,16 +28,16 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public BasicCPUParticlesVs(Graphics graphics)
+        public BasicCpuParticlesVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(BasicCPUParticlesVs), "main", ShaderDefaultBasicResources.CPUParticles_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(BasicCpuParticlesVs), "main", ShaderDefaultBasicResources.CPUParticles_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~BasicCPUParticlesVs()
+        ~BasicCpuParticlesVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

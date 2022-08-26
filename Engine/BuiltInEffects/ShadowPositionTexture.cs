@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow position-texture drawer
     /// </summary>
-    public class ShadowPositionTexture : BuiltInDrawer<ShadowPositionTextureVs, EmptyGs, EmptyPs>
+    public class ShadowPositionTexture : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,14 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public ShadowPositionTexture(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<ShadowPositionTextureVs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(textureIndex);
+            var vertexShader = GetVertexShader<ShadowPositionTextureVs>();
+            vertexShader?.WriteCBPerInstance(textureIndex);
         }
     }
 }

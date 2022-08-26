@@ -10,27 +10,25 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Built-in drawer class
     /// </summary>
-    public abstract class BuiltInDrawer<VS, GS, PS> : IBuiltInDrawer
-        where VS : IBuiltInVertexShader
-        where GS : IBuiltInGeometryShader
-        where PS : IBuiltInPixelShader
+    public abstract class BuiltInDrawer : IBuiltInDrawer
     {
+        /// <summary>
+        /// Vertex shader
+        /// </summary>
+        private IBuiltInVertexShader vertexShader = BuiltInShaders.GetVertexShader<EmptyVs>();
+        /// <summary>
+        /// Geometry shader
+        /// </summary>
+        private IBuiltInGeometryShader geometryShader = BuiltInShaders.GetGeometryShader<EmptyGs>();
+        /// <summary>
+        /// Pixel shader
+        /// </summary>
+        private IBuiltInPixelShader pixelShader = BuiltInShaders.GetPixelShader<EmptyPs>();
+
         /// <summary>
         /// Graphics
         /// </summary>
         protected readonly Graphics Graphics;
-        /// <summary>
-        /// Vertex shader
-        /// </summary>
-        protected readonly VS VertexShader;
-        /// <summary>
-        /// Geometry shader
-        /// </summary>
-        protected readonly GS GeometryShader;
-        /// <summary>
-        /// Pixel shader
-        /// </summary>
-        protected readonly PS PixelShader;
 
         /// <summary>
         /// Constructor
@@ -39,9 +37,116 @@ namespace Engine.BuiltInEffects
         protected BuiltInDrawer(Graphics graphics)
         {
             Graphics = graphics;
-            VertexShader = BuiltInShaders.GetVertexShader<VS>();
-            GeometryShader = BuiltInShaders.GetGeometryShader<GS>();
-            PixelShader = BuiltInShaders.GetPixelShader<PS>();
+        }
+
+        /// <summary>
+        /// Sets a vertex shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        protected void SetVertexShader<T>() where T : class, IBuiltInVertexShader
+        {
+            vertexShader = BuiltInShaders.GetVertexShader<T>();
+        }
+        /// <summary>
+        /// Sets the vertex shader 
+        /// </summary>
+        /// <param name="shader">Shader</param>
+        protected void SetVertexShader(IBuiltInVertexShader shader)
+        {
+            vertexShader = shader;
+        }
+        /// <summary>
+        /// Sets a geometry shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        protected void SetGeometryShader<T>() where T : class, IBuiltInGeometryShader
+        {
+            geometryShader = BuiltInShaders.GetGeometryShader<T>();
+        }
+        /// <summary>
+        /// Sets the geometry shader 
+        /// </summary>
+        /// <param name="shader">Shader</param>
+        protected void SetGeometryShader(IBuiltInGeometryShader shader)
+        {
+            geometryShader = shader;
+        }
+        /// <summary>
+        /// Sets a pixel shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        protected void SetPixelShader<T>() where T : class, IBuiltInPixelShader
+        {
+            pixelShader = BuiltInShaders.GetPixelShader<T>();
+        }
+        /// <summary>
+        /// Sets the pixel shader 
+        /// </summary>
+        /// <param name="shader">Shader</param>
+        protected void SetPixelShader(IBuiltInPixelShader shader)
+        {
+            pixelShader = shader;
+        }
+
+        /// <summary>
+        /// Gets the vertex shader
+        /// </summary>
+        protected IBuiltInVertexShader GetVertexShader()
+        {
+            return vertexShader;
+        }
+        /// <summary>
+        /// Gets the vertex shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        protected T GetVertexShader<T>() where T : class, IBuiltInVertexShader
+        {
+            return vertexShader as T;
+        }
+        /// <summary>
+        /// Gets the geometry shader
+        /// </summary>
+        protected IBuiltInGeometryShader GetGeometryShader()
+        {
+            return geometryShader;
+        }
+        /// <summary>
+        /// Gets the geometry shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        protected T GetGeometryShader<T>() where T : class, IBuiltInGeometryShader
+        {
+            return geometryShader as T;
+        }
+        /// <summary>
+        /// Gets the pixel shader
+        /// </summary>
+        protected IBuiltInPixelShader GetPixelShader()
+        {
+            return pixelShader;
+        }
+        /// <summary>
+        /// Gets the pixel shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        protected T GetPixelShader<T>() where T : class, IBuiltInPixelShader
+        {
+            return pixelShader as T;
+        }
+
+        /// <summary>
+        /// Prepares the internal shaders in the graphics device
+        /// </summary>
+        protected virtual void PrepareShaders()
+        {
+            Graphics.SetVertexShader(vertexShader?.Shader);
+            vertexShader?.SetShaderResources();
+
+            Graphics.SetGeometryShader(geometryShader?.Shader);
+            geometryShader?.SetShaderResources();
+
+            Graphics.SetPixelShader(pixelShader?.Shader);
+            pixelShader?.SetShaderResources();
         }
 
         /// <inheritdoc/>
@@ -52,26 +157,25 @@ namespace Engine.BuiltInEffects
         /// <inheritdoc/>
         public virtual void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
         {
+            if (bufferManager == null)
+            {
+                return;
+            }
+
             if (meshes?.Any() != true)
             {
                 return;
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            Graphics.SetVertexShader(VertexShader.Shader);
-            Graphics.SetGeometryShader(GeometryShader.Shader);
-            Graphics.SetPixelShader(PixelShader.Shader);
-
-            VertexShader.SetShaderResources();
-            GeometryShader.SetShaderResources();
-            PixelShader.SetShaderResources();
+            PrepareShaders();
 
             bool instanced = instances > 0;
 
             foreach (var mesh in meshes)
             {
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(VertexShader.Shader, mesh.VertexBuffer, mesh.Topology, instanced))
+                if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, instanced))
                 {
                     continue;
                 }
@@ -90,17 +194,16 @@ namespace Engine.BuiltInEffects
         /// <inheritdoc/>
         public virtual void Draw(BufferManager bufferManager, DrawOptions options)
         {
-            // Set the vertex and pixel shaders that will be used to render this mesh.
-            Graphics.SetVertexShader(VertexShader.Shader);
-            Graphics.SetGeometryShader(GeometryShader.Shader);
-            Graphics.SetPixelShader(PixelShader.Shader);
+            if (bufferManager == null)
+            {
+                return;
+            }
 
-            VertexShader.SetShaderResources();
-            GeometryShader.SetShaderResources();
-            PixelShader.SetShaderResources();
+            // Set the vertex and pixel shaders that will be used to render this mesh.
+            PrepareShaders();
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(VertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
+            if (!bufferManager.SetInputAssembler(vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
             {
                 return;
             }

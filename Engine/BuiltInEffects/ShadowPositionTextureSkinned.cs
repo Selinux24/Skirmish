@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Shadow Skinned position-texture drawer
     /// </summary>
-    public class ShadowPositionTextureSkinned : BuiltInDrawer<ShadowSkinnedPositionTextureVs, EmptyGs, EmptyPs>
+    public class ShadowPositionTextureSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,14 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public ShadowPositionTextureSkinned(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<ShadowSkinnedPositionTextureVs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerInstance(textureIndex, animation);
+            var vertexShader = GetVertexShader<ShadowSkinnedPositionTextureVs>();
+            vertexShader?.WriteCBPerInstance(textureIndex, animation);
         }
     }
 }

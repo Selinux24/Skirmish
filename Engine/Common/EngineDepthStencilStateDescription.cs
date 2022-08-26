@@ -26,7 +26,6 @@ namespace Engine.Common
                 BackFace = (DXDepthStencilOperationDescription)obj.BackFace,
             };
         }
-
         public static explicit operator EngineDepthStencilStateDescription(DXDepthStencilStateDescription obj)
         {
             return new EngineDepthStencilStateDescription
@@ -42,53 +41,46 @@ namespace Engine.Common
             };
         }
 
-        //
-        // Resumen:
-        //     Enable depth testing.
-        public bool IsDepthEnabled;
-        //
-        // Resumen:
-        //     Identify a portion of the depth-stencil buffer that can be modified by depth
-        //     data (see SharpDX.Direct3D11.DepthWriteMask).
-        public DepthWriteMask DepthWriteMask;
-        //
-        // Resumen:
-        //     A function that compares depth data against existing depth data. The function
-        //     options are listed in SharpDX.Direct3D11.Comparison.
-        public Comparison DepthComparison;
-        //
-        // Resumen:
-        //     Enable stencil testing.
-        public bool IsStencilEnabled;
-        //
-        // Resumen:
-        //     Identify a portion of the depth-stencil buffer for reading stencil data.
-        public byte StencilReadMask;
-        //
-        // Resumen:
-        //     Identify a portion of the depth-stencil buffer for writing stencil data.
-        public byte StencilWriteMask;
-        //
-        // Resumen:
-        //     Identify how to use the results of the depth test and the stencil test for pixels
-        //     whose surface normal is facing towards the camera (see SharpDX.Direct3D11.DepthStencilOperationDescription).
-        public DepthStencilOperationDescription FrontFace;
-        //
-        // Resumen:
-        //     Identify how to use the results of the depth test and the stencil test for pixels
-        //     whose surface normal is facing away from the camera (see SharpDX.Direct3D11.DepthStencilOperationDescription).
-        public DepthStencilOperationDescription BackFace;
-
-        //
-        // Resumen:
-        //     Returns default values for SharpDX.Direct3D11.DepthStencilStateDescription.
-        //
-        // Comentarios:
-        //     See MSDN documentation for default values.
+        /// <summary>
+        /// Returns default values for DepthStencilStateDescription.
+        /// </summary>
         public static EngineDepthStencilStateDescription Default()
         {
             return new EngineDepthStencilStateDescription();
         }
+
+        /// <summary>
+        /// Enable depth testing.
+        /// </summary>
+        public bool IsDepthEnabled { get; set; }
+        /// <summary>
+        /// Identify a portion of the depth-stencil buffer that can be modified by depth data (see DepthWriteMask).
+        /// </summary>
+        public DepthWriteMask DepthWriteMask { get; set; }
+        /// <summary>
+        /// A function that compares depth data against existing depth data. The function options are listed in Comparison.
+        /// </summary>
+        public Comparison DepthComparison { get; set; }
+        /// <summary>
+        /// Enable stencil testing.
+        /// </summary>
+        public bool IsStencilEnabled { get; set; }
+        /// <summary>
+        /// Identify a portion of the depth-stencil buffer for reading stencil data.
+        /// </summary>
+        public byte StencilReadMask { get; set; }
+        /// <summary>
+        /// Identify a portion of the depth-stencil buffer for writing stencil data.
+        /// </summary>
+        public byte StencilWriteMask { get; set; }
+        /// <summary>
+        /// Identify how to use the results of the depth test and the stencil test for pixels whose surface normal is facing towards the camera (see DepthStencilOperationDescription).
+        /// </summary>
+        public DepthStencilOperationDescription FrontFace { get; set; }
+        /// <summary>
+        /// Identify how to use the results of the depth test and the stencil test for pixels whose surface normal is facing away from the camera (see DepthStencilOperationDescription).
+        /// </summary>
+        public DepthStencilOperationDescription BackFace { get; set; }
     }
 
     /// <summary>
@@ -105,6 +97,7 @@ namespace Engine.Common
         /// </summary>
         All = DXDepthWriteMask.All
     }
+
     /// <summary>
     /// Stencil operations that can be performed based on the results of stencil test.
     /// </summary>
@@ -120,7 +113,6 @@ namespace Engine.Common
                 Comparison = (DXComparison)obj.Comparison,
             };
         }
-
         public static explicit operator DepthStencilOperationDescription(DXDepthStencilOperationDescription obj)
         {
             return new DepthStencilOperationDescription
@@ -135,21 +127,22 @@ namespace Engine.Common
         /// <summary>
         /// The stencil operation to perform when stencil testing fails.
         /// </summary>
-        public StencilOperation FailOperation;
+        public StencilOperation FailOperation { get; set; }
         /// <summary>
         /// The stencil operation to perform when stencil testing passes and depth testing fails.
         /// </summary>
-        public StencilOperation DepthFailOperation;
+        public StencilOperation DepthFailOperation { get; set; }
         /// <summary>
         /// The stencil operation to perform when stencil testing and depth testing both pass.
         /// </summary>
-        public StencilOperation PassOperation;
+        public StencilOperation PassOperation { get; set; }
         /// <summary>
         /// A function that compares stencil data against existing stencil data. 
         /// The function options are listed in Comparison.
         /// </summary>
-        public Comparison Comparison;
+        public Comparison Comparison { get; set; }
     }
+
     /// <summary>
     /// The stencil operations that can be performed during depth-stencil testing.
     /// </summary>

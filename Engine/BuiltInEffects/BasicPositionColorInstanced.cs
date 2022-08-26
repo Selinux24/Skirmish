@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Basic position-color instanced drawer
     /// </summary>
-    public class BasicPositionColorInstanced : BuiltInDrawer<BasicPositionColorVsI, EmptyGs, BasicPositionColorPs>
+    public class BasicPositionColorInstanced : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,16 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public BasicPositionColorInstanced(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<BasicPositionColorVsI>();
+            SetPixelShader<BasicPositionColorPs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerObject(material, tintColor);
+            var vertexShader = GetVertexShader<BasicPositionColorVsI>();
+
+            vertexShader?.WriteCBPerObject(material, tintColor);
         }
     }
 }

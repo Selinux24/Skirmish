@@ -29,7 +29,6 @@ namespace Engine.Common
                 ConservativeRasterizationMode = (DXConservativeRasterizationMode)obj.ConservativeRasterizationMode,
             };
         }
-
         public static explicit operator EngineRasterizerStateDescription(DXRasterizerStateDescription2 obj)
         {
             return new EngineRasterizerStateDescription
@@ -52,30 +51,30 @@ namespace Engine.Common
         /// <summary>
         /// A FillMode-typed value that determines the fill mode to use when rendering.
         /// </summary>
-        public FillMode FillMode;
+        public FillMode FillMode { get; set; }
         /// <summary>
         /// A CullMode-typed value that indicates that triangles facing the specified direction are not drawn.
         /// </summary>
-        public CullMode CullMode;
+        public CullMode CullMode { get; set; }
         /// <summary>
         /// Specifies whether a triangle is front- or back-facing. If TRUE, a triangle will
         /// be considered front-facing if its vertices are counter-clockwise on the render
         /// target and considered back-facing if they are clockwise. If SharpDX.Result.False,
         /// the opposite is true.
         /// </summary>
-        public bool IsFrontCounterClockwise;
+        public bool IsFrontCounterClockwise { get; set; }
         /// <summary>
         /// Depth value added to a given pixel. For info about depth bias, see Depth Bias.
         /// </summary>
-        public int DepthBias;
+        public int DepthBias { get; set; }
         /// <summary>
         /// Maximum depth bias of a pixel. For info about depth bias, see Depth Bias.
         /// </summary>
-        public float DepthBiasClamp;
+        public float DepthBiasClamp { get; set; }
         /// <summary>
         /// Scalar on a given pixel's slope. For info about depth bias, see Depth Bias.
         /// </summary>
-        public float SlopeScaledDepthBias;
+        public float SlopeScaledDepthBias { get; set; }
         /// <summary>
         /// Specifies whether to enable clipping based on distance. The hardware always performs
         /// x and y clipping of rasterized coordinates. When DepthClipEnable is set to the
@@ -95,24 +94,24 @@ namespace Engine.Common
         /// complex special-case handling for geometry that goes beyond the back clipping
         /// plane.
         /// </summary>
-        public bool IsDepthClipEnabled;
+        public bool IsDepthClipEnabled { get; set; }
         /// <summary>
         /// Specifies whether to enable scissor-rectangle culling. All pixels outside an active scissor rectangle are culled.
         /// </summary>
-        public bool IsScissorEnabled;
+        public bool IsScissorEnabled { get; set; }
         /// <summary>
         /// Specifies whether to use the quadrilateral or alpha line anti-aliasing algorithm
         /// on multisample antialiasing (MSAA) render targets. Set to TRUE to use the quadrilateral
         /// line anti-aliasing algorithm and to SharpDX.Result.False to use the alpha line
         /// anti-aliasing algorithm. For more info about this member, see Remarks.
         /// </summary>
-        public bool IsMultisampleEnabled;
+        public bool IsMultisampleEnabled { get; set; }
         /// <summary>
         /// Specifies whether to enable line antialiasing; only applies if doing line drawing
         /// and MultisampleEnable is SharpDX.Result.False. For more info about this member,
         /// see Remarks.
         /// </summary>
-        public bool IsAntialiasedLineEnabled;
+        public bool IsAntialiasedLineEnabled { get; set; }
         /// <summary>
         /// The sample count that is forced while UAV rendering or rasterizing. Valid values
         /// are 0, 1, 2, 4, 8, and optionally 16. 0 indicates that the sample count is not
@@ -125,11 +124,11 @@ namespace Engine.Common
         /// returns SharpDX.Result.False. Otherwise, rendering behavior is undefined. For
         /// info about how to configure depth-stencil, see Configuring Depth-Stencil Functionality.
         /// </summary>
-        public int ForcedSampleCount;
+        public int ForcedSampleCount { get; set; }
         /// <summary>
         /// A ConservativeRasterizationMode-typed value that identifies whether conservative rasterization is on or off.
         /// </summary>
-        public ConservativeRasterizationMode ConservativeRasterizationMode;
+        public ConservativeRasterizationMode ConservativeRasterizationMode { get; set; }
     }
 
     /// <summary>
@@ -146,6 +145,7 @@ namespace Engine.Common
         /// </summary>
         Solid = DXFillMode.Solid
     }
+
     /// <summary>
     /// Indicates triangles facing a particular direction are not drawn.
     /// </summary>
@@ -164,6 +164,7 @@ namespace Engine.Common
         /// </summary>
         Back = DXCullMode.Back
     }
+
     /// <summary>
     /// Identifies whether conservative rasterization is on or off.
     /// </summary>

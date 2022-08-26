@@ -5,9 +5,9 @@ namespace Engine.BuiltInEffects
     using Engine.Common;
 
     /// <summary>
-    /// Cubemap drawer
+    /// Texture drawer
     /// </summary>
-    public class BasicTexture : BuiltInDrawer<TextureVs, EmptyGs, TexturePs>
+    public class BasicTexture : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -15,7 +15,8 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public BasicTexture(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<TextureVs>();
+            SetPixelShader<TexturePs>();
         }
 
         /// <summary>
@@ -24,9 +25,10 @@ namespace Engine.BuiltInEffects
         /// <param name="texture">Texture</param>
         public void Update(EngineShaderResourceView texture, uint textureIndex)
         {
-            PixelShader.WriteCBPerFrame(textureIndex);
-            PixelShader.SetTexture(texture);
-            PixelShader.SetSampler(BuiltInShaders.GetSamplerLinear());
+            var pixelShader = GetPixelShader<TexturePs>();
+            pixelShader?.WriteCBPerFrame(textureIndex);
+            pixelShader?.SetTexture(texture);
+            pixelShader?.SetSampler(BuiltInShaders.GetSamplerLinear());
         }
     }
 }

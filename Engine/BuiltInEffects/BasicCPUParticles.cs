@@ -11,8 +11,10 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Cubemap drawer
     /// </summary>
-    public class BasicCPUParticles : BuiltInDrawer<BasicCPUParticlesVs, BasicCPUParticlesGS, BasicCPUParticlesPs>, IDisposable
+    public class BasicCpuParticles : BuiltInDrawer, IDisposable
     {
+        #region Buffers
+
         /// <summary>
         /// Per emitter data structure
         /// </summary>
@@ -123,6 +125,8 @@ namespace Engine.BuiltInEffects
             }
         }
 
+        #endregion
+
         /// <summary>
         /// Per emiter constant buffer
         /// </summary>
@@ -132,14 +136,18 @@ namespace Engine.BuiltInEffects
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public BasicCPUParticles(Graphics graphics) : base(graphics)
+        public BasicCpuParticles(Graphics graphics) : base(graphics)
         {
-            cbPerEmitter = new EngineConstantBuffer<PerEmitter>(graphics, nameof(BasicCPUParticles) + "." + nameof(PerEmitter));
+            SetVertexShader<BasicCpuParticlesVs>();
+            SetGeometryShader<BasicCpuParticlesGS>();
+            SetPixelShader<BasicCpuParticlesPs>();
+
+            cbPerEmitter = new EngineConstantBuffer<PerEmitter>(graphics, nameof(BasicCpuParticles) + "." + nameof(PerEmitter));
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~BasicCPUParticles()
+        ~BasicCpuParticles()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -173,12 +181,15 @@ namespace Engine.BuiltInEffects
         {
             cbPerEmitter.WriteData(PerEmitter.Build(eyePositionWorld, state, textureCount));
 
-            VertexShader.SetPerEmitterConstantBuffer(cbPerEmitter);
+            var vertexShader = GetVertexShader<BasicCpuParticlesVs>();
+            vertexShader?.SetPerEmitterConstantBuffer(cbPerEmitter);
 
-            GeometryShader.SetPerEmitterConstantBuffer(cbPerEmitter);
+            var geometryShader = GetGeometryShader<BasicCpuParticlesGS>();
+            geometryShader?.SetPerEmitterConstantBuffer(cbPerEmitter);
 
-            PixelShader.SetPerEmitterConstantBuffer(cbPerEmitter);
-            PixelShader.SetTextureArray(textures);
+            var pixelShader = GetPixelShader<BasicCpuParticlesPs>();
+            pixelShader?.SetPerEmitterConstantBuffer(cbPerEmitter);
+            pixelShader?.SetTextureArray(textures);
         }
     }
 }

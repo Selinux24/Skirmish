@@ -91,10 +91,6 @@ namespace Engine
         /// Depth stencil state for volume drawing
         /// </summary>
         private EngineDepthStencilState depthStencilVolumeDrawing = null;
-        /// <summary>
-        /// Composer effect
-        /// </summary>
-        private readonly EffectDeferredComposer composer = null;
 
         /// <summary>
         /// Graphics
@@ -109,7 +105,7 @@ namespace Engine
         {
             Graphics = graphics;
 
-            composer = DrawerPool.GetEffect<EffectDeferredComposer>();
+            var composer = DrawerPool.GetEffect<EffectDeferredComposer>();
             globalLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredDirectionalLight", composer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
             pointLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredPointLight", composer.DeferredPointLight.GetSignature(), VertexPosition.Input(BufferSlot));
             spotLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredSpotLight", composer.DeferredSpotLight.GetSignature(), VertexPosition.Input(BufferSlot));

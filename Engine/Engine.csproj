@@ -137,7 +137,7 @@
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
     <Compile Include="BuiltInEffects\BasicSkyScattering.cs" />
-    <Compile Include="BuiltInEffects\BasicCPUParticles.cs" />
+    <Compile Include="BuiltInEffects\BasicCpuParticles.cs" />
     <Compile Include="BuiltInEffects\BasicTexture.cs" />
     <Compile Include="BuiltInEffects\BasicCubemap.cs" />
     <Compile Include="BuiltInEffects\ShadowPositionTextureSkinned.cs" />
@@ -181,10 +181,11 @@
     <Compile Include="BuiltInEffects\BasicPositionTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
-    <Compile Include="BuiltIn\BasicCPUParticlesGS.cs" />
-    <Compile Include="BuiltIn\BasicCPUParticlesVs.cs" />
-    <Compile Include="BuiltIn\BasicCPUParticlesPs.cs" />
+    <Compile Include="BuiltIn\BasicCpuParticlesGS.cs" />
+    <Compile Include="BuiltIn\BasicCpuParticlesVs.cs" />
+    <Compile Include="BuiltIn\BasicCpuParticlesPs.cs" />
     <Compile Include="BuiltIn\EmptyGs.cs" />
+    <Compile Include="BuiltIn\EmptyVs.cs" />
     <Compile Include="BuiltIn\IBuiltInGeometryShader.cs" />
     <Compile Include="BuiltIn\SkyScatteringPs.cs" />
     <Compile Include="BuiltIn\TexturePs.cs" />

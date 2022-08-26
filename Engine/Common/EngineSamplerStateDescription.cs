@@ -28,7 +28,6 @@ namespace Engine.Common
                 MaximumLod = obj.MaximumLod,
             };
         }
-
         public static explicit operator EngineSamplerStateDescription(DXSampleStateDescription obj)
         {
             return new EngineSamplerStateDescription
@@ -46,6 +45,10 @@ namespace Engine.Common
             };
         }
 
+        /// <summary>
+        /// Returns default values for EngineSamplerStateDescription.
+        /// </summary>
+        /// <returns></returns>
         public static EngineSamplerStateDescription Default()
         {
             return (EngineSamplerStateDescription)DXSampleStateDescription.Default();
@@ -54,52 +57,52 @@ namespace Engine.Common
         /// <summary>
         /// Filtering method to use when sampling a texture (see Filter).
         /// </summary>
-        public Filter Filter;
+        public Filter Filter { get; set; }
         /// <summary>
         /// Method to use for resolving a u texture coordinate that is outside the 0 to 1 range (see TextureAddressMode).
         /// </summary>
-        public TextureAddressMode AddressU;
+        public TextureAddressMode AddressU { get; set; }
         /// <summary>
         /// Method to use for resolving a v texture coordinate that is outside the 0 to 1 range.
         /// </summary>
-        public TextureAddressMode AddressV;
+        public TextureAddressMode AddressV { get; set; }
         /// <summary>
         /// Method to use for resolving a w texture coordinate that is outside the 0 to 1 range.
         /// </summary>
-        public TextureAddressMode AddressW;
+        public TextureAddressMode AddressW { get; set; }
         /// <summary>
         /// Offset from the calculated mipmap level. For example, if Direct3D calculates
         /// that a texture should be sampled at mipmap level 3 and MipLODBias is 2, then
         /// the texture will be sampled at mipmap level 5.
         /// </summary>
-        public float MipLodBias;
+        public float MipLodBias { get; set; }
         /// <summary>
         /// Clamping value used if D3D11_FILTER_ANISOTROPIC or D3D11_FILTER_COMPARISON_ANISOTROPIC
         /// is specified in Filter. Valid values are between 1 and 16.
         /// </summary>
-        public int MaximumAnisotropy;
+        public int MaximumAnisotropy { get; set; }
         /// <summary>
         /// A function that compares sampled data against existing sampled data. The function
         /// options are listed in SharpDX.Direct3D11.Comparison.
         /// </summary>
-        public Comparison ComparisonFunction;
+        public Comparison ComparisonFunction { get; set; }
         /// <summary>
         /// Border color to use if D3D11_TEXTURE_ADDRESS_BORDER is specified for AddressU,
         /// AddressV, or AddressW. Range must be between 0.0 and 1.0 inclusive.
         /// </summary>
-        public Color4 BorderColor;
+        public Color4 BorderColor { get; set; }
         /// <summary>
         /// Lower end of the mipmap range to clamp access to, where 0 is the largest and
         /// most detailed mipmap level and any level higher than that is less detailed.
         /// </summary>
-        public float MinimumLod;
+        public float MinimumLod { get; set; }
         /// <summary>
         /// Upper end of the mipmap range to clamp access to, where 0 is the largest and
         /// most detailed mipmap level and any level higher than that is less detailed. This
         /// value must be greater than or equal to MinLOD. To have no upper limit on LOD
         /// set this to a large value such as D3D11_FLOAT32_MAX.
         /// </summary>
-        public float MaximumLod;
+        public float MaximumLod { get; set; }
     }
 
     /// <summary>

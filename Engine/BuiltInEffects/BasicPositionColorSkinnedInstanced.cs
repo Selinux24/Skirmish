@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Skinned position-color instanced drawer
     /// </summary>
-    public class BasicPositionColorSkinnedInstanced : BuiltInDrawer<BasicPositionColorSkinnedVsI, EmptyGs, BasicPositionColorPs>
+    public class BasicPositionColorSkinnedInstanced : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,16 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public BasicPositionColorSkinnedInstanced(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<BasicPositionColorSkinnedVsI>();
+            SetPixelShader<BasicPositionColorPs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerObject(material, tintColor);
+            var vertexShader = GetVertexShader<BasicPositionColorSkinnedVsI>();
+
+            vertexShader?.WriteCBPerObject(material, tintColor);
         }
     }
 }

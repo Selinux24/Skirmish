@@ -8,7 +8,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Basic position-normal-color instanced drawer
     /// </summary>
-    public class BasicPositionNormalColorInstanced : BuiltInDrawer<BasicPositionNormalColorVsI, EmptyGs, BasicPositionNormalColorPs>
+    public class BasicPositionNormalColorInstanced : BuiltInDrawer
     {
         /// <summary>
         /// Constructor
@@ -16,13 +16,16 @@ namespace Engine.BuiltInEffects
         /// <param name="graphics">Graphics</param>
         public BasicPositionNormalColorInstanced(Graphics graphics) : base(graphics)
         {
-
+            SetVertexShader<BasicPositionNormalColorVsI>();
+            SetPixelShader<BasicPositionNormalColorPs>();
         }
 
         /// <inheritdoc/>
         public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
-            VertexShader.WriteCBPerObject(material, tintColor);
+            var vertexShader = GetVertexShader<BasicPositionNormalColorVsI>();
+
+            vertexShader?.WriteCBPerObject(material, tintColor);
         }
     }
 }
