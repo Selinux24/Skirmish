@@ -2,7 +2,7 @@
 
 namespace Engine.BuiltInEffects
 {
-    using Engine.BuiltIn;
+    using Engine.BuiltIn.Default;
     using Engine.Common;
 
     /// <summary>

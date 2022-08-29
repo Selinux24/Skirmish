@@ -2,6 +2,7 @@
 namespace Engine.BuiltInEffects
 {
     using Engine.BuiltIn;
+    using Engine.BuiltIn.Cubemap;
     using Engine.Common;
 
     /// <summary>

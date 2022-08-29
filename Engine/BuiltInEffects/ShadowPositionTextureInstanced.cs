@@ -1,7 +1,7 @@
 ﻿
 namespace Engine.BuiltInEffects
 {
-    using Engine.BuiltIn;
+    using Engine.BuiltIn.DefaultShadow;
 
     /// <summary>
     /// Shadow position-texture instanced drawer
