@@ -162,12 +162,6 @@
     <EffectShader Include="Effects\ShaderDefaultClouds.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderDefaultCPUParticles.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderDefaultDecal.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderDefaultFoliage.fx" />
   </ItemGroup>
   <ItemGroup>

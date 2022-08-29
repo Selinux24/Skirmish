@@ -83,26 +83,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderDefaultCPUParticles {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultCPUParticles", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] ShaderDefaultDecal {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultDecal", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderDefaultFoliage {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultFoliage", resourceCulture);

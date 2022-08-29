@@ -5,9 +5,10 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Decal drawer class
@@ -40,9 +41,9 @@ namespace Engine
         /// </summary>
         private int currentDecals;
         /// <summary>
-        /// Effect
+        /// Decals drawer
         /// </summary>
-        private EffectDefaultDecals drawEffect;
+        private BasicDecals decalDrawer;
 
         /// <summary>
         /// Decal texture
@@ -111,18 +112,11 @@ namespace Engine
             TextureCount = (uint)imgContent.Count;
 
             decals = new VertexDecal[MaxDecalCount];
+
+            decalDrawer = BuiltInShaders.GetDrawer<BasicDecals>();
+
             buffer = new EngineVertexBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, true);
-
-            drawEffect = DrawerPool.GetEffect<EffectDefaultDecals>();
-
-            if (RotateDecals)
-            {
-                buffer.CreateInputLayout($"{nameof(EffectDefaultDecals)}.Decal", drawEffect.Decal.GetSignature(), BufferSlot);
-            }
-            else
-            {
-                buffer.CreateInputLayout($"{nameof(EffectDefaultDecals)}.DecalRotated", drawEffect.DecalRotated.GetSignature(), BufferSlot);
-            }
+            buffer.CreateInputLayout(nameof(BasicDecals), decalDrawer.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
         }
 
         /// <inheritdoc/>
@@ -171,28 +165,18 @@ namespace Engine
                 Counters.PrimitivesPerFrame += currentDecals;
             }
 
-            drawEffect.UpdatePerFrame(
-                context.ViewProjection,
-                context.GameTime.TotalSeconds,
-                TintColor,
-                TextureCount,
-                Texture);
-
-            buffer.SetInputAssembler(Topology.PointList);
-
             var graphics = Scene.Game.Graphics;
-
             graphics.SetDepthStencilRDZEnabled();
             graphics.SetBlendState(BlendMode);
 
-            var technique = RotateDecals ? drawEffect.DecalRotated : drawEffect.Decal;
+            decalDrawer.Update(
+                context.GameTime.TotalSeconds,
+                RotateDecals,
+                TextureCount,
+                TintColor,
+                Texture);
 
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.Draw(currentDecals, 0);
-            }
+            decalDrawer.Draw(buffer, Topology.PointList, currentDecals);
         }
 
         /// <inheritdoc/>

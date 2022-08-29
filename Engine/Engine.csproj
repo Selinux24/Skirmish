@@ -370,7 +370,6 @@
     <Compile Include="PostProcessing\PostProcessBloomParams.cs" />
     <Compile Include="PostProcessing\PostProcessBlurParams.cs" />
     <Compile Include="PostProcessingDrawer.cs" />
-    <Compile Include="Effects\EffectDefaultDecals.cs" />
     <Compile Include="MaterialBlinnPhong.cs" />
     <Compile Include="MaterialCookTorrance.cs" />
     <Compile Include="MaterialPhong.cs" />
