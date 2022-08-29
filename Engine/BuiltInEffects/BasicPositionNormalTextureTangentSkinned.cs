@@ -37,7 +37,7 @@ namespace Engine.BuiltInEffects
             var pixelShader = GetPixelShader<BasicPositionNormalTextureTangentPs>();
             pixelShader?.SetDiffuseMap(material.Material?.DiffuseTexture);
             pixelShader?.SetDiffseSampler(sampler);
-            pixelShader?.SetNormalMap(material.Material?.DiffuseTexture);
+            pixelShader?.SetNormalMap(material.Material?.NormalMap);
             pixelShader?.SetNormalSampler(sampler);
         }
     }
