@@ -43,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Drawer
         /// </summary>
-        private BasicCpuParticles drawer;
+        private BasicCpuParticles particleDrawer;
 
         /// <summary>
         /// Game instance
@@ -123,7 +123,7 @@ namespace Engine
                 Name = name,
 
                 parameters = pParameters,
-                drawer = drawer,
+                particleDrawer = drawer,
 
                 Texture = texture,
                 TextureCount = textureCount,
@@ -237,9 +237,9 @@ namespace Engine
                 RotateSpeed = parameters.RotateSpeed,
             };
 
-            drawer.Update(context.EyePosition, state, TextureCount, Texture);
+            particleDrawer.Update(context.EyePosition, state, TextureCount, Texture);
 
-            drawer.Draw(buffer, Topology.PointList, ActiveParticles);
+            particleDrawer.Draw(buffer, Topology.PointList, ActiveParticles);
         }
 
         /// <summary>

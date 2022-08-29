@@ -42,13 +42,11 @@ namespace Engine.BuiltIn
 
             Shader = graphics.CompilePixelShader(nameof(BasicCpuParticlesPs), "main", ShaderDefaultBasicResources.CPUParticles_ps, HelperShaders.PSProfile);
 
-            var samplerDesc = new EngineSamplerStateDescription
-            {
-                Filter = Filter.MinMagMipPoint,
-                AddressU = TextureAddressMode.Clamp,
-                AddressV = TextureAddressMode.Clamp,
-            };
-            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(BasicCpuParticlesPs)}.ParticlesSampler", samplerDesc);
+            var samplerDesc = EngineSamplerStateDescription.Default();
+            samplerDesc.Filter = Filter.MinMagMipPoint;
+            samplerDesc.AddressU = TextureAddressMode.Clamp;
+            samplerDesc.AddressV = TextureAddressMode.Clamp;
+
             samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(BasicCpuParticlesPs)}.ParticlesSampler", samplerDesc);
         }
         /// <summary>
