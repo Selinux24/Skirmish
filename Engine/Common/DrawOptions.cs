@@ -11,13 +11,17 @@ namespace Engine.Common
         /// </summary>
         public BufferDescriptor VertexBuffer { get; set; }
         /// <summary>
+        /// Vertex draw count
+        /// </summary>
+        public int VertexDrawCount { get; set; }
+        /// <summary>
+        /// Vertex buffer additional offset
+        /// </summary>
+        public int VertexBufferOffset { get; set; }
+        /// <summary>
         /// Topology
         /// </summary>
         public Topology Topology { get; set; }
-        /// <summary>
-        /// Primitive draw count
-        /// </summary>
-        public int DrawCount { get; set; }
 
         /// <summary>
         /// Use indices
@@ -27,6 +31,14 @@ namespace Engine.Common
         /// Index buffer descriptor
         /// </summary>
         public BufferDescriptor IndexBuffer { get; set; }
+        /// <summary>
+        /// Index draw count
+        /// </summary>
+        public int IndexDrawCount { get; set; }
+        /// <summary>
+        /// Index buffer additional offset
+        /// </summary>
+        public int IndexBufferOffset { get; set; }
 
         /// <summary>
         /// Use instanced drawing
@@ -64,18 +76,20 @@ namespace Engine.Common
         {
             if (Indexed)
             {
+                int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
+
                 graphics.DrawIndexed(
-                    IndexBuffer.Count,
-                    IndexBuffer.BufferOffset,
-                    VertexBuffer.BufferOffset);
+                    drawCount,
+                    IndexBuffer.BufferOffset + IndexBufferOffset,
+                    VertexBuffer.BufferOffset + VertexBufferOffset);
             }
             else
             {
-                int drawCount = DrawCount > 0 ? DrawCount : VertexBuffer.Count;
+                int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
                 graphics.Draw(
                     drawCount,
-                    VertexBuffer.BufferOffset);
+                    VertexBuffer.BufferOffset + VertexBufferOffset);
             }
         }
         /// <summary>
@@ -86,20 +100,22 @@ namespace Engine.Common
         {
             if (Indexed)
             {
+                int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
+
                 graphics.DrawIndexedInstanced(
-                    IndexBuffer.Count,
+                    drawCount,
                     InstanceCount,
-                    IndexBuffer.BufferOffset,
-                    VertexBuffer.BufferOffset, StartInstanceLocation);
+                    IndexBuffer.BufferOffset + IndexBufferOffset,
+                    VertexBuffer.BufferOffset + VertexBufferOffset, StartInstanceLocation);
             }
             else
             {
-                int drawCount = DrawCount > 0 ? DrawCount : VertexBuffer.Count;
+                int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
                 graphics.DrawInstanced(
                     drawCount,
                     InstanceCount,
-                    VertexBuffer.BufferOffset, StartInstanceLocation);
+                    VertexBuffer.BufferOffset + VertexBufferOffset, StartInstanceLocation);
             }
         }
     }

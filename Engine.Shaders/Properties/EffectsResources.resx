@@ -127,9 +127,6 @@
   <data name="ShaderDefaultFoliage" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderdefaultfoliage.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderDefaultFont" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdefaultfont.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderDefaultGPUParticles" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderdefaultgpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

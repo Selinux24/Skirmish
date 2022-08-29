@@ -270,7 +270,7 @@ namespace Engine
             drawer.Draw(BufferManager, new DrawOptions
             {
                 VertexBuffer = vertexBuffer,
-                DrawCount = drawCount,
+                VertexDrawCount = drawCount,
                 Topology = topology,
             });
 

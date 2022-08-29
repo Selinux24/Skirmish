@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Text drawer
@@ -81,9 +82,9 @@ namespace Engine.UI
         /// </summary>
         private bool updateInternals = false;
         /// <summary>
-        /// Effect
+        /// Font drawer
         /// </summary>
-        private readonly EffectDefaultFont drawEffect;
+        private readonly BasicFonts fontDrawer;
 
         /// <summary>
         /// Manipulator
@@ -261,7 +262,7 @@ namespace Engine.UI
         public TextDrawer(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-            drawEffect = DrawerPool.GetEffect<EffectDefaultFont>();
+            fontDrawer = BuiltInShaders.GetDrawer<BasicFonts>();
         }
         /// <summary>
         /// Destructor
@@ -434,58 +435,51 @@ namespace Engine.UI
 
             WriteBuffers();
 
-            BufferManager.SetIndexBuffer(indexBuffer);
+            var bufferManager = BufferManager;
 
-            var technique = drawEffect.FontDrawer;
+            bufferManager.SetIndexBuffer(indexBuffer);
 
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
+            fontDrawer.Update(
+                Alpha * AlphaMultplier,
+                UseTextureColor,
+                ClippingRectangle.HasValue,
+                FineSampling,
+                ClippingRectangle ?? Rectangle.Empty,
+                Game.Form.RenderRectangle.BottomRight,
+                fontMap.Texture);
+
+            int count = indexDrawCount;
 
             if (ShadowColor != Color.Transparent)
             {
                 //Draw with shadows
                 int offset = indexDrawCount / 2;
-                int count = indexDrawCount / 2;
-                DrawText(drawEffect, technique, ShadowManipulator.LocalTransform, UseTextureColor, offset, count);
-                DrawText(drawEffect, technique, Manipulator.LocalTransform, UseTextureColor, 0, count);
+                count = indexDrawCount / 2;
+
+                BuiltInShaders.UpdatePerObject(ShadowManipulator.LocalTransform, viewProjection);
+                var shOptions = new DrawOptions
+                {
+                    Indexed = true,
+                    IndexBuffer = indexBuffer,
+                    IndexDrawCount = count,
+                    IndexBufferOffset = offset,
+                    Topology = Topology.TriangleList,
+                    VertexBuffer = vertexBuffer,
+                };
+                fontDrawer.Draw(bufferManager, shOptions);
             }
-            else
+
+            BuiltInShaders.UpdatePerObject(Manipulator.LocalTransform, viewProjection);
+            var opOptions = new DrawOptions
             {
-                //Draw fore color only
-                DrawText(drawEffect, technique, Manipulator.LocalTransform, UseTextureColor, 0, indexDrawCount);
-            }
-        }
-        /// <summary>
-        /// Draw text
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        /// <param name="technique">Technique</param>
-        /// <param name="local">Local transform</param>
-        /// <param name="useTextureColor">Use the texture color</param>
-        /// <param name="index">Primitive index</param>
-        /// <param name="count">Index count</param>
-        private void DrawText(EffectDefaultFont effect, EngineEffectTechnique technique, Matrix local, bool useTextureColor, int index, int count)
-        {
-            effect.UpdatePerFrame(
-                local,
-                viewProjection,
-                Alpha * AlphaMultplier,
-                useTextureColor,
-                FineSampling,
-                fontMap.Texture);
-
-            effect.UpdatePerFrame(
-                ClippingRectangle.HasValue,
-                Game.Form.RenderRectangle.BottomRight,
-                ClippingRectangle ?? Rectangle.Empty);
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(count, indexBuffer.BufferOffset + index, vertexBuffer.BufferOffset);
-            }
+                Indexed = true,
+                IndexBuffer = indexBuffer,
+                IndexDrawCount = count,
+                IndexBufferOffset = 0,
+                Topology = Topology.TriangleList,
+                VertexBuffer = vertexBuffer,
+            };
+            fontDrawer.Draw(bufferManager, opOptions);
         }
         /// <summary>
         /// Writes text data into buffers

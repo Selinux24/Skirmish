@@ -136,6 +136,7 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\BasicFonts.cs" />
     <Compile Include="BuiltInEffects\BasicDecals.cs" />
     <Compile Include="BuiltInEffects\BasicSkyScattering.cs" />
     <Compile Include="BuiltInEffects\BasicCpuParticles.cs" />
@@ -182,6 +183,8 @@
     <Compile Include="BuiltInEffects\BasicPositionTextureInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColorInstanced.cs" />
     <Compile Include="BuiltInEffects\BasicPositionColor.cs" />
+    <Compile Include="BuiltIn\Fonts\FontsPs.cs" />
+    <Compile Include="BuiltIn\Fonts\FontsVs.cs" />
     <Compile Include="BuiltIn\CpuParticles\BasicCpuParticlesGS.cs" />
     <Compile Include="BuiltIn\CpuParticles\BasicCpuParticlesVs.cs" />
     <Compile Include="BuiltIn\CpuParticles\BasicCpuParticlesPs.cs" />
@@ -792,7 +795,6 @@
     <Compile Include="Animation\JointAnimation.cs" />
     <Compile Include="Common\VertexPositionNormalTextureTangent.cs" />
     <Compile Include="Counters.cs" />
-    <Compile Include="Effects\EffectDefaultFont.cs" />
     <Compile Include="Effects\Drawer.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Model.cs" />

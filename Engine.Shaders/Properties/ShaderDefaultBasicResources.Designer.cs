@@ -143,6 +143,26 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Font_ps {
+            get {
+                object obj = ResourceManager.GetObject("Font_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Font_vs {
+            get {
+                object obj = ResourceManager.GetObject("Font_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] PositionColor_ps {
             get {
                 object obj = ResourceManager.GetObject("PositionColor_ps", resourceCulture);

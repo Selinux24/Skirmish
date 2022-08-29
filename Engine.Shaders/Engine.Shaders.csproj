@@ -165,9 +165,6 @@
     <EffectShader Include="Effects\ShaderDefaultFoliage.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderDefaultFont.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderDefaultGPUParticles.fx" />
   </ItemGroup>
   <ItemGroup>
@@ -389,6 +386,8 @@
     <PixelShader Include="ShaderDefaultBasic\Decal.ps.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\Decal.vs.hlsl" />
     <GeometryShader Include="ShaderDefaultBasic\Decal.gs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\Font.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\Font.vs.hlsl" />
     <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
     <PixelShader Include="ShaderShadowCascade\ShadowCascade.ps.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />
