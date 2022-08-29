@@ -113,6 +113,36 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Decal_gs {
+            get {
+                object obj = ResourceManager.GetObject("Decal_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Decal_ps {
+            get {
+                object obj = ResourceManager.GetObject("Decal_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Decal_vs {
+            get {
+                object obj = ResourceManager.GetObject("Decal_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] PositionColor_ps {
             get {
                 object obj = ResourceManager.GetObject("PositionColor_ps", resourceCulture);

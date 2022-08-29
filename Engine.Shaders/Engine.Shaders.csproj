@@ -392,6 +392,9 @@
     <VertexShader Include="ShaderShadowCascade\PositionColorSkinned.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
+    <PixelShader Include="ShaderDefaultBasic\Decal.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\Decal.vs.hlsl" />
+    <GeometryShader Include="ShaderDefaultBasic\Decal.gs.hlsl" />
     <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
     <PixelShader Include="ShaderShadowCascade\ShadowCascade.ps.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />

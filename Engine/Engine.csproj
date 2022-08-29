@@ -136,6 +136,7 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltInEffects\BasicDecals.cs" />
     <Compile Include="BuiltInEffects\BasicSkyScattering.cs" />
     <Compile Include="BuiltInEffects\BasicCpuParticles.cs" />
     <Compile Include="BuiltInEffects\BasicTexture.cs" />
@@ -184,6 +185,9 @@
     <Compile Include="BuiltIn\CpuParticles\BasicCpuParticlesGS.cs" />
     <Compile Include="BuiltIn\CpuParticles\BasicCpuParticlesVs.cs" />
     <Compile Include="BuiltIn\CpuParticles\BasicCpuParticlesPs.cs" />
+    <Compile Include="BuiltIn\Decals\DecalsGS.cs" />
+    <Compile Include="BuiltIn\Decals\DecalsPs.cs" />
+    <Compile Include="BuiltIn\Decals\DecalsVs.cs" />
     <Compile Include="BuiltIn\EmptyGs.cs" />
     <Compile Include="BuiltIn\EmptyVs.cs" />
     <Compile Include="BuiltIn\IBuiltInGeometryShader.cs" />

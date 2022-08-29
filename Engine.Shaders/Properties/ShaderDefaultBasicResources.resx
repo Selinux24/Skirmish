@@ -133,6 +133,15 @@
   <data name="Cubemap_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\cubemap.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Decal_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\decal.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Decal_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\decal.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Decal_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\decal.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="PositionColorI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\positioncolori.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
