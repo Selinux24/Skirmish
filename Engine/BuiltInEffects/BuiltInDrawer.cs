@@ -43,7 +43,7 @@ namespace Engine.BuiltInEffects
         /// Sets a vertex shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        protected void SetVertexShader<T>() where T : class, IBuiltInVertexShader
+        public void SetVertexShader<T>() where T : class, IBuiltInVertexShader
         {
             vertexShader = BuiltInShaders.GetVertexShader<T>();
         }
@@ -51,7 +51,7 @@ namespace Engine.BuiltInEffects
         /// Sets the vertex shader 
         /// </summary>
         /// <param name="shader">Shader</param>
-        protected void SetVertexShader(IBuiltInVertexShader shader)
+        public void SetVertexShader(IBuiltInVertexShader shader)
         {
             vertexShader = shader;
         }
@@ -59,7 +59,7 @@ namespace Engine.BuiltInEffects
         /// Sets a geometry shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        protected void SetGeometryShader<T>() where T : class, IBuiltInGeometryShader
+        public void SetGeometryShader<T>() where T : class, IBuiltInGeometryShader
         {
             geometryShader = BuiltInShaders.GetGeometryShader<T>();
         }
@@ -67,7 +67,7 @@ namespace Engine.BuiltInEffects
         /// Sets the geometry shader 
         /// </summary>
         /// <param name="shader">Shader</param>
-        protected void SetGeometryShader(IBuiltInGeometryShader shader)
+        public void SetGeometryShader(IBuiltInGeometryShader shader)
         {
             geometryShader = shader;
         }
@@ -75,7 +75,7 @@ namespace Engine.BuiltInEffects
         /// Sets a pixel shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        protected void SetPixelShader<T>() where T : class, IBuiltInPixelShader
+        public void SetPixelShader<T>() where T : class, IBuiltInPixelShader
         {
             pixelShader = BuiltInShaders.GetPixelShader<T>();
         }
@@ -83,7 +83,7 @@ namespace Engine.BuiltInEffects
         /// Sets the pixel shader 
         /// </summary>
         /// <param name="shader">Shader</param>
-        protected void SetPixelShader(IBuiltInPixelShader shader)
+        public void SetPixelShader(IBuiltInPixelShader shader)
         {
             pixelShader = shader;
         }
@@ -91,7 +91,7 @@ namespace Engine.BuiltInEffects
         /// <summary>
         /// Gets the vertex shader
         /// </summary>
-        protected IBuiltInVertexShader GetVertexShader()
+        public IBuiltInVertexShader GetVertexShader()
         {
             return vertexShader;
         }
@@ -99,14 +99,14 @@ namespace Engine.BuiltInEffects
         /// Gets the vertex shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        protected T GetVertexShader<T>() where T : class, IBuiltInVertexShader
+        public T GetVertexShader<T>() where T : class, IBuiltInVertexShader
         {
             return vertexShader as T;
         }
         /// <summary>
         /// Gets the geometry shader
         /// </summary>
-        protected IBuiltInGeometryShader GetGeometryShader()
+        public IBuiltInGeometryShader GetGeometryShader()
         {
             return geometryShader;
         }
@@ -114,14 +114,14 @@ namespace Engine.BuiltInEffects
         /// Gets the geometry shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        protected T GetGeometryShader<T>() where T : class, IBuiltInGeometryShader
+        public T GetGeometryShader<T>() where T : class, IBuiltInGeometryShader
         {
             return geometryShader as T;
         }
         /// <summary>
         /// Gets the pixel shader
         /// </summary>
-        protected IBuiltInPixelShader GetPixelShader()
+        public IBuiltInPixelShader GetPixelShader()
         {
             return pixelShader;
         }
@@ -129,7 +129,7 @@ namespace Engine.BuiltInEffects
         /// Gets the pixel shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        protected T GetPixelShader<T>() where T : class, IBuiltInPixelShader
+        public T GetPixelShader<T>() where T : class, IBuiltInPixelShader
         {
             return pixelShader as T;
         }
@@ -210,6 +210,23 @@ namespace Engine.BuiltInEffects
 
             // Render the primitives.
             options.Draw(Graphics);
+        }
+        /// <inheritdoc/>
+        public virtual void Draw(IEngineVertexBuffer buffer, Topology topology, int drawCount)
+        {
+            if (buffer == null)
+            {
+                return;
+            }
+
+            // Set the vertex and pixel shaders that will be used to render this mesh.
+            PrepareShaders();
+
+            // Set the vertex input layout.
+            buffer.SetInputAssembler(Topology.PointList);
+
+            // Render the primitives.
+            buffer.Draw(drawCount);
         }
     }
 }

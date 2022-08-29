@@ -1,10 +1,11 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
 using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -26,7 +27,7 @@ namespace Engine
         /// <summary>
         /// Vertex buffer
         /// </summary>
-        private EngineBuffer<VertexCpuParticle> buffer;
+        private EngineVertexBuffer<VertexCpuParticle> buffer;
         /// <summary>
         /// Current particle index to update data
         /// </summary>
@@ -40,9 +41,9 @@ namespace Engine
         /// </summary>
         private ParticleSystemParams parameters;
         /// <summary>
-        /// Effect
+        /// Drawer
         /// </summary>
-        private EffectDefaultCpuParticles drawEffect;
+        private BasicCpuParticles drawer;
 
         /// <summary>
         /// Game instance
@@ -110,10 +111,11 @@ namespace Engine
             var vParticles = new VertexCpuParticle[maxConcurrentParticles];
             float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
-            var effect = DrawerPool.GetEffect<EffectDefaultCpuParticles>();
-            var pBuffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, true);
-            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.RotationDraw", effect.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
-            pBuffer.AddInputLayout(game.Graphics.CreateInputLayout("EffectDefaultCPUParticles.NonRotationDraw", effect.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
+            var pBuffer = new EngineVertexBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, true);
+
+            var drawer = BuiltInShaders.GetDrawer<BasicCpuParticles>();
+            var signature = drawer.GetVertexShader().Shader.GetShaderBytecode();
+            pBuffer.CreateInputLayout(nameof(BasicCpuParticlesPs), signature, BufferSlot);
 
             return new ParticleSystemCpu
             {
@@ -121,7 +123,7 @@ namespace Engine
                 Name = name,
 
                 parameters = pParameters,
-                drawEffect = effect,
+                drawer = drawer,
 
                 Texture = texture,
                 TextureCount = textureCount,
@@ -208,10 +210,6 @@ namespace Engine
                 return;
             }
 
-            var rot = parameters.RotateSpeed != Vector2.Zero;
-
-            var technique = rot ? drawEffect.RotationDraw : drawEffect.NonRotationDraw;
-
             var mode = context.DrawerMode;
             if (!mode.HasFlag(DrawerModes.ShadowMap))
             {
@@ -220,14 +218,10 @@ namespace Engine
             }
 
             var graphics = Game.Graphics;
-
-            graphics.IASetVertexBuffers(BufferSlot, buffer.VertexBufferBinding);
-            graphics.IAInputLayout = rot ? buffer.InputLayouts[0] : buffer.InputLayouts[1];
-            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
-
             graphics.SetDepthStencilRDZEnabled();
             graphics.SetBlendState(parameters.BlendMode);
 
+            var useRotation = parameters.RotateSpeed != Vector2.Zero;
             var state = new EffectParticleState
             {
                 TotalTime = Emitter.TotalTime,
@@ -239,22 +233,13 @@ namespace Engine
                 EndSize = parameters.EndSize,
                 MinColor = parameters.MinColor,
                 MaxColor = parameters.MaxColor,
+                UseRotation = useRotation,
                 RotateSpeed = parameters.RotateSpeed,
             };
 
-            drawEffect.UpdatePerFrame(
-                context.ViewProjection,
-                context.EyePosition,
-                state,
-                TextureCount,
-                Texture);
+            drawer.Update(context.EyePosition, state, TextureCount, Texture);
 
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.Draw(ActiveParticles, 0);
-            }
+            drawer.Draw(buffer, Topology.PointList, ActiveParticles);
         }
 
         /// <summary>
@@ -307,7 +292,7 @@ namespace Engine
             particles[currentParticleIndex].MaxAge = Emitter.TotalTime;
 
             Logger.WriteTrace(this, $"{Name} - AddParticle WriteDiscardBuffer");
-            Game.Graphics.WriteDiscardBuffer(buffer.VertexBuffer, particles);
+            buffer.Write(particles);
 
             currentParticleIndex = nextFreeParticle;
         }

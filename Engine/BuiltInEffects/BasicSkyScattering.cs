@@ -10,7 +10,7 @@ namespace Engine.BuiltInEffects
     /// <summary>
     /// Sky scattering drawer
     /// </summary>
-    public class BasicSkyScattering : BuiltInDrawer
+    public class BasicSkyScattering : BuiltInDrawer, IDisposable
     {
         #region
 

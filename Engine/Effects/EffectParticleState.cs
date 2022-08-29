@@ -68,6 +68,10 @@ namespace Engine.Effects
         /// </summary>
         public Color4 MaxColor { get; set; }
         /// <summary>
+        /// Use texture rotation
+        /// </summary>
+        public bool UseRotation { get; set; }
+        /// <summary>
         /// Rotation speed
         /// </summary>
         public Vector2 RotateSpeed { get; set; }

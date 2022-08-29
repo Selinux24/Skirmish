@@ -248,6 +248,7 @@
     <Compile Include="Common\EngineGeometryShader.cs" />
     <Compile Include="Common\EngineRasterizerStateDescription.cs" />
     <Compile Include="Common\EngineSamplerStateDescription.cs" />
+    <Compile Include="Common\IEngineVertexBuffer.cs" />
     <Compile Include="Common\IEnginePixelShader.cs" />
     <Compile Include="Common\IEngineGeometryShader.cs" />
     <Compile Include="Common\IEngineVertexShader.cs" />
@@ -310,7 +311,6 @@
     <Compile Include="BuiltIn\BasicPositionColorSkinnedVs.cs" />
     <Compile Include="BuiltIn\BasicPositionColorVsI.cs" />
     <Compile Include="BuiltIn\BasicPositionColorVs.cs" />
-    <Compile Include="Effects\EffectDefaultCPUParticles.cs" />
     <Compile Include="Effects\EffectShadowFoliageState.cs" />
     <Compile Include="BuiltInEffects\IBuiltInDrawer.cs" />
     <Compile Include="IInstacingData.cs" />

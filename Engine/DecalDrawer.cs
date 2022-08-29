@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Vertex buffer
         /// </summary>
-        private EngineBuffer<VertexDecal> buffer;
+        private EngineVertexBuffer<VertexDecal> buffer;
         /// <summary>
         /// Current decal index to update data
         /// </summary>
@@ -112,17 +111,17 @@ namespace Engine
             TextureCount = (uint)imgContent.Count;
 
             decals = new VertexDecal[MaxDecalCount];
-            buffer = new EngineBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, true);
+            buffer = new EngineVertexBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, true);
 
             drawEffect = DrawerPool.GetEffect<EffectDefaultDecals>();
 
             if (RotateDecals)
             {
-                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.Decal", drawEffect.Decal.GetSignature(), VertexDecal.Input(BufferSlot)));
+                buffer.CreateInputLayout($"{nameof(EffectDefaultDecals)}.Decal", drawEffect.Decal.GetSignature(), BufferSlot);
             }
             else
             {
-                buffer.AddInputLayout(Scene.Game.Graphics.CreateInputLayout("EffectDefaultDecals.DecalRotated", drawEffect.DecalRotated.GetSignature(), VertexDecal.Input(BufferSlot)));
+                buffer.CreateInputLayout($"{nameof(EffectDefaultDecals)}.DecalRotated", drawEffect.DecalRotated.GetSignature(), BufferSlot);
             }
         }
 
@@ -165,8 +164,6 @@ namespace Engine
                 return;
             }
 
-            var technique = RotateDecals ? drawEffect.DecalRotated : drawEffect.Decal;
-
             var mode = context.DrawerMode;
             if (!mode.HasFlag(DrawerModes.ShadowMap))
             {
@@ -174,21 +171,21 @@ namespace Engine
                 Counters.PrimitivesPerFrame += currentDecals;
             }
 
-            var graphics = Scene.Game.Graphics;
-
-            graphics.IASetVertexBuffers(BufferSlot, buffer.VertexBufferBinding);
-            graphics.IAInputLayout = buffer.InputLayouts[0];
-            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
-
-            graphics.SetDepthStencilRDZEnabled();
-            graphics.SetBlendState(BlendMode);
-
             drawEffect.UpdatePerFrame(
                 context.ViewProjection,
                 context.GameTime.TotalSeconds,
                 TintColor,
                 TextureCount,
                 Texture);
+
+            buffer.SetInputAssembler(Topology.PointList);
+
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetDepthStencilRDZEnabled();
+            graphics.SetBlendState(BlendMode);
+
+            var technique = RotateDecals ? drawEffect.DecalRotated : drawEffect.Decal;
 
             for (int p = 0; p < technique.PassCount; p++)
             {
@@ -245,7 +242,7 @@ namespace Engine
             decals[currentDecalIndex].MaxAge = maxAge;
 
             Logger.WriteTrace(this, $"{Name} - {nameof(AddDecal)} WriteDiscardBuffer");
-            Scene.Game.Graphics.WriteDiscardBuffer(buffer.VertexBuffer, decals);
+            buffer.Write(decals);
 
             currentDecalIndex = nextFreeDecal;
         }
