@@ -288,6 +288,7 @@ namespace Engine.BuiltIn
             var vsGlobal = GetConstantBuffer<VSGlobal>();
             vsGlobal?.WriteData(VSGlobal.Build(materialPaletteWidth, animationPaletteWidth));
         }
+  
         /// <summary>
         /// Gets the built-in global vertex shader constant buffer
         /// </summary>
@@ -329,6 +330,9 @@ namespace Engine.BuiltIn
                 return;
             }
 
+            var vsPerFrame = GetConstantBuffer<VSPerFrame>();
+            vsPerFrame?.WriteData(VSPerFrame.Build(context));
+
             var psPerFrame = GetConstantBuffer<PSPerFrame>();
             psPerFrame?.WriteData(PSPerFrame.Build(context));
 
@@ -344,16 +348,6 @@ namespace Engine.BuiltIn
             psPerFrameLitShadowMapDir = context.ShadowMapDirectional?.Texture;
             psPerFrameLitShadowMapSpot = context.ShadowMapSpot?.Texture;
             psPerFrameLitShadowMapPoint = context.ShadowMapPoint?.Texture;
-        }
-        /// <summary>
-        /// Updates per-object data
-        /// </summary>
-        /// <param name="localTransform">Local transform</param>
-        /// <param name="viewProjection">View projection matrix</param>
-        public static void UpdatePerObject(Matrix localTransform, Matrix viewProjection)
-        {
-            var vsPerFrame = GetConstantBuffer<VSPerFrame>();
-            vsPerFrame?.WriteData(VSPerFrame.Build(localTransform, viewProjection));
         }
 
         /// <summary>

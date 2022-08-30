@@ -353,10 +353,10 @@
     <PixelShader Include="ShaderDefaultBasic\Cubemap.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ShaderDefaultBasic\Texture.vs.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\Skymap.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <PixelShader Include="ShaderDefaultBasic\Texture.ps.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\Skymap.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <PixelShader Include="ShaderDefaultBasic\SkyScattering.ps.hlsl" />
@@ -388,6 +388,12 @@
     <GeometryShader Include="ShaderDefaultBasic\Decal.gs.hlsl" />
     <PixelShader Include="ShaderDefaultBasic\Font.ps.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\Font.vs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\GPUParticles.draw.ps.hlsl" />
+    <EffectShader Include="ShaderDefaultBasic\GPUParticles.streamout.vs.hlsl" />
+    <GeometryShader Include="ShaderDefaultBasic\GPUParticles.streamout.gs.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\GPUParticles.draw.vs.hlsl" />
+    <GeometryShader Include="ShaderDefaultBasic\GPUParticles.draw.gs.hlsl" />
+    <Content Include="Lib\IncBuiltIn.hlsl" />
     <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
     <PixelShader Include="ShaderShadowCascade\ShadowCascade.ps.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />

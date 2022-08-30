@@ -264,6 +264,7 @@ namespace Engine.Common
             {
                 Name = "Primary",
                 DrawerMode = DrawerModes.Forward,
+                Form = scene.Game.Form,
             };
 
             DrawShadowsContext = new DrawContextShadows()

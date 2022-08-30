@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncMaterials.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
@@ -5,28 +6,30 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbVSGlobals : register(b0)
+cbuffer cbGlobals : register(b0)
 {
-	uint gMaterialPaletteWidth;
-	uint gAnimationPaletteWidth;
-	uint2 PAD01;
+	Globals gGlobals;
 };
 
-cbuffer cbVSPerFrame : register(b1)
+cbuffer cbPerFrame : register(b1)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+	PerFrame gPerFrame;
 };
 
-cbuffer cbVSPerInstance : register(b2)
+cbuffer cbPerMesh : register(b2)
 {
-	float4 gTintColor;
-	uint gMaterialIndex;
-	uint3 PAD21;
+	float4x4 gLocal;
 	uint gAnimationOffset;
 	uint gAnimationOffset2;
 	float gAnimationInterpolation;
-	float PAD22;
+	float PAD21;
+};
+
+cbuffer cbPerMaterial : register(b3)
+{
+	float4 gTintColor;
+	uint gMaterialIndex;
+	uint3 PAD31;
 };
 
 Texture2D gMaterialPalette : register(t0);
@@ -39,7 +42,9 @@ PSVertexPositionColor2 main(VSVertexPositionColorSkinned input)
 {
 	PSVertexPositionColor2 output = (PSVertexPositionColor2)0;
 
-	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gMaterialPaletteWidth);
+	float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
+
+	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	ComputePositionWeights(
@@ -47,14 +52,14 @@ PSVertexPositionColor2 main(VSVertexPositionColorSkinned input)
 		gAnimationOffset,
 		gAnimationOffset2,
 		gAnimationInterpolation,
-		gAnimationPaletteWidth,
+		gGlobals.AnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
 		positionL);
 
-	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
-	output.positionWorld = mul(positionL, gWorld).xyz;
+	output.positionHomogeneous = mul(positionL, wvp);
+	output.positionWorld = mul(positionL, gLocal).xyz;
 	output.color = input.color * gTintColor * material.Diffuse;
 
 	return output;

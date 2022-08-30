@@ -17,21 +17,19 @@ namespace Engine.BuiltInEffects
         /// <summary>
         /// Per font data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 48)]
+        [StructLayout(LayoutKind.Explicit, Size = 32)]
         struct PerFont : IBufferData
         {
-            public static PerFont Build(float alpha, bool useColor, bool useRectangle, bool fineSampling, Rectangle rectangle, Vector2 resolution)
+            public static PerFont Build(BasicFontState state)
             {
                 return new PerFont
                 {
-                    Alpha = alpha,
-                    UseColor = useColor,
-                    UseRectangle = useRectangle,
-                    FineSampling = fineSampling,
+                    Alpha = state.Alpha,
+                    UseColor = state.UseColor,
+                    UseRectangle = state.UseRectangle,
+                    FineSampling = state.FineSampling,
 
-                    Rectangle = new Vector4(rectangle.X, rectangle.Y, rectangle.Width, rectangle.Height),
-
-                    Resolution = resolution,
+                    Rectangle = new Vector4(state.ClippingRectangle.X, state.ClippingRectangle.Y, state.ClippingRectangle.Width, state.ClippingRectangle.Height),
                 };
             }
 
@@ -62,16 +60,36 @@ namespace Engine.BuiltInEffects
             [FieldOffset(16)]
             public Vector4 Rectangle;
 
-            /// <summary>
-            /// Screen resolution
-            /// </summary>
-            [FieldOffset(32)]
-            public Vector2 Resolution;
-
             /// <inheritdoc/>
             public int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerFont));
+            }
+        }
+        /// <summary>
+        /// Per font data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit, Size = 64)]
+        struct PerText : IBufferData
+        {
+            public static PerText Build(Matrix local)
+            {
+                return new PerText
+                {
+                    Local = local,
+                };
+            }
+
+            /// <summary>
+            /// Local matrix
+            /// </summary>
+            [FieldOffset(0)]
+            public Matrix Local;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PerText));
             }
         }
 
@@ -81,6 +99,10 @@ namespace Engine.BuiltInEffects
         /// Per font constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<PerFont> cbPerFont;
+        /// <summary>
+        /// Per text constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerText> cbPerText;
 
         /// <summary>
         /// Constructor
@@ -92,6 +114,7 @@ namespace Engine.BuiltInEffects
             SetPixelShader<FontsPs>();
 
             cbPerFont = new EngineConstantBuffer<PerFont>(graphics, nameof(BasicFonts) + "." + nameof(PerFont));
+            cbPerText = new EngineConstantBuffer<PerText>(graphics, nameof(BasicFonts) + "." + nameof(PerText));
         }
         /// <summary>
         /// Destructor
@@ -116,19 +139,32 @@ namespace Engine.BuiltInEffects
             if (disposing)
             {
                 cbPerFont?.Dispose();
+                cbPerText?.Dispose();
             }
         }
 
         /// <summary>
         /// Updates the font drawer state
         /// </summary>
-        public void Update(float alpha, bool useColor, bool useRectangle, bool fineSampling, Rectangle rectangle, Vector2 resolution, EngineShaderResourceView texture)
+        /// <param name="state">Drawer state</param>
+        public void UpdateFont(BasicFontState state)
         {
-            cbPerFont.WriteData(PerFont.Build(alpha, useColor, useRectangle, fineSampling, rectangle, resolution));
+            cbPerFont.WriteData(PerFont.Build(state));
 
             var pixelShader = GetPixelShader<FontsPs>();
             pixelShader?.SetPerFontConstantBuffer(cbPerFont);
-            pixelShader?.SetTextureArray(texture);
+            pixelShader?.SetTextureArray(state.FontTexture);
+        }
+        /// <summary>
+        /// Updates the font drawer state
+        /// </summary>
+        /// <param name="state">Drawer state</param>
+        public void UpdateText(Matrix local)
+        {
+            cbPerText.WriteData(PerText.Build(local));
+
+            var vertexShader = GetVertexShader<FontsVs>();
+            vertexShader?.SetPerTextConstantBuffer(cbPerText);
         }
     }
 }

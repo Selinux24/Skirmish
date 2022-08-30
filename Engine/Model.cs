@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.Animation;
-    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
 
     /// <summary>
@@ -286,7 +286,6 @@ namespace Engine
             int count = 0;
 
             var localTransform = GetTransformByName(meshName);
-            BuiltInShaders.UpdatePerObject(localTransform, context.ViewProjection);
 
             var animationInfo = new AnimationDrawInfo
             {
@@ -312,12 +311,23 @@ namespace Engine
                     continue;
                 }
 
-                var materialInfo = new MaterialDrawInfo
+                var meshState = new BuiltInDrawerMeshState
                 {
-                    Material = material,
+                    Local = localTransform,
+                    Animation = animationInfo,
                 };
+                drawer.UpdateMesh(meshState);
 
-                drawer.Update(materialInfo, Color4.White, TextureIndex, animationInfo);
+                var materialState = new BuiltInDrawerMaterialState
+                {
+                    Material = new MaterialDrawInfo
+                    {
+                        Material = material,
+                    },
+                    TintColor = Color4.White,
+                    TextureIndex = TextureIndex,
+                };
+                drawer.UpdateMaterial(materialState);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {
@@ -370,7 +380,6 @@ namespace Engine
             int count = 0;
 
             var localTransform = GetTransformByName(meshName);
-            BuiltInShaders.UpdatePerObject(localTransform, context.ViewProjection);
 
             var animationInfo = new AnimationDrawInfo
             {
@@ -403,13 +412,24 @@ namespace Engine
                     continue;
                 }
 
-                var materialInfo = new MaterialDrawInfo
+                var meshState = new BuiltInDrawerMeshState
                 {
-                    Material = material,
-                    UseAnisotropic = UseAnisotropicFiltering,
+                    Local = localTransform,
+                    Animation = animationInfo,
                 };
+                drawer.UpdateMesh(meshState);
 
-                drawer.Update(materialInfo, TintColor, TextureIndex, animationInfo);
+                var materialState = new BuiltInDrawerMaterialState
+                {
+                    Material = new MaterialDrawInfo
+                    {
+                        Material = material,
+                        UseAnisotropic = UseAnisotropicFiltering,
+                    },
+                    TintColor = TintColor,
+                    TextureIndex = TextureIndex,
+                };
+                drawer.UpdateMaterial(materialState);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {

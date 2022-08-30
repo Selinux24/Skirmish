@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltInEffects
@@ -150,7 +149,12 @@ namespace Engine.BuiltInEffects
         }
 
         /// <inheritdoc/>
-        public virtual void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
+        public virtual void UpdateMesh(BuiltInDrawerMeshState state)
+        {
+
+        }
+        /// <inheritdoc/>
+        public virtual void UpdateMaterial(BuiltInDrawerMaterialState state)
         {
 
         }

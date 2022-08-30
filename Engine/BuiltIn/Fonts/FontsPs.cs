@@ -107,7 +107,13 @@ namespace Engine.BuiltIn.Fonts
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerFont);
+            var cb = new[]
+            {
+                BuiltInShaders.GetVSPerFrame(),
+                cbPerFont,
+            };
+
+            Graphics.SetPixelShaderConstantBuffers(0, cb);
 
             Graphics.SetPixelShaderResourceView(0, texture);
 

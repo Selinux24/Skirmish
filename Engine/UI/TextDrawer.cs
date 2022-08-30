@@ -439,14 +439,16 @@ namespace Engine.UI
 
             bufferManager.SetIndexBuffer(indexBuffer);
 
-            fontDrawer.Update(
-                Alpha * AlphaMultplier,
-                UseTextureColor,
-                ClippingRectangle.HasValue,
-                FineSampling,
-                ClippingRectangle ?? Rectangle.Empty,
-                Game.Form.RenderRectangle.BottomRight,
-                fontMap.Texture);
+            var state = new BasicFontState
+            {
+                Alpha = Alpha * AlphaMultplier,
+                UseColor = UseTextureColor,
+                UseRectangle = ClippingRectangle.HasValue,
+                FineSampling = FineSampling,
+                FontTexture = fontMap.Texture,
+                ClippingRectangle = ClippingRectangle ?? Rectangle.Empty,
+            };
+            fontDrawer.UpdateFont(state);
 
             int count = indexDrawCount;
 
@@ -456,7 +458,8 @@ namespace Engine.UI
                 int offset = indexDrawCount / 2;
                 count = indexDrawCount / 2;
 
-                BuiltInShaders.UpdatePerObject(ShadowManipulator.LocalTransform, viewProjection);
+                fontDrawer.UpdateText(ShadowManipulator.LocalTransform);
+
                 var shOptions = new DrawOptions
                 {
                     Indexed = true,
@@ -469,7 +472,8 @@ namespace Engine.UI
                 fontDrawer.Draw(bufferManager, shOptions);
             }
 
-            BuiltInShaders.UpdatePerObject(Manipulator.LocalTransform, viewProjection);
+            fontDrawer.UpdateText(Manipulator.LocalTransform);
+
             var opOptions = new DrawOptions
             {
                 Indexed = true,

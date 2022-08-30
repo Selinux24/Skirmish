@@ -1,5 +1,4 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.BuiltInEffects
 {
     using Engine.BuiltIn.DefaultShadow;
@@ -22,7 +21,7 @@ namespace Engine.BuiltInEffects
         }
 
         /// <inheritdoc/>
-        public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
+        public void Update(AnimationDrawInfo animation)
         {
             var vertexShader = GetVertexShader<ShadowSkinnedPositionColorVs>();
             vertexShader?.WriteCBPerInstance(animation);

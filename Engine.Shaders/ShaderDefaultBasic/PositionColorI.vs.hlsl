@@ -1,26 +1,25 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncMaterials.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbVSGlobals : register(b0)
+cbuffer cbGlobals : register(b0)
 {
-	uint gMaterialPaletteWidth;
-	uint3 PAD01;
+	Globals gGlobals;
 };
 
-cbuffer cbVSPerFrame : register(b1)
+cbuffer cbPerFrame : register(b1)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+	PerFrame gPerFrame;
 };
 
-cbuffer cbVSPerObject : register(b2)
+cbuffer cbPerMaterial : register(b2)
 {
-    float4 gTintColor;
-    uint gMaterialIndex;
-    uint3 PAD21;
+	float4 gTintColor;
+	uint gMaterialIndex;
+	uint3 PAD21;
 };
 
 Texture2D gMaterialPalette : register(t0);
@@ -35,10 +34,10 @@ PSVertexPositionColor2 main(VSVertexPositionColorI input)
 	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
     uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
 
-	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.positionWorld = mul(instancePosition, gWorld).xyz;
+	output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
+	output.positionWorld = instancePosition.xyz;
     output.color = input.color * input.tintColor * gTintColor * material.Diffuse;
 
 	return output;

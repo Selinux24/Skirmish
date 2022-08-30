@@ -73,6 +73,16 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] IncBuiltIn {
+            get {
+                object obj = ResourceManager.GetObject("IncBuiltIn", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] IncGBufferLights {
             get {
                 object obj = ResourceManager.GetObject("IncGBufferLights", resourceCulture);

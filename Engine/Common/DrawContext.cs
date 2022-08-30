@@ -17,6 +17,10 @@ namespace Engine.Common
         public DrawerModes DrawerMode { get; set; } = DrawerModes.Forward;
 
         /// <summary>
+        /// Engine form
+        /// </summary>
+        public EngineForm Form { get; set; }
+        /// <summary>
         /// Game time
         /// </summary>
         public GameTime GameTime { get; set; }

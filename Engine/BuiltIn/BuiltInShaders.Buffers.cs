@@ -53,33 +53,52 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Per-frame data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 128)]
+        [StructLayout(LayoutKind.Explicit, Size = 96)]
         struct VSPerFrame : IBufferData
         {
             /// <summary>
             /// Builds the main vertex shader Per-Frame buffer
             /// </summary>
-            /// <param name="localTransform">Local transform</param>
-            /// <param name="viewProjection">View-projection transform</param>
-            public static VSPerFrame Build(Matrix localTransform, Matrix viewProjection)
+            /// <param name="context">Draw context</param>
+            public static VSPerFrame Build(DrawContext context)
             {
                 return new VSPerFrame
                 {
-                    World = Matrix.Transpose(localTransform),
-                    WorldViewProjection = Matrix.Transpose(localTransform * viewProjection),
+                    ViewProjection = Matrix.Transpose(context.ViewProjection),
+                    EyePosition = context.EyePosition,
+                    ScreenResolution = context.Form.RenderRectangle.BottomRight,
+                    TotalTime = context.GameTime.TotalSeconds,
+                    ElapsedTime = context.GameTime.ElapsedSeconds,
                 };
             }
 
             /// <summary>
-            /// World matrix
-            /// </summary>
-            [FieldOffset(0)]
-            public Matrix World;
-            /// <summary>
             /// World view projection matrix
             /// </summary>
+            [FieldOffset(0)]
+            public Matrix ViewProjection;
+
+            /// <summary>
+            /// Eye position
+            /// </summary>
             [FieldOffset(64)]
-            public Matrix WorldViewProjection;
+            public Vector3 EyePosition;
+
+            /// <summary>
+            /// Screen resolution
+            /// </summary>
+            [FieldOffset(80)]
+            public Vector2 ScreenResolution;
+            /// <summary>
+            /// Total time
+            /// </summary>
+            [FieldOffset(88)]
+            public float TotalTime;
+            /// <summary>
+            /// Elapsed time
+            /// </summary>
+            [FieldOffset(92)]
+            public float ElapsedTime;
 
             /// <inheritdoc/>
             public int GetStride()

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Position color pixel shader
     /// </summary>
-    public class BasicPositionColorPs : IBuiltInPixelShader
+    public class PositionColorPs : IBuiltInPixelShader
     {
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }
@@ -23,16 +23,16 @@ namespace Engine.BuiltIn.Default
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public BasicPositionColorPs(Graphics graphics)
+        public PositionColorPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(BasicPositionColorPs), "main", ShaderDefaultBasicResources.PositionColor_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(PositionColorPs), "main", ShaderDefaultBasicResources.PositionColor_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~BasicPositionColorPs()
+        ~PositionColorPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

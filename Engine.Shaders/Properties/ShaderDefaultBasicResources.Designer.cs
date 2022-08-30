@@ -163,6 +163,56 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] GPUParticles_draw_gs {
+            get {
+                object obj = ResourceManager.GetObject("GPUParticles_draw_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] GPUParticles_draw_ps {
+            get {
+                object obj = ResourceManager.GetObject("GPUParticles_draw_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] GPUParticles_draw_vs {
+            get {
+                object obj = ResourceManager.GetObject("GPUParticles_draw_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] GPUParticles_streamout_gs {
+            get {
+                object obj = ResourceManager.GetObject("GPUParticles_streamout_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] GPUParticles_streamout_vs {
+            get {
+                object obj = ResourceManager.GetObject("GPUParticles_streamout_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] PositionColor_ps {
             get {
                 object obj = ResourceManager.GetObject("PositionColor_ps", resourceCulture);
@@ -413,6 +463,26 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Skymap_ps {
+            get {
+                object obj = ResourceManager.GetObject("Skymap_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Skymap_vs {
+            get {
+                object obj = ResourceManager.GetObject("Skymap_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] SkyScattering_ps {
             get {
                 object obj = ResourceManager.GetObject("SkyScattering_ps", resourceCulture);
@@ -426,26 +496,6 @@ namespace Engine.Shaders.Properties {
         public static byte[] SkyScattering_vs {
             get {
                 object obj = ResourceManager.GetObject("SkyScattering_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Texture_ps {
-            get {
-                object obj = ResourceManager.GetObject("Texture_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Texture_vs {
-            get {
-                object obj = ResourceManager.GetObject("Texture_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }

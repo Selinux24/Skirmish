@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Engine.BuiltInEffects
 {
@@ -11,13 +10,16 @@ namespace Engine.BuiltInEffects
     public interface IBuiltInDrawer
     {
         /// <summary>
-        /// Update object data
+        /// Updates drawer mesh state
         /// </summary>
-        /// <param name="material">Material information</param>
-        /// <param name="tintColor">Tint color</param>
-        /// <param name="textureIndex">Texture index</param>
-        /// <param name="animation">Animation information</param>
-        void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation);
+        /// <param name="state">Drawer state</param>
+        void UpdateMesh(BuiltInDrawerMeshState state);
+        /// <summary>
+        /// Updates drawer material state
+        /// </summary>
+        /// <param name="state">Drawer state</param>
+        void UpdateMaterial(BuiltInDrawerMaterialState state);
+
         /// <summary>
         /// Draws the specified meshes
         /// </summary>

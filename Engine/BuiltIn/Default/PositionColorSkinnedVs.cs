@@ -1,20 +1,24 @@
 ﻿using Engine.Shaders.Properties;
 using System;
 
-namespace Engine.BuiltIn.Fonts
+namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
     using Engine.Helpers;
 
     /// <summary>
-    /// Fonts vertex shader
+    /// Skinned position color vertex shader
     /// </summary>
-    public class FontsVs : IBuiltInVertexShader
+    public class PositionColorSkinnedVs : IBuiltInVertexShader
     {
         /// <summary>
-        /// Per text constant buffer
+        /// Per mesh constant buffer
         /// </summary>
-        private IEngineConstantBuffer cbPerText;
+        private IEngineConstantBuffer cbPerMesh;
+        /// <summary>
+        /// Per material constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMaterial;
 
         /// <summary>
         /// Graphics instance
@@ -28,16 +32,16 @@ namespace Engine.BuiltIn.Fonts
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public FontsVs(Graphics graphics)
+        public PositionColorSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(FontsVs), "main", ShaderDefaultBasicResources.Font_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionColorSkinnedVs), "main", ShaderDefaultBasicResources.PositionColorSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~FontsVs()
+        ~PositionColorSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -62,11 +66,20 @@ namespace Engine.BuiltIn.Fonts
         }
 
         /// <summary>
-        /// Sets per text constant buffer
+        /// Sets per mesh constant buffer
         /// </summary>
-        public void SetPerTextConstantBuffer(IEngineConstantBuffer constantBuffer)
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMeshConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
-            cbPerText = constantBuffer;
+            cbPerMesh = constantBuffer;
+        }
+        /// <summary>
+        /// Sets per material constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMaterialConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMaterial = constantBuffer;
         }
 
         /// <inheritdoc/>
@@ -74,11 +87,21 @@ namespace Engine.BuiltIn.Fonts
         {
             var cb = new[]
             {
+                BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
-                cbPerText,
+                cbPerMesh,
+                cbPerMaterial,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            var rv = new[]
+            {
+                BuiltInShaders.GetMaterialPalette(),
+                BuiltInShaders.GetAnimationPalette(),
+            };
+
+            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

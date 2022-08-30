@@ -1,9 +1,7 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.BuiltInEffects
 {
     using Engine.BuiltIn.DefaultShadow;
-    using Engine.Common;
 
     /// <summary>
     /// Shadow position-normal-texture-tangent drawer
@@ -20,7 +18,7 @@ namespace Engine.BuiltInEffects
         }
 
         /// <inheritdoc/>
-        public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
+        public void Update(uint textureIndex)
         {
             var vertexShader = GetVertexShader<ShadowPositionNormalTextureTangentVs>();
             vertexShader?.WriteCBPerInstance(textureIndex);

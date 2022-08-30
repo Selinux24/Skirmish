@@ -10,39 +10,12 @@ namespace Engine.BuiltIn.Cubemap
     /// <summary>
     /// Cubemap pixel shader
     /// </summary>
-    public class TexturePs : IBuiltInPixelShader
+    public class SkymapPs : IBuiltInPixelShader
     {
         /// <summary>
-        /// Per frame data structure
+        /// Per cube constant buffer
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 16)]
-        struct PerFrame : IBufferData
-        {
-            public static PerFrame Build(float textureIndex)
-            {
-                return new PerFrame
-                {
-                    TextureIndex = textureIndex,
-                };
-            }
-
-            /// <summary>
-            /// Texture index
-            /// </summary>
-            [FieldOffset(0)]
-            public float TextureIndex;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PerFrame));
-            }
-        }
-
-        /// <summary>
-        /// Per frame constant buffer
-        /// </summary>
-        private readonly EngineConstantBuffer<PerFrame> cbPerFrame;
+        private IEngineConstantBuffer cbPerCube;
         /// <summary>
         /// Texture resource view
         /// </summary>
@@ -64,18 +37,16 @@ namespace Engine.BuiltIn.Cubemap
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public TexturePs(Graphics graphics)
+        public SkymapPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(TexturePs), "main", ShaderDefaultBasicResources.Texture_ps, HelperShaders.PSProfile);
-
-            cbPerFrame = new EngineConstantBuffer<PerFrame>(graphics, nameof(TexturePs) + "." + nameof(PerFrame));
+            Shader = graphics.CompilePixelShader(nameof(SkymapPs), "main", ShaderDefaultBasicResources.Skymap_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~TexturePs()
+        ~SkymapPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -96,18 +67,15 @@ namespace Engine.BuiltIn.Cubemap
             {
                 Shader?.Dispose();
                 Shader = null;
-
-                cbPerFrame?.Dispose();
             }
         }
 
         /// <summary>
-        /// Writes per frame data
+        /// Sets per cube constant buffer
         /// </summary>
-        /// <param name="textureIndex">Texture index</param>
-        public void WriteCBPerFrame(uint textureIndex)
+        public void SetPerCubeConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
-            cbPerFrame.WriteData(PerFrame.Build(textureIndex));
+            cbPerCube = constantBuffer;
         }
         /// <summary>
         /// Sets the texture
@@ -129,7 +97,7 @@ namespace Engine.BuiltIn.Cubemap
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerFrame);
+            Graphics.SetPixelShaderConstantBuffer(0, cbPerCube);
 
             Graphics.SetPixelShaderResourceView(0, texture);
 

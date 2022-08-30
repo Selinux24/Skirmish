@@ -1,8 +1,6 @@
 ﻿
 namespace Engine
 {
-    using Engine.Common;
-
     /// <summary>
     /// Sky dom
     /// </summary>
@@ -21,15 +19,6 @@ namespace Engine
             : base(scene, id, name)
         {
 
-        }
-
-        /// <inheritdoc/>
-        public override void Update(UpdateContext context)
-        {
-            // Translates the box with the camera position
-            Manipulator.SetPosition(context.EyePosition);
-
-            base.Update(context);
         }
     }
 }

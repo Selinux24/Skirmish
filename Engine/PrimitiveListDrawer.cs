@@ -265,8 +265,21 @@ namespace Engine
                 return;
             }
 
-            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
-            drawer.Update(MaterialDrawInfo.Empty, Color.White, 0, AnimationDrawInfo.Empty);
+            var meshState = new BuiltInDrawerMeshState
+            {
+                Local = Matrix.Identity,
+                Animation = AnimationDrawInfo.Empty,
+            };
+            drawer.UpdateMesh(meshState);
+
+            var materialState = new BuiltInDrawerMaterialState
+            {
+                Material = MaterialDrawInfo.Empty,
+                TintColor = Color4.White,
+                TextureIndex = 0,
+            };
+            drawer.UpdateMaterial(materialState);
+
             drawer.Draw(BufferManager, new DrawOptions
             {
                 VertexBuffer = vertexBuffer,

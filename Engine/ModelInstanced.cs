@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.BuiltIn;
+    using Engine.BuiltInEffects;
     using Engine.Common;
 
     /// <summary>
@@ -349,8 +349,6 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
-            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
-
             int count = 0;
 
             var meshDict = drawingData.Meshes[meshName];
@@ -372,12 +370,16 @@ namespace Engine
                     continue;
                 }
 
-                var materialInfo = new MaterialDrawInfo
+                var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = material,
+                    Material = new MaterialDrawInfo
+                    {
+                        Material = material,
+                    },
+                    TintColor = Color4.White,
+                    TextureIndex = 0,
                 };
-
-                drawer.Update(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
+                drawer.UpdateMaterial(materialState);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {
@@ -423,8 +425,6 @@ namespace Engine
         {
             int count = 0;
             int instanceCount = 0;
-
-            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
 
             int maxCount = GetMaxCount();
 
@@ -486,8 +486,6 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
-            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
-
             int count = 0;
 
             var meshDict = drawingData.Meshes[meshName];
@@ -516,13 +514,17 @@ namespace Engine
                     continue;
                 }
 
-                var materialInfo = new MaterialDrawInfo
+                var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = material,
-                    UseAnisotropic = UseAnisotropicFiltering,
+                    Material = new MaterialDrawInfo
+                    {
+                        Material = material,
+                        UseAnisotropic = UseAnisotropicFiltering,
+                    },
+                    TintColor = Color4.White,
+                    TextureIndex = 0,
                 };
-
-                drawer.Update(materialInfo, Color.White, 0, AnimationDrawInfo.Empty);
+                drawer.UpdateMaterial(materialState);
 
                 if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
                 {

@@ -7,41 +7,32 @@ namespace Engine.BuiltIn.Cubemap
     using Engine.Helpers;
 
     /// <summary>
-    /// Cubemap pixel shader
+    /// Cubemap vertex shader
     /// </summary>
-    public class CubemapPs : IBuiltInPixelShader
+    public class SkymapVs : IBuiltInVertexShader
     {
-        /// <summary>
-        /// Cubemap resource view
-        /// </summary>
-        private EngineShaderResourceView cubemap;
-        /// <summary>
-        /// Cubemap sampler
-        /// </summary>
-        private EngineSamplerState sampler;
-
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
         /// <inheritdoc/>
-        public EnginePixelShader Shader { get; private set; }
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public CubemapPs(Graphics graphics)
+        public SkymapVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(CubemapPs), "main", ShaderDefaultBasicResources.Cubemap_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompileVertexShader(nameof(SkymapVs), "main", ShaderDefaultBasicResources.Skymap_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~CubemapPs()
+        ~SkymapVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -65,29 +56,15 @@ namespace Engine.BuiltIn.Cubemap
             }
         }
 
-        /// <summary>
-        /// Sets the cubemap
-        /// </summary>
-        /// <param name="cubemap">Cubemap</param>
-        public void SetCubemap(EngineShaderResourceView cubemap)
-        {
-            this.cubemap = cubemap;
-        }
-        /// <summary>
-        /// Sets the cubemap sampler state
-        /// </summary>
-        /// <param name="sampler">Sampler</param>
-        public void SetCubemapSampler(EngineSamplerState sampler)
-        {
-            this.sampler = sampler;
-        }
-
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            Graphics.SetPixelShaderResourceView(0, cubemap);
+            var cb = new[]
+            {
+                BuiltInShaders.GetVSPerFrame(),
+            };
 
-            Graphics.SetPixelShaderSampler(0, sampler);
+            Graphics.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

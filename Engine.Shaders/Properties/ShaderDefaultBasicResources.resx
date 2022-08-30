@@ -148,6 +148,21 @@
   <data name="Font_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\font.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="GPUParticles_draw_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\gpuparticles.draw.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="GPUParticles_draw_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\gpuparticles.draw.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="GPUParticles_draw_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\gpuparticles.draw.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="GPUParticles_streamout_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\gpuparticles.streamout.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="GPUParticles_streamout_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\gpuparticles.streamout.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="PositionColorI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\positioncolori.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -223,16 +238,16 @@
   <data name="PositionTexture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\positiontexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Skymap_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\skymap.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Skymap_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\skymap.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="SkyScattering_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\skyscattering.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="SkyScattering_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\skyscattering.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Texture_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shaderdefaultbasic\texture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Texture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shaderdefaultbasic\texture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

@@ -7,7 +7,6 @@ namespace Engine
     using Engine.BuiltIn;
     using Engine.BuiltInEffects;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Scattered sky
@@ -331,10 +330,6 @@ namespace Engine
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
             var drawer = BuiltInShaders.GetDrawer<BasicSkyScattering>();
-
-            BuiltInShaders.UpdatePerObject(
-                Matrix.Translation(context.EyePosition),
-                context.ViewProjection);
 
             drawer.Update(
                 keyLight.Direction,

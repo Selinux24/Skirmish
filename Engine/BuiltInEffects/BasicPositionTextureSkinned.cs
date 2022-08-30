@@ -28,7 +28,7 @@ namespace Engine.BuiltInEffects
         }
 
         /// <inheritdoc/>
-        public override void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
+        public void Update(MaterialDrawInfo material, Color4 tintColor, uint textureIndex, AnimationDrawInfo animation)
         {
             var vertexShader = GetVertexShader<BasicPositionTextureSkinnedVs>();
             vertexShader?.WriteCBPerInstance(material, tintColor, textureIndex, animation);

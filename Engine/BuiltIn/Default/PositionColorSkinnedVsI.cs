@@ -1,16 +1,21 @@
 ﻿using Engine.Shaders.Properties;
 using System;
 
-namespace Engine.BuiltIn.Cubemap
+namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
     using Engine.Helpers;
 
     /// <summary>
-    /// Cubemap vertex shader
+    /// Skinned position color instanced vertex shader
     /// </summary>
-    public class TextureVs : IBuiltInVertexShader
+    public class PositionColorSkinnedVsI : IBuiltInVertexShader
     {
+        /// <summary>
+        /// Per material constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMaterial;
+
         /// <summary>
         /// Graphics instance
         /// </summary>
@@ -23,16 +28,16 @@ namespace Engine.BuiltIn.Cubemap
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public TextureVs(Graphics graphics)
+        public PositionColorSkinnedVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(TextureVs), "main", ShaderDefaultBasicResources.Texture_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionColorSkinnedVsI), "main", ShaderDefaultBasicResources.PositionColorSkinnedI_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~TextureVs()
+        ~PositionColorSkinnedVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -56,15 +61,34 @@ namespace Engine.BuiltIn.Cubemap
             }
         }
 
+        /// <summary>
+        /// Sets per material constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMaterialConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMaterial = constantBuffer;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
             var cb = new[]
             {
+                BuiltInShaders.GetVSGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
+                cbPerMaterial,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            var rv = new[]
+            {
+                BuiltInShaders.GetMaterialPalette(),
+                BuiltInShaders.GetAnimationPalette(),
+            };
+
+            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

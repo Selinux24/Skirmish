@@ -1,13 +1,14 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncScattering.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncMatrix.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbPerFrame : register(b0)
 {
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
 cbuffer cbPerObject : register(b1)
@@ -36,7 +37,10 @@ PSVertexSkyScattering main(VSVertexPosition input)
 
     PSVertexSkyScattering output = (PSVertexSkyScattering) 0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
+    float4x4 translation = translateToMatrix(gPerFrame.EyePosition);
+    float4x4 wvp = mul(translation, gPerFrame.ViewProjection);
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), wvp);
     output.positionWorld = input.positionLocal;
     output.colorM = colorM;
     output.colorR = colorR;

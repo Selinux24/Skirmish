@@ -1,7 +1,13 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbPerFont : register(b0)
+cbuffer cbPerFrame : register(b0)
+{
+    PerFrame gPerFrame;
+};
+
+cbuffer cbPerFont : register(b1)
 {
     float gAlpha;
     bool gUseColor;
@@ -9,9 +15,6 @@ cbuffer cbPerFont : register(b0)
     bool gFineSampling;
     
     float4 gRectangle;
-    
-    float2 gResolution;
-    float2 PAD11;
 };
 
 Texture2D gTexture : register(t0);
@@ -61,7 +64,7 @@ float4 main(PSVertexFont input) : SV_TARGET
         return MapFont(litColor, input.color);
     }
 
-    float2 pixel = MapUVToScreenPixel(input.positionWorld.xy, gResolution);
+    float2 pixel = MapUVToScreenPixel(input.positionWorld.xy, gPerFrame.ScreenResolution);
     if (PixelIntoRectangle(pixel, gRectangle))
     {
         return MapFont(litColor, input.color);

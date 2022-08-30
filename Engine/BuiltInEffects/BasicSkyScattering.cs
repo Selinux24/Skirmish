@@ -12,7 +12,7 @@ namespace Engine.BuiltInEffects
     /// </summary>
     public class BasicSkyScattering : BuiltInDrawer, IDisposable
     {
-        #region
+        #region Buffers
 
         /// <summary>
         /// Per object data structure

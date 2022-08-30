@@ -1,24 +1,20 @@
 ﻿using Engine.Shaders.Properties;
 using System;
 
-namespace Engine.BuiltIn.Cubemap
+namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
     using Engine.Helpers;
 
     /// <summary>
-    /// Cubemap pixel shader
+    /// Position color instanced vertex shader
     /// </summary>
-    public class CubemapPs : IBuiltInPixelShader
+    public class PositionColorVsI : IBuiltInVertexShader
     {
         /// <summary>
-        /// Cubemap resource view
+        /// Per material constant buffer
         /// </summary>
-        private EngineShaderResourceView cubemap;
-        /// <summary>
-        /// Cubemap sampler
-        /// </summary>
-        private EngineSamplerState sampler;
+        private IEngineConstantBuffer cbPerMaterial;
 
         /// <summary>
         /// Graphics instance
@@ -26,22 +22,22 @@ namespace Engine.BuiltIn.Cubemap
         protected Graphics Graphics = null;
 
         /// <inheritdoc/>
-        public EnginePixelShader Shader { get; private set; }
+        public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public CubemapPs(Graphics graphics)
+        public PositionColorVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(CubemapPs), "main", ShaderDefaultBasicResources.Cubemap_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionColorVsI), "main", ShaderDefaultBasicResources.PositionColorI_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~CubemapPs()
+        ~PositionColorVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -66,28 +62,27 @@ namespace Engine.BuiltIn.Cubemap
         }
 
         /// <summary>
-        /// Sets the cubemap
+        /// Sets per material constant buffer
         /// </summary>
-        /// <param name="cubemap">Cubemap</param>
-        public void SetCubemap(EngineShaderResourceView cubemap)
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMaterialConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
-            this.cubemap = cubemap;
-        }
-        /// <summary>
-        /// Sets the cubemap sampler state
-        /// </summary>
-        /// <param name="sampler">Sampler</param>
-        public void SetCubemapSampler(EngineSamplerState sampler)
-        {
-            this.sampler = sampler;
+            cbPerMaterial = constantBuffer;
         }
 
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            Graphics.SetPixelShaderResourceView(0, cubemap);
+            var cb = new[]
+            {
+                BuiltInShaders.GetVSGlobal(),
+                BuiltInShaders.GetVSPerFrame(),
+                cbPerMaterial,
+            };
 
-            Graphics.SetPixelShaderSampler(0, sampler);
+            Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            Graphics.SetVertexShaderResourceView(0, BuiltInShaders.GetMaterialPalette());
         }
     }
 }

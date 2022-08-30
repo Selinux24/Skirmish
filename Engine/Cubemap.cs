@@ -25,10 +25,6 @@ namespace Engine
         /// </summary>
         private BufferDescriptor indexBuffer = null;
         /// <summary>
-        /// Local transform
-        /// </summary>
-        private Matrix local = Matrix.Identity;
-        /// <summary>
         /// Texture
         /// </summary>
         private EngineShaderResourceView texture = null;
@@ -37,10 +33,6 @@ namespace Engine
         /// </summary>
         private bool textureCubic;
 
-        /// <summary>
-        /// Manipulator
-        /// </summary>
-        public Manipulator3D Manipulator { get; set; }
         /// <summary>
         /// Returns true if the buffers were ready
         /// </summary>
@@ -100,7 +92,6 @@ namespace Engine
         {
             await base.InitializeAssets(description);
 
-            Manipulator = new Manipulator3D();
             textureCubic = Description.IsCubic;
 
             InitializeBuffers(Name, Description.Geometry, Description.ReverseFaces);
@@ -165,14 +156,6 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Update(UpdateContext context)
-        {
-            Manipulator.Update(context.GameTime);
-
-            local = Manipulator.LocalTransform;
-        }
-
-        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!Visible)
@@ -190,8 +173,6 @@ namespace Engine
             {
                 return;
             }
-
-            BuiltInShaders.UpdatePerObject(local, context.ViewProjection);
 
             if (textureCubic)
             {
@@ -230,7 +211,7 @@ namespace Engine
         /// </summary>
         private void DrawPlain()
         {
-            var drawer = BuiltInShaders.GetDrawer<BasicTexture>();
+            var drawer = BuiltInShaders.GetDrawer<BasicSkymap>();
             if (drawer == null)
             {
                 return;
@@ -263,8 +244,6 @@ namespace Engine
                 Layer = Layer,
                 OwnerId = Owner?.Name,
 
-                Local = local,
-                Manipulator = Manipulator.GetState(),
                 TextureIndex = TextureIndex,
             };
         }
@@ -287,8 +266,6 @@ namespace Engine
                 Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == cubemapState.OwnerId);
             }
 
-            local = cubemapState.Local;
-            Manipulator?.SetState(cubemapState.Manipulator);
             TextureIndex = cubemapState.TextureIndex;
         }
     }

@@ -261,7 +261,20 @@ namespace Engine
                     UseAnisotropic = true,
                 };
 
-                sceneryDrawer.Update(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
+                var meshState = new BuiltInDrawerMeshState
+                {
+                    Local = Matrix.Identity,
+                    Animation = AnimationDrawInfo.Empty,
+                };
+                sceneryDrawer.UpdateMesh(meshState);
+
+                var materialState = new BuiltInDrawerMaterialState
+                {
+                    Material = materialInfo,
+                    TintColor = Color4.White,
+                    TextureIndex = 0,
+                };
+                sceneryDrawer.UpdateMaterial(materialState);
 
                 bufferManager.SetIndexBuffer(mesh.IndexBuffer);
 
@@ -621,8 +634,6 @@ namespace Engine
             {
                 return;
             }
-
-            BuiltInShaders.UpdatePerObject(Matrix.Identity, context.ViewProjection);
 
             var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
             foreach (var nodeId in nodeIds)
