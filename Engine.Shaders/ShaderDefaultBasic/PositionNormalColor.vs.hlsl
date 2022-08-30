@@ -1,26 +1,30 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncMaterials.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbVSGlobals : register(b0)
+cbuffer cbGlobals : register(b0)
 {
-	uint gMaterialPaletteWidth;
-	uint3 PAD01;
+    Globals gGlobals;
 };
 
-cbuffer cbVSPerFrame : register(b1)
+cbuffer cbPerFrame : register(b1)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
-cbuffer cbVSPerInstance : register(b2)
+cbuffer cbPerMesh : register(b2)
 {
-	float4 gTintColor;
-	uint gMaterialIndex;
-	uint3 PAD21;
+    float4x4 gLocal;
+};
+
+cbuffer cbPerMaterial : register(b3)
+{
+    float4 gTintColor;
+    uint gMaterialIndex;
+    uint3 PAD31;
 };
 
 Texture2D gMaterialPalette : register(t0);
@@ -32,11 +36,13 @@ PSVertexPositionNormalColor2 main(VSVertexPositionNormalColor input)
 {
 	PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2)0;
 
-	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gMaterialPaletteWidth);
+    float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
 
-	output.positionHomogeneous = mul(float4(input.positionLocal, 1), gWorldViewProjection);
-	output.positionWorld = mul(float4(input.positionLocal, 1), gWorld).xyz;
-	output.normalWorld = normalize(mul(input.normalLocal, (float3x3) gWorld));
+    Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobals.MaterialPaletteWidth);
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), wvp);
+    output.positionWorld = mul(float4(input.positionLocal, 1), gLocal).xyz;
+    output.normalWorld = normalize(mul(input.normalLocal, (float3x3) gLocal));
 	output.color = input.color * gTintColor;
 	output.material = material;
 

@@ -11,11 +11,24 @@ struct Globals
 struct PerFrame
 {
     float4x4 ViewProjection;
+    
+    float4x4 OrthoViewProjection;
+    
     float3 EyePosition;
     float PAD0;
+    
     float2 ScreenResolution;
     float TotalTime;
     float ElapsedTime;
+
+    float3 LOD;
+    float ShadowIntensity;
+    
+    float4 FogColor;
+    
+    float FogStart;
+    float FogRange;
+    float2 PAD1;
 };
 
 #endif

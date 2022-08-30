@@ -15,7 +15,7 @@ PSVertexFont main(VSVertexFont input)
 {
     PSVertexFont output = (PSVertexFont) 0;
 
-    float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
+    float4x4 wvp = mul(gLocal, gPerFrame.OrthoViewProjection);
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), wvp);
     output.positionWorld = output.positionHomogeneous.xyz;

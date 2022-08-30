@@ -126,7 +126,7 @@ namespace Engine.BuiltIn.DefaultShadow
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSGlobal(),
+                BuiltInShaders.GetGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
                 cbPerInstance,
             };

@@ -448,13 +448,6 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Resize()
-        {
-            base.Resize();
-
-            textDrawer.Resize();
-        }
-        /// <inheritdoc/>
         public override void Invalidate()
         {
             GrowControl();

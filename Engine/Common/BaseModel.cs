@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Engine.Common
 {
     using Engine.BuiltIn;
-    using Engine.BuiltInEffects;
+    using Engine.BuiltIn.Default;
     using Engine.Content;
     using Engine.Effects;
 
@@ -315,25 +315,25 @@ namespace Engine.Common
             switch (vertexType)
             {
                 case VertexTypes.PositionColor:
-                    return BuiltInShaders.GetDrawer<BasicPositionColor>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionColor>();
                 case VertexTypes.PositionTexture:
-                    return BuiltInShaders.GetDrawer<BasicPositionTexture>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionTexture>();
                 case VertexTypes.PositionNormalColor:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalColor>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalColor>();
                 case VertexTypes.PositionNormalTexture:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTexture>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTexture>();
                 case VertexTypes.PositionNormalTextureTangent:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangent>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangent>();
                 case VertexTypes.PositionColorSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionColorSkinned>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionColorSkinned>();
                 case VertexTypes.PositionTextureSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionTextureSkinned>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionTextureSkinned>();
                 case VertexTypes.PositionNormalColorSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalColorSkinned>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalColorSkinned>();
                 case VertexTypes.PositionNormalTextureSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureSkinned>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureSkinned>();
                 case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangentSkinned>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentSkinned>();
                 default:
                     return null;
             }
@@ -347,25 +347,25 @@ namespace Engine.Common
             switch (vertexType)
             {
                 case VertexTypes.PositionColor:
-                    return BuiltInShaders.GetDrawer<BasicPositionColorInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionColorInstanced>();
                 case VertexTypes.PositionTexture:
-                    return BuiltInShaders.GetDrawer<BasicPositionTextureInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionTextureInstanced>();
                 case VertexTypes.PositionNormalColor:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalColorInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalColorInstanced>();
                 case VertexTypes.PositionNormalTexture:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureInstanced>();
                 case VertexTypes.PositionNormalTextureTangent:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangentInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentInstanced>();
                 case VertexTypes.PositionColorSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionColorSkinnedInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionColorSkinnedInstanced>();
                 case VertexTypes.PositionTextureSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionTextureSkinnedInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionTextureSkinnedInstanced>();
                 case VertexTypes.PositionNormalColorSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalColorSkinnedInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalColorSkinnedInstanced>();
                 case VertexTypes.PositionNormalTextureSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureSkinnedInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureSkinnedInstanced>();
                 case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return BuiltInShaders.GetDrawer<BasicPositionNormalTextureTangentSkinnedInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentSkinnedInstanced>();
                 default:
                     return null;
             }

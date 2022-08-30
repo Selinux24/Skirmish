@@ -1,11 +1,9 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltIn
 {
-    using Engine.BuiltInEffects;
     using Engine.Common;
 
     /// <summary>
@@ -285,16 +283,16 @@ namespace Engine.BuiltIn
             vsGlobalMaterialPalette = materialPalette;
             vsGlobalAnimationPalette = animationPalette;
 
-            var vsGlobal = GetConstantBuffer<VSGlobal>();
-            vsGlobal?.WriteData(VSGlobal.Build(materialPaletteWidth, animationPaletteWidth));
+            var vsGlobal = GetConstantBuffer<Global>();
+            vsGlobal?.WriteData(Global.Build(materialPaletteWidth, animationPaletteWidth));
         }
-  
+
         /// <summary>
-        /// Gets the built-in global vertex shader constant buffer
+        /// Gets the built-in global shaders constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetVSGlobal()
+        public static IEngineConstantBuffer GetGlobal()
         {
-            return GetConstantBuffer<VSGlobal>();
+            return GetConstantBuffer<Global>();
         }
         /// <summary>
         /// Gets the built-in global vertex shader material palette texture
@@ -316,7 +314,7 @@ namespace Engine.BuiltIn
         /// </summary>
         public static IEngineConstantBuffer GetVSPerFrame()
         {
-            return GetConstantBuffer<VSPerFrame>();
+            return GetConstantBuffer<PerFrame>();
         }
 
         /// <summary>
@@ -330,11 +328,11 @@ namespace Engine.BuiltIn
                 return;
             }
 
-            var vsPerFrame = GetConstantBuffer<VSPerFrame>();
-            vsPerFrame?.WriteData(VSPerFrame.Build(context));
+            var vsPerFrame = GetConstantBuffer<PerFrame>();
+            vsPerFrame?.WriteData(PerFrame.Build(context));
 
-            var psPerFrame = GetConstantBuffer<PSPerFrame>();
-            psPerFrame?.WriteData(PSPerFrame.Build(context));
+            var psPerFrame = GetConstantBuffer<PerFrame>();
+            psPerFrame?.WriteData(PerFrame.Build(context));
 
             var psHemispheric = GetConstantBuffer<PSHemispheric>();
             psHemispheric?.WriteData(PSHemispheric.Build(context));
@@ -351,12 +349,13 @@ namespace Engine.BuiltIn
         }
 
         /// <summary>
-        /// Gets the built-in per frame pixel shader constant buffer
+        /// Gets the built-in per frame shaders constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetPSPerFrame()
+        public static IEngineConstantBuffer GetPerFrame()
         {
-            return GetConstantBuffer<PSPerFrame>();
+            return GetConstantBuffer<PerFrame>();
         }
+
         /// <summary>
         /// Gets the built-in hemispheric light pixel shader constant buffer
         /// </summary>

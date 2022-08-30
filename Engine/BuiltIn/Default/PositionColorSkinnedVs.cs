@@ -87,7 +87,7 @@ namespace Engine.BuiltIn.Default
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSGlobal(),
+                BuiltInShaders.GetGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
                 cbPerMesh,
                 cbPerMaterial,

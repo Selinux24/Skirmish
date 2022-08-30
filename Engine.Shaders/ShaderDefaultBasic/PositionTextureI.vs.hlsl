@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncMaterials.hlsl"
 
@@ -6,17 +7,15 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbGlobals : register(b0)
 {
-	uint gMaterialPaletteWidth;
-	uint3 PAD01;
+    Globals gGlobals;
 };
 
-cbuffer cbVSPerFrame : register(b1)
+cbuffer cbPerFrame : register(b1)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
-cbuffer cbVSPerObject : register(b2)
+cbuffer cbPerMaterial : register(b2)
 {
     float4 gTintColor;
     uint gMaterialIndex;
@@ -35,10 +34,10 @@ PSVertexPositionTexture2 main(VSVertexPositionTextureI input)
 	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
     uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
 
-	output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-	output.positionWorld = mul(instancePosition, gWorld).xyz;
+    output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
+    output.positionWorld = instancePosition.xyz;
 	output.tex = input.tex;
     output.tintColor = input.tintColor * gTintColor * material.Diffuse;
 	output.textureIndex = input.textureIndex;

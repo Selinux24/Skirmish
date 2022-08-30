@@ -14,16 +14,16 @@ namespace Engine.BuiltIn
         /// Global data structure
         /// </summary>
         [StructLayout(LayoutKind.Explicit, Size = 16)]
-        struct VSGlobal : IBufferData
+        struct Global : IBufferData
         {
             /// <summary>
             /// Builds the main vertex shader global buffer
             /// </summary>
             /// <param name="materialPaletteWidth">Global material palette width</param>
             /// <param name="animationPaletteWidth">Global animation palette width</param>
-            public static VSGlobal Build(uint materialPaletteWidth, uint animationPaletteWidth)
+            public static Global Build(uint materialPaletteWidth, uint animationPaletteWidth)
             {
-                return new VSGlobal
+                return new Global
                 {
                     MaterialPaletteWidth = materialPaletteWidth,
                     AnimationPaletteWidth = animationPaletteWidth
@@ -44,7 +44,7 @@ namespace Engine.BuiltIn
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(VSGlobal));
+                return Marshal.SizeOf(typeof(Global));
             }
         }
 
@@ -53,131 +53,97 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Per-frame data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 96)]
-        struct VSPerFrame : IBufferData
+        [StructLayout(LayoutKind.Explicit, Size = 208)]
+        struct PerFrame : IBufferData
         {
             /// <summary>
             /// Builds the main vertex shader Per-Frame buffer
             /// </summary>
             /// <param name="context">Draw context</param>
-            public static VSPerFrame Build(DrawContext context)
+            public static PerFrame Build(DrawContext context)
             {
-                return new VSPerFrame
+                return new PerFrame
                 {
                     ViewProjection = Matrix.Transpose(context.ViewProjection),
+                    OrthoViewProjection = Matrix.Transpose(context.Form.GetOrthoProjectionMatrix()),
                     EyePosition = context.EyePosition,
                     ScreenResolution = context.Form.RenderRectangle.BottomRight,
                     TotalTime = context.GameTime.TotalSeconds,
                     ElapsedTime = context.GameTime.ElapsedSeconds,
+                    LevelOfDetail = context.LevelOfDetail,
+                    ShadowIntensity = context.Lights?.ShadowIntensity ?? 0,
+                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
+                    FogStart = context.Lights?.FogStart ?? 0,
+                    FogRange = context.Lights?.FogRange ?? 0,
                 };
             }
 
             /// <summary>
-            /// World view projection matrix
+            /// View projection matrix
             /// </summary>
             [FieldOffset(0)]
             public Matrix ViewProjection;
 
             /// <summary>
-            /// Eye position
+            /// Ortho view projection matrix
             /// </summary>
             [FieldOffset(64)]
+            public Matrix OrthoViewProjection;
+
+            /// <summary>
+            /// Eye position
+            /// </summary>
+            [FieldOffset(128)]
             public Vector3 EyePosition;
 
             /// <summary>
             /// Screen resolution
             /// </summary>
-            [FieldOffset(80)]
+            [FieldOffset(144)]
             public Vector2 ScreenResolution;
             /// <summary>
             /// Total time
             /// </summary>
-            [FieldOffset(88)]
+            [FieldOffset(152)]
             public float TotalTime;
             /// <summary>
             /// Elapsed time
             /// </summary>
-            [FieldOffset(92)]
+            [FieldOffset(156)]
             public float ElapsedTime;
 
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(VSPerFrame));
-            }
-        }
-
-
-
-        /// <summary>
-        /// Per frame data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 60)]
-        struct PSPerFrame : IBufferData
-        {
             /// <summary>
-            /// Builds the main pixel shader Per-Frame buffer
+            /// Level of detail values
             /// </summary>
-            /// <param name="context">Draw context</param>
-            public static PSPerFrame Build(DrawContext context)
-            {
-                if (context == null)
-                {
-                    return new PSPerFrame();
-                }
-
-                return new PSPerFrame
-                {
-                    EyePositionWorld = context.EyePosition,
-
-                    FogColor = context.Lights?.FogColor ?? Color.Transparent,
-
-                    FogStart = context.Lights?.FogStart ?? 0,
-                    FogRange = context.Lights?.FogRange ?? 0,
-
-                    LevelOfDetail = context.LevelOfDetail,
-                    ShadowIntensity = context.Lights?.ShadowIntensity ?? 0f,
-                };
-            }
-
+            [FieldOffset(160)]
+            public Vector3 LevelOfDetail;
             /// <summary>
-            /// Eye position world
+            /// Shadow intensity
             /// </summary>
-            [FieldOffset(0)]
-            public Vector3 EyePositionWorld;
+            [FieldOffset(172)]
+            public float ShadowIntensity;
 
             /// <summary>
             /// Fog color
             /// </summary>
-            [FieldOffset(16)]
+            [FieldOffset(176)]
             public Color4 FogColor;
 
             /// <summary>
             /// Fog start distance
             /// </summary>
-            [FieldOffset(32)]
+            [FieldOffset(192)]
             public float FogStart;
             /// <summary>
             /// Fog range distance
             /// </summary>
-            [FieldOffset(36)]
+            [FieldOffset(196)]
             public float FogRange;
-
-            /// <summary>
-            /// Level of detail values
-            /// </summary>
-            [FieldOffset(48)]
-            public Vector3 LevelOfDetail;
-            /// <summary>
-            /// Shadow intensity
-            /// </summary>
-            [FieldOffset(60)]
-            public float ShadowIntensity;
 
             /// <inheritdoc/>
             public int GetStride()
             {
-                return Marshal.SizeOf(typeof(PSPerFrame));
+                return Marshal.SizeOf(typeof(PerFrame));
             }
         }
 

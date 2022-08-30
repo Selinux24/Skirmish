@@ -1,8 +1,8 @@
 ﻿
 namespace Engine.BuiltInEffects
 {
+    using Engine.BuiltIn;
     using Engine.BuiltIn.DefaultShadow;
-    using Engine.Common;
 
     /// <summary>
     /// Shadow position-normal-texture drawer

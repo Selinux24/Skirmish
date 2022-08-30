@@ -59,7 +59,7 @@ namespace Engine.BuiltIn.Default
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPSPerFrame());
+            Graphics.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPerFrame());
         }
     }
 }

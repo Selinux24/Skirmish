@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncLights.hlsl"
 
@@ -6,14 +7,7 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbPerFrame : register(b0)
 {
-    float3 gEyePositionWorld;
-    float PAD11;
-    float4 gFogColor;
-    float gFogStart;
-    float gFogRange;
-    float2 PAD12;
-    float3 gLOD;
-    float gShadowIntensity;
+    PerFrame gPerFrame;
 };
 
 /**********************************************************************************************************
@@ -23,12 +17,12 @@ float4 main(PSVertexPositionColor2 input) : SV_TARGET
 {
 	float4 matColor = input.color;
 
-	if (gFogRange > 0)
+    if (gPerFrame.FogRange > 0)
 	{
-		float distToEye = length(gEyePositionWorld - input.positionWorld);
+        float distToEye = length(gPerFrame.EyePosition - input.positionWorld);
 
-		matColor = ComputeFog(matColor, distToEye, gFogStart, gFogRange, gFogColor);
-	}
+        matColor = ComputeFog(matColor, distToEye, gPerFrame.FogStart, gPerFrame.FogRange, gPerFrame.FogColor);
+    }
 
 	return matColor;
 }

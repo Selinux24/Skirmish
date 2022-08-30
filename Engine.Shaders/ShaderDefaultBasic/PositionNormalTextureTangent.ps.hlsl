@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncLights.hlsl"
 
@@ -6,14 +7,7 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbPerFrame : register(b0)
 {
-    float3 gEyePositionWorld;
-    float PAD11;
-    float4 gFogColor;
-    float gFogStart;
-    float gFogRange;
-    float2 PAD12;
-    float3 gLOD;
-    float gShadowIntensity;
+    PerFrame gPerFrame;
 };
 
 cbuffer cbHemispheric : register(b1)
@@ -64,8 +58,8 @@ float4 main(PSVertexPositionNormalTextureTangent2 input) : SV_TARGET
 	lInput.objectNormal = normalWorld;
     lInput.objectDiffuseColor = diffuseColor * input.tintColor;
 
-	lInput.eyePosition = gEyePositionWorld;
-	lInput.levelOfDetailRanges = gLOD;
+    lInput.eyePosition = gPerFrame.EyePosition;
+    lInput.levelOfDetailRanges = gPerFrame.LOD;
 
 	lInput.hemiLight = gHemiLight;
     
@@ -81,11 +75,11 @@ float4 main(PSVertexPositionNormalTextureTangent2 input) : SV_TARGET
 	lInput.shadowMapDir = gShadowMapDir;
 	lInput.shadowMapPoint = gShadowMapPoint;
 	lInput.shadowMapSpot = gShadowMapSpot;
-    lInput.minShadowIntensity = gShadowIntensity;
+    lInput.minShadowIntensity = gPerFrame.ShadowIntensity;
 
-	lInput.fogStart = gFogStart;
-	lInput.fogRange = gFogRange;
-	lInput.fogColor = gFogColor;
+	lInput.fogStart = gPerFrame.FogStart;
+	lInput.fogRange = gPerFrame.FogRange;
+    lInput.fogColor = gPerFrame.FogColor;
 
 	return ComputeLights(lInput);
 }

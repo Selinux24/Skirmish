@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltInEffects
 {
+    using Engine.BuiltIn;
     using Engine.BuiltIn.Fonts;
     using Engine.Common;
 
@@ -76,7 +77,7 @@ namespace Engine.BuiltInEffects
             {
                 return new PerText
                 {
-                    Local = local,
+                    Local = Matrix.Transpose(local),
                 };
             }
 

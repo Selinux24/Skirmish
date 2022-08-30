@@ -1,6 +1,7 @@
 ﻿
 namespace Engine.BuiltInEffects
 {
+    using Engine.BuiltIn;
     using Engine.BuiltIn.DefaultShadow;
     using Engine.Common;
 

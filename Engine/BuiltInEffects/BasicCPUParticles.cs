@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltInEffects
 {
+    using Engine.BuiltIn;
     using Engine.BuiltIn.CpuParticles;
     using Engine.Common;
     using Engine.Effects;

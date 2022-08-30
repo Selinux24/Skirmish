@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
-    using Engine.BuiltInEffects;
+    using Engine.BuiltIn;
     using Engine.Common;
 
     /// <summary>

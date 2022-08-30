@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltInEffects;
+    using Engine.BuiltIn.Default;
     using Engine.Common;
 
     /// <summary>
@@ -259,7 +259,7 @@ namespace Engine
                 return;
             }
 
-            var drawer = BuiltInShaders.GetDrawer<BasicPositionColor>();
+            var drawer = BuiltInShaders.GetDrawer<BuiltInPositionColor>();
             if (drawer == null)
             {
                 return;

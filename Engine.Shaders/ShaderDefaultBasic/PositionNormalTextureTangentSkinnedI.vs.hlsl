@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncMaterials.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
@@ -5,20 +6,17 @@
 /**********************************************************************************************************
 BUFFERS & VARIABLES
 **********************************************************************************************************/
-cbuffer cbVSGlobals : register(b0)
+cbuffer cbGlobals : register(b0)
 {
-    uint gMaterialPaletteWidth;
-    uint gAnimationPaletteWidth;
-    uint2 PAD01;
+    Globals gGlobals;
 };
 
-cbuffer cbVSPerFrame : register(b1)
+cbuffer cbPerFrame : register(b1)
 {
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
-cbuffer cbVSPerObject : register(b2)
+cbuffer cbPerMaterial : register(b2)
 {
     float4 gTintColor;
     uint gMaterialIndex;
@@ -43,7 +41,7 @@ PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentS
 		input.animationOffset,
 		input.animationOffsetB,
 		input.animationInterpolation,
-		gAnimationPaletteWidth,
+		gGlobals.AnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
@@ -57,12 +55,12 @@ PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentS
     float3 instanceTangent = mul(tangentL.xyz, (float3x3) input.localTransform);
 
     uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gMaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
 
-    output.positionHomogeneous = mul(instancePosition, gWorldViewProjection);
-    output.positionWorld = mul(instancePosition, gWorld).xyz;
-    output.normalWorld = normalize(mul(instanceNormal.xyz, (float3x3) gWorld));
-    output.tangentWorld = normalize(mul(instanceTangent.xyz, (float3x3) gWorld));
+    output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
+    output.positionWorld = instancePosition.xyz;
+    output.normalWorld = normalize(instanceNormal);
+    output.tangentWorld = normalize(instanceTangent);
     output.tex = input.tex;
     output.tintColor = input.tintColor * gTintColor;
     output.textureIndex = input.textureIndex;

@@ -12,7 +12,7 @@ namespace Engine.UI
     /// <summary>
     /// Text drawer
     /// </summary>
-    class TextDrawer : Drawable<TextDrawerDescription>, IScreenFitted
+    class TextDrawer : Drawable<TextDrawerDescription>
     {
         /// <summary>
         /// Maximum text length
@@ -43,10 +43,6 @@ namespace Engine.UI
         /// Update buffers flag
         /// </summary>
         private bool updateBuffers = false;
-        /// <summary>
-        /// View * projection matrix
-        /// </summary>
-        private Matrix viewProjection;
 
         /// <summary>
         /// Font map
@@ -295,8 +291,6 @@ namespace Engine.UI
 
             Font = $"{Description.FontFamily} {Description.FontSize}";
 
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
-
             var generator = FontMapKeycodeGenerator.DefaultWithCustom(Description.CustomKeycodes);
 
             if (!string.IsNullOrWhiteSpace(Description.FontFileName) && !string.IsNullOrWhiteSpace(Description.ContentPath))
@@ -505,16 +499,6 @@ namespace Engine.UI
             indexDrawCount = indices?.Length ?? 0;
 
             updateBuffers = false;
-        }
-
-        /// <summary>
-        /// Resize
-        /// </summary>
-        public void Resize()
-        {
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
-
-            updateInternals = true;
         }
 
         /// <summary>
