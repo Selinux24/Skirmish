@@ -372,12 +372,10 @@ namespace Engine
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = new MaterialDrawInfo
-                    {
-                        Material = material,
-                    },
-                    TintColor = Color4.White,
+                    Material = material,
+                    UseAnisotropic = false,
                     TextureIndex = 0,
+                    TintColor = Color4.White,
                 };
                 drawer.UpdateMaterial(materialState);
 
@@ -516,13 +514,10 @@ namespace Engine
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = new MaterialDrawInfo
-                    {
-                        Material = material,
-                        UseAnisotropic = UseAnisotropicFiltering,
-                    },
-                    TintColor = Color4.White,
+                    Material = material,
+                    UseAnisotropic = UseAnisotropicFiltering,
                     TextureIndex = 0,
+                    TintColor = Color4.White,
                 };
                 drawer.UpdateMaterial(materialState);
 

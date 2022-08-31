@@ -8,14 +8,14 @@ namespace Engine.BuiltIn.Cubemap
     using Engine.Helpers;
 
     /// <summary>
-    /// Cubemap pixel shader
+    /// Skymap pixel shader
     /// </summary>
     public class SkymapPs : IBuiltInPixelShader
     {
         /// <summary>
-        /// Per cube constant buffer
+        /// Per sky constant buffer
         /// </summary>
-        private IEngineConstantBuffer cbPerCube;
+        private IEngineConstantBuffer cbPerSky;
         /// <summary>
         /// Texture resource view
         /// </summary>
@@ -71,11 +71,11 @@ namespace Engine.BuiltIn.Cubemap
         }
 
         /// <summary>
-        /// Sets per cube constant buffer
+        /// Sets per sky constant buffer
         /// </summary>
-        public void SetPerCubeConstantBuffer(IEngineConstantBuffer constantBuffer)
+        public void SetPerSkyConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
-            cbPerCube = constantBuffer;
+            cbPerSky = constantBuffer;
         }
         /// <summary>
         /// Sets the texture
@@ -97,7 +97,7 @@ namespace Engine.BuiltIn.Cubemap
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerCube);
+            Graphics.SetPixelShaderConstantBuffer(0, cbPerSky);
 
             Graphics.SetPixelShaderResourceView(0, texture);
 

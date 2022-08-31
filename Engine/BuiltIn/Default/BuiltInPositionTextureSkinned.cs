@@ -85,8 +85,8 @@ namespace Engine.BuiltIn.Default
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);
 
             var pixelShader = GetPixelShader<PositionTexturePs>();
-            pixelShader?.SetDiffuseMap(state.Material.Material?.DiffuseTexture);
-            pixelShader?.SetDiffseSampler(state.Material.UseAnisotropic ? anisotropic : linear);
+            pixelShader?.SetDiffuseMap(state.Material?.DiffuseTexture);
+            pixelShader?.SetDiffseSampler(state.UseAnisotropic ? anisotropic : linear);
         }
     }
 }

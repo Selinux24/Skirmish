@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltInEffects;
+    using Engine.BuiltIn.Decals;
     using Engine.Common;
     using Engine.Content;
 
@@ -43,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Decals drawer
         /// </summary>
-        private BasicDecals decalDrawer;
+        private BuiltInDecals decalDrawer;
 
         /// <summary>
         /// Decal texture
@@ -113,10 +113,10 @@ namespace Engine
 
             decals = new VertexDecal[MaxDecalCount];
 
-            decalDrawer = BuiltInShaders.GetDrawer<BasicDecals>();
+            decalDrawer = BuiltInShaders.GetDrawer<BuiltInDecals>();
 
             buffer = new EngineVertexBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, true);
-            buffer.CreateInputLayout(nameof(BasicDecals), decalDrawer.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
+            buffer.CreateInputLayout(nameof(BuiltInDecals), decalDrawer.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
         }
 
         /// <inheritdoc/>

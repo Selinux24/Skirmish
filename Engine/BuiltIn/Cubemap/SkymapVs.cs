@@ -7,7 +7,7 @@ namespace Engine.BuiltIn.Cubemap
     using Engine.Helpers;
 
     /// <summary>
-    /// Cubemap vertex shader
+    /// Skymap vertex shader
     /// </summary>
     public class SkymapVs : IBuiltInVertexShader
     {

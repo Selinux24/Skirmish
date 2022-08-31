@@ -41,9 +41,9 @@ namespace Engine.BuiltIn.Default
             return new PerMeshSkinned
             {
                 Local = Matrix.Transpose(state.Local),
-                AnimationOffset = state.Animation.Offset1,
-                AnimationOffset2 = state.Animation.Offset2,
-                AnimationInterpolation = state.Animation.InterpolationAmount,
+                AnimationOffset = state.AnimationOffset1,
+                AnimationOffset2 = state.AnimationOffset2,
+                AnimationInterpolation = state.AnimationInterpolationAmount,
             };
         }
 
@@ -87,7 +87,7 @@ namespace Engine.BuiltIn.Default
             return new PerMaterialColor
             {
                 TintColor = state.TintColor,
-                MaterialIndex = state.Material.Material?.ResourceIndex ?? 0,
+                MaterialIndex = state.Material?.ResourceIndex ?? 0,
             };
         }
 
@@ -121,7 +121,7 @@ namespace Engine.BuiltIn.Default
             return new PerMaterialTexture
             {
                 TintColor = state.TintColor,
-                MaterialIndex = state.Material.Material?.ResourceIndex ?? 0,
+                MaterialIndex = state.Material?.ResourceIndex ?? 0,
                 TextureIndex = state.TextureIndex,
             };
         }

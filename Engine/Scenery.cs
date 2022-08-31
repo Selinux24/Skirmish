@@ -255,24 +255,12 @@ namespace Engine
             /// <param name="material">Material</param>
             private void DrawWithDrawer(BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
-                var materialInfo = new MaterialDrawInfo
-                {
-                    Material = material,
-                    UseAnisotropic = true,
-                };
-
-                var meshState = new BuiltInDrawerMeshState
-                {
-                    Local = Matrix.Identity,
-                    Animation = AnimationDrawInfo.Empty,
-                };
-                sceneryDrawer.UpdateMesh(meshState);
+                sceneryDrawer.UpdateMesh(BuiltInDrawerMeshState.Default());
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = materialInfo,
-                    TintColor = Color4.White,
-                    TextureIndex = 0,
+                    Material = material,
+                    UseAnisotropic = true,
                 };
                 sceneryDrawer.UpdateMaterial(materialState);
 

@@ -85,10 +85,10 @@ namespace Engine.BuiltIn.Default
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);
 
             var pixelShader = GetPixelShader<PositionNormalTextureTangentPs>();
-            pixelShader?.SetDiffuseMap(state.Material.Material?.DiffuseTexture);
-            pixelShader?.SetDiffseSampler(state.Material.UseAnisotropic ? anisotropic : linear);
-            pixelShader?.SetNormalMap(state.Material.Material?.NormalMap);
-            pixelShader?.SetNormalSampler(state.Material.UseAnisotropic ? anisotropic : linear);
+            pixelShader?.SetDiffuseMap(state.Material?.DiffuseTexture);
+            pixelShader?.SetDiffseSampler(state.UseAnisotropic ? anisotropic : linear);
+            pixelShader?.SetNormalMap(state.Material?.NormalMap);
+            pixelShader?.SetNormalSampler(state.UseAnisotropic ? anisotropic : linear);
         }
     }
 }

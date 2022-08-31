@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltInEffects;
+    using Engine.BuiltIn.Cubemap;
     using Engine.Common;
     using Engine.Content;
 
@@ -188,7 +188,7 @@ namespace Engine
         /// </summary>
         private void DrawCubic()
         {
-            var drawer = BuiltInShaders.GetDrawer<BasicCubemap>();
+            var drawer = BuiltInShaders.GetDrawer<BuiltInCubemap>();
             if (drawer == null)
             {
                 return;
@@ -211,7 +211,7 @@ namespace Engine
         /// </summary>
         private void DrawPlain()
         {
-            var drawer = BuiltInShaders.GetDrawer<BasicSkymap>();
+            var drawer = BuiltInShaders.GetDrawer<BuiltInSkymap>();
             if (drawer == null)
             {
                 return;

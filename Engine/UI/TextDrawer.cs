@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Engine.UI
 {
     using Engine.BuiltIn;
-    using Engine.BuiltInEffects;
+    using Engine.BuiltIn.Fonts;
     using Engine.Common;
 
     /// <summary>
@@ -80,7 +80,7 @@ namespace Engine.UI
         /// <summary>
         /// Font drawer
         /// </summary>
-        private readonly BasicFonts fontDrawer;
+        private readonly BuiltInFonts fontDrawer;
 
         /// <summary>
         /// Manipulator
@@ -258,7 +258,7 @@ namespace Engine.UI
         public TextDrawer(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-            fontDrawer = BuiltInShaders.GetDrawer<BasicFonts>();
+            fontDrawer = BuiltInShaders.GetDrawer<BuiltInFonts>();
         }
         /// <summary>
         /// Destructor
@@ -433,7 +433,7 @@ namespace Engine.UI
 
             bufferManager.SetIndexBuffer(indexBuffer);
 
-            var state = new BasicFontState
+            var state = new BuiltInFontState
             {
                 Alpha = Alpha * AlphaMultplier,
                 UseColor = UseTextureColor,

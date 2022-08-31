@@ -287,13 +287,6 @@ namespace Engine
 
             var localTransform = GetTransformByName(meshName);
 
-            var animationInfo = new AnimationDrawInfo
-            {
-                Offset1 = AnimationOffset,
-                Offset2 = TransitionOffset,
-                InterpolationAmount = TransitionInterpolation,
-            };
-
             foreach (string materialName in meshDict.Keys)
             {
                 var mesh = meshDict[materialName];
@@ -313,19 +306,19 @@ namespace Engine
 
                 var meshState = new BuiltInDrawerMeshState
                 {
-                    Local = localTransform,
-                    Animation = animationInfo,
+                    Local = Matrix.Identity,
+                    AnimationOffset1 = AnimationOffset,
+                    AnimationOffset2 = TransitionOffset,
+                    AnimationInterpolationAmount = TransitionInterpolation,
                 };
                 drawer.UpdateMesh(meshState);
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = new MaterialDrawInfo
-                    {
-                        Material = material,
-                    },
-                    TintColor = Color4.White,
+                    Material = material,
+                    UseAnisotropic = false,
                     TextureIndex = TextureIndex,
+                    TintColor = Color4.White,
                 };
                 drawer.UpdateMaterial(materialState);
 
@@ -381,13 +374,6 @@ namespace Engine
 
             var localTransform = GetTransformByName(meshName);
 
-            var animationInfo = new AnimationDrawInfo
-            {
-                Offset1 = AnimationOffset,
-                Offset2 = TransitionOffset,
-                InterpolationAmount = TransitionInterpolation,
-            };
-
             foreach (string materialName in meshDict.Keys)
             {
                 var mesh = meshDict[materialName];
@@ -415,19 +401,18 @@ namespace Engine
                 var meshState = new BuiltInDrawerMeshState
                 {
                     Local = localTransform,
-                    Animation = animationInfo,
+                    AnimationOffset1 = AnimationOffset,
+                    AnimationOffset2 = TransitionOffset,
+                    AnimationInterpolationAmount = TransitionInterpolation,
                 };
                 drawer.UpdateMesh(meshState);
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
-                    Material = new MaterialDrawInfo
-                    {
-                        Material = material,
-                        UseAnisotropic = UseAnisotropicFiltering,
-                    },
-                    TintColor = TintColor,
+                    Material = material,
+                    UseAnisotropic = UseAnisotropicFiltering,
                     TextureIndex = TextureIndex,
+                    TintColor = TintColor,
                 };
                 drawer.UpdateMaterial(materialState);
 

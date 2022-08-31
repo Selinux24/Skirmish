@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltInEffects;
+    using Engine.BuiltIn.SkyScattering;
     using Engine.Common;
 
     /// <summary>
@@ -329,11 +329,11 @@ namespace Engine
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            var drawer = BuiltInShaders.GetDrawer<BasicSkyScattering>();
+            var drawer = BuiltInShaders.GetDrawer<BuiltInSkyScattering>();
 
             drawer.Update(
                 keyLight.Direction,
-                new BasicSkyScatteringState
+                new BuiltInSkyScatteringState
                 {
                     PlanetRadius = PlanetRadius,
                     PlanetAtmosphereRadius = PlanetAtmosphereRadius,

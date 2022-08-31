@@ -265,20 +265,8 @@ namespace Engine
                 return;
             }
 
-            var meshState = new BuiltInDrawerMeshState
-            {
-                Local = Matrix.Identity,
-                Animation = AnimationDrawInfo.Empty,
-            };
-            drawer.UpdateMesh(meshState);
-
-            var materialState = new BuiltInDrawerMaterialState
-            {
-                Material = MaterialDrawInfo.Empty,
-                TintColor = Color4.White,
-                TextureIndex = 0,
-            };
-            drawer.UpdateMaterial(materialState);
+            drawer.UpdateMesh(BuiltInDrawerMeshState.Default());
+            drawer.UpdateMaterial(BuiltInDrawerMaterialState.Default());
 
             drawer.Draw(BufferManager, new DrawOptions
             {
