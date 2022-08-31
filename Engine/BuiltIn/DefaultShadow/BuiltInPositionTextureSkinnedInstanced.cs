@@ -12,7 +12,7 @@ namespace Engine.BuiltIn.DefaultShadow
         /// <param name="graphics">Graphics</param>
         public BuiltInPositionTextureSkinnedInstanced(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<SkinnedPositionTextureVsI>();
+            SetVertexShader<PositionTextureSkinnedVsI>();
         }
     }
 }

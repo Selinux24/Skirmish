@@ -12,7 +12,7 @@ namespace Engine.BuiltIn.DefaultShadow
         /// <param name="graphics">Graphics</param>
         public BuiltInPositionNormalTextureTangentSkinnedInstanced(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<SkinnedPositionNormalTextureTangentVsI>();
+            SetVertexShader<PositionNormalTextureTangentSkinnedVsI>();
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Engine.Shaders.Properties;
 using System;
-using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.DefaultShadow
 {
@@ -13,36 +12,13 @@ namespace Engine.BuiltIn.DefaultShadow
     public class PositionNormalTextureVs : IBuiltInVertexShader
     {
         /// <summary>
-        /// Per instance data structure
+        /// Per mesh constant buffer
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 16)]
-        struct PerInstance : IBufferData
-        {
-            public static PerInstance Build(uint textureIndex)
-            {
-                return new PerInstance
-                {
-                    TextureIndex = textureIndex,
-                };
-            }
-
-            /// <summary>
-            /// Texture index
-            /// </summary>
-            [FieldOffset(0)]
-            public uint TextureIndex;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PerInstance));
-            }
-        }
-
+        private IEngineConstantBuffer cbPerMesh;
         /// <summary>
-        /// Per instance constant buffer
+        /// Per material constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerInstance> cbPerInstance;
+        private IEngineConstantBuffer cbPerMaterial;
 
         /// <summary>
         /// Graphics instance
@@ -61,8 +37,6 @@ namespace Engine.BuiltIn.DefaultShadow
             Graphics = graphics;
 
             Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureVs), "main", ShaderShadowBasicResources.PositionNormalTexture_vs, HelperShaders.VSProfile);
-
-            cbPerInstance = new EngineConstantBuffer<PerInstance>(graphics, nameof(PositionNormalTextureVs) + "." + nameof(PerInstance));
         }
         /// <summary>
         /// Destructor
@@ -88,20 +62,24 @@ namespace Engine.BuiltIn.DefaultShadow
             {
                 Shader?.Dispose();
                 Shader = null;
-
-                cbPerInstance?.Dispose();
             }
         }
 
         /// <summary>
-        /// Writes per instance data
+        /// Sets per mesh constant buffer
         /// </summary>
-        /// <param name="material">Material</param>
-        /// <param name="tintColor">Tint color</param>
-        /// <param name="textureIndex">Texture index</param>
-        public void WriteCBPerInstance(uint textureIndex)
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMeshConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
-            cbPerInstance.WriteData(PerInstance.Build(textureIndex));
+            cbPerMesh = constantBuffer;
+        }
+        /// <summary>
+        /// Sets per material constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMaterialConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMaterial = constantBuffer;
         }
 
         /// <inheritdoc/>
@@ -110,7 +88,8 @@ namespace Engine.BuiltIn.DefaultShadow
             var cb = new[]
             {
                 BuiltInShaders.GetVSPerFrame(),
-                cbPerInstance,
+                cbPerMesh,
+                cbPerMaterial,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

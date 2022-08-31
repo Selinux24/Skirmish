@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Engine.BuiltIn.DefaultShadow
 {
     using Engine.Common;
@@ -6,8 +7,13 @@ namespace Engine.BuiltIn.DefaultShadow
     /// <summary>
     /// Shadow skinned position-color drawer
     /// </summary>
-    public class BuiltInPositionColorSkinned : BuiltInDrawer
+    public class BuiltInPositionColorSkinned : BuiltInDrawer, IDisposable
     {
+        /// <summary>
+        /// Per mesh constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerMeshSkinned> cbPerMesh;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -16,14 +22,43 @@ namespace Engine.BuiltIn.DefaultShadow
         /// <param name="positionColorPs">Position color pixel shader</param>
         public BuiltInPositionColorSkinned(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<SkinnedPositionColorVs>();
+            SetVertexShader<PositionColorSkinnedVs>();
+
+            cbPerMesh = new EngineConstantBuffer<PerMeshSkinned>(graphics, nameof(BuiltInPositionColorSkinned) + "." + nameof(PerMeshSkinned));
+        }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~BuiltInPositionColorSkinned()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                cbPerMesh?.Dispose();
+            }
         }
 
         /// <inheritdoc/>
-        public void Update(AnimationDrawInfo animation)
+        public override void UpdateMesh(BuiltInDrawerMeshState state)
         {
-            var vertexShader = GetVertexShader<SkinnedPositionColorVs>();
-            vertexShader?.WriteCBPerInstance(animation);
+            cbPerMesh.WriteData(PerMeshSkinned.Build(state));
+
+            var vertexShader = GetVertexShader<PositionColorSkinnedVs>();
+            vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);
         }
     }
 }

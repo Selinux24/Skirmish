@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
 /**********************************************************************************************************
@@ -5,14 +6,18 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbPerFrame : register(b0)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
-cbuffer cbPerInstance : register(b1)
+cbuffer cbPerMesh : register(b1)
 {
-	uint gTextureIndex;
-	uint3 PAD11;
+    float4x4 gLocal;
+};
+
+cbuffer cbPerMaterial : register(b2)
+{
+    uint gTextureIndex;
+    uint3 PAD21;
 };
 
 /**********************************************************************************************************
@@ -22,7 +27,9 @@ PSShadowMapPositionTexture main(VSVertexPositionNormalTexture input)
 {
     PSShadowMapPositionTexture output = (PSShadowMapPositionTexture)0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection);
+    float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), wvp);
     output.depth = output.positionHomogeneous;
     output.tex = input.tex;
     output.textureIndex = gTextureIndex;

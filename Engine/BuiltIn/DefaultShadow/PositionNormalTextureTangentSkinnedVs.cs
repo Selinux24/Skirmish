@@ -1,5 +1,6 @@
 ﻿using Engine.Shaders.Properties;
 using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.DefaultShadow
 {
@@ -7,9 +8,9 @@ namespace Engine.BuiltIn.DefaultShadow
     using Engine.Helpers;
 
     /// <summary>
-    /// Position normal texture tangent vertex shader
+    /// Skinned position normal texture tangent vertex shader
     /// </summary>
-    public class PositionNormalTextureTangentVs : IBuiltInVertexShader
+    public class PositionNormalTextureTangentSkinnedVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Per mesh constant buffer
@@ -32,16 +33,16 @@ namespace Engine.BuiltIn.DefaultShadow
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionNormalTextureTangentVs(Graphics graphics)
+        public PositionNormalTextureTangentSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentVs), "main", ShaderShadowBasicResources.PositionNormalTextureTangent_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentSkinnedVs), "main", ShaderShadowBasicResources.PositionNormalTextureTangentSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionNormalTextureTangentVs()
+        ~PositionNormalTextureTangentSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -87,12 +88,20 @@ namespace Engine.BuiltIn.DefaultShadow
         {
             var cb = new[]
             {
+                BuiltInShaders.GetGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
                 cbPerMesh,
                 cbPerMaterial,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
+
+            var rv = new[]
+            {
+                BuiltInShaders.GetAnimationPalette(),
+            };
+
+            Graphics.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

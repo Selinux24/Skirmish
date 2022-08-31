@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
 /**********************************************************************************************************
@@ -5,8 +6,12 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbPerFrame : register(b0)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+	PerFrame gPerFrame;
+};
+
+cbuffer cbPerMesh : register(b1)
+{
+	float4x4 gLocal;
 };
 
 /**********************************************************************************************************
@@ -16,7 +21,9 @@ PSShadowMapPosition main(VSVertexPositionColor input)
 {
 	PSShadowMapPosition output = (PSShadowMapPosition)0;
 
-	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), gWorldViewProjection);
+	float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
+
+	output.positionHomogeneous = mul(float4(input.positionLocal, 1.0f), wvp);
 
 	return output;
 }

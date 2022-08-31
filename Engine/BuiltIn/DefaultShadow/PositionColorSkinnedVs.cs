@@ -7,10 +7,15 @@ namespace Engine.BuiltIn.DefaultShadow
     using Engine.Helpers;
 
     /// <summary>
-    /// Skinned position color instanced vertex shader
+    /// Skinned position color vertex shader
     /// </summary>
-    public class SkinnedPositionColorVsI : IBuiltInVertexShader
+    public class PositionColorSkinnedVs : IBuiltInVertexShader
     {
+        /// <summary>
+        /// Per mesh constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMesh;
+
         /// <summary>
         /// Graphics instance
         /// </summary>
@@ -23,16 +28,16 @@ namespace Engine.BuiltIn.DefaultShadow
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionColorVsI(Graphics graphics)
+        public PositionColorSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(SkinnedPositionColorVsI), "main", ShaderShadowBasicResources.PositionColorSkinnedI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionColorSkinnedVs), "main", ShaderShadowBasicResources.PositionColorSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionColorVsI()
+        ~PositionColorSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -56,6 +61,15 @@ namespace Engine.BuiltIn.DefaultShadow
             }
         }
 
+        /// <summary>
+        /// Sets per mesh constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMeshConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMesh = constantBuffer;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
@@ -63,6 +77,7 @@ namespace Engine.BuiltIn.DefaultShadow
             {
                 BuiltInShaders.GetGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
+                cbPerMesh,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

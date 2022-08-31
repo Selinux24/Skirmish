@@ -1,3 +1,4 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
@@ -6,23 +7,27 @@ BUFFERS & VARIABLES
 **********************************************************************************************************/
 cbuffer cbGlobals : register(b0)
 {
-	uint PAD01;
-	uint gAnimationPaletteWidth;
-	uint2 PAD02;
+	Globals gGlobals;
 };
 
 cbuffer cbPerFrame : register(b1)
 {
-	float4x4 gWorld;
-	float4x4 gWorldViewProjection;
+	PerFrame gPerFrame;
 };
 
-cbuffer cbPerInstance : register(b2)
+cbuffer cbPerMesh : register(b2)
 {
-	uint gTextureIndex;
+	float4x4 gLocal;
 	uint gAnimationOffset;
 	uint gAnimationOffset2;
 	float gAnimationInterpolation;
+	float PAD21;
+};
+
+cbuffer cbPerMaterial : register(b3)
+{
+	uint gTextureIndex;
+	uint3 PAD31;
 };
 
 Texture2D gAnimationPalette : register(t0);
@@ -40,13 +45,15 @@ PSShadowMapPositionTexture main(VSVertexPositionNormalTextureSkinned input)
 		gAnimationOffset,
 		gAnimationOffset2,
 		gAnimationInterpolation,
-		gAnimationPaletteWidth,
+		gGlobals.AnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
 		positionL);
 
-	output.positionHomogeneous = mul(positionL, gWorldViewProjection);
+	float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
+
+	output.positionHomogeneous = mul(positionL, wvp);
 	output.depth = output.positionHomogeneous;
 	output.tex = input.tex;
 	output.textureIndex = gTextureIndex;

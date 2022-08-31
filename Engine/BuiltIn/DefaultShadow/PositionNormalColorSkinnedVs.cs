@@ -7,10 +7,15 @@ namespace Engine.BuiltIn.DefaultShadow
     using Engine.Helpers;
 
     /// <summary>
-    /// Skinned position texture instanced vertex shader 
+    /// Skinned position normal color vertex shader
     /// </summary>
-    public class SkinnedPositionTextureVsI : IBuiltInVertexShader
+    public class PositionNormalColorSkinnedVs : IBuiltInVertexShader
     {
+        /// <summary>
+        /// Per mesh constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMesh;
+
         /// <summary>
         /// Graphics instance
         /// </summary>
@@ -23,16 +28,16 @@ namespace Engine.BuiltIn.DefaultShadow
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionTextureVsI(Graphics graphics)
+        public PositionNormalColorSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(SkinnedPositionTextureVsI), "main", ShaderShadowBasicResources.PositionTextureSkinnedI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionNormalColorSkinnedVs), "main", ShaderShadowBasicResources.PositionNormalColorSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionTextureVsI()
+        ~PositionNormalColorSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -56,6 +61,15 @@ namespace Engine.BuiltIn.DefaultShadow
             }
         }
 
+        /// <summary>
+        /// Sets per mesh constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMeshConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMesh = constantBuffer;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
@@ -63,6 +77,7 @@ namespace Engine.BuiltIn.DefaultShadow
             {
                 BuiltInShaders.GetGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
+                cbPerMesh,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

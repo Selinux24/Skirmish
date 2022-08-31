@@ -7,9 +7,9 @@ namespace Engine.BuiltIn.DefaultShadow
     using Engine.Helpers;
 
     /// <summary>
-    /// Skinned position normal color instanced vertex shader
+    /// Skinned position normal texture tangent instanced vertex shader
     /// </summary>
-    public class SkinnedPositionNormalColorVsI : IBuiltInVertexShader
+    public class PositionNormalTextureTangentSkinnedVsI : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -23,16 +23,16 @@ namespace Engine.BuiltIn.DefaultShadow
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionNormalColorVsI(Graphics graphics)
+        public PositionNormalTextureTangentSkinnedVsI(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(SkinnedPositionNormalColorVsI), "main", ShaderShadowBasicResources.PositionNormalColorSkinnedI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentSkinnedVsI), "main", ShaderShadowBasicResources.PositionNormalTextureTangentSkinnedI_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionNormalColorVsI()
+        ~PositionNormalTextureTangentSkinnedVsI()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

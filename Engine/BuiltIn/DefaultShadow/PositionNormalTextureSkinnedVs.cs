@@ -7,10 +7,19 @@ namespace Engine.BuiltIn.DefaultShadow
     using Engine.Helpers;
 
     /// <summary>
-    /// Skinned position normal texture tangent instanced vertex shader
+    /// Skinned position normal texture vertex shader
     /// </summary>
-    public class SkinnedPositionNormalTextureTangentVsI : IBuiltInVertexShader
+    public class PositionNormalTextureSkinnedVs : IBuiltInVertexShader
     {
+        /// <summary>
+        /// Per mesh constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMesh;
+        /// <summary>
+        /// Per material constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMaterial;
+
         /// <summary>
         /// Graphics instance
         /// </summary>
@@ -23,16 +32,16 @@ namespace Engine.BuiltIn.DefaultShadow
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SkinnedPositionNormalTextureTangentVsI(Graphics graphics)
+        public PositionNormalTextureSkinnedVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(SkinnedPositionNormalTextureTangentVsI), "main", ShaderShadowBasicResources.PositionNormalTextureTangentSkinnedI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureSkinnedVs), "main", ShaderShadowBasicResources.PositionNormalTextureSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SkinnedPositionNormalTextureTangentVsI()
+        ~PositionNormalTextureSkinnedVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -56,6 +65,23 @@ namespace Engine.BuiltIn.DefaultShadow
             }
         }
 
+        /// <summary>
+        /// Sets per mesh constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMeshConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMesh = constantBuffer;
+        }
+        /// <summary>
+        /// Sets per material constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMaterialConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMaterial = constantBuffer;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
@@ -63,6 +89,8 @@ namespace Engine.BuiltIn.DefaultShadow
             {
                 BuiltInShaders.GetGlobal(),
                 BuiltInShaders.GetVSPerFrame(),
+                cbPerMesh,
+                cbPerMaterial,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

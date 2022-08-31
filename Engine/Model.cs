@@ -306,7 +306,7 @@ namespace Engine
 
                 var meshState = new BuiltInDrawerMeshState
                 {
-                    Local = Matrix.Identity,
+                    Local = localTransform,
                     AnimationOffset1 = AnimationOffset,
                     AnimationOffset2 = TransitionOffset,
                     AnimationInterpolationAmount = TransitionInterpolation,
