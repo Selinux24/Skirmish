@@ -1,15 +1,9 @@
 #include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbPerInstance : register(b1)
+cbuffer cbPerMaterial : register(b0)
 {
-    float4 gTintColor;
-    uint gMaterialIndex;
     uint gTextureIndex;
-    uint2 PAD11;
-    uint gAnimationOffset;
-    uint gAnimationOffset2;
-    float gAnimationInterpolation;
-    float PAD12;
+    uint3 PAD01;
 };
 
 PSShadowMapPositionTexture main(VSVertexPositionNormalTextureTangent input)

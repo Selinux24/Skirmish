@@ -3,7 +3,7 @@
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltIn.DefaultShadow;
+    using Engine.BuiltIn.ShadowSpots;
     using Engine.Common;
     using Engine.Effects;
 

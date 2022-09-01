@@ -1,11 +1,10 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
 cbuffer cbGlobals : register(b0)
 {
-    uint gMaterialPaletteWidth;
-    uint gAnimationPaletteWidth;
-    uint2 PAD01;
+	Globals gGlobals;
 };
 
 Texture2D gAnimationPalette : register(t0);
@@ -21,7 +20,7 @@ PSShadowMapPosition main(VSVertexPositionColorSkinnedI input)
 		input.animationOffset,
 		input.animationOffsetB,
 		input.animationInterpolation,
-		gAnimationPaletteWidth,
+		gGlobals.AnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,

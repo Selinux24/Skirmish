@@ -1,9 +1,9 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
 struct GSShadowMap
@@ -23,7 +23,7 @@ void main(triangle PSShadowMapPosition input[3] : SV_Position, inout TriangleStr
 
         for (int v = 0; v < 3; v++)
         {
-            output.positionHomogeneous = mul(input[v].positionHomogeneous, gWorldViewProjection[iFace]);
+            output.positionHomogeneous = mul(input[v].positionHomogeneous, gPerFrame.ViewProjection[iFace]);
 
             outputStream.Append(output);
         }

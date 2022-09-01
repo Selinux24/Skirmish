@@ -1,23 +1,19 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
 cbuffer cbGlobals : register(b0)
 {
-    uint gMaterialPaletteWidth;
-    uint gAnimationPaletteWidth;
-    uint2 PAD01;
+	Globals gGlobals;
 };
 
-cbuffer cbPerInstance : register(b1)
+cbuffer cbPerMesh : register(b1)
 {
-    float4 gTintColor;
-    uint gMaterialIndex;
-    uint gTextureIndex;
-    uint2 PAD11;
-    uint gAnimationOffset;
-    uint gAnimationOffset2;
-    float gAnimationInterpolation;
-    float PAD12;
+	float4x4 gLocal;
+	uint gAnimationOffset;
+	uint gAnimationOffset2;
+	float gAnimationInterpolation;
+	float PAD11;
 };
 
 Texture2D gAnimationPalette : register(t0);
@@ -33,12 +29,12 @@ PSShadowMapPosition main(VSVertexPositionColorSkinned input)
 		gAnimationOffset,
 		gAnimationOffset2,
 		gAnimationInterpolation,
-		gAnimationPaletteWidth,
+		gGlobals.AnimationPaletteWidth,
 		input.weights,
 		input.boneIndices,
 		input.positionLocal,
 		positionL);
-	
+
     output.positionHomogeneous = positionL;
 
     return output;
