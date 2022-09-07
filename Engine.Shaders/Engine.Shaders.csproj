@@ -211,9 +211,6 @@
     <EffectShader Include="Effects\ShaderShadowBillboard.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderShadowCascade.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderShadowFoliage.fx" />
   </ItemGroup>
   <ItemGroup>

@@ -172,9 +172,6 @@
   <data name="ShaderShadowBillboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shadershadowbillboard.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderShadowCascade" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shadershadowcascade.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderShadowFoliage" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shadershadowfoliage.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

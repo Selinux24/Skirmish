@@ -99,8 +99,6 @@ namespace Engine.Effects
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
-            GetEffect<EffectShadowCascade>().UpdateGlobals(animationPalette, animationPaletteWidth);
-
             GetEffect<EffectShadowPoint>().UpdateGlobals(animationPalette, animationPaletteWidth);
         }
     }

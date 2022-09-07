@@ -562,7 +562,6 @@
     <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectDefaultWater.cs" />
     <Compile Include="Effects\EffectPostProcess.cs" />
-    <Compile Include="Effects\EffectShadowCascade.cs" />
     <Compile Include="Effects\EffectShadowPoint.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />
     <Compile Include="Effects\EffectShadowBillboard.cs" />
