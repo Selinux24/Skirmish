@@ -3,8 +3,9 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Water;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Water drawer
@@ -19,6 +20,10 @@ namespace Engine
         /// Index buffer descriptor
         /// </summary>
         private BufferDescriptor indexBuffer = null;
+        /// <summary>
+        /// Water drawer
+        /// </summary>
+        private BuiltInWater waterDrawer = null;
 
         /// <summary>
         /// Water state
@@ -118,6 +123,8 @@ namespace Engine
 
             vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             indexBuffer = BufferManager.AddIndexData(name, false, indices);
+
+            waterDrawer = BuiltInShaders.GetDrawer<BuiltInWater>();
         }
 
         /// <inheritdoc/>
@@ -133,97 +140,42 @@ namespace Engine
                 return;
             }
 
+            if (waterDrawer == null)
+            {
+                return;
+            }
+
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
             }
 
-            var effect = DrawerPool.GetEffect<EffectDefaultWater>();
-            var technique = effect.Water;
+            var waterState = new BuiltInWaterState
+            {
+                BaseColor = WaterState.BaseColor,
+                WaterColor = new Color4(WaterState.WaterColor, WaterState.WaterTransparency),
+                WaveHeight = WaterState.WaveHeight,
+                WaveChoppy = WaterState.WaveChoppy,
+                WaveSpeed = WaterState.WaveSpeed,
+                WaveFrequency = WaterState.WaveFrequency,
+                Steps = WaterState.Steps,
+                GeometryIterations = WaterState.GeometryIterations,
+                ColorIterations = WaterState.ColorIterations,
+            };
+            waterDrawer.UpdateWater(waterState);
+
+            var drawOptions = new DrawOptions
+            {
+                VertexBuffer = vertexBuffer,
+                IndexBuffer = indexBuffer,
+                Indexed = true,
+                Topology = Topology.TriangleList,
+            };
+            waterDrawer.Draw(BufferManager, drawOptions);
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
-
-            effect.UpdatePerFrame(
-                context.ViewProjection,
-                context.EyePosition,
-                context.Lights,
-                new EffectWaterState
-                {
-                    BaseColor = WaterState.BaseColor,
-                    WaterColor = new Color4(WaterState.WaterColor, WaterState.WaterTransparency),
-                    WaveHeight = WaterState.WaveHeight,
-                    WaveChoppy = WaterState.WaveChoppy,
-                    WaveSpeed = WaterState.WaveSpeed,
-                    WaveFrequency = WaterState.WaveFrequency,
-                    Steps = WaterState.Steps,
-                    GeometryIterations = WaterState.GeometryIterations,
-                    ColorIterations = WaterState.ColorIterations,
-                    TotalTime = context.GameTime.TotalSeconds,
-                });
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
-            }
         }
-    }
-
-    /// <summary>
-    /// Water state
-    /// </summary>
-    public class WaterState
-    {
-        /// <summary>
-        /// Base color
-        /// </summary>
-        public Color3 BaseColor { get; set; }
-        /// <summary>
-        /// Water color
-        /// </summary>
-        public Color3 WaterColor { get; set; }
-        /// <summary>
-        /// Water color alpha component
-        /// </summary>
-        public float WaterTransparency { get; set; }
-        /// <summary>
-        /// Wave heigth
-        /// </summary>
-        public float WaveHeight { get; set; }
-        /// <summary>
-        /// Wave choppy
-        /// </summary>
-        public float WaveChoppy { get; set; }
-        /// <summary>
-        /// Wave speed
-        /// </summary>
-        public float WaveSpeed { get; set; }
-        /// <summary>
-        /// Wave frequency
-        /// </summary>
-        public float WaveFrequency { get; set; }
-        /// <summary>
-        /// Shader steps
-        /// </summary>
-        public int Steps { get; set; }
-        /// <summary>
-        /// Geometry iterations
-        /// </summary>
-        public int GeometryIterations { get; set; }
-        /// <summary>
-        /// Color iterations
-        /// </summary>
-        public int ColorIterations { get; set; }
     }
 }

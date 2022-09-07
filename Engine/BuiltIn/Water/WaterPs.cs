@@ -1,38 +1,43 @@
 ﻿using Engine.Shaders.Properties;
 using System;
 
-namespace Engine.BuiltIn.ShadowCascade
+namespace Engine.BuiltIn.Water
 {
     using Engine.Common;
     using Engine.Helpers;
 
     /// <summary>
-    /// Position color vertex shader
+    /// Water pixel shader
     /// </summary>
-    public class PositionColorVs : IBuiltInVertexShader
+    public class WaterPs : IBuiltInPixelShader
     {
+        /// <summary>
+        /// Per water constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerWater;
+
+        /// <inheritdoc/>
+        public EnginePixelShader Shader { get; private set; }
+
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
-        /// <inheritdoc/>
-        public EngineVertexShader Shader { get; private set; }
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVs(Graphics graphics)
+        public WaterPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionColorVs), "main", ShaderShadowCascadeResources.PositionColor_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompilePixelShader(nameof(WaterPs), "main", ShaderDefaultBasicResources.Water_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVs()
+        ~WaterPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -56,10 +61,25 @@ namespace Engine.BuiltIn.ShadowCascade
             }
         }
 
+        /// <summary>
+        /// Sets per water constant buffer
+        /// </summary>
+        public void SetPerWaterConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerWater = constantBuffer;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            // No shader resources
+            var cb = new[]
+            {
+                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPSDirectionals(),
+                cbPerWater,
+            };
+
+            Graphics.SetPixelShaderConstantBuffers(0, cb);
         }
     }
 }

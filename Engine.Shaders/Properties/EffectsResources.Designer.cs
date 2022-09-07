@@ -123,16 +123,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderDefaultWater {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultWater", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderDeferredBasic {
             get {
                 object obj = ResourceManager.GetObject("ShaderDeferredBasic", resourceCulture);

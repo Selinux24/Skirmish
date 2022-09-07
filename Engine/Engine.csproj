@@ -294,6 +294,10 @@
     <Compile Include="BuiltIn\Default\PositionNormalColorSkinnedVsI.cs" />
     <Compile Include="BuiltIn\Default\PositionTextureSkinnedVs.cs" />
     <Compile Include="BuiltIn\Default\PositionTextureSkinnedVsI.cs" />
+    <Compile Include="BuiltIn\Water\BuiltInWater.cs" />
+    <Compile Include="BuiltIn\Water\BuiltInWaterState.cs" />
+    <Compile Include="BuiltIn\Water\WaterPs.cs" />
+    <Compile Include="BuiltIn\Water\WaterVs.cs" />
     <Compile Include="Common\AnimationDrawInfo.cs" />
     <Compile Include="Common\AnimationShadowDrawInfo.cs" />
     <Compile Include="Common\BaseSceneObjectState.cs" />
@@ -560,7 +564,6 @@
     <Compile Include="IntersectionVolumeSphere.cs" />
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectDefaultClouds.cs" />
-    <Compile Include="Effects\EffectDefaultWater.cs" />
     <Compile Include="Effects\EffectPostProcess.cs" />
     <Compile Include="Effects\EffectShadowPoint.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />
@@ -877,6 +880,7 @@
     <Compile Include="Common\VertexPositionTexture.cs" />
     <Compile Include="Common\VertexTypes.cs" />
     <Compile Include="Scenery.cs" />
+    <Compile Include="WaterState.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Resources.resx">

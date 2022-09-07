@@ -1,26 +1,27 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbVSPerFrame : register(b1)
+cbuffer cbPerFrame : register(b0)
 {
-    float4x4 gVSWorld;
-    float4x4 gVSWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
-cbuffer cbPSPerFrame : register(b3)
+cbuffer cbDirectionals : register(b1)
 {
-    float3 gPSEyePositionWorld;
-    float gPSTotalTime;
+    uint gDirLightsCount;
+    DirectionalLight gDirLights[MAX_LIGHTS_DIRECTIONAL];
+};
+
+cbuffer cbPerWater : register(b2)
+{
     float4 gPSWaveParams;
-    float3 gPSFogColor;
-    float gPSFogRange;
-    float gPSFogStart;
     float3 gPSWaterColor;
-    float3 gPSBaseColor;
     float gPSWaterAlpha;
+    float3 gPSBaseColor;
+    float PAD21;
     uint3 gPSIters;
-    uint gPSLightCount;
-    DirectionalLight gPSDirLights[MAX_LIGHTS_DIRECTIONAL];
+    uint PAD22;
 };
 
 static const float2x2 octaveMatrix = float2x2(1.6, 1.2, -1.6, 1.2);
@@ -142,25 +143,15 @@ float GetSeaAlpha(float distToEye, float alpha)
     return min(((distToEye / trDistance) * (1 - alpha)) + alpha, 1);
 }
 
-PSVertexPosition VSWater(VSVertexPosition input)
+float4 main(PSVertexPosition input) : SV_TARGET
 {
-    PSVertexPosition output = (PSVertexPosition) 0;
-
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gVSWorldViewProjection);
-    output.positionWorld = mul(float4(input.positionLocal, 1), gVSWorld).xyz;
-
-    return output;
-}
-
-float4 PSWater(PSVertexPosition input) : SV_TARGET
-{
-    float3 eyePos = gPSEyePositionWorld;
+    float3 eyePos = gPerFrame.EyePosition;
     float3 eyeDir = eyePos - input.positionWorld;
     float distToEye = length(eyeDir);
     eyeDir /= distToEye;
 
     // Get the current time    
-    float time = (1.0f + gPSTotalTime * gPSWaveParams.z);
+    float time = (1.0f + gPerFrame.TotalTime * gPSWaveParams.z);
     
     // Move position to origin level for tracing
     eyePos.y -= input.positionWorld.y;
@@ -171,27 +162,27 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
     float3 hmNormal = GetNormal(hmPosition, epsilon, time);
 
     float fog = 0;
-    if (gPSFogRange > 0)
+    if (gPerFrame.FogRange > 0)
     {
-        fog = CalcFogFactor(distToEye, gPSFogStart, gPSFogRange);
+        fog = CalcFogFactor(distToEye, gPerFrame.FogStart, gPerFrame.FogRange);
     }
 
     if (fog >= 1)
     {
-        return float4(gPSFogColor, 1);
+        return float4(gPerFrame.FogColor.rgb, 1);
     }
     else
     {
         // Do light color
         float3 lDiffuse = 0;
         float3 lSpecular = 0;
-        if (gPSLightCount > 0)
+        if (gDirLightsCount > 0)
         {
-            for (uint i = 0; i < gPSLightCount.x; i++)
+            for (uint i = 0; i < gDirLightsCount; i++)
             {
                 float3 diffuse = 0;
                 float3 specular = 0;
-                GetLightColor(gPSDirLights[i], hmNormal, eyeDir, diffuse, specular);
+                GetLightColor(gDirLights[i], hmNormal, eyeDir, diffuse, specular);
                 lDiffuse += diffuse;
                 lSpecular += specular;
             }
@@ -201,16 +192,6 @@ float4 PSWater(PSVertexPosition input) : SV_TARGET
         float3 color = GetSeaColor(hmPosition, hmNormal, eyeDir, saturate(lDiffuse), lSpecular, epsilon);
         float alpha = GetSeaAlpha(distToEye, gPSWaterAlpha);
         
-        return float4(lerp(color, gPSFogColor, fog), alpha);
-    }
-}
-
-technique11 Water
-{
-    pass P0
-    {
-        SetVertexShader(CompileShader(vs_5_0, VSWater()));
-        SetGeometryShader(NULL);
-        SetPixelShader(CompileShader(ps_5_0, PSWater()));
+        return float4(lerp(color, gPerFrame.FogColor.rgb, fog), alpha);
     }
 }

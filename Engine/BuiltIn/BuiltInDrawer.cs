@@ -205,6 +205,9 @@ namespace Engine.BuiltIn
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders();
 
+            // Set the index buffer
+            bufferManager.SetIndexBuffer(options.IndexBuffer);
+
             // Set the vertex input layout.
             if (!bufferManager.SetInputAssembler(vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
             {

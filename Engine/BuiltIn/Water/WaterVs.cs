@@ -1,15 +1,15 @@
 ﻿using Engine.Shaders.Properties;
 using System;
 
-namespace Engine.BuiltIn.ShadowCascade
+namespace Engine.BuiltIn.Water
 {
     using Engine.Common;
     using Engine.Helpers;
 
     /// <summary>
-    /// Position color vertex shader
+    /// Water vertex shader
     /// </summary>
-    public class PositionColorVs : IBuiltInVertexShader
+    public class WaterVs : IBuiltInVertexShader
     {
         /// <summary>
         /// Graphics instance
@@ -23,16 +23,16 @@ namespace Engine.BuiltIn.ShadowCascade
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionColorVs(Graphics graphics)
+        public WaterVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionColorVs), "main", ShaderShadowCascadeResources.PositionColor_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(WaterVs), "main", ShaderDefaultBasicResources.Water_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionColorVs()
+        ~WaterVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -59,7 +59,12 @@ namespace Engine.BuiltIn.ShadowCascade
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            // No shader resources
+            var cb = new[]
+            {
+                BuiltInShaders.GetVSPerFrame(),
+            };
+
+            Graphics.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

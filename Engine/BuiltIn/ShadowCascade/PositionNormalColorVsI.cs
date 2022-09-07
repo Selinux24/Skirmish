@@ -59,7 +59,7 @@ namespace Engine.BuiltIn.ShadowCascade
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-
+            // No shader resources
         }
     }
 }
