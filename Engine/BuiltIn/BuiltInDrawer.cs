@@ -157,17 +157,18 @@ namespace Engine.BuiltIn
         {
 
         }
+
         /// <inheritdoc/>
-        public virtual void Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
+        public virtual bool Draw(BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
         {
             if (bufferManager == null)
             {
-                return;
+                return false;
             }
 
             if (meshes?.Any() != true)
             {
-                return;
+                return false;
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
@@ -177,6 +178,12 @@ namespace Engine.BuiltIn
 
             foreach (var mesh in meshes)
             {
+                // Set the index buffer
+                if (!bufferManager.SetIndexBuffer(mesh.IndexBuffer))
+                {
+                    continue;
+                }
+
                 // Set the vertex input layout.
                 if (!bufferManager.SetInputAssembler(vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, instanced))
                 {
@@ -193,36 +200,43 @@ namespace Engine.BuiltIn
                     mesh.Draw(Graphics);
                 }
             }
+
+            return true;
         }
         /// <inheritdoc/>
-        public virtual void Draw(BufferManager bufferManager, DrawOptions options)
+        public virtual bool Draw(BufferManager bufferManager, DrawOptions options)
         {
             if (bufferManager == null)
             {
-                return;
+                return false;
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders();
 
             // Set the index buffer
-            bufferManager.SetIndexBuffer(options.IndexBuffer);
+            if (!bufferManager.SetIndexBuffer(options.IndexBuffer))
+            {
+                return false;
+            }
 
             // Set the vertex input layout.
             if (!bufferManager.SetInputAssembler(vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
             {
-                return;
+                return false;
             }
 
             // Render the primitives.
             options.Draw(Graphics);
+
+            return true;
         }
         /// <inheritdoc/>
-        public virtual void Draw(IEngineVertexBuffer buffer, Topology topology, int drawCount)
+        public virtual bool Draw(IEngineVertexBuffer buffer, Topology topology, int drawCount)
         {
             if (buffer == null)
             {
-                return;
+                return false;
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
@@ -233,6 +247,8 @@ namespace Engine.BuiltIn
 
             // Render the primitives.
             buffer.Draw(drawCount);
+
+            return true;
         }
     }
 }

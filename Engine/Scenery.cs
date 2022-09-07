@@ -264,8 +264,6 @@ namespace Engine
                 };
                 sceneryDrawer.UpdateMaterial(materialState);
 
-                bufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
                 sceneryDrawer.Draw(bufferManager, new[] { mesh });
             }
 

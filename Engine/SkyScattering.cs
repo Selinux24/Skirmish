@@ -47,6 +47,10 @@ namespace Engine
         /// </summary>
         private BufferDescriptor indexBuffer = null;
         /// <summary>
+        /// Sky drawer
+        /// </summary>
+        private BuiltInSkyScattering skyDrawer = null;
+        /// <summary>
         /// Rayleigh scattering constant value
         /// </summary>
         private float rayleighScattering;
@@ -290,6 +294,8 @@ namespace Engine
 
             vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             indexBuffer = BufferManager.AddIndexData(name, false, indices);
+
+            skyDrawer = BuiltInShaders.GetDrawer<BuiltInSkyScattering>();
         }
 
         /// <inheritdoc/>
@@ -320,47 +326,49 @@ namespace Engine
                 return;
             }
 
+            if (skyDrawer == null)
+            {
+                return;
+            }
+
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
             }
 
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+            var skyState = new BuiltInSkyScatteringState
+            {
+                PlanetRadius = PlanetRadius,
+                PlanetAtmosphereRadius = PlanetAtmosphereRadius,
+                SphereOuterRadius = SphereOuterRadius,
+                SphereInnerRadius = SphereInnerRadius,
+                SkyBrightness = Brightness,
+                RayleighScattering = RayleighScattering,
+                RayleighScattering4PI = RayleighScattering4PI,
+                MieScattering = MieScattering,
+                MieScattering4PI = MieScattering4PI,
+                InvWaveLength4 = InvWaveLength4,
+                Scale = ScatteringScale,
+                RayleighScaleDepth = RayleighScaleDepth,
+                BackColor = context.Lights.FogColor,
+                HdrExposure = HDRExposure,
+                Samples = (uint)Resolution,
+            };
+            skyDrawer.Update(keyLight.Direction, skyState);
 
-            var drawer = BuiltInShaders.GetDrawer<BuiltInSkyScattering>();
-
-            drawer.Update(
-                keyLight.Direction,
-                new BuiltInSkyScatteringState
-                {
-                    PlanetRadius = PlanetRadius,
-                    PlanetAtmosphereRadius = PlanetAtmosphereRadius,
-                    SphereOuterRadius = SphereOuterRadius,
-                    SphereInnerRadius = SphereInnerRadius,
-                    SkyBrightness = Brightness,
-                    RayleighScattering = RayleighScattering,
-                    RayleighScattering4PI = RayleighScattering4PI,
-                    MieScattering = MieScattering,
-                    MieScattering4PI = MieScattering4PI,
-                    InvWaveLength4 = InvWaveLength4,
-                    Scale = ScatteringScale,
-                    RayleighScaleDepth = RayleighScaleDepth,
-                    BackColor = context.Lights.FogColor,
-                    HdrExposure = HDRExposure,
-                    Samples = (uint)Resolution,
-                });
-
-            BufferManager.SetIndexBuffer(indexBuffer);
-
-            drawer.Draw(BufferManager, new DrawOptions
+            var drawOptions = new DrawOptions
             {
                 Indexed = true,
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
-            });
+            };
+            if (skyDrawer.Draw(BufferManager, drawOptions))
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+            }
         }
 
         /// <summary>

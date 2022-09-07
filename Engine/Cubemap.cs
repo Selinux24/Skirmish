@@ -194,8 +194,6 @@ namespace Engine
                 return;
             }
 
-            BufferManager.SetIndexBuffer(indexBuffer);
-
             drawer.Update(texture);
 
             drawer.Draw(BufferManager, new DrawOptions
@@ -216,8 +214,6 @@ namespace Engine
             {
                 return;
             }
-
-            BufferManager.SetIndexBuffer(indexBuffer);
 
             drawer.Update(texture, TextureIndex);
 

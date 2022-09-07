@@ -431,8 +431,6 @@ namespace Engine.UI
 
             var bufferManager = BufferManager;
 
-            bufferManager.SetIndexBuffer(indexBuffer);
-
             var state = new BuiltInFontState
             {
                 Alpha = Alpha * AlphaMultplier,

@@ -379,16 +379,11 @@ namespace Engine
                 };
                 drawer.UpdateMaterial(materialState);
 
-                if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
-                {
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => IndexBuffer not set");
-                    continue;
-                }
-
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
-                drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation);
-
-                count += mesh.Count;
+                if (drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                {
+                    count += mesh.Count;
+                }
             }
 
             return count;
@@ -521,16 +516,11 @@ namespace Engine
                 };
                 drawer.UpdateMaterial(materialState);
 
-                if (!BufferManager.SetIndexBuffer(mesh.IndexBuffer))
-                {
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => IndexBuffer not set");
-                    continue;
-                }
-
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
-                drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation);
-
-                count += mesh.Count;
+                if (drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                {
+                    count += mesh.Count;
+                }
             }
 
             return count;

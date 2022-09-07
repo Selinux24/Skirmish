@@ -66,43 +66,13 @@ namespace Engine.BuiltIn.Water
                 return Marshal.SizeOf(typeof(PerWater));
             }
         }
-        /// <summary>
-        /// Per font data structure
-        /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 64)]
-        struct PerText : IBufferData
-        {
-            public static PerText Build(Matrix local)
-            {
-                return new PerText
-                {
-                    Local = Matrix.Transpose(local),
-                };
-            }
-
-            /// <summary>
-            /// Local matrix
-            /// </summary>
-            [FieldOffset(0)]
-            public Matrix Local;
-
-            /// <inheritdoc/>
-            public int GetStride()
-            {
-                return Marshal.SizeOf(typeof(PerText));
-            }
-        }
 
         #endregion
 
         /// <summary>
-        /// Per font constant buffer
+        /// Per water constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<PerWater> cbPerFont;
-        /// <summary>
-        /// Per text constant buffer
-        /// </summary>
-        private readonly EngineConstantBuffer<PerText> cbPerText;
 
         /// <summary>
         /// Constructor
@@ -114,7 +84,6 @@ namespace Engine.BuiltIn.Water
             SetPixelShader<WaterPs>();
 
             cbPerFont = new EngineConstantBuffer<PerWater>(graphics, nameof(BuiltInWater) + "." + nameof(PerWater));
-            cbPerText = new EngineConstantBuffer<PerText>(graphics, nameof(BuiltInWater) + "." + nameof(PerText));
         }
         /// <summary>
         /// Destructor
@@ -139,7 +108,6 @@ namespace Engine.BuiltIn.Water
             if (disposing)
             {
                 cbPerFont?.Dispose();
-                cbPerText?.Dispose();
             }
         }
 
