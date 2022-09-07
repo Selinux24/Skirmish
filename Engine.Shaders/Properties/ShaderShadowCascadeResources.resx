@@ -181,10 +181,10 @@
   <data name="ShadowCascade_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadershadowcascade\shadowcascade.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShadowCascade_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadowcascade\shadowcascade.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShadowTextureCascade_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadershadowcascade\shadowtexturecascade.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="ShadowTextureCascade_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadowcascade\shadowtexturecascade.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

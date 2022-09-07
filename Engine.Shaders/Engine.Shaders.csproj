@@ -396,7 +396,7 @@
     <GeometryShader Include="ShaderDefaultBasic\GPUParticles.draw.gs.hlsl" />
     <Content Include="Lib\IncBuiltIn.hlsl" />
     <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
-    <PixelShader Include="ShaderShadowCascade\ShadowCascade.ps.hlsl" />
+    <PixelShader Include="ShaderShadowCascade\ShadowTextureCascade.ps.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowCascade.gs.hlsl" />
     <VertexShader Include="ShaderShadowCascade\PositionNormalTextureTangent.vs.hlsl" />

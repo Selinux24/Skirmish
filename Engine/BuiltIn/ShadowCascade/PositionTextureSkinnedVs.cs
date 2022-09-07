@@ -1,6 +1,5 @@
 ﻿using Engine.Shaders.Properties;
 using System;
-using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.ShadowCascade
 {
@@ -37,7 +36,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionTextureSkinnedVs), "main", ShaderShadowBasicResources.PositionTextureSkinned_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionTextureSkinnedVs), "main", ShaderShadowCascadeResources.PositionTextureSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
@@ -89,7 +88,6 @@ namespace Engine.BuiltIn.ShadowCascade
             var cb = new[]
             {
                 BuiltInShaders.GetGlobal(),
-                BuiltInShaders.GetVSPerFrame(),
                 cbPerMesh,
                 cbPerMaterial,
             };

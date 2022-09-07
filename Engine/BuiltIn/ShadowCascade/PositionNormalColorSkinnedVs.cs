@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionNormalColorSkinnedVs), "main", ShaderShadowBasicResources.PositionNormalColorSkinned_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionNormalColorSkinnedVs), "main", ShaderShadowCascadeResources.PositionNormalColorSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
@@ -76,7 +76,6 @@ namespace Engine.BuiltIn.ShadowCascade
             var cb = new[]
             {
                 BuiltInShaders.GetGlobal(),
-                BuiltInShaders.GetVSPerFrame(),
                 cbPerMesh,
             };
 

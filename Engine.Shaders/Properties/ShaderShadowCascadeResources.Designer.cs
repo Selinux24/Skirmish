@@ -273,9 +273,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShadowCascade_ps {
+        public static byte[] ShadowTextureCascade_gs {
             get {
-                object obj = ResourceManager.GetObject("ShadowCascade_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("ShadowTextureCascade_gs", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -283,9 +283,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShadowTextureCascade_gs {
+        public static byte[] ShadowTextureCascade_ps {
             get {
-                object obj = ResourceManager.GetObject("ShadowTextureCascade_gs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShadowTextureCascade_ps", resourceCulture);
                 return ((byte[])(obj));
             }
         }

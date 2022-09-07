@@ -7,32 +7,37 @@ namespace Engine.BuiltIn.ShadowCascade
     using Engine.Helpers;
 
     /// <summary>
-    /// Position texture instanced vertex shader
+    /// Shadow transparent texture pixel shader
     /// </summary>
-    public class PositionTextureVsI : IBuiltInVertexShader
+    public class TextureCascadePs : IBuiltInPixelShader
     {
+        /// <inheritdoc/>
+        public EnginePixelShader Shader { get; private set; }
+
+        /// <summary>
+        /// Diffuse map resource view
+        /// </summary>
+        private EngineShaderResourceView diffuseMapArray;
+
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
-        /// <inheritdoc/>
-        public EngineVertexShader Shader { get; private set; }
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionTextureVsI(Graphics graphics)
+        public TextureCascadePs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionTextureVsI), "main", ShaderShadowCascadeResources.PositionTextureI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompilePixelShader(nameof(TextureCascadePs), "main", ShaderShadowCascadeResources.ShadowTextureCascade_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionTextureVsI()
+        ~TextureCascadePs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -56,10 +61,24 @@ namespace Engine.BuiltIn.ShadowCascade
             }
         }
 
+        /// <summary>
+        /// Sets the diffuse map array
+        /// </summary>
+        /// <param name="diffuseMapArray">Diffuse map array</param>
+        public void SetDiffuseMap(EngineShaderResourceView diffuseMapArray)
+        {
+            this.diffuseMapArray = diffuseMapArray;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
+            var rv = new[]
+            {
+                diffuseMapArray,
+            };
 
+            Graphics.SetPixelShaderResourceViews(0, rv);
         }
     }
 }

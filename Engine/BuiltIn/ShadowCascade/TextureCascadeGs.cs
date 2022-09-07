@@ -7,9 +7,9 @@ namespace Engine.BuiltIn.ShadowCascade
     using Engine.Helpers;
 
     /// <summary>
-    /// Position texture instanced vertex shader
+    /// Cascade geometry shader
     /// </summary>
-    public class PositionTextureVsI : IBuiltInVertexShader
+    public class TextureCascadeGs : IBuiltInGeometryShader
     {
         /// <summary>
         /// Graphics instance
@@ -17,22 +17,22 @@ namespace Engine.BuiltIn.ShadowCascade
         protected Graphics Graphics = null;
 
         /// <inheritdoc/>
-        public EngineVertexShader Shader { get; private set; }
+        public EngineGeometryShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public PositionTextureVsI(Graphics graphics)
+        public TextureCascadeGs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionTextureVsI), "main", ShaderShadowCascadeResources.PositionTextureI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileGeometryShader(nameof(TextureCascadeGs), "main", ShaderShadowCascadeResources.ShadowTextureCascade_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~PositionTextureVsI()
+        ~TextureCascadeGs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -59,7 +59,12 @@ namespace Engine.BuiltIn.ShadowCascade
         /// <inheritdoc/>
         public void SetShaderResources()
         {
+            var cb = new[]
+            {
+                BuiltInShaders.GetVSPerFrame(),
+            };
 
+            Graphics.SetGeometryShaderConstantBuffers(0, cb);
         }
     }
 }

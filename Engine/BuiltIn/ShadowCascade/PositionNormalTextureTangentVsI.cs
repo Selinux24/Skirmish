@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentVsI), "main", ShaderShadowBasicResources.PositionNormalTextureTangentI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentVsI), "main", ShaderShadowCascadeResources.PositionNormalTextureTangentI_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
@@ -59,12 +59,7 @@ namespace Engine.BuiltIn.ShadowCascade
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            var cb = new[]
-            {
-                BuiltInShaders.GetVSPerFrame(),
-            };
 
-            Graphics.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }
