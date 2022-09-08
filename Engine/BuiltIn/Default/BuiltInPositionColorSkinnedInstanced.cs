@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Skinned position-color instanced drawer
     /// </summary>
-    public class BuiltInPositionColorSkinnedInstanced : BuiltInDrawer, IDisposable
+    public class BuiltInPositionColorSkinnedInstanced : BuiltInDrawer
     {
         /// <summary>
         /// Per material constant buffer
@@ -23,32 +22,7 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionColorSkinnedVsI>();
             SetPixelShader<PositionColorPs>();
 
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialColor>(graphics, nameof(BuiltInPositionColorSkinnedInstanced) + "." + nameof(PerMaterialColor));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionColorSkinnedInstanced()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMaterial?.Dispose();
-            }
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialColor>();
         }
 
         /// <inheritdoc/>

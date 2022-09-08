@@ -35,7 +35,7 @@ PSShadowMapPosition main(VSVertexPositionColorSkinned input)
 		input.positionLocal,
 		positionL);
 
-    output.positionHomogeneous = positionL;
+    output.positionHomogeneous = mul(positionL, gLocal);
 
     return output;
 }

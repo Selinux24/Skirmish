@@ -370,6 +370,8 @@ namespace Engine
                     continue;
                 }
 
+                drawer.UpdateCastingLight(context);
+
                 var materialState = new BuiltInDrawerMaterialState
                 {
                     Material = material,

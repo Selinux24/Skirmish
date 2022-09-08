@@ -1,10 +1,15 @@
 #include "..\Lib\IncVertexFormats.hlsl"
 
+cbuffer cbPerMesh : register(b0)
+{
+    float4x4 gLocal;
+};
+
 PSShadowMapPosition main(VSVertexPositionNormalColor input)
 {
     PSShadowMapPosition output = (PSShadowMapPosition) 0;
 
-    output.positionHomogeneous = float4(input.positionLocal, 1.0f);
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gLocal);
 
     return output;
 }

@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Basic position-color drawer
     /// </summary>
-    public class BuiltInPositionColor : BuiltInDrawer, IDisposable
+    public class BuiltInPositionColor : BuiltInDrawer
     {
         /// <summary>
         /// Per mesh constant buffer
@@ -27,34 +26,8 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionColorVs>();
             SetPixelShader<PositionColorPs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSingle>(graphics, nameof(BuiltInPositionColor) + "." + nameof(PerMeshSingle));
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialColor>(graphics, nameof(BuiltInPositionColor) + "." + nameof(PerMaterialColor));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionColor()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-                cbPerMaterial?.Dispose();
-            }
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSingle>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialColor>();
         }
 
         /// <inheritdoc/>

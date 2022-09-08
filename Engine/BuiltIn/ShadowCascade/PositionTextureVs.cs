@@ -12,6 +12,10 @@ namespace Engine.BuiltIn.ShadowCascade
     public class PositionTextureVs : IBuiltInVertexShader
     {
         /// <summary>
+        /// Per mesh constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMesh;
+        /// <summary>
         /// Per material constant buffer
         /// </summary>
         private IEngineConstantBuffer cbPerMaterial;
@@ -32,7 +36,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionTextureVs), "main", ShaderShadowCascadeResources.PositionTexture_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader($"{nameof(ShadowCascade)}_{nameof(PositionTextureVs)}", "main", ShaderShadowCascadeResources.PositionTexture_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
@@ -62,6 +66,14 @@ namespace Engine.BuiltIn.ShadowCascade
         }
 
         /// <summary>
+        /// Sets per mesh constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMeshConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMesh = constantBuffer;
+        }
+        /// <summary>
         /// Sets per material constant buffer
         /// </summary>
         /// <param name="constantBuffer">Constant buffer</param>
@@ -75,6 +87,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             var cb = new[]
             {
+                cbPerMesh,
                 cbPerMaterial,
             };
 

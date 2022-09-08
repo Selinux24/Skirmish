@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Basic position-normal-color instanced drawer
     /// </summary>
-    public class BuiltInPositionNormalColorInstanced : BuiltInDrawer, IDisposable
+    public class BuiltInPositionNormalColorInstanced : BuiltInDrawer
     {
         /// <summary>
         /// Per aterial constant buffer
@@ -23,32 +22,7 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionNormalColorVsI>();
             SetPixelShader<PositionNormalColorPs>();
 
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialColor>(graphics, nameof(BuiltInPositionNormalColorInstanced) + "." + nameof(PerMaterialColor));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionNormalColorInstanced()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMaterial?.Dispose();
-            }
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialColor>();
         }
 
         /// <inheritdoc/>

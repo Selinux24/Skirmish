@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionColorSkinnedVsI), "main", ShaderShadowCascadeResources.PositionColorSkinnedI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader($"{nameof(ShadowCascade)}_{nameof(PositionColorSkinnedVsI)}", "main", ShaderShadowCascadeResources.PositionColorSkinnedI_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

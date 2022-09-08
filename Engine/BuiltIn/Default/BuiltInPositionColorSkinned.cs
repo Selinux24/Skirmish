@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Skinned position-color drawer
     /// </summary>
-    public class BuiltInPositionColorSkinned : BuiltInDrawer, IDisposable
+    public class BuiltInPositionColorSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Per mesh constant buffer
@@ -27,34 +26,8 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionColorSkinnedVs>();
             SetPixelShader<PositionColorPs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSkinned>(graphics, nameof(BuiltInPositionColorSkinned) + "." + nameof(PerMeshSkinned));
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialColor>(graphics, nameof(BuiltInPositionColorSkinned) + "." + nameof(PerMaterialColor));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionColorSkinned()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-                cbPerMaterial?.Dispose();
-            }
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialColor>();
         }
 
         /// <inheritdoc/>

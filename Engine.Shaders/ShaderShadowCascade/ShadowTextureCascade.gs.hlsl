@@ -1,9 +1,9 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbPerFrame : register(b0)
+cbuffer cbPerLight : register(b0)
 {
-    PerFrame gPerFrame;
+    float4x4 gFromLightViewProjection[3];
 };
 
 struct GSShadowMapTexture
@@ -26,7 +26,7 @@ void main(triangle PSShadowMapPositionTexture input[3] : SV_Position, inout Tria
 
         for (int v = 0; v < 3; v++)
         {
-            output.positionHomogeneous = mul(input[v].positionHomogeneous, gPerFrame.ViewProjection[iFace]);
+            output.positionHomogeneous = mul(input[v].positionHomogeneous, gFromLightViewProjection[iFace]);
             output.depth = input[v].depth;
             output.tex = input[v].tex;
             output.textureIndex = input[v].textureIndex;

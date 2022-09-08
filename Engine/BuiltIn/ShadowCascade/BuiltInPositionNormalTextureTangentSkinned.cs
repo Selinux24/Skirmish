@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.ShadowCascade
 {
     using Engine.Common;
@@ -7,8 +6,12 @@ namespace Engine.BuiltIn.ShadowCascade
     /// <summary>
     /// Shadow Skinned position-normal-texture-tangent drawer
     /// </summary>
-    public class BuiltInPositionNormalTextureTangentSkinned : BuiltInDrawer, IDisposable
+    public class BuiltInPositionNormalTextureTangentSkinned : BuiltInDrawer
     {
+        /// <summary>
+        /// Per light constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerCastingLight> cbPerLight;
         /// <summary>
         /// Per mesh constant buffer
         /// </summary>
@@ -25,37 +28,21 @@ namespace Engine.BuiltIn.ShadowCascade
         public BuiltInPositionNormalTextureTangentSkinned(Graphics graphics) : base(graphics)
         {
             SetVertexShader<PositionNormalTextureTangentSkinnedVs>();
+            SetGeometryShader<CascadeGs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSkinned>(graphics, nameof(BuiltInPositionNormalTextureTangentSkinned) + "." + nameof(PerMeshSkinned));
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialTexture>(graphics, nameof(BuiltInPositionNormalTextureTangentSkinned) + "." + nameof(PerMaterialTexture));
+            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLight>();
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
         }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionNormalTextureTangentSkinned()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
+
         /// <inheritdoc/>
-        public void Dispose()
+        public override void UpdateCastingLight(DrawContextShadows context)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-                cbPerMaterial?.Dispose();
-            }
-        }
+            cbPerLight.WriteData(PerCastingLight.Build(context));
 
+            var geometryShader = GetGeometryShader<CascadeGs>();
+            geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
+        }
         /// <inheritdoc/>
         public override void UpdateMesh(BuiltInDrawerMeshState state)
         {

@@ -36,7 +36,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureSkinnedVs), "main", ShaderShadowCascadeResources.PositionNormalTextureSkinned_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader($"{nameof(ShadowCascade)}_{nameof(PositionNormalTextureSkinnedVs)}", "main", ShaderShadowCascadeResources.PositionNormalTextureSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

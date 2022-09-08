@@ -1,16 +1,21 @@
 #include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbPerMaterial : register(b0)
+cbuffer cbPerMesh : register(b0)
+{
+    float4x4 gLocal;
+};
+
+cbuffer cbPerMaterial : register(b1)
 {
     uint gTextureIndex;
-    uint3 PAD01;
+    uint3 PAD11;
 };
 
 PSShadowMapPositionTexture main(VSVertexPositionNormalTexture input)
 {
     PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
 
-    output.positionHomogeneous = float4(input.positionLocal, 1.0f);
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gLocal);
     output.depth = output.positionHomogeneous;
     output.tex = input.tex;
     output.textureIndex = gTextureIndex;

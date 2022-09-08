@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.ShadowSpots
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.ShadowSpots
     /// <summary>
     /// Shadow position-texture drawer
     /// </summary>
-    public class BuiltInPositionTexture : BuiltInDrawer, IDisposable
+    public class BuiltInPositionTexture : BuiltInDrawer
     {
         /// <summary>
         /// Per mesh constant buffer
@@ -26,34 +25,8 @@ namespace Engine.BuiltIn.ShadowSpots
         {
             SetVertexShader<PositionTextureVs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSingle>(graphics, nameof(BuiltInPositionTexture) + "." + nameof(PerMeshSingle));
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialTexture>(graphics, nameof(BuiltInPositionTexture) + "." + nameof(PerMaterialTexture));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionTexture()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-                cbPerMaterial?.Dispose();
-            }
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSingle>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
         }
 
         /// <inheritdoc/>

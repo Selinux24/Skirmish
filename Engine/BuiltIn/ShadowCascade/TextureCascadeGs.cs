@@ -12,6 +12,11 @@ namespace Engine.BuiltIn.ShadowCascade
     public class TextureCascadeGs : IBuiltInGeometryShader
     {
         /// <summary>
+        /// Per light constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerCastingLight;
+
+        /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
@@ -27,7 +32,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader(nameof(TextureCascadeGs), "main", ShaderShadowCascadeResources.ShadowTextureCascade_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader($"{nameof(ShadowCascade)}_{nameof(TextureCascadeGs)}", "main", ShaderShadowCascadeResources.ShadowTextureCascade_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor
@@ -56,12 +61,21 @@ namespace Engine.BuiltIn.ShadowCascade
             }
         }
 
+        /// <summary>
+        /// Sets per mesh constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerCastingLightConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerCastingLight = constantBuffer;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
             var cb = new[]
             {
-                BuiltInShaders.GetPerFrameConstantBuffer(),
+                cbPerCastingLight,
             };
 
             Graphics.SetGeometryShaderConstantBuffers(0, cb);

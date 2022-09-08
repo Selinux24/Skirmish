@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(TextureCascadePs), "main", ShaderShadowCascadeResources.ShadowTextureCascade_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader($"{nameof(ShadowCascade)}_{nameof(TextureCascadePs)}", "main", ShaderShadowCascadeResources.ShadowTextureCascade_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

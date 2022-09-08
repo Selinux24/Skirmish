@@ -148,6 +148,11 @@ namespace Engine.BuiltIn
         }
 
         /// <inheritdoc/>
+        public virtual void UpdateCastingLight(DrawContextShadows context)
+        {
+
+        }
+        /// <inheritdoc/>
         public virtual void UpdateMesh(BuiltInDrawerMeshState state)
         {
 

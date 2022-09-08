@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.ShadowSpots
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.ShadowSpots
     /// <summary>
     /// Shadow Skinned position-normal-color drawer
     /// </summary>
-    public class BuiltInPositionNormalColorSkinned : BuiltInDrawer, IDisposable
+    public class BuiltInPositionNormalColorSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Per mesh constant buffer
@@ -22,32 +21,7 @@ namespace Engine.BuiltIn.ShadowSpots
         {
             SetVertexShader<PositionNormalColorSkinnedVs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSkinned>(graphics, nameof(BuiltInPositionNormalColorSkinned) + "." + nameof(PerMeshSkinned));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionNormalColorSkinned()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-            }
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
         }
 
         /// <inheritdoc/>

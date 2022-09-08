@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Skinned position-texture drawer
     /// </summary>
-    public class BuiltInPositionTextureSkinned : BuiltInDrawer, IDisposable
+    public class BuiltInPositionTextureSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Per mesh constant buffer
@@ -35,37 +34,11 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionTextureSkinnedVs>();
             SetPixelShader<PositionTexturePs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSkinned>(graphics, nameof(BuiltInPositionTextureSkinned) + "." + nameof(PerMeshSkinned));
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialTexture>(graphics, nameof(BuiltInPositionTextureSkinned) + "." + nameof(PerMaterialTexture));
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
 
             linear = BuiltInShaders.GetSamplerLinear();
             anisotropic = BuiltInShaders.GetSamplerAnisotropic();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionTextureSkinned()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-                cbPerMaterial?.Dispose();
-            }
         }
 
         /// <inheritdoc/>

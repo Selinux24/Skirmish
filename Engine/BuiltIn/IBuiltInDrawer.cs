@@ -10,6 +10,12 @@ namespace Engine.BuiltIn
     public interface IBuiltInDrawer
     {
         /// <summary>
+        /// Updates drawer casting light
+        /// </summary>
+        /// <param name="context">Context</param>
+        void UpdateCastingLight(DrawContextShadows context);
+
+        /// <summary>
         /// Updates drawer mesh state
         /// </summary>
         /// <param name="state">Drawer state</param>

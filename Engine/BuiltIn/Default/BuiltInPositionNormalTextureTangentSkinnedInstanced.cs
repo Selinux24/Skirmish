@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Skinned position-normal-texture-tangent instanced drawer
     /// </summary>
-    public class BuiltInPositionNormalTextureTangentSkinnedInstanced : BuiltInDrawer, IDisposable
+    public class BuiltInPositionNormalTextureTangentSkinnedInstanced : BuiltInDrawer
     {
         /// <summary>
         /// Per material constant buffer
@@ -31,35 +30,10 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionNormalTextureTangentSkinnedVsI>();
             SetPixelShader<PositionNormalTextureTangentPs>();
 
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialTexture>(graphics, nameof(BuiltInPositionNormalTextureTangentSkinnedInstanced) + "." + nameof(PerMaterialTexture));
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
 
             linear = BuiltInShaders.GetSamplerLinear();
             anisotropic = BuiltInShaders.GetSamplerAnisotropic();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionNormalTextureTangentSkinnedInstanced()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMaterial?.Dispose();
-            }
         }
 
         /// <inheritdoc/>

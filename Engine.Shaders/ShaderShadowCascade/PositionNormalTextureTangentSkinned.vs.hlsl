@@ -41,7 +41,7 @@ PSShadowMapPositionTexture main(VSVertexPositionNormalTextureTangentSkinned inpu
 		input.positionLocal,
 		positionL);
 	
-    output.positionHomogeneous = positionL;
+    output.positionHomogeneous = mul(positionL, gLocal);
     output.depth = output.positionHomogeneous;
     output.tex = input.tex;
     output.textureIndex = gTextureIndex;

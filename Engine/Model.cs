@@ -260,12 +260,6 @@ namespace Engine
                 return;
             }
 
-            var effect = context.ShadowMap.GetEffect();
-            if (effect == null)
-            {
-                return;
-            }
-
             int count = 0;
             foreach (var mesh in DrawingData.Meshes)
             {
@@ -303,6 +297,8 @@ namespace Engine
                 {
                     continue;
                 }
+
+                drawer.UpdateCastingLight(context);
 
                 var meshState = new BuiltInDrawerMeshState
                 {

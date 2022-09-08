@@ -12,6 +12,11 @@ namespace Engine.BuiltIn.ShadowCascade
     public class PositionColorVs : IBuiltInVertexShader
     {
         /// <summary>
+        /// Per mesh constant buffer
+        /// </summary>
+        private IEngineConstantBuffer cbPerMesh;
+
+        /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
@@ -27,7 +32,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionColorVs), "main", ShaderShadowCascadeResources.PositionColor_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader($"{nameof(ShadowCascade)}_{nameof(PositionColorVs)}", "main", ShaderShadowCascadeResources.PositionColor_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
@@ -56,10 +61,24 @@ namespace Engine.BuiltIn.ShadowCascade
             }
         }
 
+        /// <summary>
+        /// Sets per mesh constant buffer
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        public void SetPerMeshConstantBuffer(IEngineConstantBuffer constantBuffer)
+        {
+            cbPerMesh = constantBuffer;
+        }
+
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            // No shader resources
+            var cb = new[]
+            {
+                cbPerMesh,
+            };
+
+            Graphics.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

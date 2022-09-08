@@ -280,13 +280,12 @@ namespace Engine.BuiltIn
         /// <param name="animationPaletteWidth">Animation palette width</param>
         public static void UpdateGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
+            var cbGlobal = GetConstantBuffer<Global>();
+            cbGlobal?.WriteData(Global.Build(materialPaletteWidth, animationPaletteWidth));
+
             rvMaterialPalette = materialPalette;
             rvAnimationPalette = animationPalette;
-
-            var vsGlobal = GetConstantBuffer<Global>();
-            vsGlobal?.WriteData(Global.Build(materialPaletteWidth, animationPaletteWidth));
         }
-
         /// <summary>
         /// Gets the built-in global shaders constant buffer
         /// </summary>
@@ -320,28 +319,23 @@ namespace Engine.BuiltIn
                 return;
             }
 
-            var vsPerFrame = GetConstantBuffer<PerFrame>();
-            vsPerFrame?.WriteData(PerFrame.Build(context));
-
-            var psPerFrame = GetConstantBuffer<PerFrame>();
-            psPerFrame?.WriteData(PerFrame.Build(context));
-
-            var psHemispheric = GetConstantBuffer<PSHemispheric>();
-            psHemispheric?.WriteData(PSHemispheric.Build(context));
-            var psDirectionals = GetConstantBuffer<PSDirectional>();
-            psDirectionals?.WriteData(PSDirectional.Build(context));
-            var psSpots = GetConstantBuffer<PSSpots>();
-            psSpots?.WriteData(PSSpots.Build(context));
-            var psPoints = GetConstantBuffer<PSPoints>();
-            psPoints?.WriteData(PSPoints.Build(context));
+            var cbPerFrame = GetConstantBuffer<PerFrame>();
+            cbPerFrame?.WriteData(PerFrame.Build(context));
+            var cbHemispheric = GetConstantBuffer<PSHemispheric>();
+            cbHemispheric?.WriteData(PSHemispheric.Build(context));
+            var cbDirectionals = GetConstantBuffer<PSDirectional>();
+            cbDirectionals?.WriteData(PSDirectional.Build(context));
+            var cbSpots = GetConstantBuffer<PSSpots>();
+            cbSpots?.WriteData(PSSpots.Build(context));
+            var cbPoints = GetConstantBuffer<PSPoints>();
+            cbPoints?.WriteData(PSPoints.Build(context));
 
             rvShadowMapDir = context.ShadowMapDirectional?.Texture;
             rvShadowMapSpot = context.ShadowMapSpot?.Texture;
             rvShadowMapPoint = context.ShadowMapPoint?.Texture;
         }
-
         /// <summary>
-        /// Gets the built-in per frame shaders constant buffer
+        /// Gets the built-in per frame constant buffer
         /// </summary>
         public static IEngineConstantBuffer GetPerFrameConstantBuffer()
         {

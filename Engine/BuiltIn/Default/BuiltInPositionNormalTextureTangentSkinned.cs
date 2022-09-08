@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.Default
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn.Default
     /// <summary>
     /// Skinned position-normal-texture-tangent drawer
     /// </summary>
-    public class BuiltInPositionNormalTextureTangentSkinned : BuiltInDrawer, IDisposable
+    public class BuiltInPositionNormalTextureTangentSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Per mesh constant buffer
@@ -35,37 +34,11 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionNormalTextureTangentSkinnedVs>();
             SetPixelShader<PositionNormalTextureTangentPs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSingle>(graphics, nameof(BuiltInPositionNormalTextureTangentSkinned) + "." + nameof(PerMeshSingle));
-            cbPerMaterial = new EngineConstantBuffer<PerMaterialTexture>(graphics, nameof(BuiltInPositionNormalTextureTangentSkinned) + "." + nameof(PerMaterialTexture));
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSingle>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
 
             linear = BuiltInShaders.GetSamplerLinear();
             anisotropic = BuiltInShaders.GetSamplerAnisotropic();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionNormalTextureTangentSkinned()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-                cbPerMaterial?.Dispose();
-            }
         }
 
         /// <inheritdoc/>

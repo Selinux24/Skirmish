@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn.ShadowCascade
 {
     using Engine.Common;
@@ -7,8 +6,12 @@ namespace Engine.BuiltIn.ShadowCascade
     /// <summary>
     /// Shadow Skinned position-normal-color drawer
     /// </summary>
-    public class BuiltInPositionNormalColorSkinned : BuiltInDrawer, IDisposable
+    public class BuiltInPositionNormalColorSkinned : BuiltInDrawer
     {
+        /// <summary>
+        /// Per light constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerCastingLight> cbPerLight;
         /// <summary>
         /// Per mesh constant buffer
         /// </summary>
@@ -21,35 +24,20 @@ namespace Engine.BuiltIn.ShadowCascade
         public BuiltInPositionNormalColorSkinned(Graphics graphics) : base(graphics)
         {
             SetVertexShader<PositionNormalColorSkinnedVs>();
+            SetGeometryShader<CascadeGs>();
 
-            cbPerMesh = new EngineConstantBuffer<PerMeshSkinned>(graphics, nameof(BuiltInPositionNormalColorSkinned) + "." + nameof(PerMeshSkinned));
+            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLight>();
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
         }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInPositionNormalColorSkinned()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
+
         /// <inheritdoc/>
-        public void Dispose()
+        public override void UpdateCastingLight(DrawContextShadows context)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerMesh?.Dispose();
-            }
-        }
+            cbPerLight.WriteData(PerCastingLight.Build(context));
 
+            var geometryShader = GetGeometryShader<CascadeGs>();
+            geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
+        }
         /// <inheritdoc/>
         public override void UpdateMesh(BuiltInDrawerMeshState state)
         {

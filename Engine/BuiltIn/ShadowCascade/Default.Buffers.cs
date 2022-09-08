@@ -1,8 +1,87 @@
 ﻿using SharpDX;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.ShadowCascade
 {
+    using Engine.Common;
+
+    /// <summary>
+    /// Per-shadow casting light data structure
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = 64 * MaxCount)]
+    struct PerCastingLight : IBufferData
+    {
+        /// <summary>
+        /// Number of faces
+        /// </summary>
+        public const int MaxCount = 3;
+
+        /// <summary>
+        /// Builds the main Per-Light buffer
+        /// </summary>
+        /// <param name="context">Draw context</param>
+        public static PerCastingLight Build(DrawContextShadows context)
+        {
+            var viewProjection = context?.ShadowMap?.FromLightViewProjectionArray;
+
+            if (viewProjection?.Length > MaxCount)
+            {
+                throw new EngineException($"The matrix array must have a maximum length of {MaxCount}");
+            }
+
+            var m = new Matrix[MaxCount];
+            for (int i = 0; i < MaxCount; i++)
+            {
+                m[i] = Matrix.Transpose(viewProjection.ElementAtOrDefault(i));
+            }
+
+            return new PerCastingLight
+            {
+                FromLightViewProjection = m,
+            };
+        }
+
+        /// <summary>
+        /// View projection matrix
+        /// </summary>
+        [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxCount)]
+        public Matrix[] FromLightViewProjection;
+
+        /// <inheritdoc/>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(PerCastingLight));
+        }
+    }
+
+    /// <summary>
+    /// Per mesh single data structure
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = 64)]
+    struct PerMeshSingle : IBufferData
+    {
+        public static PerMeshSingle Build(BuiltInDrawerMeshState state)
+        {
+            return new PerMeshSingle
+            {
+                Local = Matrix.Transpose(state.Local),
+            };
+        }
+
+        /// <summary>
+        /// Local transform
+        /// </summary>
+        [FieldOffset(0)]
+        public Matrix Local;
+
+        /// <inheritdoc/>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(PerMeshSingle));
+        }
+    }
+
     /// <summary>
     /// Per mesh skinned data structure
     /// </summary>
