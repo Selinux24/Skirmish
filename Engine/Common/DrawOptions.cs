@@ -26,7 +26,13 @@ namespace Engine.Common
         /// <summary>
         /// Use indices
         /// </summary>
-        public bool Indexed { get; set; }
+        public bool Indexed
+        {
+            get
+            {
+                return IndexBuffer != null;
+            }
+        }
         /// <summary>
         /// Index buffer descriptor
         /// </summary>

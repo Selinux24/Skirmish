@@ -359,7 +359,6 @@ namespace Engine
 
             var drawOptions = new DrawOptions
             {
-                Indexed = true,
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,

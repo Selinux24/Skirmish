@@ -16,7 +16,7 @@ namespace Engine.BuiltIn.Water
         /// <summary>
         /// Per water data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 32)]
+        [StructLayout(LayoutKind.Explicit, Size = 64)]
         struct PerWater : IBufferData
         {
             public static PerWater Build(BuiltInWaterState state)

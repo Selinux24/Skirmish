@@ -198,7 +198,6 @@ namespace Engine
 
             drawer.Draw(BufferManager, new DrawOptions
             {
-                Indexed = true,
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
@@ -221,7 +220,6 @@ namespace Engine
 
             drawer.Draw(BufferManager, new DrawOptions
             {
-                Indexed = true,
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,

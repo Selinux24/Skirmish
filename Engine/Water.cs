@@ -167,7 +167,6 @@ namespace Engine
             {
                 VertexBuffer = vertexBuffer,
                 IndexBuffer = indexBuffer,
-                Indexed = true,
                 Topology = Topology.TriangleList,
             };
             waterDrawer.Draw(BufferManager, drawOptions);

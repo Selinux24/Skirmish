@@ -259,7 +259,9 @@ namespace Engine
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
+                    TintColor = Color4.White,
                     Material = material,
+                    TextureIndex = 0,
                     UseAnisotropic = true,
                 };
                 sceneryDrawer.UpdateMaterial(materialState);

@@ -454,7 +454,6 @@ namespace Engine.UI
 
                 var shOptions = new DrawOptions
                 {
-                    Indexed = true,
                     IndexBuffer = indexBuffer,
                     IndexDrawCount = count,
                     IndexBufferOffset = offset,
@@ -468,7 +467,6 @@ namespace Engine.UI
 
             var opOptions = new DrawOptions
             {
-                Indexed = true,
                 IndexBuffer = indexBuffer,
                 IndexDrawCount = count,
                 IndexBufferOffset = 0,
