@@ -74,7 +74,7 @@ namespace Engine.BuiltIn.Decals
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerDecal,
             };
 

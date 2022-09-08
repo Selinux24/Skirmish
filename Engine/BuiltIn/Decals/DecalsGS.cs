@@ -61,7 +61,7 @@ namespace Engine.BuiltIn.Decals
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
             Graphics.SetGeometryShaderConstantBuffers(0, cb);

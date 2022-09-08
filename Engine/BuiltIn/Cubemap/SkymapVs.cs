@@ -61,7 +61,7 @@ namespace Engine.BuiltIn.Cubemap
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

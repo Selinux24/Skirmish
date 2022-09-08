@@ -75,7 +75,7 @@ namespace Engine.BuiltIn.SkyScattering
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerObject,
             };
 

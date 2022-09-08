@@ -61,7 +61,7 @@ namespace Engine.BuiltIn.Water
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);

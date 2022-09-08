@@ -75,8 +75,8 @@ namespace Engine.BuiltIn.Default
         {
             var cb = new[]
             {
-                BuiltInShaders.GetGlobal(),
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetGlobalConstantBuffer(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerMaterial,
             };
 
@@ -84,8 +84,8 @@ namespace Engine.BuiltIn.Default
 
             var rv = new[]
             {
-                BuiltInShaders.GetMaterialPalette(),
-                BuiltInShaders.GetAnimationPalette(),
+                BuiltInShaders.GetMaterialPaletteResourceView(),
+                BuiltInShaders.GetAnimationPaletteResourceView(),
             };
 
             Graphics.SetVertexShaderResourceViews(0, rv);

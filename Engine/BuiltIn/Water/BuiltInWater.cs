@@ -23,11 +23,18 @@ namespace Engine.BuiltIn.Water
             {
                 return new PerWater
                 {
+                    WaveHeight = state.WaveHeight,
+                    WaveChoppy = state.WaveChoppy,
+                    WaveSpeed = state.WaveSpeed,
+                    WaveFrequency = state.WaveFrequency,
+
+                    WaterColor = state.WaterColor,
+
                     BaseColor = state.BaseColor,
-                    WaterColor = state.WaterColor.RGB(),
-                    WaterAlpha = state.WaterColor.Alpha,
-                    WaveParams = new Vector4(state.WaveHeight, state.WaveChoppy, state.WaveSpeed, state.WaveFrequency),
-                    IterParams = new Int3(state.Steps, state.GeometryIterations, state.ColorIterations),
+
+                    Steps = state.Steps,
+                    GeometryIterations = state.GeometryIterations,
+                    ColorIterations = state.ColorIterations,
                 };
             }
 
@@ -35,18 +42,19 @@ namespace Engine.BuiltIn.Water
             /// Wave parameters
             /// </summary>
             [FieldOffset(0)]
-            public Vector4 WaveParams;
+            public float WaveHeight;
+            [FieldOffset(4)]
+            public float WaveChoppy;
+            [FieldOffset(8)]
+            public float WaveSpeed;
+            [FieldOffset(12)]
+            public float WaveFrequency;
 
             /// <summary>
             /// Water color
             /// </summary>
             [FieldOffset(16)]
-            public Color3 WaterColor;
-            /// <summary>
-            /// Water alpha
-            /// </summary>
-            [FieldOffset(28)]
-            public float WaterAlpha;
+            public Color4 WaterColor;
 
             /// <summary>
             /// Base color
@@ -55,10 +63,20 @@ namespace Engine.BuiltIn.Water
             public Color3 BaseColor;
 
             /// <summary>
-            /// Iterator
+            /// Steps
             /// </summary>
             [FieldOffset(48)]
-            public Int3 IterParams;
+            public uint Steps;
+            /// <summary>
+            /// Geometry iterations
+            /// </summary>
+            [FieldOffset(52)]
+            public uint GeometryIterations;
+            /// <summary>
+            /// Color iterations
+            /// </summary>
+            [FieldOffset(56)]
+            public uint ColorIterations;
 
             /// <inheritdoc/>
             public int GetStride()
@@ -72,7 +90,7 @@ namespace Engine.BuiltIn.Water
         /// <summary>
         /// Per water constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerWater> cbPerFont;
+        private readonly EngineConstantBuffer<PerWater> cbPerWater;
 
         /// <summary>
         /// Constructor
@@ -83,7 +101,7 @@ namespace Engine.BuiltIn.Water
             SetVertexShader<WaterVs>();
             SetPixelShader<WaterPs>();
 
-            cbPerFont = new EngineConstantBuffer<PerWater>(graphics, nameof(BuiltInWater) + "." + nameof(PerWater));
+            cbPerWater = new EngineConstantBuffer<PerWater>(graphics, nameof(BuiltInWater) + "." + nameof(PerWater));
         }
         /// <summary>
         /// Destructor
@@ -107,7 +125,7 @@ namespace Engine.BuiltIn.Water
         {
             if (disposing)
             {
-                cbPerFont?.Dispose();
+                cbPerWater?.Dispose();
             }
         }
 
@@ -117,10 +135,10 @@ namespace Engine.BuiltIn.Water
         /// <param name="state">Drawer state</param>
         public void UpdateWater(BuiltInWaterState state)
         {
-            cbPerFont.WriteData(PerWater.Build(state));
+            cbPerWater.WriteData(PerWater.Build(state));
 
             var pixelShader = GetPixelShader<WaterPs>();
-            pixelShader?.SetPerWaterConstantBuffer(cbPerFont);
+            pixelShader?.SetPerWaterConstantBuffer(cbPerWater);
         }
     }
 }

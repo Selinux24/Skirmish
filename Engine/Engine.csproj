@@ -504,7 +504,6 @@
     <Compile Include="Effects\EffectShadowBase.cs" />
     <Compile Include="BuiltIn\SkyScattering\BuiltInSkyScatteringState.cs" />
     <Compile Include="Effects\EffectTerrainState.cs" />
-    <Compile Include="Effects\EffectWaterState.cs" />
     <Compile Include="FrameStatsForward.cs" />
     <Compile Include="GameLoadResourcesEventArgs.cs" />
     <Compile Include="GameLoadResourcesEventHandler.cs" />

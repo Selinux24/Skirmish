@@ -34,14 +34,14 @@ namespace Engine.BuiltIn.Water
         /// <summary>
         /// Shader steps
         /// </summary>
-        public int Steps { get; set; }
+        public uint Steps { get; set; }
         /// <summary>
         /// Geometry iterations
         /// </summary>
-        public int GeometryIterations { get; set; }
+        public uint GeometryIterations { get; set; }
         /// <summary>
         /// Color iterations
         /// </summary>
-        public int ColorIterations { get; set; }
+        public uint ColorIterations { get; set; }
     }
 }

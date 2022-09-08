@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -95,8 +94,7 @@ namespace Engine
             WaterState = new WaterState
             {
                 BaseColor = Description.BaseColor,
-                WaterColor = Description.WaterColor.RGB(),
-                WaterTransparency = Description.WaterColor.Alpha,
+                WaterColor = Description.WaterColor,
                 WaveHeight = Description.WaveHeight,
                 WaveChoppy = Description.WaveChoppy,
                 WaveSpeed = Description.WaveSpeed,
@@ -154,7 +152,7 @@ namespace Engine
             var waterState = new BuiltInWaterState
             {
                 BaseColor = WaterState.BaseColor,
-                WaterColor = new Color4(WaterState.WaterColor, WaterState.WaterTransparency),
+                WaterColor = WaterState.WaterColor,
                 WaveHeight = WaterState.WaveHeight,
                 WaveChoppy = WaterState.WaveChoppy,
                 WaveSpeed = WaterState.WaveSpeed,

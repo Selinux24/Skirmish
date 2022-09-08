@@ -97,15 +97,15 @@ namespace Engine
         /// <summary>
         /// Number of iterations to obtain the wave height
         /// </summary>
-        public int HeightmapIterations { get; set; } = 8;
+        public uint HeightmapIterations { get; set; } = 8;
         /// <summary>
         /// Number of iterations to obtain the wave shape
         /// </summary>
-        public int GeometryIterations { get; set; } = 4;
+        public uint GeometryIterations { get; set; } = 4;
         /// <summary>
         /// Number of iterations to obtain the wave color
         /// </summary>
-        public int ColorIterations { get; set; } = 6;
+        public uint ColorIterations { get; set; } = 6;
 
         /// <summary>
         /// Constructor

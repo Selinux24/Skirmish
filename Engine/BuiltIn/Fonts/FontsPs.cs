@@ -109,7 +109,7 @@ namespace Engine.BuiltIn.Fonts
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerFont,
             };
 

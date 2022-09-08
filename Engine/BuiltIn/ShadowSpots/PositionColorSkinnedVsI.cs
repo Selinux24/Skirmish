@@ -61,15 +61,15 @@ namespace Engine.BuiltIn.ShadowSpots
         {
             var cb = new[]
             {
-                BuiltInShaders.GetGlobal(),
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetGlobalConstantBuffer(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
-                BuiltInShaders.GetAnimationPalette(),
+                BuiltInShaders.GetAnimationPaletteResourceView(),
             };
 
             Graphics.SetVertexShaderResourceViews(0, rv);

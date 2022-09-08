@@ -87,7 +87,7 @@ namespace Engine.BuiltIn.ShadowSpots
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerMesh,
                 cbPerMaterial,
             };

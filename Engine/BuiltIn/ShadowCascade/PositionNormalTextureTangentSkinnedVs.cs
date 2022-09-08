@@ -87,7 +87,7 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             var cb = new[]
             {
-                BuiltInShaders.GetGlobal(),
+                BuiltInShaders.GetGlobalConstantBuffer(),
                 cbPerMesh,
                 cbPerMaterial,
             };
@@ -96,7 +96,7 @@ namespace Engine.BuiltIn.ShadowCascade
 
             var rv = new[]
             {
-                BuiltInShaders.GetAnimationPalette(),
+                BuiltInShaders.GetAnimationPaletteResourceView(),
             };
 
             Graphics.SetVertexShaderResourceViews(0, rv);

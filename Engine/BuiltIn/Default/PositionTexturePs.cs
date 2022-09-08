@@ -101,7 +101,7 @@ namespace Engine.BuiltIn.Default
         {
             var cb = new[]
             {
-                BuiltInShaders.GetPerFrame(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerFrame,
             };
 

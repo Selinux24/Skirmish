@@ -87,15 +87,15 @@ namespace Engine.BuiltIn.Default
         {
             var cb = new[]
             {
-                BuiltInShaders.GetGlobal(),
-                BuiltInShaders.GetVSPerFrame(),
+                BuiltInShaders.GetGlobalConstantBuffer(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerMesh,
                 cbPerMaterial,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
 
-            Graphics.SetVertexShaderResourceView(0, BuiltInShaders.GetMaterialPalette());
+            Graphics.SetVertexShaderResourceView(0, BuiltInShaders.GetMaterialPaletteResourceView());
         }
     }
 }

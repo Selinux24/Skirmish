@@ -74,8 +74,8 @@ namespace Engine.BuiltIn.Water
         {
             var cb = new[]
             {
-                BuiltInShaders.GetVSPerFrame(),
-                BuiltInShaders.GetPSDirectionals(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
+                BuiltInShaders.GetDirectionalsConstantBuffer(),
                 cbPerWater,
             };
 

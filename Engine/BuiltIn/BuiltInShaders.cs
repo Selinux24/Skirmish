@@ -60,23 +60,23 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Material palette resource view
         /// </summary>
-        private static EngineShaderResourceView vsGlobalMaterialPalette;
+        private static EngineShaderResourceView rvMaterialPalette;
         /// <summary>
         /// Animation palette resource view
         /// </summary>
-        private static EngineShaderResourceView vsGlobalAnimationPalette;
+        private static EngineShaderResourceView rvAnimationPalette;
         /// <summary>
         /// Directional shadow map resource view
         /// </summary>
-        private static EngineShaderResourceView psPerFrameLitShadowMapDir;
+        private static EngineShaderResourceView rvShadowMapDir;
         /// <summary>
         /// Spot shadow map resource view
         /// </summary>
-        private static EngineShaderResourceView psPerFrameLitShadowMapSpot;
+        private static EngineShaderResourceView rvShadowMapSpot;
         /// <summary>
         /// Point shadow map resource view
         /// </summary>
-        private static EngineShaderResourceView psPerFrameLitShadowMapPoint;
+        private static EngineShaderResourceView rvShadowMapPoint;
 
         /// <summary>
         /// Initializes pool
@@ -280,8 +280,8 @@ namespace Engine.BuiltIn
         /// <param name="animationPaletteWidth">Animation palette width</param>
         public static void UpdateGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
-            vsGlobalMaterialPalette = materialPalette;
-            vsGlobalAnimationPalette = animationPalette;
+            rvMaterialPalette = materialPalette;
+            rvAnimationPalette = animationPalette;
 
             var vsGlobal = GetConstantBuffer<Global>();
             vsGlobal?.WriteData(Global.Build(materialPaletteWidth, animationPaletteWidth));
@@ -290,31 +290,23 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Gets the built-in global shaders constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetGlobal()
+        public static IEngineConstantBuffer GetGlobalConstantBuffer()
         {
             return GetConstantBuffer<Global>();
         }
         /// <summary>
         /// Gets the built-in global vertex shader material palette texture
         /// </summary>
-        public static EngineShaderResourceView GetMaterialPalette()
+        public static EngineShaderResourceView GetMaterialPaletteResourceView()
         {
-            return vsGlobalMaterialPalette;
+            return rvMaterialPalette;
         }
         /// <summary>
         /// Gets the built-in global vertex shader animation palette texture
         /// </summary>
-        public static EngineShaderResourceView GetAnimationPalette()
+        public static EngineShaderResourceView GetAnimationPaletteResourceView()
         {
-            return vsGlobalAnimationPalette;
-        }
-
-        /// <summary>
-        /// Gets the built-in per frame vertex shader constant buffer
-        /// </summary>
-        public static IEngineConstantBuffer GetVSPerFrame()
-        {
-            return GetConstantBuffer<PerFrame>();
+            return rvAnimationPalette;
         }
 
         /// <summary>
@@ -343,15 +335,15 @@ namespace Engine.BuiltIn
             var psPoints = GetConstantBuffer<PSPoints>();
             psPoints?.WriteData(PSPoints.Build(context));
 
-            psPerFrameLitShadowMapDir = context.ShadowMapDirectional?.Texture;
-            psPerFrameLitShadowMapSpot = context.ShadowMapSpot?.Texture;
-            psPerFrameLitShadowMapPoint = context.ShadowMapPoint?.Texture;
+            rvShadowMapDir = context.ShadowMapDirectional?.Texture;
+            rvShadowMapSpot = context.ShadowMapSpot?.Texture;
+            rvShadowMapPoint = context.ShadowMapPoint?.Texture;
         }
 
         /// <summary>
         /// Gets the built-in per frame shaders constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetPerFrame()
+        public static IEngineConstantBuffer GetPerFrameConstantBuffer()
         {
             return GetConstantBuffer<PerFrame>();
         }
@@ -359,51 +351,51 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Gets the built-in hemispheric light pixel shader constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetPSHemispheric()
+        public static IEngineConstantBuffer GetHemisphericConstantBuffer()
         {
             return GetConstantBuffer<PSHemispheric>();
         }
         /// <summary>
         /// Gets the built-in directional lights pixel shader constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetPSDirectionals()
+        public static IEngineConstantBuffer GetDirectionalsConstantBuffer()
         {
             return GetConstantBuffer<PSDirectional>();
         }
         /// <summary>
         /// Gets the built-in spot lights pixel shader constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetPSSpots()
+        public static IEngineConstantBuffer GetSpotsConstantBuffer()
         {
             return GetConstantBuffer<PSSpots>();
         }
         /// <summary>
         /// Gets the built-in point lights pixel shader constant buffer
         /// </summary>
-        public static IEngineConstantBuffer GetPSPoints()
+        public static IEngineConstantBuffer GetPointsConstantBuffer()
         {
             return GetConstantBuffer<PSPoints>();
         }
         /// <summary>
         /// Gets the built-in global pixel shader directional shadow map
         /// </summary>
-        public static EngineShaderResourceView GetPSPerFrameLitShadowMapDir()
+        public static EngineShaderResourceView GetShadowMapDirResourceView()
         {
-            return psPerFrameLitShadowMapDir;
+            return rvShadowMapDir;
         }
         /// <summary>
         /// Gets the built-in global pixel shader sopt shadow map
         /// </summary>
-        public static EngineShaderResourceView GetPSPerFrameLitShadowMapSpot()
+        public static EngineShaderResourceView GetShadowMapSpotResourceView()
         {
-            return psPerFrameLitShadowMapSpot;
+            return rvShadowMapSpot;
         }
         /// <summary>
         /// Gets the built-in global pixel shader point shadow map
         /// </summary>
-        public static EngineShaderResourceView GetPSPerFrameLitShadowMapPoint()
+        public static EngineShaderResourceView GetShadowMapPointResourceView()
         {
-            return psPerFrameLitShadowMapPoint;
+            return rvShadowMapPoint;
         }
     }
 }

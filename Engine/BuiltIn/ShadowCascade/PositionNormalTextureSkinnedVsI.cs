@@ -61,14 +61,14 @@ namespace Engine.BuiltIn.ShadowCascade
         {
             var cb = new[]
             {
-                BuiltInShaders.GetGlobal(),
+                BuiltInShaders.GetGlobalConstantBuffer(),
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
-                BuiltInShaders.GetAnimationPalette(),
+                BuiltInShaders.GetAnimationPaletteResourceView(),
             };
 
             Graphics.SetVertexShaderResourceViews(0, rv);

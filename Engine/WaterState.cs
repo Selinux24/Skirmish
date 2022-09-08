@@ -14,11 +14,7 @@ namespace Engine
         /// <summary>
         /// Water color
         /// </summary>
-        public Color3 WaterColor { get; set; }
-        /// <summary>
-        /// Water color alpha component
-        /// </summary>
-        public float WaterTransparency { get; set; }
+        public Color4 WaterColor { get; set; }
         /// <summary>
         /// Wave heigth
         /// </summary>
@@ -38,14 +34,14 @@ namespace Engine
         /// <summary>
         /// Shader steps
         /// </summary>
-        public int Steps { get; set; }
+        public uint Steps { get; set; }
         /// <summary>
         /// Geometry iterations
         /// </summary>
-        public int GeometryIterations { get; set; }
+        public uint GeometryIterations { get; set; }
         /// <summary>
         /// Color iterations
         /// </summary>
-        public int ColorIterations { get; set; }
+        public uint ColorIterations { get; set; }
     }
 }

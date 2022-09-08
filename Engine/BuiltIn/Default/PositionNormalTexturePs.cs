@@ -89,20 +89,20 @@ namespace Engine.BuiltIn.Default
         {
             var cb = new[]
             {
-                BuiltInShaders.GetPerFrame(),
-                BuiltInShaders.GetPSHemispheric(),
-                BuiltInShaders.GetPSDirectionals(),
-                BuiltInShaders.GetPSSpots(),
-                BuiltInShaders.GetPSPoints(),
+                BuiltInShaders.GetPerFrameConstantBuffer(),
+                BuiltInShaders.GetHemisphericConstantBuffer(),
+                BuiltInShaders.GetDirectionalsConstantBuffer(),
+                BuiltInShaders.GetSpotsConstantBuffer(),
+                BuiltInShaders.GetPointsConstantBuffer(),
             };
 
             Graphics.SetPixelShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
-                BuiltInShaders.GetPSPerFrameLitShadowMapDir(),
-                BuiltInShaders.GetPSPerFrameLitShadowMapSpot(),
-                BuiltInShaders.GetPSPerFrameLitShadowMapPoint(),
+                BuiltInShaders.GetShadowMapDirResourceView(),
+                BuiltInShaders.GetShadowMapSpotResourceView(),
+                BuiltInShaders.GetShadowMapPointResourceView(),
                 diffuseMapArray,
             };
 
