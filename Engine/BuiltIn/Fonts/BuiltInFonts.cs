@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Fonts
     /// <summary>
     /// Fonts drawer
     /// </summary>
-    public class BuiltInFonts : BuiltInDrawer, IDisposable
+    public class BuiltInFonts : BuiltInDrawer
     {
         #region Buffers
 
@@ -112,34 +112,8 @@ namespace Engine.BuiltIn.Fonts
             SetVertexShader<FontsVs>();
             SetPixelShader<FontsPs>();
 
-            cbPerFont = new EngineConstantBuffer<PerFont>(graphics, nameof(BuiltInFonts) + "." + nameof(PerFont));
-            cbPerText = new EngineConstantBuffer<PerText>(graphics, nameof(BuiltInFonts) + "." + nameof(PerText));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInFonts()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerFont?.Dispose();
-                cbPerText?.Dispose();
-            }
+            cbPerFont = BuiltInShaders.GetConstantBuffer<PerFont>();
+            cbPerText = BuiltInShaders.GetConstantBuffer<PerText>();
         }
 
         /// <summary>

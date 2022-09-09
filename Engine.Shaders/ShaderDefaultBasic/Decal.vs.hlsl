@@ -1,18 +1,17 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
 cbuffer cbPerDecal : register(b1)
 {
-    float gTotalTime;
     bool gRotation;
     uint gTextureCount;
-    uint PAD11;
+    uint2 PAD11;
     
     float4 gTintColor;
 }
@@ -36,7 +35,7 @@ GSDecal main(VSVertexDecal input)
     GSDecal output;
 
     //Move to zero age and normalize from 0 to 1
-    float currentAge = gTotalTime - input.startTime;
+    float currentAge = gPerFrame.TotalTime - input.startTime;
     float normalizedAge = saturate(currentAge / input.maxAge);
     float4 rotation = 0;
     if (gRotation == true)

@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.SkyScattering
@@ -9,7 +8,7 @@ namespace Engine.BuiltIn.SkyScattering
     /// <summary>
     /// Sky scattering drawer
     /// </summary>
-    public class BuiltInSkyScattering : BuiltInDrawer, IDisposable
+    public class BuiltInSkyScattering : BuiltInDrawer
     {
         #region Buffers
 
@@ -114,32 +113,7 @@ namespace Engine.BuiltIn.SkyScattering
             SetVertexShader<SkyScatteringVs>();
             SetPixelShader<SkyScatteringPs>();
 
-            cbPerObject = new EngineConstantBuffer<PerObject>(graphics, nameof(BuiltInSkyScattering) + "." + nameof(PerObject));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInSkyScattering()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerObject?.Dispose();
-            }
+            cbPerObject = BuiltInShaders.GetConstantBuffer<PerObject>();
         }
 
         /// <summary>

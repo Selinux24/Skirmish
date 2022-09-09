@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Decals
@@ -9,7 +8,7 @@ namespace Engine.BuiltIn.Decals
     /// <summary>
     /// Decals drawer
     /// </summary>
-    public class BuiltInDecals : BuiltInDrawer, IDisposable
+    public class BuiltInDecals : BuiltInDrawer
     {
         #region Buffers
 
@@ -19,11 +18,10 @@ namespace Engine.BuiltIn.Decals
         [StructLayout(LayoutKind.Explicit, Size = 32)]
         struct PerDecal : IBufferData
         {
-            public static PerDecal Build(float totalTime, bool rotation, uint textureCount, Color4 tintColor)
+            public static PerDecal Build(bool rotation, uint textureCount, Color4 tintColor)
             {
                 return new PerDecal
                 {
-                    TotalTime = totalTime,
                     Rotation = rotation,
                     TextureCount = textureCount,
                     TintColor = tintColor,
@@ -31,19 +29,14 @@ namespace Engine.BuiltIn.Decals
             }
 
             /// <summary>
-            /// Total time
-            /// </summary>
-            [FieldOffset(0)]
-            public float TotalTime;
-            /// <summary>
             /// Rotation
             /// </summary>
-            [FieldOffset(4)]
+            [FieldOffset(0)]
             public bool Rotation;
             /// <summary>
             /// Texture count
             /// </summary>
-            [FieldOffset(8)]
+            [FieldOffset(4)]
             public uint TextureCount;
 
             /// <summary>
@@ -76,44 +69,18 @@ namespace Engine.BuiltIn.Decals
             SetGeometryShader<DecalsGS>();
             SetPixelShader<DecalsPs>();
 
-            cbPerDecal = new EngineConstantBuffer<PerDecal>(graphics, nameof(BuiltInDecals) + "." + nameof(PerDecal));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInDecals()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerDecal?.Dispose();
-            }
+            cbPerDecal = BuiltInShaders.GetConstantBuffer<PerDecal>();
         }
 
         /// <summary>
         /// Updates the particle drawer
         /// </summary>
-        /// <param name="eyePositionWorld">Eye position world</param>
-        /// <param name="state">Particle state</param>
-        /// <param name="textureCount">Texture count</param>
+        /// <param name="rotation">Rotation</param>
+        /// <param name="tintColor">Tint color</param>
         /// <param name="textures">Texture array</param>
-        public void Update(float totalTime, bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
+        public void Update(bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
         {
-            cbPerDecal.WriteData(PerDecal.Build(totalTime, rotation, textureCount, tintColor));
+            cbPerDecal.WriteData(PerDecal.Build(rotation, textureCount, tintColor));
 
             var vertexShader = GetVertexShader<DecalsVs>();
             vertexShader?.SetPerDecalConstantBuffer(cbPerDecal);

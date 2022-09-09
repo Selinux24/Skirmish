@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Water
@@ -9,7 +8,7 @@ namespace Engine.BuiltIn.Water
     /// <summary>
     /// Water drawer
     /// </summary>
-    public class BuiltInWater : BuiltInDrawer, IDisposable
+    public class BuiltInWater : BuiltInDrawer
     {
         #region Buffers
 
@@ -39,14 +38,23 @@ namespace Engine.BuiltIn.Water
             }
 
             /// <summary>
-            /// Wave parameters
+            /// Wave height
             /// </summary>
             [FieldOffset(0)]
             public float WaveHeight;
+            /// <summary>
+            /// Wave choppy
+            /// </summary>
             [FieldOffset(4)]
             public float WaveChoppy;
+            /// <summary>
+            /// Wave speed
+            /// </summary>
             [FieldOffset(8)]
             public float WaveSpeed;
+            /// <summary>
+            /// Wave frequency
+            /// </summary>
             [FieldOffset(12)]
             public float WaveFrequency;
 
@@ -101,32 +109,7 @@ namespace Engine.BuiltIn.Water
             SetVertexShader<WaterVs>();
             SetPixelShader<WaterPs>();
 
-            cbPerWater = new EngineConstantBuffer<PerWater>(graphics, nameof(BuiltInWater) + "." + nameof(PerWater));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInWater()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerWater?.Dispose();
-            }
+            cbPerWater = BuiltInShaders.GetConstantBuffer<PerWater>();
         }
 
         /// <summary>

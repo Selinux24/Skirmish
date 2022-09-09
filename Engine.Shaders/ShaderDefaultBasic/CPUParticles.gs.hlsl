@@ -1,15 +1,12 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbPerFrame : register(b0)
-{
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
-};
-
-cbuffer cbPerEmitter : register(b1)
+cbuffer cbPerEmitter : register(b0)
 {
     float gTotalTime;
-    float3 gEyePositionWorld;
+    float gMaxDuration;
+    float gMaxDurationRandomness;
+    float PAD01;
 
     bool gRotation;
     float2 gRotateSpeed;
@@ -22,11 +19,12 @@ cbuffer cbPerEmitter : register(b1)
     float2 gEndSize;
     float4 gMinColor;
     float4 gMaxColor;
-
-    float gMaxDuration;
-    float gMaxDurationRandomness;
-    float2 PAD11;
 }
+
+cbuffer cbPerFrame : register(b1)
+{
+    PerFrame gPerFrame;
+};
 
 static float2 quadTexC[4] =
 {
@@ -45,7 +43,7 @@ void main(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inout Tria
     float4 rotationWorld = input[0].rotationWorld;
 
 	//Compute the local coordinate system of the sprite relative to the world space such that the billboard is aligned with the y-axis and faces the eye.
-    float3 look = gEyePositionWorld - centerWorld;
+    float3 look = gPerFrame.EyePosition - centerWorld;
     look.y = 0.0f; // y-axis aligned, so project to xz-plane
     look = normalize(look);
     float3 up = float3(0.0f, 1.0f, 0.0f);
@@ -65,8 +63,8 @@ void main(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inout Tria
 	[unroll]
     for (int i = 0; i < 4; ++i)
     {
-        gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
-        gout.positionWorld = mul(v[i], gWorld).xyz;
+        gout.positionHomogeneous = mul(v[i], gPerFrame.ViewProjection);
+        gout.positionWorld = v[i].xyz;
         gout.tex = quadTexC[i];
         gout.color = color;
         gout.rotationWorld = rotationWorld;

@@ -1,9 +1,9 @@
+#include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
+    PerFrame gPerFrame;
 };
 
 static float2 quadTexC[4] =
@@ -43,8 +43,8 @@ void main(point GSDecal input[1], uint primID : SV_PrimitiveID, inout TriangleSt
 	[unroll]
     for (int i = 0; i < 4; ++i)
     {
-        gout.positionHomogeneous = mul(v[i], gWorldViewProjection);
-        gout.positionWorld = mul(v[i], gWorld).xyz;
+        gout.positionHomogeneous = mul(v[i], gPerFrame.ViewProjection);
+        gout.positionWorld = v[i].xyz;
         gout.rotationWorld = rotationWorld;
         gout.alpha = alpha;
         gout.tex = quadTexC[i];

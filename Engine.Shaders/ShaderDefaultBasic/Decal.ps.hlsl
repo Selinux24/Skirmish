@@ -2,10 +2,9 @@
 
 cbuffer cbPerDecal : register(b0)
 {
-    float gTotalTime;
     bool gRotation;
     uint gTextureCount;
-    uint PAD01;
+    uint2 PAD01;
     
     float4 gTintColor;
 }

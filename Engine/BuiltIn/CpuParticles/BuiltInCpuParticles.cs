@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.CpuParticles
@@ -10,22 +9,23 @@ namespace Engine.BuiltIn.CpuParticles
     /// <summary>
     /// Cubemap drawer
     /// </summary>
-    public class BuiltInCpuParticles : BuiltInDrawer, IDisposable
+    public class BuiltInCpuParticles : BuiltInDrawer
     {
         #region Buffers
 
         /// <summary>
         /// Per emitter data structure
         /// </summary>
-        [StructLayout(LayoutKind.Explicit, Size = 112)]
+        [StructLayout(LayoutKind.Explicit, Size = 96)]
         struct PerEmitter : IBufferData
         {
-            public static PerEmitter Build(Vector3 eyePositionWorld, EffectParticleState state, uint textureCount)
+            public static PerEmitter Build(EffectParticleState state, uint textureCount)
             {
                 return new PerEmitter
                 {
                     TotalTime = state.TotalTime,
-                    EyePositionWorld = eyePositionWorld,
+                    MaxDuration = state.MaxDuration,
+                    MaxDurationRandomness = state.MaxDurationRandomness,
 
                     Rotation = state.RotateSpeed != Vector2.Zero,
                     RotateSpeed = state.RotateSpeed,
@@ -39,9 +39,6 @@ namespace Engine.BuiltIn.CpuParticles
 
                     MinColor = state.MinColor,
                     MaxColor = state.MaxColor,
-
-                    MaxDuration = state.MaxDuration,
-                    MaxDurationRandomness = state.MaxDurationRandomness,
                 };
             }
 
@@ -51,10 +48,15 @@ namespace Engine.BuiltIn.CpuParticles
             [FieldOffset(0)]
             public float TotalTime;
             /// <summary>
-            /// Eye position world
+            /// Max duration
             /// </summary>
             [FieldOffset(4)]
-            public Vector3 EyePositionWorld;
+            public float MaxDuration;
+            /// <summary>
+            /// Max duration randomness
+            /// </summary>
+            [FieldOffset(8)]
+            public float MaxDurationRandomness;
 
             /// <summary>
             /// Rotation
@@ -106,17 +108,6 @@ namespace Engine.BuiltIn.CpuParticles
             [FieldOffset(80)]
             public Vector4 MaxColor;
 
-            /// <summary>
-            /// Max duration
-            /// </summary>
-            [FieldOffset(96)]
-            public float MaxDuration;
-            /// <summary>
-            /// Max duration randomness
-            /// </summary>
-            [FieldOffset(100)]
-            public float MaxDurationRandomness;
-
             /// <inheritdoc/>
             public int GetStride()
             {
@@ -141,44 +132,18 @@ namespace Engine.BuiltIn.CpuParticles
             SetGeometryShader<CpuParticlesGS>();
             SetPixelShader<CpuParticlesPs>();
 
-            cbPerEmitter = new EngineConstantBuffer<PerEmitter>(graphics, nameof(BuiltInCpuParticles) + "." + nameof(PerEmitter));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInCpuParticles()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerEmitter?.Dispose();
-            }
+            cbPerEmitter = BuiltInShaders.GetConstantBuffer<PerEmitter>();
         }
 
         /// <summary>
         /// Updates the particle drawer
         /// </summary>
-        /// <param name="eyePositionWorld">Eye position world</param>
         /// <param name="state">Particle state</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture array</param>
-        public void Update(Vector3 eyePositionWorld, EffectParticleState state, uint textureCount, EngineShaderResourceView textures)
+        public void Update(EffectParticleState state, uint textureCount, EngineShaderResourceView textures)
         {
-            cbPerEmitter.WriteData(PerEmitter.Build(eyePositionWorld, state, textureCount));
+            cbPerEmitter.WriteData(PerEmitter.Build(state, textureCount));
 
             var vertexShader = GetVertexShader<CpuParticlesVs>();
             vertexShader?.SetPerEmitterConstantBuffer(cbPerEmitter);

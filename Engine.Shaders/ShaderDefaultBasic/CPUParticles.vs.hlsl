@@ -1,15 +1,11 @@
 #include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbPerFrame : register(b0)
-{
-    float4x4 gWorld;
-    float4x4 gWorldViewProjection;
-};
-
-cbuffer cbPerEmitter : register(b1)
+cbuffer cbPerEmitter : register(b0)
 {
     float gTotalTime;
-    float3 gEyePositionWorld;
+    float gMaxDuration;
+    float gMaxDurationRandomness;
+    float PAD01;
 
     bool gRotation;
     float2 gRotateSpeed;
@@ -22,10 +18,6 @@ cbuffer cbPerEmitter : register(b1)
     float2 gEndSize;
     float4 gMinColor;
     float4 gMaxColor;
-
-    float gMaxDuration;
-    float gMaxDurationRandomness;
-    float2 PAD11;
 }
 
 float3 ComputeParticlePosition(float3 position, float3 velocity, float age, float normalizedAge)

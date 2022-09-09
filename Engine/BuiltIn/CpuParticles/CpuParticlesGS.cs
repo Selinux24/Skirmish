@@ -74,8 +74,8 @@ namespace Engine.BuiltIn.CpuParticles
         {
             var cb = new[]
             {
-                BuiltInShaders.GetPerFrameConstantBuffer(),
                 cbPerEmitter,
+                BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
             Graphics.SetGeometryShaderConstantBuffers(0, cb);

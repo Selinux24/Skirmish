@@ -237,7 +237,7 @@ namespace Engine
                 RotateSpeed = parameters.RotateSpeed,
             };
 
-            particleDrawer.Update(context.EyePosition, state, TextureCount, Texture);
+            particleDrawer.Update(state, TextureCount, Texture);
 
             particleDrawer.Draw(buffer, Topology.PointList, ActiveParticles);
         }

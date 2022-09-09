@@ -170,7 +170,6 @@ namespace Engine
             graphics.SetBlendState(BlendMode);
 
             decalDrawer.Update(
-                context.GameTime.TotalSeconds,
                 RotateDecals,
                 TextureCount,
                 TintColor,

@@ -2,24 +2,22 @@
 
 cbuffer cbPerEmitter : register(b0)
 {
-    float gTotalTime;
-    float3 gEyePositionWorld;
+	float gTotalTime;
+	float gMaxDuration;
+	float gMaxDurationRandomness;
+	float PAD01;
 
-    bool gRotation;
-    float2 gRotateSpeed;
-    uint gTextureCount;
+	bool gRotation;
+	float2 gRotateSpeed;
+	uint gTextureCount;
 
-    float3 gGravity;
-    float gEndVelocity;
+	float3 gGravity;
+	float gEndVelocity;
 
-    float2 gStartSize;
-    float2 gEndSize;
-    float4 gMinColor;
-    float4 gMaxColor;
-
-    float gMaxDuration;
-    float gMaxDurationRandomness;
-    float2 PAD11;
+	float2 gStartSize;
+	float2 gEndSize;
+	float4 gMinColor;
+	float4 gMaxColor;
 }
 
 Texture2DArray gTextureArray : register(t0);

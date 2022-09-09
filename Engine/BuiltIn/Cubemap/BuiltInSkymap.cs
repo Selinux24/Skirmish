@@ -1,5 +1,4 @@
-﻿using System;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Cubemap
 {
@@ -8,7 +7,7 @@ namespace Engine.BuiltIn.Cubemap
     /// <summary>
     /// Skymap drawer
     /// </summary>
-    public class BuiltInSkymap : BuiltInDrawer, IDisposable
+    public class BuiltInSkymap : BuiltInDrawer
     {
         #region Buffer  
 
@@ -55,32 +54,7 @@ namespace Engine.BuiltIn.Cubemap
             SetVertexShader<SkymapVs>();
             SetPixelShader<SkymapPs>();
 
-            cbPerCube = new EngineConstantBuffer<PerCube>(graphics, nameof(BuiltInSkymap) + "." + nameof(PerCube));
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~BuiltInSkymap()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                cbPerCube?.Dispose();
-            }
+            cbPerCube = BuiltInShaders.GetConstantBuffer<PerCube>();
         }
 
         /// <summary>
