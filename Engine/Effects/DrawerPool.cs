@@ -82,10 +82,6 @@ namespace Engine.Effects
             EngineShaderResourceView materialPalette, uint materialPaletteWidth,
             EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
-            GetEffect<EffectDefaultBillboard>().UpdateGlobals(
-                materialPalette, materialPaletteWidth,
-                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
-
             GetEffect<EffectDefaultFoliage>().UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);

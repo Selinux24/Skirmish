@@ -63,16 +63,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderDefaultBillboard {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultBillboard", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderDefaultClouds {
             get {
                 object obj = ResourceManager.GetObject("ShaderDefaultClouds", resourceCulture);

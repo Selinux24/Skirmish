@@ -157,9 +157,6 @@
     <EffectShader Include="Lib\IncVertexFormats.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderDefaultBillboard.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderDefaultClouds.fx" />
   </ItemGroup>
   <ItemGroup>
