@@ -136,6 +136,11 @@
     <Compile Include="Animation\AnimationPathState.cs" />
     <Compile Include="Animation\AnimationControllerEventArgs.cs" />
     <Compile Include="BasicManipulatorControllerState.cs" />
+    <Compile Include="BuiltIn\Billboard\BuiltInBillboards.cs" />
+    <Compile Include="BuiltIn\Billboard\BillboardGS.cs" />
+    <Compile Include="BuiltIn\Billboard\BillboardPs.cs" />
+    <Compile Include="BuiltIn\Billboard\BillboardVs.cs" />
+    <Compile Include="BuiltIn\Billboard\BuiltInBillboardState.cs" />
     <Compile Include="BuiltIn\BuiltInDrawerMeshState.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColor.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColorInstanced.cs" />

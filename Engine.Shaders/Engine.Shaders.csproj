@@ -391,6 +391,9 @@
     <Content Include="Lib\IncBuiltIn.hlsl" />
     <PixelShader Include="ShaderDefaultBasic\Water.ps.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\Water.vs.hlsl" />
+    <Content Include="ShaderDefaultBasic\Billboard.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\Billboard.vs.hlsl" />
+    <GeometryShader Include="ShaderDefaultBasic\Billboard.gs.hlsl" />
     <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
     <PixelShader Include="ShaderShadowCascade\ShadowTextureCascade.ps.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />

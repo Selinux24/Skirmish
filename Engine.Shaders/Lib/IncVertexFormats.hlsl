@@ -403,6 +403,24 @@ struct PSVertexPositionColor
 	float4 color : COLOR0;
 	uint materialIndex : MATERIALINDEX;
 };
+struct GSVertexBillboard2
+{
+    float3 centerWorld : POSITION;
+    float2 sizeWorld : SIZE;
+    float4 tintColor : TINTCOLOR;
+    Material material;
+};
+struct PSVertexBillboard2
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 tintColor : TINTCOLOR;
+    Material material;
+    uint primitiveID : SV_PRIMITIVEID;
+};
 struct PSVertexPositionColor2
 {
 	float4 positionHomogeneous : SV_POSITION;

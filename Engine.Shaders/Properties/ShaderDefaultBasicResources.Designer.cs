@@ -63,6 +63,36 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Billboard_gs {
+            get {
+                object obj = ResourceManager.GetObject("Billboard_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Billboard_ps {
+            get {
+                object obj = ResourceManager.GetObject("Billboard_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Billboard_vs {
+            get {
+                object obj = ResourceManager.GetObject("Billboard_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] CPUParticles_gs {
             get {
                 object obj = ResourceManager.GetObject("CPUParticles_gs", resourceCulture);
