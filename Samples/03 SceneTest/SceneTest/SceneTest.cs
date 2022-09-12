@@ -979,7 +979,6 @@ namespace SceneTest.SceneTest
         }
         private void UpdateSkyEffects()
         {
-            skyPlane.Direction = Vector2.Normalize(wind);
             skyPlane.Velocity = Math.Min(1f, MathUtil.Lerp(skyPlane.Velocity, wind.Length() / 100f, 0.001f));
         }
         private void UpdateParticles()

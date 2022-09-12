@@ -142,6 +142,10 @@
     <Compile Include="BuiltIn\Billboard\BillboardVs.cs" />
     <Compile Include="BuiltIn\Billboard\BuiltInBillboardState.cs" />
     <Compile Include="BuiltIn\BuiltInDrawerMeshState.cs" />
+    <Compile Include="BuiltIn\Clouds\BuiltInClouds.cs" />
+    <Compile Include="BuiltIn\Clouds\BuiltInCloudsState.cs" />
+    <Compile Include="BuiltIn\Clouds\CloudsPs.cs" />
+    <Compile Include="BuiltIn\Clouds\CloudsVs.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColor.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColorInstanced.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColorSkinned.cs" />
@@ -570,7 +574,6 @@
     <Compile Include="IntersectionVolumeAxisAlignedBox.cs" />
     <Compile Include="IntersectionVolumeSphere.cs" />
     <Compile Include="Effects\EffectDefaultFoliage.cs" />
-    <Compile Include="Effects\EffectDefaultClouds.cs" />
     <Compile Include="Effects\EffectPostProcess.cs" />
     <Compile Include="Effects\EffectShadowPoint.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />

@@ -127,6 +127,12 @@
   <data name="Billboard_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\billboard.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Clouds_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\clouds.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Clouds_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\clouds.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="CPUParticles_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\cpuparticles.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

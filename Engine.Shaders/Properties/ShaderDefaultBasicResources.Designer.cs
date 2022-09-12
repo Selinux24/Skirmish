@@ -93,6 +93,26 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Clouds_ps {
+            get {
+                object obj = ResourceManager.GetObject("Clouds_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Clouds_vs {
+            get {
+                object obj = ResourceManager.GetObject("Clouds_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] CPUParticles_gs {
             get {
                 object obj = ResourceManager.GetObject("CPUParticles_gs", resourceCulture);
