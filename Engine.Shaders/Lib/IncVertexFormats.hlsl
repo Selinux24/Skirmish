@@ -512,6 +512,17 @@ struct PSVertexTerrain
 	float2 tex1 : TEXCOORD1;
 	float4 color : COLOR0;
 };
+struct PSVertexTerrain2
+{
+	float4 positionHomogeneous : SV_POSITION;
+	float3 positionWorld : POSITION;
+	float3 normalWorld : NORMAL;
+	float3 tangentWorld : TANGENT;
+	float2 tex0 : TEXCOORD0;
+	float2 tex1 : TEXCOORD1;
+	float4 color : COLOR0;
+	Material material;
+};
 struct PSVertexSkyScattering
 {
 	float4 positionHomogeneous : SV_POSITION;

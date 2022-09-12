@@ -130,9 +130,6 @@
   <data name="ShaderDefaultSprite" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderdefaultsprite.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderDefaultTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdefaultterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderDeferredBasic" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderdeferredbasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

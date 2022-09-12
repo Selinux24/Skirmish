@@ -387,6 +387,28 @@ namespace Engine
                 DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMinimum);
             }
             /// <summary>
+            /// Draw
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="state">Terrain state</param>
+            public void Draw(DrawContext context, BufferManager bufferManager, BuiltIn.Terrain.BuiltInTerrainState state)
+            {
+                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+
+                var drawer = BuiltIn.BuiltInShaders.GetDrawer<BuiltIn.Terrain.BuiltInTerrain>();
+                drawer.Update(state);
+
+                var mode = context.DrawerMode;
+                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
+                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
+                DrawNodeList(bufferManager, drawer, visibleNodesLow);
+                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+            }
+            /// <summary>
             /// Draws the visible node list
             /// </summary>
             /// <param name="mode">Drawer mode</param>
@@ -421,6 +443,33 @@ namespace Engine
                                 gNode.VBDesc.BufferOffset);
                         }
                     }
+                }
+            }
+            /// <summary>
+            /// Draws the visible node list
+            /// </summary>
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="drawer">Drawer</param>
+            /// <param name="nodeList">Node list</param>
+            private void DrawNodeList(BufferManager bufferManager, BuiltIn.IBuiltInDrawer drawer, MapGridNode[] nodeList)
+            {
+                for (int i = 0; i < nodeList.Length; i++)
+                {
+                    var gNode = nodeList[i];
+                    if (gNode.IBDesc.Count <= 0)
+                    {
+                        continue;
+                    }
+
+                    drawer.Draw(bufferManager, new DrawOptions
+                    {
+                        IndexBuffer = gNode.IBDesc,
+                        VertexBuffer = gNode.VBDesc,
+                        Topology = Topology.TriangleList,
+                    });
+
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
                 }
             }
         }
@@ -821,6 +870,31 @@ namespace Engine
             {
                 mapGrid?.Draw(context, BufferManager, terrainTechnique);
             }
+            else
+            {
+                BuiltIn.Terrain.BuiltInTerrainModes mode = BuiltIn.Terrain.BuiltInTerrainModes.AlphaMap;
+                if (useAlphaMap && useSlopes) { mode = BuiltIn.Terrain.BuiltInTerrainModes.Full; }
+                if (useAlphaMap) { mode = BuiltIn.Terrain.BuiltInTerrainModes.AlphaMap; }
+                if (useSlopes) { mode = BuiltIn.Terrain.BuiltInTerrainModes.Slopes; }
+
+                var state = new BuiltIn.Terrain.BuiltInTerrainState
+                {
+                    TintColor = Color.White,
+                    MaterialIndex = terrainMaterial.ResourceIndex,
+                    Mode = mode,
+                    TextureResolution = textureResolution,
+                    Proportion = proportion,
+                    SlopeRanges = slopeRanges,
+                    AlphaMap = alphaMap,
+                    MormalMap = terrainNormalMaps,
+                    ColorTexture = colorTextures,
+                    LowResolutionTexture = terrainTexturesLR,
+                    HighResolutionTexture = terrainTexturesHR,
+                    UseAnisotropic = useAnisotropic,
+                };
+
+                mapGrid?.Draw(context, BufferManager, state);
+            }
         }
         /// <summary>
         /// Sets thecnique for terrain drawing
@@ -830,46 +904,15 @@ namespace Engine
         private EngineEffectTechnique SetTechniqueTerrain(DrawContext context)
         {
             var mode = context.DrawerMode;
-
-            EngineEffectTechnique terrainTechnique = null;
-            if (mode.HasFlag(DrawerModes.Forward)) terrainTechnique = SetTechniqueTerrainDefault(context);
-            if (mode.HasFlag(DrawerModes.Deferred)) terrainTechnique = SetTechniqueTerrainDeferred(context);
-
-            return terrainTechnique;
-        }
-        /// <summary>
-        /// Sets thecnique for terrain drawing with forward renderer
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrainDefault(DrawContext context)
-        {
-            var effect = DrawerPool.GetEffect<EffectDefaultTerrain>();
-
-            effect.UpdatePerFrame(
-                textureResolution,
-                context);
-
-            var state = new EffectTerrainState
+            if (mode.HasFlag(DrawerModes.Forward))
             {
-                UseAnisotropic = useAnisotropic,
-                NormalMap = terrainNormalMaps,
-                UseAlphaMap = useAlphaMap,
-                AlphaMap = alphaMap,
-                ColorTextures = colorTextures,
-                UseSlopes = useSlopes,
-                SlopeRanges = slopeRanges,
-                DiffuseMapLR = terrainTexturesLR,
-                DiffuseMapHR = terrainTexturesHR,
-                Proportion = proportion,
-                MaterialIndex = terrainMaterial.ResourceIndex,
-            };
+                return null;
+            }
 
-            effect.UpdatePerObject(state);
-
-            if (useAlphaMap && useSlopes) { return effect.TerrainFullForward; }
-            if (useAlphaMap) { return effect.TerrainAlphaMapForward; }
-            if (useSlopes) { return effect.TerrainSlopesForward; }
+            if (mode.HasFlag(DrawerModes.Deferred))
+            {
+                return SetTechniqueTerrainDeferred(context);
+            }
 
             return null;
         }

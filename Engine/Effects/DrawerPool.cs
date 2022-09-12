@@ -86,10 +86,6 @@ namespace Engine.Effects
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
 
-            GetEffect<EffectDefaultTerrain>().UpdateGlobals(
-                materialPalette, materialPaletteWidth,
-                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
-
             GetEffect<EffectDeferredBasic>().UpdateGlobals(animationPalette, animationPaletteWidth);
             GetEffect<EffectDeferredComposer>().UpdateGlobals(
                 materialPalette, materialPaletteWidth,

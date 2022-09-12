@@ -259,6 +259,12 @@
   <data name="SkyScattering_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\skyscattering.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Terrain_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\terrain.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Terrain_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\terrain.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Water_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\water.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

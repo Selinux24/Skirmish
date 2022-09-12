@@ -299,6 +299,10 @@
     <Compile Include="BuiltIn\Default\PositionNormalColorSkinnedVsI.cs" />
     <Compile Include="BuiltIn\Default\PositionTextureSkinnedVs.cs" />
     <Compile Include="BuiltIn\Default\PositionTextureSkinnedVsI.cs" />
+    <Compile Include="BuiltIn\Terrain\BuiltInTerrain.cs" />
+    <Compile Include="BuiltIn\Terrain\BuiltInTerrainState.cs" />
+    <Compile Include="BuiltIn\Terrain\TerrainPs.cs" />
+    <Compile Include="BuiltIn\Terrain\TerrainVs.cs" />
     <Compile Include="BuiltIn\Water\BuiltInWater.cs" />
     <Compile Include="BuiltIn\Water\BuiltInWaterState.cs" />
     <Compile Include="BuiltIn\Water\WaterPs.cs" />
@@ -377,6 +381,7 @@
     <Compile Include="BuiltIn\Default\PositionColorVs.cs" />
     <Compile Include="Effects\EffectShadowFoliageState.cs" />
     <Compile Include="BuiltIn\IBuiltInDrawer.cs" />
+    <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
@@ -507,7 +512,6 @@
     <Compile Include="Effects\EffectParticleState.cs" />
     <Compile Include="Effects\EffectShadowBase.cs" />
     <Compile Include="BuiltIn\SkyScattering\BuiltInSkyScatteringState.cs" />
-    <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="FrameStatsForward.cs" />
     <Compile Include="GameLoadResourcesEventArgs.cs" />
     <Compile Include="GameLoadResourcesEventHandler.cs" />
@@ -777,7 +781,6 @@
     <Compile Include="ISceneRenderer.cs" />
     <Compile Include="IScreenFitted.cs" />
     <Compile Include="Content\LightContent.cs" />
-    <Compile Include="Effects\EffectDefaultTerrain.cs" />
     <Compile Include="Effects\EffectDefaultSprite.cs" />
     <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="LensFlare.cs" />
@@ -838,7 +841,9 @@
     <Compile Include="Manipulator2D.cs" />
     <Compile Include="ParticleSystemGpu.cs" />
     <Compile Include="Cubemap.cs" />
-    <Compile Include="EngineForm.cs" />
+    <Compile Include="EngineForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="ModelInstanced.cs" />
     <Compile Include="SceneLightDirectional.cs" />
     <Compile Include="SceneLightPoint.cs" />

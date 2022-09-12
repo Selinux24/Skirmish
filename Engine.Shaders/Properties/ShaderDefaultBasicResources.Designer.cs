@@ -533,6 +533,26 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Terrain_ps {
+            get {
+                object obj = ResourceManager.GetObject("Terrain_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Terrain_vs {
+            get {
+                object obj = ResourceManager.GetObject("Terrain_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] Water_ps {
             get {
                 object obj = ResourceManager.GetObject("Water_ps", resourceCulture);
