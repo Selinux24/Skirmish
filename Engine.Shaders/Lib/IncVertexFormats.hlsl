@@ -358,6 +358,18 @@ struct PSVertexBillboard
 	float2 tex : TEXCOORD0;
 	uint primitiveID : SV_PRIMITIVEID;
 };
+struct PSSpriteColor
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float4 color : COLOR0;
+};
+struct PSSpriteTexture
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+};
 struct PSDecal
 {
 	float4 positionHomogeneous : SV_POSITION;

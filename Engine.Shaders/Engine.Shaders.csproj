@@ -391,6 +391,10 @@
     <GeometryShader Include="ShaderDefaultBasic\Foliage4.gs.hlsl" />
     <GeometryShader Include="ShaderDefaultBasic\Foliage8.gl.hlsl" />
     <GeometryShader Include="ShaderDefaultBasic\Foliage16.gs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\SpriteTexture.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\SpriteColor.vs.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\SpriteTexture.vs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\SpriteColor.ps.hlsl" />
     <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
     <PixelShader Include="ShaderShadowCascade\ShadowTextureCascade.ps.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />

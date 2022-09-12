@@ -603,6 +603,46 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] SpriteColor_ps {
+            get {
+                object obj = ResourceManager.GetObject("SpriteColor_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] SpriteColor_vs {
+            get {
+                object obj = ResourceManager.GetObject("SpriteColor_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] SpriteTexture_ps {
+            get {
+                object obj = ResourceManager.GetObject("SpriteTexture_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] SpriteTexture_vs {
+            get {
+                object obj = ResourceManager.GetObject("SpriteTexture_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] Terrain_ps {
             get {
                 object obj = ResourceManager.GetObject("Terrain_ps", resourceCulture);
