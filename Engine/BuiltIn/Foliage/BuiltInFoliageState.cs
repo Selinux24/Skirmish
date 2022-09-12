@@ -1,30 +1,14 @@
 ﻿using SharpDX;
 
-namespace Engine.Effects
+namespace Engine.BuiltIn.Foliage
 {
     using Engine.Common;
 
     /// <summary>
-    /// Effect foliage state
+    /// Built-in foliage state
     /// </summary>
-    public struct EffectFoliageState
+    public struct BuiltInFoliageState
     {
-        /// <summary>
-        /// Wind direction
-        /// </summary>
-        public Vector3 WindDirection { get; set; }
-        /// <summary>
-        /// Wind strength
-        /// </summary>
-        public float WindStrength { get; set; }
-        /// <summary>
-        /// Total time
-        /// </summary>
-        public float TotalTime { get; set; }
-        /// <summary>
-        /// Delta
-        /// </summary>
-        public Vector3 Delta { get; set; }
         /// <summary>
         /// Drawing start radius
         /// </summary>
@@ -34,9 +18,9 @@ namespace Engine.Effects
         /// </summary>
         public float EndRadius { get; set; }
         /// <summary>
-        /// Random texture
+        /// Tint color
         /// </summary>
-        public EngineShaderResourceView RandomTexture { get; set; }
+        public Color4 TintColor { get; set; }
         /// <summary>
         /// Material index
         /// </summary>
@@ -50,6 +34,10 @@ namespace Engine.Effects
         /// </summary>
         public uint NormalMapCount { get; set; }
         /// <summary>
+        /// Random texture
+        /// </summary>
+        public EngineShaderResourceView RandomTexture { get; set; }
+        /// <summary>
         /// Texture
         /// </summary>
         public EngineShaderResourceView Texture { get; set; }
@@ -57,5 +45,21 @@ namespace Engine.Effects
         /// Normal maps
         /// </summary>
         public EngineShaderResourceView NormalMaps { get; set; }
+        /// <summary>
+        /// Wind direction
+        /// </summary>
+        public Vector3 WindDirection { get; set; }
+        /// <summary>
+        /// Wind strength
+        /// </summary>
+        public float WindStrength { get; set; }
+        /// <summary>
+        /// Delta
+        /// </summary>
+        public Vector3 Delta { get; set; }
+        /// <summary>
+        /// Wind effect
+        /// </summary>
+        public float WindEffect { get; set; }
     }
 }

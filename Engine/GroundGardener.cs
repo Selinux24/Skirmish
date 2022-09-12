@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Foliage;
     using Engine.Collections;
     using Engine.Common;
     using Engine.Content;
@@ -511,23 +513,20 @@ namespace Engine
             /// <summary>
             /// Draws the foliage data
             /// </summary>
-            /// <param name="technique">Technique</param>
-            public void DrawFoliage(EngineEffectTechnique technique)
+            /// <param name="drawer">Drawer</param>
+            public void DrawFoliage(BuiltInFoliage drawer)
             {
-                if (vertexDrawCount > 0)
+                if (vertexDrawCount <= 0)
                 {
-                    var graphics = Game.Graphics;
-
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += vertexDrawCount / 3;
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        graphics.Draw(vertexDrawCount, VertexBuffer.BufferOffset);
-                    }
+                    return;
                 }
+
+                drawer.Draw(BufferManager, new DrawOptions
+                {
+                    VertexBuffer = VertexBuffer,
+                    VertexDrawCount = vertexDrawCount,
+                    Topology = Topology.PointList,
+                });
             }
 
             /// <summary>
@@ -603,6 +602,10 @@ namespace Engine
         /// Initialized flag
         /// </summary>
         private bool initialized = false;
+        /// <summary>
+        /// Foliage drawer
+        /// </summary>
+        private BuiltInFoliage foliageDrawer = null;
 
         /// <summary>
         /// Wind direction
@@ -709,6 +712,8 @@ namespace Engine
             {
                 foliageBuffers.Add(new FoliageBuffer(Game, BufferManager, Name));
             }
+
+            foliageDrawer = BuiltInShaders.GetDrawer<BuiltInFoliage>();
 
             initialized = true;
         }
@@ -859,15 +864,14 @@ namespace Engine
 
             foreach (var item in visibleNodes)
             {
-                DrawNode(context, item);
+                DrawNode(item);
             }
         }
         /// <summary>
         /// Draws the node
         /// </summary>
-        /// <param name="context">Context</param>
         /// <param name="item">Node</param>
-        private void DrawNode(DrawContext context, QuadTreeNode item)
+        private void DrawNode(QuadTreeNode item)
         {
             var buffers = foliageBuffers.Where(b => b.CurrentPatch?.CurrentNode == item);
             if (!buffers.Any())
@@ -877,16 +881,28 @@ namespace Engine
 
             foreach (var buffer in buffers)
             {
-                var vegetationTechnique = SetTechniqueVegetationDefault(context, buffer.CurrentPatch.Channel);
-                if (vegetationTechnique != null)
-                {
-                    BufferManager.SetInputAssembler(
-                        vegetationTechnique,
-                        buffer.VertexBuffer,
-                        Topology.PointList);
+                var channelData = foliageMapChannels[buffer.CurrentPatch.Channel];
 
-                    buffer.DrawFoliage(vegetationTechnique);
-                }
+                var state = new BuiltInFoliageState
+                {
+                    StartRadius = channelData.StartRadius,
+                    EndRadius = channelData.EndRadius,
+                    TintColor = Color4.White,
+                    MaterialIndex = foliageMaterial.ResourceIndex,
+                    TextureCount = channelData.TextureCount,
+                    NormalMapCount = channelData.NormalMapCount,
+                    RandomTexture = textureRandom,
+                    Texture = channelData.Textures,
+                    NormalMaps = channelData.NormalMaps,
+                    WindDirection = WindDirection,
+                    WindStrength = WindStrength * channelData.WindEffect,
+                    Delta = channelData.Delta,
+                    WindEffect = channelData.WindEffect,
+                };
+
+                foliageDrawer.UpdateFoliage(state);
+
+                buffer.DrawFoliage(foliageDrawer);
             }
         }
 
@@ -910,41 +926,6 @@ namespace Engine
             return cull;
         }
 
-        /// <summary>
-        /// Sets thecnique for vegetation drawing with forward renderer
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="channel">Channel</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueVegetationDefault(DrawContext context, int channel)
-        {
-            var channelData = foliageMapChannels[channel];
-
-            var effect = DrawerPool.GetEffect<EffectDefaultFoliage>();
-
-            effect.UpdatePerFrame(
-                context,
-                new EffectFoliageState
-                {
-                    WindDirection = WindDirection,
-                    WindStrength = WindStrength * channelData.WindEffect,
-                    TotalTime = windTime * channelData.WindEffect,
-                    Delta = channelData.Delta,
-                    StartRadius = channelData.StartRadius,
-                    EndRadius = channelData.EndRadius,
-                    RandomTexture = textureRandom,
-                    MaterialIndex = foliageMaterial.ResourceIndex,
-                    TextureCount = channelData.TextureCount,
-                    Texture = channelData.Textures,
-                    NormalMapCount = channelData.NormalMapCount,
-                    NormalMaps = channelData.NormalMaps,
-                });
-
-            if (channelData.Count == 1) return effect.ForwardFoliage4;
-            if (channelData.Count == 2) return effect.ForwardFoliage8;
-            if (channelData.Count == 4) return effect.ForwardFoliage16;
-            else return null;
-        }
         /// <summary>
         /// Sets thecnique for vegetation drawing in shadow mapping
         /// </summary>

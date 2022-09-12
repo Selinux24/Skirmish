@@ -157,6 +157,21 @@
   <data name="Decal_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\decal.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Foliage16_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\foliage16.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Foliage4_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\foliage4.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Foliage8_gl" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\foliage8.gl.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Foliage_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\foliage.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Foliage_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shaderdefaultbasic\foliage.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Font_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shaderdefaultbasic\font.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

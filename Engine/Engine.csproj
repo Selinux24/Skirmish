@@ -146,6 +146,11 @@
     <Compile Include="BuiltIn\Clouds\BuiltInCloudsState.cs" />
     <Compile Include="BuiltIn\Clouds\CloudsPs.cs" />
     <Compile Include="BuiltIn\Clouds\CloudsVs.cs" />
+    <Compile Include="BuiltIn\Foliage\FoliageGS.cs" />
+    <Compile Include="BuiltIn\Foliage\FoliagePs.cs" />
+    <Compile Include="BuiltIn\Foliage\FoliageVs.cs" />
+    <Compile Include="BuiltIn\Foliage\BuiltInFoliage.cs" />
+    <Compile Include="BuiltIn\Foliage\BuiltInFoliageState.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColor.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColorInstanced.cs" />
     <Compile Include="BuiltIn\ShadowCascade\BuiltInPositionColorSkinned.cs" />
@@ -512,7 +517,6 @@
     <Compile Include="Effects\BufferLightPoint.cs" />
     <Compile Include="Effects\BufferLightSpot.cs" />
     <Compile Include="FrameStatsDeferred.cs" />
-    <Compile Include="Effects\EffectFoliageState.cs" />
     <Compile Include="Effects\EffectParticleState.cs" />
     <Compile Include="Effects\EffectShadowBase.cs" />
     <Compile Include="BuiltIn\SkyScattering\BuiltInSkyScatteringState.cs" />
@@ -573,7 +577,6 @@
     <Compile Include="IntersectionVolumeFrustum.cs" />
     <Compile Include="IntersectionVolumeAxisAlignedBox.cs" />
     <Compile Include="IntersectionVolumeSphere.cs" />
-    <Compile Include="Effects\EffectDefaultFoliage.cs" />
     <Compile Include="Effects\EffectPostProcess.cs" />
     <Compile Include="Effects\EffectShadowPoint.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />

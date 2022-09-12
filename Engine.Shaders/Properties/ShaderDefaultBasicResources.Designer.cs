@@ -193,6 +193,56 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Foliage_ps {
+            get {
+                object obj = ResourceManager.GetObject("Foliage_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Foliage_vs {
+            get {
+                object obj = ResourceManager.GetObject("Foliage_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Foliage16_gs {
+            get {
+                object obj = ResourceManager.GetObject("Foliage16_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Foliage4_gs {
+            get {
+                object obj = ResourceManager.GetObject("Foliage4_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Foliage8_gl {
+            get {
+                object obj = ResourceManager.GetObject("Foliage8_gl", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] Font_ps {
             get {
                 object obj = ResourceManager.GetObject("Font_ps", resourceCulture);

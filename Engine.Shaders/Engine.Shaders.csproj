@@ -157,9 +157,6 @@
     <EffectShader Include="Lib\IncVertexFormats.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderDefaultFoliage.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderDefaultGPUParticles.fx" />
   </ItemGroup>
   <ItemGroup>
@@ -389,6 +386,11 @@
     <PixelShader Include="ShaderDefaultBasic\Terrain.ps.hlsl" />
     <PixelShader Include="ShaderDefaultBasic\Clouds.ps.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\Clouds.vs.hlsl" />
+    <PixelShader Include="ShaderDefaultBasic\Foliage.ps.hlsl" />
+    <VertexShader Include="ShaderDefaultBasic\Foliage.vs.hlsl" />
+    <GeometryShader Include="ShaderDefaultBasic\Foliage4.gs.hlsl" />
+    <GeometryShader Include="ShaderDefaultBasic\Foliage8.gl.hlsl" />
+    <GeometryShader Include="ShaderDefaultBasic\Foliage16.gs.hlsl" />
     <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
     <PixelShader Include="ShaderShadowCascade\ShadowTextureCascade.ps.hlsl" />
     <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />
