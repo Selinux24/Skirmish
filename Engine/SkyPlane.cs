@@ -55,9 +55,9 @@ namespace Engine
         /// </summary>
         private Color3 color;
         /// <summary>
-        /// Effect
+        /// Clouds drawer
         /// </summary>
-        private readonly BuiltInClouds drawEffect;
+        private BuiltInClouds cloudsDrawer;
 
         /// <summary>
         /// First layer translation
@@ -126,7 +126,7 @@ namespace Engine
         public SkyPlane(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-            drawEffect = BuiltInShaders.GetDrawer<BuiltInClouds>();
+
         }
         /// <summary>
         /// Destructor
@@ -180,6 +180,8 @@ namespace Engine
 
             vertexBuffer = BufferManager.AddVertexData(Name, false, vertices);
             indexBuffer = BufferManager.AddIndexData(Name, false, indices);
+
+            cloudsDrawer = BuiltInShaders.GetDrawer<BuiltInClouds>();
         }
 
         /// <inheritdoc/>
@@ -219,9 +221,6 @@ namespace Engine
                 return;
             }
 
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
             var state = new BuiltInCloudsState
             {
                 Perturbed = skyMode == SkyPlaneModes.Perturbed,
@@ -235,16 +234,18 @@ namespace Engine
                 Clouds1 = skyTexture1,
                 Clouds2 = skyTexture2,
             };
+            cloudsDrawer.UpdateClouds(state);
 
-            drawEffect.UpdateClouds(state);
-
-            drawEffect.Draw(BufferManager, new DrawOptions
+            var drawOptions = new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
+            };
+            cloudsDrawer.Draw(BufferManager, drawOptions);
 
-            });
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
         }
     }
 }

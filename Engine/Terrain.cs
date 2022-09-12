@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn.Terrain;
     using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
@@ -47,6 +48,10 @@ namespace Engine
             /// Updating nodes flag for asynchronous task
             /// </summary>
             private bool updatingNodes = false;
+            /// <summary>
+            /// Terrain drawer
+            /// </summary>
+            private BuiltInTerrain terrainDrawer;
 
             /// <summary>
             /// Game
@@ -96,7 +101,7 @@ namespace Engine
             {
                 MapGrid res = new MapGrid
                 {
-                    Game = game
+                    Game = game,
                 };
 
                 //Populate collections
@@ -160,6 +165,8 @@ namespace Engine
 
                     res.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
                 }
+
+                res.terrainDrawer = BuiltIn.BuiltInShaders.GetDrawer<BuiltInTerrain>();
 
                 return res;
             }
@@ -392,21 +399,19 @@ namespace Engine
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="state">Terrain state</param>
-            public void Draw(DrawContext context, BufferManager bufferManager, BuiltIn.Terrain.BuiltInTerrainState state)
+            public void Draw(DrawContext context, BufferManager bufferManager, BuiltInTerrainState state)
             {
                 var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
                 var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
                 var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
                 var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
 
-                var drawer = BuiltIn.BuiltInShaders.GetDrawer<BuiltIn.Terrain.BuiltInTerrain>();
-                drawer.Update(state);
+                terrainDrawer.Update(state);
 
-                var mode = context.DrawerMode;
-                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
-                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
-                DrawNodeList(bufferManager, drawer, visibleNodesLow);
-                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+                DrawNodeList(bufferManager, visibleNodesHigh);
+                DrawNodeList(bufferManager, visibleNodesMedium);
+                DrawNodeList(bufferManager, visibleNodesLow);
+                DrawNodeList(bufferManager, visibleNodesMinimum);
             }
             /// <summary>
             /// Draws the visible node list
@@ -449,9 +454,8 @@ namespace Engine
             /// Draws the visible node list
             /// </summary>
             /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="drawer">Drawer</param>
             /// <param name="nodeList">Node list</param>
-            private void DrawNodeList(BufferManager bufferManager, BuiltIn.IBuiltInDrawer drawer, MapGridNode[] nodeList)
+            private void DrawNodeList(BufferManager bufferManager, MapGridNode[] nodeList)
             {
                 for (int i = 0; i < nodeList.Length; i++)
                 {
@@ -461,7 +465,7 @@ namespace Engine
                         continue;
                     }
 
-                    drawer.Draw(bufferManager, new DrawOptions
+                    terrainDrawer.Draw(bufferManager, new DrawOptions
                     {
                         IndexBuffer = gNode.IBDesc,
                         VertexBuffer = gNode.VBDesc,
