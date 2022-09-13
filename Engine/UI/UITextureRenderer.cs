@@ -4,9 +4,10 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Sprites;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Render to texture control
@@ -22,13 +23,9 @@ namespace Engine.UI
         /// </summary>
         private BufferDescriptor indexBuffer = null;
         /// <summary>
-        /// View * projection for 2D projection
-        /// </summary>
-        private Matrix viewProjection;
-        /// <summary>
         /// Effect
         /// </summary>
-        private readonly EffectDefaultSprite drawEffect;
+        private readonly BuiltInSpriteTexture spriteDrawer;
 
         /// <summary>
         /// Texture
@@ -37,11 +34,11 @@ namespace Engine.UI
         /// <summary>
         /// Texture index
         /// </summary>
-        public int TextureIndex { get; set; } = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
-        /// Drawing channels
+        /// Color channel
         /// </summary>
-        public ColorChannels Channels { get; set; }
+        public ColorChannels Channel { get; set; }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -62,7 +59,7 @@ namespace Engine.UI
         public UITextureRenderer(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-            drawEffect = DrawerPool.GetEffect<EffectDefaultSprite>();
+            spriteDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -92,9 +89,7 @@ namespace Engine.UI
 
             Texture = await InitializeTexture(Description.ContentPath, Description.Textures);
             TextureIndex = Description.TextureIndex;
-            Channels = Description.Channel;
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
+            Channel = Description.Channel;
         }
         /// <summary>
         /// Initialize textures
@@ -131,47 +126,26 @@ namespace Engine.UI
                 return;
             }
 
-            var technique = drawEffect.GetTechnique(
-                VertexTypes.PositionTexture,
-                Channels);
+            spriteDrawer.UpdateSprite(new BuiltInSpriteState
+            {
+                Local = Manipulator.LocalTransform,
+                Color1 = Color4.White,
+                Texture = Texture,
+                TextureIndex = TextureIndex,
+                Channel = Channel,
+            });
+
+            spriteDrawer.Draw(BufferManager, new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            });
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
-
-            drawEffect.UpdatePerFrame(
-                Manipulator.LocalTransform,
-                viewProjection,
-                Game.Form.RenderRectangle.BottomRight);
-
-            drawEffect.UpdatePerObject(
-                Color4.White,
-                Texture,
-                TextureIndex);
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
-            }
-
             base.Draw(context);
-        }
-
-        /// <inheritdoc/>
-        public override void Resize()
-        {
-            base.Resize();
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
     }
 }

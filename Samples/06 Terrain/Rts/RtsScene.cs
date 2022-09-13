@@ -319,7 +319,7 @@ namespace Terrain.Rts
             var smDesc = UITextureRendererDescription.Default(smLeft, smTop, width, height);
             smDesc.DeferredEnabled = false;
             shadowMapDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("++DEBUG++ Shadow Map", "++DEBUG++ Shadow Map", smDesc);
-            shadowMapDrawer.Channels = ColorChannels.Red;
+            shadowMapDrawer.Channel = ColorChannels.Red;
             shadowMapDrawer.Visible = false;
 
             debugTex = await Game.ResourceManager.RequestResource(@"Rts/resources/uvtest.png");

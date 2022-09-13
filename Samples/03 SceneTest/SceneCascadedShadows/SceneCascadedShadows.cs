@@ -127,15 +127,15 @@ namespace SceneTest.SceneCascadedShadows
 
             bufferDrawer1.Texture = shadowMap;
             bufferDrawer1.TextureIndex = 0;
-            bufferDrawer1.Channels = ColorChannels.Red;
+            bufferDrawer1.Channel = ColorChannels.Red;
 
             bufferDrawer2.Texture = shadowMap;
             bufferDrawer2.TextureIndex = 1;
-            bufferDrawer2.Channels = ColorChannels.Red;
+            bufferDrawer2.Channel = ColorChannels.Red;
 
             bufferDrawer3.Texture = shadowMap;
             bufferDrawer3.TextureIndex = 2;
-            bufferDrawer3.Channels = ColorChannels.Red;
+            bufferDrawer3.Channel = ColorChannels.Red;
         }
         private void InitializeUICompleted(LoadResourcesResult res)
         {

@@ -308,6 +308,13 @@
     <Compile Include="BuiltIn\Default\PositionNormalColorSkinnedVsI.cs" />
     <Compile Include="BuiltIn\Default\PositionTextureSkinnedVs.cs" />
     <Compile Include="BuiltIn\Default\PositionTextureSkinnedVsI.cs" />
+    <Compile Include="BuiltIn\Sprites\BuiltInSpriteTexture.cs" />
+    <Compile Include="BuiltIn\Sprites\BuiltInSpriteColor.cs" />
+    <Compile Include="BuiltIn\Sprites\BuiltInSpriteState.cs" />
+    <Compile Include="BuiltIn\Sprites\SpriteTexturePs.cs" />
+    <Compile Include="BuiltIn\Sprites\SpriteColorPs.cs" />
+    <Compile Include="BuiltIn\Sprites\SpriteTextureVs.cs" />
+    <Compile Include="BuiltIn\Sprites\SpriteColorVs.cs" />
     <Compile Include="BuiltIn\Terrain\BuiltInTerrain.cs" />
     <Compile Include="BuiltIn\Terrain\BuiltInTerrainState.cs" />
     <Compile Include="BuiltIn\Terrain\TerrainPs.cs" />
@@ -401,7 +408,6 @@
     <Compile Include="Content\BuiltInMaterials.cs" />
     <Compile Include="Content\IAnimationLoader.cs" />
     <Compile Include="CubemapState.cs" />
-    <Compile Include="Effects\SpriteEffectParameters.cs" />
     <Compile Include="IGameState.cs" />
     <Compile Include="IHasGameState.cs" />
     <Compile Include="CameraState.cs" />
@@ -787,7 +793,6 @@
     <Compile Include="ISceneRenderer.cs" />
     <Compile Include="IScreenFitted.cs" />
     <Compile Include="Content\LightContent.cs" />
-    <Compile Include="Effects\EffectDefaultSprite.cs" />
     <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="LensFlare.cs" />
     <Compile Include="LevelOfDetail.cs" />
@@ -902,6 +907,7 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <Compile Include="BuiltIn\Default\Default.Buffers.cs" />
+    <Compile Include="BuiltIn\Sprites\Sprite.Buffers.cs" />
     <None Include="Engine.ruleset" />
     <None Include="Engine.snk" />
   </ItemGroup>

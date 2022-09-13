@@ -123,7 +123,7 @@ namespace Engine.UI
         /// <summary>
         /// Initial texture index
         /// </summary>
-        public int TextureIndex { get; set; } = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
         /// UV map
         /// </summary>

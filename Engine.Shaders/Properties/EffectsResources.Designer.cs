@@ -73,16 +73,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderDefaultSprite {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultSprite", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderDeferredBasic {
             get {
                 object obj = ResourceManager.GetObject("ShaderDeferredBasic", resourceCulture);

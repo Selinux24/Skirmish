@@ -4,35 +4,31 @@ namespace Engine
     /// <summary>
     /// Channel color
     /// </summary>
-    public enum ColorChannels
+    public enum ColorChannels : uint
     {
         /// <summary>
-        /// No channel selected
+        /// As is
         /// </summary>
-        None,
-        /// <summary>
-        /// All
-        /// </summary>
-        All,
+        Default = 0,
         /// <summary>
         /// Red channel
         /// </summary>
-        Red,
+        Red = 1,
         /// <summary>
         /// Green channel
         /// </summary>
-        Green,
+        Green = 2,
         /// <summary>
         /// Blue channel
         /// </summary>
-        Blue,
+        Blue = 3,
         /// <summary>
         /// Alpha channel
         /// </summary>
-        Alpha,
+        Alpha = 4,
         /// <summary>
         /// Without Alpha Channel
         /// </summary>
-        NoAlpha,
+        NoAlpha = 5,
     }
 }

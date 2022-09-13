@@ -796,7 +796,7 @@ namespace Deferred
 
             //Colors
             bufferDrawer.Texture = colorMap;
-            bufferDrawer.Channels = ColorChannels.NoAlpha;
+            bufferDrawer.Channel = ColorChannels.NoAlpha;
             help.Text = "Colors";
 
             bufferDrawer.Visible = true;
@@ -808,18 +808,18 @@ namespace Deferred
             var normalMap = Renderer.GetResource(bufferType);
 
             if (bufferDrawer.Texture == normalMap &&
-                bufferDrawer.Channels == ColorChannels.NoAlpha)
+                bufferDrawer.Channel == ColorChannels.NoAlpha)
             {
                 //Specular Power
                 bufferDrawer.Texture = normalMap;
-                bufferDrawer.Channels = ColorChannels.Alpha;
+                bufferDrawer.Channel = ColorChannels.Alpha;
                 help.Text = "Specular Power";
             }
             else
             {
                 //Normals
                 bufferDrawer.Texture = normalMap;
-                bufferDrawer.Channels = ColorChannels.NoAlpha;
+                bufferDrawer.Channel = ColorChannels.NoAlpha;
                 help.Text = "Normals";
             }
             bufferDrawer.Visible = true;
@@ -831,18 +831,18 @@ namespace Deferred
             var depthMap = Renderer.GetResource(bufferType);
 
             if (bufferDrawer.Texture == depthMap &&
-                bufferDrawer.Channels == ColorChannels.NoAlpha)
+                bufferDrawer.Channel == ColorChannels.NoAlpha)
             {
                 //Specular Factor
                 bufferDrawer.Texture = depthMap;
-                bufferDrawer.Channels = ColorChannels.Alpha;
+                bufferDrawer.Channel = ColorChannels.Alpha;
                 help.Text = "Specular Intensity";
             }
             else
             {
                 //Position
                 bufferDrawer.Texture = depthMap;
-                bufferDrawer.Channels = ColorChannels.NoAlpha;
+                bufferDrawer.Channel = ColorChannels.NoAlpha;
                 help.Text = "Position";
             }
             bufferDrawer.Visible = true;
@@ -860,12 +860,12 @@ namespace Deferred
                 {
                     bufferDrawer.Texture = shadowMap;
                     bufferDrawer.TextureIndex = 0;
-                    bufferDrawer.Channels = ColorChannels.Red;
+                    bufferDrawer.Channel = ColorChannels.Red;
                     bufferDrawer.Visible = true;
                 }
                 else
                 {
-                    int tIndex = bufferDrawer.TextureIndex;
+                    uint tIndex = bufferDrawer.TextureIndex;
                     if (!shift)
                     {
                         tIndex++;
@@ -900,7 +900,7 @@ namespace Deferred
             {
                 //Light map
                 bufferDrawer.Texture = lightMap;
-                bufferDrawer.Channels = ColorChannels.NoAlpha;
+                bufferDrawer.Channel = ColorChannels.NoAlpha;
                 bufferDrawer.Visible = true;
                 help.Text = "Light map";
             }

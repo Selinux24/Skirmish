@@ -4,20 +4,16 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Sprites;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Sprite drawer
     /// </summary>
     public sealed class Sprite : UIControl<SpriteDescription>
     {
-        /// <summary>
-        /// View * projection matrix
-        /// </summary>
-        private Matrix viewProjection;
-
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
@@ -31,9 +27,13 @@ namespace Engine.UI
         /// </summary>
         private EngineShaderResourceView spriteTexture = null;
         /// <summary>
-        /// Effect
+        /// Color drawer
         /// </summary>
-        private readonly EffectDefaultSprite drawEffect;
+        private readonly BuiltInSpriteColor spriteColorDrawer;
+        /// <summary>
+        /// Texture drawer
+        /// </summary>
+        private readonly BuiltInSpriteTexture spriteTextureDrawer;
 
         /// <summary>
         /// First color
@@ -54,7 +54,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets or sets the texture index to render
         /// </summary>
-        public int TextureIndex { get; set; }
+        public uint TextureIndex { get; set; }
         /// <summary>
         /// Use textures flag
         /// </summary>
@@ -74,7 +74,7 @@ namespace Engine.UI
         /// <summary>
         /// Draw direction
         /// </summary>
-        public int DrawDirection { get; set; }
+        public uint DrawDirection { get; set; }
         /// <summary>
         /// Use percentage drawing
         /// </summary>
@@ -105,7 +105,8 @@ namespace Engine.UI
         public Sprite(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-            drawEffect = DrawerPool.GetEffect<EffectDefaultSprite>();
+            spriteColorDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteColor>();
+            spriteTextureDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -132,7 +133,7 @@ namespace Engine.UI
             Percentage1 = Description.Percentage1;
             Percentage2 = Description.Percentage2;
             Percentage3 = Description.Percentage3;
-            DrawDirection = (int)Description.DrawDirection;
+            DrawDirection = (uint)Description.DrawDirection;
             Textured = Description.Textures?.Any() == true;
             TextureIndex = Description.TextureIndex;
 
@@ -142,8 +143,6 @@ namespace Engine.UI
             {
                 await InitializeTexture(Description.ContentPath, Description.Textures);
             }
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
         /// <summary>
         /// Initialize buffers
@@ -207,14 +206,7 @@ namespace Engine.UI
                 return;
             }
 
-            if (UsePercentage)
-            {
-                DrawPct();
-            }
-            else
-            {
-                Draw();
-            }
+            Draw();
 
             base.Draw(context);
         }
@@ -223,92 +215,61 @@ namespace Engine.UI
         /// </summary>
         private void Draw()
         {
-            var technique = drawEffect.GetTechnique(
-                Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
-                ColorChannels.All);
+            BuiltInSpriteState state;
 
-            if (!BufferManager.SetIndexBuffer(indexBuffer)) return;
-            if (!BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList)) return;
-
-            drawEffect.UpdatePerFrame(
-                GetTransform(),
-                viewProjection,
-                Game.Form.RenderRectangle.BottomRight);
-
-            var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
-            color.Alpha *= Alpha;
-
-            drawEffect.UpdatePerObject(color, spriteTexture, TextureIndex);
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
+            if (UsePercentage)
             {
-                graphics.EffectPassApply(technique, p, 0);
+                state = new BuiltInSpriteState
+                {
+                    Local = GetTransform(),
+                    Color1 = Color1,
+                    Color2 = Color2,
+                    Color3 = Color3,
+                    Color4 = Color4,
+                    UsePercentage = true,
+                    Percentage1 = Percentage1,
+                    Percentage2 = Percentage2,
+                    Percentage3 = Percentage3,
+                    Direction = DrawDirection,
+                    Texture = spriteTexture,
+                    TextureIndex = TextureIndex,
+                    RenderArea = GetRenderArea(true),
+                };
+            }
+            else
+            {
+                var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
+                color.Alpha *= Alpha;
 
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
+                state = new BuiltInSpriteState
+                {
+                    Local = GetTransform(),
+                    Color1 = color,
+                    Texture = spriteTexture,
+                    TextureIndex = TextureIndex,
+                };
+            }
+
+            var drawOptions = new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            };
+
+            if (Textured)
+            {
+                spriteTextureDrawer.UpdateSprite(state);
+                spriteTextureDrawer.Draw(BufferManager, drawOptions);
+            }
+            else
+            {
+                spriteColorDrawer.UpdateSprite(state);
+                spriteColorDrawer.Draw(BufferManager, drawOptions);
             }
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-        }
-        /// <summary>
-        /// Percentage sprite draw
-        /// </summary>
-        private void DrawPct()
-        {
-            var technique = drawEffect.GetTechniquePct(
-                Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor);
-
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
-
-            drawEffect.UpdatePerFrame(
-                GetTransform(),
-                viewProjection,
-                Game.Form.RenderRectangle.BottomRight);
-
-            var color = BaseColor;
-            color.Alpha *= Alpha;
-            var color2 = TintColor;
-            color2.Alpha *= Alpha;
-
-            var parameters = new SpriteEffectParameters(
-                new[] { Color1, Color2, Color3, Color4 },
-                new[] { Percentage1, Percentage2, Percentage3 },
-                DrawDirection,
-                GetRenderArea(true));
-
-            drawEffect.UpdatePerObjectPct(
-                parameters,
-                spriteTexture,
-                TextureIndex);
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override void Resize()
-        {
-            base.Resize();
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
         }
 
         /// <summary>

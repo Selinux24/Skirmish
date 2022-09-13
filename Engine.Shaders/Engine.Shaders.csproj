@@ -136,31 +136,28 @@
     <PixelShader Include="ShaderDefaultBasic\PositionColor.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncGBufferLights.hlsl" />
+    <Content Include="Lib\IncGBufferLights.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncHelpers.hlsl" />
+    <Content Include="Lib\IncHelpers.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncLights.hlsl" />
+    <Content Include="Lib\IncLights.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncMaterials.hlsl" />
+    <Content Include="Lib\IncMaterials.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncScattering.hlsl" />
+    <Content Include="Lib\IncScattering.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncTerrain.hlsl" />
+    <Content Include="Lib\IncTerrain.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncVertexFormats.hlsl" />
+    <Content Include="Lib\IncVertexFormats.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Effects\ShaderDefaultGPUParticles.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderDefaultSprite.fx" />
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Effects\ShaderDeferredBasic.fx" />
@@ -210,13 +207,13 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncAnimation.hlsl" />
+    <Content Include="Lib\IncAnimation.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncMatrix.hlsl" />
+    <Content Include="Lib\IncMatrix.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Lib\IncQuaternion.hlsl" />
+    <Content Include="Lib\IncQuaternion.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <VertexShader Include="ShaderDefaultBasic\PositionColor.vs.hlsl" />
@@ -376,6 +373,7 @@
     <GeometryShader Include="ShaderDefaultBasic\GPUParticles.streamout.gs.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\GPUParticles.draw.vs.hlsl" />
     <GeometryShader Include="ShaderDefaultBasic\GPUParticles.draw.gs.hlsl" />
+    <Content Include="Lib\IncSprites.hlsl" />
     <Content Include="Lib\IncBuiltIn.hlsl" />
     <PixelShader Include="ShaderDefaultBasic\Water.ps.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\Water.vs.hlsl" />

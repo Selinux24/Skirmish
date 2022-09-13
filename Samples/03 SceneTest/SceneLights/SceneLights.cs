@@ -470,7 +470,7 @@ namespace SceneTest.SceneLights
 
             bufferDrawer.Texture = buffer;
             bufferDrawer.TextureIndex = 0;
-            bufferDrawer.Channels = ColorChannels.Red;
+            bufferDrawer.Channel = ColorChannels.Red;
             bufferDrawer.Visible = true;
         }
     }

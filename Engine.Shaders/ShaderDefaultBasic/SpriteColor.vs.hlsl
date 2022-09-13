@@ -1,5 +1,4 @@
-#include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncSprites.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
@@ -9,14 +8,33 @@ cbuffer cbPerFrame : register(b0)
     PerFrame gPerFrame;
 };
 
+cbuffer cbPerSprite : register(b1)
+{
+    float4x4 gLocal;
+    float4 gSize;
+    float4 gColor1;
+    float4 gColor2;
+    float4 gColor3;
+    float4 gColor4;
+    bool gUsePct;
+    float3 gPct;
+    uint gDirection;
+    uint gChannel;
+    uint gTextureIndex;
+    bool gUseRect;
+    float4 gRectangle;
+};
+
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
-PSSpriteColor main(VSVertexPositionColor input)
+PSSpriteColor main(VSSpriteColor input)
 {
     PSSpriteColor output = (PSSpriteColor) 0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gPerFrame.ViewProjection);
+    float4x4 wvp = mul(gLocal, gPerFrame.OrthoViewProjection);
+
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), wvp);
     output.positionWorld = output.positionHomogeneous.xyz;
     output.color = input.color;
     

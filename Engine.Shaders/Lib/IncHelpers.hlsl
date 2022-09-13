@@ -17,6 +17,57 @@
 #define TWO_PI 6.28318530
 #endif
 
+#ifndef CHANNEL_ALL
+#define CHANNEL_ALL 	0
+#endif
+#ifndef CHANNEL_RED
+#define CHANNEL_RED 	1
+#endif
+#ifndef CHANNEL_GREEN
+#define CHANNEL_GREEN	2
+#endif
+#ifndef CHANNEL_BLUE
+#define CHANNEL_BLUE	3
+#endif
+#ifndef CHANNEL_ALPHA
+#define CHANNEL_ALPHA	4
+#endif
+#ifndef CHANNEL_NALPHA
+#define CHANNEL_NALPHA	5
+#endif
+
+inline float4 GetChannel(float4 color, uint channel) 
+{
+	if (channel == CHANNEL_ALL)
+	{
+		return color;
+	}
+	else if (channel == CHANNEL_RED)
+	{
+		return float4(color.rrr, 1);
+	}
+	else if (channel == CHANNEL_GREEN)
+	{
+		return float4(color.ggg, 1);
+	}
+	else if (channel == CHANNEL_BLUE)
+	{
+		return float4(color.bbb, 1);
+	}
+	else if (channel == CHANNEL_ALPHA)
+	{
+		return float4(color.aaa, 1);
+	}
+	else if (channel == CHANNEL_NALPHA)
+	{
+		return float4(color.rgb, 1);
+	}
+	else
+	{
+		return color;
+	}
+}
+
 inline float2 EncodeColor(float3 rgb24)
 {
 	// scale up to 8-bit

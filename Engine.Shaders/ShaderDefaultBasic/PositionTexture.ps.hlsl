@@ -1,25 +1,7 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncLights.hlsl"
-
-#ifndef CHANNEL_ALL
-#define CHANNEL_ALL 	0
-#endif
-#ifndef CHANNEL_RED
-#define CHANNEL_RED 	1
-#endif
-#ifndef CHANNEL_GREEN
-#define CHANNEL_GREEN	2
-#endif
-#ifndef CHANNEL_BLUE
-#define CHANNEL_BLUE	3
-#endif
-#ifndef CHANNEL_ALPHA
-#define CHANNEL_ALPHA	4
-#endif
-#ifndef CHANNEL_NALPHA
-#define CHANNEL_NALPHA	5
-#endif
+#include "..\Lib\IncHelpers.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
@@ -45,36 +27,7 @@ POSITION TEXTURE
 float4 main(PSVertexPositionTexture2 input) : SV_TARGET
 {
 	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
-
-	if(gChannel == CHANNEL_ALL)
-	{
-		color *= input.tintColor;
-	}
-	else if(gChannel == CHANNEL_RED)
-	{
-		//Grayscale of red channel
-		color = float4(color.rrr, 1);
-	}
-	else if(gChannel == CHANNEL_GREEN)
-	{
-		//Grayscale of green channel
-		color = float4(color.ggg, 1);
-	}
-	else if(gChannel == CHANNEL_BLUE)
-	{
-		//Grayscale of blue channel
-		color = float4(color.bbb, 1);
-	}
-	else if(gChannel == CHANNEL_ALPHA)
-	{
-		//Grayscale of alpha channel
-		color = float4(color.aaa, 1);
-	}
-	else if(gChannel == CHANNEL_NALPHA)
-	{
-		//Color channel
-		color = float4(color.rgb, 1);
-	}
+	color *= input.tintColor;
 
     if (gPerFrame.FogRange > 0)
 	{
@@ -82,6 +35,8 @@ float4 main(PSVertexPositionTexture2 input) : SV_TARGET
 
         color = ComputeFog(color, distToEye, gPerFrame.FogStart, gPerFrame.FogRange, gPerFrame.FogColor);
     }
+
+	color = GetChannel(color, gChannel);
 
 	return color;
 }

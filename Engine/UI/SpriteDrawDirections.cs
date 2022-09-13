@@ -4,7 +4,7 @@ namespace Engine.UI
     /// <summary>
     /// Sprite draw directions
     /// </summary>
-    public enum SpriteDrawDirections
+    public enum SpriteDrawDirections : uint
     {
         /// <summary>
         /// Horizontal, from the left to the right

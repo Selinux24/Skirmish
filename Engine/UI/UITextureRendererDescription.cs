@@ -2,8 +2,6 @@
 
 namespace Engine.UI
 {
-    using Engine.Effects;
-
     /// <summary>
     /// Minimap description
     /// </summary>
@@ -123,11 +121,11 @@ namespace Engine.UI
         /// <summary>
         /// Initial texture index
         /// </summary>
-        public int TextureIndex { get; set; } = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
         /// Channel color
         /// </summary>
-        public ColorChannels Channel { get; set; } = ColorChannels.All;
+        public ColorChannels Channel { get; set; } = ColorChannels.Default;
 
         /// <summary>
         /// Constructor

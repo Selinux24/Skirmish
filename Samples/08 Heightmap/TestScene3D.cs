@@ -1492,11 +1492,11 @@ namespace Heightmap
                 if (shadowMap != null)
                 {
                     bufferDrawer.Texture = shadowMap;
-                    bufferDrawer.Channels = ColorChannels.Red;
+                    bufferDrawer.Channel = ColorChannels.Red;
 
                     if (Game.Input.ShiftPressed)
                     {
-                        int tIndex = bufferDrawer.TextureIndex;
+                        uint tIndex = bufferDrawer.TextureIndex;
 
                         tIndex++;
                         tIndex %= 3;
