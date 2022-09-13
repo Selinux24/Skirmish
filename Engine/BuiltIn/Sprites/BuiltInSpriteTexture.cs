@@ -33,7 +33,7 @@ namespace Engine.BuiltIn.Sprites
         {
             cbPerSprite.WriteData(PerSprite.Build(state));
 
-            var vertexShader = GetVertexShader<SpriteColorVs>();
+            var vertexShader = GetVertexShader<SpriteTextureVs>();
             vertexShader?.SetPerSpriteConstantBuffer(cbPerSprite);
 
             var pixelShader = GetPixelShader<SpriteTexturePs>();

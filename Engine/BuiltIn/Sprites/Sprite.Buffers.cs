@@ -13,19 +13,14 @@ namespace Engine.BuiltIn.Sprites
         {
             return new PerSprite
             {
-                Local = state.Local,
-                Size = state.RenderArea,
+                Local = Matrix.Transpose(state.Local),
+                Size = new Vector4(state.RenderArea.X, state.RenderArea.Y, state.RenderArea.Width, state.RenderArea.Height),
                 Color1 = state.Color1,
                 Color2 = state.Color2,
                 Color3 = state.Color3,
                 Color4 = state.Color4,
                 UsePercentage = state.UsePercentage,
-                Percentage = new Vector3
-                {
-                    X = state.Percentage1,
-                    Y = state.Percentage2,
-                    Z = state.Percentage3,
-                },
+                Percentage = new Vector3(state.Percentage1, state.Percentage2, state.Percentage3),
                 Direction = state.Direction,
                 TextureIndex = state.TextureIndex,
                 Channel = (uint)state.Channel,
@@ -44,7 +39,7 @@ namespace Engine.BuiltIn.Sprites
         /// Sprite size
         /// </summary>
         [FieldOffset(64)]
-        public RectangleF Size;
+        public Vector4 Size;
 
         /// <summary>
         /// Color 1

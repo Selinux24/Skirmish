@@ -145,6 +145,9 @@
   <data name="IncScattering" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\incscattering.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="IncSprites" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incsprites.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="IncTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\incterrain.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

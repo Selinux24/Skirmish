@@ -45,5 +45,10 @@ float4 main(PSSpriteColor input) : SV_TARGET
     
     color = GetChannel(color, gChannel);
 
-    return EvaluateRect(input.positionWorld.xy, color, gPerFrame.ScreenResolution, gRectangle);
+    if (gUseRect)
+    {
+        return EvaluateRect(input.positionWorld.xy, color, gPerFrame.ScreenResolution, gRectangle);
+    }
+    
+    return color;
 }
