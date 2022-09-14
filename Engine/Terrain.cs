@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
     using Engine.BuiltIn.Terrain;
     using Engine.Collections.Generic;
     using Engine.Common;
@@ -48,10 +49,6 @@ namespace Engine
             /// Updating nodes flag for asynchronous task
             /// </summary>
             private bool updatingNodes = false;
-            /// <summary>
-            /// Terrain drawer
-            /// </summary>
-            private BuiltInTerrain terrainDrawer;
 
             /// <summary>
             /// Game
@@ -165,8 +162,6 @@ namespace Engine
 
                     res.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
                 }
-
-                res.terrainDrawer = BuiltIn.BuiltInShaders.GetDrawer<BuiltInTerrain>();
 
                 return res;
             }
@@ -357,25 +352,51 @@ namespace Engine
                 }
             }
             /// <summary>
-            /// Draw shadows 
+            /// Cull non contained nodes
+            /// </summary>
+            /// <param name="volume">Volume</param>
+            private (MapGridNode[] visibleNodesHigh, MapGridNode[] visibleNodesMedium, MapGridNode[] visibleNodesLow, MapGridNode[] visibleNodesMinimum) Cull(IIntersectionVolume volume)
+            {
+                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+
+                return (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum);
+            }
+
+            /// <summary>
+            /// Draws shadows
             /// </summary>
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="terrainTechnique">Technique for drawing</param>
-            public void DrawShadows(DrawContextShadows context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
+            /// <param name="drawer">Drawer</param>
+            public void DrawShadows(DrawContextShadows context, BufferManager bufferManager, IBuiltInDrawer drawer)
             {
-                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Frustum);
 
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesHigh);
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMedium);
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesLow);
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMinimum);
+                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
+                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
+                DrawNodeList(bufferManager, drawer, visibleNodesLow);
+                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
             }
             /// <summary>
-            /// Draw
+            /// Draws
+            /// </summary>
+            /// <param name="context">Draw context</param>
+            /// <param name="bufferManager">Buffer manager</param>
+            /// <param name="drawer">Drawer</param>
+            public void Draw(DrawContext context, BufferManager bufferManager, IBuiltInDrawer drawer)
+            {
+                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull(context.CameraVolume);
+
+                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
+                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
+                DrawNodeList(bufferManager, drawer, visibleNodesLow);
+                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+            }
+            /// <summary>
+            /// Draws
             /// </summary>
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
@@ -394,24 +415,31 @@ namespace Engine
                 DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMinimum);
             }
             /// <summary>
-            /// Draw
+            /// Draws the visible node list
             /// </summary>
-            /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="state">Terrain state</param>
-            public void Draw(DrawContext context, BufferManager bufferManager, BuiltInTerrainState state)
+            /// <param name="drawer">Drawer</param>
+            /// <param name="nodeList">Node list</param>
+            private void DrawNodeList(BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
             {
-                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                for (int i = 0; i < nodeList.Length; i++)
+                {
+                    var gNode = nodeList[i];
+                    if (gNode.IBDesc.Count <= 0)
+                    {
+                        continue;
+                    }
 
-                terrainDrawer.Update(state);
+                    drawer.Draw(bufferManager, new DrawOptions
+                    {
+                        IndexBuffer = gNode.IBDesc,
+                        VertexBuffer = gNode.VBDesc,
+                        Topology = Topology.TriangleList,
+                    });
 
-                DrawNodeList(bufferManager, visibleNodesHigh);
-                DrawNodeList(bufferManager, visibleNodesMedium);
-                DrawNodeList(bufferManager, visibleNodesLow);
-                DrawNodeList(bufferManager, visibleNodesMinimum);
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
+                }
             }
             /// <summary>
             /// Draws the visible node list
@@ -448,32 +476,6 @@ namespace Engine
                                 gNode.VBDesc.BufferOffset);
                         }
                     }
-                }
-            }
-            /// <summary>
-            /// Draws the visible node list
-            /// </summary>
-            /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="nodeList">Node list</param>
-            private void DrawNodeList(BufferManager bufferManager, MapGridNode[] nodeList)
-            {
-                for (int i = 0; i < nodeList.Length; i++)
-                {
-                    var gNode = nodeList[i];
-                    if (gNode.IBDesc.Count <= 0)
-                    {
-                        continue;
-                    }
-
-                    terrainDrawer.Draw(bufferManager, new DrawOptions
-                    {
-                        IndexBuffer = gNode.IBDesc,
-                        VertexBuffer = gNode.VBDesc,
-                        Topology = Topology.TriangleList,
-                    });
-
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
                 }
             }
         }
@@ -693,15 +695,14 @@ namespace Engine
         /// Terrain material
         /// </summary>
         private IMeshMaterial terrainMaterial;
-
         /// <summary>
-        /// Gets or sets whether use alpha mapping or not
+        /// Terrain drawer
         /// </summary>
-        private bool useAlphaMap;
+        private readonly BuiltInTerrain terrainDrawer;
         /// <summary>
-        /// Gets or sets whether use slope texturing or not
+        /// Gets or sets the terrain drawing mode
         /// </summary>
-        private bool useSlopes;
+        private BuiltInTerrainModes terrainMode;
         /// <summary>
         /// Lerping proportion between alhpa mapping and slope texturing
         /// </summary>
@@ -744,7 +745,7 @@ namespace Engine
         public Terrain(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-
+            terrainDrawer = BuiltInShaders.GetDrawer<BuiltInTerrain>();
         }
         /// <summary>
         /// Destructor
@@ -803,11 +804,15 @@ namespace Engine
                 // Read texture data
                 uvScale = Description.Heightmap.Textures.Scale;
                 uvDisplacement = Description.Heightmap.Textures.Displacement;
-                useAlphaMap = Description.Heightmap.Textures.UseAlphaMapping;
-                useSlopes = Description.Heightmap.Textures.UseSlopes;
                 proportion = Description.Heightmap.Textures.Proportion;
                 textureResolution = Description.Heightmap.Textures.Resolution;
                 slopeRanges = Description.Heightmap.Textures.SlopeRanges;
+
+                bool useAlphaMap = Description.Heightmap.Textures.UseAlphaMapping;
+                bool useSlopes = Description.Heightmap.Textures.UseSlopes;
+                terrainMode = BuiltInTerrainModes.AlphaMap;
+                if (useAlphaMap && useSlopes) { terrainMode = BuiltInTerrainModes.Full; }
+                if (useSlopes) { terrainMode = BuiltInTerrainModes.Slopes; }
 
                 await ReadHeightmapTextures(Description.Heightmap.ContentPath, Description.Heightmap.Textures);
             }
@@ -855,11 +860,13 @@ namespace Engine
                 return;
             }
 
-            var terrainTechnique = SetTechniqueTerrainShadowMap(context);
-            if (terrainTechnique != null)
+            var shadowDrawer = context.ShadowMap?.GetDrawer(VertexTypes.Terrain, false, false);
+            if (shadowDrawer == null)
             {
-                mapGrid?.DrawShadows(context, BufferManager, terrainTechnique);
+                return;
             }
+
+            mapGrid?.DrawShadows(context, BufferManager, shadowDrawer);
         }
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
@@ -873,32 +880,29 @@ namespace Engine
             if (terrainTechnique != null)
             {
                 mapGrid?.Draw(context, BufferManager, terrainTechnique);
+
+                return;
             }
-            else
+
+            var state = new BuiltInTerrainState
             {
-                BuiltIn.Terrain.BuiltInTerrainModes mode = BuiltIn.Terrain.BuiltInTerrainModes.AlphaMap;
-                if (useAlphaMap && useSlopes) { mode = BuiltIn.Terrain.BuiltInTerrainModes.Full; }
-                if (useAlphaMap) { mode = BuiltIn.Terrain.BuiltInTerrainModes.AlphaMap; }
-                if (useSlopes) { mode = BuiltIn.Terrain.BuiltInTerrainModes.Slopes; }
+                TintColor = Color.White,
+                MaterialIndex = terrainMaterial.ResourceIndex,
+                Mode = terrainMode,
+                TextureResolution = textureResolution,
+                Proportion = proportion,
+                SlopeRanges = slopeRanges,
+                AlphaMap = alphaMap,
+                MormalMap = terrainNormalMaps,
+                ColorTexture = colorTextures,
+                LowResolutionTexture = terrainTexturesLR,
+                HighResolutionTexture = terrainTexturesHR,
+                UseAnisotropic = useAnisotropic,
+            };
 
-                var state = new BuiltIn.Terrain.BuiltInTerrainState
-                {
-                    TintColor = Color.White,
-                    MaterialIndex = terrainMaterial.ResourceIndex,
-                    Mode = mode,
-                    TextureResolution = textureResolution,
-                    Proportion = proportion,
-                    SlopeRanges = slopeRanges,
-                    AlphaMap = alphaMap,
-                    MormalMap = terrainNormalMaps,
-                    ColorTexture = colorTextures,
-                    LowResolutionTexture = terrainTexturesLR,
-                    HighResolutionTexture = terrainTexturesHR,
-                    UseAnisotropic = useAnisotropic,
-                };
+            terrainDrawer.Update(state);
 
-                mapGrid?.Draw(context, BufferManager, state);
-            }
+            mapGrid?.Draw(context, BufferManager, terrainDrawer);
         }
         /// <summary>
         /// Sets thecnique for terrain drawing
@@ -913,21 +917,24 @@ namespace Engine
                 return null;
             }
 
-            if (mode.HasFlag(DrawerModes.Deferred))
+            if (!mode.HasFlag(DrawerModes.Deferred))
             {
-                return SetTechniqueTerrainDeferred(context);
+                return null;
             }
 
-            return null;
-        }
-        /// <summary>
-        /// Sets thecnique for terrain drawing with deferred renderer
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrainDeferred(DrawContext context)
-        {
             var effect = DrawerPool.GetEffect<EffectDeferredTerrain>();
+
+            bool useAlphaMap = terrainMode == BuiltInTerrainModes.AlphaMap || terrainMode == BuiltInTerrainModes.Full;
+            bool useSlopes = terrainMode == BuiltInTerrainModes.Slopes || terrainMode == BuiltInTerrainModes.Full;
+
+            EngineEffectTechnique technique = null;
+            if (useAlphaMap && useSlopes) { technique = effect.TerrainFullDeferred; }
+            if (useAlphaMap) { technique = effect.TerrainAlphaMapDeferred; }
+            if (useSlopes) { technique = effect.TerrainSlopesDeferred; }
+            if (technique == null)
+            {
+                return null;
+            }
 
             effect.UpdatePerFrame(
                 context.ViewProjection,
@@ -950,24 +957,7 @@ namespace Engine
 
             effect.UpdatePerObject(state);
 
-            if (useAlphaMap && useSlopes) { return effect.TerrainFullDeferred; }
-            if (useAlphaMap) { return effect.TerrainAlphaMapDeferred; }
-            if (useSlopes) { return effect.TerrainSlopesDeferred; }
-
-            return null;
-        }
-        /// <summary>
-        /// Sets thecnique for terrain drawing in shadow mapping
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrainShadowMap(DrawContextShadows context)
-        {
-            var effect = DrawerPool.GetEffect<EffectShadowTerrain>();
-
-            effect.UpdatePerFrame(context.ViewProjection);
-
-            return effect.TerrainShadowMap;
+            return technique;
         }
 
         /// <summary>

@@ -151,13 +151,7 @@
   <data name="ShaderPostProcess" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderpostprocess.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderShadowBillboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shadershadowbillboard.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderShadowFoliage" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shadershadowfoliage.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderShadowTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shadershadowterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

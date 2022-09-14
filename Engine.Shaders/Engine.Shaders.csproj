@@ -106,6 +106,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\EffectsResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EffectsResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\LibResources.Designer.cs">
       <DependentUpon>LibResources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -113,11 +118,6 @@
     </Compile>
     <Compile Include="Properties\ShaderDefaultBasicResources.Designer.cs">
       <DependentUpon>ShaderDefaultBasicResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Properties\EffectsResources.Designer.cs">
-      <DependentUpon>EffectsResources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
@@ -187,13 +187,7 @@
     <EffectShader Include="Effects\ShaderPostProcess.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderShadowBillboard.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderShadowFoliage.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderShadowTerrain.fx" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.HLSL.CSharpVB">
@@ -344,8 +338,8 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\EffectsResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>EffectsResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>EffectsResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\ShaderShadowsResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>

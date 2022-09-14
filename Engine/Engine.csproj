@@ -522,9 +522,7 @@
     <Compile Include="IntersectionVolumeSphere.cs" />
     <Compile Include="Effects\EffectPostProcess.cs" />
     <Compile Include="Effects\EffectShadowFoliage.cs" />
-    <Compile Include="Effects\EffectShadowBillboard.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
-    <Compile Include="Effects\EffectShadowTerrain.cs" />
     <Compile Include="Effects\IGeometryDrawer.cs" />
     <Compile Include="Effects\IShadowMapDrawer.cs" />
     <Compile Include="FoliageMap.cs" />

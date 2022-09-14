@@ -173,29 +173,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderShadowBillboard {
-            get {
-                object obj = ResourceManager.GetObject("ShaderShadowBillboard", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderShadowFoliage {
             get {
                 object obj = ResourceManager.GetObject("ShaderShadowFoliage", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] ShaderShadowTerrain {
-            get {
-                object obj = ResourceManager.GetObject("ShaderShadowTerrain", resourceCulture);
                 return ((byte[])(obj));
             }
         }
