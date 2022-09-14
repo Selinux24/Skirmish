@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Default
         /// <summary>
         /// Per mesh constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerMeshSingle> cbPerMesh;
+        private readonly EngineConstantBuffer<PerMeshSkinned> cbPerMesh;
         /// <summary>
         /// Per material constant buffer
         /// </summary>
@@ -34,7 +34,7 @@ namespace Engine.BuiltIn.Default
             SetVertexShader<PositionNormalTextureTangentSkinnedVs>();
             SetPixelShader<PositionNormalTextureTangentPs>();
 
-            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSingle>();
+            cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
             cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
 
             linear = BuiltInShaders.GetSamplerLinear();
@@ -44,7 +44,7 @@ namespace Engine.BuiltIn.Default
         /// <inheritdoc/>
         public override void UpdateMesh(BuiltInDrawerMeshState state)
         {
-            cbPerMesh.WriteData(PerMeshSingle.Build(state));
+            cbPerMesh.WriteData(PerMeshSkinned.Build(state));
 
             var vertexShader = GetVertexShader<PositionNormalTextureTangentSkinnedVs>();
             vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);
