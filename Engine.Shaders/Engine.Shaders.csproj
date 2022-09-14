@@ -116,20 +116,15 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Properties\ShaderShadowBasicResources.Designer.cs">
-      <DependentUpon>ShaderShadowBasicResources.resx</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Properties\EffectsResources.Designer.cs">
       <DependentUpon>EffectsResources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="Properties\ShaderShadowCascadeResources.Designer.cs">
+    <Compile Include="Properties\ShaderShadowsResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>ShaderShadowCascadeResources.resx</DependentUpon>
+      <DependentUpon>ShaderShadowsResources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
@@ -137,6 +132,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lib\IncGBufferLights.hlsl" />
+    <GeometryShader Include="ShaderShadows\PointTransparent.gs.hlsl" />
+    <GeometryShader Include="ShaderShadows\Point.gs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lib\IncHelpers.hlsl" />
@@ -194,9 +191,6 @@
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Effects\ShaderShadowFoliage.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderShadowPoints.fx" />
   </ItemGroup>
   <ItemGroup>
     <EffectShader Include="Effects\ShaderShadowTerrain.fx" />
@@ -264,69 +258,6 @@
     <VertexShader Include="ShaderDefaultBasic\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionColor.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionColorI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionColorSkinned.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionColorSkinnedI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalColor.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalColorI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalColorSkinned.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalColorSkinnedI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTexture.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureSkinned.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureSkinnedI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangent.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangentI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangentSkinned.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionTexture.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionTextureI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionTextureSkinned.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <VertexShader Include="ShaderShadowBasic\PositionTextureSkinnedI.vs.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <PixelShader Include="ShaderShadowBasic\TextureDefault.ps.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
     <VertexShader Include="ShaderDefaultBasic\Cubemap.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
@@ -354,13 +285,13 @@
     <VertexShader Include="ShaderDefaultBasic\CPUParticles.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ShaderShadowCascade\PositionColor.vs.hlsl" />
+    <VertexShader Include="ShaderShadows\Position.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ShaderShadowCascade\PositionColorI.vs.hlsl" />
+    <VertexShader Include="ShaderShadows\PositionI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ShaderShadowCascade\PositionColorSkinned.vs.hlsl" />
+    <VertexShader Include="ShaderShadows\PositionSkinned.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <PixelShader Include="ShaderDefaultBasic\Decal.ps.hlsl" />
@@ -393,26 +324,12 @@
     <VertexShader Include="ShaderDefaultBasic\SpriteColor.vs.hlsl" />
     <VertexShader Include="ShaderDefaultBasic\SpriteTexture.vs.hlsl" />
     <PixelShader Include="ShaderDefaultBasic\SpriteColor.ps.hlsl" />
-    <Content Include="ShaderShadowCascade\PositionColorSkinnedI.vs.hlsl" />
-    <PixelShader Include="ShaderShadowCascade\ShadowTextureCascade.ps.hlsl" />
-    <GeometryShader Include="ShaderShadowCascade\ShadowTextureCascade.gs.hlsl" />
-    <GeometryShader Include="ShaderShadowCascade\ShadowCascade.gs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTextureTangent.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTextureTangentI.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTextureTangentSkinned.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTexture.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTextureI.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTextureSkinned.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalTextureSkinnedI.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionTexture.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionTextureI.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionTextureSkinned.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionTextureSkinnedI.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalColorSkinned.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalColorSkinnedI.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalColor.vs.hlsl" />
-    <VertexShader Include="ShaderShadowCascade\PositionNormalColorI.vs.hlsl" />
+    <GeometryShader Include="ShaderShadows\Spot.gs.hlsl" />
+    <GeometryShader Include="ShaderShadows\SpotTransparent.gs.hlsl" />
+    <Content Include="ShaderShadows\PositionSkinnedI.vs.hlsl" />
+    <PixelShader Include="ShaderShadows\Transparent.ps.hlsl" />
+    <GeometryShader Include="ShaderShadows\CascadeTransparent.gs.hlsl" />
+    <GeometryShader Include="ShaderShadows\Cascade.gs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\LibResources.resx">
@@ -425,20 +342,15 @@
       <LastGenOutput>ShaderDefaultBasicResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\ShaderShadowBasicResources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>ShaderShadowBasicResources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <EmbeddedResource Include="Properties\EffectsResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>EffectsResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\ShaderShadowCascadeResources.resx">
+    <EmbeddedResource Include="Properties\ShaderShadowsResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
-      <LastGenOutput>ShaderShadowCascadeResources.Designer.cs</LastGenOutput>
+      <LastGenOutput>ShaderShadowsResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

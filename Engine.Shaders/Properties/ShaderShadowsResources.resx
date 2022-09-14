@@ -118,46 +118,37 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ShaderDefaultGPUParticles" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdefaultgpuparticles.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="CascadeTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\cascadetransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderDeferredBasic" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdeferredbasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Cascade_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\cascade.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderDeferredComposer" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdeferredcomposer.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PointTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\pointtransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderDeferredTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdeferredterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Point_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\point.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderLightCapsule" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightcapsule.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\positioni.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderLightDirectional" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightdirectional.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\positionskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderLightEmissive" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightemissive.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\positionskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderLightPoint" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightpoint.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Position_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\position.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderLightSpot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightspot.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="SpotTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\spottransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderNull" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shadernull.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Spot_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\spot.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderPostProcess" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderpostprocess.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderShadowBillboard" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shadershadowbillboard.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderShadowFoliage" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shadershadowfoliage.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderShadowTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shadershadowterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Transparent_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadershadows\transparent.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

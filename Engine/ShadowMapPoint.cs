@@ -3,6 +3,7 @@
 namespace Engine
 {
     using Engine.BuiltIn;
+    using Engine.BuiltIn.Shadows;
     using Engine.Common;
     using Engine.Effects;
 
@@ -76,12 +77,35 @@ namespace Engine
         /// <inheritdoc/>
         public override IShadowMapDrawer GetEffect()
         {
-            return DrawerPool.GetEffect<EffectShadowPoint>();
+            return null;
         }
         /// <inheritdoc/>
         public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
         {
-            return null;
+            bool skinned = VertexData.IsSkinned(vertexType);
+
+            if (instanced)
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPointPositionSkinnedInstanced>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPointPositionInstanced>();
+                }
+            }
+            else
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPointPositionSkinned>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPointPosition>();
+                }
+            }
         }
 
         /// <inheritdoc/>

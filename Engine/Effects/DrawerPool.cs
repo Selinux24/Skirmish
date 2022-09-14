@@ -86,8 +86,6 @@ namespace Engine.Effects
             GetEffect<EffectDeferredComposer>().UpdateGlobals(
                 materialPalette, materialPaletteWidth,
                 environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
-
-            GetEffect<EffectShadowPoint>().UpdateGlobals(animationPalette, animationPaletteWidth);
         }
     }
 }
