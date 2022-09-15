@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Shadows
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(PointGs)}", "main", ShaderShadowsResources.Point_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(PointGs)}", "main", ShadowRenderingResources.Point_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor

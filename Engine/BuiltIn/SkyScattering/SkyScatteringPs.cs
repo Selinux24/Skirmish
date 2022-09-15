@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.SkyScattering
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(SkyScatteringPs), "main", ShaderDefaultBasicResources.SkyScattering_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(SkyScatteringPs), "main", ForwardRenderingResources.SkyScattering_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

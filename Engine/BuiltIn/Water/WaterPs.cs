@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Water
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(WaterPs), "main", ShaderDefaultBasicResources.Water_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(WaterPs), "main", ForwardRenderingResources.Water_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

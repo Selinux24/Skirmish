@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Terrain
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(TerrainVs), "main", ShaderDefaultBasicResources.Terrain_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(TerrainVs), "main", ForwardRenderingResources.Terrain_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Sprites
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(SpriteTextureVs), "main", ShaderDefaultBasicResources.SpriteTexture_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(SpriteTextureVs), "main", UIRenderingResources.SpriteTexture_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

@@ -48,7 +48,7 @@ namespace Engine.BuiltIn.Billboard
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(BillboardPs), "main", ShaderDefaultBasicResources.Billboard_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(BillboardPs), "main", ForwardRenderingResources.Billboard_ps, HelperShaders.PSProfile);
 
             var samplerDesc = EngineSamplerStateDescription.Default();
             samplerDesc.Filter = Filter.MinMagMipPoint;

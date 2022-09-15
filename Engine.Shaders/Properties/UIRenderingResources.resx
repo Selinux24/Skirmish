@@ -118,37 +118,22 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="CascadeTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\cascadetransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Font_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\uifont\font.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Cascade_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\cascade.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Font_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\uifont\font.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PointTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\pointtransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="SpriteColor_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\uisprites\spritecolor.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Point_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\point.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="SpriteColor_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\uisprites\spritecolor.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PositionI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\positioni.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="SpriteTexture_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\uisprites\spritetexture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PositionSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\positionskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="PositionSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\positionskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Position_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\position.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="SpotTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\spottransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Spot_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\spot.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Transparent_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadershadows\transparent.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="SpriteTexture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\uisprites\spritetexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

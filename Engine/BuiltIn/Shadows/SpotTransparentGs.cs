@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Shadows
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(SpotTransparentGs)}", "main", ShaderShadowsResources.SpotTransparent_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(SpotTransparentGs)}", "main", ShadowRenderingResources.SpotTransparent_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor

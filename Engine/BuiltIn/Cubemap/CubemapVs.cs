@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Cubemap
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(CubemapVs), "main", ShaderDefaultBasicResources.Cubemap_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(CubemapVs), "main", ForwardRenderingResources.Cubemap_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.CpuParticles
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(CpuParticlesVs), "main", ShaderDefaultBasicResources.CPUParticles_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(CpuParticlesVs), "main", ForwardRenderingResources.CPUParticles_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

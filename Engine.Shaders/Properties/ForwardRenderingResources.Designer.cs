@@ -22,14 +22,14 @@ namespace Engine.Shaders.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class ShaderDefaultBasicResources {
+    public class ForwardRenderingResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal ShaderDefaultBasicResources() {
+        internal ForwardRenderingResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Engine.Shaders.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Engine.Shaders.Properties.ShaderDefaultBasicResources", typeof(ShaderDefaultBasicResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Engine.Shaders.Properties.ForwardRenderingResources", typeof(ForwardRenderingResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -236,26 +236,6 @@ namespace Engine.Shaders.Properties {
         public static byte[] Foliage8_gl {
             get {
                 object obj = ResourceManager.GetObject("Foliage8_gl", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Font_ps {
-            get {
-                object obj = ResourceManager.GetObject("Font_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Font_vs {
-            get {
-                object obj = ResourceManager.GetObject("Font_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -596,46 +576,6 @@ namespace Engine.Shaders.Properties {
         public static byte[] SkyScattering_vs {
             get {
                 object obj = ResourceManager.GetObject("SkyScattering_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] SpriteColor_ps {
-            get {
-                object obj = ResourceManager.GetObject("SpriteColor_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] SpriteColor_vs {
-            get {
-                object obj = ResourceManager.GetObject("SpriteColor_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] SpriteTexture_ps {
-            get {
-                object obj = ResourceManager.GetObject("SpriteTexture_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] SpriteTexture_vs {
-            get {
-                object obj = ResourceManager.GetObject("SpriteTexture_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }

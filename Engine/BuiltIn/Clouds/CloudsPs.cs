@@ -48,7 +48,7 @@ namespace Engine.BuiltIn.Clouds
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(CloudsPs), "main", ShaderDefaultBasicResources.Clouds_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(CloudsPs), "main", ForwardRenderingResources.Clouds_ps, HelperShaders.PSProfile);
 
             samplerLinear = BuiltInShaders.GetSamplerLinear();
             samplerAnisotropic = BuiltInShaders.GetSamplerAnisotropic();

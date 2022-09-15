@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Billboard
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader(nameof(BillboardGS), "main", ShaderDefaultBasicResources.Billboard_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader(nameof(BillboardGS), "main", ForwardRenderingResources.Billboard_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor

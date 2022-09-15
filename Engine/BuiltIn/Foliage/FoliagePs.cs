@@ -44,7 +44,7 @@ namespace Engine.BuiltIn.Foliage
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(FoliagePs), "main", ShaderDefaultBasicResources.Foliage_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(FoliagePs), "main", ForwardRenderingResources.Foliage_ps, HelperShaders.PSProfile);
 
             samplerFoliage = BuiltInShaders.GetSamplerLinear();
         }

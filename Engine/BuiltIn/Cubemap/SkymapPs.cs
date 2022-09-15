@@ -41,7 +41,7 @@ namespace Engine.BuiltIn.Cubemap
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(SkymapPs), "main", ShaderDefaultBasicResources.Skymap_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(SkymapPs), "main", ForwardRenderingResources.Skymap_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

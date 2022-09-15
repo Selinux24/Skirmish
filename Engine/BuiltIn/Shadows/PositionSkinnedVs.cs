@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Shadows
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader($"{nameof(Shadows)}_{nameof(PositionSkinnedVs)}", "main", ShaderShadowsResources.PositionSkinned_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader($"{nameof(Shadows)}_{nameof(PositionSkinnedVs)}", "main", ShadowRenderingResources.PositionSkinned_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

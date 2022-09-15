@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Foliage
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(FoliageVs), "main", ShaderDefaultBasicResources.Foliage_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(FoliageVs), "main", ForwardRenderingResources.Foliage_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Sprites
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(SpriteColorPs), "main", ShaderDefaultBasicResources.SpriteColor_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(SpriteColorPs), "main", UIRenderingResources.SpriteColor_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

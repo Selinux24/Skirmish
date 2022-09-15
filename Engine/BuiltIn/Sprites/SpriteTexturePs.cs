@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.Sprites
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(SpriteTexturePs), "main", ShaderDefaultBasicResources.SpriteTexture_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(SpriteTexturePs), "main", UIRenderingResources.SpriteTexture_ps, HelperShaders.PSProfile);
 
             textureSampler = BuiltInShaders.GetSamplerLinear();
         }

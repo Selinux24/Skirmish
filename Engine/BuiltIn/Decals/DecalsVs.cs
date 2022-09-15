@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Decals
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(DecalsVs), "main", ShaderDefaultBasicResources.Decal_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(DecalsVs), "main", ForwardRenderingResources.Decal_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

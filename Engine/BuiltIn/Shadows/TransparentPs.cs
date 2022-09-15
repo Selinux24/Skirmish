@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Shadows
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader($"{nameof(Shadows)}_{nameof(TransparentPs)}", "main", ShaderShadowsResources.Transparent_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader($"{nameof(Shadows)}_{nameof(TransparentPs)}", "main", ShadowRenderingResources.Transparent_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

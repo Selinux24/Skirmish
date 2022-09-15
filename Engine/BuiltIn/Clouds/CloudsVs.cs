@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Clouds
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(CloudsVs), "main", ShaderDefaultBasicResources.Clouds_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(CloudsVs), "main", ForwardRenderingResources.Clouds_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Water
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(WaterVs), "main", ShaderDefaultBasicResources.Water_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(WaterVs), "main", ForwardRenderingResources.Water_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

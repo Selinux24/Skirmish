@@ -44,7 +44,7 @@ namespace Engine.BuiltIn.Foliage
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader(nameof(FoliageGS), "main", ShaderDefaultBasicResources.Foliage4_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader(nameof(FoliageGS), "main", ForwardRenderingResources.Foliage4_gs, HelperShaders.GSProfile);
 
             samplerPoint = BuiltInShaders.GetSamplerPoint();
         }

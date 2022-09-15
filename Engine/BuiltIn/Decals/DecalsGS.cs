@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Decals
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader(nameof(DecalsGS), "main", ShaderDefaultBasicResources.Decal_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader(nameof(DecalsGS), "main", ForwardRenderingResources.Decal_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor

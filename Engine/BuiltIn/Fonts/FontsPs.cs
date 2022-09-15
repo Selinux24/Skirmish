@@ -44,7 +44,7 @@ namespace Engine.BuiltIn.Fonts
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(FontsPs), "main", ShaderDefaultBasicResources.Font_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(FontsPs), "main", UIRenderingResources.Font_ps, HelperShaders.PSProfile);
 
             var samplerPointDesc = EngineSamplerStateDescription.Default();
             samplerPointDesc.Filter = Filter.MinMagMipPoint;

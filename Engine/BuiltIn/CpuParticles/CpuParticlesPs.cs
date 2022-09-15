@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.CpuParticles
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(CpuParticlesPs), "main", ShaderDefaultBasicResources.CPUParticles_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(CpuParticlesPs), "main", ForwardRenderingResources.CPUParticles_ps, HelperShaders.PSProfile);
 
             var samplerDesc = EngineSamplerStateDescription.Default();
             samplerDesc.Filter = Filter.MinMagMipPoint;

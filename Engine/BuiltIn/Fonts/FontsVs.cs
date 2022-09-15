@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Fonts
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(FontsVs), "main", ShaderDefaultBasicResources.Font_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(FontsVs), "main", UIRenderingResources.Font_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

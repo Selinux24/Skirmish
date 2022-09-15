@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Default
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(PositionNormalColorPs), "main", ShaderDefaultBasicResources.PositionNormalColor_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(PositionNormalColorPs), "main", ForwardRenderingResources.PositionNormalColor_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

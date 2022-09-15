@@ -60,7 +60,7 @@ namespace Engine.BuiltIn.Terrain
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(TerrainPs), "main", ShaderDefaultBasicResources.Terrain_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(TerrainPs), "main", ForwardRenderingResources.Terrain_ps, HelperShaders.PSProfile);
         }
         /// <summary>
         /// Destructor

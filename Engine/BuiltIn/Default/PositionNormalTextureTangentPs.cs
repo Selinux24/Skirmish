@@ -44,7 +44,7 @@ namespace Engine.BuiltIn.Default
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(PositionNormalTextureTangentPs), "main", ShaderDefaultBasicResources.PositionNormalTextureTangent_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(PositionNormalTextureTangentPs), "main", ForwardRenderingResources.PositionNormalTextureTangent_ps, HelperShaders.PSProfile);
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
             samplerNormal = BuiltInShaders.GetSamplerLinear();

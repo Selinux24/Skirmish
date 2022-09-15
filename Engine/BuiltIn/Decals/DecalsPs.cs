@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.Decals
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(DecalsPs), "main", ShaderDefaultBasicResources.Decal_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(DecalsPs), "main", ForwardRenderingResources.Decal_ps, HelperShaders.PSProfile);
 
             var samplerDesc = EngineSamplerStateDescription.Default();
             samplerDesc.Filter = Filter.MinMagMipPoint;

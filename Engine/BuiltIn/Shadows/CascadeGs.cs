@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Shadows
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(CascadeGs)}", "main", ShaderShadowsResources.Cascade_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(CascadeGs)}", "main", ShadowRenderingResources.Cascade_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor

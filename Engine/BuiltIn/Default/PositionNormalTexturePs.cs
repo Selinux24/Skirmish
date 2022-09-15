@@ -36,7 +36,7 @@ namespace Engine.BuiltIn.Default
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(PositionNormalTexturePs), "main", ShaderDefaultBasicResources.PositionNormalTexture_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(PositionNormalTexturePs), "main", ForwardRenderingResources.PositionNormalTexture_ps, HelperShaders.PSProfile);
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
         }
