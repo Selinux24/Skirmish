@@ -866,6 +866,11 @@ namespace Engine
                 return;
             }
 
+            shadowDrawer.UpdateMesh(new BuiltInDrawerMeshState
+            {
+                Local = Matrix.Identity,
+            });
+
             mapGrid?.DrawShadows(context, BufferManager, shadowDrawer);
         }
         /// <inheritdoc/>
