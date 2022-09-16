@@ -24,8 +24,9 @@ namespace Engine.BuiltIn.Shadows
         public static PerCastingLight Build(DrawContextShadows context)
         {
             var viewProjection = context?.ShadowMap?.FromLightViewProjectionArray;
+            int length = viewProjection?.Length ?? 0;
 
-            if (viewProjection?.Length > MaxCount)
+            if (length > MaxCount)
             {
                 throw new EngineException($"The matrix array must have a maximum length of {MaxCount}");
             }
@@ -39,7 +40,7 @@ namespace Engine.BuiltIn.Shadows
             return new PerCastingLight
             {
                 FromLightViewProjection = m,
-                FaceCount = (uint)viewProjection?.Length,
+                FaceCount = (uint)length,
             };
         }
 

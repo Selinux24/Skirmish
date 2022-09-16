@@ -393,10 +393,6 @@ namespace Engine
             private int vertexDrawCount = 0;
 
             /// <summary>
-            /// Game
-            /// </summary>
-            protected readonly Game Game = null;
-            /// <summary>
             /// Buffer manager
             /// </summary>
             protected BufferManager BufferManager = null;
@@ -421,12 +417,10 @@ namespace Engine
             /// <summary>
             /// Constructor
             /// </summary>
-            /// <param name="game">Game</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="name">Name</param>
-            public FoliageBuffer(Game game, BufferManager bufferManager, string name)
+            public FoliageBuffer(BufferManager bufferManager, string name)
             {
-                Game = game;
                 BufferManager = bufferManager;
                 Id = GetID();
                 Attached = false;
@@ -687,7 +681,7 @@ namespace Engine
 
             for (int i = 0; i < MaxFoliageBuffers; i++)
             {
-                foliageBuffers.Add(new FoliageBuffer(Game, BufferManager, Name));
+                foliageBuffers.Add(new FoliageBuffer(BufferManager, Name));
             }
 
             foliageDrawer = BuiltInShaders.GetDrawer<BuiltInFoliage>();
