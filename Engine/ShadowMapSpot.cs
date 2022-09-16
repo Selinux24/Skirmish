@@ -56,22 +56,22 @@ namespace Engine
             {
                 if (skinned)
                 {
-                    return BuiltInShaders.GetDrawer<BuiltInSpotPositionSkinnedInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinnedInstanced>();
                 }
                 else
                 {
-                    return BuiltInShaders.GetDrawer<BuiltInSpotPositionInstanced>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionInstanced>();
                 }
             }
             else
             {
                 if (skinned)
                 {
-                    return BuiltInShaders.GetDrawer<BuiltInSpotPositionSkinned>();
+                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinned>();
                 }
                 else
                 {
-                    return BuiltInShaders.GetDrawer<BuiltInSpotPosition>();
+                    return BuiltInShaders.GetDrawer<BuiltInPosition>();
                 }
             }
         }

@@ -7,9 +7,9 @@ namespace Engine.BuiltIn.Shadows
     using Engine.Helpers;
 
     /// <summary>
-    /// Spot geometry shader
+    /// Point geometry shader
     /// </summary>
-    public class SpotTransparentGs : IBuiltInGeometryShader
+    public class ShadowsTransparentGs : IBuiltInGeometryShader
     {
         /// <summary>
         /// Per light constant buffer
@@ -28,16 +28,16 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public SpotTransparentGs(Graphics graphics)
+        public ShadowsTransparentGs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(SpotTransparentGs)}", "main", ShadowRenderingResources.SpotTransparent_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(ShadowsTransparentGs)}", "main", ShadowRenderingResources.ShadowTransparent_gs, HelperShaders.GSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~SpotTransparentGs()
+        ~ShadowsTransparentGs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

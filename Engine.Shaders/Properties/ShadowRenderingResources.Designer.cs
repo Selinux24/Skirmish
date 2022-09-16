@@ -63,76 +63,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] Cascade_gs {
-            get {
-                object obj = ResourceManager.GetObject("Cascade_gs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] CascadeTransparent_gs {
-            get {
-                object obj = ResourceManager.GetObject("CascadeTransparent_gs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Foliage_gs {
-            get {
-                object obj = ResourceManager.GetObject("Foliage_gs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Foliage_ps {
-            get {
-                object obj = ResourceManager.GetObject("Foliage_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Foliage_vs {
-            get {
-                object obj = ResourceManager.GetObject("Foliage_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] Point_gs {
-            get {
-                object obj = ResourceManager.GetObject("Point_gs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PointTransparent_gs {
-            get {
-                object obj = ResourceManager.GetObject("PointTransparent_gs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] Position_vs {
             get {
                 object obj = ResourceManager.GetObject("Position_vs", resourceCulture);
@@ -173,9 +103,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] Spot_gs {
+        public static byte[] Shadow_gs {
             get {
-                object obj = ResourceManager.GetObject("Spot_gs", resourceCulture);
+                object obj = ResourceManager.GetObject("Shadow_gs", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -183,9 +113,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] SpotTransparent_gs {
+        public static byte[] ShadowTransparent_gs {
             get {
-                object obj = ResourceManager.GetObject("SpotTransparent_gs", resourceCulture);
+                object obj = ResourceManager.GetObject("ShadowTransparent_gs", resourceCulture);
                 return ((byte[])(obj));
             }
         }

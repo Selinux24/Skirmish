@@ -54,14 +54,14 @@ SamplerState SamplerLinear : register(s0)
 
 struct PSFoliage
 {
+    uint primitiveID : SV_PRIMITIVEID;
     float4 positionHomogeneous : SV_POSITION;
     float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
     float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
-    float size: SIZE;
+    float size : SIZE0;
     Material material;
-    uint primitiveID : SV_PRIMITIVEID;
 };
 
 float4 main(PSFoliage input) : SV_Target

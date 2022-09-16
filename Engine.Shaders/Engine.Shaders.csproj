@@ -136,15 +136,12 @@
     <PixelShader Include="ForwardDefault\PositionColor.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <PixelShader Include="ShadowsFoliage\Foliage.ps.hlsl" />
-    <GeometryShader Include="ShadowsFoliage\Foliage.gs.hlsl" />
-    <VertexShader Include="ShadowsFoliage\Foliage.vs.hlsl" />
     <PixelShader Include="ForwardFoliage\Foliage.ps.hlsl" />
     <VertexShader Include="ForwardFoliage\Foliage.vs.hlsl" />
     <GeometryShader Include="ForwardFoliage\Foliage.gs.hlsl" />
     <Content Include="Lib\IncGBufferLights.hlsl" />
-    <GeometryShader Include="ShadowsDefault\PointTransparent.gs.hlsl" />
-    <GeometryShader Include="ShadowsDefault\Point.gs.hlsl" />
+    <GeometryShader Include="ShadowsDefault\ShadowTransparent.gs.hlsl" />
+    <GeometryShader Include="ShadowsDefault\Shadow.gs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lib\IncHelpers.hlsl" />
@@ -318,12 +315,8 @@
     <VertexShader Include="UISprites\SpriteColor.vs.hlsl" />
     <VertexShader Include="UISprites\SpriteTexture.vs.hlsl" />
     <PixelShader Include="UISprites\SpriteColor.ps.hlsl" />
-    <GeometryShader Include="ShadowsDefault\Spot.gs.hlsl" />
-    <GeometryShader Include="ShadowsDefault\SpotTransparent.gs.hlsl" />
     <Content Include="ShadowsDefault\PositionSkinnedI.vs.hlsl" />
     <PixelShader Include="ShadowsDefault\Transparent.ps.hlsl" />
-    <GeometryShader Include="ShadowsDefault\CascadeTransparent.gs.hlsl" />
-    <GeometryShader Include="ShadowsDefault\Cascade.gs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\UIRenderingResources.resx">

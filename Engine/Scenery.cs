@@ -141,8 +141,6 @@ namespace Engine
                         if (sceneryDrawer != null)
                         {
                             DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material);
-
-                            continue;
                         }
                     }
                 }

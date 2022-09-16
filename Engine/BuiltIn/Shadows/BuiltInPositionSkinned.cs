@@ -6,12 +6,12 @@ namespace Engine.BuiltIn.Shadows
     /// <summary>
     /// Point shadow skinned position drawer
     /// </summary>
-    public class BuiltInPointPositionSkinned : BuiltInDrawer
+    public class BuiltInPositionSkinned : BuiltInDrawer
     {
         /// <summary>
         /// Per light constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerCastingLightPoint> cbPerLight;
+        private readonly EngineConstantBuffer<PerCastingLight> cbPerLight;
         /// <summary>
         /// Per mesh constant buffer
         /// </summary>
@@ -23,21 +23,21 @@ namespace Engine.BuiltIn.Shadows
         /// <param name="graphics">Graphics</param>
         /// <param name="positionColorVsSkinned">Skinned position color vertex shader</param>
         /// <param name="positionColorPs">Position color pixel shader</param>
-        public BuiltInPointPositionSkinned(Graphics graphics) : base(graphics)
+        public BuiltInPositionSkinned(Graphics graphics) : base(graphics)
         {
             SetVertexShader<PositionSkinnedVs>();
-            SetGeometryShader<PointGs>();
+            SetGeometryShader<ShadowsGs>();
 
-            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLightPoint>();
+            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLight>();
             cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
         }
 
         /// <inheritdoc/>
         public override void UpdateCastingLight(DrawContextShadows context)
         {
-            cbPerLight.WriteData(PerCastingLightPoint.Build(context));
+            cbPerLight.WriteData(PerCastingLight.Build(context));
 
-            var geometryShader = GetGeometryShader<PointGs>();
+            var geometryShader = GetGeometryShader<ShadowsGs>();
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
         }
         /// <inheritdoc/>

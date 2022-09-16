@@ -842,6 +842,7 @@ namespace Engine.Common
         {
             if (descriptor == null)
             {
+                game.Graphics.IASetIndexBuffer(null, Format.R32_UInt, 0);
                 return true;
             }
 

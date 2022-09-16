@@ -26,7 +26,7 @@ struct Foliage
 
 struct GSFoliage
 {
-    float3 centerWorld : POSITION;
+    float3 positionWorld : POSITION;
     float2 sizeWorld : SIZE;
     Material material;
 };
@@ -37,7 +37,7 @@ GSFoliage main(Foliage input)
 
     Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobal.MaterialPaletteWidth);
     
-    output.centerWorld = input.positionWorld;
+    output.positionWorld = input.positionWorld;
     output.sizeWorld = input.sizeWorld;
     output.material = material;
 

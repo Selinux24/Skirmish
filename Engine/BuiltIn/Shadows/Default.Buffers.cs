@@ -9,106 +9,8 @@ namespace Engine.BuiltIn.Shadows
     /// <summary>
     /// Per-shadow casting light data structure
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 64 * MaxCount)]
-    struct PerCastingLightCascade : IBufferData
-    {
-        /// <summary>
-        /// Number of faces
-        /// </summary>
-        public const int MaxCount = 3;
-
-        /// <summary>
-        /// Builds the main Per-Light buffer
-        /// </summary>
-        /// <param name="context">Draw context</param>
-        public static PerCastingLightCascade Build(DrawContextShadows context)
-        {
-            var viewProjection = context?.ShadowMap?.FromLightViewProjectionArray;
-
-            if (viewProjection?.Length > MaxCount)
-            {
-                throw new EngineException($"The matrix array must have a maximum length of {MaxCount}");
-            }
-
-            var m = new Matrix[MaxCount];
-            for (int i = 0; i < MaxCount; i++)
-            {
-                m[i] = Matrix.Transpose(viewProjection.ElementAtOrDefault(i));
-            }
-
-            return new PerCastingLightCascade
-            {
-                FromLightViewProjection = m,
-            };
-        }
-
-        /// <summary>
-        /// View projection matrix
-        /// </summary>
-        [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxCount)]
-        public Matrix[] FromLightViewProjection;
-
-        /// <inheritdoc/>
-        public int GetStride()
-        {
-            return Marshal.SizeOf(typeof(PerCastingLightCascade));
-        }
-    }
-
-    /// <summary>
-    /// Per-shadow casting light data structure
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 64 * MaxCount)]
-    struct PerCastingLightSpot : IBufferData
-    {
-        /// <summary>
-        /// Number of faces
-        /// </summary>
-        public const int MaxCount = 1;
-
-        /// <summary>
-        /// Builds the main Per-Light buffer
-        /// </summary>
-        /// <param name="context">Draw context</param>
-        public static PerCastingLightSpot Build(DrawContextShadows context)
-        {
-            var viewProjection = context?.ShadowMap?.FromLightViewProjectionArray;
-
-            if (viewProjection?.Length > MaxCount)
-            {
-                throw new EngineException($"The matrix array must have a maximum length of {MaxCount}");
-            }
-
-            var m = new Matrix[MaxCount];
-            for (int i = 0; i < MaxCount; i++)
-            {
-                m[i] = Matrix.Transpose(viewProjection.ElementAtOrDefault(i));
-            }
-
-            return new PerCastingLightSpot
-            {
-                FromLightViewProjection = m,
-            };
-        }
-
-        /// <summary>
-        /// View projection matrix
-        /// </summary>
-        [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxCount)]
-        public Matrix[] FromLightViewProjection;
-
-        /// <inheritdoc/>
-        public int GetStride()
-        {
-            return Marshal.SizeOf(typeof(PerCastingLightSpot));
-        }
-    }
-
-    /// <summary>
-    /// Per-shadow casting light data structure
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 64 * MaxCount)]
-    struct PerCastingLightPoint : IBufferData
+    [StructLayout(LayoutKind.Explicit, Size = (64 * MaxCount) + 16)]
+    struct PerCastingLight : IBufferData
     {
         /// <summary>
         /// Number of faces
@@ -119,7 +21,7 @@ namespace Engine.BuiltIn.Shadows
         /// Builds the main Per-Light buffer
         /// </summary>
         /// <param name="context">Draw context</param>
-        public static PerCastingLightPoint Build(DrawContextShadows context)
+        public static PerCastingLight Build(DrawContextShadows context)
         {
             var viewProjection = context?.ShadowMap?.FromLightViewProjectionArray;
 
@@ -134,9 +36,10 @@ namespace Engine.BuiltIn.Shadows
                 m[i] = Matrix.Transpose(viewProjection.ElementAtOrDefault(i));
             }
 
-            return new PerCastingLightPoint
+            return new PerCastingLight
             {
                 FromLightViewProjection = m,
+                FaceCount = (uint)viewProjection?.Length,
             };
         }
 
@@ -146,10 +49,16 @@ namespace Engine.BuiltIn.Shadows
         [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxCount)]
         public Matrix[] FromLightViewProjection;
 
+        /// <summary>
+        /// Face count
+        /// </summary>
+        [FieldOffset(64 * MaxCount)]
+        public uint FaceCount;
+
         /// <inheritdoc/>
         public int GetStride()
         {
-            return Marshal.SizeOf(typeof(PerCastingLightPoint));
+            return Marshal.SizeOf(typeof(PerCastingLight));
         }
     }
 

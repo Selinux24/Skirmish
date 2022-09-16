@@ -89,41 +89,42 @@ inline void createPatches(uint primID, float3 position, float2 size)
 
 struct GSFoliage
 {
-    float3 centerWorld : POSITION;
+    float3 positionWorld : POSITION;
     float2 sizeWorld : SIZE;
     Material material;
 };
 
 struct PSFoliage
 {
+    uint primitiveID : SV_PRIMITIVEID;
     float4 positionHomogeneous : SV_POSITION;
     float3 positionWorld : POSITION;
     float3 normalWorld : NORMAL;
     float3 tangentWorld : TANGENT;
     float2 tex : TEXCOORD0;
-    float size: SIZE;
+    float size : SIZE0;
     Material material;
-    uint primitiveID : SV_PRIMITIVEID;
 };
 
 [maxvertexcount(16)]
 void main(point GSFoliage input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSFoliage> outputStream)
 {
-    createPatches(primID, input[0].centerWorld, input[0].sizeWorld);
+    createPatches(primID, input[0].positionWorld, input[0].sizeWorld);
 
 	//Transform quad vertices to world space and output them as a triangle strip.
     PSFoliage gout;
+    gout.normalWorld = up;
+    gout.tangentWorld = tangent;
+    gout.size = gEndRadius;
+    gout.material = input[0].material;
+    gout.primitiveID = primID;
+
 	[unroll]
     for (uint i = 0; i < gInstances * 4; ++i)
     {
         gout.positionHomogeneous = mul(v[i], gPerFrame.ViewProjection);
         gout.positionWorld = v[i].xyz;
-        gout.normalWorld = up;
-        gout.tangentWorld = tangent;
         gout.tex = BillboardTexCoords[i % 8];
-        gout.size = gEndRadius;
-        gout.material = input[0].material;
-        gout.primitiveID = primID;
 
         outputStream.Append(gout);
 

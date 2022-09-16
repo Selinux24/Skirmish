@@ -4,33 +4,33 @@ namespace Engine.BuiltIn.Shadows
     using Engine.Common;
 
     /// <summary>
-    /// Spot shadow position instanced drawer
+    /// Point shadow position instanced drawer
     /// </summary>
-    public class BuiltInSpotPositionInstanced : BuiltInDrawer
+    public class BuiltInPositionInstanced : BuiltInDrawer
     {
         /// <summary>
         /// Per light constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerCastingLightSpot> cbPerLight;
+        private readonly EngineConstantBuffer<PerCastingLight> cbPerLight;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public BuiltInSpotPositionInstanced(Graphics graphics) : base(graphics)
+        public BuiltInPositionInstanced(Graphics graphics) : base(graphics)
         {
             SetVertexShader<PositionVsI>();
-            SetGeometryShader<SpotGs>();
+            SetGeometryShader<ShadowsGs>();
 
-            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLightSpot>();
+            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLight>();
         }
 
         /// <inheritdoc/>
         public override void UpdateCastingLight(DrawContextShadows context)
         {
-            cbPerLight.WriteData(PerCastingLightSpot.Build(context));
+            cbPerLight.WriteData(PerCastingLight.Build(context));
 
-            var geometryShader = GetGeometryShader<SpotGs>();
+            var geometryShader = GetGeometryShader<ShadowsGs>();
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
         }
     }

@@ -492,24 +492,6 @@ namespace Engine
                 CurrentPatch = patch;
             }
             /// <summary>
-            /// Draw foliage shadows
-            /// </summary>
-            /// <param name="technique">Technique</param>
-            public void DrawFoliageShadows(EngineEffectTechnique technique)
-            {
-                if (vertexDrawCount > 0)
-                {
-                    var graphics = Game.Graphics;
-
-                    for (int p = 0; p < technique.PassCount; p++)
-                    {
-                        graphics.EffectPassApply(technique, p, 0);
-
-                        graphics.Draw(vertexDrawCount, VertexBuffer.BufferOffset);
-                    }
-                }
-            }
-            /// <summary>
             /// Draws the foliage data
             /// </summary>
             /// <param name="drawer">Drawer</param>
@@ -601,10 +583,6 @@ namespace Engine
         /// Foliage drawer
         /// </summary>
         private BuiltInFoliage foliageDrawer = null;
-        /// <summary>
-        /// Foliage shadows drawer
-        /// </summary>
-        private BuiltInFoliageShadows foliageShadowsDrawer = null;
 
         /// <summary>
         /// Wind direction
@@ -713,7 +691,6 @@ namespace Engine
             }
 
             foliageDrawer = BuiltInShaders.GetDrawer<BuiltInFoliage>();
-            foliageShadowsDrawer = BuiltInShaders.GetDrawer<BuiltInFoliageShadows>();
 
             initialized = true;
         }
@@ -781,69 +758,6 @@ namespace Engine
             }
 
             UpdatePatchesAsync(context);
-        }
-
-        /// <inheritdoc/>
-        public override void DrawShadows(DrawContextShadows context)
-        {
-            if (!initialized)
-            {
-                return;
-            }
-
-            if (!Visible)
-            {
-                return;
-            }
-
-            if (!visibleNodes.Any())
-            {
-                return;
-            }
-
-            foreach (var item in visibleNodes)
-            {
-                DrawShadowsNode(item);
-            }
-        }
-        /// <summary>
-        /// Draws the node shadows
-        /// </summary>
-        /// <param name="item">Node</param>
-        private void DrawShadowsNode(QuadTreeNode item)
-        {
-            var buffers = foliageBuffers.Where(b => b.CurrentPatch?.CurrentNode == item);
-            if (!buffers.Any())
-            {
-                return;
-            }
-
-            foreach (var buffer in buffers)
-            {
-                var channelData = foliageMapChannels[buffer.CurrentPatch.Channel];
-
-                var state = new BuiltInFoliageState
-                {
-                    StartRadius = channelData.StartRadius,
-                    EndRadius = channelData.EndRadius,
-                    TintColor = Color4.White,
-                    MaterialIndex = foliageMaterial.ResourceIndex,
-                    TextureCount = channelData.TextureCount,
-                    NormalMapCount = channelData.NormalMapCount,
-                    RandomTexture = textureRandom,
-                    Texture = channelData.Textures,
-                    NormalMaps = channelData.NormalMaps,
-                    WindDirection = WindDirection,
-                    WindStrength = WindStrength * channelData.WindEffect,
-                    Delta = channelData.Delta,
-                    WindEffect = channelData.WindEffect,
-                    Instances = channelData.Count,
-                };
-
-                foliageShadowsDrawer.UpdateFoliage(state);
-
-                buffer.DrawFoliage(foliageShadowsDrawer);
-            }
         }
 
         /// <inheritdoc/>

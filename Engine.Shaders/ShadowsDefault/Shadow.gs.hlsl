@@ -1,9 +1,14 @@
-#include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerLight : register(b0)
 {
-    float4x4 gFromLightViewProjection[3];
+    float4x4 gFromLightViewProjection[6];
+    uint gFaceCount;
+    uint3 PAD01;
+};
+
+struct PSShadowMapPosition
+{
+    float4 positionHomogeneous : SV_POSITION;
 };
 
 struct GSShadowMap
@@ -12,21 +17,22 @@ struct GSShadowMap
     uint index : SV_RENDERTARGETARRAYINDEX;
 };
 
-[maxvertexcount(9)]
+[maxvertexcount(18)]
 void main(triangle PSShadowMapPosition input[3] : SV_Position, inout TriangleStream<GSShadowMap> outputStream)
 {
-    for (int iFace = 0; iFace < 3; iFace++)
+    GSShadowMap output;
+    
+    for (uint iFace = 0; iFace < gFaceCount; iFace++)
     {
-        GSShadowMap output;
-
         output.index = iFace;
 
-        for (int v = 0; v < 3; v++)
+        for (uint v = 0; v < 3; v++)
         {
             output.positionHomogeneous = mul(input[v].positionHomogeneous, gFromLightViewProjection[iFace]);
-
+            
             outputStream.Append(output);
         }
+        
         outputStream.RestartStrip();
     }
 }

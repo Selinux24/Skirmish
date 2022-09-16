@@ -118,27 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="CascadeTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsdefault\cascadetransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Cascade_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsdefault\cascade.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Foliage_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsfoliage\foliage.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Foliage_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsfoliage\foliage.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Foliage_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsfoliage\foliage.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="PointTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsdefault\pointtransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Point_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsdefault\point.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="PositionI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadowsdefault\positioni.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -151,11 +130,11 @@
   <data name="Position_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadowsdefault\position.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="SpotTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsdefault\spottransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ShadowTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsdefault\shadowtransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Spot_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\shadowsdefault\spot.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Shadow_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsdefault\shadow.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Transparent_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadowsdefault\transparent.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

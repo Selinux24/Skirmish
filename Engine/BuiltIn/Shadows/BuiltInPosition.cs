@@ -4,14 +4,14 @@ namespace Engine.BuiltIn.Shadows
     using Engine.Common;
 
     /// <summary>
-    /// Cascaded shadow position drawer
+    /// Point shadow position drawer
     /// </summary>
-    public class BuiltInCascadedPosition : BuiltInDrawer
+    public class BuiltInPosition : BuiltInDrawer
     {
         /// <summary>
         /// Per light constant buffer
         /// </summary>
-        private readonly EngineConstantBuffer<PerCastingLightCascade> cbPerLight;
+        private readonly EngineConstantBuffer<PerCastingLight> cbPerLight;
         /// <summary>
         /// Per mesh constant buffer
         /// </summary>
@@ -21,21 +21,21 @@ namespace Engine.BuiltIn.Shadows
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public BuiltInCascadedPosition(Graphics graphics) : base(graphics)
+        public BuiltInPosition(Graphics graphics) : base(graphics)
         {
             SetVertexShader<PositionVs>();
-            SetGeometryShader<CascadeGs>();
+            SetGeometryShader<ShadowsGs>();
 
-            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLightCascade>();
+            cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLight>();
             cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSingle>();
         }
 
         /// <inheritdoc/>
         public override void UpdateCastingLight(DrawContextShadows context)
         {
-            cbPerLight.WriteData(PerCastingLightCascade.Build(context));
+            cbPerLight.WriteData(PerCastingLight.Build(context));
 
-            var geometryShader = GetGeometryShader<CascadeGs>();
+            var geometryShader = GetGeometryShader<ShadowsGs>();
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
         }
         /// <inheritdoc/>
