@@ -1,6 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -38,10 +37,6 @@ cbuffer cbPerMaterial : register(b5)
     uint gTextureCount;
     uint gNormalMapCount;
     uint PAD51;
-
-    float gStartRadius;
-    float gEndRadius;
-    float2 PAD52;
 };
 
 Texture2DArray<float> gShadowMapDir : register(t0);
@@ -57,14 +52,26 @@ SamplerState SamplerLinear : register(s0)
     AddressV = WRAP;
 };
 
-float4 main(PSVertexBillboard2 input) : SV_Target
+struct PSFoliage
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex : TEXCOORD0;
+    float size: SIZE;
+    Material material;
+    uint primitiveID : SV_PRIMITIVEID;
+};
+
+float4 main(PSFoliage input) : SV_Target
 {
     float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 
     float4 diffuseColor = gTextureArray.Sample(SamplerLinear, uvw);
 
     float distToEye = length(gPerFrame.EyePosition - input.positionWorld);
-    float falloff = saturate(distToEye / gEndRadius);
+    float falloff = saturate(distToEye / input.size);
     clip(diffuseColor.a - max(0.01f, falloff));
 
     float3 normalWorld = normalize(input.normalWorld);
@@ -79,7 +86,7 @@ float4 main(PSVertexBillboard2 input) : SV_Target
     lInput.material = input.material;
     lInput.objectPosition = input.positionWorld;
     lInput.objectNormal = normalWorld;
-    lInput.objectDiffuseColor = diffuseColor * input.tintColor;
+    lInput.objectDiffuseColor = diffuseColor * gTintColor;
 
     lInput.eyePosition = gPerFrame.EyePosition;
     lInput.levelOfDetailRanges = gPerFrame.LOD;

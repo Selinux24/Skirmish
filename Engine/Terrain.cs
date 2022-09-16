@@ -866,10 +866,13 @@ namespace Engine
                 return;
             }
 
-            shadowDrawer.UpdateMesh(new BuiltInDrawerMeshState
+            shadowDrawer.UpdateCastingLight(context);
+
+            var meshState = new BuiltInDrawerMeshState
             {
                 Local = Matrix.Identity,
-            });
+            };
+            shadowDrawer.UpdateMesh(meshState);
 
             mapGrid?.DrawShadows(context, BufferManager, shadowDrawer);
         }

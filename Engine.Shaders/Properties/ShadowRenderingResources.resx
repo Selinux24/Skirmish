@@ -124,6 +124,15 @@
   <data name="Cascade_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadowsdefault\cascade.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="Foliage_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsfoliage\foliage.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Foliage_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsfoliage\foliage.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Foliage_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsfoliage\foliage.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="PointTransparent_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadowsdefault\pointtransparent.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

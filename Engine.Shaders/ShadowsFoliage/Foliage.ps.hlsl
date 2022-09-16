@@ -1,7 +1,7 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
 
-cbuffer cbPerMaterial : register(b5)
+cbuffer cbPerMaterial : register(b0)
 {
     float4 gTintColor;
     
@@ -9,10 +9,6 @@ cbuffer cbPerMaterial : register(b5)
     uint gTextureCount;
     uint gNormalMapCount;
     uint PAD51;
-
-    float gStartRadius;
-    float gEndRadius;
-    float2 PAD52;
 };
 
 Texture2DArray gTextureArray : register(t3);

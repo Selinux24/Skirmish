@@ -16,6 +16,21 @@ namespace Engine.Common
     public class BufferManager : IDisposable
     {
         /// <summary>
+        /// Imput asembler key
+        /// </summary>
+        struct InputAssemblerKey
+        {
+            /// <summary>
+            /// Shader
+            /// </summary>
+            public IEngineVertexShader Shader;
+            /// <summary>
+            /// Vertices
+            /// </summary>
+            public BufferManagerVertices Vertices;
+        }
+
+        /// <summary>
         /// Creates a vertex buffer from IVertexData
         /// </summary>
         /// <param name="graphics">Graphics device</param>
@@ -106,7 +121,7 @@ namespace Engine.Common
         /// <summary>
         /// Input layouts by vertex shaders
         /// </summary>
-        private readonly Dictionary<IEngineVertexShader, InputLayout> vertexShadersInputLayouts = new Dictionary<IEngineVertexShader, InputLayout>();
+        private readonly Dictionary<InputAssemblerKey, InputLayout> vertexShadersInputLayouts = new Dictionary<InputAssemblerKey, InputLayout>();
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -929,7 +944,13 @@ namespace Engine.Common
                 return false;
             }
 
-            if (!vertexShadersInputLayouts.ContainsKey(vertexShader))
+            InputAssemblerKey key = new InputAssemblerKey
+            {
+                Shader = vertexShader,
+                Vertices = vertexBufferDescriptor,
+            };
+
+            if (!vertexShadersInputLayouts.ContainsKey(key))
             {
                 // The vertex shader defines the input vertex data type
                 var signature = vertexShader.GetShaderBytecode();
@@ -938,11 +959,11 @@ namespace Engine.Common
                     vertexBufferDescriptor.Input.Where(i => i.Classification == InputClassification.PerVertexData).ToArray();
 
                 vertexShadersInputLayouts.Add(
-                    vertexShader,
+                    key,
                     game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
             }
 
-            game.Graphics.IAInputLayout = vertexShadersInputLayouts[vertexShader];
+            game.Graphics.IAInputLayout = vertexShadersInputLayouts[key];
             game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
             return true;
         }

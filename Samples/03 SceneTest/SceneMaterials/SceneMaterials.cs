@@ -468,24 +468,36 @@ namespace SceneTest.SceneMaterials
                 Game.Input.MouseYDelta);
 #endif
 
+            bool shift = Game.Input.ShiftPressed;
+
             if (Game.Input.KeyPressed(Keys.A))
             {
-                Camera.MoveLeft(gameTime, Game.Input.ShiftPressed);
+                Camera.MoveLeft(gameTime, shift);
             }
 
             if (Game.Input.KeyPressed(Keys.D))
             {
-                Camera.MoveRight(gameTime, Game.Input.ShiftPressed);
+                Camera.MoveRight(gameTime, shift);
             }
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
+                Camera.MoveForward(gameTime, shift);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
+                Camera.MoveBackward(gameTime, shift);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Space))
+            {
+                Camera.MoveUp(gameTime, shift);
+            }
+
+            if (Game.Input.KeyPressed(Keys.C))
+            {
+                Camera.MoveDown(gameTime, shift);
             }
         }
         private void UpdateLight(GameTime gameTime)

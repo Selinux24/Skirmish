@@ -77,11 +77,6 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public override IShadowMapDrawer GetEffect()
-        {
-            return null;
-        }
-        /// <inheritdoc/>
         public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
         {
             bool skinned = VertexData.IsSkinned(vertexType);

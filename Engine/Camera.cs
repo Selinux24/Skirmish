@@ -656,6 +656,24 @@ namespace Engine
             Move(gameTime, Right, slow);
         }
         /// <summary>
+        /// Move up
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public void MoveUp(GameTime gameTime, bool slow)
+        {
+            Move(gameTime, Up, slow);
+        }
+        /// <summary>
+        /// Move down
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="slow">Slow movement</param>
+        public void MoveDown(GameTime gameTime, bool slow)
+        {
+            Move(gameTime, Down, slow);
+        }
+        /// <summary>
         /// Rotate up
         /// </summary>
         /// <param name="gameTime">Game time</param>

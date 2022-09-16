@@ -146,6 +146,12 @@
     <Compile Include="BuiltIn\Clouds\BuiltInCloudsState.cs" />
     <Compile Include="BuiltIn\Clouds\CloudsPs.cs" />
     <Compile Include="BuiltIn\Clouds\CloudsVs.cs" />
+    <Compile Include="BuiltIn\Foliage\BuiltInFoliageShadows.cs" />
+    <Compile Include="BuiltIn\Foliage\Foliage.Buffers.cs" />
+    <Compile Include="BuiltIn\Foliage\FoliageShadowsGS.cs" />
+    <Compile Include="BuiltIn\Foliage\FoliageShadowsPs.cs" />
+    <Compile Include="BuiltIn\Foliage\FoliageShadowsVs.cs" />
+    <Compile Include="BuiltIn\Foliage\BuiltInFoliageInstances.cs" />
     <Compile Include="BuiltIn\Foliage\FoliageGS.cs" />
     <Compile Include="BuiltIn\Foliage\FoliagePs.cs" />
     <Compile Include="BuiltIn\Foliage\FoliageVs.cs" />
@@ -333,7 +339,6 @@
     <Compile Include="BuiltIn\Default\PositionColorSkinnedVs.cs" />
     <Compile Include="BuiltIn\Default\PositionColorVsI.cs" />
     <Compile Include="BuiltIn\Default\PositionColorVs.cs" />
-    <Compile Include="Effects\EffectShadowFoliageState.cs" />
     <Compile Include="BuiltIn\IBuiltInDrawer.cs" />
     <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="IInstacingData.cs" />
@@ -521,10 +526,8 @@
     <Compile Include="IntersectionVolumeAxisAlignedBox.cs" />
     <Compile Include="IntersectionVolumeSphere.cs" />
     <Compile Include="Effects\EffectPostProcess.cs" />
-    <Compile Include="Effects\EffectShadowFoliage.cs" />
     <Compile Include="Effects\EffectDeferredTerrain.cs" />
     <Compile Include="Effects\IGeometryDrawer.cs" />
-    <Compile Include="Effects\IShadowMapDrawer.cs" />
     <Compile Include="FoliageMap.cs" />
     <Compile Include="FontMapStyles.cs" />
     <Compile Include="GroundGardener.cs" />
@@ -727,7 +730,6 @@
     <Compile Include="ISceneRenderer.cs" />
     <Compile Include="IScreenFitted.cs" />
     <Compile Include="Content\LightContent.cs" />
-    <Compile Include="Effects\EffectNull.cs" />
     <Compile Include="LensFlare.cs" />
     <Compile Include="LevelOfDetail.cs" />
     <Compile Include="Line2D.cs" />

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Foliage
     /// <summary>
     /// Foliage geometry shader
     /// </summary>
-    public class FoliageGS : IBuiltInGeometryShader
+    public class FoliageShadowsGS : IBuiltInGeometryShader
     {
         /// <summary>
         /// Per patch constant buffer
@@ -36,18 +36,18 @@ namespace Engine.BuiltIn.Foliage
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public FoliageGS(Graphics graphics)
+        public FoliageShadowsGS(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = Graphics.CompileGeometryShader(nameof(FoliageGS), "main", ForwardRenderingResources.Foliage_gs, HelperShaders.GSProfile);
+            Shader = Graphics.CompileGeometryShader(nameof(FoliageShadowsGS), "main", ShadowRenderingResources.Foliage_gs, HelperShaders.GSProfile);
 
             samplerPoint = BuiltInShaders.GetSamplerPoint();
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~FoliageGS()
+        ~FoliageShadowsGS()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

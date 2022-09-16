@@ -121,10 +121,8 @@ namespace Engine
             /// </summary>
             /// <param name="sceneryEffect">Scenery effect</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawSceneryShadows(IShadowMapDrawer sceneryEffect, BufferManager bufferManager)
+            public void DrawSceneryShadows(DrawContextShadows context, BufferManager bufferManager)
             {
-                var graphics = Game.Graphics;
-
                 foreach (string meshName in DrawingData.Meshes.Keys)
                 {
                     var meshDict = DrawingData.Meshes[meshName];
@@ -139,23 +137,12 @@ namespace Engine
 
                         var material = DrawingData.Materials[materialName];
 
-                        var materialInfo = new MaterialShadowDrawInfo
+                        var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
+                        if (sceneryDrawer != null)
                         {
-                            Material = material
-                        };
+                            DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material);
 
-                        sceneryEffect.UpdatePerObject(AnimationShadowDrawInfo.Empty, materialInfo, 0);
-
-                        var technique = sceneryEffect.GetTechnique(mesh.VertextType, false, material.Material.IsTransparent);
-
-                        bufferManager.SetIndexBuffer(mesh.IndexBuffer);
-                        bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                        for (int p = 0; p < technique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(technique, p, 0);
-
-                            mesh.Draw(graphics);
+                            continue;
                         }
                     }
                 }
@@ -592,27 +579,17 @@ namespace Engine
                 return;
             }
 
-            var sceneryEffect = context.ShadowMap.GetEffect();
-            if (sceneryEffect == null)
-            {
-                return;
-            }
-
-            sceneryEffect.UpdatePerFrame(Matrix.Identity, context);
-
             var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
             foreach (var nodeId in nodeIds)
             {
-                if (patchDictionary.ContainsKey(nodeId))
-                {
-                    Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
-
-                    patchDictionary[nodeId]?.DrawSceneryShadows(sceneryEffect, BufferManager);
-                }
-                else
+                if (!patchDictionary.ContainsKey(nodeId))
                 {
                     Logger.WriteWarning(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} without assigned patch. No draw method called");
                 }
+
+                Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
+
+                patchDictionary[nodeId]?.DrawSceneryShadows(context, BufferManager);
             }
         }
         /// <inheritdoc/>

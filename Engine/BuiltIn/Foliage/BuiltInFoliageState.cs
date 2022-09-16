@@ -54,12 +54,16 @@ namespace Engine.BuiltIn.Foliage
         /// </summary>
         public float WindStrength { get; set; }
         /// <summary>
-        /// Delta
-        /// </summary>
-        public Vector3 Delta { get; set; }
-        /// <summary>
         /// Wind effect
         /// </summary>
         public float WindEffect { get; set; }
+        /// <summary>
+        /// Foliage instances per position
+        /// </summary>
+        public BuiltInFoliageInstances Instances { get; set; }
+        /// <summary>
+        /// Delta added to position for additional instances
+        /// </summary>
+        public Vector3 Delta { get; set; }
     }
 }

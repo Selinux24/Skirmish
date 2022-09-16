@@ -137,15 +137,11 @@
   </ItemGroup>
   <ItemGroup>
     <PixelShader Include="ShadowsFoliage\Foliage.ps.hlsl" />
-    <GeometryShader Include="ShadowsFoliage\Foliage8.gl.hlsl" />
-    <GeometryShader Include="ShadowsFoliage\Foliage4.gs.hlsl" />
-    <GeometryShader Include="ShadowsFoliage\Foliage16.gs.hlsl" />
+    <GeometryShader Include="ShadowsFoliage\Foliage.gs.hlsl" />
     <VertexShader Include="ShadowsFoliage\Foliage.vs.hlsl" />
     <PixelShader Include="ForwardFoliage\Foliage.ps.hlsl" />
     <VertexShader Include="ForwardFoliage\Foliage.vs.hlsl" />
-    <GeometryShader Include="ForwardFoliage\Foliage16.gs.hlsl" />
-    <GeometryShader Include="ForwardFoliage\Foliage4.gs.hlsl" />
-    <GeometryShader Include="ForwardFoliage\Foliage8.gl.hlsl" />
+    <GeometryShader Include="ForwardFoliage\Foliage.gs.hlsl" />
     <Content Include="Lib\IncGBufferLights.hlsl" />
     <GeometryShader Include="ShadowsDefault\PointTransparent.gs.hlsl" />
     <GeometryShader Include="ShadowsDefault\Point.gs.hlsl" />
@@ -196,13 +192,7 @@
     <EffectShader Include="Effects\ShaderLightSpot.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderNull.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderPostProcess.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderShadowFoliage.fx" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.HLSL.CSharpVB">

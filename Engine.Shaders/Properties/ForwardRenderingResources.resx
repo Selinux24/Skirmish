@@ -157,14 +157,8 @@
   <data name="Decal_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwarddecals\decal.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Foliage16_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardfoliage\foliage16.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Foliage4_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardfoliage\foliage4.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="Foliage8_gl" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardfoliage\foliage8.gl.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Foliage_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\forwardfoliage\foliage.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Foliage_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwardfoliage\foliage.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

@@ -323,6 +323,13 @@ struct GSVertexBillboard
 	float3 centerWorld : POSITION;
 	float2 sizeWorld : SIZE;
 };
+struct GSVertexBillboard2
+{
+    float3 centerWorld : POSITION;
+    float2 sizeWorld : SIZE;
+    float4 tintColor : TINTCOLOR;
+    Material material;
+};
 struct GSDecal
 {
 	float3 centerWorld : POSITION;
@@ -402,13 +409,6 @@ struct PSVertexPositionColor
 	float3 positionWorld : POSITION;
 	float4 color : COLOR0;
 	uint materialIndex : MATERIALINDEX;
-};
-struct GSVertexBillboard2
-{
-    float3 centerWorld : POSITION;
-    float2 sizeWorld : SIZE;
-    float4 tintColor : TINTCOLOR;
-    Material material;
 };
 struct PSVertexBillboard2
 {

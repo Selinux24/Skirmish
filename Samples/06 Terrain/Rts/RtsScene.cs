@@ -777,7 +777,7 @@ namespace Terrain.Rts
                     Delta = new Vector3(0.2f, 0f, 0.2f),
                     WindEffect = 0.5f,
                     Seed = 1,
-                    Count = 4,
+                    Instances = GroundGardenerPatchInstances.Four,
                 }
             };
             gardener = await AddComponentEffect<GroundGardener, GroundGardenerDescription>("Grass", "Grass", grDesc);

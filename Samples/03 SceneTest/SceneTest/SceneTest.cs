@@ -930,6 +930,16 @@ namespace SceneTest.SceneTest
             {
                 Camera.MoveBackward(gameTime, !shift);
             }
+
+            if (Game.Input.KeyPressed(Keys.Space))
+            {
+                Camera.MoveUp(gameTime, !shift);
+            }
+
+            if (Game.Input.KeyPressed(Keys.C))
+            {
+                Camera.MoveDown(gameTime, !shift);
+            }
         }
         private void UpdateInputDebug()
         {

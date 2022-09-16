@@ -639,7 +639,7 @@ namespace Heightmap
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
                 PlantingArea = gardenerArea,
-                CastShadow = false,
+                CastShadow = true,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "grass_v.dds" },
@@ -650,7 +650,7 @@ namespace Heightmap
                     MaxSize = new Vector2(1.5f, 1.5f),
                     Seed = 1,
                     WindEffect = 1f,
-                    Count = 4,
+                    Instances = GroundGardenerPatchInstances.Four,
                 },
                 ChannelGreen = new GroundGardenerDescription.Channel()
                 {
@@ -663,7 +663,7 @@ namespace Heightmap
                     MaxSize = new Vector2(1f, 1f),
                     Seed = 2,
                     WindEffect = 1f,
-                    Count = 4,
+                    Instances = GroundGardenerPatchInstances.Two,
                 },
                 ChannelBlue = new GroundGardenerDescription.Channel()
                 {
@@ -676,7 +676,7 @@ namespace Heightmap
                     Delta = new Vector3(0, -0.05f, 0),
                     Seed = 3,
                     WindEffect = 1f,
-                    Count = 1,
+                    Instances = GroundGardenerPatchInstances.Default,
                 },
             };
             gardener = await AddComponent<GroundGardener, GroundGardenerDescription>("Grass", "Grass", vDesc);

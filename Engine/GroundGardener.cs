@@ -11,7 +11,6 @@ namespace Engine
     using Engine.Collections;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Ground garden planter
@@ -330,9 +329,9 @@ namespace Engine
             /// </summary>
             public float WindEffect;
             /// <summary>
-            /// Gometry output count
+            /// Geometry output count
             /// </summary>
-            public int Count;
+            public BuiltInFoliageInstances Count;
 
             /// <summary>
             /// Destructor
@@ -514,7 +513,7 @@ namespace Engine
             /// Draws the foliage data
             /// </summary>
             /// <param name="drawer">Drawer</param>
-            public void DrawFoliage(BuiltInFoliage drawer)
+            public void DrawFoliage(BuiltInDrawer drawer)
             {
                 if (vertexDrawCount <= 0)
                 {
@@ -559,10 +558,6 @@ namespace Engine
         /// </summary>
         private readonly List<FoliageBuffer> foliageBuffers = new List<FoliageBuffer>();
         /// <summary>
-        /// Wind total time
-        /// </summary>
-        private float windTime = 0;
-        /// <summary>
         /// Random texture
         /// </summary>
         private EngineShaderResourceView textureRandom = null;
@@ -606,6 +601,10 @@ namespace Engine
         /// Foliage drawer
         /// </summary>
         private BuiltInFoliage foliageDrawer = null;
+        /// <summary>
+        /// Foliage shadows drawer
+        /// </summary>
+        private BuiltInFoliageShadows foliageShadowsDrawer = null;
 
         /// <summary>
         /// Wind direction
@@ -714,6 +713,7 @@ namespace Engine
             }
 
             foliageDrawer = BuiltInShaders.GetDrawer<BuiltInFoliage>();
+            foliageShadowsDrawer = BuiltInShaders.GetDrawer<BuiltInFoliageShadows>();
 
             initialized = true;
         }
@@ -764,7 +764,7 @@ namespace Engine
                 Textures = foliageTextures,
                 NormalMaps = foliageNormalMaps,
                 WindEffect = channel.WindEffect,
-                Count = channel.Count,
+                Count = (BuiltInFoliageInstances)channel.Instances,
             };
         }
 
@@ -779,8 +779,6 @@ namespace Engine
             {
                 return;
             }
-
-            windTime += context.GameTime.ElapsedSeconds * WindStrength;
 
             UpdatePatchesAsync(context);
         }
@@ -805,15 +803,14 @@ namespace Engine
 
             foreach (var item in visibleNodes)
             {
-                DrawShadowsNode(context, item);
+                DrawShadowsNode(item);
             }
         }
         /// <summary>
         /// Draws the node shadows
         /// </summary>
-        /// <param name="context">Context</param>
         /// <param name="item">Node</param>
-        private void DrawShadowsNode(DrawContextShadows context, QuadTreeNode item)
+        private void DrawShadowsNode(QuadTreeNode item)
         {
             var buffers = foliageBuffers.Where(b => b.CurrentPatch?.CurrentNode == item);
             if (!buffers.Any())
@@ -823,16 +820,29 @@ namespace Engine
 
             foreach (var buffer in buffers)
             {
-                var vegetationTechnique = SetTechniqueVegetationShadowMap(context, buffer.CurrentPatch.Channel);
-                if (vegetationTechnique != null)
-                {
-                    BufferManager.SetInputAssembler(
-                        vegetationTechnique,
-                        buffer.VertexBuffer,
-                        Topology.PointList);
+                var channelData = foliageMapChannels[buffer.CurrentPatch.Channel];
 
-                    buffer.DrawFoliageShadows(vegetationTechnique);
-                }
+                var state = new BuiltInFoliageState
+                {
+                    StartRadius = channelData.StartRadius,
+                    EndRadius = channelData.EndRadius,
+                    TintColor = Color4.White,
+                    MaterialIndex = foliageMaterial.ResourceIndex,
+                    TextureCount = channelData.TextureCount,
+                    NormalMapCount = channelData.NormalMapCount,
+                    RandomTexture = textureRandom,
+                    Texture = channelData.Textures,
+                    NormalMaps = channelData.NormalMaps,
+                    WindDirection = WindDirection,
+                    WindStrength = WindStrength * channelData.WindEffect,
+                    Delta = channelData.Delta,
+                    WindEffect = channelData.WindEffect,
+                    Instances = channelData.Count,
+                };
+
+                foliageShadowsDrawer.UpdateFoliage(state);
+
+                buffer.DrawFoliage(foliageShadowsDrawer);
             }
         }
 
@@ -898,6 +908,7 @@ namespace Engine
                     WindStrength = WindStrength * channelData.WindEffect,
                     Delta = channelData.Delta,
                     WindEffect = channelData.WindEffect,
+                    Instances = channelData.Count,
                 };
 
                 foliageDrawer.UpdateFoliage(state);
@@ -924,39 +935,6 @@ namespace Engine
             }
 
             return cull;
-        }
-
-        /// <summary>
-        /// Sets thecnique for vegetation drawing in shadow mapping
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="channel">Channel</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueVegetationShadowMap(DrawContextShadows context, int channel)
-        {
-            var channelData = foliageMapChannels[channel];
-
-            var effect = DrawerPool.GetEffect<EffectShadowFoliage>();
-
-            effect.UpdatePerFrame(
-                context,
-                new EffectShadowFoliageState
-                {
-                    WindDirection = WindDirection,
-                    WindStrength = WindStrength * channelData.WindEffect,
-                    TotalTime = windTime * channelData.WindEffect,
-                    Delta = channelData.Delta,
-                    StartRadius = channelData.StartRadius,
-                    EndRadius = channelData.EndRadius,
-                    RandomTexture = textureRandom,
-                    TextureCount = channelData.TextureCount,
-                    Texture = channelData.Textures,
-                });
-
-            if (channelData.Count == 1) return effect.ShadowMapFoliage4;
-            if (channelData.Count == 2) return effect.ShadowMapFoliage8;
-            if (channelData.Count == 4) return effect.ShadowMapFoliage16;
-            else return null;
         }
 
         /// <summary>

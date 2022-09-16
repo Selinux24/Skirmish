@@ -7,47 +7,47 @@ namespace Engine.BuiltIn.Foliage
     using Engine.Helpers;
 
     /// <summary>
-    /// Foliage geometry shader
+    /// Foliage pixel shader
     /// </summary>
-    public class FoliageGS : IBuiltInGeometryShader
+    public class FoliageShadowsPs : IBuiltInPixelShader
     {
         /// <summary>
-        /// Per patch constant buffer
+        /// Per material constant buffer
         /// </summary>
-        private IEngineConstantBuffer cbPerPatch;
+        private IEngineConstantBuffer cbPerMaterial;
         /// <summary>
-        /// Random texture
+        /// Texture array resource view
         /// </summary>
-        private EngineShaderResourceView randomTexture;
+        private EngineShaderResourceView textureArray;
         /// <summary>
-        /// Sampler point
+        /// Foliage sampler
         /// </summary>
-        private readonly EngineSamplerState samplerPoint;
+        private readonly EngineSamplerState samplerFoliage;
+
+        /// <inheritdoc/>
+        public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Graphics instance
         /// </summary>
         protected Graphics Graphics = null;
 
-        /// <inheritdoc/>
-        public EngineGeometryShader Shader { get; private set; }
-
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public FoliageGS(Graphics graphics)
+        public FoliageShadowsPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = Graphics.CompileGeometryShader(nameof(FoliageGS), "main", ForwardRenderingResources.Foliage_gs, HelperShaders.GSProfile);
+            Shader = graphics.CompilePixelShader(nameof(FoliageShadowsPs), "main", ShadowRenderingResources.Foliage_ps, HelperShaders.PSProfile);
 
-            samplerPoint = BuiltInShaders.GetSamplerPoint();
+            samplerFoliage = BuiltInShaders.GetSamplerLinear();
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~FoliageGS()
+        ~FoliageShadowsPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -72,19 +72,19 @@ namespace Engine.BuiltIn.Foliage
         }
 
         /// <summary>
-        /// Sets per patch constant buffer
+        /// Sets per material constant buffer
         /// </summary>
-        public void SetPerPatchConstantBuffer(IEngineConstantBuffer constantBuffer)
+        public void SetPerMaterialConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
-            cbPerPatch = constantBuffer;
+            cbPerMaterial = constantBuffer;
         }
         /// <summary>
-        /// Sets the random texture resource view
+        /// Sets the texture array
         /// </summary>
-        /// <param name="randomTexture">Random texture</param>
-        public void SetRandomTexture(EngineShaderResourceView randomTexture)
+        /// <param name="textureArray">Texture array</param>
+        public void SetTextureArray(EngineShaderResourceView textureArray)
         {
-            this.randomTexture = randomTexture;
+            this.textureArray = textureArray;
         }
 
         /// <inheritdoc/>
@@ -92,15 +92,19 @@ namespace Engine.BuiltIn.Foliage
         {
             var cb = new[]
             {
-                BuiltInShaders.GetPerFrameConstantBuffer(),
-                cbPerPatch,
+                cbPerMaterial,
             };
 
-            Graphics.SetGeometryShaderConstantBuffers(0, cb);
+            Graphics.SetPixelShaderConstantBuffers(0, cb);
 
-            Graphics.SetGeometryShaderResourceView(0, randomTexture);
+            var rv = new[]
+            {
+                textureArray,
+            };
 
-            Graphics.SetGeometryShaderSampler(0, samplerPoint);
+            Graphics.SetPixelShaderResourceViews(0, rv);
+
+            Graphics.SetPixelShaderSampler(0, samplerFoliage);
         }
     }
 }

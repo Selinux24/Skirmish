@@ -44,11 +44,6 @@ namespace Engine
         /// <param name="index">Array index</param>
         void Bind(Graphics graphics, int index);
         /// <summary>
-        /// Gets the effect to draw this shadow map
-        /// </summary>
-        /// <returns>Returns an effect</returns>
-        IShadowMapDrawer GetEffect();
-        /// <summary>
         /// Gets the drawer to draw this shadow map
         /// </summary>
         /// <param name="vertexType">Vertex type</param>

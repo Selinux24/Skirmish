@@ -6,7 +6,7 @@ namespace Engine.BuiltIn.Foliage
     /// <summary>
     /// Foliage drawer
     /// </summary>
-    public class BuiltInFoliage : BuiltInDrawer
+    public class BuiltInFoliageShadows : BuiltInDrawer
     {
         /// <summary>
         /// Per material constant buffer
@@ -21,11 +21,11 @@ namespace Engine.BuiltIn.Foliage
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public BuiltInFoliage(Graphics graphics) : base(graphics)
+        public BuiltInFoliageShadows(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<FoliageVs>();
-            SetGeometryShader<FoliageGS>();
-            SetPixelShader<FoliagePs>();
+            SetVertexShader<FoliageShadowsVs>();
+            SetGeometryShader<FoliageShadowsGS>();
+            SetPixelShader<FoliageShadowsPs>();
 
             cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterial>();
             cbPerPatch = BuiltInShaders.GetConstantBuffer<PerPatch>();
@@ -40,17 +40,13 @@ namespace Engine.BuiltIn.Foliage
             cbPerMaterial.WriteData(PerMaterial.Build(state));
             cbPerPatch.WriteData(PerPatch.Build(state));
 
-            var vertexShader = GetVertexShader<FoliageVs>();
-            vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);
-
-            var geometryShader = GetGeometryShader<FoliageGS>();
+            var geometryShader = GetGeometryShader<FoliageShadowsGS>();
             geometryShader?.SetPerPatchConstantBuffer(cbPerPatch);
             geometryShader?.SetRandomTexture(state.RandomTexture);
 
-            var pixelShader = GetPixelShader<FoliagePs>();
+            var pixelShader = GetPixelShader<FoliageShadowsPs>();
             pixelShader?.SetPerMaterialConstantBuffer(cbPerMaterial);
             pixelShader?.SetTextureArray(state.Texture);
-            pixelShader?.SetNormalMapArray(state.NormalMaps);
         }
     }
 }

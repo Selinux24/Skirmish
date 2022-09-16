@@ -83,6 +83,36 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] Foliage_gs {
+            get {
+                object obj = ResourceManager.GetObject("Foliage_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Foliage_ps {
+            get {
+                object obj = ResourceManager.GetObject("Foliage_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Foliage_vs {
+            get {
+                object obj = ResourceManager.GetObject("Foliage_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] Point_gs {
             get {
                 object obj = ResourceManager.GetObject("Point_gs", resourceCulture);
