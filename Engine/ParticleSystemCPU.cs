@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltIn.CpuParticles;
+    using Engine.BuiltIn.Particles;
     using Engine.Common;
     using Engine.Content;
     using Engine.Effects;
@@ -43,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Drawer
         /// </summary>
-        private BuiltInCpuParticles particleDrawer;
+        private BuiltInParticles particleDrawer;
 
         /// <summary>
         /// Game instance
@@ -113,9 +113,9 @@ namespace Engine
 
             var pBuffer = new EngineVertexBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, true);
 
-            var drawer = BuiltInShaders.GetDrawer<BuiltInCpuParticles>();
+            var drawer = BuiltInShaders.GetDrawer<BuiltInParticles>();
             var signature = drawer.GetVertexShader().Shader.GetShaderBytecode();
-            pBuffer.CreateInputLayout(nameof(CpuParticlesPs), signature, BufferSlot);
+            pBuffer.CreateInputLayout(nameof(ParticlesPs), signature, BufferSlot);
 
             return new ParticleSystemCpu
             {

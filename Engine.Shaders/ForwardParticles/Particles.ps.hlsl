@@ -1,11 +1,10 @@
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerEmitter : register(b0)
 {
-	float gTotalTime;
 	float gMaxDuration;
 	float gMaxDurationRandomness;
-	float PAD01;
+	float gTotalTime;
+    float gElapsedTime;
 
 	bool gRotation;
 	float2 gRotateSpeed;
@@ -29,7 +28,17 @@ SamplerState SamplerPointParticle : register(s0)
 	AddressV = CLAMP;
 };
 
-float4 main(PSCPUParticle input) : SV_Target
+struct PSParticle
+{
+    uint primitiveID : SV_PRIMITIVEID;
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float4 rotationWorld : ROTATION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
+
+float4 main(PSParticle input) : SV_Target
 {
 	float2 tex = input.tex;
 

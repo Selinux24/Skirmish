@@ -1,12 +1,16 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
-cbuffer cbPerEmitter : register(b0)
+cbuffer cbPerFrame : register(b0)
 {
-    float gTotalTime;
+    PerFrame gPerFrame;
+};
+
+cbuffer cbPerEmitter : register(b1)
+{
     float gMaxDuration;
     float gMaxDurationRandomness;
-    float PAD01;
+    float gTotalTime;
+    float gElapsedTime;
 
     bool gRotation;
     float2 gRotateSpeed;
@@ -21,11 +25,6 @@ cbuffer cbPerEmitter : register(b0)
     float4 gMaxColor;
 }
 
-cbuffer cbPerFrame : register(b1)
-{
-    PerFrame gPerFrame;
-};
-
 static float2 quadTexC[4] =
 {
     float2(0.0f, 1.0f),
@@ -34,8 +33,26 @@ static float2 quadTexC[4] =
     float2(1.0f, 0.0f)
 };
 
+struct GSParticle
+{
+    float3 centerWorld : POSITION;
+    float2 sizeWorld : SIZE;
+    float4 color : COLOR;
+    float4 rotationWorld : ROTATION;
+};
+
+struct PSParticle
+{
+    uint primitiveID : SV_PRIMITIVEID;
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float4 rotationWorld : ROTATION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
+
 [maxvertexcount(4)]
-void main(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSCPUParticle> outputStream)
+void main(point GSParticle input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSParticle> outputStream)
 {
     float3 centerWorld = input[0].centerWorld;
     float2 sizeWorld = input[0].sizeWorld;
@@ -59,16 +76,17 @@ void main(point GSCPUParticle input[1], uint primID : SV_PrimitiveID, inout Tria
     v[3] = float4(centerWorld - halfWidth * right + halfHeight * up, 1.0f);
 
 	//Transform quad vertices to world space and output them as a triangle strip.
-    PSCPUParticle gout;
-	[unroll]
+    PSParticle gout;
+    gout.primitiveID = primID;
+    gout.color = color;
+    gout.rotationWorld = rotationWorld;
+
+    [unroll]
     for (int i = 0; i < 4; ++i)
     {
         gout.positionHomogeneous = mul(v[i], gPerFrame.ViewProjection);
         gout.positionWorld = v[i].xyz;
         gout.tex = quadTexC[i];
-        gout.color = color;
-        gout.rotationWorld = rotationWorld;
-        gout.primitiveID = primID;
 
         outputStream.Append(gout);
     }

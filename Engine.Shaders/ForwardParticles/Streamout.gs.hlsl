@@ -1,15 +1,14 @@
-#include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncHelpers.hlsl"
 
 #define PT_EMITTER 0
 #define PT_FLARE 1
 
-cbuffer cbPerFrame : register(b0)
+cbuffer cbPerStreamOut : register(b0)
 {
-    float gTotalTime;
-    float gElapsedTime;
     float gEmissionRate;
     float gVelocitySensitivity;
+    float gTotalTime;
+    float gElapsedTime;
 
     float2 gHorizontalVelocity;
     float2 gVerticalVelocity;
@@ -17,8 +16,18 @@ cbuffer cbPerFrame : register(b0)
     float4 gRandomValues;
 };
 
+struct VSParticle
+{
+    float3 position : POSITION;
+    float3 velocity : VELOCITY;
+    float4 random : RANDOM;
+    float maxAge : MAX_AGE;
+    uint type : TYPE;
+    float emissionTime : EMISSION_TIME;
+};
+
 [maxvertexcount(2)]
-void main(point VSVertexGPUParticle input[1], inout PointStream<VSVertexGPUParticle> ptStream)
+void main(point VSParticle input[1], inout PointStream<VSParticle> ptStream)
 {
     if (input[0].type == PT_EMITTER)
     {
@@ -40,7 +49,7 @@ void main(point VSVertexGPUParticle input[1], inout PointStream<VSVertexGPUParti
                 velocity.z += horizontalVelocity * sin(horizontalAngle);
                 velocity.y += lerp(gVerticalVelocity.x, gVerticalVelocity.y, gRandomValues.z);
 
-                VSVertexGPUParticle p;
+                VSParticle p;
 			
                 p.position = input[0].position;
                 p.velocity = velocity;

@@ -1,15 +1,15 @@
 ﻿using SharpDX;
 using System.Runtime.InteropServices;
 
-namespace Engine.BuiltIn.CpuParticles
+namespace Engine.BuiltIn.Particles
 {
     using Engine.Common;
     using Engine.Effects;
 
     /// <summary>
-    /// Cubemap drawer
+    /// Particle drawer
     /// </summary>
-    public class BuiltInCpuParticles : BuiltInDrawer
+    public class BuiltInParticles : BuiltInDrawer
     {
         #region Buffers
 
@@ -23,9 +23,10 @@ namespace Engine.BuiltIn.CpuParticles
             {
                 return new PerEmitter
                 {
-                    TotalTime = state.TotalTime,
                     MaxDuration = state.MaxDuration,
                     MaxDurationRandomness = state.MaxDurationRandomness,
+                    TotalTime = state.TotalTime,
+                    ElapsedTime = state.ElapsedTime,
 
                     Rotation = state.RotateSpeed != Vector2.Zero,
                     RotateSpeed = state.RotateSpeed,
@@ -43,20 +44,25 @@ namespace Engine.BuiltIn.CpuParticles
             }
 
             /// <summary>
-            /// Total time
-            /// </summary>
-            [FieldOffset(0)]
-            public float TotalTime;
-            /// <summary>
             /// Max duration
             /// </summary>
-            [FieldOffset(4)]
+            [FieldOffset(0)]
             public float MaxDuration;
             /// <summary>
             /// Max duration randomness
             /// </summary>
-            [FieldOffset(8)]
+            [FieldOffset(4)]
             public float MaxDurationRandomness;
+            /// <summary>
+            /// Total particle time (not game time)
+            /// </summary>
+            [FieldOffset(8)]
+            public float TotalTime;
+            /// <summary>
+            /// Elapsed particle time (not game time)
+            /// </summary>
+            [FieldOffset(12)]
+            public float ElapsedTime;
 
             /// <summary>
             /// Rotation
@@ -126,11 +132,11 @@ namespace Engine.BuiltIn.CpuParticles
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public BuiltInCpuParticles(Graphics graphics) : base(graphics)
+        public BuiltInParticles(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<CpuParticlesVs>();
-            SetGeometryShader<CpuParticlesGS>();
-            SetPixelShader<CpuParticlesPs>();
+            SetVertexShader<ParticlesVs>();
+            SetGeometryShader<ParticlesGS>();
+            SetPixelShader<ParticlesPs>();
 
             cbPerEmitter = BuiltInShaders.GetConstantBuffer<PerEmitter>();
         }
@@ -145,13 +151,13 @@ namespace Engine.BuiltIn.CpuParticles
         {
             cbPerEmitter.WriteData(PerEmitter.Build(state, textureCount));
 
-            var vertexShader = GetVertexShader<CpuParticlesVs>();
+            var vertexShader = GetVertexShader<ParticlesVs>();
             vertexShader?.SetPerEmitterConstantBuffer(cbPerEmitter);
 
-            var geometryShader = GetGeometryShader<CpuParticlesGS>();
+            var geometryShader = GetGeometryShader<ParticlesGS>();
             geometryShader?.SetPerEmitterConstantBuffer(cbPerEmitter);
 
-            var pixelShader = GetPixelShader<CpuParticlesPs>();
+            var pixelShader = GetPixelShader<ParticlesPs>();
             pixelShader?.SetPerEmitterConstantBuffer(cbPerEmitter);
             pixelShader?.SetTextureArray(textures);
         }

@@ -133,15 +133,6 @@
   <data name="Clouds_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwardclouds\clouds.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="CPUParticles_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardcpuparticles\cpuparticles.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="CPUParticles_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardcpuparticles\cpuparticles.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="CPUParticles_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardcpuparticles\cpuparticles.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="Cubemap_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwardcubemap\cubemap.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -166,20 +157,14 @@
   <data name="Foliage_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwardfoliage\foliage.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="GPUParticles_draw_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardgpuparticles\gpuparticles.draw.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Particles_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\forwardparticles\particles.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="GPUParticles_draw_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardgpuparticles\gpuparticles.draw.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Particles_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\forwardparticles\particles.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="GPUParticles_draw_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardgpuparticles\gpuparticles.draw.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="GPUParticles_streamout_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardgpuparticles\gpuparticles.streamout.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="GPUParticles_streamout_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\forwardgpuparticles\gpuparticles.streamout.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="Particles_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\forwardparticles\particles.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PositionColorI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwarddefault\positioncolori.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
@@ -267,6 +252,12 @@
   </data>
   <data name="SkyScattering_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwardskyscattering\skyscattering.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Streamout_gs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\forwardparticles\streamout.gs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Streamout_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\forwardparticles\streamout.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Terrain_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\forwardterrain\terrain.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

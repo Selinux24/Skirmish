@@ -113,36 +113,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] CPUParticles_gs {
-            get {
-                object obj = ResourceManager.GetObject("CPUParticles_gs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] CPUParticles_ps {
-            get {
-                object obj = ResourceManager.GetObject("CPUParticles_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] CPUParticles_vs {
-            get {
-                object obj = ResourceManager.GetObject("CPUParticles_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] Cubemap_ps {
             get {
                 object obj = ResourceManager.GetObject("Cubemap_ps", resourceCulture);
@@ -223,9 +193,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] GPUParticles_draw_gs {
+        public static byte[] Particles_gs {
             get {
-                object obj = ResourceManager.GetObject("GPUParticles_draw_gs", resourceCulture);
+                object obj = ResourceManager.GetObject("Particles_gs", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -233,9 +203,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] GPUParticles_draw_ps {
+        public static byte[] Particles_ps {
             get {
-                object obj = ResourceManager.GetObject("GPUParticles_draw_ps", resourceCulture);
+                object obj = ResourceManager.GetObject("Particles_ps", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -243,29 +213,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] GPUParticles_draw_vs {
+        public static byte[] Particles_vs {
             get {
-                object obj = ResourceManager.GetObject("GPUParticles_draw_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] GPUParticles_streamout_gs {
-            get {
-                object obj = ResourceManager.GetObject("GPUParticles_streamout_gs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] GPUParticles_streamout_vs {
-            get {
-                object obj = ResourceManager.GetObject("GPUParticles_streamout_vs", resourceCulture);
+                object obj = ResourceManager.GetObject("Particles_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -556,6 +506,26 @@ namespace Engine.Shaders.Properties {
         public static byte[] SkyScattering_vs {
             get {
                 object obj = ResourceManager.GetObject("SkyScattering_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Streamout_gs {
+            get {
+                object obj = ResourceManager.GetObject("Streamout_gs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Streamout_vs {
+            get {
+                object obj = ResourceManager.GetObject("Streamout_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -1,7 +1,7 @@
 ﻿using Engine.Shaders.Properties;
 using System;
 
-namespace Engine.BuiltIn.CpuParticles
+namespace Engine.BuiltIn.Particles
 {
     using Engine.Common;
     using Engine.Helpers;
@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.CpuParticles
     /// <summary>
     /// CPU particles pixel shader
     /// </summary>
-    public class CpuParticlesPs : IBuiltInPixelShader
+    public class ParticlesPs : IBuiltInPixelShader
     {
         /// <summary>
         /// Per frame constant buffer
@@ -36,23 +36,23 @@ namespace Engine.BuiltIn.CpuParticles
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public CpuParticlesPs(Graphics graphics)
+        public ParticlesPs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(CpuParticlesPs), "main", ForwardRenderingResources.CPUParticles_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(ParticlesPs), "main", ForwardRenderingResources.Particles_ps, HelperShaders.PSProfile);
 
             var samplerDesc = EngineSamplerStateDescription.Default();
             samplerDesc.Filter = Filter.MinMagMipPoint;
             samplerDesc.AddressU = TextureAddressMode.Clamp;
             samplerDesc.AddressV = TextureAddressMode.Clamp;
 
-            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(CpuParticlesPs)}.ParticlesSampler", samplerDesc);
+            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(ParticlesPs)}.ParticlesSampler", samplerDesc);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~CpuParticlesPs()
+        ~ParticlesPs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

@@ -111,6 +111,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>EffectsResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Properties\ForwardRenderingResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ForwardRenderingResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Properties\ShadowRenderingResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -120,11 +125,6 @@
       <DependentUpon>UIRenderingResources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-    </Compile>
-    <Compile Include="Properties\ForwardRenderingResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ForwardRenderingResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\LibResources.Designer.cs">
       <DependentUpon>LibResources.resx</DependentUpon>
@@ -272,13 +272,13 @@
     <VertexShader Include="ForwardSkyScattering\SkyScattering.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <PixelShader Include="ForwardCPUParticles\CPUParticles.ps.hlsl" />
+    <PixelShader Include="ForwardParticles\Particles.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <GeometryShader Include="ForwardCPUParticles\CPUParticles.gs.hlsl" />
+    <GeometryShader Include="ForwardParticles\Particles.gs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardCPUParticles\CPUParticles.vs.hlsl" />
+    <VertexShader Include="ForwardParticles\Particles.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <VertexShader Include="ShadowsDefault\Position.vs.hlsl" />
@@ -295,11 +295,8 @@
     <GeometryShader Include="ForwardDecals\Decal.gs.hlsl" />
     <PixelShader Include="UIFont\Font.ps.hlsl" />
     <VertexShader Include="UIFont\Font.vs.hlsl" />
-    <PixelShader Include="ForwardGPUParticles\GPUParticles.draw.ps.hlsl" />
-    <EffectShader Include="ForwardGPUParticles\GPUParticles.streamout.vs.hlsl" />
-    <GeometryShader Include="ForwardGPUParticles\GPUParticles.streamout.gs.hlsl" />
-    <VertexShader Include="ForwardGPUParticles\GPUParticles.draw.vs.hlsl" />
-    <GeometryShader Include="ForwardGPUParticles\GPUParticles.draw.gs.hlsl" />
+    <EffectShader Include="ForwardParticles\Streamout.vs.hlsl" />
+    <GeometryShader Include="ForwardParticles\Streamout.gs.hlsl" />
     <Content Include="Lib\IncSprites.hlsl" />
     <Content Include="Lib\IncBuiltIn.hlsl" />
     <PixelShader Include="ForwardWater\Water.ps.hlsl" />

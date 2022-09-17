@@ -153,6 +153,10 @@
     <Compile Include="BuiltIn\Foliage\FoliageVs.cs" />
     <Compile Include="BuiltIn\Foliage\BuiltInFoliage.cs" />
     <Compile Include="BuiltIn\Foliage\BuiltInFoliageState.cs" />
+    <Compile Include="BuiltIn\Particles\BuiltInStreamOut.cs" />
+    <Compile Include="BuiltIn\Particles\BuiltInStreamOutState.cs" />
+    <Compile Include="BuiltIn\Particles\StreamOutGS.cs" />
+    <Compile Include="BuiltIn\Particles\StreamOutVs.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPosition.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionInstanced.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionSkinned.cs" />
@@ -169,7 +173,7 @@
     <Compile Include="BuiltIn\Decals\BuiltInDecals.cs" />
     <Compile Include="BuiltIn\Fonts\BuiltInFontState.cs" />
     <Compile Include="BuiltIn\SkyScattering\BuiltInSkyScattering.cs" />
-    <Compile Include="BuiltIn\CpuParticles\BuiltInCpuParticles.cs" />
+    <Compile Include="BuiltIn\Particles\BuiltInParticles.cs" />
     <Compile Include="BuiltIn\Cubemap\BuiltInSkymap.cs" />
     <Compile Include="BuiltIn\Cubemap\BuiltInCubemap.cs" />
     <Compile Include="BuiltIn\BuiltInDrawerMaterialState.cs" />
@@ -196,9 +200,9 @@
     <Compile Include="BuiltIn\Default\BuiltInPositionColor.cs" />
     <Compile Include="BuiltIn\Fonts\FontsPs.cs" />
     <Compile Include="BuiltIn\Fonts\FontsVs.cs" />
-    <Compile Include="BuiltIn\CpuParticles\CpuParticlesGS.cs" />
-    <Compile Include="BuiltIn\CpuParticles\CpuParticlesVs.cs" />
-    <Compile Include="BuiltIn\CpuParticles\CpuParticlesPs.cs" />
+    <Compile Include="BuiltIn\Particles\ParticlesGS.cs" />
+    <Compile Include="BuiltIn\Particles\ParticlesVs.cs" />
+    <Compile Include="BuiltIn\Particles\ParticlesPs.cs" />
     <Compile Include="BuiltIn\Decals\DecalsGS.cs" />
     <Compile Include="BuiltIn\Decals\DecalsPs.cs" />
     <Compile Include="BuiltIn\Decals\DecalsVs.cs" />

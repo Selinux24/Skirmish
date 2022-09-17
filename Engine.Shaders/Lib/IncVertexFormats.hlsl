@@ -21,8 +21,8 @@ struct VSVertexDecal
 };
 struct VSVertexCPUParticle
 {
-	float3 positionWorld : POSITION;
-	float3 velocityWorld : VELOCITY;
+	float3 position : POSITION;
+	float3 velocity : VELOCITY;
 	float4 random : RANDOM;
 	float maxAge : MAX_AGE;
 };

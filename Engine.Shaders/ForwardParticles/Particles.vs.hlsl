@@ -1,19 +1,24 @@
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncBuiltIn.hlsl"
 
-cbuffer cbPerFrame : register(b0)
+cbuffer cbPerEmitter : register(b0)
 {
-    float gTotalTime;
-
     float gMaxDuration;
     float gMaxDurationRandomness;
-    float gEndVelocity;
+    float gTotalTime;
+    float gElapsedTime;
+
+    bool gRotation;
+    float2 gRotateSpeed;
+    uint gTextureCount;
+
     float3 gGravity;
+    float gEndVelocity;
+
     float2 gStartSize;
     float2 gEndSize;
     float4 gMinColor;
     float4 gMaxColor;
-    float2 gRotateSpeed;
-};
+}
 
 float3 ComputeParticlePosition(float3 position, float3 velocity, float age, float normalizedAge)
 {
@@ -59,9 +64,25 @@ float4 ComputeParticleRotation(float randomValue, float age)
     return rotationMatrix;
 }
 
-GSCPUParticle main(VSVertexGPUParticle input)
+struct VSParticle
 {
-    GSCPUParticle output;
+    float3 position : POSITION;
+    float3 velocity : VELOCITY;
+    float4 random : RANDOM;
+    float maxAge : MAX_AGE;
+};
+
+struct GSParticle
+{
+    float3 centerWorld : POSITION;
+    float2 sizeWorld : SIZE;
+    float4 color : COLOR;
+    float4 rotationWorld : ROTATION;
+};
+
+GSParticle main(VSParticle input)
+{
+    GSParticle output;
 
     float age = gTotalTime - input.maxAge;
     age *= 1.0f + input.random.x * gMaxDurationRandomness;
