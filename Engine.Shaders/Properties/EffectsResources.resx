@@ -127,21 +127,6 @@
   <data name="ShaderDeferredTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderdeferredterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ShaderLightCapsule" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightcapsule.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderLightDirectional" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightdirectional.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderLightEmissive" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightemissive.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderLightPoint" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightpoint.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderLightSpot" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderlightspot.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderPostProcess" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderpostprocess.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

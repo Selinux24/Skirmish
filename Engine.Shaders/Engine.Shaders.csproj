@@ -171,21 +171,6 @@
     <EffectShader Include="Effects\ShaderDeferredTerrain.fx" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderLightCapsule.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderLightDirectional.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderLightEmissive.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderLightPoint.fx" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderLightSpot.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderPostProcess.fx" />
   </ItemGroup>
   <ItemGroup>

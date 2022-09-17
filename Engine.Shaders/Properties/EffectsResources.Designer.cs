@@ -93,56 +93,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderLightCapsule {
-            get {
-                object obj = ResourceManager.GetObject("ShaderLightCapsule", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] ShaderLightDirectional {
-            get {
-                object obj = ResourceManager.GetObject("ShaderLightDirectional", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] ShaderLightEmissive {
-            get {
-                object obj = ResourceManager.GetObject("ShaderLightEmissive", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] ShaderLightPoint {
-            get {
-                object obj = ResourceManager.GetObject("ShaderLightPoint", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] ShaderLightSpot {
-            get {
-                object obj = ResourceManager.GetObject("ShaderLightSpot", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderPostProcess {
             get {
                 object obj = ResourceManager.GetObject("ShaderPostProcess", resourceCulture);
