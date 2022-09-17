@@ -63,16 +63,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderDefaultGPUParticles {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDefaultGPUParticles", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderDeferredBasic {
             get {
                 object obj = ResourceManager.GetObject("ShaderDeferredBasic", resourceCulture);

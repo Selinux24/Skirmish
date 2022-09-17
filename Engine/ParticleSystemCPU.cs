@@ -8,7 +8,6 @@ namespace Engine
     using Engine.BuiltIn.Particles;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// CPU particle system
@@ -111,7 +110,7 @@ namespace Engine
             var vParticles = new VertexCpuParticle[maxConcurrentParticles];
             float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
-            var pBuffer = new EngineVertexBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, true);
+            var pBuffer = new EngineVertexBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, VertexBufferParams.Dynamic);
 
             var drawer = BuiltInShaders.GetDrawer<BuiltInParticles>();
             var signature = drawer.GetVertexShader().Shader.GetShaderBytecode();
@@ -222,7 +221,7 @@ namespace Engine
             graphics.SetBlendState(parameters.BlendMode);
 
             var useRotation = parameters.RotateSpeed != Vector2.Zero;
-            var state = new EffectParticleState
+            var state = new BuiltInParticlesState
             {
                 TotalTime = Emitter.TotalTime,
                 MaxDuration = parameters.MaxDuration,

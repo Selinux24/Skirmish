@@ -4,7 +4,6 @@ using System.Runtime.InteropServices;
 namespace Engine.BuiltIn.Particles
 {
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Particle drawer
@@ -19,7 +18,7 @@ namespace Engine.BuiltIn.Particles
         [StructLayout(LayoutKind.Explicit, Size = 96)]
         struct PerEmitter : IBufferData
         {
-            public static PerEmitter Build(EffectParticleState state, uint textureCount)
+            public static PerEmitter Build(BuiltInParticlesState state, uint textureCount)
             {
                 return new PerEmitter
                 {
@@ -147,7 +146,7 @@ namespace Engine.BuiltIn.Particles
         /// <param name="state">Particle state</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture array</param>
-        public void Update(EffectParticleState state, uint textureCount, EngineShaderResourceView textures)
+        public void Update(BuiltInParticlesState state, uint textureCount, EngineShaderResourceView textures)
         {
             cbPerEmitter.WriteData(PerEmitter.Build(state, textureCount));
 

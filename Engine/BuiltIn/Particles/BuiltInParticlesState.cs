@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 
-namespace Engine.Effects
+namespace Engine.BuiltIn.Particles
 {
     /// <summary>
     /// Particle state for particle effects
     /// </summary>
-    public struct EffectParticleState
+    public struct BuiltInParticlesState
     {
         /// <summary>
         /// Total time

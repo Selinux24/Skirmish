@@ -100,7 +100,7 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public InputElement[] GetInput(int slot)
         {
-            return VertexCpuParticle.Input(slot);
+            return Input(slot);
         }
 
         /// <inheritdoc/>

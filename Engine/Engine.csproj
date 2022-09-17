@@ -264,6 +264,7 @@
     <Compile Include="Common\EngineGeometryShader.cs" />
     <Compile Include="Common\EngineRasterizerStateDescription.cs" />
     <Compile Include="Common\EngineSamplerStateDescription.cs" />
+    <Compile Include="Common\EngineStreamOutputElement.cs" />
     <Compile Include="Common\IEngineVertexBuffer.cs" />
     <Compile Include="Common\IEnginePixelShader.cs" />
     <Compile Include="Common\IEngineGeometryShader.cs" />
@@ -454,7 +455,7 @@
     <Compile Include="Effects\BufferLightPoint.cs" />
     <Compile Include="Effects\BufferLightSpot.cs" />
     <Compile Include="FrameStatsDeferred.cs" />
-    <Compile Include="Effects\EffectParticleState.cs" />
+    <Compile Include="BuiltIn\Particles\BuiltInParticlesState.cs" />
     <Compile Include="BuiltIn\SkyScattering\BuiltInSkyScatteringState.cs" />
     <Compile Include="FrameStatsForward.cs" />
     <Compile Include="GameLoadResourcesEventArgs.cs" />
@@ -769,7 +770,6 @@
     <Compile Include="Terrain.cs" />
     <Compile Include="GroundDescription.cs" />
     <Compile Include="Effects\DrawingStages.cs" />
-    <Compile Include="Effects\EffectDefaultGpuParticles.cs" />
     <Compile Include="Effects\IDrawer.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />

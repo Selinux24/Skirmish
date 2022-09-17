@@ -15,6 +15,14 @@ namespace Engine.BuiltIn.Particles
         /// Velocity sensitivity
         /// </summary>
         public float VelocitySensitivity { get; set; }
+        /// <summary>
+        /// Total time
+        /// </summary>
+        public float TotalTime { get; set; }
+        /// <summary>
+        /// Elapsed time
+        /// </summary>
+        public float ElapsedTime { get; set; }
 
         /// <summary>
         /// Horizontal velocity

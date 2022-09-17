@@ -32,7 +32,17 @@ namespace Engine.BuiltIn.Particles
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileGeometryShader(nameof(StreamOutGS), "main", ForwardRenderingResources.Streamout_gs, HelperShaders.GSProfile);
+            var so = new[]
+            {
+                new EngineStreamOutputElement("POSITION", 0, 0, 3, 0),
+                new EngineStreamOutputElement("VELOCITY", 0, 0, 3, 0),
+                new EngineStreamOutputElement("RANDOM", 0, 0, 4, 0),
+                new EngineStreamOutputElement("MAX_AGE", 0, 0, 1, 0),
+                new EngineStreamOutputElement("TYPE", 0, 0, 1, 0),
+                new EngineStreamOutputElement("EMISSION_TIME", 0, 0, 1, 0),
+            };
+
+            Shader = graphics.CompileGeometryShaderWithStreamOut(nameof(StreamOutGS), "main", ForwardRenderingResources.Streamout_gs, HelperShaders.GSProfile, so);
         }
         /// <summary>
         /// Destructor

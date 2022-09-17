@@ -162,9 +162,6 @@
     <Content Include="Lib\IncVertexFormats.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderDefaultGPUParticles.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderDeferredBasic.fx" />
   </ItemGroup>
   <ItemGroup>

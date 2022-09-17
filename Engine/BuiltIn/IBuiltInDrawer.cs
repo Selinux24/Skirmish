@@ -47,5 +47,21 @@ namespace Engine.BuiltIn
         /// <param name="topology">Primitive topology</param>
         /// <param name="drawCount">Draw count</param>
         bool Draw(IEngineVertexBuffer buffer, Topology topology, int drawCount);
+
+        /// <summary>
+        /// Draws the specified vertex buffer
+        /// </summary>
+        /// <param name="buffer">Vertex buffer</param>
+        /// <param name="topology">Primitive topology</param>
+        bool DrawAuto(IEngineVertexBuffer buffer, Topology topology);
+
+        /// <summary>
+        /// Streams-out the specified buffer into the stream-out buffer
+        /// </summary>
+        /// <param name="firstRun">First run</param>
+        /// <param name="buffer">Data buffer</param>
+        /// <param name="streamOutBuffer">Stream-out target buffer</param>
+        /// <param name="topology">Primitive topology</param>
+        void StreamOut(bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology);
     }
 }

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
     using SharpDX.DXGI;
 
@@ -910,7 +909,7 @@ namespace Engine.Common
             }
 
             game.Graphics.IAInputLayout = techniqueInputLayouts[technique];
-            game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
+            game.Graphics.IAPrimitiveTopology = topology;
             return true;
         }
         /// <summary>
@@ -965,7 +964,7 @@ namespace Engine.Common
             }
 
             game.Graphics.IAInputLayout = vertexShadersInputLayouts[key];
-            game.Graphics.IAPrimitiveTopology = (PrimitiveTopology)topology;
+            game.Graphics.IAPrimitiveTopology = topology;
             return true;
         }
 

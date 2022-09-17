@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
@@ -238,7 +237,7 @@ namespace Engine
                 return;
             }
 
-            graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
+            graphics.IAPrimitiveTopology = Topology.TriangleList;
             graphics.IASetVertexBuffers(BufferSlot, vertexBufferBinding);
             graphics.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
 

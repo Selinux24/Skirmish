@@ -74,5 +74,3 @@ void main(point VSParticle input[1], inout PointStream<VSParticle> ptStream)
         }
     }
 }
-
-GeometryShader gsStreamOut = ConstructGSWithSO(CompileShader(gs_5_0, main()), "POSITION.xyz; VELOCITY.xyz; RANDOM.xyzw; MAX_AGE.x; TYPE.x; EMISSION_TIME.x");

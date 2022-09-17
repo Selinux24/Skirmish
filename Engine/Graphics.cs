@@ -179,7 +179,7 @@ namespace Engine
         /// <summary>
         /// Current primitive topology set in input assembler
         /// </summary>
-        private PrimitiveTopology currentIAPrimitiveTopology = PrimitiveTopology.Undefined;
+        private Topology currentIAPrimitiveTopology = Topology.TriangleList;
         /// <summary>
         /// Current input layout set in input assembler
         /// </summary>
@@ -250,7 +250,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets the input assembler's primitive topology
         /// </summary>
-        public PrimitiveTopology IAPrimitiveTopology
+        public Topology IAPrimitiveTopology
         {
             get
             {
@@ -260,7 +260,7 @@ namespace Engine
             {
                 if (currentIAPrimitiveTopology != value)
                 {
-                    deviceContext.InputAssembler.PrimitiveTopology = value;
+                    deviceContext.InputAssembler.PrimitiveTopology = (PrimitiveTopology)value;
                     Counters.IAPrimitiveTopologySets++;
 
                     currentIAPrimitiveTopology = value;
@@ -1669,6 +1669,23 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="name">Buffer name</param>
+        /// <param name="sizeInBytes">Buffer size in bytes</param>
+        /// <param name="dynamic">Dynamic or Inmutable</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateVertexBuffer(string name, int sizeInBytes, bool dynamic)
+        {
+            return CreateBuffer(
+                name,
+                sizeInBytes,
+                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                BindFlags.VertexBuffer,
+                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a vertex buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
@@ -1682,6 +1699,7 @@ namespace Engine
                 BindFlags.VertexBuffer,
                 dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
         }
+
         /// <summary>
         /// Creates an index buffer
         /// </summary>
@@ -1700,6 +1718,57 @@ namespace Engine
                 BindFlags.IndexBuffer,
                 dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
         }
+
+        /// <summary>
+        /// Creates a stream-out buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="data">Data to write in the buffer</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateStreamOutBuffer<T>(string name, IEnumerable<T> data)
+            where T : struct
+        {
+            return CreateBuffer(
+                name,
+                data,
+                ResourceUsage.Default,
+                BindFlags.VertexBuffer | BindFlags.StreamOutput,
+                CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a stream-out buffer
+        /// </summary>
+        /// <param name="name">Buffer name</param>
+        /// <param name="sizeInBytes">Buffer size in bytes</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateStreamOutBuffer(string name, int sizeInBytes)
+        {
+            return CreateBuffer(
+                name,
+                sizeInBytes,
+                ResourceUsage.Default,
+                BindFlags.VertexBuffer | BindFlags.StreamOutput,
+                CpuAccessFlags.None);
+        }
+        /// <summary>
+        /// Creates a stream-out buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="name">Buffer name</param>
+        /// <param name="length">Buffer length</param>
+        /// <returns>Returns created buffer initialized with the specified data</returns>
+        internal Buffer CreateStreamOutBuffer<T>(string name, int length)
+            where T : struct
+        {
+            return CreateBuffer<T>(
+                name,
+                length,
+                ResourceUsage.Default,
+                BindFlags.VertexBuffer | BindFlags.StreamOutput,
+                CpuAccessFlags.None);
+        }
+
         /// <summary>
         /// Creates a constant buffer for the specified data type
         /// </summary>
@@ -1723,6 +1792,36 @@ namespace Engine
                 SizeInBytes = sizeInBytes,
                 BindFlags = binding,
                 CpuAccessFlags = CpuAccessFlags.None,
+                OptionFlags = ResourceOptionFlags.None,
+                StructureByteStride = 0,
+            };
+
+            return new Buffer(device, description)
+            {
+                DebugName = name,
+            };
+        }
+
+        /// <summary>
+        /// Creates a buffer for the specified data type
+        /// </summary>
+        /// <param name="device">Graphics device</param>
+        /// <param name="name">Buffer name</param>
+        /// <param name="sizeInBytes">Buffer size in bytes</param>
+        /// <param name="usage">Resource usage</param>
+        /// <param name="binding">Binding</param>
+        /// <param name="access">Cpu access</param>
+        /// <returns>Returns created buffer</returns>
+        internal Buffer CreateBuffer(string name, int sizeInBytes, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        {
+            Counters.RegBuffer(typeof(object), name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
+
+            var description = new BufferDescription()
+            {
+                Usage = usage,
+                SizeInBytes = sizeInBytes,
+                BindFlags = binding,
+                CpuAccessFlags = access,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
@@ -2684,7 +2783,7 @@ namespace Engine
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        internal void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        public void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
             if (data?.Any() == true)
             {
@@ -2708,7 +2807,7 @@ namespace Engine
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
-        internal void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        public void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
             if (data?.Any() == true)
             {
@@ -3221,7 +3320,7 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader CompileVertexShader(
+        public EngineVertexShader CompileVertexShader(
             string name,
             string entryPoint,
             string filename,
@@ -3242,7 +3341,7 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader CompileVertexShader(
+        public EngineVertexShader CompileVertexShader(
             string name,
             string entryPoint,
             string filename,
@@ -3264,7 +3363,7 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader CompileVertexShader(
+        public EngineVertexShader CompileVertexShader(
             string name,
             string entryPoint,
             byte[] byteCode,
@@ -3293,7 +3392,7 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Retuns vertex shader description</returns>
-        internal EngineVertexShader CompileVertexShader(
+        public EngineVertexShader CompileVertexShader(
             string name,
             string entryPoint,
             byte[] byteCode,
@@ -3329,7 +3428,7 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="bytes">Pre-compiled byte code</param>
         /// <returns>Returns loaded shader</returns>
-        internal EngineVertexShader LoadVertexShader(
+        public EngineVertexShader LoadVertexShader(
             string name,
             byte[] bytes)
         {
@@ -3356,7 +3455,7 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns geometry shader description</returns>
-        internal EngineGeometryShader CompileGeometryShader(
+        public EngineGeometryShader CompileGeometryShader(
             string name,
             string entryPoint,
             string filename,
@@ -3385,7 +3484,7 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns geometry shader description</returns>
-        internal EngineGeometryShader CompileGeometryShader(
+        public EngineGeometryShader CompileGeometryShader(
             string name,
             string entryPoint,
             string filename,
@@ -3407,7 +3506,7 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns geometry shader description</returns>
-        internal EngineGeometryShader CompileGeometryShader(
+        public EngineGeometryShader CompileGeometryShader(
             string name,
             string entryPoint,
             byte[] byteCode,
@@ -3436,7 +3535,7 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns geometry shader description</returns>
-        internal EngineGeometryShader CompileGeometryShader(
+        public EngineGeometryShader CompileGeometryShader(
             string name,
             string entryPoint,
             byte[] byteCode,
@@ -3469,7 +3568,7 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="bytes">Pre-compiled byte code</param>
         /// <returns>Returns loaded shader</returns>
-        internal EngineGeometryShader LoadGeometryShader(
+        public EngineGeometryShader LoadGeometryShader(
             string name,
             byte[] bytes)
         {
@@ -3489,6 +3588,163 @@ namespace Engine
         }
 
         /// <summary>
+        /// Loads a geometry shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="soElements">Stream-out elements</param>
+        /// <returns>Returns geometry shader description</returns>
+        public EngineGeometryShader CompileGeometryShaderWithStreamOut(
+            string name,
+            string entryPoint,
+            string filename,
+            string profile,
+            IEnumerable<EngineStreamOutputElement> soElements)
+        {
+            var res = CompileGeometryShaderWithStreamOut(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                soElements,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a geometry shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <param name="soElements">Stream-out elements</param>
+        /// <returns>Returns geometry shader description</returns>
+        public EngineGeometryShader CompileGeometryShaderWithStreamOut(
+            string name,
+            string entryPoint,
+            string filename,
+            string profile,
+            IEnumerable<EngineStreamOutputElement> soElements,
+            out string compilationErrors)
+        {
+            return CompileGeometryShaderWithStreamOut(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                soElements,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a geometry shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="soElements">Stream-out elements</param>
+        /// <returns>Returns geometry shader description</returns>
+        public EngineGeometryShader CompileGeometryShaderWithStreamOut(
+            string name,
+            string entryPoint,
+            byte[] byteCode,
+            string profile,
+            IEnumerable<EngineStreamOutputElement> soElements)
+        {
+            var res = CompileGeometryShaderWithStreamOut(
+                name,
+                entryPoint,
+                byteCode,
+                profile,
+                soElements,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineGeometryShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a geometry shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <param name="soElements">Stream-out elements</param>
+        /// <returns>Returns geometry shader description</returns>
+        public EngineGeometryShader CompileGeometryShaderWithStreamOut(
+            string name,
+            string entryPoint,
+            byte[] byteCode,
+            string profile,
+            IEnumerable<EngineStreamOutputElement> soElements,
+            out string compilationErrors)
+        {
+            compilationErrors = null;
+
+            using (ShaderIncludeManager includeManager = new ShaderIncludeManager())
+            using (CompilationResult cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                profile,
+                ShaderFlags.EnableStrictness,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                if (cmpResult.HasErrors)
+                {
+                    compilationErrors = cmpResult.Message;
+                }
+
+                var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
+
+                var shader = new GeometryShader(device, cmpResult.Bytecode, so, new int[] { }, 0);
+
+                return new EngineGeometryShader(name, shader, cmpResult.Bytecode);
+            }
+        }
+        /// <summary>
+        /// Loads a geometry shader from pre-compiled file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <param name="soElements">Stream-out elements</param>
+        /// <returns>Returns loaded shader</returns>
+        public EngineGeometryShader LoadGeometryShaderWithStreamOut(
+            string name,
+            byte[] bytes,
+            IEnumerable<EngineStreamOutputElement> soElements)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var byteCode = ShaderBytecode.FromStream(ms))
+                {
+                    var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
+
+                    var shader = new GeometryShader(device, byteCode.Data, so, new int[] { }, 0);
+
+                    return new EngineGeometryShader(name, shader, byteCode);
+                }
+            }
+        }
+
+        /// <summary>
         /// Loads a pixel shader from file
         /// </summary>
         /// <param name="name">Name</param>
@@ -3496,7 +3752,7 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader CompilePixelShader(
+        public EnginePixelShader CompilePixelShader(
             string name,
             string entryPoint,
             string filename,
@@ -3525,7 +3781,7 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader CompilePixelShader(
+        public EnginePixelShader CompilePixelShader(
             string name,
             string entryPoint,
             string filename,
@@ -3547,7 +3803,7 @@ namespace Engine
         /// <param name="entryPoint">Entry point</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader CompilePixelShader(
+        public EnginePixelShader CompilePixelShader(
             string name,
             string entryPoint,
             byte[] byteCode,
@@ -3576,7 +3832,7 @@ namespace Engine
         /// <param name="profile">Compilation profile</param>
         /// <param name="compilationErrors">Gets compilation errors if any</param>
         /// <returns>Returns pixel shader description</returns>
-        internal EnginePixelShader CompilePixelShader(
+        public EnginePixelShader CompilePixelShader(
             string name,
             string entryPoint,
             byte[] byteCode,
@@ -3609,7 +3865,7 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="bytes">Pre-compiled byte code</param>
         /// <returns>Returns loaded shader</returns>
-        internal EnginePixelShader LoadPixelShader(
+        public EnginePixelShader LoadPixelShader(
             string name,
             byte[] bytes)
         {
@@ -3634,7 +3890,7 @@ namespace Engine
         /// <param name="bytes">Byte code</param>
         /// <param name="profile">Compilation profile</param>
         /// <returns>Returns loaded effect</returns>
-        internal EngineEffect CompileEffect(byte[] bytes, string profile)
+        public EngineEffect CompileEffect(byte[] bytes, string profile)
         {
             using (var includeManager = new ShaderIncludeManager())
             using (var cmpResult = ShaderBytecode.Compile(
@@ -3659,7 +3915,7 @@ namespace Engine
         /// </summary>
         /// <param name="bytes">Pre-compiled byte code</param>
         /// <returns>Returns loaded effect</returns>
-        internal EngineEffect LoadEffect(byte[] bytes)
+        public EngineEffect LoadEffect(byte[] bytes)
         {
             using (var ms = new MemoryStream(bytes))
             {
@@ -3682,7 +3938,7 @@ namespace Engine
         /// <param name="technique"></param>
         /// <param name="index"></param>
         /// <param name="flags"></param>
-        internal void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
+        public void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
             technique.GetPass(index).Apply(deviceContext, flags);
         }
@@ -3693,7 +3949,7 @@ namespace Engine
         /// <param name="name">Name</param>
         /// <param name="description">Sampler description</param>
         /// <returns>Returns the new sampler state</returns>
-        internal EngineSamplerState CreateSamplerState(string name, EngineSamplerStateDescription description)
+        public EngineSamplerState CreateSamplerState(string name, EngineSamplerStateDescription description)
         {
             return new EngineSamplerState(name, new SamplerState(device, (SamplerStateDescription)description));
         }
@@ -3885,7 +4141,7 @@ namespace Engine
         /// </summary>
         /// <param name="vertexCount">Vertex count</param>
         /// <param name="startVertexLocation">Start vertex location</param>
-        internal void Draw(int vertexCount, int startVertexLocation)
+        public void Draw(int vertexCount, int startVertexLocation)
         {
             deviceContext.Draw(vertexCount, startVertexLocation);
 
@@ -3897,7 +4153,7 @@ namespace Engine
         /// <param name="indexCount">Index count</param>
         /// <param name="startIndexLocation">Start vertex location</param>
         /// <param name="baseVertexLocation">Base vertex location</param>
-        internal void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
+        public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
             deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
 
@@ -3910,7 +4166,7 @@ namespace Engine
         /// <param name="instanceCount">Instance count</param>
         /// <param name="startVertexLocation">Start vertex location</param>
         /// <param name="startInstanceLocation">Start instance count</param>
-        internal void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
+        public void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
         {
             deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
 
@@ -3924,7 +4180,7 @@ namespace Engine
         /// <param name="startIndexLocation">Start index location</param>
         /// <param name="baseVertexLocation">Base vertex location</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        internal void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
+        public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
         {
             deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
 
@@ -3933,7 +4189,7 @@ namespace Engine
         /// <summary>
         /// Draw auto
         /// </summary>
-        internal void DrawAuto()
+        public void DrawAuto()
         {
             deviceContext.DrawAuto();
 

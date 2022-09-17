@@ -115,7 +115,7 @@ namespace Engine
 
             decalDrawer = BuiltInShaders.GetDrawer<BuiltInDecals>();
 
-            buffer = new EngineVertexBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, true);
+            buffer = new EngineVertexBuffer<VertexDecal>(Scene.Game.Graphics, Name, decals, VertexBufferParams.Dynamic);
             buffer.CreateInputLayout(nameof(BuiltInDecals), decalDrawer.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
         }
 

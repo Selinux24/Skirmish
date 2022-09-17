@@ -248,12 +248,75 @@ namespace Engine.BuiltIn
             PrepareShaders();
 
             // Set the vertex input layout.
-            buffer.SetInputAssembler(Topology.PointList);
+            buffer.SetVertexBuffers();
+            buffer.SetInputLayout();
+
+            Graphics.IAPrimitiveTopology = topology;
 
             // Render the primitives.
             buffer.Draw(drawCount);
 
             return true;
+        }
+
+        /// <inheritdoc/>
+        public virtual bool DrawAuto(IEngineVertexBuffer buffer, Topology topology)
+        {
+            if (buffer == null)
+            {
+                return false;
+            }
+
+            // Set the vertex and pixel shaders that will be used to render this mesh.
+            PrepareShaders();
+
+            // Set the vertex input layout.
+            buffer.SetVertexBuffers();
+            buffer.SetInputLayout();
+
+            Graphics.IAPrimitiveTopology = topology;
+
+            // Render the primitives.
+            buffer.DrawAuto();
+
+            return true;
+        }
+
+        /// <inheritdoc/>
+        public void StreamOut(bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology)
+        {
+            if (buffer == null)
+            {
+                return;
+            }
+
+            if (streamOutBuffer == null)
+            {
+                return;
+            }
+
+            // Set the vertex and pixel shaders that will be used to render this mesh.
+            PrepareShaders();
+
+            // Set the vertex input layout.
+            buffer.SetVertexBuffers();
+
+            // Set the stream-out target.
+            streamOutBuffer.SetInputLayout();
+            streamOutBuffer.SetStreamOutputTargets();
+
+            Graphics.IAPrimitiveTopology = topology;
+
+            if (firstRun)
+            {
+                streamOutBuffer.Draw(1);
+            }
+            else
+            {
+                streamOutBuffer.DrawAuto();
+            }
+
+            Graphics.SetStreamOutputTargets(null);
         }
     }
 }

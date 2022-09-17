@@ -24,6 +24,8 @@ namespace Engine.BuiltIn.Particles
                 {
                     EmissionRate = state.EmissionRate,
                     VelocitySensitivity = state.VelocitySensitivity,
+                    TotalTime = state.TotalTime,
+                    ElapsedTime = state.ElapsedTime,
                     HorizontalVelocity = state.HorizontalVelocity,
                     VerticalVelocity = state.VerticalVelocity,
                     RandomValues = state.RandomValues,
@@ -40,6 +42,16 @@ namespace Engine.BuiltIn.Particles
             /// </summary>
             [FieldOffset(4)]
             public float VelocitySensitivity;
+            /// <summary>
+            /// Total particle time (not game time)
+            /// </summary>
+            [FieldOffset(8)]
+            public float TotalTime;
+            /// <summary>
+            /// Elapsed particle time (not game time)
+            /// </summary>
+            [FieldOffset(12)]
+            public float ElapsedTime;
 
             /// <summary>
             /// Horizontal velocity

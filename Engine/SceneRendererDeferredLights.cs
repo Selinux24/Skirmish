@@ -1,5 +1,4 @@
-﻿using SharpDX.Direct3D;
-using SharpDX.DXGI;
+﻿using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -292,7 +291,7 @@ namespace Engine
         /// <param name="graphics">Graphics device</param>
         public void BindGeometry(Graphics graphics)
         {
-            graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
+            graphics.IAPrimitiveTopology = Topology.TriangleList;
             graphics.IASetVertexBuffers(BufferSlot, lightGeometryVertexBufferBinding);
             graphics.IASetIndexBuffer(lightGeometryIndexBuffer, Format.R32_UInt, 0);
         }
@@ -384,7 +383,7 @@ namespace Engine
         /// <param name="graphics">Graphics device</param>
         public void BindResult(Graphics graphics)
         {
-            graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
+            graphics.IAPrimitiveTopology = Topology.TriangleList;
             graphics.IASetVertexBuffers(BufferSlot, lightGeometryVertexBufferBinding);
             graphics.IASetIndexBuffer(lightGeometryIndexBuffer, Format.R32_UInt, 0);
 
