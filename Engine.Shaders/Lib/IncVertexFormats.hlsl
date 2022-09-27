@@ -4,7 +4,7 @@
 #include "IncMaterials.hlsl"
 
 /*
-BASIC VS INPUTS
+SPEC VS INPUTS
 */
 struct VSVertexBillboard
 {
@@ -42,9 +42,21 @@ struct VSVertexFont
 	float2 tex : TEXCOORD0;
 	float4 color : COLOR0;
 };
+struct VSVertexTerrain
+{
+    float3 positionLocal : POSITION;
+    float3 normalLocal : NORMAL;
+    float3 tangentLocal : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
+
+/*
+BASIC VS INPUTS
+*/
 struct VSVertexPosition
 {
-	float3 positionLocal : POSITION;
+    float3 positionLocal : POSITION;
 };
 struct VSVertexPositionColor
 {
@@ -74,14 +86,6 @@ struct VSVertexPositionNormalTextureTangent
 	float3 normalLocal : NORMAL;
 	float3 tangentLocal : TANGENT;
 	float2 tex : TEXCOORD0;
-};
-struct VSVertexTerrain
-{
-	float3 positionLocal : POSITION;
-	float3 normalLocal : NORMAL;
-	float3 tangentLocal : TANGENT;
-	float2 tex : TEXCOORD0;
-	float4 color : COLOR0;
 };
 
 /*
@@ -140,12 +144,7 @@ struct VSVertexPositionI
 {
 	float3 positionLocal : POSITION;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
 	int materialIndex : MATERIALINDEX;
-	uint animationOffset : ANIMATIONOFFSET;
-	uint animationOffsetB : ANIMATIONOFFSETB;
-	float animationInterpolation : ANIMATIONINTERPOLATION;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionColorI
@@ -153,12 +152,8 @@ struct VSVertexPositionColorI
 	float3 positionLocal : POSITION;
 	float4 color : COLOR0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
+    float4 tintColor : TINTCOLOR;
     int materialIndex : MATERIALINDEX;
-	uint animationOffset : ANIMATIONOFFSET;
-	uint animationOffsetB : ANIMATIONOFFSETB;
-	float animationInterpolation : ANIMATIONINTERPOLATION;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionNormalColorI
@@ -167,12 +162,8 @@ struct VSVertexPositionNormalColorI
 	float3 normalLocal : NORMAL;
 	float4 color : COLOR0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
+    float4 tintColor : TINTCOLOR;
     int materialIndex : MATERIALINDEX;
-	uint animationOffset : ANIMATIONOFFSET;
-	uint animationOffsetB : ANIMATIONOFFSETB;
-	float animationInterpolation : ANIMATIONINTERPOLATION;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionTextureI
@@ -180,12 +171,9 @@ struct VSVertexPositionTextureI
 	float3 positionLocal : POSITION;
 	float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
-	uint animationOffset : ANIMATIONOFFSET;
-	uint animationOffsetB : ANIMATIONOFFSETB;
-	float animationInterpolation : ANIMATIONINTERPOLATION;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionNormalTextureI
@@ -194,12 +182,9 @@ struct VSVertexPositionNormalTextureI
 	float3 normalLocal : NORMAL;
 	float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
-	uint animationOffset : ANIMATIONOFFSET;
-	uint animationOffsetB : ANIMATIONOFFSETB;
-	float animationInterpolation : ANIMATIONINTERPOLATION;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionNormalTextureTangentI
@@ -209,12 +194,9 @@ struct VSVertexPositionNormalTextureTangentI
 	float3 tangentLocal : TANGENT;
 	float2 tex : TEXCOORD0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
-	uint animationOffset : ANIMATIONOFFSET;
-	uint animationOffsetB : ANIMATIONOFFSETB;
-	float animationInterpolation : ANIMATIONINTERPOLATION;
 	uint instanceId : SV_INSTANCEID;
 };
 
@@ -227,7 +209,6 @@ struct VSVertexPositionSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
@@ -242,7 +223,7 @@ struct VSVertexPositionColorSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
@@ -258,7 +239,7 @@ struct VSVertexPositionNormalColorSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
@@ -273,7 +254,7 @@ struct VSVertexPositionTextureSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
@@ -289,7 +270,7 @@ struct VSVertexPositionNormalTextureSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
@@ -306,7 +287,7 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 	float3 weights : WEIGHTS;
 	uint4 boneIndices : BONEINDICES;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
-	float4 tintColor : TINTCOLOR;
+    float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
     int materialIndex : MATERIALINDEX;
 	uint animationOffset : ANIMATIONOFFSET;
