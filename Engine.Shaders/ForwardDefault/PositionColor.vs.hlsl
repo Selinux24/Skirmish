@@ -1,6 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncVertexFormats.hlsl"
-#include "..\Lib\IncMaterials.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
@@ -34,11 +33,11 @@ POSITION COLOR
 **********************************************************************************************************/
 PSVertexPositionColor2 main(VSVertexPositionColor input)
 {
-	PSVertexPositionColor2 output = (PSVertexPositionColor2)0;
-
     float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
 
 	Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobals.MaterialPaletteWidth);
+
+    PSVertexPositionColor2 output = (PSVertexPositionColor2) 0;
 
 	output.positionHomogeneous = mul(float4(input.positionLocal, 1), wvp);
 	output.positionWorld = mul(float4(input.positionLocal, 1), gLocal).xyz;

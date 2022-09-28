@@ -31,8 +31,6 @@ POSITION NORMAL TEXTURE
 **********************************************************************************************************/
 PSVertexPositionNormalTexture2 main(VSVertexPositionNormalTextureSkinnedI input)
 {
-	PSVertexPositionNormalTexture2 output = (PSVertexPositionNormalTexture2)0;
-
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	ComputePositionNormalWeights(
@@ -52,6 +50,8 @@ PSVertexPositionNormalTexture2 main(VSVertexPositionNormalTextureSkinnedI input)
 	
     uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
     Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+
+    PSVertexPositionNormalTexture2 output = (PSVertexPositionNormalTexture2) 0;
 
     output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
     output.positionWorld = instancePosition.xyz;

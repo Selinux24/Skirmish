@@ -31,8 +31,6 @@ POSITION NORMAL TEXTURE TANGENT
 **********************************************************************************************************/
 PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentSkinnedI input)
 {
-    PSVertexPositionNormalTextureTangent2 output = (PSVertexPositionNormalTextureTangent2) 0;
-
     float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 tangentL = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -56,6 +54,8 @@ PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentS
 
     uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
     Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+
+    PSVertexPositionNormalTextureTangent2 output = (PSVertexPositionNormalTextureTangent2) 0;
 
     output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
     output.positionWorld = instancePosition.xyz;

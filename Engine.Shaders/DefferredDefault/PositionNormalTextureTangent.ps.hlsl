@@ -10,7 +10,7 @@ SamplerState SamplerNormal : register(s1);
 /**********************************************************************************************************
 POSITION TEXTURE
 **********************************************************************************************************/
-GBufferPSOutput main(PSVertexPositionNormalTextureTangent input)
+GBufferPSOutput main(PSVertexPositionNormalTextureTangent2 input)
 {
     float4 diffuse = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
     float3 normalMapSample = gNormalMapArray.Sample(SamplerNormal, float3(input.tex, input.textureIndex)).rgb;
@@ -18,9 +18,12 @@ GBufferPSOutput main(PSVertexPositionNormalTextureTangent input)
 
     GBufferPSOutput output = (GBufferPSOutput) 0;
     
-    output.color = diffuse * input.tintColor;
-    output.normal = float4(bumpedNormalW, 0);
-    output.depth = float4(input.positionWorld, input.materialIndex);
-
+    output.color = diffuse * input.tintColor * input.material.Diffuse;
+    output.normal = float4(bumpedNormalW, 1);
+    output.depth = float4(input.positionWorld, input.material.Algorithm);
+    output.mat1 = float4(input.material.Specular, input.material.Shininess);
+    output.mat2 = float4(input.material.Emissive, input.material.Metallic);
+    output.mat3 = float4(input.material.Ambient, input.material.Roughness);
+    
     return output;
 }

@@ -102,9 +102,6 @@
     <VertexShader Include="ForwardDefault\PositionNormalTexture.vs.hlsl" />
     <PixelShader Include="ForwardDefault\PositionNormalTextureTangent.ps.hlsl" />
     <VertexShader Include="ForwardDefault\PositionNormalTextureTangent.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionColor.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionColorI.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionColorSkinned.vs.hlsl" />
     <None Include="Engine.Shaders.snk" />
   </ItemGroup>
   <ItemGroup>
@@ -147,28 +144,17 @@
     <PixelShader Include="ForwardFoliage\Foliage.ps.hlsl" />
     <VertexShader Include="ForwardFoliage\Foliage.vs.hlsl" />
     <GeometryShader Include="ForwardFoliage\Foliage.gs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionColorSkinnedI.vs.hlsl" />
     <PixelShader Include="DefferredDefault\PositionColor.ps.hlsl" />
     <PixelShader Include="DefferredDefault\PositionNormalColor.ps.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalColor.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalColorI.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalColorSkinned.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalColorSkinnedI.vs.hlsl" />
     <PixelShader Include="DefferredDefault\PositionTexture.ps.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionTexture.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionTextureI.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionTextureSkinned.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionTextureSkinnedI.vs.hlsl" />
     <PixelShader Include="DefferredDefault\PositionNormalTexture.ps.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTexture.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTextureI.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTextureSkinned.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTextureSkinnedI.vs.hlsl" />
     <PixelShader Include="DefferredDefault\PositionNormalTextureTangent.ps.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTextureTangent.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTextureTangentI.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTextureTangentSkinned.vs.hlsl" />
-    <VertexShader Include="DefferredDefault\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
+    <VertexShader Include="DefferredDefault\DeferredLight.vs.hlsl" />
+    <VertexShader Include="DefferredDefault\DeferredStencil.vs.hlsl" />
+    <PixelShader Include="DefferredDefault\DeferredLightDirectional.ps.hlsl" />
+    <PixelShader Include="DefferredDefault\DeferredLightSpot.ps.hlsl" />
+    <PixelShader Include="DefferredDefault\DeferredLightPoint.ps.hlsl" />
+    <PixelShader Include="DefferredDefault\DeferredComposer.ps.hlsl" />
     <Content Include="Lib\IncGBufferLights.hlsl" />
     <GeometryShader Include="ShadowsDefault\ShadowTransparent.gs.hlsl" />
     <GeometryShader Include="ShadowsDefault\Shadow.gs.hlsl" />

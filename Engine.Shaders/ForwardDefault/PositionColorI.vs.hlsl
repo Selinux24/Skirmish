@@ -29,12 +29,12 @@ POSITION COLOR
 **********************************************************************************************************/
 PSVertexPositionColor2 main(VSVertexPositionColorI input)
 {
-	PSVertexPositionColor2 output = (PSVertexPositionColor2)0;
-
 	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
     uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
     Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+
+    PSVertexPositionColor2 output = (PSVertexPositionColor2) 0;
 
 	output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
 	output.positionWorld = instancePosition.xyz;

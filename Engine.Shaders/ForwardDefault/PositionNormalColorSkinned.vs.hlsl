@@ -40,8 +40,6 @@ POSITION NORMAL COLOR
 **********************************************************************************************************/
 PSVertexPositionNormalColor2 main(VSVertexPositionNormalColorSkinned input)
 {
-	PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2)0;
-
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	ComputePositionNormalWeights(
@@ -60,6 +58,8 @@ PSVertexPositionNormalColor2 main(VSVertexPositionNormalColorSkinned input)
     float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
 
     Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobals.MaterialPaletteWidth);
+
+    PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2) 0;
 
     output.positionHomogeneous = mul(positionL, wvp);
     output.positionWorld = mul(positionL, gLocal).xyz;

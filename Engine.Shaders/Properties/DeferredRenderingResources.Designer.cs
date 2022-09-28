@@ -63,49 +63,69 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] DeferredComposer_ps {
+            get {
+                object obj = ResourceManager.GetObject("DeferredComposer_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] DeferredLight_vs {
+            get {
+                object obj = ResourceManager.GetObject("DeferredLight_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] DeferredLightDirectional_ps {
+            get {
+                object obj = ResourceManager.GetObject("DeferredLightDirectional_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] DeferredLightPoint_ps {
+            get {
+                object obj = ResourceManager.GetObject("DeferredLightPoint_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] DeferredLightSpot_ps {
+            get {
+                object obj = ResourceManager.GetObject("DeferredLightSpot_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] DeferredStencil_vs {
+            get {
+                object obj = ResourceManager.GetObject("DeferredStencil_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] PositionColor_ps {
             get {
                 object obj = ResourceManager.GetObject("PositionColor_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionColor_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionColor_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionColorI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionColorI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionColorSkinned_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionColorSkinned_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionColorSkinnedI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionColorSkinnedI_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -123,89 +143,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalColor_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalColor_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalColorI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalColorI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalColorSkinned_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalColorSkinned_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalColorSkinnedI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalColorSkinnedI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] PositionNormalTexture_ps {
             get {
                 object obj = ResourceManager.GetObject("PositionNormalTexture_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalTexture_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTexture_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalTextureI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalTextureSkinned_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureSkinned_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalTextureSkinnedI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureSkinnedI_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -223,89 +163,9 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] PositionNormalTextureTangent_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangent_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalTextureTangentI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangentI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalTextureTangentSkinned_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangentSkinned_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionNormalTextureTangentSkinnedI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionNormalTextureTangentSkinnedI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] PositionTexture_ps {
             get {
                 object obj = ResourceManager.GetObject("PositionTexture_ps", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTexture_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTexture_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTextureI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTextureI_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTextureSkinned_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTextureSkinned_vs", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] PositionTextureSkinnedI_vs {
-            get {
-                object obj = ResourceManager.GetObject("PositionTextureSkinnedI_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }

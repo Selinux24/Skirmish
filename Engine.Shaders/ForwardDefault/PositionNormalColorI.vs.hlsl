@@ -29,14 +29,14 @@ POSITION NORMAL COLOR
 **********************************************************************************************************/
 PSVertexPositionNormalColor2 main(VSVertexPositionNormalColorI input)
 {
-    PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2) 0;
-
     float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
     float3 instanceNormal = mul(input.normalLocal, (float3x3) input.localTransform);
 
     uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
     Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
 	
+    PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2) 0;
+
     output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
     output.positionWorld = instancePosition.xyz;
     output.normalWorld = normalize(instanceNormal);

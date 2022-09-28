@@ -40,8 +40,6 @@ POSITION COLOR
 **********************************************************************************************************/
 PSVertexPositionColor2 main(VSVertexPositionColorSkinned input)
 {
-	PSVertexPositionColor2 output = (PSVertexPositionColor2)0;
-
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	ComputePositionWeights(
 		gAnimationPalette,
@@ -57,6 +55,8 @@ PSVertexPositionColor2 main(VSVertexPositionColorSkinned input)
     float4x4 wvp = mul(gLocal, gPerFrame.ViewProjection);
 
     Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobals.MaterialPaletteWidth);
+
+    PSVertexPositionColor2 output = (PSVertexPositionColor2) 0;
 
 	output.positionHomogeneous = mul(positionL, wvp);
 	output.positionWorld = mul(positionL, gLocal).xyz;
