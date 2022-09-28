@@ -5,8 +5,9 @@ using System.Linq;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Deferred;
     using Engine.Common;
-    using Engine.Effects;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -104,11 +105,17 @@ namespace Engine
         {
             Graphics = graphics;
 
-            var composer = DrawerPool.GetEffect<EffectDeferredComposer>();
-            globalLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredDirectionalLight", composer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            pointLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredPointLight", composer.DeferredPointLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            spotLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredSpotLight", composer.DeferredSpotLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            combineLightsInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredCombineLights", composer.DeferredCombineLights.GetSignature(), VertexPosition.Input(BufferSlot));
+            var ld = BuiltInShaders.GetDrawer<BuiltInLightDirectional>();
+            globalLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredDirectionalLight", ld.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+
+            var lp = BuiltInShaders.GetDrawer<BuiltInLightPoint>();
+            pointLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredPointLight", lp.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+
+            var ls = BuiltInShaders.GetDrawer<BuiltInLightSpot>();
+            spotLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredSpotLight", ls.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+
+            var composer = BuiltInShaders.GetDrawer<BuiltInComposer>();
+            combineLightsInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredCombineLights", composer.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
 
             //Stencil pass rasterizer state
             rasterizerStencilPass = EngineRasterizerState.StencilPass(graphics, nameof(SceneRendererDeferredLights));
@@ -276,14 +283,9 @@ namespace Engine
         /// <param name="graphics">Graphics device</param>
         /// <param name="geometry">Geometry</param>
         /// <param name="effectTechnique">Technique</param>
-        private void DrawSingleLight(Graphics graphics, LightGeometry geometry, EngineEffectTechnique effectTechnique)
+        private void DrawSingleLight(Graphics graphics, LightGeometry geometry, IBuiltInDrawer drawer)
         {
-            for (int p = 0; p < effectTechnique.PassCount; p++)
-            {
-                graphics.EffectPassApply(effectTechnique, p, 0);
-
-                graphics.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
-            }
+            graphics.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
         }
         /// <summary>
         /// Binds light geometry to the input assembler
@@ -299,7 +301,7 @@ namespace Engine
         /// Binds the hemispheric/directional (global) light input layout to the input assembler
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public void BindGobalLight(Graphics graphics)
+        public void BindGlobalLight(Graphics graphics)
         {
             graphics.IAInputLayout = globalLightInputLayout;
             Counters.IAInputLayoutSets++;
@@ -308,20 +310,10 @@ namespace Engine
         /// Draws a directional light
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawDirectional(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="drawer">Drawer</param>
+        public void DrawDirectional(Graphics graphics, BuiltInLightDirectional drawer)
         {
-            var effectTechnique = effect.DeferredDirectionalLight;
-
-            for (int p = 0; p < effectTechnique.PassCount; p++)
-            {
-                graphics.EffectPassApply(effectTechnique, p, 0);
-
-                graphics.DrawIndexed(
-                    screenGeometry.IndexCount,
-                    screenGeometry.Offset,
-                    0);
-            }
+            graphics.DrawIndexed(screenGeometry.IndexCount, screenGeometry.Offset, 0);
         }
         /// <summary>
         /// Binds the point light input layout to the input assembler
@@ -336,19 +328,20 @@ namespace Engine
         /// Draws a point light
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawPoint(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="stencilDrawer">Stencil drawer</param>
+        /// <param name="drawer">Drawer</param>
+        public void DrawPoint(Graphics graphics, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
         {
             var geometry = pointLightGeometry;
 
             SetRasterizerStencilPass();
             SetDepthStencilVolumeMarking();
             graphics.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            DrawSingleLight(graphics, geometry, effect.DeferredPointStencil);
+            DrawSingleLight(graphics, geometry, stencilDrawer);
 
             SetRasterizerLightingPass();
             SetDepthStencilVolumeDrawing();
-            DrawSingleLight(graphics, geometry, effect.DeferredPointLight);
+            DrawSingleLight(graphics, geometry, drawer);
         }
         /// <summary>
         /// Binds the spot light input layout to the input assembler
@@ -363,19 +356,20 @@ namespace Engine
         /// Draws a spot light
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawSpot(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="stencilDrawer">Stencil drawer</param>
+        /// <param name="drawer">Drawer</param>
+        public void DrawSpot(Graphics graphics, BuiltInStencil stencilDrawer, BuiltInLightSpot drawer)
         {
             var geometry = spotLightGeometry;
 
             SetRasterizerStencilPass();
             SetDepthStencilVolumeMarking();
             graphics.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            DrawSingleLight(graphics, geometry, effect.DeferredSpotStencil);
+            DrawSingleLight(graphics, geometry, stencilDrawer);
 
             SetRasterizerLightingPass();
             SetDepthStencilVolumeDrawing();
-            DrawSingleLight(graphics, geometry, effect.DeferredSpotLight);
+            DrawSingleLight(graphics, geometry, drawer);
         }
         /// <summary>
         /// Binds the result box input layout to the input assembler
@@ -393,17 +387,10 @@ namespace Engine
         /// Draws the resulting light composition
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawResult(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="Drawer">Effect</param>
+        public void DrawResult(Graphics graphics, BuiltInComposer drawer)
         {
-            var effectTechnique = effect.DeferredCombineLights;
-
-            for (int p = 0; p < effectTechnique.PassCount; p++)
-            {
-                graphics.EffectPassApply(effectTechnique, p, 0);
-
-                graphics.DrawIndexed(screenGeometry.IndexCount, screenGeometry.Offset, 0);
-            }
+            graphics.DrawIndexed(screenGeometry.IndexCount, screenGeometry.Offset, 0);
         }
 
         /// <summary>

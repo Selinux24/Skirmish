@@ -8,8 +8,9 @@ using System.Linq;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Deferred;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Deferred renderer class
@@ -45,9 +46,25 @@ namespace Engine
         /// </summary>
         private SceneRendererDeferredLights lightDrawer = null;
         /// <summary>
-        /// Composer effect
+        /// Composer
         /// </summary>
-        private readonly EffectDeferredComposer composer;
+        private readonly BuiltInComposer composer;
+        /// <summary>
+        /// Stencil drawer
+        /// </summary>
+        private readonly BuiltInStencil stencilDrawer;
+        /// <summary>
+        /// Directional light drawer
+        /// </summary>
+        private readonly BuiltInLightDirectional lightDirectionalDrawer;
+        /// <summary>
+        /// Spot light drawer
+        /// </summary>
+        private readonly BuiltInLightSpot lightSpotDrawer;
+        /// <summary>
+        /// Point light drawer
+        /// </summary>
+        private readonly BuiltInLightPoint lightPointDrawer;
 
         /// <summary>
         /// Blend state for deferred lighting blending
@@ -110,15 +127,21 @@ namespace Engine
 
             UpdateRectangleAndView();
 
-            composer = DrawerPool.GetEffect<EffectDeferredComposer>();
+            composer = BuiltInShaders.GetDrawer<BuiltInComposer>();
+            stencilDrawer = BuiltInShaders.GetDrawer<BuiltInStencil>();
+            lightDirectionalDrawer = BuiltInShaders.GetDrawer<BuiltInLightDirectional>();
+            lightSpotDrawer = BuiltInShaders.GetDrawer<BuiltInLightSpot>();
+            lightPointDrawer = BuiltInShaders.GetDrawer<BuiltInLightPoint>();
 
-            geometryBuffer = new RenderTarget(scene.Game, "GeometryBuffer", Format.R32G32B32A32_Float, false, 3);
+            int gbCount = 6;
+
+            geometryBuffer = new RenderTarget(scene.Game, "GeometryBuffer", Format.R32G32B32A32_Float, false, gbCount);
             lightBuffer = new RenderTarget(scene.Game, "LightBuffer", Format.R32G32B32A32_Float, false, 1);
 
-            blendDeferredComposer = EngineBlendState.DeferredComposer(scene.Game.Graphics, 3);
-            blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(scene.Game.Graphics, 3);
-            blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(scene.Game.Graphics, 3);
-            blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(scene.Game.Graphics, 3);
+            blendDeferredComposer = EngineBlendState.DeferredComposer(scene.Game.Graphics, gbCount);
+            blendDeferredComposerTransparent = EngineBlendState.DeferredComposerTransparent(scene.Game.Graphics, gbCount);
+            blendDeferredComposerAlpha = EngineBlendState.DeferredComposerAlpha(scene.Game.Graphics, gbCount);
+            blendDeferredComposerAdditive = EngineBlendState.DeferredComposerAdditive(scene.Game.Graphics, gbCount);
             blendDeferredLighting = EngineBlendState.DeferredLighting(scene.Game.Graphics);
         }
         /// <summary>
@@ -502,13 +525,6 @@ namespace Engine
             var spotLights = context.Lights.GetVisibleSpotLights();
             var pointLights = context.Lights.GetVisiblePointLights();
 
-            composer.UpdatePerFrame(
-                ViewProjection,
-                context.EyePosition,
-                GeometryMap.ElementAtOrDefault(0),
-                GeometryMap.ElementAtOrDefault(1),
-                GeometryMap.ElementAtOrDefault(2));
-
             graphics.SetDepthStencilRDZDisabled();
             SetBlendDeferredLighting();
 
@@ -524,15 +540,15 @@ namespace Engine
 #endif
             if (directionalLights.Any())
             {
-                lightDrawer.BindGobalLight(graphics);
+                lightDrawer.BindGlobalLight(graphics);
+
+                lightDirectionalDrawer.UpdateGeometryMap(GeometryMap);
 
                 foreach (var light in directionalLights)
                 {
-                    composer.UpdatePerLight(
-                        light,
-                        context.ShadowMapDirectional);
+                    lightDirectionalDrawer.UpdatePerLight(light);
 
-                    lightDrawer.DrawDirectional(graphics, composer);
+                    lightDrawer.DrawDirectional(graphics, lightDirectionalDrawer);
                 }
             }
 #if DEBUG
@@ -548,16 +564,14 @@ namespace Engine
             {
                 lightDrawer.BindPoint(graphics);
 
+                lightPointDrawer.UpdateGeometryMap(GeometryMap);
+
                 foreach (var light in pointLights)
                 {
                     //Draw Pass
-                    composer.UpdatePerLight(
-                        light,
-                        light.Local,
-                        context.ViewProjection,
-                        context.ShadowMapPoint);
+                    lightPointDrawer.UpdatePerLight(light);
 
-                    lightDrawer.DrawPoint(graphics, composer);
+                    lightDrawer.DrawPoint(graphics, stencilDrawer, lightPointDrawer);
                 }
             }
 #if DEBUG
@@ -573,16 +587,14 @@ namespace Engine
             {
                 lightDrawer.BindSpot(graphics);
 
+                lightSpotDrawer.UpdateGeometryMap(GeometryMap);
+
                 foreach (var light in spotLights)
                 {
                     //Draw Pass
-                    composer.UpdatePerLight(
-                        light,
-                        light.Local,
-                        context.ViewProjection,
-                        context.ShadowMapSpot);
+                    lightSpotDrawer.UpdatePerLight(light);
 
-                    lightDrawer.DrawSpot(graphics, composer);
+                    lightDrawer.DrawSpot(graphics, stencilDrawer, lightSpotDrawer);
                 }
             }
 #if DEBUG
@@ -623,11 +635,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swInit = Stopwatch.StartNew();
 #endif
-                composer.UpdateComposer(
-                    ViewProjection,
-                    GeometryMap.ElementAtOrDefault(2),
-                    LightMap.ElementAtOrDefault(0),
-                    context);
+                composer.UpdateGeometryMap(GeometryMap, LightMap.ElementAtOrDefault(0));
 
                 lightDrawer.BindResult(graphics);
 

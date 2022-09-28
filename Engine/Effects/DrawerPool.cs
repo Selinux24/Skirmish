@@ -4,8 +4,6 @@ using System.Linq;
 
 namespace Engine.Effects
 {
-    using Engine.Common;
-
     /// <summary>
     /// Pool of drawers
     /// </summary>
@@ -69,23 +67,6 @@ namespace Engine.Effects
             effects.Add(ef);
 
             return ef;
-        }
-
-        /// <summary>
-        /// Update scene globals
-        /// </summary>
-        /// <param name="environment">Game environment</param>
-        /// <param name="materialPalette">Material palette</param>
-        /// <param name="materialPaletteWidth">Material palette width</param>
-        public static void UpdateSceneGlobals(
-            GameEnvironment environment,
-            EngineShaderResourceView materialPalette, uint materialPaletteWidth,
-            EngineShaderResourceView animationPalette, uint animationPaletteWidth)
-        {
-            GetEffect<EffectDeferredBasic>().UpdateGlobals(animationPalette, animationPaletteWidth);
-            GetEffect<EffectDeferredComposer>().UpdateGlobals(
-                materialPalette, materialPaletteWidth,
-                environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow);
         }
     }
 }

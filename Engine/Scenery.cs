@@ -9,11 +9,11 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltIn.Default;
+    using Engine.BuiltIn.Forward;
+    using Engine.BuiltIn.Deferred;
     using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Terrain model
@@ -182,54 +182,12 @@ namespace Engine
                             continue;
                         }
 
-                        var sceneryEffect = GetEffect(context.DrawerMode);
-                        if (sceneryEffect != null)
-                        {
-                            DrawWithEffect(context, bufferManager, sceneryEffect, mesh, material);
-
-                            continue;
-                        }
-
                         count += mesh.Count;
                     }
                 }
 
                 Counters.InstancesPerFrame++;
                 Counters.PrimitivesPerFrame += count;
-            }
-            /// <summary>
-            /// Draws the patch using the effects framework
-            /// </summary>
-            /// <param name="context">Draw context</param>
-            /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="sceneryEffect">Effect</param>
-            /// <param name="mesh">Mesh</param>
-            /// <param name="material">Material</param>
-            private void DrawWithEffect(DrawContext context, BufferManager bufferManager, IGeometryDrawer sceneryEffect, Mesh mesh, IMeshMaterial material)
-            {
-                var graphics = Game.Graphics;
-
-                sceneryEffect.UpdatePerFrameFull(Matrix.Identity, context);
-
-                var technique = sceneryEffect.GetTechnique(mesh.VertextType, false);
-
-                var materialInfo = new MaterialDrawInfo
-                {
-                    Material = material,
-                    UseAnisotropic = true,
-                };
-
-                sceneryEffect.UpdatePerObject(materialInfo, Color4.White, 0, AnimationDrawInfo.Empty);
-
-                bufferManager.SetIndexBuffer(mesh.IndexBuffer);
-                bufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    mesh.Draw(graphics);
-                }
             }
             /// <summary>
             /// Draws the patch using shaders
@@ -255,20 +213,6 @@ namespace Engine
             }
 
             /// <summary>
-            /// Gets effect for rendering based on drawing mode
-            /// </summary>
-            /// <param name="mode">Drawing mode</param>
-            /// <returns>Returns the effect for rendering</returns>
-            private IGeometryDrawer GetEffect(DrawerModes mode)
-            {
-                if (mode.HasFlag(DrawerModes.Deferred))
-                {
-                    return DrawerPool.GetEffect<EffectDeferredBasic>();
-                }
-
-                return null;
-            }
-            /// <summary>
             /// Gets the drawing effect for the current instance
             /// </summary>
             /// <param name="mode">Drawing mode</param>
@@ -276,36 +220,17 @@ namespace Engine
             /// <returns>Returns the drawing effect</returns>
             private IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType)
             {
-                if (!mode.HasFlag(DrawerModes.Forward))
+                if (mode.HasFlag(DrawerModes.Forward))
                 {
-                    return null;
+                    return ForwardDrawerManager.GetDrawer(vertexType, false);
                 }
 
-                switch (vertexType)
+                if (mode.HasFlag(DrawerModes.Deferred))
                 {
-                    case VertexTypes.PositionColor:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionColor>();
-                    case VertexTypes.PositionTexture:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionTexture>();
-                    case VertexTypes.PositionNormalColor:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionNormalColor>();
-                    case VertexTypes.PositionNormalTexture:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionNormalTexture>();
-                    case VertexTypes.PositionNormalTextureTangent:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangent>();
-                    case VertexTypes.PositionColorSkinned:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionColorSkinned>();
-                    case VertexTypes.PositionTextureSkinned:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionTextureSkinned>();
-                    case VertexTypes.PositionNormalColorSkinned:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionNormalColorSkinned>();
-                    case VertexTypes.PositionNormalTextureSkinned:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureSkinned>();
-                    case VertexTypes.PositionNormalTextureTangentSkinned:
-                        return BuiltInShaders.GetDrawer<BuiltInPositionNormalTextureTangentSkinned>();
-                    default:
-                        return null;
+                    return DeferredDrawerManager.GetDrawer(vertexType, false);
                 }
+
+                return null;
             }
 
             /// <summary>

@@ -118,12 +118,6 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="ShaderDeferredBasic" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdeferredbasic.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ShaderDeferredComposer" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\effects\shaderdeferredcomposer.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ShaderDeferredTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\effects\shaderdeferredterrain.fx;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

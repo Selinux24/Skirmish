@@ -6,7 +6,7 @@ cbuffer cbPerFrame : register(b0)
     PerFrame gPerFrame;
 };
 
-cbuffer cbCombineLights : register(b5)
+cbuffer cbCombineLights : register(b1)
 {
     HemisphericLight gHemiLight;
 }
