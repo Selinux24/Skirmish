@@ -5,11 +5,6 @@ cbuffer cbPerFrame : register(b0)
     PerFrame gPerFrame;
 };
 
-cbuffer cbPerLight : register(b1)
-{
-    float4x4 gLocal;
-};
-
 struct VSVertexPosition
 {
     float3 positionLocal : POSITION;
@@ -25,7 +20,7 @@ PSLightInput main(VSVertexPosition input)
 {
     PSLightInput output = (PSLightInput) 0;
 
-    output.positionHomogeneous = mul(float4(input.positionLocal, 1), mul(gLocal, gPerFrame.ViewProjection));
+    output.positionHomogeneous = mul(float4(input.positionLocal, 1), gPerFrame.OrthoViewProjection);
     output.positionScreen = output.positionHomogeneous;
 
     return output;

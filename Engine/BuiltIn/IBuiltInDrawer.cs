@@ -3,6 +3,7 @@
 namespace Engine.BuiltIn
 {
     using Engine.Common;
+    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Built-in drawer interface
@@ -47,6 +48,16 @@ namespace Engine.BuiltIn
         /// <param name="topology">Primitive topology</param>
         /// <param name="drawCount">Draw count</param>
         bool Draw(IEngineVertexBuffer buffer, Topology topology, int drawCount);
+        /// <summary>
+        /// Draws the specified vertex buffer
+        /// </summary>
+        /// <param name="topology">Primitive topology</param>
+        /// <param name="bufferSlot">Buffer slot</param>
+        /// <param name="vertexBufferBinding">Vertex binding</param>
+        /// <param name="indexBuffer">Index buffer</param>
+        /// <param name="count">Draw count</param>
+        /// <param name="startLocation">Start location</param>
+        bool Draw(Topology topology, int bufferSlot, VertexBufferBinding vertexBufferBinding, Buffer indexBuffer, int count, int startLocation);
 
         /// <summary>
         /// Draws the specified vertex buffer

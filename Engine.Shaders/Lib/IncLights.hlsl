@@ -479,11 +479,11 @@ inline ComputeLightsOutput ComputeSpotLightLOD1(ComputeSpotLightsInput input)
     if (input.spotLight.CastShadow == 1 && input.spotLight.MapIndex >= 0)
     {
         cShadowFactor = CalcSpotShadowFactor(
-            input.pPosition, 
-            input.minShadowIntensity, 
-            input.spotLight.MapIndex, 
-            input.spotLight.FromLightVP, 
-            input.shadowMap, 
+            input.pPosition,
+            input.minShadowIntensity,
+            input.spotLight.MapIndex,
+            input.spotLight.FromLightVP,
+            input.shadowMap,
             SHADOW_SAMPLES_HD);
     }
 
@@ -508,11 +508,11 @@ inline ComputeLightsOutput ComputeSpotLightLOD2(ComputeSpotLightsInput input)
     if (input.spotLight.CastShadow == 1 && input.spotLight.MapIndex >= 0)
     {
         cShadowFactor = CalcSpotShadowFactor(
-            input.pPosition, 
-            input.minShadowIntensity, 
-            input.spotLight.MapIndex, 
-            input.spotLight.FromLightVP, 
-            input.shadowMap, 
+            input.pPosition,
+            input.minShadowIntensity,
+            input.spotLight.MapIndex,
+            input.spotLight.FromLightVP,
+            input.shadowMap,
             SHADOW_SAMPLES_LD);
     }
 
@@ -540,10 +540,7 @@ inline ComputeLightsOutput ComputeSpotLight(ComputeSpotLightsInput input)
     }
     else
     {
-        ComputeLightsOutput output;
-        output.diffuse = 0;
-        output.specular = 0;
-        return output;
+        return (ComputeLightsOutput) 0;
     }
 }
 
@@ -620,10 +617,7 @@ inline ComputeLightsOutput ComputePointLight(ComputePointLightsInput input)
     }
     else
     {
-        ComputeLightsOutput output;
-        output.diffuse = 0;
-        output.specular = 0;
-        return output;
+        return (ComputeLightsOutput) 0;
     }
 }
 

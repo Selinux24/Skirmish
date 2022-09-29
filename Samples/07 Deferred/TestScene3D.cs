@@ -146,9 +146,9 @@ namespace Deferred
 
                     var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-                    PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
+                    PathFinderDescription = new PathFinderDescription(nmsettings, nmInput);
 
-                    Task.WhenAll(UpdateNavigationGraph());
+                    Task.WhenAll(UpdateNavigationGraph()).GetAwaiter().GetResult();
 
                     gameReady = true;
                 });

@@ -331,70 +331,71 @@ namespace Engine
 #endif
             var toCullDeferred = deferredEnabledComponents.OfType<ICullable>();
 
-            bool draw = false;
+            bool draw = true;
             if (Scene.PerformFrustumCulling)
             {
                 //Frustum culling
                 draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullDeferred);
             }
-            else
+
+            if (!draw)
             {
-                draw = true;
+                return;
             }
 
-            if (draw)
+            var groundVolume = Scene.GetSceneVolume();
+            if (groundVolume != null)
             {
-                var groundVolume = Scene.GetSceneVolume();
-                if (groundVolume != null)
-                {
-                    //Ground culling
-                    draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullDeferred);
-                }
+                //Ground culling
+                draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullDeferred);
             }
+
 #if DEBUG
             swCull.Stop();
 
             frameStats.DeferredCull = swCull.ElapsedTicks;
 #endif
 
-            if (draw)
+            if (!draw)
             {
-#if DEBUG
-                Stopwatch swGeometryBuffer = Stopwatch.StartNew();
-
-                Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
-#endif
-                BindGBuffer();
-#if DEBUG
-                swGeometryBufferInit.Stop();
-
-                Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
-#endif
-                //Draw scene on g-buffer render targets
-                DrawResultComponents(DrawContext, CullIndexDrawIndex, deferredEnabledComponents);
-#if DEBUG
-                swGeometryBufferDraw.Stop();
-
-                swGeometryBuffer.Stop();
-
-                frameStats.DeferredGbuffer = swGeometryBuffer.ElapsedTicks;
-                frameStats.DeferredGbufferInit = swGeometryBufferInit.ElapsedTicks;
-                frameStats.DeferredGbufferDraw = swGeometryBufferDraw.ElapsedTicks;
-#endif
-
-#if DEBUG
-                Stopwatch swLightBuffer = Stopwatch.StartNew();
-#endif
-                BindLights();
-
-                //Draw scene lights on light buffer using g-buffer output
-                DrawLights(DrawContext);
-#if DEBUG
-                swLightBuffer.Stop();
-
-                frameStats.DeferredLbuffer = swLightBuffer.ElapsedTicks;
-#endif
+                return;
             }
+
+#if DEBUG
+            Stopwatch swGeometryBuffer = Stopwatch.StartNew();
+
+            Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
+#endif
+            BindGBuffer();
+#if DEBUG
+            swGeometryBufferInit.Stop();
+
+            Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
+#endif
+            //Draw scene on g-buffer render targets
+            DrawResultComponents(DrawContext, CullIndexDrawIndex, deferredEnabledComponents);
+#if DEBUG
+            swGeometryBufferDraw.Stop();
+
+            swGeometryBuffer.Stop();
+
+            frameStats.DeferredGbuffer = swGeometryBuffer.ElapsedTicks;
+            frameStats.DeferredGbufferInit = swGeometryBufferInit.ElapsedTicks;
+            frameStats.DeferredGbufferDraw = swGeometryBufferDraw.ElapsedTicks;
+#endif
+
+#if DEBUG
+            Stopwatch swLightBuffer = Stopwatch.StartNew();
+#endif
+            BindLights();
+
+            //Draw scene lights on light buffer using g-buffer output
+            DrawLights(DrawContext);
+#if DEBUG
+            swLightBuffer.Stop();
+
+            frameStats.DeferredLbuffer = swLightBuffer.ElapsedTicks;
+#endif
         }
         /// <summary>
         /// Do forward rendering (UI, transparents, etc.)
@@ -528,7 +529,6 @@ namespace Engine
             graphics.SetDepthStencilRDZDisabled();
             SetBlendDeferredLighting();
 
-            lightDrawer.BindGeometry(graphics);
 #if DEBUG
             swPrepare.Stop();
 #endif
@@ -548,7 +548,7 @@ namespace Engine
                 {
                     lightDirectionalDrawer.UpdatePerLight(light);
 
-                    lightDrawer.DrawDirectional(graphics, lightDirectionalDrawer);
+                    lightDrawer.DrawDirectional(lightDirectionalDrawer);
                 }
             }
 #if DEBUG
@@ -650,7 +650,7 @@ namespace Engine
 #if DEBUG
                 Stopwatch swDraw = Stopwatch.StartNew();
 #endif
-                lightDrawer.DrawResult(graphics, composer);
+                lightDrawer.DrawResult(composer);
 #if DEBUG
                 swDraw.Stop();
 
@@ -675,6 +675,8 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawResultComponents(DrawContext context, int index, IEnumerable<IDrawable> components)
         {
+            BuiltInShaders.UpdatePerFrame(context);
+
             //Save current drawing mode
             var mode = context.DrawerMode;
 

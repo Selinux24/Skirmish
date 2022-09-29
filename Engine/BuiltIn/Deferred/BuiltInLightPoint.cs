@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Deferred
 {
@@ -9,6 +11,33 @@ namespace Engine.BuiltIn.Deferred
     /// </summary>
     public class BuiltInLightPoint : BuiltInDrawer
     {
+        /// <summary>
+        /// Per light data structure
+        /// </summary>
+        [StructLayout(LayoutKind.Explicit, Size = 64)]
+        struct PerLight : IBufferData
+        {
+            public static PerLight Build(Matrix local)
+            {
+                return new PerLight
+                {
+                    Local = Matrix.Transpose(local),
+                };
+            }
+
+            /// <summary>
+            /// Local transform
+            /// </summary>
+            [FieldOffset(0)]
+            public Matrix Local;
+
+            /// <inheritdoc/>
+            public int GetStride()
+            {
+                return Marshal.SizeOf(typeof(PerLight));
+            }
+        }
+
         /// <summary>
         /// Point sampler
         /// </summary>
@@ -42,6 +71,12 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="light">Light constant buffer</param>
         public void UpdatePerLight(ISceneLightPoint light)
         {
+            var cbLight = BuiltInShaders.GetConstantBuffer<PerLight>();
+            cbLight?.WriteData(PerLight.Build(light.Local));
+
+            var vertexShader = GetVertexShader<DeferredLightVs>();
+            vertexShader?.SetPerLightConstantBuffer(cbLight);
+
             var cbPoint = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightPoint>();
             cbPoint?.WriteData(BuiltInShaders.BufferLightPoint.Build(light));
 

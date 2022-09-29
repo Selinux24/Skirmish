@@ -155,6 +155,7 @@
     <Compile Include="BuiltIn\Deferred\DeferredComposerPs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightPointPs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightSpotPs.cs" />
+    <Compile Include="BuiltIn\Deferred\DeferredLightOrthoVs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredStencilVs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightVs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightDirectionalPs.cs" />

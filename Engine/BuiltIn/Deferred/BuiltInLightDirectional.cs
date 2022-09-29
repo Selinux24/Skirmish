@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="graphics">Graphics</param>
         public BuiltInLightDirectional(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<DeferredLightVs>();
+            SetVertexShader<DeferredLightOrthoVs>();
             SetPixelShader<DeferredLightDirectionalPs>();
 
             pointSampler = BuiltInShaders.GetSamplerPoint();

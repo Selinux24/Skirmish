@@ -93,6 +93,16 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] DeferredLightOrtho_vs {
+            get {
+                object obj = ResourceManager.GetObject("DeferredLightOrtho_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] DeferredLightPoint_ps {
             get {
                 object obj = ResourceManager.GetObject("DeferredLightPoint_ps", resourceCulture);

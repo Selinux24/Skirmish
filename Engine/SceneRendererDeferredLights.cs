@@ -280,22 +280,11 @@ namespace Engine
         /// <summary>
         /// Draws a single light
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
         /// <param name="geometry">Geometry</param>
-        /// <param name="effectTechnique">Technique</param>
-        private void DrawSingleLight(Graphics graphics, LightGeometry geometry, IBuiltInDrawer drawer)
+        /// <param name="drawer">Drawer</param>
+        private void DrawSingleLight(LightGeometry geometry, IBuiltInDrawer drawer)
         {
-            graphics.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
-        }
-        /// <summary>
-        /// Binds light geometry to the input assembler
-        /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public void BindGeometry(Graphics graphics)
-        {
-            graphics.IAPrimitiveTopology = Topology.TriangleList;
-            graphics.IASetVertexBuffers(BufferSlot, lightGeometryVertexBufferBinding);
-            graphics.IASetIndexBuffer(lightGeometryIndexBuffer, Format.R32_UInt, 0);
+            drawer.Draw(Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, geometry.IndexCount, geometry.Offset);
         }
         /// <summary>
         /// Binds the hemispheric/directional (global) light input layout to the input assembler
@@ -309,11 +298,10 @@ namespace Engine
         /// <summary>
         /// Draws a directional light
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawDirectional(Graphics graphics, BuiltInLightDirectional drawer)
+        public void DrawDirectional(BuiltInLightDirectional drawer)
         {
-            graphics.DrawIndexed(screenGeometry.IndexCount, screenGeometry.Offset, 0);
+            drawer.Draw(Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
         /// <summary>
         /// Binds the point light input layout to the input assembler
@@ -337,11 +325,11 @@ namespace Engine
             SetRasterizerStencilPass();
             SetDepthStencilVolumeMarking();
             graphics.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            DrawSingleLight(graphics, geometry, stencilDrawer);
+            DrawSingleLight(geometry, stencilDrawer);
 
             SetRasterizerLightingPass();
             SetDepthStencilVolumeDrawing();
-            DrawSingleLight(graphics, geometry, drawer);
+            DrawSingleLight(geometry, drawer);
         }
         /// <summary>
         /// Binds the spot light input layout to the input assembler
@@ -365,11 +353,11 @@ namespace Engine
             SetRasterizerStencilPass();
             SetDepthStencilVolumeMarking();
             graphics.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            DrawSingleLight(graphics, geometry, stencilDrawer);
+            DrawSingleLight(geometry, stencilDrawer);
 
             SetRasterizerLightingPass();
             SetDepthStencilVolumeDrawing();
-            DrawSingleLight(graphics, geometry, drawer);
+            DrawSingleLight(geometry, drawer);
         }
         /// <summary>
         /// Binds the result box input layout to the input assembler
@@ -377,20 +365,16 @@ namespace Engine
         /// <param name="graphics">Graphics device</param>
         public void BindResult(Graphics graphics)
         {
-            graphics.IAPrimitiveTopology = Topology.TriangleList;
-            graphics.IASetVertexBuffers(BufferSlot, lightGeometryVertexBufferBinding);
-            graphics.IASetIndexBuffer(lightGeometryIndexBuffer, Format.R32_UInt, 0);
-
             graphics.IAInputLayout = combineLightsInputLayout;
+            Counters.IAInputLayoutSets++;
         }
         /// <summary>
         /// Draws the resulting light composition
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
         /// <param name="Drawer">Effect</param>
-        public void DrawResult(Graphics graphics, BuiltInComposer drawer)
+        public void DrawResult(BuiltInComposer drawer)
         {
-            graphics.DrawIndexed(screenGeometry.IndexCount, screenGeometry.Offset, 0);
+            drawer.Draw(Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
 
         /// <summary>

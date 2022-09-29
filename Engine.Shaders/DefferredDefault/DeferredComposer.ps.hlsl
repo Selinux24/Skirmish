@@ -43,42 +43,41 @@ float4 main(PSLightInput input) : SV_TARGET
     float doLighting = tg2.w;
     if (doLighting == 0)
     {
-        float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
-        float4 tg4 = gTG4Map.SampleLevel(SamplerPoint, tex, 0);
-        float4 tg5 = gTG5Map.SampleLevel(SamplerPoint, tex, 0);
-        float4 tg6 = gTG6Map.SampleLevel(SamplerPoint, tex, 0);
-        float4 lmap = gLightMap.Sample(SamplerPoint, tex);
-
-        float4 albedo = tg1;
-        float3 position = tg3.xyz;
-        float3 normal = tg2.xyz;
-        float3 diffuseSpecular = lmap.rgb;
-        
-        Material k = (Material) 0;
-        k.Algorithm = (uint) tg3.w;
-        k.Specular = tg4.rgb;
-        k.Shininess = tg4.a;
-        k.Emissive = tg5.rgb;
-        k.Metallic = tg5.a;
-        k.Ambient = tg6.rgb;
-        k.Roughness = tg6.a;
-
-        float3 lAmbient = CalcAmbientHemispheric(gHemiLight.AmbientDown, gHemiLight.AmbientRange, normal);
-
-        float3 light = DeferredLightEquation(k, lAmbient, diffuseSpecular);
-        float4 color = float4(light, 1) * albedo;
-
-        if (gPerFrame.FogRange > 0)
-        {
-            float distToEye = length(gPerFrame.EyePosition - position);
-
-            color = ComputeFog(color, distToEye, gPerFrame.FogStart, gPerFrame.FogRange, gPerFrame.FogColor);
-        }
-
-        return saturate(color);
-    }
-    else
-    {
         return tg1;
     }
+    
+    float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
+    float4 tg4 = gTG4Map.SampleLevel(SamplerPoint, tex, 0);
+    float4 tg5 = gTG5Map.SampleLevel(SamplerPoint, tex, 0);
+    float4 tg6 = gTG6Map.SampleLevel(SamplerPoint, tex, 0);
+    float4 lmap = gLightMap.Sample(SamplerPoint, tex);
+
+    float4 albedo = tg1;
+    float3 position = tg3.xyz;
+    float3 normal = tg2.xyz;
+    float3 diffuseSpecular = lmap.rgb;
+        
+    Material k = (Material) 0;
+    k.Algorithm = tg3.w;
+    k.Diffuse = float4(1, 1, 1, 1);
+    k.Specular = tg4.rgb;
+    k.Shininess = tg4.a;
+    k.Emissive = tg5.rgb;
+    k.Metallic = tg5.a;
+    k.Ambient = tg6.rgb;
+    k.Roughness = tg6.a;
+
+    float3 lAmbient = CalcAmbientHemispheric(gHemiLight.AmbientDown, gHemiLight.AmbientRange, normal);
+
+    float3 light = DeferredLightEquation(k, lAmbient, diffuseSpecular);
+    float4 color = float4(light, 1) * albedo;
+
+    if (gPerFrame.FogRange > 0)
+    {
+        float distToEye = length(gPerFrame.EyePosition - position);
+
+        color = ComputeFog(color, distToEye, gPerFrame.FogStart, gPerFrame.FogRange, gPerFrame.FogColor);
+    }
+
+    return saturate(color);
 };

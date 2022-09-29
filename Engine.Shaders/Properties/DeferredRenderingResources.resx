@@ -124,6 +124,9 @@
   <data name="DeferredLightDirectional_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\defferreddefault\deferredlightdirectional.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="DeferredLightOrtho_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\defferreddefault\deferredlightortho.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="DeferredLightPoint_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\defferreddefault\deferredlightpoint.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

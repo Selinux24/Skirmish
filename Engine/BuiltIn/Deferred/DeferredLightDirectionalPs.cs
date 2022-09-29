@@ -116,6 +116,14 @@ namespace Engine.BuiltIn.Deferred
             Graphics.SetPixelShaderResourceView(deferredBuffer.Count(), BuiltInShaders.GetShadowMapDirResourceView());
 
             Graphics.SetPixelShaderSampler(0, samplerPoint);
+
+            var ss = new[]
+            {
+                BuiltInShaders.GetSamplerComparisonLessEqualBorder(),
+                BuiltInShaders.GetSamplerComparisonLessEqualClamp(),
+            };
+
+            Graphics.SetPixelShaderSamplers(10, ss);
         }
     }
 }

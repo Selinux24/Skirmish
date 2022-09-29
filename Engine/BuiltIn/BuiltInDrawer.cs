@@ -4,6 +4,8 @@ using System.Linq;
 namespace Engine.BuiltIn
 {
     using Engine.Common;
+    using SharpDX.Direct3D11;
+    using SharpDX.DXGI;
 
     /// <summary>
     /// Built-in drawer class
@@ -255,6 +257,27 @@ namespace Engine.BuiltIn
 
             // Render the primitives.
             buffer.Draw(drawCount);
+
+            return true;
+        }
+        /// <inheritdoc/>
+        public virtual bool Draw(Topology topology, int bufferSlot, VertexBufferBinding vertexBufferBinding, Buffer indexBuffer, int count, int startLocation)
+        {
+            // Set the vertex and pixel shaders that will be used to render this mesh.
+            PrepareShaders();
+
+            Graphics.IASetVertexBuffers(bufferSlot, vertexBufferBinding);
+            Graphics.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
+            Graphics.IAPrimitiveTopology = topology;
+
+            if (indexBuffer != null)
+            {
+                Graphics.DrawIndexed(count, startLocation, 0);
+            }
+            else
+            {
+                Graphics.Draw(count, startLocation);
+            }
 
             return true;
         }

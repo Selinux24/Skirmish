@@ -1,7 +1,5 @@
 ﻿using Engine.Shaders.Properties;
 using System;
-using SharpDX;
-using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Deferred
 {
@@ -11,13 +9,8 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Deferred light vertex shader
     /// </summary>
-    public class DeferredLightVs : IBuiltInVertexShader
+    public class DeferredLightOrthoVs : IBuiltInVertexShader
     {
-        /// <summary>
-        /// Light constant buffer
-        /// </summary>
-        private IEngineConstantBuffer perLightBuffer;
-
         /// <summary>
         /// Graphics instance
         /// </summary>
@@ -30,16 +23,16 @@ namespace Engine.BuiltIn.Deferred
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public DeferredLightVs(Graphics graphics)
+        public DeferredLightOrthoVs(Graphics graphics)
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(DeferredLightVs), "main", DeferredRenderingResources.DeferredLight_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(DeferredLightOrthoVs), "main", DeferredRenderingResources.DeferredLightOrtho_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~DeferredLightVs()
+        ~DeferredLightOrthoVs()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -63,22 +56,12 @@ namespace Engine.BuiltIn.Deferred
             }
         }
 
-        /// <summary>
-        /// Sets per-light constant buffer
-        /// </summary>
-        /// <param name="perLightBuffer">Constant buffer</param>
-        public void SetPerLightConstantBuffer(IEngineConstantBuffer perLightBuffer)
-        {
-            this.perLightBuffer = perLightBuffer;
-        }
-
         /// <inheritdoc/>
         public void SetShaderResources()
         {
             var cb = new[]
             {
                 BuiltInShaders.GetPerFrameConstantBuffer(),
-                perLightBuffer,
             };
 
             Graphics.SetVertexShaderConstantBuffers(0, cb);
