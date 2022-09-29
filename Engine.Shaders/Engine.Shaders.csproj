@@ -157,6 +157,7 @@
     <PixelShader Include="DefferredDefault\DeferredLightPoint.ps.hlsl" />
     <PixelShader Include="DefferredDefault\DeferredComposer.ps.hlsl" />
     <VertexShader Include="DefferredDefault\DeferredLightOrtho.vs.hlsl" />
+    <PixelShader Include="DeferredTerrain\Terrain.ps.hlsl" />
     <Content Include="Lib\IncGBufferLights.hlsl" />
     <GeometryShader Include="ShadowsDefault\ShadowTransparent.gs.hlsl" />
     <GeometryShader Include="ShadowsDefault\Shadow.gs.hlsl" />

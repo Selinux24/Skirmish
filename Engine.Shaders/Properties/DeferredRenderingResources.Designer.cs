@@ -179,5 +179,15 @@ namespace Engine.Shaders.Properties {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] Terrain_ps {
+            get {
+                object obj = ResourceManager.GetObject("Terrain_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
     }
 }
