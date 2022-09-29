@@ -272,7 +272,7 @@ namespace Engine
                     Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
                     //Draw scene result on screen using g-buffer and light buffer
-                    DrawResult(DrawContext);
+                    DrawResult();
 
 #if DEBUG
                     swComponsition.Stop();
@@ -619,8 +619,7 @@ namespace Engine
         /// <summary>
         /// Draw result
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        private void DrawResult(DrawContext context)
+        private void DrawResult()
         {
             var graphics = Scene.Game.Graphics;
 

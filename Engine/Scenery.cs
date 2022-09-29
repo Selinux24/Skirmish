@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltIn.Forward;
     using Engine.BuiltIn.Deferred;
+    using Engine.BuiltIn.Forward;
     using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
@@ -62,14 +62,10 @@ namespace Engine
                 {
                     Id = node.Id,
                     Duration = watch.Elapsed,
-                    Patch = new SceneryPatch(game, drawingData),
+                    Patch = new SceneryPatch(drawingData),
                 };
             }
 
-            /// <summary>
-            /// Game
-            /// </summary>
-            protected Game Game = null;
             /// <summary>
             /// Drawing data
             /// </summary>
@@ -80,11 +76,9 @@ namespace Engine
             /// <summary>
             /// Cosntructor
             /// </summary>
-            /// <param name="game">Game</param>
             /// <param name="drawingData">Drawing data</param>
-            public SceneryPatch(Game game, DrawingData drawingData)
+            public SceneryPatch(DrawingData drawingData)
             {
-                Game = game;
                 DrawingData = drawingData;
             }
             /// <summary>
