@@ -42,7 +42,11 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="light">Light constant buffer</param>
         public void UpdatePerLight(ISceneLightSpot light)
         {
+            var cbSpot = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightSpot>();
+            cbSpot?.WriteData(BuiltInShaders.BufferLightSpot.Build(light));
 
+            var pixelShader = GetPixelShader<DeferredLightSpotPs>();
+            pixelShader?.SetPerLightConstantBuffer(cbSpot);
         }
     }
 }
