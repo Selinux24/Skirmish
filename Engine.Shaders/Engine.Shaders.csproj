@@ -284,13 +284,13 @@
     <GeometryShader Include="ForwardDecals\Decal.gs.hlsl" />
     <PixelShader Include="UIFont\Font.ps.hlsl" />
     <VertexShader Include="UIFont\Font.vs.hlsl" />
-    <EffectShader Include="ForwardParticles\Streamout.vs.hlsl" />
+    <VertexShader Include="ForwardParticles\Streamout.vs.hlsl" />
     <GeometryShader Include="ForwardParticles\Streamout.gs.hlsl" />
     <Content Include="Lib\IncSprites.hlsl" />
     <Content Include="Lib\IncBuiltIn.hlsl" />
     <PixelShader Include="ForwardWater\Water.ps.hlsl" />
     <VertexShader Include="ForwardWater\Water.vs.hlsl" />
-    <Content Include="ForwardBillboards\Billboard.ps.hlsl" />
+    <PixelShader Include="ForwardBillboards\Billboard.ps.hlsl" />
     <VertexShader Include="ForwardBillboards\Billboard.vs.hlsl" />
     <GeometryShader Include="ForwardBillboards\Billboard.gs.hlsl" />
     <VertexShader Include="ForwardTerrain\Terrain.vs.hlsl" />
@@ -304,7 +304,7 @@
     <VertexShader Include="PostProcess\PostProcess.vs.hlsl" />
     <PixelShader Include="PostProcess\PostProcess.ps.hlsl" />
     <PixelShader Include="PostProcess\Combine.ps.hlsl" />
-    <Content Include="ShadowsDefault\PositionSkinnedI.vs.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionSkinnedI.vs.hlsl" />
     <PixelShader Include="ShadowsDefault\Transparent.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
