@@ -4,17 +4,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine.PostProcessing.Tween
+namespace Engine.BuiltIn.PostProcess
 {
     /// <summary>
     /// Tween collection for post processing parameters
     /// </summary>
-    class DrawerPostProcessParamsTweenCollection : ITweenCollection<IDrawerPostProcessParams>
+    class BuiltInPostProcessStateTweenCollection : ITweenCollection<BuiltInPostProcessState>
     {
         /// <summary>
         /// Task list
         /// </summary>
-        private readonly ConcurrentDictionary<IDrawerPostProcessParams, List<Func<float, bool>>> tasks = new ConcurrentDictionary<IDrawerPostProcessParams, List<Func<float, bool>>>();
+        private readonly ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>> tasks = new ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>>();
 
         /// <summary>
         /// Updates the task list
@@ -32,11 +32,6 @@ namespace Engine.PostProcessing.Tween
 
             foreach (var task in activeControls)
             {
-                if (!task.Key.Active)
-                {
-                    continue;
-                }
-
                 // Copy active tasks
                 var activeTasks = task.Value.ToList();
                 if (!activeTasks.Any())
@@ -73,7 +68,7 @@ namespace Engine.PostProcessing.Tween
         /// </summary>
         /// <param name="item">Tween item</param>
         /// <param name="tween">Tween funcion</param>
-        public void AddTween(IDrawerPostProcessParams item, Func<float, bool> tween)
+        public void AddTween(BuiltInPostProcessState item, Func<float, bool> tween)
         {
             var list = tasks.GetOrAdd(item, new List<Func<float, bool>>());
 
@@ -83,7 +78,7 @@ namespace Engine.PostProcessing.Tween
         /// Clears all tweens
         /// </summary>
         /// <param name="item">Tween item</param>
-        public void ClearTween(IDrawerPostProcessParams item)
+        public void ClearTween(BuiltInPostProcessState item)
         {
             tasks.TryRemove(item, out _);
         }

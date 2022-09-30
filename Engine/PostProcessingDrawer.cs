@@ -1,5 +1,4 @@
-﻿using SharpDX.DXGI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,7 +7,6 @@ namespace Engine
     using Engine.BuiltIn;
     using Engine.BuiltIn.PostProcess;
     using Engine.Common;
-    using Engine.PostProcessing;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -139,17 +137,13 @@ namespace Engine
         /// <summary>
         /// Updates the effect parameters
         /// </summary>
-        /// <param name="texture">Source texture</param>
-        /// <param name="parameters">Parameters</param>
-        public IBuiltInDrawer UpdateEffectParameters(EngineShaderResourceView texture, IDrawerPostProcessParams parameters)
+        /// <param name="sourceTexture">Source texture</param>
+        /// <param name="state">State</param>
+        public IBuiltInDrawer UpdateEffectParameters(EngineShaderResourceView sourceTexture, BuiltInPostProcessState state)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
-            drawer.UpdatePass(new BuiltInPostProcessState
-            {
-                RenderTargetTexture = texture,
-                EffectIntensity = parameters.EffectIntensity,
-            });
+            drawer.UpdatePass(sourceTexture, state);
 
             return drawer;
         }
@@ -158,16 +152,16 @@ namespace Engine
         /// </summary>
         public void Bind()
         {
-            graphics.IAPrimitiveTopology = Topology.TriangleList;
-            graphics.IASetVertexBuffers(BufferSlot, vertexBufferBinding);
-            graphics.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
+            //graphics.IAPrimitiveTopology = Topology.TriangleList;
+            //graphics.IASetVertexBuffers(BufferSlot, vertexBufferBinding);
+            //graphics.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
         }
         /// <summary>
         /// Draws the resulting light composition
         /// </summary>
         public void Draw()
         {
-            graphics.DrawIndexed(indexCount, 0, 0);
+            //graphics.DrawIndexed(indexCount, 0, 0);
         }
         /// <summary>
         /// Updates the internal buffers according to the new render dimension

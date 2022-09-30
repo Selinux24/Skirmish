@@ -424,11 +424,6 @@
     <Compile Include="SceneLightState.cs" />
     <Compile Include="ScenePickingExtensions.cs" />
     <Compile Include="SceneState.cs" />
-    <Compile Include="PostProcessing\IDrawerPostProcessParams.cs" />
-    <Compile Include="PostProcessing\PostProcessBlurVignetteParams.cs" />
-    <Compile Include="PostProcessing\PostProcessToneMappingParams.cs" />
-    <Compile Include="PostProcessing\PostProcessBloomParams.cs" />
-    <Compile Include="PostProcessing\PostProcessBlurParams.cs" />
     <Compile Include="PostProcessingDrawer.cs" />
     <Compile Include="MaterialBlinnPhong.cs" />
     <Compile Include="MaterialCookTorrance.cs" />
@@ -440,9 +435,8 @@
     <Compile Include="DecalDrawer.cs" />
     <Compile Include="DecalDrawerDescription.cs" />
     <Compile Include="BuiltIn\PostProcess\BuiltInPostProcessEffects.cs" />
-    <Compile Include="PostProcessing\PostProcessVignetteParams.cs" />
-    <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenCollection.cs" />
-    <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenExtensions.cs" />
+    <Compile Include="BuiltIn\PostProcess\Tween\BuiltInPostProcessStateTweenCollection.cs" />
+    <Compile Include="BuiltIn\PostProcess\Tween\BuiltInPostProcessStateTweenExtensions.cs" />
     <Compile Include="RenderPass.cs" />
     <Compile Include="RotationQ.cs" />
     <Compile Include="Scale3.cs" />

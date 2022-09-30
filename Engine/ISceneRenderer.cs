@@ -2,8 +2,8 @@
 
 namespace Engine
 {
+    using Engine.BuiltIn.PostProcess;
     using Engine.Common;
-    using Engine.PostProcessing;
 
     /// <summary>
     /// Scene renderer interface
@@ -25,8 +25,8 @@ namespace Engine
         /// Sets the post-processing effect
         /// </summary>
         /// <param name="renderPass">Render pass</param>
-        /// <param name="parameters">Parameters</param>
-        void SetPostProcessingEffect(RenderPass renderPass, IDrawerPostProcessParams parameters);
+        /// <param name="state">State</param>
+        void SetPostProcessingEffect(RenderPass renderPass, BuiltInPostProcessState state);
         /// <summary>
         /// Clears the post-processing effect
         /// </summary>

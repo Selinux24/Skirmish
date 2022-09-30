@@ -28,15 +28,16 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Update pass state
         /// </summary>
+        /// <param name="sourceTexture">Source texture</param>
         /// <param name="state">State</param>
-        public void UpdatePass(BuiltInPostProcessState state)
+        public void UpdatePass(EngineShaderResourceView sourceTexture, BuiltInPostProcessState state)
         {
             var cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>();
             cbPerPass.WriteData(PerPass.Build(state));
 
             var pixelShader = GetPixelShader<PostProcessPs>();
             pixelShader?.SetPerPassConstantBuffer(cbPerPass);
-            pixelShader?.SetDiffuseMap(state.RenderTargetTexture);
+            pixelShader?.SetDiffuseMap(sourceTexture);
             pixelShader?.SetDiffseSampler(linear);
         }
     }

@@ -1,9 +1,9 @@
 ﻿using Engine;
 using Engine.Audio;
+using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
-using Engine.PostProcessing;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -2063,14 +2063,13 @@ You will lost all the game progress.",
         }
         private void SetOnGameEffects()
         {
-            Renderer.ClearPostProcessingEffects();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessToneMappingParams.Filmic);
+            Renderer?.ClearPostProcessingEffects();
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, BuiltInPostProcessState.Empty.AddToneMapping(BuiltInToneMappingTones.Filmic));
         }
         private void SetOnModalEffects()
         {
-            Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, null);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessBlurParams.Strong);
+            Renderer?.ClearPostProcessingEffects();
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, BuiltInPostProcessState.Empty.AddGrayScale().AddBlurStrong());
         }
     }
 }

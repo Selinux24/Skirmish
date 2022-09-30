@@ -1,7 +1,7 @@
 ﻿using Engine;
+using Engine.BuiltIn.PostProcess;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
-using Engine.PostProcessing;
 using Engine.UI;
 using SharpDX;
 using System.Threading.Tasks;
@@ -94,7 +94,7 @@ namespace Collada.Dungeon
         private void InitializePostProcessing()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessToneMappingParams.RomBinDaHouse);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, BuiltInPostProcessState.Empty.AddToneMapping(BuiltInToneMappingTones.RomBinDaHouse));
         }
 
         private void LoadGameAssets()

@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Audio;
+using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj;
@@ -8,7 +9,6 @@ using Engine.Modular;
 using Engine.Modular.Persistence;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
-using Engine.PostProcessing;
 using Engine.UI;
 using Engine.UI.Tween;
 using SharpDX;
@@ -90,9 +90,10 @@ namespace Collada.ModularDungeon
         private string ratSoundTalk = null;
         private IAudioEffect ratSoundInstance = null;
 
-        private readonly PostProcessToneMappingParams toneMapParams = PostProcessToneMappingParams.SimpleReinhard;
-        private readonly PostProcessBloomParams bloomParams = PostProcessBloomParams.Low;
-        private readonly PostProcessBlurVignetteParams vignetteParams = PostProcessBlurVignetteParams.Default;
+        private BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty
+            .AddToneMapping(BuiltInToneMappingTones.SimpleReinhard)
+            .AddBlurVignette()
+            .AddBloomLow();
 
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;
@@ -782,9 +783,7 @@ namespace Collada.ModularDungeon
         private void InitializePostProcessing()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, toneMapParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, vignetteParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, bloomParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, postProcessingState);
         }
 
         private void StartCamera()
@@ -965,12 +964,12 @@ namespace Collada.ModularDungeon
 
             if (Game.Input.KeyPressed(Keys.Left))
             {
-                bloomParams.Intensity = MathUtil.Clamp(bloomParams.Intensity - gameTime.ElapsedSeconds, 0, 100);
+                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity - gameTime.ElapsedSeconds, 0, 100);
             }
 
             if (Game.Input.KeyPressed(Keys.Right))
             {
-                bloomParams.Intensity = MathUtil.Clamp(bloomParams.Intensity + gameTime.ElapsedSeconds, 0, 100);
+                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity + gameTime.ElapsedSeconds, 0, 100);
             }
         }
         private void UpdateGraphInput()
@@ -1040,7 +1039,7 @@ namespace Collada.ModularDungeon
 
         private void UpdatePlayerState(GameTime gameTime)
         {
-            vignetteParams.Inner = 0.66f + ((float)Math.Sin(gameTime.TotalSeconds * 2f) * 0.1f);
+            postProcessingState.VignetteInner = 0.66f + ((float)Math.Sin(gameTime.TotalSeconds * 2f) * 0.1f);
         }
         private void UpdateSelection()
         {

@@ -1,9 +1,8 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
-using Engine.PostProcessing;
-using Engine.PostProcessing.Tween;
 using Engine.Tween;
 using Engine.UI;
 using SharpDX;
@@ -29,9 +28,10 @@ namespace Instancing
         private ModelInstanced troops = null;
 
         private readonly int instanceBlock = 10;
-        private readonly PostProcessToneMappingParams toneParams = new PostProcessToneMappingParams { Tone = ToneMappingTones.LumaBasedReinhard };
-        private readonly PostProcessBloomParams bloomParams = PostProcessBloomParams.Default;
-        private readonly PostProcessBlurParams blurParams = PostProcessBlurParams.Strong;
+        private BuiltInPostProcessState postProcessState = BuiltInPostProcessState.Empty
+            .AddToneMapping(BuiltInToneMappingTones.LumaBasedReinhard)
+            .AddBloom()
+            .AddBlurStrong();
 
         private bool gameReady = false;
 
@@ -317,8 +317,8 @@ namespace Instancing
 
             SetPostProcessingEffects();
 
-            blurParams.TweenIntensity(1, 0, 60000, ScaleFuncs.CubicEaseOut);
-            bloomParams.TweenIntensity(0, 1, 120000, ScaleFuncs.CubicEaseOut);
+            postProcessState.TweenEffect3Intensity(1, 0, 60000, ScaleFuncs.CubicEaseOut);
+            postProcessState.TweenBloomIntensity(0, 1, 120000, ScaleFuncs.CubicEaseOut);
 
             gameReady = true;
         }
@@ -362,7 +362,7 @@ namespace Instancing
 
             base.Update(gameTime);
 
-            runtimeText.Text = $"{Game.RuntimeText}. Instances: {troops.MaximumCount}; Tone: {toneParams.Tone}.";
+            runtimeText.Text = $"{Game.RuntimeText}. Instances: {troops.MaximumCount}; Tone: {postProcessState.ToneMappingTone}.";
         }
         private void UpdateCamera(GameTime gameTime)
         {
@@ -423,11 +423,11 @@ namespace Instancing
         {
             if (Game.Input.KeyJustReleased(Keys.Tab))
             {
-                int inc = (int)toneParams.Tone + (Game.Input.ShiftPressed ? -1 : 1);
+                int inc = (int)postProcessState.ToneMappingTone + (Game.Input.ShiftPressed ? -1 : 1);
                 uint tone = (uint)inc;
                 tone %= 8;
 
-                toneParams.Tone = (ToneMappingTones)tone;
+                postProcessState.ToneMappingTone = (BuiltInToneMappingTones)tone;
             }
         }
         private void UpdateSkybox()
@@ -468,9 +468,7 @@ namespace Instancing
 
         private void SetPostProcessingEffects()
         {
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, bloomParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, blurParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, toneParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, postProcessState);
         }
     }
 }

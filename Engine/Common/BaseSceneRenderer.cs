@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.PostProcessing;
+    using Engine.BuiltIn.PostProcess;
 
     /// <summary>
     /// Base scene renderer
@@ -25,9 +25,9 @@ namespace Engine.Common
             /// </summary>
             public RenderPass RenderPass { get; set; }
             /// <summary>
-            /// Parameters
+            /// State
             /// </summary>
-            public IDrawerPostProcessParams Parameters { get; set; }
+            public BuiltInPostProcessState State { get; set; }
         }
 
         /// <summary>
@@ -86,11 +86,7 @@ namespace Engine.Common
         /// <summary>
         /// Post-processing effects
         /// </summary>
-        private readonly List<PostProcessingEffect> postProcessingEffects = new List<PostProcessingEffect>();
-        /// <summary>
-        /// Empty post process state
-        /// </summary>
-        private readonly IDrawerPostProcessParams emptyParameters = null;
+        private PostProcessingEffect postProcessingEffect;
 
         /// <summary>
         /// Shadow map size
@@ -1213,12 +1209,6 @@ namespace Engine.Common
                 return false;
             }
 
-            var effects = postProcessingEffects.Where(e => e.RenderPass == renderPass);
-            if (!effects.Any())
-            {
-                return false;
-            }
-
             //Gets the last used target texture
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
@@ -1230,25 +1220,23 @@ namespace Engine.Common
 
             processingDrawer.Bind();
 
-            foreach (var postEffect in effects)
-            {
-                //Toggles post-processing buffers
-                TogglePostProcessingTargets();
+            //Toggles post-processing buffers
+            TogglePostProcessingTargets();
 
-                //Use the next buffer as render target
-                BindPostProcessingTarget(false, Color.Transparent);
+            //Use the next buffer as render target
+            BindPostProcessingTarget(false, Color.Transparent);
 
-                processingDrawer.UpdateEffectParameters(texture, postEffect.Parameters);
-                processingDrawer.Draw();
+            processingDrawer.UpdateEffectParameters(texture, postProcessingEffect.State);
+            processingDrawer.Draw();
 
-                //Gets the source texture
-                texture = postProcessingTarget1.Textures?.FirstOrDefault();
-            }
+            //Gets the source texture
+            texture = postProcessingTarget1.Textures?.FirstOrDefault();
 
             //Set the result render target
             SetTarget(target, false, Color.Transparent);
 
             //Draw the result
+            processingDrawer.UpdateEffectParameters(texture, new BuiltInPostProcessState());
             processingDrawer.Draw();
 
             return true;
@@ -1313,7 +1301,7 @@ namespace Engine.Common
 
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
-            processingDrawer.UpdateEffectParameters(texture, emptyParameters);
+            processingDrawer.UpdateEffectParameters(texture, new BuiltInPostProcessState());
             processingDrawer.Bind();
             processingDrawer.Draw();
         }
@@ -1322,14 +1310,14 @@ namespace Engine.Common
         /// Sets the post-processing effect
         /// </summary>
         /// <param name="renderPass">Render pass</param>
-        /// <param name="parameters">Parameters</param>
-        public void SetPostProcessingEffect(RenderPass renderPass, IDrawerPostProcessParams parameters)
+        /// <param name="state">State</param>
+        public void SetPostProcessingEffect(RenderPass renderPass, BuiltInPostProcessState state)
         {
-            postProcessingEffects.Add(new PostProcessingEffect
+            postProcessingEffect = new PostProcessingEffect
             {
                 RenderPass = renderPass,
-                Parameters = parameters,
-            });
+                State = state,
+            };
 
             PostProcessingEnabled = true;
         }
@@ -1338,7 +1326,7 @@ namespace Engine.Common
         /// </summary>
         public void ClearPostProcessingEffects()
         {
-            postProcessingEffects.Clear();
+            postProcessingEffect = new PostProcessingEffect();
             PostProcessingEnabled = false;
         }
     }

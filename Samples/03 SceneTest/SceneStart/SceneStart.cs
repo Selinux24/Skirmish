@@ -1,8 +1,8 @@
 ﻿using Engine;
 using Engine.Audio;
 using Engine.Audio.Tween;
+using Engine.BuiltIn.PostProcess;
 using Engine.Content;
-using Engine.PostProcessing;
 using Engine.Tween;
 using Engine.UI;
 using Engine.UI.Tween;
@@ -44,8 +44,8 @@ namespace SceneTest.SceneStart
 
             GameEnvironment.Background = Color.Black;
 
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessBlurParams.Strong);
-            Renderer?.SetPostProcessingEffect(RenderPass.Final, PostProcessToneMappingParams.Filmic);
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, BuiltInPostProcessState.Empty.AddBlurStrong());
+            Renderer?.SetPostProcessingEffect(RenderPass.Final, BuiltInPostProcessState.Empty.AddToneMapping(BuiltInToneMappingTones.Filmic));
         }
 
         public override async Task Initialize()
