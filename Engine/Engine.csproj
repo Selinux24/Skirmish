@@ -199,6 +199,14 @@
     <Compile Include="BuiltIn\Particles\BuiltInStreamOutState.cs" />
     <Compile Include="BuiltIn\Particles\StreamOutGS.cs" />
     <Compile Include="BuiltIn\Particles\StreamOutVs.cs" />
+    <Compile Include="BuiltIn\PostProcess\BuiltInCombine.cs" />
+    <Compile Include="BuiltIn\PostProcess\BuiltInPostProcess.cs" />
+    <Compile Include="BuiltIn\PostProcess\BuiltInPostProcessState.cs" />
+    <Compile Include="BuiltIn\PostProcess\BuiltInToneMappingTones.cs" />
+    <Compile Include="BuiltIn\PostProcess\PostProcess.Buffers.cs" />
+    <Compile Include="BuiltIn\PostProcess\CombinePs.cs" />
+    <Compile Include="BuiltIn\PostProcess\PostProcessPs.cs" />
+    <Compile Include="BuiltIn\PostProcess\PostProcessVs.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPosition.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionInstanced.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionSkinned.cs" />
@@ -432,7 +440,7 @@
     <Compile Include="Common\RayPickingHelper.cs" />
     <Compile Include="DecalDrawer.cs" />
     <Compile Include="DecalDrawerDescription.cs" />
-    <Compile Include="PostProcessing\PostProcessingEffects.cs" />
+    <Compile Include="BuiltIn\PostProcess\BuiltInPostProcessEffects.cs" />
     <Compile Include="PostProcessing\PostProcessVignetteParams.cs" />
     <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenCollection.cs" />
     <Compile Include="PostProcessing\Tween\DrawerPostProcessParamsTweenExtensions.cs" />
@@ -551,7 +559,6 @@
     <Compile Include="IntersectionVolumeFrustum.cs" />
     <Compile Include="IntersectionVolumeAxisAlignedBox.cs" />
     <Compile Include="IntersectionVolumeSphere.cs" />
-    <Compile Include="Effects\EffectPostProcess.cs" />
     <Compile Include="Effects\IGeometryDrawer.cs" />
     <Compile Include="FoliageMap.cs" />
     <Compile Include="FontMapStyles.cs" />

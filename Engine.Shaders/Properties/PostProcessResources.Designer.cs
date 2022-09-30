@@ -22,14 +22,14 @@ namespace Engine.Shaders.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    public class EffectsResources {
+    public class PostProcessResources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal EffectsResources() {
+        internal PostProcessResources() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace Engine.Shaders.Properties {
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Engine.Shaders.Properties.EffectsResources", typeof(EffectsResources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Engine.Shaders.Properties.PostProcessResources", typeof(PostProcessResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,9 +63,29 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderPostProcess {
+        public static byte[] Combine_ps {
             get {
-                object obj = ResourceManager.GetObject("ShaderPostProcess", resourceCulture);
+                object obj = ResourceManager.GetObject("Combine_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] PostProcess_ps {
+            get {
+                object obj = ResourceManager.GetObject("PostProcess_ps", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] PostProcess_vs {
+            get {
+                object obj = ResourceManager.GetObject("PostProcess_vs", resourceCulture);
                 return ((byte[])(obj));
             }
         }

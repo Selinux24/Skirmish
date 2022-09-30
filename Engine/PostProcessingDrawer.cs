@@ -1,13 +1,13 @@
-﻿using SharpDX;
-using SharpDX.DXGI;
+﻿using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.PostProcess;
     using Engine.Common;
-    using Engine.Effects;
     using Engine.PostProcessing;
     using SharpDX.Direct3D11;
 
@@ -26,10 +26,6 @@ namespace Engine
         /// </summary>
         private readonly Graphics graphics;
         /// <summary>
-        /// Post processing drawer
-        /// </summary>
-        private readonly IDrawerPostProcess drawer;
-        /// <summary>
         /// Window vertex buffer
         /// </summary>
         private Buffer vertexBuffer;
@@ -46,14 +42,6 @@ namespace Engine
         /// </summary>
         private int indexCount;
         /// <summary>
-        /// Current drawer
-        /// </summary>
-        private EngineEffectTechnique currentTechnique;
-        /// <summary>
-        /// Current input layout
-        /// </summary>
-        private InputLayout currentInputLayout;
-        /// <summary>
         /// Layout dictionary
         /// </summary>
         private Dictionary<EngineEffectTechnique, InputLayout> layouts = new Dictionary<EngineEffectTechnique, InputLayout>();
@@ -61,10 +49,9 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public PostProcessingDrawer(Graphics graphics, IDrawerPostProcess drawer)
+        public PostProcessingDrawer(Graphics graphics)
         {
             this.graphics = graphics;
-            this.drawer = drawer;
 
             InitializeBuffers();
         }
@@ -137,128 +124,50 @@ namespace Engine
         }
 
         /// <summary>
-        /// Sets the effect to the post processing helper class
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        private void SetEffect(PostProcessingEffects effect)
-        {
-            var effectTechnique = drawer.GetTechnique(effect);
-
-            if (currentTechnique == effectTechnique)
-            {
-                return;
-            }
-
-            currentTechnique = effectTechnique;
-
-            if (effectTechnique == null)
-            {
-                currentInputLayout = null;
-
-                return;
-            }
-
-            if (!layouts.ContainsKey(effectTechnique))
-            {
-                var layout = graphics.CreateInputLayout($"{nameof(PostProcessingEffects)}.{effect}", effectTechnique.GetSignature(), VertexPositionTexture.Input(BufferSlot));
-
-                layouts.Add(effectTechnique, layout);
-
-                currentInputLayout = layout;
-            }
-            else
-            {
-                currentInputLayout = layouts[effectTechnique];
-            }
-        }
-        /// <summary>
         /// Updates the effect parameters
         /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="texture">Source texture</param>
-        public void UpdateEffectEmpty(Scene scene, EngineShaderResourceView texture)
-        {
-            SetEffect(PostProcessingEffects.None);
-
-            var viewProj = scene.Game.Form.GetOrthoProjectionMatrix();
-
-            drawer.UpdatePerFrameEmpty(
-                viewProj,
-                texture);
-        }
-        /// <summary>
-        /// Updates the effect parameters
-        /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="texture1">Texture 1</param>
         /// <param name="texture2">Texture 2</param>
-        public void UpdateEffectCombine(Scene scene, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
+        public IBuiltInDrawer UpdateEffectCombine(EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
-            SetEffect(PostProcessingEffects.Combine);
+            var drawer = BuiltInShaders.GetDrawer<BuiltInCombine>();
 
-            var viewProj = scene.Game.Form.GetOrthoProjectionMatrix();
+            drawer.Update(texture1, texture2);
 
-            drawer.UpdatePerFrameCombine(
-                viewProj,
-                texture1,
-                texture2);
+            return drawer;
         }
         /// <summary>
         /// Updates the effect parameters
         /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="totalSeconds">Total seconds</param>
         /// <param name="texture">Source texture</param>
-        /// <param name="effect">Effect</param>
         /// <param name="parameters">Parameters</param>
-        public void UpdateEffectParameters(Scene scene, float totalSeconds, EngineShaderResourceView texture, PostProcessingEffects effect, IDrawerPostProcessParams parameters)
+        public IBuiltInDrawer UpdateEffectParameters(EngineShaderResourceView texture, IDrawerPostProcessParams parameters)
         {
-            SetEffect(effect);
+            var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
-            var forms = scene.Game.Form;
-            var viewProj = forms.GetOrthoProjectionMatrix();
-            var screenRect = forms.RenderRectangle;
+            drawer.UpdatePass(new BuiltInPostProcessState
+            {
+                RenderTargetTexture = texture,
+                EffectIntensity = parameters.EffectIntensity,
+            });
 
-            drawer.UpdatePerFrame(
-                viewProj,
-                new Vector2(screenRect.Width, screenRect.Height),
-                totalSeconds,
-                texture);
-
-            drawer.UpdatePerEffect(parameters);
+            return drawer;
         }
         /// <summary>
         /// Binds the result box input layout to the input assembler
         /// </summary>
         public void Bind()
         {
-            if (currentTechnique == null)
-            {
-                return;
-            }
-
             graphics.IAPrimitiveTopology = Topology.TriangleList;
             graphics.IASetVertexBuffers(BufferSlot, vertexBufferBinding);
             graphics.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
-
-            graphics.IAInputLayout = currentInputLayout;
         }
         /// <summary>
         /// Draws the resulting light composition
         /// </summary>
         public void Draw()
         {
-            if (currentTechnique == null)
-            {
-                return;
-            }
-
-            for (int p = 0; p < currentTechnique.PassCount; p++)
-            {
-                graphics.EffectPassApply(currentTechnique, p, 0);
-
-                graphics.DrawIndexed(indexCount, 0, 0);
-            }
+            graphics.DrawIndexed(indexCount, 0, 0);
         }
         /// <summary>
         /// Updates the internal buffers according to the new render dimension

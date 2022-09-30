@@ -1,50 +1,46 @@
 ﻿
-namespace Engine.PostProcessing
+namespace Engine.BuiltIn.PostProcess
 {
     /// <summary>
     /// Post processing effects
     /// </summary>
-    public enum PostProcessingEffects
+    public enum BuiltInPostProcessEffects : uint
     {
         /// <summary>
         /// None
         /// </summary>
-        None,
-        /// <summary>
-        /// Combines two textures
-        /// </summary>
-        Combine,
+        None = 0,
         /// <summary>
         /// Gray scale
         /// </summary>
-        Grayscale,
+        Grayscale = 1,
         /// <summary>
         /// Sepia
         /// </summary>
-        Sepia,
+        Sepia = 2,
         /// <summary>
         /// Vignette
         /// </summary>
-        Vignette,
+        Vignette = 3,
         /// <summary>
         /// Blur
         /// </summary>
-        Blur,
+        Blur = 4,
         /// <summary>
         /// Blur + Vignette
         /// </summary>
-        BlurVignette,
+        BlurVignette = 5,
         /// <summary>
         /// Bloom
         /// </summary>
-        Bloom,
+        Bloom = 6,
         /// <summary>
         /// Grain
         /// </summary>
-        Grain,
+        Grain = 7,
         /// <summary>
         /// Tone mapping
         /// </summary>
-        ToneMapping,
+        ToneMapping = 8,
     }
 }

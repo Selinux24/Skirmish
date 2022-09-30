@@ -8,7 +8,6 @@ using System.Linq;
 
 namespace Engine.Common
 {
-    using Engine.Effects;
     using Engine.PostProcessing;
 
     /// <summary>
@@ -25,10 +24,6 @@ namespace Engine.Common
             /// Render pass
             /// </summary>
             public RenderPass RenderPass { get; set; }
-            /// <summary>
-            /// Effect
-            /// </summary>
-            public PostProcessingEffects Effect { get; set; }
             /// <summary>
             /// Parameters
             /// </summary>
@@ -92,6 +87,10 @@ namespace Engine.Common
         /// Post-processing effects
         /// </summary>
         private readonly List<PostProcessingEffect> postProcessingEffects = new List<PostProcessingEffect>();
+        /// <summary>
+        /// Empty post process state
+        /// </summary>
+        private readonly IDrawerPostProcessParams emptyParameters = null;
 
         /// <summary>
         /// Shadow map size
@@ -280,7 +279,7 @@ namespace Engine.Common
 
             postProcessingTarget1 = new RenderTarget(scene.Game, "PostProcessingTarget1", targetFormat, false, 1);
             postProcessingTarget2 = new RenderTarget(scene.Game, "PostProcessingTarget2", targetFormat, false, 1);
-            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, DrawerPool.GetEffect<EffectPostProcess>());
+            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics);
         }
         /// <summary>
         /// Destructor
@@ -1239,7 +1238,7 @@ namespace Engine.Common
                 //Use the next buffer as render target
                 BindPostProcessingTarget(false, Color.Transparent);
 
-                processingDrawer.UpdateEffectParameters(Scene, gameTime.TotalSeconds, texture, postEffect.Effect, postEffect.Parameters);
+                processingDrawer.UpdateEffectParameters(texture, postEffect.Parameters);
                 processingDrawer.Draw();
 
                 //Gets the source texture
@@ -1250,7 +1249,6 @@ namespace Engine.Common
             SetTarget(target, false, Color.Transparent);
 
             //Draw the result
-            processingDrawer.UpdateEffectEmpty(Scene, texture);
             processingDrawer.Draw();
 
             return true;
@@ -1295,7 +1293,7 @@ namespace Engine.Common
             var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
             var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
 
-            processingDrawer.UpdateEffectCombine(Scene, texture1, texture2);
+            processingDrawer.UpdateEffectCombine(texture1, texture2);
             processingDrawer.Bind();
             processingDrawer.Draw();
         }
@@ -1315,7 +1313,7 @@ namespace Engine.Common
 
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
-            processingDrawer.UpdateEffectEmpty(Scene, texture);
+            processingDrawer.UpdateEffectParameters(texture, emptyParameters);
             processingDrawer.Bind();
             processingDrawer.Draw();
         }
@@ -1324,14 +1322,12 @@ namespace Engine.Common
         /// Sets the post-processing effect
         /// </summary>
         /// <param name="renderPass">Render pass</param>
-        /// <param name="effect">Effect</param>
         /// <param name="parameters">Parameters</param>
-        public void SetPostProcessingEffect(RenderPass renderPass, PostProcessingEffects effect, IDrawerPostProcessParams parameters)
+        public void SetPostProcessingEffect(RenderPass renderPass, IDrawerPostProcessParams parameters)
         {
             postProcessingEffects.Add(new PostProcessingEffect
             {
                 RenderPass = renderPass,
-                Effect = effect,
                 Parameters = parameters,
             });
 

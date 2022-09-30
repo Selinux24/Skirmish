@@ -107,10 +107,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Properties\EffectsResources.Designer.cs">
+    <Compile Include="Properties\PostProcessResources.Designer.cs">
+      <DependentUpon>PostProcessResources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>EffectsResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\DeferredRenderingResources.Designer.cs">
       <DependentUpon>DeferredRenderingResources.resx</DependentUpon>
@@ -179,9 +179,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lib\IncVertexFormats.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <EffectShader Include="Effects\ShaderPostProcess.fx" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.HLSL.CSharpVB">
@@ -304,6 +301,9 @@
     <VertexShader Include="UISprites\SpriteColor.vs.hlsl" />
     <VertexShader Include="UISprites\SpriteTexture.vs.hlsl" />
     <PixelShader Include="UISprites\SpriteColor.ps.hlsl" />
+    <VertexShader Include="PostProcess\PostProcess.vs.hlsl" />
+    <PixelShader Include="PostProcess\PostProcess.ps.hlsl" />
+    <PixelShader Include="PostProcess\Combine.ps.hlsl" />
     <Content Include="ShadowsDefault\PositionSkinnedI.vs.hlsl" />
     <PixelShader Include="ShadowsDefault\Transparent.ps.hlsl" />
   </ItemGroup>
@@ -311,6 +311,11 @@
     <EmbeddedResource Include="Properties\DeferredRenderingResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>DeferredRenderingResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\PostProcessResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PostProcessResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\UIRenderingResources.resx">
@@ -327,11 +332,6 @@
       <Generator>PublicResXFileCodeGenerator</Generator>
       <SubType>Designer</SubType>
       <LastGenOutput>ForwardRenderingResources.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Properties\EffectsResources.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <SubType>Designer</SubType>
-      <LastGenOutput>EffectsResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\ShadowRenderingResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
