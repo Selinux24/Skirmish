@@ -181,9 +181,6 @@
     <Content Include="Lib\IncVertexFormats.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <EffectShader Include="Effects\ShaderDeferredTerrain.fx" />
-  </ItemGroup>
-  <ItemGroup>
     <EffectShader Include="Effects\ShaderPostProcess.fx" />
   </ItemGroup>
   <ItemGroup>

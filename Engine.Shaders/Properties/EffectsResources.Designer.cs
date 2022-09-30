@@ -63,16 +63,6 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
-        public static byte[] ShaderDeferredTerrain {
-            get {
-                object obj = ResourceManager.GetObject("ShaderDeferredTerrain", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
         public static byte[] ShaderPostProcess {
             get {
                 object obj = ResourceManager.GetObject("ShaderPostProcess", resourceCulture);
