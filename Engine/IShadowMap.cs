@@ -5,7 +5,6 @@ namespace Engine
 {
     using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Shadow map interface

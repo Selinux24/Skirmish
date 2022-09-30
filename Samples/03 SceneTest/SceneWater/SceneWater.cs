@@ -37,7 +37,7 @@ namespace SceneTest.SceneWater
 
             Lights.BaseFogColor = Color.White;
 
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Bloom, PostProcessBloomParams.Low);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessBloomParams.Low);
 
             GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
             //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)

@@ -3,8 +3,8 @@ using System;
 
 namespace Engine
 {
+    using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Material description

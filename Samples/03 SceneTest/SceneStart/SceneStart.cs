@@ -44,8 +44,8 @@ namespace SceneTest.SceneStart
 
             GameEnvironment.Background = Color.Black;
 
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
-            Renderer?.SetPostProcessingEffect(RenderPass.Final, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.Filmic);
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessBlurParams.Strong);
+            Renderer?.SetPostProcessingEffect(RenderPass.Final, PostProcessToneMappingParams.Filmic);
         }
 
         public override async Task Initialize()

@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Effects;
     using Engine.UI;
 
     /// <summary>
@@ -358,7 +357,6 @@ namespace Engine
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
             BuiltIn.BuiltInShaders.Initialize(Graphics);
-            DrawerPool.Initialize(Graphics);
         }
         /// <summary>
         /// Destructor
@@ -399,7 +397,6 @@ namespace Engine
                 }
 
                 BuiltIn.BuiltInShaders.DisposeResources();
-                DrawerPool.DisposeResources();
 
                 FontMapCache.Clear();
 

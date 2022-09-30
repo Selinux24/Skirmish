@@ -1,7 +1,7 @@
 ﻿
 namespace Engine
 {
-    using Engine.Effects;
+    using Engine.Common;
 
     /// <summary>
     /// Material

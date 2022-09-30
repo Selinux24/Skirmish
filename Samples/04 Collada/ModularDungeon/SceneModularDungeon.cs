@@ -782,9 +782,9 @@ namespace Collada.ModularDungeon
         private void InitializePostProcessing()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, toneMapParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.BlurVignette, vignetteParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Bloom, bloomParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, toneMapParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, vignetteParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, bloomParams);
         }
 
         private void StartCamera()

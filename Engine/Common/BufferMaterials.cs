@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System.Runtime.InteropServices;
 
-namespace Engine.Effects
+namespace Engine.Common
 {
     /// <summary>
     /// Material buffer

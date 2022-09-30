@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 namespace Engine.Common
 {
     using Engine.BuiltIn;
-    using Engine.BuiltIn.Forward;
     using Engine.BuiltIn.Deferred;
+    using Engine.BuiltIn.Forward;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Model basic implementation

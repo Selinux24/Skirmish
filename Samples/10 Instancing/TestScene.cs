@@ -468,9 +468,9 @@ namespace Instancing
 
         private void SetPostProcessingEffects()
         {
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Bloom, bloomParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, blurParams);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, toneParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, bloomParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, blurParams);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, toneParams);
         }
     }
 }

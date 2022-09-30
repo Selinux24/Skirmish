@@ -94,7 +94,7 @@ namespace Collada.Dungeon
         private void InitializePostProcessing()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.RomBinDaHouse);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessToneMappingParams.RomBinDaHouse);
         }
 
         private void LoadGameAssets()

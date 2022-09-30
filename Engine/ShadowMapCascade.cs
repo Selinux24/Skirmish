@@ -4,7 +4,6 @@ namespace Engine
     using Engine.BuiltIn;
     using Engine.BuiltIn.Shadows;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Cascaded shadow map

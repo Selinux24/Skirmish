@@ -2064,13 +2064,13 @@ You will lost all the game progress.",
         private void SetOnGameEffects()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.ToneMapping, PostProcessToneMappingParams.Filmic);
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, PostProcessToneMappingParams.Filmic);
         }
         private void SetOnModalEffects()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Grayscale, null);
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessingEffects.Blur, PostProcessBlurParams.Strong);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, null);
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, PostProcessBlurParams.Strong);
         }
     }
 }
