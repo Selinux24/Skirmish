@@ -72,13 +72,9 @@ namespace Engine.Common
         /// </summary>
         private RenderTarget sceneResultsTarget = null;
         /// <summary>
-        /// Post-processing render target 1
+        /// Post-processing render target
         /// </summary>
-        private RenderTarget postProcessingTarget1 = null;
-        /// <summary>
-        /// Post-processing render target 2
-        /// </summary>
-        private RenderTarget postProcessingTarget2 = null;
+        private RenderTarget postProcessingTarget = null;
         /// <summary>
         /// Post-processing drawer
         /// </summary>
@@ -273,9 +269,8 @@ namespace Engine.Common
             sceneUITarget = new RenderTarget(scene.Game, "SceneUITarget", targetFormat, false, 1);
             sceneResultsTarget = new RenderTarget(scene.Game, "SceneResultsTarget", targetFormat, false, 1);
 
-            postProcessingTarget1 = new RenderTarget(scene.Game, "PostProcessingTarget1", targetFormat, false, 1);
-            postProcessingTarget2 = new RenderTarget(scene.Game, "PostProcessingTarget2", targetFormat, false, 1);
-            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics);
+            postProcessingTarget = new RenderTarget(scene.Game, "PostProcessingTarget", targetFormat, false, 1);
+            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, scene.Game.BufferManager);
         }
         /// <summary>
         /// Destructor
@@ -316,13 +311,8 @@ namespace Engine.Common
                 sceneUITarget = null;
                 sceneResultsTarget?.Dispose();
                 sceneResultsTarget = null;
-                postProcessingTarget1?.Dispose();
-                postProcessingTarget1 = null;
-                postProcessingTarget2?.Dispose();
-                postProcessingTarget2 = null;
-
-                processingDrawer?.Dispose();
-                processingDrawer = null;
+                postProcessingTarget?.Dispose();
+                postProcessingTarget = null;
             }
         }
 
@@ -334,8 +324,7 @@ namespace Engine.Common
             sceneObjectsTarget?.Resize();
             sceneUITarget?.Resize();
             sceneResultsTarget?.Resize();
-            postProcessingTarget1?.Resize();
-            postProcessingTarget2?.Resize();
+            postProcessingTarget?.Resize();
             processingDrawer?.Resize();
         }
         /// <summary>
@@ -1181,20 +1170,11 @@ namespace Engine.Common
         {
             var graphics = Scene.Game.Graphics;
 
-            graphics.SetRenderTargets(postProcessingTarget1.Targets, clearRT, clearRTColor);
+            graphics.SetRenderTargets(postProcessingTarget.Targets, clearRT, clearRTColor);
 
             //Set local viewport
             var viewport = Scene.Game.Form.GetViewport();
             graphics.SetViewport(viewport);
-        }
-        /// <summary>
-        /// Toggles post-processing render targets
-        /// </summary>
-        private void TogglePostProcessingTargets()
-        {
-            var tmp = postProcessingTarget1;
-            postProcessingTarget1 = postProcessingTarget2;
-            postProcessingTarget2 = tmp;
         }
         /// <summary>
         /// Does the post-processing draw
@@ -1209,6 +1189,11 @@ namespace Engine.Common
                 return false;
             }
 
+            if (postProcessingEffect.RenderPass != renderPass)
+            {
+                return false;
+            }
+
             //Gets the last used target texture
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
@@ -1218,26 +1203,21 @@ namespace Engine.Common
             graphics.SetDepthStencilNone();
             graphics.SetBlendDefault();
 
-            processingDrawer.Bind();
-
-            //Toggles post-processing buffers
-            TogglePostProcessingTargets();
-
             //Use the next buffer as render target
             BindPostProcessingTarget(false, Color.Transparent);
 
-            processingDrawer.UpdateEffectParameters(texture, postProcessingEffect.State);
-            processingDrawer.Draw();
+            var drawer = processingDrawer.UpdateEffectParameters(texture, postProcessingEffect.State);
+            processingDrawer.Draw(drawer);
 
             //Gets the source texture
-            texture = postProcessingTarget1.Textures?.FirstOrDefault();
+            texture = postProcessingTarget.Textures?.FirstOrDefault();
 
             //Set the result render target
             SetTarget(target, false, Color.Transparent);
 
             //Draw the result
-            processingDrawer.UpdateEffectParameters(texture, new BuiltInPostProcessState());
-            processingDrawer.Draw();
+            var resultDrawer = processingDrawer.UpdateEffectParameters(texture, BuiltInPostProcessState.Empty);
+            processingDrawer.Draw(resultDrawer);
 
             return true;
         }
@@ -1281,9 +1261,8 @@ namespace Engine.Common
             var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
             var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
 
-            processingDrawer.UpdateEffectCombine(texture1, texture2);
-            processingDrawer.Bind();
-            processingDrawer.Draw();
+            var drawer = processingDrawer.UpdateEffectCombine(texture1, texture2);
+            processingDrawer.Draw(drawer);
         }
         /// <summary>
         /// Draws the specified target to screen
@@ -1301,9 +1280,8 @@ namespace Engine.Common
 
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
-            processingDrawer.UpdateEffectParameters(texture, new BuiltInPostProcessState());
-            processingDrawer.Bind();
-            processingDrawer.Draw();
+            var drawer = processingDrawer.UpdateEffectParameters(texture, BuiltInPostProcessState.Empty);
+            processingDrawer.Draw(drawer);
         }
 
         /// <summary>

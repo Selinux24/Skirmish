@@ -99,7 +99,13 @@ namespace Engine.BuiltIn.PostProcess
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerPass);
+            var cb = new[]
+            {
+                BuiltInShaders.GetPerFrameConstantBuffer(),
+                cbPerPass,
+            };
+
+            Graphics.SetPixelShaderConstantBuffers(0, cb);
 
             Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
 

@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
+﻿
 namespace Engine
 {
     using Engine.BuiltIn;
     using Engine.BuiltIn.PostProcess;
     using Engine.Common;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Post-processing drawer class
     /// </summary>
-    public class PostProcessingDrawer : IDisposable
+    public class PostProcessingDrawer
     {
         /// <summary>
         /// Render helper geometry buffer slot
@@ -24,71 +20,27 @@ namespace Engine
         /// </summary>
         private readonly Graphics graphics;
         /// <summary>
-        /// Window vertex buffer
+        /// Buffer manager
         /// </summary>
-        private Buffer vertexBuffer;
+        private readonly BufferManager bufferManager;
         /// <summary>
-        /// Vertex buffer binding
+        /// Vertex buffer descriptor
         /// </summary>
-        private VertexBufferBinding vertexBufferBinding;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
-        /// Window index buffer
+        /// Index buffer descriptor
         /// </summary>
-        private Buffer indexBuffer;
-        /// <summary>
-        /// Index count
-        /// </summary>
-        private int indexCount;
-        /// <summary>
-        /// Layout dictionary
-        /// </summary>
-        private Dictionary<EngineEffectTechnique, InputLayout> layouts = new Dictionary<EngineEffectTechnique, InputLayout>();
+        private BufferDescriptor indexBuffer = null;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public PostProcessingDrawer(Graphics graphics)
+        public PostProcessingDrawer(Graphics graphics, BufferManager bufferManager)
         {
             this.graphics = graphics;
+            this.bufferManager = bufferManager;
 
             InitializeBuffers();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~PostProcessingDrawer()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                vertexBuffer?.Dispose();
-                vertexBuffer = null;
-                indexBuffer?.Dispose();
-                indexBuffer = null;
-
-                foreach (var layout in layouts?.Values)
-                {
-                    layout?.Dispose();
-                }
-                layouts?.Clear();
-                layouts = null;
-            }
         }
 
         /// <summary>
@@ -97,28 +49,9 @@ namespace Engine
         private void InitializeBuffers()
         {
             var screen = GeometryUtil.CreateScreen((int)graphics.Viewport.Width, (int)graphics.Viewport.Height);
-
-            indexCount = screen.Indices.Count();
+            indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             var vertices = VertexPositionTexture.Generate(screen.Vertices, screen.Uvs);
-
-            if (vertexBuffer == null)
-            {
-                vertexBuffer = graphics.CreateVertexBuffer("Post processing vertex buffer", vertices, true);
-                vertexBufferBinding = new VertexBufferBinding(vertexBuffer, vertices.First().GetStride(), 0);
-            }
-            else
-            {
-                graphics.WriteDiscardBuffer(vertexBuffer, vertices);
-            }
-
-            if (indexBuffer == null)
-            {
-                indexBuffer = graphics.CreateIndexBuffer("Post processing index buffer", screen.Indices, true);
-            }
-            else
-            {
-                graphics.WriteDiscardBuffer(indexBuffer, screen.Indices);
-            }
+            vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
         }
 
         /// <summary>
@@ -148,20 +81,17 @@ namespace Engine
             return drawer;
         }
         /// <summary>
-        /// Binds the result box input layout to the input assembler
-        /// </summary>
-        public void Bind()
-        {
-            //graphics.IAPrimitiveTopology = Topology.TriangleList;
-            //graphics.IASetVertexBuffers(BufferSlot, vertexBufferBinding);
-            //graphics.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
-        }
-        /// <summary>
         /// Draws the resulting light composition
         /// </summary>
-        public void Draw()
+        /// <param name="drawer">Drawer</param>
+        public void Draw(IBuiltInDrawer drawer)
         {
-            //graphics.DrawIndexed(indexCount, 0, 0);
+            drawer.Draw(bufferManager, new DrawOptions
+            {
+                Topology = Topology.TriangleList,
+                VertexBuffer = vertexBuffer,
+                IndexBuffer = indexBuffer,
+            });
         }
         /// <summary>
         /// Updates the internal buffers according to the new render dimension

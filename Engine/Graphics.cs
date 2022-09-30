@@ -179,7 +179,7 @@ namespace Engine
         /// <summary>
         /// Current primitive topology set in input assembler
         /// </summary>
-        private Topology currentIAPrimitiveTopology = Topology.TriangleList;
+        private Topology currentIAPrimitiveTopology = Topology.Undefined;
         /// <summary>
         /// Current input layout set in input assembler
         /// </summary>
@@ -881,7 +881,7 @@ namespace Engine
             var rtv = renderTargets?.GetRenderTargets()?.ToArray();
             var rtvCount = renderTargets?.Count ?? 0;
 
-            deviceContext.OutputMerger.SetTargets(dsv, rtvCount, rtv);
+            deviceContext.OutputMerger.SetRenderTargets(dsv, rtv);
 
             if (clearRT && rtv != null && rtvCount > 0)
             {
