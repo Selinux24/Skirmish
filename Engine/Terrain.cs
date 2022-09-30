@@ -8,11 +8,10 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.BuiltIn;
-    using Engine.BuiltIn.Terrain;
+    using Engine.BuiltIn.Common;
     using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Terrain class
@@ -696,10 +695,6 @@ namespace Engine
         /// </summary>
         private IMeshMaterial terrainMaterial;
         /// <summary>
-        /// Terrain drawer
-        /// </summary>
-        private readonly BuiltInTerrain terrainDrawer;
-        /// <summary>
         /// Gets or sets the terrain drawing mode
         /// </summary>
         private BuiltInTerrainModes terrainMode;
@@ -745,7 +740,7 @@ namespace Engine
         public Terrain(Scene scene, string id, string name)
             : base(scene, id, name)
         {
-            terrainDrawer = BuiltInShaders.GetDrawer<BuiltInTerrain>();
+
         }
         /// <summary>
         /// Destructor
@@ -884,15 +879,42 @@ namespace Engine
                 return;
             }
 
-            var terrainTechnique = SetTechniqueTerrain(context);
-            if (terrainTechnique != null)
+            var terrainDrawer = GetDrawer(context);
+            if (terrainDrawer == null)
             {
-                mapGrid?.Draw(context, BufferManager, terrainTechnique);
-
                 return;
             }
 
-            var state = new BuiltInTerrainState
+            mapGrid?.Draw(context, BufferManager, terrainDrawer);
+        }
+        /// <summary>
+        /// Gets the terrain drawer, based on the drawing context
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        private IBuiltInDrawer GetDrawer(DrawContext context)
+        {
+            if (context.DrawerMode.HasFlag(DrawerModes.Forward))
+            {
+                var dr = BuiltInShaders.GetDrawer<BuiltIn.Terrain.BuiltInTerrain>();
+                dr.Update(GetTerrainState());
+                return dr;
+            }
+
+            if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
+            {
+                var dr = BuiltInShaders.GetDrawer<BuiltIn.Deferred.BuiltInTerrain>();
+                dr.Update(GetTerrainState());
+                return dr;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Gets the terrain state
+        /// </summary>
+        private BuiltInTerrainState GetTerrainState()
+        {
+            return new BuiltInTerrainState
             {
                 TintColor = Color.White,
                 MaterialIndex = terrainMaterial.ResourceIndex,
@@ -907,65 +929,6 @@ namespace Engine
                 HighResolutionTexture = terrainTexturesHR,
                 UseAnisotropic = useAnisotropic,
             };
-
-            terrainDrawer.Update(state);
-
-            mapGrid?.Draw(context, BufferManager, terrainDrawer);
-        }
-        /// <summary>
-        /// Sets thecnique for terrain drawing
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrain(DrawContext context)
-        {
-            var mode = context.DrawerMode;
-            if (mode.HasFlag(DrawerModes.Forward))
-            {
-                return null;
-            }
-
-            if (!mode.HasFlag(DrawerModes.Deferred))
-            {
-                return null;
-            }
-
-            var effect = DrawerPool.GetEffect<EffectDeferredTerrain>();
-
-            bool useAlphaMap = terrainMode == BuiltInTerrainModes.AlphaMap || terrainMode == BuiltInTerrainModes.Full;
-            bool useSlopes = terrainMode == BuiltInTerrainModes.Slopes || terrainMode == BuiltInTerrainModes.Full;
-
-            EngineEffectTechnique technique = null;
-            if (useAlphaMap && useSlopes) { technique = effect.TerrainFullDeferred; }
-            if (useAlphaMap) { technique = effect.TerrainAlphaMapDeferred; }
-            if (useSlopes) { technique = effect.TerrainSlopesDeferred; }
-            if (technique == null)
-            {
-                return null;
-            }
-
-            effect.UpdatePerFrame(
-                context.ViewProjection,
-                textureResolution);
-
-            var state = new EffectTerrainState
-            {
-                UseAnisotropic = useAnisotropic,
-                NormalMap = terrainNormalMaps,
-                UseAlphaMap = useAlphaMap,
-                AlphaMap = alphaMap,
-                ColorTextures = colorTextures,
-                UseSlopes = useSlopes,
-                SlopeRanges = slopeRanges,
-                DiffuseMapLR = terrainTexturesLR,
-                DiffuseMapHR = terrainTexturesHR,
-                Proportion = proportion,
-                MaterialIndex = terrainMaterial.ResourceIndex,
-            };
-
-            effect.UpdatePerObject(state);
-
-            return technique;
         }
 
         /// <summary>

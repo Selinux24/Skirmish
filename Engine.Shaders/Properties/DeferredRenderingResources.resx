@@ -119,40 +119,40 @@
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="DeferredComposer_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\deferredcomposer.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\deferredcomposer.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="DeferredLightDirectional_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\deferredlightdirectional.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\deferredlightdirectional.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="DeferredLightOrtho_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\deferredlightortho.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\deferredlightortho.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="DeferredLightPoint_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\deferredlightpoint.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\deferredlightpoint.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="DeferredLightSpot_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\deferredlightspot.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\deferredlightspot.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="DeferredLight_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\deferredlight.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\deferredlight.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="DeferredStencil_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\deferredstencil.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\deferredstencil.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PositionColor_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\positioncolor.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\positioncolor.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PositionNormalColor_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\positionnormalcolor.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\positionnormalcolor.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PositionNormalTextureTangent_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\positionnormaltexturetangent.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\positionnormaltexturetangent.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PositionNormalTexture_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\positionnormaltexture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\positionnormaltexture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="PositionTexture_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\defferreddefault\positiontexture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>..\deferreddefault\positiontexture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="Terrain_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\deferredterrain\terrain.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

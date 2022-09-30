@@ -1,5 +1,5 @@
 ﻿
-namespace Engine.BuiltIn.Terrain
+namespace Engine.BuiltIn.Deferred
 {
     using Engine.BuiltIn.Common;
     using Engine.Common;

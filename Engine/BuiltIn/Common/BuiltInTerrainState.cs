@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace Engine.BuiltIn.Terrain
+namespace Engine.BuiltIn.Common
 {
     using Engine.Common;
 

@@ -176,4 +176,69 @@ namespace Engine.BuiltIn.Common
             return Marshal.SizeOf(typeof(PerFramePositionTexture));
         }
     }
+
+    /// <summary>
+    /// Per terrain data structure
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = 48)]
+    struct PerTerrain : IBufferData
+    {
+        public static PerTerrain Build(BuiltInTerrainState state)
+        {
+            return new PerTerrain
+            {
+                TintColor = state.TintColor,
+                MaterialIndex = state.MaterialIndex,
+                Mode = (uint)state.Mode,
+                TextureResolution = state.TextureResolution,
+                Proportion = state.Proportion,
+                Slope1 = state.SlopeRanges.X,
+                Slope2 = state.SlopeRanges.Y,
+            };
+        }
+
+        /// <summary>
+        /// Tint color
+        /// </summary>
+        [FieldOffset(0)]
+        public Color4 TintColor;
+
+        /// <summary>
+        /// Scattering coefficients
+        /// </summary>
+        [FieldOffset(16)]
+        public uint MaterialIndex;
+        /// <summary>
+        /// Render mode
+        /// </summary>
+        [FieldOffset(20)]
+        public uint Mode;
+
+        /// <summary>
+        /// Close texture resolution
+        /// </summary>
+        [FieldOffset(32)]
+        public float TextureResolution;
+        /// <summary>
+        /// Proportion between alpha mapping and sloped terrain
+        /// </summary>
+        [FieldOffset(36)]
+        public float Proportion;
+        /// <summary>
+        /// Slope 1 height
+        /// </summary>
+        [FieldOffset(40)]
+        public float Slope1;
+        /// <summary>
+        /// Slope 2 height
+        /// </summary>
+        [FieldOffset(44)]
+        public float Slope2;
+
+        /// <inheritdoc/>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(PerTerrain));
+        }
+    }
 }

@@ -152,6 +152,7 @@
     <Compile Include="BuiltIn\Deferred\BuiltInLightPoint.cs" />
     <Compile Include="BuiltIn\Deferred\BuiltInLightSpot.cs" />
     <Compile Include="BuiltIn\Deferred\BuiltInLightDirectional.cs" />
+    <Compile Include="BuiltIn\Deferred\BuiltInTerrain.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredComposerPs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightPointPs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightSpotPs.cs" />
@@ -159,6 +160,7 @@
     <Compile Include="BuiltIn\Deferred\DeferredStencilVs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightVs.cs" />
     <Compile Include="BuiltIn\Deferred\DeferredLightDirectionalPs.cs" />
+    <Compile Include="BuiltIn\Deferred\TerrainPs.cs" />
     <Compile Include="BuiltIn\Forward\ForwardDrawerManager.cs" />
     <Compile Include="BuiltIn\Deferred\BuiltInPositionColor.cs" />
     <Compile Include="BuiltIn\Deferred\BuiltInPositionColorInstanced.cs" />
@@ -288,9 +290,9 @@
     <Compile Include="BuiltIn\Sprites\SpriteTextureVs.cs" />
     <Compile Include="BuiltIn\Sprites\SpriteColorVs.cs" />
     <Compile Include="BuiltIn\Terrain\BuiltInTerrain.cs" />
-    <Compile Include="BuiltIn\Terrain\BuiltInTerrainState.cs" />
+    <Compile Include="BuiltIn\Common\BuiltInTerrainState.cs" />
     <Compile Include="BuiltIn\Terrain\TerrainPs.cs" />
-    <Compile Include="BuiltIn\Terrain\TerrainVs.cs" />
+    <Compile Include="BuiltIn\Common\TerrainVs.cs" />
     <Compile Include="BuiltIn\Water\BuiltInWater.cs" />
     <Compile Include="BuiltIn\Water\BuiltInWaterState.cs" />
     <Compile Include="BuiltIn\Water\WaterPs.cs" />
@@ -369,7 +371,6 @@
     <Compile Include="BuiltIn\Common\PositionColorVsI.cs" />
     <Compile Include="BuiltIn\Common\PositionColorVs.cs" />
     <Compile Include="BuiltIn\IBuiltInDrawer.cs" />
-    <Compile Include="Effects\EffectTerrainState.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
@@ -490,10 +491,6 @@
     <Compile Include="Common\VertexCpuParticle.cs" />
     <Compile Include="Content\ContentDescription.cs" />
     <Compile Include="Content\ILoader.cs" />
-    <Compile Include="Effects\BufferLightDirectional.cs" />
-    <Compile Include="Effects\BufferLightHemispheric.cs" />
-    <Compile Include="Effects\BufferLightPoint.cs" />
-    <Compile Include="Effects\BufferLightSpot.cs" />
     <Compile Include="FrameStatsDeferred.cs" />
     <Compile Include="BuiltIn\Particles\BuiltInParticlesState.cs" />
     <Compile Include="BuiltIn\SkyScattering\BuiltInSkyScatteringState.cs" />
@@ -555,7 +552,6 @@
     <Compile Include="IntersectionVolumeAxisAlignedBox.cs" />
     <Compile Include="IntersectionVolumeSphere.cs" />
     <Compile Include="Effects\EffectPostProcess.cs" />
-    <Compile Include="Effects\EffectDeferredTerrain.cs" />
     <Compile Include="Effects\IGeometryDrawer.cs" />
     <Compile Include="FoliageMap.cs" />
     <Compile Include="FontMapStyles.cs" />
@@ -807,7 +803,6 @@
     <Compile Include="UI\UIButton.cs" />
     <Compile Include="Terrain.cs" />
     <Compile Include="GroundDescription.cs" />
-    <Compile Include="Effects\DrawingStages.cs" />
     <Compile Include="Effects\IDrawer.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Helpers\NativeMethods.cs" />
