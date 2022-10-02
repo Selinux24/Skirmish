@@ -28,12 +28,15 @@ namespace Engine.BuiltIn.PostProcess
             }
 
             // Copy active controls
-            var activeControls = tasks.Where(task => task.Value.Any()).ToArray();
+            var activeControls = tasks
+                .Where(task => task.Value.Any())
+                .Select(task => task.Value)
+                .ToArray();
 
-            foreach (var task in activeControls)
+            foreach (var tasks in activeControls)
             {
                 // Copy active tasks
-                var activeTasks = task.Value.ToList();
+                var activeTasks = tasks.ToList();
 
                 List<Func<float, bool>> toDelete = new List<Func<float, bool>>();
 
@@ -48,7 +51,7 @@ namespace Engine.BuiltIn.PostProcess
 
                 if (toDelete.Any())
                 {
-                    toDelete.ForEach(t => task.Value.Remove(t));
+                    toDelete.ForEach(t => tasks.Remove(t));
                 }
             }
 

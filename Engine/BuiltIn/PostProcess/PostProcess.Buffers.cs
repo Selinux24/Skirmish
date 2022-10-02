@@ -16,7 +16,9 @@ namespace Engine.BuiltIn.PostProcess
             uint[] effects = new uint[MaxEffects];
             for (int i = 0; i < MaxEffects; i++)
             {
-                effects[i] = (uint)state.Effects?.ElementAtOrDefault(i);
+                var effect = state.Effects?.ElementAtOrDefault(i) ?? BuiltInPostProcessEffects.None;
+
+                effects[i] = (uint)effect;
             }
 
             return new PerPass
