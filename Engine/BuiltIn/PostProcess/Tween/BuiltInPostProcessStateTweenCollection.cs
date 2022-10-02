@@ -14,7 +14,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Task list
         /// </summary>
-        private readonly ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>> tasks = new ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>>();
+        private readonly ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>> taskList = new ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>>();
 
         /// <summary>
         /// Updates the task list
@@ -22,13 +22,13 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            if (!tasks.Any())
+            if (!taskList.Any())
             {
                 return;
             }
 
             // Copy active controls
-            var activeControls = tasks
+            var activeControls = taskList
                 .Where(task => task.Value.Any())
                 .Select(task => task.Value)
                 .ToArray();
@@ -55,10 +55,10 @@ namespace Engine.BuiltIn.PostProcess
                 }
             }
 
-            var emptyControls = tasks.Where(t => t.Value.Count == 0).Select(t => t.Key).ToList();
+            var emptyControls = taskList.Where(t => t.Value.Count == 0).Select(t => t.Key).ToList();
             if (emptyControls.Any())
             {
-                emptyControls.ForEach(c => tasks.TryRemove(c, out _));
+                emptyControls.ForEach(c => taskList.TryRemove(c, out _));
             }
         }
 
@@ -69,7 +69,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="tween">Tween funcion</param>
         public void AddTween(BuiltInPostProcessState item, Func<float, bool> tween)
         {
-            var list = tasks.GetOrAdd(item, new List<Func<float, bool>>());
+            var list = taskList.GetOrAdd(item, new List<Func<float, bool>>());
 
             list.Add(tween);
         }
@@ -79,14 +79,14 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="item">Tween item</param>
         public void ClearTween(BuiltInPostProcessState item)
         {
-            tasks.TryRemove(item, out _);
+            taskList.TryRemove(item, out _);
         }
         /// <summary>
         /// Clears all the tween tasks
         /// </summary>
         public void Clear()
         {
-            tasks.Clear();
+            taskList.Clear();
         }
     }
 }
