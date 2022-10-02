@@ -22,7 +22,7 @@ namespace Engine.Tween
     /// Tween collection
     /// </summary>
     /// <typeparam name="T">Item type</typeparam>
-    public interface ITweenCollection<T> : ITweenCollection
+    public interface ITweenCollection<T> : ITweenCollection where T : class
     {
         /// <summary>
         /// Adds a new tween to the specified item

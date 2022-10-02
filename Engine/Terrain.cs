@@ -395,25 +395,6 @@ namespace Engine
                 DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
             }
             /// <summary>
-            /// Draws
-            /// </summary>
-            /// <param name="context">Draw context</param>
-            /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="terrainTechnique">Technique for drawing</param>
-            public void Draw(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
-            {
-                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-
-                var mode = context.DrawerMode;
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesHigh);
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMedium);
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesLow);
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMinimum);
-            }
-            /// <summary>
             /// Draws the visible node list
             /// </summary>
             /// <param name="bufferManager">Buffer manager</param>
@@ -438,43 +419,6 @@ namespace Engine
 
                     Counters.InstancesPerFrame++;
                     Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
-                }
-            }
-            /// <summary>
-            /// Draws the visible node list
-            /// </summary>
-            /// <param name="mode">Drawer mode</param>
-            /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="terrainTechnique">Technique for drawing</param>
-            /// <param name="nodeList">Node list</param>
-            private void DrawNodeList(DrawerModes mode, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
-            {
-                var graphics = Game.Graphics;
-
-                for (int i = 0; i < nodeList.Length; i++)
-                {
-                    var gNode = nodeList[i];
-                    if (gNode.IBDesc.Count > 0)
-                    {
-                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc, Topology.TriangleList);
-                        bufferManager.SetIndexBuffer(gNode.IBDesc);
-
-                        if (!mode.HasFlag(DrawerModes.ShadowMap))
-                        {
-                            Counters.InstancesPerFrame++;
-                            Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
-                        }
-
-                        for (int p = 0; p < terrainTechnique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(terrainTechnique, p, 0);
-
-                            graphics.DrawIndexed(
-                                gNode.IBDesc.Count,
-                                gNode.IBDesc.BufferOffset,
-                                gNode.VBDesc.BufferOffset);
-                        }
-                    }
                 }
             }
         }
@@ -895,7 +839,7 @@ namespace Engine
         {
             if (context.DrawerMode.HasFlag(DrawerModes.Forward))
             {
-                var dr = BuiltInShaders.GetDrawer<BuiltIn.Terrain.BuiltInTerrain>();
+                var dr = BuiltInShaders.GetDrawer<BuiltIn.Forward.BuiltInTerrain>();
                 dr.Update(GetTerrainState());
                 return dr;
             }

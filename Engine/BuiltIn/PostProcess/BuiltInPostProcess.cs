@@ -35,8 +35,12 @@ namespace Engine.BuiltIn.PostProcess
             var cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>();
             cbPerPass.WriteData(PerPass.Build(state));
 
+            var cbPerPassData = BuiltInShaders.GetConstantBuffer<PerPassData>();
+            cbPerPassData.WriteData(PerPassData.Build(state));
+
             var pixelShader = GetPixelShader<PostProcessPs>();
             pixelShader?.SetPerPassConstantBuffer(cbPerPass);
+            pixelShader?.SetPerPassDataConstantBuffer(cbPerPassData);
             pixelShader?.SetDiffuseMap(sourceTexture);
             pixelShader?.SetDiffseSampler(linear);
         }

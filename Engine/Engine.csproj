@@ -297,9 +297,9 @@
     <Compile Include="BuiltIn\Sprites\SpriteColorPs.cs" />
     <Compile Include="BuiltIn\Sprites\SpriteTextureVs.cs" />
     <Compile Include="BuiltIn\Sprites\SpriteColorVs.cs" />
-    <Compile Include="BuiltIn\Terrain\BuiltInTerrain.cs" />
+    <Compile Include="BuiltIn\Forward\BuiltInTerrain.cs" />
     <Compile Include="BuiltIn\Common\BuiltInTerrainState.cs" />
-    <Compile Include="BuiltIn\Terrain\TerrainPs.cs" />
+    <Compile Include="BuiltIn\Forward\TerrainPs.cs" />
     <Compile Include="BuiltIn\Common\TerrainVs.cs" />
     <Compile Include="BuiltIn\Water\BuiltInWater.cs" />
     <Compile Include="BuiltIn\Water\BuiltInWaterState.cs" />

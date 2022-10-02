@@ -90,10 +90,7 @@ namespace Collada.ModularDungeon
         private string ratSoundTalk = null;
         private IAudioEffect ratSoundInstance = null;
 
-        private BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty
-            .AddToneMapping(BuiltInToneMappingTones.SimpleReinhard)
-            .AddBlurVignette()
-            .AddBloomLow();
+        private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
 
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;
@@ -125,6 +122,10 @@ namespace Collada.ModularDungeon
             Game.VisibleMouse = false;
             Game.LockMouse = true;
 #endif
+
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.SimpleReinhard);
+            postProcessingState.AddBlurVignette();
+            postProcessingState.AddBloomLow();
         }
 
         public override async Task Initialize()

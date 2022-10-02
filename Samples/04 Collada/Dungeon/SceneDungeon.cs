@@ -23,6 +23,8 @@ namespace Collada.Dungeon
         private bool userInterfaceInitialized = false;
         private bool gameReady = false;
 
+        private readonly BuiltInPostProcessState postProcessing = BuiltInPostProcessState.Empty;
+
         public SceneDungeon(Game game)
             : base(game)
         {
@@ -34,6 +36,8 @@ namespace Collada.Dungeon
             Game.VisibleMouse = false;
             Game.LockMouse = true;
 #endif
+
+            postProcessing.AddToneMapping(BuiltInToneMappingTones.RomBinDaHouse);
         }
 
         public override async Task Initialize()
@@ -94,7 +98,7 @@ namespace Collada.Dungeon
         private void InitializePostProcessing()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, BuiltInPostProcessState.Empty.AddToneMapping(BuiltInToneMappingTones.RomBinDaHouse));
+            Renderer.SetPostProcessingEffect(RenderPass.Objects, postProcessing);
         }
 
         private void LoadGameAssets()

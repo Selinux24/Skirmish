@@ -60,6 +60,10 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Post-processing drawer
+        /// </summary>
+        private readonly PostProcessingDrawer processingDrawer = null;
+        /// <summary>
         /// Scene objects target
         /// </summary>
         private RenderTarget sceneObjectsTarget = null;
@@ -75,10 +79,6 @@ namespace Engine.Common
         /// Post-processing render target
         /// </summary>
         private RenderTarget postProcessingTarget = null;
-        /// <summary>
-        /// Post-processing drawer
-        /// </summary>
-        private PostProcessingDrawer processingDrawer = null;
         /// <summary>
         /// Post-processing effects
         /// </summary>

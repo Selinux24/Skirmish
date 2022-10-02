@@ -28,16 +28,12 @@ namespace Engine.BuiltIn.PostProcess
             }
 
             // Copy active controls
-            var activeControls = tasks.ToArray();
+            var activeControls = tasks.Where(task => task.Value.Any()).ToArray();
 
             foreach (var task in activeControls)
             {
                 // Copy active tasks
                 var activeTasks = task.Value.ToList();
-                if (!activeTasks.Any())
-                {
-                    continue;
-                }
 
                 List<Func<float, bool>> toDelete = new List<Func<float, bool>>();
 

@@ -95,18 +95,23 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Xml" />
-    <PixelShader Include="ForwardDefault\PositionNormalColor.ps.hlsl" />
-    <VertexShader Include="ForwardDefault\PositionNormalColor.vs.hlsl" />
-    <PixelShader Include="ForwardDefault\PositionTexture.ps.hlsl" />
-    <VertexShader Include="ForwardDefault\PositionTexture.vs.hlsl" />
-    <PixelShader Include="ForwardDefault\PositionNormalTexture.ps.hlsl" />
-    <VertexShader Include="ForwardDefault\PositionNormalTexture.vs.hlsl" />
-    <PixelShader Include="ForwardDefault\PositionNormalTextureTangent.ps.hlsl" />
-    <VertexShader Include="ForwardDefault\PositionNormalTextureTangent.vs.hlsl" />
+    <PixelShader Include="Forward\PositionNormalColor.ps.hlsl" />
+    <VertexShader Include="Common\PositionNormalColor.vs.hlsl" />
+    <PixelShader Include="Forward\PositionTexture.ps.hlsl" />
+    <VertexShader Include="Common\PositionTexture.vs.hlsl" />
+    <PixelShader Include="Forward\PositionNormalTexture.ps.hlsl" />
+    <VertexShader Include="Common\PositionNormalTexture.vs.hlsl" />
+    <PixelShader Include="Forward\PositionNormalTextureTangent.ps.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureTangent.vs.hlsl" />
     <None Include="Engine.Shaders.snk" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\CommonResources.Designer.cs">
+      <DependentUpon>CommonResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
     <Compile Include="Properties\PostProcessResources.Designer.cs">
       <DependentUpon>PostProcessResources.resx</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -139,24 +144,24 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PixelShader Include="ForwardDefault\PositionColor.ps.hlsl" />
+    <PixelShader Include="Forward\PositionColor.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <PixelShader Include="ForwardFoliage\Foliage.ps.hlsl" />
     <VertexShader Include="ForwardFoliage\Foliage.vs.hlsl" />
     <GeometryShader Include="ForwardFoliage\Foliage.gs.hlsl" />
-    <PixelShader Include="DeferredDefault\PositionColor.ps.hlsl" />
-    <PixelShader Include="DeferredDefault\PositionNormalColor.ps.hlsl" />
-    <PixelShader Include="DeferredDefault\PositionTexture.ps.hlsl" />
-    <PixelShader Include="DeferredDefault\PositionNormalTexture.ps.hlsl" />
-    <PixelShader Include="DeferredDefault\PositionNormalTextureTangent.ps.hlsl" />
-    <VertexShader Include="DeferredDefault\DeferredLight.vs.hlsl" />
-    <VertexShader Include="DeferredDefault\DeferredStencil.vs.hlsl" />
-    <PixelShader Include="DeferredDefault\DeferredLightDirectional.ps.hlsl" />
-    <PixelShader Include="DeferredDefault\DeferredLightSpot.ps.hlsl" />
-    <PixelShader Include="DeferredDefault\DeferredLightPoint.ps.hlsl" />
-    <PixelShader Include="DeferredDefault\DeferredComposer.ps.hlsl" />
-    <VertexShader Include="DeferredDefault\DeferredLightOrtho.vs.hlsl" />
+    <PixelShader Include="Deferred\PositionColor.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionNormalColor.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionTexture.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionNormalTexture.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionNormalTextureTangent.ps.hlsl" />
+    <VertexShader Include="Deferred\DeferredLight.vs.hlsl" />
+    <VertexShader Include="Deferred\DeferredStencil.vs.hlsl" />
+    <PixelShader Include="Deferred\DeferredLightDirectional.ps.hlsl" />
+    <PixelShader Include="Deferred\DeferredLightSpot.ps.hlsl" />
+    <PixelShader Include="Deferred\DeferredLightPoint.ps.hlsl" />
+    <PixelShader Include="Deferred\DeferredComposer.ps.hlsl" />
+    <VertexShader Include="Deferred\DeferredLightOrtho.vs.hlsl" />
     <PixelShader Include="DeferredTerrain\Terrain.ps.hlsl" />
     <Content Include="Lib\IncGBufferLights.hlsl" />
     <GeometryShader Include="ShadowsDefault\ShadowTransparent.gs.hlsl" />
@@ -195,52 +200,52 @@
     <Content Include="Lib\IncQuaternion.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionColor.vs.hlsl" />
+    <VertexShader Include="Common\PositionColor.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionColorSkinnedI.vs.hlsl" />
+    <VertexShader Include="Common\PositionColorSkinnedI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionColorI.vs.hlsl" />
+    <VertexShader Include="Common\PositionColorI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionColorSkinned.vs.hlsl" />
+    <VertexShader Include="Common\PositionColorSkinned.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionTextureI.vs.hlsl" />
+    <VertexShader Include="Common\PositionTextureI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionTextureSkinned.vs.hlsl" />
+    <VertexShader Include="Common\PositionTextureSkinned.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionTextureSkinnedI.vs.hlsl" />
+    <VertexShader Include="Common\PositionTextureSkinnedI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalColorI.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalColorI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalColorSkinned.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalColorSkinned.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalColorSkinnedI.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalColorSkinnedI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalTextureSkinned.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureSkinned.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalTextureSkinnedI.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureSkinnedI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalTextureI.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalTextureTangentI.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureTangentI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalTextureTangentSkinned.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureTangentSkinned.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <VertexShader Include="ForwardDefault\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <VertexShader Include="ForwardCubemap\Cubemap.vs.hlsl" />
@@ -293,7 +298,7 @@
     <PixelShader Include="ForwardBillboards\Billboard.ps.hlsl" />
     <VertexShader Include="ForwardBillboards\Billboard.vs.hlsl" />
     <GeometryShader Include="ForwardBillboards\Billboard.gs.hlsl" />
-    <VertexShader Include="ForwardTerrain\Terrain.vs.hlsl" />
+    <VertexShader Include="Common\Terrain.vs.hlsl" />
     <PixelShader Include="ForwardTerrain\Terrain.ps.hlsl" />
     <PixelShader Include="ForwardClouds\Clouds.ps.hlsl" />
     <VertexShader Include="ForwardClouds\Clouds.vs.hlsl" />
@@ -311,6 +316,11 @@
     <EmbeddedResource Include="Properties\DeferredRenderingResources.resx">
       <Generator>PublicResXFileCodeGenerator</Generator>
       <LastGenOutput>DeferredRenderingResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\CommonResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\PostProcessResources.resx">

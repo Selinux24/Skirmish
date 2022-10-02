@@ -1,5 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncLights.hlsl"
+#include "..\Lib\IncHelpers.hlsl"
 
 #ifndef GAMMA_INVERSE
 #define GAMMA_INVERSE 1.0/2.2
@@ -33,23 +33,31 @@
 #define EFFECT_TONEMAPPING 8
 #endif
 
+#ifndef MAX_EFFECTS
+#define MAX_EFFECTS 8
+#endif
+
 cbuffer cbPerFrame : register(b0)
 {
     PerFrame gPerFrame;
 };
 
-cbuffer cbPerPass : register(b1)
+cbuffer cbPerPassData : register(b1)
 {
-    uint4 gEffects;
-    float4 gEffectsIntensity;
-
+    float gGrayscaleIntensity;
+    float gSpeiaIntensity;
+    float gGrainIntensity;
+    
+    float gBlurIntensity;
     float gBlurDirections;
     float gBlurQuality;
     float gBlurSize;
 
+    float gVignetteIntensity;
     float gVignetteOuter;
     float gVignetteInner;
 	
+    float gBlurVignetteIntensity;
     float gBlurVignetteDirections;
     float gBlurVignetteQuality;
     float gBlurVignetteSize;
@@ -57,17 +65,19 @@ cbuffer cbPerPass : register(b1)
     float gBlurVignetteInner;
 	
     float gBloomIntensity;
+    float gBloomForce;
     float gBloomDirections;
     float gBloomQuality;
     float gBloomSize;
 
+    float gToneMappingIntensity;
     uint gToneMappingTone;
+    uint PAD11;
 };
 
-struct PSVertexEmpty
+cbuffer cbPerPass : register(b2)
 {
-    float4 hpos : SV_Position;
-    float2 uv : TEXCOORD0;
+    uint gEffects[MAX_EFFECTS];
 };
 
 Texture2D gDiffuseMap : register(t0);
@@ -79,20 +89,18 @@ SamplerState SamplerLinear : register(s0)
     AddressV = WRAP;
 };
 
-static float3 inverseGamma = GAMMA_INVERSE.rrr;
-
 inline float3 LinearToneMapping(float3 color)
 {
     float exposure = 1.;
     color = clamp(exposure * color, 0., 1.);
-    color = pow(color, inverseGamma);
+    color = pow(color, GAMMA_INVERSE.rrr);
     return color;
 }
 inline float3 SimpleReinhardToneMapping(float3 color)
 {
     float exposure = 1.5;
     color *= exposure / (1. + color / exposure);
-    color = pow(saturate(color), inverseGamma);
+    color = pow(saturate(color), GAMMA_INVERSE.rrr);
     return color;
 }
 inline float3 LumaBasedReinhardToneMapping(float3 color)
@@ -100,7 +108,7 @@ inline float3 LumaBasedReinhardToneMapping(float3 color)
     float luma = dot(color, float3(0.2126, 0.7152, 0.0722));
     float toneMappedLuma = luma / (1. + luma);
     color *= toneMappedLuma / luma;
-    color = pow(saturate(color), inverseGamma);
+    color = pow(saturate(color), GAMMA_INVERSE.rrr);
     return color;
 }
 inline float3 WhitePreservingLumaBasedReinhardToneMapping(float3 color)
@@ -109,13 +117,13 @@ inline float3 WhitePreservingLumaBasedReinhardToneMapping(float3 color)
     float luma = dot(color, float3(0.2126, 0.7152, 0.0722));
     float toneMappedLuma = luma * (1. + luma / (white * white)) / (1. + luma);
     color *= toneMappedLuma / luma;
-    color = pow(saturate(color), inverseGamma);
+    color = pow(saturate(color), GAMMA_INVERSE.rrr);
     return color;
 }
 inline float3 RomBinDaHouseToneMapping(float3 color)
 {
     color = exp(-1.0 / (2.72 * color + 0.15));
-    color = pow(saturate(color), inverseGamma);
+    color = pow(saturate(color), GAMMA_INVERSE.rrr);
     return color;
 }
 inline float3 FilmicToneMapping(float3 color)
@@ -138,7 +146,7 @@ inline float3 Uncharted2ToneMapping(float3 color)
     color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
     float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
     color /= white;
-    color = pow(saturate(color), inverseGamma);
+    color = pow(saturate(color), GAMMA_INVERSE.rrr);
     return color;
 }
 
@@ -203,6 +211,11 @@ inline float CalcGrain(float2 uv, float iTime)
 
 inline float4 grayscale(float4 color, float intensity)
 {
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
     float greyScale = .5;
     float3 output = dot(color.rgb, greyScale.rrr).rrr;
 
@@ -210,6 +223,11 @@ inline float4 grayscale(float4 color, float intensity)
 }
 inline float4 sepia(float4 color, float intensity)
 {
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
     float3 sepia = float3(1.2, 1.0, 0.8);
     float grey = dot(color.rgb, float3(0.299, 0.587, 0.114));
     float3 output = grey.rrr * sepia;
@@ -219,6 +237,11 @@ inline float4 sepia(float4 color, float intensity)
 }
 inline float4 vignette(float4 color, float2 uv, float intensity)
 {
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
     float vOutter = gVignetteOuter;
     float vInner = gVignetteInner;
     float vig = GetVignette(vOutter, vInner, uv);
@@ -231,6 +254,11 @@ inline float4 vignette(float4 color, float2 uv, float intensity)
 }
 inline float4 blur(float4 color, float2 uv, float intensity)
 {
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
     float directions = gBlurDirections;
     float quality = gBlurQuality;
     float2 radius = gBlurSize / gPerFrame.ScreenResolution;
@@ -242,6 +270,11 @@ inline float4 blur(float4 color, float2 uv, float intensity)
 }
 inline float4 blurVignette(float4 color, float2 uv, float intensity)
 {
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
     float directions = gBlurVignetteDirections;
     float quality = gBlurVignetteQuality;
     float2 radius = gBlurVignetteSize / gPerFrame.ScreenResolution;
@@ -259,7 +292,12 @@ inline float4 blurVignette(float4 color, float2 uv, float intensity)
 }
 inline float4 bloom(float4 color, float2 uv, float intensity)
 {
-    float bIntensity = gBloomIntensity;
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
+    float force = gBloomForce;
     float directions = gBloomDirections;
     float quality = gBloomQuality;
     float2 radius = gBloomSize / gPerFrame.ScreenResolution;
@@ -267,12 +305,17 @@ inline float4 bloom(float4 color, float2 uv, float intensity)
     float3 blur = CalcGaussianBlur(uv, gDiffuseMap, color.rgb, directions, quality, radius);
 
 	//Bloom intensity
-    float3 output = blur * bIntensity + color.rgb;
+    float3 output = blur * force + color.rgb;
 
     return float4(lerp(color.rgb, output, intensity), color.a);
 }
 inline float4 grain(float4 color, float2 uv, float intensity)
 {
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
     float3 grain = CalcGrain(uv, gPerFrame.TotalTime);
 
     float3 output = lerp(color.rgb, grain, .1);
@@ -281,6 +324,11 @@ inline float4 grain(float4 color, float2 uv, float intensity)
 }
 inline float4 toneMapping(float4 color, float intensity)
 {
+    if (intensity <= 0)
+    {
+        return color;
+    }
+    
     uint toneMap = gToneMappingTone;
 
     float3 output = color.rgb;
@@ -303,52 +351,64 @@ inline float4 toneMapping(float4 color, float intensity)
     return float4(lerp(color.rgb, output, intensity), color.a);
 }
 
+struct PSVertexEmpty
+{
+    float4 hpos : SV_Position;
+    float2 uv : TEXCOORD0;
+};
+
 float4 main(PSVertexEmpty input) : SV_TARGET
 {
     float4 color = gDiffuseMap.Sample(SamplerLinear, input.uv);
 
 	[unroll]
-    for (int i = 0; i < 4; i++)
+    for (uint i = 0; i < MAX_EFFECTS; i++)
     {
         uint effect = gEffects[i];
-        float intensity = gEffectsIntensity[i];
 
-        if (intensity == 0)
+        if (effect == EFFECT_EMPTY)
         {
-            continue;
+            break;
         }
-
+        
         if (effect == EFFECT_GRAYSCALE)
         {
-            color = grayscale(color, intensity);
+            color = grayscale(color, gGrayscaleIntensity);
         }
-        else if (effect == EFFECT_SEPIA)
+        
+        if (effect == EFFECT_SEPIA)
         {
-            color = sepia(color, intensity);
+            color = sepia(color, gSpeiaIntensity);
         }
-        else if (effect == EFFECT_VIGNETTE)
+        
+        if (effect == EFFECT_VIGNETTE)
         {
-            color = vignette(color, input.uv, intensity);
+            color = vignette(color, input.uv, gVignetteIntensity);
         }
-        else if (effect == EFFECT_BLUR)
+        
+        if (effect == EFFECT_BLUR)
         {
-            color = blur(color, input.uv, intensity);
+            color = blur(color, input.uv, gBlurIntensity);
         }
-        else if (effect == EFFECT_BLURVIGNETTE)
+        
+        if (effect == EFFECT_BLURVIGNETTE)
         {
-            color = blurVignette(color, input.uv, intensity);
+            color = blurVignette(color, input.uv, gBlurVignetteIntensity);
         }
-        else if (effect == EFFECT_BLOOM)
+        
+        if (effect == EFFECT_BLOOM)
         {
-            color = bloom(color, input.uv, intensity);
+            color = bloom(color, input.uv, gBloomIntensity);
         }
-        else if (effect == EFFECT_GRAIN)
+        
+        if (effect == EFFECT_GRAIN)
         {
-            color = grain(color, input.uv, intensity);
+            color = grain(color, input.uv, gGrainIntensity);
         }
-        else if (effect == EFFECT_TONEMAPPING)
+        
+        if (effect == EFFECT_TONEMAPPING)
         {
-            color = toneMapping(color, intensity);
+            color = toneMapping(color, gToneMappingIntensity);
         }
     }
 

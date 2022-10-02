@@ -28,8 +28,6 @@ struct Material
     uint Algorithm : ALGORITHM;
 };
 
-Texture2D CookTorranceTexRoughness;
-
 inline Material GetMaterialData(Texture2D materialsTexture, uint materialIndex, uint paletteWidth)
 {
     uint baseIndex = MATERIAL_STRIDE * materialIndex;

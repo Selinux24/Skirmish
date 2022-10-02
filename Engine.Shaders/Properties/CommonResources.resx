@@ -118,43 +118,67 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="DeferredComposer_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\deferredcomposer.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionColorI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positioncolori.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="DeferredLightDirectional_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\deferredlightdirectional.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionColorSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positioncolorskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="DeferredLightOrtho_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\deferredlightortho.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionColorSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positioncolorskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="DeferredLightPoint_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\deferredlightpoint.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionColor_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positioncolor.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="DeferredLightSpot_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\deferredlightspot.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalColorI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormalcolori.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="DeferredLight_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\deferredlight.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalColorSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormalcolorskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="DeferredStencil_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\deferredstencil.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalColorSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormalcolorskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PositionColor_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\positioncolor.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalColor_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormalcolor.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PositionNormalColor_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\positionnormalcolor.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalTextureI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltexturei.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PositionNormalTextureTangent_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\positionnormaltexturetangent.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalTextureSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltextureskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PositionNormalTexture_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\positionnormaltexture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalTextureSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltextureskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="PositionTexture_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferred\positiontexture.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalTextureTangentI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltexturetangenti.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Terrain_ps" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\deferredterrain\terrain.ps.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="PositionNormalTextureTangentSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltexturetangentskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureTangentSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltexturetangentskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTextureTangent_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltexturetangent.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionNormalTexture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positionnormaltexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positiontexturei.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positiontextureskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positiontextureskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTexture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\positiontexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Terrain_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\common\terrain.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

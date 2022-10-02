@@ -1,7 +1,7 @@
 ﻿using Engine.Shaders.Properties;
 using System;
 
-namespace Engine.BuiltIn.Terrain
+namespace Engine.BuiltIn.Forward
 {
     using Engine.Common;
     using Engine.Helpers;

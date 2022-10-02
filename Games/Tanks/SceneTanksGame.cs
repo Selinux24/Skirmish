@@ -130,6 +130,9 @@ namespace Tanks
 
         private readonly string loadGroupSceneObjects = "loadGroupSceneObjects";
 
+        private readonly BuiltInPostProcessState onGamePostProcessing = BuiltInPostProcessState.Empty;
+        private readonly BuiltInPostProcessState modalPostProcessing = BuiltInPostProcessState.Empty;
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -137,6 +140,11 @@ namespace Tanks
         public SceneTanksGame(Game game) : base(game)
         {
             InitializeEnvironment();
+
+            onGamePostProcessing.AddToneMapping(BuiltInToneMappingTones.Filmic);
+
+            modalPostProcessing.AddGrayScale();
+            modalPostProcessing.AddBlurStrong();
         }
         private void InitializeEnvironment()
         {
@@ -2064,12 +2072,12 @@ You will lost all the game progress.",
         private void SetOnGameEffects()
         {
             Renderer?.ClearPostProcessingEffects();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, BuiltInPostProcessState.Empty.AddToneMapping(BuiltInToneMappingTones.Filmic));
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, onGamePostProcessing);
         }
         private void SetOnModalEffects()
         {
             Renderer?.ClearPostProcessingEffects();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, BuiltInPostProcessState.Empty.AddGrayScale().AddBlurStrong());
+            Renderer?.SetPostProcessingEffect(RenderPass.Objects, modalPostProcessing);
         }
     }
 }

@@ -36,7 +36,7 @@ namespace Engine.BuiltIn.Common
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionColorVs), "main", ForwardRenderingResources.PositionColor_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionColorVs), "main", CommonResources.PositionColor_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

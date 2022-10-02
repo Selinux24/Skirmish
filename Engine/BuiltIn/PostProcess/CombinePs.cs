@@ -40,7 +40,7 @@ namespace Engine.BuiltIn.PostProcess
         {
             Graphics = graphics;
 
-            Shader = graphics.CompilePixelShader(nameof(CombinePs), "main", PostProcessResources.PostProcess_ps, HelperShaders.PSProfile);
+            Shader = graphics.CompilePixelShader(nameof(CombinePs), "main", PostProcessResources.Combine_ps, HelperShaders.PSProfile);
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
         }

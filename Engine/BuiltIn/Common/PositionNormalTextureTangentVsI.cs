@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Common
         {
             Graphics = graphics;
 
-            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentVsI), "main", ForwardRenderingResources.PositionNormalTextureTangentI_vs, HelperShaders.VSProfile);
+            Shader = graphics.CompileVertexShader(nameof(PositionNormalTextureTangentVsI), "main", CommonResources.PositionNormalTextureTangentI_vs, HelperShaders.VSProfile);
         }
         /// <summary>
         /// Destructor

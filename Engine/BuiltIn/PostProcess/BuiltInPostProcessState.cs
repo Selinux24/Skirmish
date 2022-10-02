@@ -1,259 +1,64 @@
 ﻿
+using System.Collections.Generic;
+
 namespace Engine.BuiltIn.PostProcess
 {
     /// <summary>
     /// Built-in post process drawer state
     /// </summary>
-    public struct BuiltInPostProcessState
+    public class BuiltInPostProcessState
     {
-        public static readonly BuiltInPostProcessState Empty = new BuiltInPostProcessState();
+        /// <summary>
+        /// Max active effects
+        /// </summary>
+        private const int MaxEffects = 8;
 
-        private static bool SetState(BuiltInPostProcessState sourceState, BuiltInPostProcessEffects effect, float intensity, out BuiltInPostProcessState newState)
+        /// <summary>
+        /// Gets the empty effect
+        /// </summary>
+        public static BuiltInPostProcessState Empty
         {
-            newState = new BuiltInPostProcessState(sourceState);
-
-            if (sourceState.Effect1 == BuiltInPostProcessEffects.None && sourceState.Effect1 != effect)
+            get
             {
-                newState.Effect1 = effect;
-                newState.Effect1Intensity = intensity;
-                return true;
+                return new BuiltInPostProcessState();
             }
-            else if (sourceState.Effect2 == BuiltInPostProcessEffects.None && sourceState.Effect2 != effect)
-            {
-                newState.Effect2 = effect;
-                newState.Effect2Intensity = intensity;
-                return true;
-            }
-            else if (sourceState.Effect3 == BuiltInPostProcessEffects.None && sourceState.Effect3 != effect)
-            {
-                newState.Effect3 = effect;
-                newState.Effect3Intensity = intensity;
-                return true;
-            }
-            else if (sourceState.Effect4 == BuiltInPostProcessEffects.None && sourceState.Effect4 != effect)
-            {
-                newState.Effect4 = effect;
-                newState.Effect4Intensity = intensity;
-                return true;
-            }
-
-            return false;
-        }
-
-        public BuiltInPostProcessState AddGrayScale()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Grayscale, 1, out var newState))
-            {
-                return this;
-            }
-
-            return newState;
-        }
-
-        public BuiltInPostProcessState AddSepia()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Sepia, 1, out var newState))
-            {
-                return this;
-            }
-
-            return newState;
-        }
-
-        public BuiltInPostProcessState AddGrain()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Grain, 1, out var newState))
-            {
-                return this;
-            }
-
-            return newState;
-        }
-
-        public BuiltInPostProcessState AddBlur()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Blur, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.BlurDirections = 16;
-            newState.BlurQuality = 3;
-            newState.BlurSize = 4;
-
-            return newState;
-        }
-        public BuiltInPostProcessState AddBlurStrong()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Blur, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.BlurDirections = 16;
-            newState.BlurQuality = 3;
-            newState.BlurSize = 8;
-
-            return newState;
-        }
-
-        public BuiltInPostProcessState AddVignette()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Vignette, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.VignetteOuter = 1f;
-            newState.VignetteInner = 0.05f;
-
-            return newState;
-        }
-        public BuiltInPostProcessState AddVignetteThin()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Vignette, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.VignetteOuter = 1f;
-            newState.VignetteInner = 0.66f;
-
-            return newState;
-        }
-        public BuiltInPostProcessState AddVignetteStrong()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Vignette, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.VignetteOuter = 0.5f;
-            newState.VignetteInner = 0.1f;
-
-            return newState;
-        }
-
-        public BuiltInPostProcessState AddBlurVignette()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.BlurVignette, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.BlurVignetteDirections = 16;
-            newState.BlurVignetteQuality = 3;
-            newState.BlurVignetteSize = 4;
-            newState.BlurVignetteOuter = 1f;
-            newState.BlurVignetteInner = 0.05f;
-
-            return newState;
-        }
-        public BuiltInPostProcessState AddBlurVignetteStrong()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.BlurVignette, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.BlurVignetteDirections = 16;
-            newState.BlurVignetteQuality = 3;
-            newState.BlurVignetteSize = 8;
-            newState.BlurVignetteOuter = 1f;
-            newState.BlurVignetteInner = 0.05f;
-
-            return newState;
-        }
-
-        public BuiltInPostProcessState AddBloom()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Bloom, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.BloomIntensity = 0.25f;
-            newState.BloomDirections = 16;
-            newState.BloomQuality = 3;
-            newState.BloomSize = 4;
-
-            return newState;
-        }
-        public BuiltInPostProcessState AddBloomLow()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Bloom, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.BloomIntensity = 0.15f;
-            newState.BloomDirections = 16;
-            newState.BloomQuality = 3;
-            newState.BloomSize = 4;
-
-            return newState;
-        }
-        public BuiltInPostProcessState AddBloomHigh()
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.Bloom, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.BloomIntensity = 0.35f;
-            newState.BloomDirections = 16;
-            newState.BloomQuality = 3;
-            newState.BloomSize = 4;
-
-            return newState;
-        }
-
-        public BuiltInPostProcessState AddToneMapping(BuiltInToneMappingTones tone)
-        {
-            if (!SetState(this, BuiltInPostProcessEffects.ToneMapping, 1, out var newState))
-            {
-                return this;
-            }
-
-            newState.ToneMappingTone = tone;
-
-            return newState;
         }
 
         /// <summary>
-        /// First effect
+        /// Effect list
         /// </summary>
-        public BuiltInPostProcessEffects Effect1 { get; set; }
-        /// <summary>
-        /// Second effect
-        /// </summary>
-        public BuiltInPostProcessEffects Effect2 { get; set; }
-        /// <summary>
-        /// Third effect
-        /// </summary>
-        public BuiltInPostProcessEffects Effect3 { get; set; }
-        /// <summary>
-        /// Fourth effect
-        /// </summary>
-        public BuiltInPostProcessEffects Effect4 { get; set; }
+        private readonly List<BuiltInPostProcessEffects> effects = new List<BuiltInPostProcessEffects>();
 
         /// <summary>
-        /// Fourth 1 effect intensity
+        /// Gets the effect list
         /// </summary>
-        public float Effect1Intensity { get; set; }
-        /// <summary>
-        /// Fourth 2 effect intensity
-        /// </summary>
-        public float Effect2Intensity { get; set; }
-        /// <summary>
-        /// Fourth 3 effect intensity
-        /// </summary>
-        public float Effect3Intensity { get; set; }
-        /// <summary>
-        /// Fourth 4 effect intensity
-        /// </summary>
-        public float Effect4Intensity { get; set; }
+        public IEnumerable<BuiltInPostProcessEffects> Effects
+        {
+            get
+            {
+                return effects.ToArray();
+            }
+        }
 
+        /// <summary>
+        /// Gray scale intensity
+        /// </summary>
+        public float GrayscaleIntensity { get; set; }
+
+        /// <summary>
+        /// Sepia intensity
+        /// </summary>
+        public float SepiaIntensity { get; set; }
+
+        /// <summary>
+        /// Grain intensity
+        /// </summary>
+        public float GrainIntensity { get; set; }
+
+        /// <summary>
+        /// Blur intensity
+        /// </summary>
+        public float BlurIntensity { get; set; }
         /// <summary>
         /// Blur directions
         /// </summary>
@@ -268,6 +73,10 @@ namespace Engine.BuiltIn.PostProcess
         public float BlurSize { get; set; }
 
         /// <summary>
+        /// Vignette intensity
+        /// </summary>
+        public float VignetteIntensity { get; set; }
+        /// <summary>
         /// Vignette outer
         /// </summary>
         public float VignetteOuter { get; set; }
@@ -276,6 +85,10 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         public float VignetteInner { get; set; }
 
+        /// <summary>
+        /// Blur & Vignette intensity
+        /// </summary>
+        public float BlurVignetteIntensity { get; set; }
         /// <summary>
         /// Blur & Vignette directions
         /// </summary>
@@ -302,6 +115,10 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         public float BloomIntensity { get; set; }
         /// <summary>
+        /// Bloom force
+        /// </summary>
+        public float BloomForce { get; set; }
+        /// <summary>
         /// Bloom directions
         /// </summary>
         public float BloomDirections { get; set; }
@@ -315,6 +132,10 @@ namespace Engine.BuiltIn.PostProcess
         public float BloomSize { get; set; }
 
         /// <summary>
+        /// Tone mapping intensity
+        /// </summary>
+        public float ToneMappingIntensity { get; set; }
+        /// <summary>
         /// Tone mapping tone
         /// </summary>
         public BuiltInToneMappingTones ToneMappingTone { get; set; }
@@ -322,38 +143,231 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="state">State</param>
-        public BuiltInPostProcessState(BuiltInPostProcessState state)
+        public BuiltInPostProcessState()
         {
-            Effect1 = state.Effect1;
-            Effect2 = state.Effect2;
-            Effect3 = state.Effect3;
-            Effect4 = state.Effect4;
 
-            Effect1Intensity = state.Effect1Intensity;
-            Effect2Intensity = state.Effect2Intensity;
-            Effect3Intensity = state.Effect3Intensity;
-            Effect4Intensity = state.Effect4Intensity;
+        }
 
-            BlurDirections = state.BlurDirections;
-            BlurQuality = state.BlurQuality;
-            BlurSize = state.BlurSize;
 
-            VignetteOuter = state.VignetteOuter;
-            VignetteInner = state.VignetteInner;
+        private bool AddEffect(BuiltInPostProcessEffects effect)
+        {
+            if (effects.Count >= MaxEffects)
+            {
+                return false;
+            }
 
-            BlurVignetteDirections = state.BlurVignetteDirections;
-            BlurVignetteQuality = state.BlurVignetteQuality;
-            BlurVignetteSize = state.BlurVignetteSize;
-            BlurVignetteOuter = state.BlurVignetteOuter;
-            BlurVignetteInner = state.BlurVignetteInner;
+            if (effects.Contains(effect))
+            {
+                return true;
+            }
 
-            BloomIntensity = state.BloomIntensity;
-            BloomDirections = state.BloomDirections;
-            BloomQuality = state.BloomQuality;
-            BloomSize = state.BloomSize;
+            effects.Add(effect);
 
-            ToneMappingTone = state.ToneMappingTone;
+            return true;
+        }
+        public void AddGrayScale(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Grayscale))
+            {
+                return;
+            }
+
+            GrayscaleIntensity = intensity;
+        }
+        public void AddSepia(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Sepia))
+            {
+                return;
+            }
+
+            SepiaIntensity = intensity;
+        }
+        public void AddGrain(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Grain))
+            {
+                return;
+            }
+
+            GrainIntensity = intensity;
+        }
+        public void AddBlur(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Blur))
+            {
+                return;
+            }
+
+            BlurIntensity = intensity;
+            BlurDirections = 16;
+            BlurQuality = 3;
+            BlurSize = 4;
+        }
+        public void AddBlurStrong(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Blur))
+            {
+                return;
+            }
+
+            BlurIntensity = intensity;
+            BlurDirections = 16;
+            BlurQuality = 3;
+            BlurSize = 8;
+        }
+        public void AddVignette(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Vignette))
+            {
+                return;
+            }
+
+            VignetteIntensity = intensity;
+            VignetteOuter = 1f;
+            VignetteInner = 0.05f;
+        }
+        public void AddVignetteThin(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Vignette))
+            {
+                return;
+            }
+
+            VignetteIntensity = intensity;
+            VignetteOuter = 1f;
+            VignetteInner = 0.66f;
+        }
+        public void AddVignetteStrong(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Vignette))
+            {
+                return;
+            }
+
+            VignetteIntensity = intensity;
+            VignetteOuter = 0.5f;
+            VignetteInner = 0.1f;
+        }
+        public void AddBlurVignette(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.BlurVignette))
+            {
+                return;
+            }
+
+            BlurVignetteIntensity = intensity;
+            BlurVignetteDirections = 16;
+            BlurVignetteQuality = 3;
+            BlurVignetteSize = 4;
+            BlurVignetteOuter = 1f;
+            BlurVignetteInner = 0.05f;
+        }
+        public void AddBlurVignetteStrong(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.BlurVignette))
+            {
+                return;
+            }
+
+            BlurVignetteIntensity = intensity;
+            BlurVignetteDirections = 16;
+            BlurVignetteQuality = 3;
+            BlurVignetteSize = 8;
+            BlurVignetteOuter = 1f;
+            BlurVignetteInner = 0.05f;
+        }
+        public void AddBloom(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Bloom))
+            {
+                return;
+            }
+
+            BloomIntensity = intensity;
+            BloomForce = 0.25f;
+            BloomDirections = 16;
+            BloomQuality = 3;
+            BloomSize = 4;
+        }
+        public void AddBloomLow(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Bloom))
+            {
+                return;
+            }
+
+            BloomIntensity = intensity;
+            BloomForce = 0.15f;
+            BloomDirections = 16;
+            BloomQuality = 3;
+            BloomSize = 4;
+        }
+        public void AddBloomHigh(float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.Bloom))
+            {
+                return;
+            }
+
+            BloomIntensity = intensity;
+            BloomForce = 0.35f;
+            BloomDirections = 16;
+            BloomQuality = 3;
+            BloomSize = 4;
+        }
+        public void AddToneMapping(BuiltInToneMappingTones tone, float intensity = 1f)
+        {
+            if (!AddEffect(BuiltInPostProcessEffects.ToneMapping))
+            {
+                return;
+            }
+
+            ToneMappingIntensity = intensity;
+            ToneMappingTone = tone;
+        }
+
+
+        public void RemoveEffect(BuiltInPostProcessEffects effect)
+        {
+            if (!effects.Contains(effect))
+            {
+                return;
+            }
+
+            effects.Remove(effect);
+        }
+        public void RemoveGrayscale()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.Grayscale);
+        }
+        public void RemoveSepia()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.Sepia);
+        }
+        public void RemoveGrain()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.Grain);
+        }
+        public void RemoveBlur()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.Blur);
+        }
+        public void RemoveVignette()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.Vignette);
+        }
+        public void RemoveBlurVignette()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.BlurVignette);
+        }
+        public void RemoveBloom()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.Bloom);
+        }
+        public void RemoveToneMapping()
+        {
+            RemoveEffect(BuiltInPostProcessEffects.ToneMapping);
         }
     }
 }

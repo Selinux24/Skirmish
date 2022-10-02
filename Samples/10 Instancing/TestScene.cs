@@ -28,10 +28,7 @@ namespace Instancing
         private ModelInstanced troops = null;
 
         private readonly int instanceBlock = 10;
-        private BuiltInPostProcessState postProcessState = BuiltInPostProcessState.Empty
-            .AddToneMapping(BuiltInToneMappingTones.LumaBasedReinhard)
-            .AddBloom()
-            .AddBlurStrong();
+        private readonly BuiltInPostProcessState postProcessState = BuiltInPostProcessState.Empty;
 
         private bool gameReady = false;
 
@@ -317,8 +314,8 @@ namespace Instancing
 
             SetPostProcessingEffects();
 
-            postProcessState.TweenEffect3Intensity(1, 0, 60000, ScaleFuncs.CubicEaseOut);
-            postProcessState.TweenBloomIntensity(0, 1, 120000, ScaleFuncs.CubicEaseOut);
+            postProcessState.Tween((s, value) => s.BlurIntensity = value, 1, 0, 10000, ScaleFuncs.CubicEaseOut);
+            postProcessState.TweenBounce((s, value) => s.BloomForce = value, 0, 1, 1000, ScaleFuncs.CubicEaseInOut);
 
             gameReady = true;
         }
@@ -468,6 +465,10 @@ namespace Instancing
 
         private void SetPostProcessingEffects()
         {
+            postProcessState.AddBlurStrong();
+            postProcessState.AddBloom();
+            postProcessState.AddToneMapping(BuiltInToneMappingTones.LumaBasedReinhard);
+
             Renderer.SetPostProcessingEffect(RenderPass.Objects, postProcessState);
         }
     }
