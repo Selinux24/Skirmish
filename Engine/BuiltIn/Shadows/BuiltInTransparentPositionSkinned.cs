@@ -17,6 +17,10 @@ namespace Engine.BuiltIn.Shadows
         /// </summary>
         private readonly EngineConstantBuffer<PerMeshSkinned> cbPerMesh;
         /// <summary>
+        /// Per material constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerMaterialTexture> cbPerMaterial;
+        /// <summary>
         /// Linear sampler
         /// </summary>
         private readonly EngineSamplerState linear;
@@ -29,12 +33,13 @@ namespace Engine.BuiltIn.Shadows
         /// <param name="positionColorPs">Position color pixel shader</param>
         public BuiltInTransparentPositionSkinned(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<PositionSkinnedVs>();
+            SetVertexShader<PositionTextureSkinnedVs>();
             SetGeometryShader<ShadowsTransparentGs>();
             SetPixelShader<TransparentPs>();
 
             cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLight>();
             cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSkinned>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
 
             linear = BuiltInShaders.GetSamplerLinear();
         }
@@ -52,12 +57,17 @@ namespace Engine.BuiltIn.Shadows
         {
             cbPerMesh.WriteData(PerMeshSkinned.Build(state));
 
-            var vertexShader = GetVertexShader<PositionSkinnedVs>();
+            var vertexShader = GetVertexShader<PositionTextureSkinnedVs>();
             vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);
         }
         /// <inheritdoc/>
         public override void UpdateMaterial(BuiltInDrawerMaterialState state)
         {
+            cbPerMaterial.WriteData(PerMaterialTexture.Build(state));
+
+            var vertexShader = GetVertexShader<PositionTextureSkinnedVs>();
+            vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);
+
             var pixelShader = GetPixelShader<TransparentPs>();
             pixelShader?.SetDiffuseMap(state.Material?.DiffuseTexture);
             pixelShader?.SetDiffuseSampler(linear);

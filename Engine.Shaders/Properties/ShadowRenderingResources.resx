@@ -127,6 +127,18 @@
   <data name="PositionSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadowsdefault\positionskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="PositionTextureI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsdefault\positiontexturei.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureSkinnedI_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsdefault\positiontextureskinnedi.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTextureSkinned_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsdefault\positiontextureskinned.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="PositionTexture_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\shadowsdefault\positiontexture.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="Position_vs" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\shadowsdefault\position.vs.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

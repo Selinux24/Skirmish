@@ -878,10 +878,10 @@ namespace Engine
             }
 
             var dsv = depthMap?.GetDepthStencil();
-            var rtv = renderTargets?.GetRenderTargets()?.ToArray();
+            var rtv = renderTargets?.GetRenderTargets()?.ToArray() ?? new RenderTargetView1[] { };
             var rtvCount = renderTargets?.Count ?? 0;
 
-            deviceContext.OutputMerger.SetRenderTargets(dsv, rtv);
+            deviceContext.OutputMerger.SetTargets(dsv, 0, new UnorderedAccessView[] { }, new int[] { }, rtv);
 
             if (clearRT && rtv != null && rtvCount > 0)
             {

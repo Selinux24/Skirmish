@@ -17,6 +17,10 @@ namespace Engine.BuiltIn.Shadows
         /// </summary>
         private readonly EngineConstantBuffer<PerMeshSingle> cbPerMesh;
         /// <summary>
+        /// Per material constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerMaterialTexture> cbPerMaterial;
+        /// <summary>
         /// Linear sampler
         /// </summary>
         private readonly EngineSamplerState linear;
@@ -27,12 +31,13 @@ namespace Engine.BuiltIn.Shadows
         /// <param name="graphics">Graphics</param>
         public BuiltInTransparentPosition(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<PositionVs>();
+            SetVertexShader<PositionTextureVs>();
             SetGeometryShader<ShadowsTransparentGs>();
             SetPixelShader<TransparentPs>();
 
             cbPerLight = BuiltInShaders.GetConstantBuffer<PerCastingLight>();
             cbPerMesh = BuiltInShaders.GetConstantBuffer<PerMeshSingle>();
+            cbPerMaterial = BuiltInShaders.GetConstantBuffer<PerMaterialTexture>();
 
             linear = BuiltInShaders.GetSamplerLinear();
         }
@@ -50,12 +55,17 @@ namespace Engine.BuiltIn.Shadows
         {
             cbPerMesh.WriteData(PerMeshSingle.Build(state));
 
-            var vertexShader = GetVertexShader<PositionVs>();
+            var vertexShader = GetVertexShader<PositionTextureVs>();
             vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);
         }
         /// <inheritdoc/>
         public override void UpdateMaterial(BuiltInDrawerMaterialState state)
         {
+            cbPerMaterial.WriteData(PerMaterialTexture.Build(state));
+
+            var vertexShader = GetVertexShader<PositionTextureVs>();
+            vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);
+
             var pixelShader = GetPixelShader<TransparentPs>();
             pixelShader?.SetDiffuseMap(state.Material?.DiffuseTexture);
             pixelShader?.SetDiffuseSampler(linear);

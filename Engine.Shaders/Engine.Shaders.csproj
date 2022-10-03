@@ -147,6 +147,10 @@
     <PixelShader Include="Forward\PositionColor.ps.hlsl" />
   </ItemGroup>
   <ItemGroup>
+    <VertexShader Include="ShadowsDefault\PositionTextureSkinnedI.vs.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionTextureSkinned.vs.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionTextureI.vs.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionTexture.vs.hlsl" />
     <PixelShader Include="ForwardFoliage\Foliage.ps.hlsl" />
     <VertexShader Include="ForwardFoliage\Foliage.vs.hlsl" />
     <GeometryShader Include="ForwardFoliage\Foliage.gs.hlsl" />

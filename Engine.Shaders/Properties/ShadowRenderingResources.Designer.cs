@@ -103,6 +103,46 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] PositionTexture_vs {
+            get {
+                object obj = ResourceManager.GetObject("PositionTexture_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] PositionTextureI_vs {
+            get {
+                object obj = ResourceManager.GetObject("PositionTextureI_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] PositionTextureSkinned_vs {
+            get {
+                object obj = ResourceManager.GetObject("PositionTextureSkinned_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
+        public static byte[] PositionTextureSkinnedI_vs {
+            get {
+                object obj = ResourceManager.GetObject("PositionTextureSkinnedI_vs", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] Shadow_gs {
             get {
                 object obj = ResourceManager.GetObject("Shadow_gs", resourceCulture);

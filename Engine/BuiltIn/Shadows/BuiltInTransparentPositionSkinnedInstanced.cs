@@ -23,7 +23,7 @@ namespace Engine.BuiltIn.Shadows
         /// <param name="graphics">Graphics</param>
         public BuiltInTransparentPositionSkinnedInstanced(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<PositionSkinnedVsI>();
+            SetVertexShader<PositionTextureSkinnedVsI>();
             SetGeometryShader<ShadowsTransparentGs>();
             SetPixelShader<TransparentPs>();
 

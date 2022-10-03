@@ -215,6 +215,10 @@
     <Compile Include="BuiltIn\Shadows\BuiltInPositionSkinned.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInTransparentPositionSkinnedInstanced.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionSkinnedInstanced.cs" />
+    <Compile Include="BuiltIn\Shadows\PositionTextureSkinnedVs.cs" />
+    <Compile Include="BuiltIn\Shadows\PositionTextureSkinnedVsI.cs" />
+    <Compile Include="BuiltIn\Shadows\PositionTextureVs.cs" />
+    <Compile Include="BuiltIn\Shadows\PositionTextureVsI.cs" />
     <Compile Include="BuiltIn\Shadows\ShadowsTransparentGs.cs" />
     <Compile Include="BuiltIn\Shadows\ShadowsGs.cs" />
     <Compile Include="BuiltIn\Shadows\Default.Buffers.cs" />
