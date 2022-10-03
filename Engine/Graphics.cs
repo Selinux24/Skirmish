@@ -879,17 +879,14 @@ namespace Engine
 
             var dsv = depthMap?.GetDepthStencil();
             var rtv = renderTargets?.GetRenderTargets()?.ToArray() ?? new RenderTargetView1[] { };
-            var rtvCount = renderTargets?.Count ?? 0;
 
             deviceContext.OutputMerger.SetTargets(dsv, 0, new UnorderedAccessView[] { }, new int[] { }, rtv);
 
-            if (clearRT && rtv != null && rtvCount > 0)
+            if (clearRT && rtv.Length > 0)
             {
-                for (int i = 0; i < rtvCount; i++)
+                for (int i = 0; i < rtv.Length; i++)
                 {
-                    deviceContext.ClearRenderTargetView(
-                        rtv[i],
-                        clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
                 }
             }
 
