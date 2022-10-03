@@ -18,6 +18,10 @@ namespace Engine.BuiltIn.Shadows
         /// Diffuse map resource view
         /// </summary>
         private EngineShaderResourceView diffuseMapArray;
+        /// <summary>
+        /// Diffuse sampler
+        /// </summary>
+        private EngineSamplerState diffuseSampler;
 
         /// <summary>
         /// Graphics instance
@@ -69,16 +73,21 @@ namespace Engine.BuiltIn.Shadows
         {
             this.diffuseMapArray = diffuseMapArray;
         }
+        /// <summary>
+        /// Sets the diffuse sampler
+        /// </summary>
+        /// <param name="diffuseMapArray">Diffuse sampler</param>
+        public void SetDiffuseSampler(EngineSamplerState diffuseSampler)
+        {
+            this.diffuseSampler = diffuseSampler;
+        }
 
         /// <inheritdoc/>
         public void SetShaderResources()
         {
-            var rv = new[]
-            {
-                diffuseMapArray,
-            };
+            Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
 
-            Graphics.SetPixelShaderResourceViews(0, rv);
+            Graphics.SetPixelShaderSampler(0, diffuseSampler);
         }
     }
 }

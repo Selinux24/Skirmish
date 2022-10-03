@@ -131,7 +131,7 @@ namespace Engine
 
                         var material = DrawingData.Materials[materialName];
 
-                        var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
+                        var sceneryDrawer = context.ShadowMap?.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
                         if (sceneryDrawer != null)
                         {
                             DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material);

@@ -207,9 +207,13 @@
     <Compile Include="BuiltIn\PostProcess\CombinePs.cs" />
     <Compile Include="BuiltIn\PostProcess\PostProcessPs.cs" />
     <Compile Include="BuiltIn\PostProcess\PostProcessVs.cs" />
+    <Compile Include="BuiltIn\Shadows\BuiltInTransparentPosition.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPosition.cs" />
+    <Compile Include="BuiltIn\Shadows\BuiltInTransparentPositionInstanced.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionInstanced.cs" />
+    <Compile Include="BuiltIn\Shadows\BuiltInTransparentPositionSkinned.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionSkinned.cs" />
+    <Compile Include="BuiltIn\Shadows\BuiltInTransparentPositionSkinnedInstanced.cs" />
     <Compile Include="BuiltIn\Shadows\BuiltInPositionSkinnedInstanced.cs" />
     <Compile Include="BuiltIn\Shadows\ShadowsTransparentGs.cs" />
     <Compile Include="BuiltIn\Shadows\ShadowsGs.cs" />

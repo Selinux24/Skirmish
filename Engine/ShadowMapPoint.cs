@@ -2,10 +2,6 @@
 
 namespace Engine
 {
-    using Engine.BuiltIn;
-    using Engine.BuiltIn.Shadows;
-    using Engine.Common;
-
     /// <summary>
     /// Cubic shadow map
     /// </summary>
@@ -71,34 +67,6 @@ namespace Engine
                 ToShadowMatrix = vp[0];
                 LightPosition = lightPoint.Position;
                 FromLightViewProjectionArray = vp;
-            }
-        }
-        /// <inheritdoc/>
-        public override IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
-        {
-            bool skinned = VertexData.IsSkinned(vertexType);
-
-            if (instanced)
-            {
-                if (skinned)
-                {
-                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinnedInstanced>();
-                }
-                else
-                {
-                    return BuiltInShaders.GetDrawer<BuiltInPositionInstanced>();
-                }
-            }
-            else
-            {
-                if (skinned)
-                {
-                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinned>();
-                }
-                else
-                {
-                    return BuiltInShaders.GetDrawer<BuiltInPosition>();
-                }
             }
         }
 

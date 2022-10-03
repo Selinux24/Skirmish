@@ -6,6 +6,7 @@ using System.Linq;
 namespace Engine
 {
     using Engine.BuiltIn;
+    using Engine.BuiltIn.Shadows;
     using Engine.Common;
 
     /// <summary>
@@ -108,7 +109,81 @@ namespace Engine
                 true);
         }
         /// <inheritdoc/>
-        public abstract IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
+        public IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
+        {
+            if (useTextureAlpha)
+            {
+                return GetTransparentDrawer(vertexType, instanced);
+            }
+            else
+            {
+                return GetOpaqueDrawer(vertexType, instanced);
+            }
+        }
+        /// <summary>
+        /// Gets the opaque drawer for the vertex type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="instanced">Instanced</param>
+        private IBuiltInDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
+        {
+            bool skinned = VertexData.IsSkinned(vertexType);
+
+            if (instanced)
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinnedInstanced>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPositionInstanced>();
+                }
+            }
+            else
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinned>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPosition>();
+                }
+            }
+        }
+        /// <summary>
+        /// Gets the transparent drawer for the vertex type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="instanced">Instanced</param>
+        private IBuiltInDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
+        {
+            bool skinned = VertexData.IsSkinned(vertexType);
+
+            if (instanced)
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPositionSkinnedInstanced>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPositionInstanced>();
+                }
+            }
+            else
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPositionSkinned>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPosition>();
+                }
+            }
+        }
 
         /// <inheritdoc/>
         public abstract void UpdateGlobals();

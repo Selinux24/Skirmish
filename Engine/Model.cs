@@ -292,7 +292,7 @@ namespace Engine
 
                 var material = DrawingData.Materials[materialName];
 
-                var drawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
+                var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
                 if (drawer == null)
                 {
                     continue;
