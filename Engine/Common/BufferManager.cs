@@ -1028,5 +1028,13 @@ namespace Engine.Common
 
             return game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
         }
+
+        /// <summary>
+        /// Create buffers manually
+        /// </summary>
+        public void CreateBuffers()
+        {
+            Task.Run(async () => await CreateBuffersAsync(string.Empty, null));
+        }
     }
 }

@@ -52,6 +52,8 @@ namespace Engine
             indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             var vertices = VertexPositionTexture.Generate(screen.Vertices, screen.Uvs);
             vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
+
+            bufferManager.CreateBuffers();
         }
 
         /// <inheritdoc/>
