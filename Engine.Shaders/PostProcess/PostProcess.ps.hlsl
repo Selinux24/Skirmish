@@ -33,16 +33,12 @@
 #define EFFECT_TONEMAPPING 8
 #endif
 
-#ifndef MAX_EFFECTS
-#define MAX_EFFECTS 8
-#endif
-
 cbuffer cbPerFrame : register(b0)
 {
     PerFrame gPerFrame;
 };
 
-cbuffer cbPerPassData : register(b1)
+cbuffer cbPerPass : register(b1)
 {
     float gGrayscaleIntensity;
     float gSpeiaIntensity;
@@ -75,9 +71,10 @@ cbuffer cbPerPassData : register(b1)
     uint PAD11;
 };
 
-cbuffer cbPerPass : register(b2)
+cbuffer cbPerEffect : register(b2)
 {
-    uint gEffects[MAX_EFFECTS];
+    uint gEffect;
+    uint3 PAD21;
 };
 
 Texture2D gDiffuseMap : register(t0);
@@ -361,55 +358,46 @@ float4 main(PSVertexEmpty input) : SV_TARGET
 {
     float4 color = gDiffuseMap.Sample(SamplerLinear, input.uv);
 
-	[unroll]
-    for (uint i = 0; i < MAX_EFFECTS; i++)
+    uint effect = gEffect;
+        
+    if (effect == EFFECT_GRAYSCALE)
     {
-        uint effect = gEffects[i];
-
-        if (effect == EFFECT_EMPTY)
-        {
-            break;
-        }
+        return grayscale(color, gGrayscaleIntensity);
+    }
         
-        if (effect == EFFECT_GRAYSCALE)
-        {
-            color = grayscale(color, gGrayscaleIntensity);
-        }
+    if (effect == EFFECT_SEPIA)
+    {
+        return sepia(color, gSpeiaIntensity);
+    }
         
-        if (effect == EFFECT_SEPIA)
-        {
-            color = sepia(color, gSpeiaIntensity);
-        }
+    if (effect == EFFECT_VIGNETTE)
+    {
+        return vignette(color, input.uv, gVignetteIntensity);
+    }
         
-        if (effect == EFFECT_VIGNETTE)
-        {
-            color = vignette(color, input.uv, gVignetteIntensity);
-        }
+    if (effect == EFFECT_BLUR)
+    {
+        return blur(color, input.uv, gBlurIntensity);
+    }
         
-        if (effect == EFFECT_BLUR)
-        {
-            color = blur(color, input.uv, gBlurIntensity);
-        }
+    if (effect == EFFECT_BLURVIGNETTE)
+    {
+        return blurVignette(color, input.uv, gBlurVignetteIntensity);
+    }
         
-        if (effect == EFFECT_BLURVIGNETTE)
-        {
-            color = blurVignette(color, input.uv, gBlurVignetteIntensity);
-        }
+    if (effect == EFFECT_BLOOM)
+    {
+        return bloom(color, input.uv, gBloomIntensity);
+    }
         
-        if (effect == EFFECT_BLOOM)
-        {
-            color = bloom(color, input.uv, gBloomIntensity);
-        }
+    if (effect == EFFECT_GRAIN)
+    {
+        return grain(color, input.uv, gGrainIntensity);
+    }
         
-        if (effect == EFFECT_GRAIN)
-        {
-            color = grain(color, input.uv, gGrainIntensity);
-        }
-        
-        if (effect == EFFECT_TONEMAPPING)
-        {
-            color = toneMapping(color, gToneMappingIntensity);
-        }
+    if (effect == EFFECT_TONEMAPPING)
+    {
+        return toneMapping(color, gToneMappingIntensity);
     }
 
     return color;

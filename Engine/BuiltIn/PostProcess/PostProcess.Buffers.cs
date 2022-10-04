@@ -1,53 +1,42 @@
-﻿using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.PostProcess
 {
     /// <summary>
     /// Per pass data structure
     /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 4 * MaxEffects)]
+    [StructLayout(LayoutKind.Explicit, Size = 16)]
+    struct PerEffect : IBufferData
+    {
+        public static PerEffect Build(BuiltInPostProcessEffects effect)
+        {
+            return new PerEffect
+            {
+                Effect = (uint)effect,
+            };
+        }
+
+        [FieldOffset(0)]
+        public uint Effect;
+
+        /// <inheritdoc/>
+        public int GetStride()
+        {
+            return Marshal.SizeOf(typeof(PerEffect));
+        }
+    }
+
+    /// <summary>
+    /// Per pass structure
+    /// </summary>
+    [StructLayout(LayoutKind.Explicit, Size = 96)]
     struct PerPass : IBufferData
     {
         public const int MaxEffects = 8;
 
         public static PerPass Build(BuiltInPostProcessState state)
         {
-            uint[] effects = new uint[MaxEffects];
-            for (int i = 0; i < MaxEffects; i++)
-            {
-                var effect = state.Effects?.ElementAtOrDefault(i) ?? BuiltInPostProcessEffects.None;
-
-                effects[i] = (uint)effect;
-            }
-
             return new PerPass
-            {
-                Effects = effects,
-            };
-        }
-
-        [FieldOffset(0), MarshalAs(UnmanagedType.ByValArray, SizeConst = MaxEffects)]
-        public uint[] Effects;
-
-        /// <inheritdoc/>
-        public int GetStride()
-        {
-            return Marshal.SizeOf(typeof(PerPass));
-        }
-    }
-
-    /// <summary>
-    /// Per pass data structure
-    /// </summary>
-    [StructLayout(LayoutKind.Explicit, Size = 96)]
-    struct PerPassData : IBufferData
-    {
-        public const int MaxEffects = 8;
-
-        public static PerPassData Build(BuiltInPostProcessState state)
-        {
-            return new PerPassData
             {
                 GrayscaleIntensity = state.GrayscaleIntensity,
                 SepiaIntensity = state.SepiaIntensity,
@@ -135,7 +124,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <inheritdoc/>
         public int GetStride()
         {
-            return Marshal.SizeOf(typeof(PerPassData));
+            return Marshal.SizeOf(typeof(PerPass));
         }
     }
 }

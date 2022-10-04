@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.BuiltIn.PostProcess
 {
@@ -148,6 +147,11 @@ namespace Engine.BuiltIn.PostProcess
 
         }
 
+
+        public IEnumerable<BuiltInPostProcessEffects> GetEffects()
+        {
+            return effects.ToArray();
+        }
 
         private bool AddEffect(BuiltInPostProcessEffects effect)
         {
@@ -368,14 +372,6 @@ namespace Engine.BuiltIn.PostProcess
         public void RemoveToneMapping()
         {
             RemoveEffect(BuiltInPostProcessEffects.ToneMapping);
-        }
-
-
-        public IEnumerable<BuiltInPostProcessEffects> GetActiveEffects()
-        {
-            return effects
-                .Where(e => e != BuiltInPostProcessEffects.None)
-                .ToArray();
         }
     }
 }

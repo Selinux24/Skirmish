@@ -16,9 +16,9 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         private IEngineConstantBuffer cbPerPass;
         /// <summary>
-        /// Per pass data constant buffer
+        /// Per effect constant buffer
         /// </summary>
-        private IEngineConstantBuffer cbPerPassData;
+        private IEngineConstantBuffer cbPerEffect;
         /// <summary>
         /// Diffuse map resource view
         /// </summary>
@@ -84,12 +84,12 @@ namespace Engine.BuiltIn.PostProcess
             cbPerPass = constantBuffer;
         }
         /// <summary>
-        /// Sets per pass data constant buffer
+        /// Sets per effect constant buffer
         /// </summary>
         /// <param name="constantBuffer">Constant buffer</param>
-        public void SetPerPassDataConstantBuffer(IEngineConstantBuffer constantBuffer)
+        public void SetPerEffectConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
-            cbPerPassData = constantBuffer;
+            cbPerEffect = constantBuffer;
         }
         /// <summary>
         /// Sets the diffuse map array
@@ -114,8 +114,8 @@ namespace Engine.BuiltIn.PostProcess
             var cb = new[]
             {
                 BuiltInShaders.GetPerFrameConstantBuffer(),
-                cbPerPassData,
                 cbPerPass,
+                cbPerEffect,
             };
 
             Graphics.SetPixelShaderConstantBuffers(0, cb);

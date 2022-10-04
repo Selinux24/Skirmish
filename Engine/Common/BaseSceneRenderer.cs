@@ -1226,17 +1226,23 @@ namespace Engine.Common
                 return false;
             }
 
-            var activeEffects = postProcessingEffect.State.GetActiveEffects();
+            var activeEffects = postProcessingEffect.State.GetEffects();
 
             for (int i = 0; i < activeEffects.Count(); i++)
             {
+                var effect = activeEffects.ElementAt(i);
+                if (effect == BuiltInPostProcessEffects.None)
+                {
+                    break;
+                }
+
                 //Toggles post-processing buffers
                 TogglePostProcessingTargets();
 
                 //Use the next buffer as render target
                 BindPostProcessingTarget(false, Color.Transparent);
 
-                processingDrawer.UpdateEffect(texture, activeEffects.ElementAt(i));
+                processingDrawer.UpdateEffect(texture, effect);
                 processingDrawer.Draw(drawer);
 
                 //Gets the source texture

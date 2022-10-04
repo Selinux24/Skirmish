@@ -826,6 +826,7 @@ namespace Engine.Common
 
             if (vertexBufferDescriptors.Any(d => d.Dirty))
             {
+                Logger.WriteWarning(this, "Attempt to set vertex buffers to Input Assembler with no dirty descriptors");
                 return false;
             }
 
@@ -864,52 +865,6 @@ namespace Engine.Common
             }
 
             game.Graphics.IASetIndexBuffer(indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
-            return true;
-        }
-        /// <summary>
-        /// Sets input layout to device context
-        /// </summary>
-        /// <param name="technique">Technique</param>
-        /// <param name="descriptor">Buffer descriptor</param>
-        /// <param name="topology">Topology</param>
-        public bool SetInputAssembler(EngineEffectTechnique technique, BufferDescriptor descriptor, Topology topology)
-        {
-            if (descriptor == null)
-            {
-                return true;
-            }
-
-            if (!descriptor.Ready)
-            {
-                return false;
-            }
-
-            if (!Initilialized)
-            {
-                Logger.WriteWarning(this, "Attempt to set technique to Input Assembler with no initialized manager");
-                return false;
-            }
-
-            var vertexBufferDescriptor = vertexBufferDescriptors[descriptor.BufferDescriptionIndex];
-            if (vertexBufferDescriptor.Dirty)
-            {
-                Logger.WriteWarning(this, $"Attempt to set technique in buffer description {descriptor.BufferDescriptionIndex} to Input Assembler with no allocated buffer");
-                return false;
-            }
-
-            if (!techniqueInputLayouts.ContainsKey(technique))
-            {
-                // The vertex shader's technique defines the input vertex data type
-                var signature = technique.GetSignature();
-                var inputLayout = vertexBufferDescriptor.Input.ToArray();
-
-                techniqueInputLayouts.Add(
-                    technique,
-                    game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
-            }
-
-            game.Graphics.IAInputLayout = techniqueInputLayouts[technique];
-            game.Graphics.IAPrimitiveTopology = topology;
             return true;
         }
         /// <summary>

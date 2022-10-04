@@ -68,7 +68,7 @@ namespace Engine
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
-            drawer.UpdatePass(null, state);
+            drawer.UpdatePass(state);
 
             return drawer;
         }
@@ -77,7 +77,7 @@ namespace Engine
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
-            //drawer.UpdatePass(sourceTexture, state)
+            drawer.UpdateEffect(sourceTexture, effect);
 
             return drawer;
         }

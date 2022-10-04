@@ -958,13 +958,16 @@ namespace Engine
 
             FrameInput();
 
-            FrameBegin(activeScene);
-
             FrameSceneUpdate(activeScene);
 
-            FrameSceneDraw(activeScene);
+            if (BufferManager.SetVertexBuffers())
+            {
+                FrameBegin(activeScene);
 
-            FrameEnd();
+                FrameSceneDraw(activeScene);
+
+                FrameEnd();
+            }
 
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
@@ -1060,11 +1063,6 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            if (!BufferManager.SetVertexBuffers())
-            {
-                return;
-            }
-
             try
             {
                 Stopwatch dSW = new Stopwatch();
