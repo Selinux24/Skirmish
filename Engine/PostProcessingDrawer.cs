@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Post-processing drawer class
     /// </summary>
-    public class PostProcessingDrawer
+    public class PostProcessingDrawer : IPostProcessingDrawer
     {
         /// <summary>
         /// Render helper geometry buffer slot
@@ -54,11 +54,7 @@ namespace Engine
             vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
         }
 
-        /// <summary>
-        /// Updates the effect parameters
-        /// </summary>
-        /// <param name="texture1">Texture 1</param>
-        /// <param name="texture2">Texture 2</param>
+        /// <inheritdoc/>
         public IBuiltInDrawer UpdateEffectCombine(EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInCombine>();
@@ -67,23 +63,25 @@ namespace Engine
 
             return drawer;
         }
-        /// <summary>
-        /// Updates the effect parameters
-        /// </summary>
-        /// <param name="sourceTexture">Source texture</param>
-        /// <param name="state">State</param>
-        public IBuiltInDrawer UpdateEffectParameters(EngineShaderResourceView sourceTexture, BuiltInPostProcessState state)
+        /// <inheritdoc/>
+        public IBuiltInDrawer UpdateEffectParameters(BuiltInPostProcessState state)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
-            drawer.UpdatePass(sourceTexture, state);
+            drawer.UpdatePass(null, state);
 
             return drawer;
         }
-        /// <summary>
-        /// Draws the resulting light composition
-        /// </summary>
-        /// <param name="drawer">Drawer</param>
+        /// <inheritdoc/>
+        public IBuiltInDrawer UpdateEffect(EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
+        {
+            var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
+
+            //drawer.UpdatePass(sourceTexture, state)
+
+            return drawer;
+        }
+        /// <inheritdoc/>
         public void Draw(IBuiltInDrawer drawer)
         {
             drawer.Draw(bufferManager, new DrawOptions
@@ -93,9 +91,7 @@ namespace Engine
                 IndexBuffer = indexBuffer,
             });
         }
-        /// <summary>
-        /// Updates the internal buffers according to the new render dimension
-        /// </summary>
+        /// <inheritdoc/>
         public void Resize()
         {
             InitializeBuffers();

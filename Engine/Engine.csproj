@@ -407,6 +407,7 @@
     <Compile Include="GameEnvironmentState.cs" />
     <Compile Include="IModelHasParts.cs" />
     <Compile Include="IModelPart.cs" />
+    <Compile Include="Common\IPostProcessingDrawer.cs" />
     <Compile Include="ISceneObjectState.cs" />
     <Compile Include="ISkinningData.cs" />
     <Compile Include="IUIEventsEvaluable.cs" />
