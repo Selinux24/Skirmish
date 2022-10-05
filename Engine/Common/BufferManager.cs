@@ -826,7 +826,7 @@ namespace Engine.Common
 
             if (vertexBufferDescriptors.Any(d => d.Dirty))
             {
-                Logger.WriteWarning(this, "Attempt to set vertex buffers to Input Assembler with no dirty descriptors");
+                Logger.WriteWarning(this, "Attempt to set vertex buffers to Input Assembler with dirty descriptors");
                 return false;
             }
 

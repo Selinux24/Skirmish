@@ -275,7 +275,7 @@ namespace Engine.Common
 
             postProcessingTargetA = new RenderTarget(scene.Game, "PostProcessingTargetA", targetFormat, false, 1);
             postProcessingTargetB = new RenderTarget(scene.Game, "PostProcessingTargetB", targetFormat, false, 1);
-            processingDrawer = new PostProcessingDrawer(scene.Game.Graphics, scene.Game.BufferManager);
+            processingDrawer = new PostProcessingDrawer(scene.Game);
         }
         /// <summary>
         /// Destructor
@@ -354,17 +354,8 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         public virtual void Update(GameTime gameTime)
         {
-            Matrix viewProj = Scene.Camera.View * Scene.Camera.Projection;
-            UpdateContext.GameTime = gameTime;
-            UpdateContext.View = Scene.Camera.View;
-            UpdateContext.Projection = Scene.Camera.Projection;
-            UpdateContext.NearPlaneDistance = Scene.Camera.NearPlaneDistance;
-            UpdateContext.FarPlaneDistance = Scene.Camera.FarPlaneDistance;
-            UpdateContext.ViewProjection = viewProj;
-            UpdateContext.EyePosition = Scene.Camera.Position;
-            UpdateContext.EyeDirection = Scene.Camera.Direction;
-            UpdateContext.Lights = Scene.Lights;
-            UpdateContext.CameraVolume = new IntersectionVolumeFrustum(viewProj);
+            //Updates the update context
+            UpdateUpdateContext(gameTime);
 
             //Cull lights
             Scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
@@ -379,44 +370,40 @@ namespace Engine.Common
                 updatables
                     .AsParallel()
                     .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                    .ForAll(EarlyUpdateCall);
+                    .ForAll(c => c.EarlyUpdate(UpdateContext));
 
                 updatables
                     .AsParallel()
                     .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                    .ForAll(UpdateCall);
+                    .ForAll(c => c.Update(UpdateContext));
 
                 updatables
                     .AsParallel()
                     .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                    .ForAll(LateUpdateCall);
+                    .ForAll(c => c.LateUpdate(UpdateContext));
             }
 
             Updated = true;
         }
         /// <summary>
-        /// Early update loop call
+        /// Updates the update context
         /// </summary>
-        /// <param name="c">Component</param>
-        private void EarlyUpdateCall(IUpdatable c)
+        /// <param name="gameTime">Game time</param>
+        protected virtual void UpdateUpdateContext(GameTime gameTime)
         {
-            c.EarlyUpdate(UpdateContext);
-        }
-        /// <summary>
-        /// Update loop call
-        /// </summary>
-        /// <param name="c">Component</param>
-        private void UpdateCall(IUpdatable c)
-        {
-            c.Update(UpdateContext);
-        }
-        /// <summary>
-        /// Late update loop call
-        /// </summary>
-        /// <param name="c">Component</param>
-        private void LateUpdateCall(IUpdatable c)
-        {
-            c.LateUpdate(UpdateContext);
+            UpdateContext.GameTime = gameTime;
+
+            Matrix viewProj = Scene.Camera.View * Scene.Camera.Projection;
+            UpdateContext.View = Scene.Camera.View;
+            UpdateContext.Projection = Scene.Camera.Projection;
+            UpdateContext.ViewProjection = viewProj;
+            UpdateContext.CameraVolume = new IntersectionVolumeFrustum(viewProj);
+            UpdateContext.NearPlaneDistance = Scene.Camera.NearPlaneDistance;
+            UpdateContext.FarPlaneDistance = Scene.Camera.FarPlaneDistance;
+            UpdateContext.EyePosition = Scene.Camera.Position;
+            UpdateContext.EyeDirection = Scene.Camera.Direction;
+
+            UpdateContext.Lights = Scene.Lights;
         }
 
         /// <summary>
@@ -425,6 +412,30 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         /// <param name="scene">Scene</param>
         public abstract void Draw(GameTime gameTime);
+        /// <summary>
+        /// Updates the draw context
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="drawMode">Draw mode</param>
+        protected virtual void UpdateDrawContext(GameTime gameTime, DrawerModes drawMode)
+        {
+            DrawContext.GameTime = gameTime;
+
+            DrawContext.DrawerMode = drawMode;
+
+            //Initialize context data from update context
+            DrawContext.ViewProjection = UpdateContext.ViewProjection;
+            DrawContext.CameraVolume = UpdateContext.CameraVolume;
+            DrawContext.EyePosition = UpdateContext.EyePosition;
+            DrawContext.EyeDirection = UpdateContext.EyeDirection;
+
+            //Initialize context data from scene
+            DrawContext.Lights = Scene.Lights;
+            DrawContext.LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow);
+            DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+            DrawContext.ShadowMapPoint = ShadowMapperPoint;
+            DrawContext.ShadowMapSpot = ShadowMapperSpot;
+        }
 
         /// <summary>
         /// Update renderer globals
@@ -511,9 +522,10 @@ namespace Engine.Common
         {
             var transparents = components.Where(c =>
             {
-                if (!(c is IDrawable)) return false;
-
-                if (!c.BlendMode.HasFlag(BlendModes.Alpha) && !c.BlendMode.HasFlag(BlendModes.Transparent)) return false;
+                if (!c.BlendMode.HasFlag(BlendModes.Alpha) && !c.BlendMode.HasFlag(BlendModes.Transparent))
+                {
+                    return false;
+                }
 
                 if (c is ICullable cull)
                 {
@@ -571,53 +583,48 @@ namespace Engine.Common
         /// Draws an object
         /// </summary>
         /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        protected virtual void Draw(DrawContext context, IDrawable c)
+        /// <param name="drawable">Drawable component</param>
+        protected virtual void Draw(DrawContext context, IDrawable drawable)
         {
-            if (c is IDrawable drawable)
+            Counters.MaxInstancesPerFrame += drawable.InstanceCount;
+
+            var blend = drawable.BlendMode;
+            if (drawable.Usage.HasFlag(SceneObjectUsages.UI))
             {
-                Counters.MaxInstancesPerFrame += c.InstanceCount;
-
-                BlendModes blend = c.BlendMode;
-                if (c.Usage.HasFlag(SceneObjectUsages.UI))
-                {
-                    blend |= BlendModes.PostProcess;
-                }
-
-                SetRasterizer(context);
-
-                SetBlendState(context, blend);
-
-                SetDepthStencil(context, c.DepthEnabled);
-
-                drawable.Draw(context);
+                blend |= BlendModes.PostProcess;
             }
+
+            SetRasterizer();
+
+            SetBlendState(context.DrawerMode, blend);
+
+            SetDepthStencil(drawable.DepthEnabled);
+
+            drawable.Draw(context);
         }
         /// <summary>
         /// Sets the rasterizer state
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void SetRasterizer(DrawContext context)
+        protected virtual void SetRasterizer()
         {
             Scene.Game.Graphics.SetRasterizerDefault();
         }
         /// <summary>
         /// Sets the blend state
         /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <param name="drawMode">Draw mode</param>
         /// <param name="blendMode">Blend mode</param>
-        protected virtual void SetBlendState(DrawContext context, BlendModes blendMode)
+        protected virtual void SetBlendState(DrawerModes drawMode, BlendModes blendMode)
         {
             Scene.Game.Graphics.SetBlendState(blendMode);
         }
         /// <summary>
         /// Sets the depth-stencil buffer state
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="enable">Enables the z-buffer</param>
-        protected virtual void SetDepthStencil(DrawContext context, bool enable)
+        /// <param name="enableWrite">Enables the z-buffer writing</param>
+        protected virtual void SetDepthStencil(bool enableWrite)
         {
-            if (enable)
+            if (enableWrite)
             {
                 Scene.Game.Graphics.SetDepthStencilWRZEnabled();
             }
@@ -993,16 +1000,18 @@ namespace Engine.Common
         /// <param name="components">Components to draw</param>
         protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<IDrawable> components)
         {
-            var graphics = Scene.Game.Graphics;
-
             var objects = components
-                .Where(c => IsVisible(c, index)).ToList();
-            if (objects.Any())
-            {
-                objects.Sort((c1, c2) => Sort(c1, c2, index));
+                .Where(c => IsVisible(c, index))
+                .ToList();
 
-                objects.ForEach((c) => DrawShadows(graphics, context, c));
+            if (!objects.Any())
+            {
+                return;
             }
+
+            objects.Sort((c1, c2) => Sort(c1, c2, index));
+
+            objects.ForEach((c) => DrawShadows(context, c));
         }
         /// <summary>
         /// Gets if the specified object is not culled by the cull index
@@ -1012,8 +1021,6 @@ namespace Engine.Common
         /// <returns>Returns true if the object is not culled</returns>
         private bool IsVisible(IDrawable c, int cullIndex)
         {
-            if (!(c is IDrawable)) return false;
-
             if (c is ICullable cull)
             {
                 return !cullManager.GetCullValue(cullIndex, cull).Culled;
@@ -1058,27 +1065,25 @@ namespace Engine.Common
         /// <summary>
         /// Draws the specified object shadows
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="context">Context</param>
-        /// <param name="c">Scene object</param>
-        private void DrawShadows(Graphics graphics, DrawContextShadows context, IDrawable c)
+        /// <param name="drawable">Drawable object</param>
+        private void DrawShadows(DrawContextShadows context, IDrawable drawable)
         {
-            if (c is IDrawable drawable)
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRasterizerShadowMapping();
+            graphics.SetDepthStencilShadowMapping();
+
+            if (drawable.BlendMode.HasFlag(BlendModes.Alpha) || drawable.BlendMode.HasFlag(BlendModes.Transparent))
             {
-                graphics.SetRasterizerShadowMapping();
-                graphics.SetDepthStencilShadowMapping();
-
-                if (c.BlendMode.HasFlag(BlendModes.Alpha) || c.BlendMode.HasFlag(BlendModes.Transparent))
-                {
-                    graphics.SetBlendAlpha();
-                }
-                else
-                {
-                    graphics.SetBlendDefault();
-                }
-
-                drawable.DrawShadows(context);
+                graphics.SetBlendAlpha();
             }
+            else
+            {
+                graphics.SetBlendDefault();
+            }
+
+            drawable.DrawShadows(context);
         }
 
         /// <summary>

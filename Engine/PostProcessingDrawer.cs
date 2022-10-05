@@ -11,18 +11,9 @@ namespace Engine
     public class PostProcessingDrawer : IPostProcessingDrawer
     {
         /// <summary>
-        /// Render helper geometry buffer slot
+        /// Game instance
         /// </summary>
-        public static int BufferSlot { get; set; } = 0;
-
-        /// <summary>
-        /// Graphics class
-        /// </summary>
-        private readonly Graphics graphics;
-        /// <summary>
-        /// Buffer manager
-        /// </summary>
-        private readonly BufferManager bufferManager;
+        private readonly Game game;
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
@@ -35,10 +26,9 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public PostProcessingDrawer(Graphics graphics, BufferManager bufferManager)
+        public PostProcessingDrawer(Game game)
         {
-            this.graphics = graphics;
-            this.bufferManager = bufferManager;
+            this.game = game;
 
             InitializeBuffers();
         }
@@ -48,9 +38,13 @@ namespace Engine
         /// </summary>
         private void InitializeBuffers()
         {
+            var graphics = game.Graphics;
+            var bufferManager = game.BufferManager;
+
             var screen = GeometryUtil.CreateScreen((int)graphics.Viewport.Width, (int)graphics.Viewport.Height);
-            indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             var vertices = VertexPositionTexture.Generate(screen.Vertices, screen.Uvs);
+        
+            indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
 
             bufferManager.CreateBuffers();
@@ -86,6 +80,8 @@ namespace Engine
         /// <inheritdoc/>
         public void Draw(IBuiltInDrawer drawer)
         {
+            var bufferManager = game.BufferManager;
+
             drawer.Draw(bufferManager, new DrawOptions
             {
                 Topology = Topology.TriangleList,

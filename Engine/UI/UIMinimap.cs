@@ -127,12 +127,12 @@ namespace Engine.UI
             float aspect = minimapBox.Height / minimapBox.Width;
             float near = 0.1f;
 
-            Vector3 eyePos = new Vector3(0, y + near, 0);
-            Vector3 target = Vector3.Zero;
+            Vector3 eyePosition = new Vector3(0, y + near, 0);
+            Vector3 eyeDirection = Vector3.Zero;
 
             Matrix view = Matrix.LookAtLH(
-                eyePos,
-                target,
+                eyePosition,
+                eyeDirection,
                 Vector3.UnitZ);
 
             Matrix proj = Matrix.OrthoLH(
@@ -145,8 +145,8 @@ namespace Engine.UI
             {
                 DrawerMode = DrawerModes.Forward | DrawerModes.OpaqueOnly,
                 ViewProjection = view * proj,
-                EyePosition = eyePos,
-                EyeTarget = target,
+                EyePosition = eyePosition,
+                EyeDirection = eyeDirection,
                 Lights = SceneLights.CreateDefault(Scene),
             };
         }

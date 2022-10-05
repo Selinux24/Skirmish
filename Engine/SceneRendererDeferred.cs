@@ -88,17 +88,13 @@ namespace Engine
         private EngineBlendState blendDeferredComposerAdditive = null;
 
         /// <summary>
-        /// View * OrthoProjection Matrix
-        /// </summary>
-        protected Matrix ViewProjection;
-        /// <summary>
         /// Geometry map
         /// </summary>
         protected IEnumerable<EngineShaderResourceView> GeometryMap
         {
             get
             {
-                return geometryBuffer?.Textures ?? new EngineShaderResourceView[] { };
+                return geometryBuffer?.Textures ?? Enumerable.Empty<EngineShaderResourceView>();
             }
         }
         /// <summary>
@@ -108,7 +104,7 @@ namespace Engine
         {
             get
             {
-                return lightBuffer?.Textures ?? new EngineShaderResourceView[] { };
+                return lightBuffer?.Textures ?? Enumerable.Empty<EngineShaderResourceView>();
             }
         }
 
@@ -228,23 +224,8 @@ namespace Engine
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-
-            //Initialize context data from update context
-            DrawContext.GameTime = gameTime;
-            DrawContext.DrawerMode = DrawerModes.Deferred;
-            DrawContext.ViewProjection = UpdateContext.ViewProjection;
-            DrawContext.CameraVolume = UpdateContext.CameraVolume;
-            DrawContext.EyePosition = UpdateContext.EyePosition;
-            DrawContext.EyeTarget = UpdateContext.EyeDirection;
-
-            //Initialize context data from scene
-            DrawContext.Lights = Scene.Lights;
-            DrawContext.LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow);
-
-            //Initialize context data from shadow mapping
-            DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
-            DrawContext.ShadowMapPoint = ShadowMapperPoint;
-            DrawContext.ShadowMapSpot = ShadowMapperSpot;
+            //Updates the draw context
+            UpdateDrawContext(gameTime, DrawerModes.Deferred);
 
             //Shadow mapping
             DoShadowMapping(gameTime);
@@ -464,8 +445,6 @@ namespace Engine
             Height = Scene.Game.Form.RenderHeight;
 
             Viewport = Scene.Game.Form.GetViewport();
-
-            ViewProjection = Scene.Game.Form.GetOrthoProjectionMatrix();
 
             lightDrawer.Update(Scene.Game.Graphics, Width, Height);
         }
@@ -712,9 +691,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        protected override void SetBlendState(DrawContext context, BlendModes blendMode)
+        protected override void SetBlendState(DrawerModes drawMode, BlendModes blendMode)
         {
-            if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
+            if (drawMode.HasFlag(DrawerModes.Deferred))
             {
                 if (blendMode.HasFlag(BlendModes.Additive))
                 {
@@ -731,7 +710,7 @@ namespace Engine
             }
             else
             {
-                base.SetBlendState(context, blendMode);
+                base.SetBlendState(drawMode, blendMode);
             }
         }
         /// <summary>

@@ -49,7 +49,6 @@ namespace Engine
 
             //Select visible components
             var visibleComponents = Scene.GetComponents<IDrawable>().Where(c => c.Visible);
-
             if (!visibleComponents.Any())
             {
                 return;
@@ -60,21 +59,8 @@ namespace Engine
 
             Stopwatch swTotal = Stopwatch.StartNew();
 #endif
-
-            //Initialize context data from update context
-            DrawContext.GameTime = gameTime;
-            DrawContext.DrawerMode = DrawerModes.Forward;
-            DrawContext.ViewProjection = UpdateContext.ViewProjection;
-            DrawContext.CameraVolume = UpdateContext.CameraVolume;
-            DrawContext.EyePosition = UpdateContext.EyePosition;
-            DrawContext.EyeTarget = UpdateContext.EyeDirection;
-
-            //Initialize context data from scene
-            DrawContext.Lights = Scene.Lights;
-            DrawContext.LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow);
-            DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
-            DrawContext.ShadowMapPoint = ShadowMapperPoint;
-            DrawContext.ShadowMapSpot = ShadowMapperSpot;
+            //Updates the draw context
+            UpdateDrawContext(gameTime, DrawerModes.Forward);
 
             //Shadow mapping
             DoShadowMapping(gameTime);

@@ -37,9 +37,9 @@ namespace Engine.Common
         /// </summary>
         public Vector3 EyePosition { get; set; }
         /// <summary>
-        /// Eye target
+        /// Eye view direction
         /// </summary>
-        public Vector3 EyeTarget { get; set; }
+        public Vector3 EyeDirection { get; set; }
         /// <summary>
         /// Lights
         /// </summary>
