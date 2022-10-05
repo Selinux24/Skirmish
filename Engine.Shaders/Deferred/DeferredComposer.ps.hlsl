@@ -1,4 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
+#include "..\Lib\IncGBuffer.hlsl"
 #include "..\Lib\IncLights.hlsl"
 
 cbuffer cbPerFrame : register(b0)
@@ -17,6 +18,7 @@ Texture2D gTG3Map : register(t2);
 Texture2D gTG4Map : register(t3);
 Texture2D gTG5Map : register(t4);
 Texture2D gTG6Map : register(t5);
+
 Texture2D gLightMap : register(t6);
 
 SamplerState SamplerPoint : register(s0)
@@ -36,36 +38,28 @@ float4 main(PSLightInput input) : SV_TARGET
     float4 lPosition = input.positionScreen;
     lPosition.xy /= lPosition.w;
     float2 tex = 0.5f * (float2(lPosition.x, -lPosition.y) + 1);
-
-    float4 tg1 = gTG1Map.SampleLevel(SamplerPoint, tex, 0);
-    float4 tg2 = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
-
-    float doLighting = tg2.w;
-    if (doLighting == 0)
-    {
-        return tg1;
-    }
     
-    float4 tg3 = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
-    float4 tg4 = gTG4Map.SampleLevel(SamplerPoint, tex, 0);
-    float4 tg5 = gTG5Map.SampleLevel(SamplerPoint, tex, 0);
-    float4 tg6 = gTG6Map.SampleLevel(SamplerPoint, tex, 0);
-    float4 lmap = gLightMap.Sample(SamplerPoint, tex);
+    GBuffer gBuffer;
+    gBuffer.color = gTG1Map.SampleLevel(SamplerPoint, tex, 0);
+    gBuffer.normal = gTG2Map.SampleLevel(SamplerPoint, tex, 0);
+    gBuffer.depth = gTG3Map.SampleLevel(SamplerPoint, tex, 0);
+    gBuffer.mat1 = gTG4Map.SampleLevel(SamplerPoint, tex, 0);
+    gBuffer.mat2 = gTG5Map.SampleLevel(SamplerPoint, tex, 0);
+    gBuffer.mat3 = gTG6Map.SampleLevel(SamplerPoint, tex, 0);
+    
+    float3 position;
+    float3 normal;
+    float4 albedo;
+    float doLighting;
+    Material k;
+    UnPack(gBuffer, position, normal, albedo, doLighting, k);
+    
+    if (!doLighting)
+    {
+        return albedo;
+    }
 
-    float4 albedo = tg1;
-    float3 position = tg3.xyz;
-    float3 normal = tg2.xyz;
-    float3 diffuseSpecular = lmap.rgb;
-        
-    Material k = (Material) 0;
-    k.Algorithm = tg3.w;
-    k.Diffuse = float4(1, 1, 1, 1);
-    k.Specular = tg4.rgb;
-    k.Shininess = tg4.a;
-    k.Emissive = tg5.rgb;
-    k.Metallic = tg5.a;
-    k.Ambient = tg6.rgb;
-    k.Roughness = tg6.a;
+    float3 diffuseSpecular = gLightMap.SampleLevel(SamplerPoint, tex, 0).rgb;
 
     float3 lAmbient = CalcAmbientHemispheric(gHemiLight.AmbientDown, gHemiLight.AmbientRange, normal);
 

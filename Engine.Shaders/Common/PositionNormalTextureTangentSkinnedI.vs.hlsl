@@ -52,8 +52,7 @@ PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentS
     float3 instanceNormal = mul(normalL.xyz, (float3x3) input.localTransform);
     float3 instanceTangent = mul(tangentL.xyz, (float3x3) input.localTransform);
 
-    uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
     PSVertexPositionNormalTextureTangent2 output = (PSVertexPositionNormalTextureTangent2) 0;
 

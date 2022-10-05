@@ -31,8 +31,7 @@ PSVertexPositionTexture2 main(VSVertexPositionTextureI input)
 {
 	float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
 
-    uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
     PSVertexPositionTexture2 output = (PSVertexPositionTexture2) 0;
 

@@ -48,8 +48,7 @@ PSVertexPositionNormalTexture2 main(VSVertexPositionNormalTextureSkinnedI input)
 	float4 instancePosition = mul(positionL, input.localTransform);
 	float3 instanceNormal = mul(normalL.xyz, (float3x3) input.localTransform);
 	
-    uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
     PSVertexPositionNormalTexture2 output = (PSVertexPositionNormalTexture2) 0;
 

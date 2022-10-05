@@ -555,14 +555,5 @@ struct GBufferVSTextureOutput
 	float2 depth : TEXCOORD1;
 	uint textureIndex : TEXTUREINDEX;
 };
-struct GBufferPSOutput
-{
-	float4 color : SV_TARGET0;
-	float4 normal : SV_TARGET1;
-	float4 depth : SV_TARGET2;
-	float4 mat1 : SV_TARGET3;
-    float4 mat2 : SV_TARGET4;
-    float4 mat3 : SV_TARGET5;
-};
 
 #endif

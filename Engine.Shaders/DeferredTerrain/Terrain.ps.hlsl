@@ -1,5 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncGBuffer.hlsl"
 #include "..\Lib\IncLights.hlsl"
 
 #define MODE_ALHPAMAP      0
@@ -151,7 +151,19 @@ inline float4 Full(float4 positionHomogeneous, float4 color, float3 normalWorld,
     return saturate(((color1 * gProp) + (color2 * (1.0f - gProp))) * color);
 }
 
-GBufferPSOutput main(PSVertexTerrain2 input)
+struct PSVertex
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex0 : TEXCOORD0;
+    float2 tex1 : TEXCOORD1;
+    float4 color : COLOR0;
+    Material material;
+};
+
+GBuffer main(PSVertex input)
 {
     float3 normal;
     float4 diffuse;
@@ -173,14 +185,5 @@ GBufferPSOutput main(PSVertexTerrain2 input)
         diffuse = input.color;
     }
 
-    GBufferPSOutput output = (GBufferPSOutput) 0;
-
-    output.color = diffuse * gTintColor * input.material.Diffuse;
-    output.normal = float4(normal, 1);
-    output.depth = float4(input.positionWorld, input.material.Algorithm);
-    output.mat1 = float4(input.material.Specular, input.material.Shininess);
-    output.mat2 = float4(input.material.Emissive, input.material.Metallic);
-    output.mat3 = float4(input.material.Ambient, input.material.Roughness);
-    
-    return output;
+    return Pack(input.positionWorld, normal, diffuse * gTintColor, true, input.material);
 }

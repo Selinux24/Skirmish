@@ -1,18 +1,16 @@
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncGBuffer.hlsl"
+
+struct PSVertex
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float4 color : COLOR0;
+};
 
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
-GBufferPSOutput main(PSVertexPositionColor2 input)
+GBuffer main(PSVertex input)
 {
-    GBufferPSOutput output = (GBufferPSOutput) 0;
-
-    output.color = input.color;
-    output.normal = float4(0, 0, 0, 0);
-    output.depth = float4(input.positionWorld, 0);
-    output.mat1 = float4(0, 0, 0, 0);
-    output.mat2 = float4(0, 0, 0, 0);
-    output.mat3 = float4(0, 0, 0, 0);
-
-    return output;
+    return Pack(input.positionWorld, float3(0, 0, 0), input.color, false, (Material) 0);
 }

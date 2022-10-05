@@ -83,6 +83,16 @@ namespace Engine.Shaders.Properties {
         /// <summary>
         ///   Busca un recurso adaptado de tipo System.Byte[].
         /// </summary>
+        public static byte[] IncGBuffer {
+            get {
+                object obj = ResourceManager.GetObject("IncGBuffer", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Busca un recurso adaptado de tipo System.Byte[].
+        /// </summary>
         public static byte[] IncGBufferLights {
             get {
                 object obj = ResourceManager.GetObject("IncGBufferLights", resourceCulture);
@@ -156,16 +166,6 @@ namespace Engine.Shaders.Properties {
         public static byte[] IncSprites {
             get {
                 object obj = ResourceManager.GetObject("IncSprites", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Busca un recurso adaptado de tipo System.Byte[].
-        /// </summary>
-        public static byte[] IncTerrain {
-            get {
-                object obj = ResourceManager.GetObject("IncTerrain", resourceCulture);
                 return ((byte[])(obj));
             }
         }

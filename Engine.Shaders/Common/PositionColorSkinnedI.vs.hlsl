@@ -44,8 +44,7 @@ PSVertexPositionColor2 main(VSVertexPositionColorSkinnedI input)
 		positionL);
 	float4 instancePosition = mul(positionL, input.localTransform);
 
-    uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
     PSVertexPositionColor2 output = (PSVertexPositionColor2) 0;
 

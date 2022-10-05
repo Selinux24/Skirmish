@@ -167,6 +167,7 @@
     <PixelShader Include="Deferred\DeferredComposer.ps.hlsl" />
     <VertexShader Include="Deferred\DeferredLightOrtho.vs.hlsl" />
     <PixelShader Include="DeferredTerrain\Terrain.ps.hlsl" />
+    <Content Include="Lib\IncGBuffer.hlsl" />
     <Content Include="Lib\IncGBufferLights.hlsl" />
     <GeometryShader Include="ShadowsDefault\ShadowTransparent.gs.hlsl" />
     <GeometryShader Include="ShadowsDefault\Shadow.gs.hlsl" />
@@ -182,9 +183,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lib\IncScattering.hlsl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Lib\IncTerrain.hlsl" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lib\IncVertexFormats.hlsl" />

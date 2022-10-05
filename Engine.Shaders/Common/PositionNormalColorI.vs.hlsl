@@ -32,8 +32,7 @@ PSVertexPositionNormalColor2 main(VSVertexPositionNormalColorI input)
     float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
     float3 instanceNormal = mul(input.normalLocal, (float3x3) input.localTransform);
 
-    uint materialIndex = input.materialIndex >= 0 ? input.materialIndex : gMaterialIndex;
-    Material material = GetMaterialData(gMaterialPalette, materialIndex, gGlobals.MaterialPaletteWidth);
+    Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 	
     PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2) 0;
 

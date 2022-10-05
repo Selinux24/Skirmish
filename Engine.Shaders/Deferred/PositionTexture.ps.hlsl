@@ -1,24 +1,24 @@
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncGBuffer.hlsl"
 
 Texture2DArray gDiffuseMapArray : register(t0);
 
 SamplerState SamplerDiffuse : register(s0);
 
+struct PSVertex
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 tintColor : TINTCOLOR;
+    uint textureIndex : TEXTUREINDEX;
+};
+
 /**********************************************************************************************************
 POSITION TEXTURE
 **********************************************************************************************************/
-GBufferPSOutput main(PSVertexPositionTexture2 input)
+GBuffer main(PSVertex input)
 {
     float4 diffuse = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
     
-    GBufferPSOutput output = (GBufferPSOutput) 0;
-
-    output.color = diffuse * input.tintColor;
-    output.normal = float4(0, 0, 0, 0);
-    output.depth = float4(input.positionWorld, 0);
-    output.mat1 = float4(0, 0, 0, 0);
-    output.mat2 = float4(0, 0, 0, 0);
-    output.mat3 = float4(0, 0, 0, 0);
-
-    return output;
+    return Pack(input.positionWorld, float3(0, 0, 0), diffuse * input.tintColor, true, (Material) 0);
 }

@@ -124,6 +124,9 @@
   <data name="IncBuiltIn" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\incbuiltin.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="IncGBuffer" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\incgbuffer.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="IncGBufferLights" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\incgbufferlights.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -147,9 +150,6 @@
   </data>
   <data name="IncSprites" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\incsprites.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="IncTerrain" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\lib\incterrain.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="IncVertexFormats" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\incvertexformats.hlsl;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
