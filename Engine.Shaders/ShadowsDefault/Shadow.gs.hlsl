@@ -6,7 +6,7 @@ cbuffer cbPerLight : register(b0)
     uint3 PAD01;
 };
 
-struct PSShadowMapPosition
+struct PSShadowMap
 {
     float4 positionHomogeneous : SV_POSITION;
 };
@@ -18,7 +18,7 @@ struct GSShadowMap
 };
 
 [maxvertexcount(18)]
-void main(triangle PSShadowMapPosition input[3] : SV_Position, inout TriangleStream<GSShadowMap> outputStream)
+void main(triangle PSShadowMap input[3] : SV_Position, inout TriangleStream<GSShadowMap> outputStream)
 {
     GSShadowMap output;
     

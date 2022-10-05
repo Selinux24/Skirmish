@@ -39,7 +39,7 @@ Texture2D gAnimationPalette : register(t1);
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE TANGENT
 **********************************************************************************************************/
-PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentSkinned input)
+PSVertexPositionNormalTextureTangent main(VSVertexPositionNormalTextureTangentSkinned input)
 {
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -63,7 +63,7 @@ PSVertexPositionNormalTextureTangent2 main(VSVertexPositionNormalTextureTangentS
 
     Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobals.MaterialPaletteWidth);
 	
-    PSVertexPositionNormalTextureTangent2 output = (PSVertexPositionNormalTextureTangent2) 0;
+    PSVertexPositionNormalTextureTangent output = (PSVertexPositionNormalTextureTangent) 0;
 
     output.positionHomogeneous = mul(positionL, wvp);
     output.positionWorld = mul(positionL, gLocal).xyz;

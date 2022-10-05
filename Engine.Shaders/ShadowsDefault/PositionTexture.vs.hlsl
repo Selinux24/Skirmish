@@ -1,4 +1,3 @@
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerMesh : register(b0)
 {
@@ -11,9 +10,23 @@ cbuffer cbPerMaterial : register(b1)
     uint3 PAD21;
 };
 
-PSShadowMapPositionTexture main(VSVertexPositionTexture input)
+struct VSVertex
 {
-    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+    float3 positionLocal : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PSShadowMap
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float4 depth : TEXCOORD0;
+    float2 tex : TEXCOORD1;
+    uint textureIndex : TEXTUREINDEX;
+};
+
+PSShadowMap main(VSVertex input)
+{
+    PSShadowMap output = (PSShadowMap) 0;
 
     output.positionHomogeneous = mul(float4(input.positionLocal, 1), gLocal);
     output.depth = float4(input.positionLocal, 1);

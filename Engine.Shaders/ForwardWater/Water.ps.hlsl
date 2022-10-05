@@ -1,6 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -150,7 +149,13 @@ float GetSeaAlpha(float distToEye, float alpha)
 	return min(((distToEye / trDistance) * (1 - alpha)) + alpha, 1);
 }
 
-float4 main(PSVertexPosition input) : SV_TARGET
+struct PSVertex
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+};
+
+float4 main(PSVertex input) : SV_TARGET
 {
 	float3 eyePos = gPerFrame.EyePosition;
 	float3 eyeDir = eyePos - input.positionWorld;

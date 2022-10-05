@@ -1,6 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -52,6 +51,14 @@ float4 MapFont(float4 litColor, float4 color)
 
     return saturate(litColor);
 }
+
+struct PSVertexFont
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
 
 float4 main(PSVertexFont input) : SV_TARGET
 {

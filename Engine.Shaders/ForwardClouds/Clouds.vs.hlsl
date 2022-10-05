@@ -1,5 +1,4 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncMatrix.hlsl"
 
 /**********************************************************************************************************
@@ -10,9 +9,25 @@ cbuffer cbPerFrame : register(b0)
     PerFrame gPerFrame;
 };
 
-PSVertexPositionTexture main(VSVertexPositionTexture input)
+struct VSVertexCloud
 {
-    PSVertexPositionTexture output = (PSVertexPositionTexture) 0;
+    float3 positionLocal : POSITION;
+    float2 tex : TEXCOORD0;
+};
+
+struct PSVertexCloud
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 tintColor : TINTCOLOR;
+    uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
+};
+
+PSVertexCloud main(VSVertexCloud input)
+{
+    PSVertexCloud output = (PSVertexCloud) 0;
 
     float4x4 translation = translateToMatrix(gPerFrame.EyePosition);
     float4x4 wvp = mul(translation, gPerFrame.ViewProjection);

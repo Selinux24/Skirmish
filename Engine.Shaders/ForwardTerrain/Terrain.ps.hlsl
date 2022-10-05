@@ -177,7 +177,19 @@ inline float4 Full(float4 positionHomogeneous, float4 color, float3 normalWorld,
 	return saturate(((color1 * gProp) + (color2 * (1.0f - gProp))) * color);
 }
 
-float4 main(PSVertexTerrain2 input) : SV_TARGET
+struct PSVertexTerrain
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex0 : TEXCOORD0;
+    float2 tex1 : TEXCOORD1;
+    float4 color : COLOR0;
+    Material material;
+};
+
+float4 main(PSVertexTerrain input) : SV_TARGET
 {
 	float3 normal;
 	float4 color;

@@ -29,7 +29,7 @@ Texture2D gAnimationPalette : register(t1);
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
-PSVertexPositionColor2 main(VSVertexPositionColorSkinnedI input)
+PSVertexPositionColor main(VSVertexPositionColorSkinnedI input)
 {
 	float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	ComputePositionWeights(
@@ -46,7 +46,7 @@ PSVertexPositionColor2 main(VSVertexPositionColorSkinnedI input)
 
     Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
-    PSVertexPositionColor2 output = (PSVertexPositionColor2) 0;
+    PSVertexPositionColor output = (PSVertexPositionColor) 0;
 
 	output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
 	output.positionWorld = instancePosition.xyz;

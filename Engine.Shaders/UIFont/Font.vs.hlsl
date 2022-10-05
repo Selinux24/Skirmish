@@ -1,5 +1,4 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -9,6 +8,21 @@ cbuffer cbPerFrame : register(b0)
 cbuffer cbPerText : register(b1)
 {
     float4x4 gLocal;
+};
+
+struct VSVertexFont
+{
+    float3 positionLocal : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
+
+struct PSVertexFont
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
 };
 
 PSVertexFont main(VSVertexFont input)

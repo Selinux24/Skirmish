@@ -1,6 +1,5 @@
 #include "..\Lib\IncScattering.hlsl"
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
@@ -18,7 +17,16 @@ cbuffer cbPerObject : register(b0)
     uint3 PAD;
 };
 
-float4 main(PSVertexSkyScattering input) : SV_TARGET
+struct PSVertex
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 direction : DIRECTION;
+    float4 colorR : COLOR0;
+    float4 colorM : COLOR1;
+};
+
+float4 main(PSVertex input) : SV_TARGET
 {
     return HDR(pixelPhase(gLightDirection, input.direction, input.colorR, input.colorM), gHDRExposure);
 }

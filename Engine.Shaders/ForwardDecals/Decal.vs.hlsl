@@ -1,6 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -29,6 +28,24 @@ float4 computeDecalRotation(float rotation)
     
     return rotationMatrix;
 }
+
+struct VSVertexDecal
+{
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float2 sizeWorld : SIZE;
+    float startTime : START_TIME;
+    float maxAge : MAX_AGE;
+};
+
+struct GSDecal
+{
+    float3 centerWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float4 rotationWorld : ROTATION;
+    float2 sizeWorld : SIZE;
+    float alpha : ALPHA;
+};
 
 GSDecal main(VSVertexDecal input)
 {

@@ -1,5 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncMaterials.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
@@ -30,12 +30,33 @@ cbuffer cbTerrain : register(b2)
 
 Texture2D gMaterialPalette : register(t0);
 
+struct VSVertexTerrain
+{
+    float3 positionLocal : POSITION;
+    float3 normalLocal : NORMAL;
+    float3 tangentLocal : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 color : COLOR0;
+};
+
+struct PSVertexTerrain
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex0 : TEXCOORD0;
+    float2 tex1 : TEXCOORD1;
+    float4 color : COLOR0;
+    Material material;
+};
+
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE TANGENT
 **********************************************************************************************************/
-PSVertexTerrain2 main(VSVertexTerrain input)
+PSVertexTerrain main(VSVertexTerrain input)
 {
-    PSVertexTerrain2 output = (PSVertexTerrain2) 0;
+    PSVertexTerrain output = (PSVertexTerrain) 0;
 
     Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobals.MaterialPaletteWidth);
 

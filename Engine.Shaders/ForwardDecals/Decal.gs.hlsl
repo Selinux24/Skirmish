@@ -1,5 +1,4 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -12,6 +11,25 @@ static float2 quadTexC[4] =
     float2(0.0f, 0.0f),
     float2(1.0f, 1.0f),
     float2(1.0f, 0.0f)
+};
+
+struct GSDecal
+{
+    float3 centerWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float4 rotationWorld : ROTATION;
+    float2 sizeWorld : SIZE;
+    float alpha : ALPHA;
+};
+
+struct PSDecal
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float4 rotationWorld : ROTATION;
+    float alpha : ALPHA;
+    float2 tex : TEXCOORD0;
+    uint primitiveID : SV_PRIMITIVEID;
 };
 
 [maxvertexcount(4)]

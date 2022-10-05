@@ -1,10 +1,20 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncMatrix.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
     PerFrame gPerFrame;
+};
+
+struct VSVertexPosition
+{
+    float3 positionLocal : POSITION;
+};
+
+struct PSVertexPosition
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
 };
 
 PSVertexPosition main(VSVertexPosition input)

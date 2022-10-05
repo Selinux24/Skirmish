@@ -1,5 +1,4 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 #include "..\Lib\IncAnimation.hlsl"
 
 cbuffer cbGlobals : register(b0)
@@ -24,9 +23,25 @@ cbuffer cbPerMaterial : register(b2)
 
 Texture2D gAnimationPalette : register(t0);
 
-PSShadowMapPositionTexture main(VSVertexPositionTextureSkinned input)
+struct VSVertex
 {
-    PSShadowMapPositionTexture output = (PSShadowMapPositionTexture) 0;
+    float3 positionLocal : POSITION;
+    float2 tex : TEXCOORD0;
+    float3 weights : WEIGHTS;
+    uint4 boneIndices : BONEINDICES;
+};
+
+struct PSShadowMap
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float4 depth : TEXCOORD0;
+    float2 tex : TEXCOORD1;
+    uint textureIndex : TEXTUREINDEX;
+};
+
+PSShadowMap main(VSVertex input)
+{
+    PSShadowMap output = (PSShadowMap) 0;
 
     float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
 	

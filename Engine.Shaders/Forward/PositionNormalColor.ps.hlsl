@@ -40,7 +40,7 @@ TextureCubeArray<float> gShadowMapPoint : register(t2);
 /**********************************************************************************************************
 POSITION NORMAL COLOR
 **********************************************************************************************************/
-float4 main(PSVertexPositionNormalColor2 input) : SV_TARGET
+float4 main(PSVertexPositionNormalColor input) : SV_TARGET
 {
 	ComputeLightsInput lInput;
 

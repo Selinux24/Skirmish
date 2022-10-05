@@ -1,6 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -21,8 +20,28 @@ cbuffer cbBillboard : register(b1)
     float2 PAD12;
 };
 
+struct GSVertexBillboard
+{
+    float3 centerWorld : POSITION;
+    float2 sizeWorld : SIZE;
+    float4 tintColor : TINTCOLOR;
+    Material material;
+};
+
+struct PSVertexBillboard
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 tintColor : TINTCOLOR;
+    Material material;
+    uint primitiveID : SV_PRIMITIVEID;
+};
+
 [maxvertexcount(4)]
-void main(point GSVertexBillboard2 input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSVertexBillboard2> outputStream)
+void main(point GSVertexBillboard input[1], uint primID : SV_PrimitiveID, inout TriangleStream<PSVertexBillboard> outputStream)
 {
     float3 look = gPerFrame.EyePosition - input[0].centerWorld;
     float radius = length(look);
@@ -46,7 +65,7 @@ void main(point GSVertexBillboard2 input[1], uint primID : SV_PrimitiveID, inout
 	[unroll]
     for (int i = 0; i < 4; ++i)
     {
-        PSVertexBillboard2 gout;
+        PSVertexBillboard gout;
         
         gout.positionHomogeneous = mul(v[i], gPerFrame.ViewProjection);
         gout.positionWorld = v[i].xyz;

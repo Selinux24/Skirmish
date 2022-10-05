@@ -24,7 +24,7 @@ SamplerState SamplerDiffuse : register(s0);
 /**********************************************************************************************************
 POSITION TEXTURE
 **********************************************************************************************************/
-float4 main(PSVertexPositionTexture2 input) : SV_TARGET
+float4 main(PSVertexPositionTexture input) : SV_TARGET
 {
 	float4 color = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 	color *= input.tintColor;

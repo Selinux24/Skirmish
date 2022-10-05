@@ -29,7 +29,7 @@ Texture2D gAnimationPalette : register(t1);
 /**********************************************************************************************************
 POSITION NORMAL COLOR
 **********************************************************************************************************/
-PSVertexPositionNormalColor2 main(VSVertexPositionNormalColorSkinnedI input)
+PSVertexPositionNormalColor main(VSVertexPositionNormalColorSkinnedI input)
 {
     float4 positionL = float4(0.0f, 0.0f, 0.0f, 0.0f);
     float4 normalL = float4(0.0f, 0.0f, 0.0f, 0.0f);
@@ -50,7 +50,7 @@ PSVertexPositionNormalColor2 main(VSVertexPositionNormalColorSkinnedI input)
 
     Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
-    PSVertexPositionNormalColor2 output = (PSVertexPositionNormalColor2) 0;
+    PSVertexPositionNormalColor output = (PSVertexPositionNormalColor) 0;
 
     output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
     output.positionWorld = instancePosition.xyz;

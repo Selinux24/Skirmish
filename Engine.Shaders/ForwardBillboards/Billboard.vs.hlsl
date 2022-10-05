@@ -1,5 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
+#include "..\Lib\IncMaterials.hlsl"
 
 cbuffer cbGlobal : register(b0)
 {
@@ -22,9 +22,23 @@ cbuffer cbPerMaterial : register(b1)
 
 Texture2D gMaterialPalette : register(t0);
 
-GSVertexBillboard2 main(VSVertexBillboard input)
+struct VSVertexBillboard
 {
-    GSVertexBillboard2 output;
+    float3 positionWorld : POSITION;
+    float2 sizeWorld : SIZE;
+};
+
+struct GSVertexBillboard
+{
+    float3 centerWorld : POSITION;
+    float2 sizeWorld : SIZE;
+    float4 tintColor : TINTCOLOR;
+    Material material;
+};
+
+GSVertexBillboard main(VSVertexBillboard input)
+{
+    GSVertexBillboard output;
 
     Material material = GetMaterialData(gMaterialPalette, gMaterialIndex, gGlobal.MaterialPaletteWidth);
     

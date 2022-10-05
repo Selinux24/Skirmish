@@ -1,6 +1,5 @@
 #include "..\Lib\IncBuiltIn.hlsl"
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerFrame : register(b0)
 {
@@ -58,7 +57,19 @@ SamplerState SamplerLinear : register(s0)
     AddressV = WRAP;
 };
 
-float4 main(PSVertexBillboard2 input) : SV_Target
+struct PSVertexBillboard
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float3 normalWorld : NORMAL;
+    float3 tangentWorld : TANGENT;
+    float2 tex : TEXCOORD0;
+    float4 tintColor : TINTCOLOR;
+    Material material;
+    uint primitiveID : SV_PRIMITIVEID;
+};
+
+float4 main(PSVertexBillboard input) : SV_Target
 {
     float3 uvw = float3(input.tex, input.primitiveID % gTextureCount);
 

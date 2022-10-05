@@ -4,60 +4,8 @@
 #include "IncMaterials.hlsl"
 
 /*
-SPEC VS INPUTS
-*/
-struct VSVertexBillboard
-{
-	float3 positionWorld : POSITION;
-	float2 sizeWorld : SIZE;
-};
-struct VSVertexDecal
-{
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float2 sizeWorld : SIZE;
-	float startTime : START_TIME;
-	float maxAge : MAX_AGE;
-};
-struct VSVertexCPUParticle
-{
-	float3 position : POSITION;
-	float3 velocity : VELOCITY;
-	float4 random : RANDOM;
-	float maxAge : MAX_AGE;
-};
-struct VSVertexGPUParticle
-{
-	float3 position : POSITION;
-	float3 velocity : VELOCITY;
-	float4 random : RANDOM;
-	float maxAge : MAX_AGE;
-
-	uint type : TYPE;
-	float emissionTime : EMISSION_TIME;
-};
-struct VSVertexFont
-{
-	float3 positionLocal : POSITION;
-	float2 tex : TEXCOORD0;
-	float4 color : COLOR0;
-};
-struct VSVertexTerrain
-{
-    float3 positionLocal : POSITION;
-    float3 normalLocal : NORMAL;
-    float3 tangentLocal : TANGENT;
-    float2 tex : TEXCOORD0;
-    float4 color : COLOR0;
-};
-
-/*
 BASIC VS INPUTS
 */
-struct VSVertexPosition
-{
-    float3 positionLocal : POSITION;
-};
 struct VSVertexPositionColor
 {
 	float3 positionLocal : POSITION;
@@ -91,12 +39,6 @@ struct VSVertexPositionNormalTextureTangent
 /*
 SKINNED VS INPUTS
 */
-struct VSVertexPositionSkinned
-{
-	float3 positionLocal : POSITION;
-	float3 weights : WEIGHTS;
-	uint4 boneIndices : BONEINDICES;
-};
 struct VSVertexPositionColorSkinned
 {
 	float3 positionLocal : POSITION;
@@ -140,13 +82,6 @@ struct VSVertexPositionNormalTextureTangentSkinned
 /*
 INSTANCING VS INPUTS
 */
-struct VSVertexPositionI
-{
-	float3 positionLocal : POSITION;
-	row_major float4x4 localTransform : LOCALTRANSFORM;
-	int materialIndex : MATERIALINDEX;
-	uint instanceId : SV_INSTANCEID;
-};
 struct VSVertexPositionColorI
 {
 	float3 positionLocal : POSITION;
@@ -203,19 +138,6 @@ struct VSVertexPositionNormalTextureTangentI
 /*
 SKINNED INSTANCING VS INPUTS
 */
-struct VSVertexPositionSkinnedI
-{
-	float3 positionLocal : POSITION;
-	float3 weights : WEIGHTS;
-	uint4 boneIndices : BONEINDICES;
-	row_major float4x4 localTransform : LOCALTRANSFORM;
-	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
-	uint animationOffset : ANIMATIONOFFSET;
-	uint animationOffsetB : ANIMATIONOFFSETB;
-	float animationInterpolation : ANIMATIONINTERPOLATION;
-	uint instanceId : SV_INSTANCEID;
-};
 struct VSVertexPositionColorSkinnedI
 {
 	float3 positionLocal : POSITION;
@@ -297,126 +219,15 @@ struct VSVertexPositionNormalTextureTangentSkinnedI
 };
 
 /*
-BASIC GS INPUTS
-*/
-struct GSVertexBillboard
-{
-	float3 centerWorld : POSITION;
-	float2 sizeWorld : SIZE;
-};
-struct GSVertexBillboard2
-{
-    float3 centerWorld : POSITION;
-    float2 sizeWorld : SIZE;
-    float4 tintColor : TINTCOLOR;
-    Material material;
-};
-struct GSDecal
-{
-	float3 centerWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float4 rotationWorld : ROTATION;
-	float2 sizeWorld : SIZE;
-	float alpha : ALPHA;
-};
-struct GSCPUParticle
-{
-	float3 centerWorld : POSITION;
-	float2 sizeWorld : SIZE;
-	float4 color : COLOR;
-	float4 rotationWorld : ROTATION;
-};
-struct GSGPUParticle
-{
-	float3 positionWorld : POSITION;
-	float2 sizeWorld : SIZE;
-	float4 color : COLOR;
-	uint type : TYPE;
-};
-
-/*
 BASIC PS INPUTS
 */
-struct PSVertexBillboard
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float3 tangentWorld : TANGENT;
-	float2 tex : TEXCOORD0;
-	uint primitiveID : SV_PRIMITIVEID;
-};
-struct PSDecal
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float4 rotationWorld : ROTATION;
-	float alpha : ALPHA;
-	float2 tex : TEXCOORD0;
-	uint primitiveID : SV_PRIMITIVEID;
-};
-struct PSCPUParticle
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float4 rotationWorld : ROTATION;
-	float2 tex : TEXCOORD0;
-	float4 color : COLOR0;
-	uint primitiveID : SV_PRIMITIVEID;
-};
-struct PSGPUParticle
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float4 color : COLOR0;
-	float2 tex : TEXCOORD0;
-	uint primitiveID : SV_PRIMITIVEID;
-};
-struct PSVertexFont
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float2 tex : TEXCOORD0;
-	float4 color : COLOR0;
-};
-struct PSVertexPosition
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-};
 struct PSVertexPositionColor
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float4 color : COLOR0;
-	uint materialIndex : MATERIALINDEX;
-};
-struct PSVertexBillboard2
-{
-    float4 positionHomogeneous : SV_POSITION;
-    float3 positionWorld : POSITION;
-    float3 normalWorld : NORMAL;
-    float3 tangentWorld : TANGENT;
-    float2 tex : TEXCOORD0;
-    float4 tintColor : TINTCOLOR;
-    Material material;
-    uint primitiveID : SV_PRIMITIVEID;
-};
-struct PSVertexPositionColor2
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
 	float4 color : COLOR0;
 };
 struct PSVertexPositionNormalColor
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float4 color : COLOR0;
-	uint materialIndex : MATERIALINDEX;
-};
-struct PSVertexPositionNormalColor2
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
@@ -431,27 +242,8 @@ struct PSVertexPositionTexture
 	float2 tex : TEXCOORD0;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
-};
-struct PSVertexPositionTexture2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float2 tex : TEXCOORD0;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
 };
 struct PSVertexPositionNormalTexture
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float2 tex : TEXCOORD0;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
-};
-struct PSVertexPositionNormalTexture2
 {
 	float4 positionHomogeneous : SV_POSITION;
 	float3 positionWorld : POSITION;
@@ -470,90 +262,7 @@ struct PSVertexPositionNormalTextureTangent
 	float2 tex : TEXCOORD0;
 	float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-	uint materialIndex : MATERIALINDEX;
-};
-struct PSVertexPositionNormalTextureTangent2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float3 tangentWorld : TANGENT;
-	float2 tex : TEXCOORD0;
-	float4 tintColor : TINTCOLOR;
-	uint textureIndex : TEXTUREINDEX;
 	Material material;
-};
-struct PSVertexTerrain
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float3 tangentWorld : TANGENT;
-	float2 tex0 : TEXCOORD0;
-	float2 tex1 : TEXCOORD1;
-	float4 color : COLOR0;
-};
-struct PSVertexTerrain2
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float3 tangentWorld : TANGENT;
-	float2 tex0 : TEXCOORD0;
-	float2 tex1 : TEXCOORD1;
-	float4 color : COLOR0;
-	Material material;
-};
-struct PSVertexSkyScattering
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 direction : DIRECTION;
-	float4 colorR : COLOR0;
-	float4 colorM : COLOR1;
-};
-
-/*
-SHADOW MAPPING
-*/
-struct PSShadowMapPosition
-{
-	float4 positionHomogeneous : SV_POSITION;
-};
-struct PSShadowMapPositionTexture
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float4 depth : TEXCOORD0;
-	float2 tex : TEXCOORD1;
-	uint textureIndex : TEXTUREINDEX;
-};
-struct PSShadowMapBillboard
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float4 depth : TEXCOORD0;
-	float2 tex : TEXCOORD1;
-	uint primitiveID : SV_PRIMITIVEID;
-};
-
-/*
-DEFERRED LIGHTNING
-*/
-struct GBufferVSColorOutput
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float4 color : COLOR0;
-	float2 depth : TEXCOORD0;
-};
-struct GBufferVSTextureOutput
-{
-	float4 positionHomogeneous : SV_POSITION;
-	float3 positionWorld : POSITION;
-	float3 normalWorld : NORMAL;
-	float2 tex : TEXCOORD0;
-	float2 depth : TEXCOORD1;
-	uint textureIndex : TEXTUREINDEX;
 };
 
 #endif

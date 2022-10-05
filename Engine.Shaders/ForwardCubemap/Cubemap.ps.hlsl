@@ -1,4 +1,3 @@
-#include "..\Lib\IncVertexFormats.hlsl"
 
 TextureCube gCubemap : register(t0);
 
@@ -9,7 +8,13 @@ SamplerState SamplerLinear : register(s0)
     AddressV = WRAP;
 };
 
-float4 main(PSVertexPosition input) : SV_Target
+struct PSVertex
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+};
+
+float4 main(PSVertex input) : SV_Target
 {
     return gCubemap.Sample(SamplerLinear, input.positionWorld);
 }

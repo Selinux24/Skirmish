@@ -27,14 +27,14 @@ Texture2D gMaterialPalette : register(t0);
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE
 **********************************************************************************************************/
-PSVertexPositionNormalTexture2 main(VSVertexPositionNormalTextureI input)
+PSVertexPositionNormalTexture main(VSVertexPositionNormalTextureI input)
 {
     float4 instancePosition = mul(float4(input.positionLocal, 1), input.localTransform);
     float3 instanceNormal = mul(input.normalLocal, (float3x3) input.localTransform);
 
     Material material = GetMaterialData(gMaterialPalette, input.materialIndex + gMaterialIndex, gGlobals.MaterialPaletteWidth);
 
-    PSVertexPositionNormalTexture2 output = (PSVertexPositionNormalTexture2) 0;
+    PSVertexPositionNormalTexture output = (PSVertexPositionNormalTexture) 0;
 
     output.positionHomogeneous = mul(instancePosition, gPerFrame.ViewProjection);
     output.positionWorld = instancePosition.xyz;

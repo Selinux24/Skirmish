@@ -1,4 +1,3 @@
-#include "..\Lib\IncVertexFormats.hlsl"
 
 cbuffer cbPerDecal : register(b0)
 {
@@ -16,6 +15,16 @@ SamplerState SamplerPointDecal : register(s0)
     Filter = MIN_MAG_MIP_POINT;
     AddressU = CLAMP;
     AddressV = CLAMP;
+};
+
+struct PSDecal
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float4 rotationWorld : ROTATION;
+    float alpha : ALPHA;
+    float2 tex : TEXCOORD0;
+    uint primitiveID : SV_PRIMITIVEID;
 };
 
 float4 main(PSDecal input) : SV_Target

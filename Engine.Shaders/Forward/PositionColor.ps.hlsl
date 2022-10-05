@@ -13,7 +13,7 @@ cbuffer cbPerFrame : register(b0)
 /**********************************************************************************************************
 POSITION COLOR
 **********************************************************************************************************/
-float4 main(PSVertexPositionColor2 input) : SV_TARGET
+float4 main(PSVertexPositionColor input) : SV_TARGET
 {
 	float4 matColor = input.color;
 

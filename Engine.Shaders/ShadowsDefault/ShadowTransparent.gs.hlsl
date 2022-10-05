@@ -6,7 +6,7 @@ cbuffer cbPerLight : register(b0)
     uint3 PAD01;
 };
 
-struct PSShadowMapPositionTexture
+struct PSShadowMap
 {
     float4 positionHomogeneous : SV_POSITION;
     float4 depth : TEXCOORD0;
@@ -14,7 +14,7 @@ struct PSShadowMapPositionTexture
     uint textureIndex : TEXTUREINDEX;
 };
 
-struct GSShadowMapTexture
+struct GSShadowMap
 {
     float4 positionHomogeneous : SV_POSITION;
     float4 depth : TEXCOORD0;
@@ -24,11 +24,11 @@ struct GSShadowMapTexture
 };
 
 [maxvertexcount(18)]
-void main(triangle PSShadowMapPositionTexture input[3] : SV_Position, inout TriangleStream<GSShadowMapTexture> outputStream)
+void main(triangle PSShadowMap input[3] : SV_Position, inout TriangleStream<GSShadowMap> outputStream)
 {
     for (uint iFace = 0; iFace < gFaceCount; iFace++)
     {
-        GSShadowMapTexture output;
+        GSShadowMap output;
 
         output.index = iFace;
 

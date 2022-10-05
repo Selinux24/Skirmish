@@ -1,5 +1,4 @@
 #include "..\Lib\IncLights.hlsl"
-#include "..\Lib\IncVertexFormats.hlsl"
 
 /**********************************************************************************************************
 BUFFERS & VARIABLES
@@ -86,7 +85,17 @@ inline float4 RandomVector4(float min, float max, float seed, Texture1D rndTex)
     return r;
 }
 
-float4 main(PSVertexPositionTexture input) : SV_TARGET
+struct PSVertexCloud
+{
+    float4 positionHomogeneous : SV_POSITION;
+    float3 positionWorld : POSITION;
+    float2 tex : TEXCOORD0;
+    float4 tintColor : TINTCOLOR;
+    uint textureIndex : TEXTUREINDEX;
+    uint materialIndex : MATERIALINDEX;
+};
+
+float4 main(PSVertexCloud input) : SV_TARGET
 {
     float4 color;
     if (gPerturbed)

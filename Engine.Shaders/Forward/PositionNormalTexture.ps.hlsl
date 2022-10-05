@@ -43,7 +43,7 @@ SamplerState SamplerDiffuse : register(s0);
 /**********************************************************************************************************
 POSITION NORMAL TEXTURE
 **********************************************************************************************************/
-float4 main(PSVertexPositionNormalTexture2 input) : SV_TARGET
+float4 main(PSVertexPositionNormalTexture input) : SV_TARGET
 {
     float4 diffuseColor = gDiffuseMapArray.Sample(SamplerDiffuse, float3(input.tex, input.textureIndex));
 
