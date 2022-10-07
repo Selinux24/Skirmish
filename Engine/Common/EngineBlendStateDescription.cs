@@ -172,7 +172,7 @@ namespace Engine.Common
                 DestinationAlphaBlend = (BlendOption)obj.DestinationAlphaBlend,
                 AlphaBlendOperation = (BlendOperation)obj.AlphaBlendOperation,
                 LogicOperation = (LogicOperation)obj.LogicOperation,
-                RenderTargetWriteMask = (ColorWriteMask)obj.RenderTargetWriteMask,
+                RenderTargetWriteMask = (ColorWriteMasks)obj.RenderTargetWriteMask,
             };
         }
 
@@ -220,7 +220,7 @@ namespace Engine.Common
         /// <summary>
         /// A write mask.
         /// </summary>
-        public ColorWriteMask RenderTargetWriteMask { get; set; }
+        public ColorWriteMasks RenderTargetWriteMask { get; set; }
     }
 
     /// <summary>
@@ -428,7 +428,7 @@ namespace Engine.Common
     }
 
     [Flags]
-    public enum ColorWriteMask : byte
+    public enum ColorWriteMasks : byte
     {
         /// <summary>
         /// Allow data to be stored in the red component.

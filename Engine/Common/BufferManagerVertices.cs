@@ -152,12 +152,20 @@ namespace Engine.Common
         /// <param name="vertices">Vertex list</param>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<IVertexData> vertices)
         {
+            int offset;
+
             Monitor.Enter(data);
-            //Store current data index as descriptor offset
-            int offset = data.Count;
-            //Add items to data list
-            data.AddRange(vertices);
-            Monitor.Exit(data);
+            try
+            {
+                //Store current data index as descriptor offset
+                offset = data.Count;
+                //Add items to data list
+                data.AddRange(vertices);
+            }
+            finally
+            {
+                Monitor.Exit(data);
+            }
 
             //Add the new descriptor to main descriptor list
             descriptor.Id = id;
@@ -166,8 +174,14 @@ namespace Engine.Common
             descriptor.Count = vertices.Count();
 
             Monitor.Enter(vertexDescriptors);
-            vertexDescriptors.Add(descriptor);
-            Monitor.Exit(vertexDescriptors);
+            try
+            {
+                vertexDescriptors.Add(descriptor);
+            }
+            finally
+            {
+                Monitor.Exit(vertexDescriptors);
+            }
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
@@ -179,16 +193,27 @@ namespace Engine.Common
             {
                 //If descriptor has items, remove from buffer descriptors
                 Monitor.Enter(data);
-                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
-                Monitor.Exit(data);
+                try
+                {
+                    data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                }
+                finally
+                {
+                    Monitor.Exit(data);
+                }
             }
 
             Monitor.Enter(vertexDescriptors);
-            //Remove descriptor
-            vertexDescriptors.Remove(descriptor);
-
-            if (vertexDescriptors.Any())
+            try
             {
+                //Remove descriptor
+                vertexDescriptors.Remove(descriptor);
+
+                if (!vertexDescriptors.Any())
+                {
+                    return;
+                }
+
                 //Reallocate descriptor offsets
                 vertexDescriptors[0].BufferOffset = 0;
                 for (int i = 1; i < vertexDescriptors.Count; i++)
@@ -198,7 +223,10 @@ namespace Engine.Common
                     vertexDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
             }
-            Monitor.Exit(vertexDescriptors);
+            finally
+            {
+                Monitor.Exit(vertexDescriptors);
+            }
         }
 
         /// <inheritdoc/>

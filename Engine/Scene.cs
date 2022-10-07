@@ -737,59 +737,63 @@ namespace Engine
         public void AddComponent(ISceneObject component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
         {
             Monitor.Enter(internalComponents);
-
-            if (internalComponents.Contains(component))
+            try
             {
-                return;
-            }
-
-            if (internalComponents.Any(c => component.Id == c.Id))
-            {
-                throw new EngineException($"{nameof(Scene)} => The specified component id {component.Id} already exists.");
-            }
-
-            if (component is IDrawable drawable)
-            {
-                drawable.Usage |= usage;
-
-                if (layer != 0)
+                if (internalComponents.Contains(component))
                 {
-                    drawable.Layer = layer;
-                }
-            }
-
-            internalComponents.Add(component);
-            internalComponents.Sort((p1, p2) =>
-            {
-                //First by type
-                bool p1D = p1 is IDrawable;
-                bool p2D = p2 is IDrawable;
-                int i = p1D.CompareTo(p2D);
-                if (i != 0) return i;
-
-                if (!p1D || !p2D)
-                {
-                    return 0;
+                    return;
                 }
 
-                IDrawable drawable1 = (IDrawable)p1;
-                IDrawable drawable2 = (IDrawable)p2;
+                if (internalComponents.Any(c => component.Id == c.Id))
+                {
+                    throw new EngineException($"{nameof(Scene)} => The specified component id {component.Id} already exists.");
+                }
 
-                //First by order index
-                i = drawable1.Layer.CompareTo(drawable2.Layer);
-                if (i != 0) return i;
+                if (component is IDrawable drawable)
+                {
+                    drawable.Usage |= usage;
 
-                //Then opaques
-                i = drawable1.BlendMode.CompareTo(drawable2.BlendMode);
-                if (i != 0) return i;
+                    if (layer != 0)
+                    {
+                        drawable.Layer = layer;
+                    }
+                }
 
-                //Then z-buffer writers
-                i = drawable1.DepthEnabled.CompareTo(drawable2.DepthEnabled);
+                internalComponents.Add(component);
+                internalComponents.Sort((p1, p2) =>
+                {
+                    //First by type
+                    bool p1D = p1 is IDrawable;
+                    bool p2D = p2 is IDrawable;
+                    int i = p1D.CompareTo(p2D);
+                    if (i != 0) return i;
 
-                return i;
-            });
+                    if (!p1D || !p2D)
+                    {
+                        return 0;
+                    }
 
-            Monitor.Exit(internalComponents);
+                    IDrawable drawable1 = (IDrawable)p1;
+                    IDrawable drawable2 = (IDrawable)p2;
+
+                    //First by order index
+                    i = drawable1.Layer.CompareTo(drawable2.Layer);
+                    if (i != 0) return i;
+
+                    //Then opaques
+                    i = drawable1.BlendMode.CompareTo(drawable2.BlendMode);
+                    if (i != 0) return i;
+
+                    //Then z-buffer writers
+                    i = drawable1.DepthEnabled.CompareTo(drawable2.DepthEnabled);
+
+                    return i;
+                });
+            }
+            finally
+            {
+                Monitor.Exit(internalComponents);
+            }
 
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
@@ -806,8 +810,14 @@ namespace Engine
             }
 
             Monitor.Enter(internalComponents);
-            internalComponents.Remove(component);
-            Monitor.Exit(internalComponents);
+            try
+            {
+                internalComponents.Remove(component);
+            }
+            finally
+            {
+                Monitor.Exit(internalComponents);
+            }
 
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
@@ -824,22 +834,28 @@ namespace Engine
         public void RemoveComponents(IEnumerable<ISceneObject> components)
         {
             Monitor.Enter(internalComponents);
-            foreach (var component in components)
+            try
             {
-                if (internalComponents.Contains(component))
+                foreach (var component in components)
                 {
-                    internalComponents.Remove(component);
+                    if (internalComponents.Contains(component))
+                    {
+                        internalComponents.Remove(component);
 
-                    updateMaterialsPalette = true;
-                    updateAnimationsPalette = true;
-                }
+                        updateMaterialsPalette = true;
+                        updateAnimationsPalette = true;
+                    }
 
-                if (component is IDisposable disposable)
-                {
-                    disposable.Dispose();
+                    if (component is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
                 }
             }
-            Monitor.Exit(internalComponents);
+            finally
+            {
+                Monitor.Exit(internalComponents);
+            }
         }
 
         /// <summary>
