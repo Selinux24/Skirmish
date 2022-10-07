@@ -49,7 +49,7 @@ namespace Engine.Common
             var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
 
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
@@ -71,7 +71,7 @@ namespace Engine.Common
             var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
 
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
@@ -96,7 +96,7 @@ namespace Engine.Common
             desc.AlphaToCoverageEnable = true;
 
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
 
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
@@ -121,7 +121,7 @@ namespace Engine.Common
             desc.AlphaToCoverageEnable = true;
 
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
 
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
@@ -143,7 +143,7 @@ namespace Engine.Common
             var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
 
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
@@ -168,7 +168,7 @@ namespace Engine.Common
             desc.IndependentBlendEnable = true;
 
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.One;
             desc.RenderTarget[0].DestinationBlend = BlendOption.Zero;
@@ -179,7 +179,7 @@ namespace Engine.Common
             for (int i = 1; i < rtCount; i++)
             {
                 desc.RenderTarget[i].IsBlendEnabled = true;
-                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMask.All;
                 desc.RenderTarget[i].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[i].SourceBlend = BlendOption.One;
                 desc.RenderTarget[i].DestinationBlend = BlendOption.Zero;
@@ -205,7 +205,7 @@ namespace Engine.Common
 
             //Transparent blending only in first buffer
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
             desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
@@ -216,7 +216,7 @@ namespace Engine.Common
             for (int i = 1; i < rtCount; i++)
             {
                 desc.RenderTarget[i].IsBlendEnabled = true;
-                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMask.All;
                 desc.RenderTarget[i].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[i].SourceBlend = BlendOption.One;
                 desc.RenderTarget[i].DestinationBlend = BlendOption.Zero;
@@ -241,7 +241,7 @@ namespace Engine.Common
 
             //Additive blending only in first buffer
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
             desc.RenderTarget[0].DestinationBlend = BlendOption.InverseSourceAlpha;
@@ -252,7 +252,7 @@ namespace Engine.Common
             for (int i = 1; i < rtCount; i++)
             {
                 desc.RenderTarget[i].IsBlendEnabled = true;
-                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMask.All;
                 desc.RenderTarget[i].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[i].SourceBlend = BlendOption.One;
                 desc.RenderTarget[i].DestinationBlend = BlendOption.Zero;
@@ -277,7 +277,7 @@ namespace Engine.Common
 
             //Additive blending only in first buffer
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
 
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.SourceAlpha;
@@ -290,7 +290,7 @@ namespace Engine.Common
             for (int i = 1; i < rtCount; i++)
             {
                 desc.RenderTarget[i].IsBlendEnabled = true;
-                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+                desc.RenderTarget[i].RenderTargetWriteMask = ColorWriteMask.All;
                 desc.RenderTarget[i].BlendOperation = BlendOperation.Add;
                 desc.RenderTarget[i].SourceBlend = BlendOption.One;
                 desc.RenderTarget[i].DestinationBlend = BlendOption.Zero;
@@ -311,7 +311,7 @@ namespace Engine.Common
             var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
+            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMask.All;
             desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
             desc.RenderTarget[0].SourceBlend = BlendOption.One;
             desc.RenderTarget[0].DestinationBlend = BlendOption.One;

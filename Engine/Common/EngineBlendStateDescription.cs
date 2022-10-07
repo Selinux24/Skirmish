@@ -44,9 +44,14 @@ namespace Engine.Common
             blendState.AlphaToCoverageEnable = obj.AlphaToCoverageEnable;
             blendState.IndependentBlendEnable = obj.IndependentBlendEnable;
 
-            for (int i = 0; i < MaxRenderTargetDescriptions; i++)
+            if (obj.RenderTarget?.Any() == true)
             {
-                blendState.RenderTarget[i] = (DXRenderTargetBlendDescription)obj.RenderTarget?.ElementAtOrDefault(i);
+                int count = Math.Min(MaxRenderTargetDescriptions, obj.RenderTarget.Length);
+
+                for (int i = 0; i < count; i++)
+                {
+                    blendState.RenderTarget[i] = (DXRenderTargetBlendDescription)obj.RenderTarget[i];
+                }
             }
 
             return blendState;
@@ -62,7 +67,7 @@ namespace Engine.Common
 
             for (int i = 0; i < MaxRenderTargetDescriptions; i++)
             {
-                blendState.RenderTarget[i] = (EngineRenderTargetBlendDescription)obj.RenderTarget?.ElementAtOrDefault(i);
+                blendState.RenderTarget[i] = (EngineRenderTargetBlendDescription)obj.RenderTarget[i];
             }
 
             return blendState;
@@ -103,9 +108,14 @@ namespace Engine.Common
             blendState.AlphaToCoverageEnable = AlphaToCoverageEnable;
             blendState.IndependentBlendEnable = IndependentBlendEnable;
 
-            for (int i = 0; i < MaxRenderTargetDescriptions; i++)
+            if (RenderTarget?.Any() == true)
             {
-                blendState.RenderTarget[i] = (EngineRenderTargetBlendDescription)RenderTarget?.ElementAtOrDefault(i);
+                int count = Math.Min(MaxRenderTargetDescriptions, RenderTarget.Length);
+
+                for (int i = 0; i < count; i++)
+                {
+                    blendState.RenderTarget[i] = RenderTarget[i];
+                }
             }
 
             return blendState;
@@ -162,55 +172,55 @@ namespace Engine.Common
                 DestinationAlphaBlend = (BlendOption)obj.DestinationAlphaBlend,
                 AlphaBlendOperation = (BlendOperation)obj.AlphaBlendOperation,
                 LogicOperation = (LogicOperation)obj.LogicOperation,
-                RenderTargetWriteMask = (ColorWriteMaskFlags)obj.RenderTargetWriteMask,
+                RenderTargetWriteMask = (ColorWriteMask)obj.RenderTargetWriteMask,
             };
         }
 
         /// <summary>
         /// Enable (or disable) blending.
         /// </summary>
-        public bool IsBlendEnabled;
+        public bool IsBlendEnabled { get; set; }
         /// <summary>
         /// Enable (or disable) a logical operation.
         /// </summary>
-        public bool IsLogicOperationEnabled;
+        public bool IsLogicOperationEnabled { get; set; }
         /// <summary>
         /// This blend option specifies the operation to perform on the RGB value that the pixel shader outputs.
         /// The BlendOp member defines how to combine the SrcBlend and DestBlend operations.
         /// </summary>
-        public BlendOption SourceBlend;
+        public BlendOption SourceBlend { get; set; }
         /// <summary>
         /// This blend option specifies the operation to perform on the current RGB value in the render target.
         /// The BlendOp member defines how to combine the SrcBlend and DestBlend operations.
         /// </summary>
-        public BlendOption DestinationBlend;
+        public BlendOption DestinationBlend { get; set; }
         /// <summary>
         /// This blend operation defines how to combine the SrcBlend and DestBlend operations.
         /// </summary>
-        public BlendOperation BlendOperation;
+        public BlendOperation BlendOperation { get; set; }
         /// <summary>
         /// This blend option specifies the operation to perform on the alpha value that the pixel shader outputs.
         /// Blend options that end in _COLOR are not allowed. The BlendOpAlpha member defines how to combine the SrcBlendAlpha and DestBlendAlpha operations.
         /// </summary>
-        public BlendOption SourceAlphaBlend;
+        public BlendOption SourceAlphaBlend { get; set; }
         /// <summary>
         /// This blend option specifies the operation to perform on the current alpha value in the render target.
         /// Blend options that end in _COLOR are not allowed.
         /// The BlendOpAlpha member defines how to combine the SrcBlendAlpha and DestBlendAlpha operations.
         /// </summary>
-        public BlendOption DestinationAlphaBlend;
+        public BlendOption DestinationAlphaBlend { get; set; }
         /// <summary>
         /// This blend operation defines how to combine the SrcBlendAlpha and DestBlendAlpha operations.
         /// </summary>
-        public BlendOperation AlphaBlendOperation;
+        public BlendOperation AlphaBlendOperation { get; set; }
         /// <summary>
         /// A LogicOperation-typed value that specifies the logical operation to configure for the render target.
         /// </summary>
-        public LogicOperation LogicOperation;
+        public LogicOperation LogicOperation { get; set; }
         /// <summary>
         /// A write mask.
         /// </summary>
-        public ColorWriteMaskFlags RenderTargetWriteMask;
+        public ColorWriteMask RenderTargetWriteMask { get; set; }
     }
 
     /// <summary>
@@ -418,7 +428,7 @@ namespace Engine.Common
     }
 
     [Flags]
-    public enum ColorWriteMaskFlags : byte
+    public enum ColorWriteMask : byte
     {
         /// <summary>
         /// Allow data to be stored in the red component.
