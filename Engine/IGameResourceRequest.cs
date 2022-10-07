@@ -9,6 +9,10 @@ namespace Engine
     public interface IGameResourceRequest
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; }
+        /// <summary>
         /// Engine resource view
         /// </summary>
         EngineShaderResourceView ResourceView { get; }

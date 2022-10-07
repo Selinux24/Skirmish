@@ -317,6 +317,7 @@
     <Compile Include="Common\AnimationShadowDrawInfo.cs" />
     <Compile Include="Common\BaseSceneObjectState.cs" />
     <Compile Include="Common\DrawOptions.cs" />
+    <Compile Include="Common\EngineBlendStateDescription.cs" />
     <Compile Include="Common\EngineConstantBuffer.cs" />
     <Compile Include="Common\EngineDepthStencilStateDescription.cs" />
     <Compile Include="Common\EngineGeometryShader.cs" />
@@ -387,6 +388,10 @@
     <Compile Include="BuiltIn\Common\PositionColorVsI.cs" />
     <Compile Include="BuiltIn\Common\PositionColorVs.cs" />
     <Compile Include="BuiltIn\IBuiltInDrawer.cs" />
+    <Compile Include="Graphics.Buffers.cs" />
+    <Compile Include="Graphics.Shaders.cs" />
+    <Compile Include="Graphics.States.cs" />
+    <Compile Include="Graphics.Textures.cs" />
     <Compile Include="IInstacingData.cs" />
     <Compile Include="Common\IntersectionHelper.cs" />
     <Compile Include="Common\IntersectionTriangle.cs" />
@@ -871,6 +876,7 @@
     <Compile Include="BuiltIn\Sprites\Sprite.Buffers.cs" />
     <None Include="Engine.ruleset" />
     <None Include="Engine.snk" />
+    <Compile Include="Graphics.Effects.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="engine.ico" />

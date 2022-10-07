@@ -22,6 +22,8 @@ namespace Engine.Content
         /// </summary>
         private readonly Rectangle cropRectangle;
         /// <inheritdoc/>
+        public string Name { get; private set; }
+        /// <inheritdoc/>
         public int Count
         {
             get
@@ -47,15 +49,17 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public EngineShaderResourceView CreateResource(Game game, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView CreateResource(Game game, string name, bool mipAutogen = true, bool dynamic = false)
         {
+            Name = name;
+
             if (cropRectangle == Rectangle.Empty)
             {
-                return game.Graphics.LoadTextureArray(GetResourceKey(), streams, mipAutogen, dynamic);
+                return game.Graphics.LoadTextureArray($"{name}_{GetResourceKey()}", streams, mipAutogen, dynamic);
             }
             else
             {
-                return game.Graphics.LoadTextureArray(GetResourceKey(), streams, cropRectangle, mipAutogen, dynamic);
+                return game.Graphics.LoadTextureArray($"{name}_{GetResourceKey()}", streams, cropRectangle, mipAutogen, dynamic);
             }
         }
         /// <inheritdoc/>

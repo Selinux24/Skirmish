@@ -21,6 +21,8 @@ namespace Engine.Content
         /// </summary>
         private readonly Rectangle[] faces;
         /// <inheritdoc/>
+        public string Name { get; private set; }
+        /// <inheritdoc/>
         public int Count
         {
             get
@@ -87,9 +89,11 @@ namespace Engine.Content
         }
 
         /// <inheritdoc/>
-        public EngineShaderResourceView CreateResource(Game game, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView CreateResource(Game game, string name, bool mipAutogen = true, bool dynamic = false)
         {
-            return game.Graphics.LoadTextureCubic(GetResourceKey(), path, faces, mipAutogen, dynamic);
+            Name = name;
+
+            return game.Graphics.LoadTextureCubic($"{name}_{GetResourceKey()}", path, faces, mipAutogen, dynamic);
         }
         /// <inheritdoc/>
         public string GetResourceKey()

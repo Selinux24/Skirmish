@@ -343,7 +343,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            GameResourceValueArray<T> resource = new GameResourceValueArray<T>()
+            GameResourceValueArray<T> resource = new GameResourceValueArray<T>(name)
             {
                 Values = values,
                 Size = size,
@@ -366,7 +366,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            GameResourceRandomTexture resource = new GameResourceRandomTexture()
+            GameResourceRandomTexture resource = new GameResourceRandomTexture(name)
             {
                 Size = size,
                 Min = min,
@@ -472,7 +472,7 @@ namespace Engine
                 return requestedResources[key].ResourceView;
             }
 
-            var request = new GameResourceValueArray<T>
+            var request = new GameResourceValueArray<T>(identifier.ToString("B"))
             {
                 Values = values,
                 Size = size,
@@ -509,7 +509,7 @@ namespace Engine
                 return requestedResources[key].ResourceView;
             }
 
-            var request = new GameResourceRandomTexture
+            var request = new GameResourceRandomTexture(identifier.ToString("B"))
             {
                 Size = size,
                 Min = min,

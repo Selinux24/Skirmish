@@ -9,6 +9,10 @@ namespace Engine.Content
     public interface IImageContent
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; }
+        /// <summary>
         /// Gets the image count into the image content
         /// </summary>
         int Count { get; }
@@ -17,10 +21,11 @@ namespace Engine.Content
         /// Generates the resource view
         /// </summary>
         /// <param name="game">Game instance</param>
+        /// <param name="name">Name</param>
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Dynamic texture</param>
         /// <returns>Returns the created resource view</returns>
-        EngineShaderResourceView CreateResource(Game game, bool mipAutogen = true, bool dynamic = false);
+        EngineShaderResourceView CreateResource(Game game, string name, bool mipAutogen = true, bool dynamic = false);
         /// <summary>
         /// Gets the image unique resource key
         /// </summary>

@@ -3,7 +3,7 @@ using System;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using BlendState = SharpDX.Direct3D11.BlendState1;
 
     /// <summary>
     /// Engine blend state
@@ -13,7 +13,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal blend state
         /// </summary>
-        private BlendState1 state = null;
+        private BlendState state = null;
 
         /// <summary>
         /// Name
@@ -35,22 +35,7 @@ namespace Engine.Common
         /// <returns>Returns the default blend state</returns>
         public static EngineBlendState Default(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = false
-            };
-
-            desc.RenderTarget[0].IsBlendEnabled = true;
-            desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
-
-            desc.RenderTarget[0].BlendOperation = BlendOperation.Add;
-            desc.RenderTarget[0].SourceBlend = BlendOption.One;
-            desc.RenderTarget[0].DestinationBlend = BlendOption.Zero;
-
-            desc.RenderTarget[0].AlphaBlendOperation = BlendOperation.Add;
-            desc.RenderTarget[0].SourceAlphaBlend = BlendOption.One;
-            desc.RenderTarget[0].DestinationAlphaBlend = BlendOption.Zero;
+            var desc = EngineBlendStateDescription.Default();
 
             return graphics.CreateBlendState(nameof(Default), desc, Color.Transparent, -1);
         }
@@ -61,11 +46,7 @@ namespace Engine.Common
         /// <returns>Creates the alpha enabled blend state</returns>
         public static EngineBlendState AlphaBlend(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = false
-            };
+            var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -87,11 +68,7 @@ namespace Engine.Common
         /// <returns>Creates the alpha enabled blend state</returns>
         public static EngineBlendState AlphaConservativeBlend(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = false
-            };
+            var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -114,11 +91,9 @@ namespace Engine.Common
         /// <returns>Creates the transparent enabled blend state</returns>
         public static EngineBlendState Transparent(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = true,
-                IndependentBlendEnable = false
-            };
+            var desc = EngineBlendStateDescription.Default();
+
+            desc.AlphaToCoverageEnable = true;
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -141,11 +116,9 @@ namespace Engine.Common
         /// <returns>Creates the transparent enabled blend state</returns>
         public static EngineBlendState TransparentConservative(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = true,
-                IndependentBlendEnable = false
-            };
+            var desc = EngineBlendStateDescription.Default();
+
+            desc.AlphaToCoverageEnable = true;
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -167,11 +140,7 @@ namespace Engine.Common
         /// <returns>Creates the additive enabled blend state</returns>
         public static EngineBlendState Additive(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = false
-            };
+            var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -194,11 +163,9 @@ namespace Engine.Common
         /// <returns>Creates the deferred composer blend state</returns>
         public static EngineBlendState DeferredComposer(Graphics graphics, int rtCount)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = true
-            };
+            var desc = EngineBlendStateDescription.Default();
+
+            desc.IndependentBlendEnable = true;
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -231,11 +198,10 @@ namespace Engine.Common
         /// <returns>Creates the deferred composer transparent enabled blend state</returns>
         public static EngineBlendState DeferredComposerTransparent(Graphics graphics, int rtCount)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = true,
-                IndependentBlendEnable = true
-            };
+            var desc = EngineBlendStateDescription.Default();
+
+            desc.AlphaToCoverageEnable = true;
+            desc.IndependentBlendEnable = true;
 
             //Transparent blending only in first buffer
             desc.RenderTarget[0].IsBlendEnabled = true;
@@ -269,11 +235,9 @@ namespace Engine.Common
         /// <returns>Creates the deferred composer alpha enabled blend state</returns>
         public static EngineBlendState DeferredComposerAlpha(Graphics graphics, int rtCount)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = true
-            };
+            var desc = EngineBlendStateDescription.Default();
+
+            desc.IndependentBlendEnable = true;
 
             //Additive blending only in first buffer
             desc.RenderTarget[0].IsBlendEnabled = true;
@@ -307,11 +271,9 @@ namespace Engine.Common
         /// <returns>Creates the deferred composer additive enabled blend state</returns>
         public static EngineBlendState DeferredComposerAdditive(Graphics graphics, int rtCount)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = true
-            };
+            var desc = EngineBlendStateDescription.Default();
+
+            desc.IndependentBlendEnable = true;
 
             //Additive blending only in first buffer
             desc.RenderTarget[0].IsBlendEnabled = true;
@@ -346,11 +308,7 @@ namespace Engine.Common
         /// <returns>Creates the deferred lighting blend state</returns>
         public static EngineBlendState DeferredLighting(Graphics graphics)
         {
-            BlendStateDescription1 desc = new BlendStateDescription1
-            {
-                AlphaToCoverageEnable = false,
-                IndependentBlendEnable = false
-            };
+            var desc = EngineBlendStateDescription.Default();
 
             desc.RenderTarget[0].IsBlendEnabled = true;
             desc.RenderTarget[0].RenderTargetWriteMask = ColorWriteMaskFlags.All;
@@ -371,7 +329,7 @@ namespace Engine.Common
         /// <param name="blendState">Blend state</param>
         /// <param name="blendFactor">Blend factor</param>
         /// <param name="sampleMask">Sample mask</param>
-        internal EngineBlendState(string name, BlendState1 blendState, Color4? blendFactor, int sampleMask)
+        internal EngineBlendState(string name, BlendState blendState, Color4? blendFactor, int sampleMask)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A blend state name must be specified.");
             state = blendState ?? throw new ArgumentNullException(nameof(blendState), "A blend state must be specified.");
@@ -413,7 +371,7 @@ namespace Engine.Common
         /// Gets the internal blend state
         /// </summary>
         /// <returns>Returns the internal blend state</returns>
-        internal BlendState1 GetBlendState()
+        internal BlendState GetBlendState()
         {
             return state;
         }

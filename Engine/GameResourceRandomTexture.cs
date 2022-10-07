@@ -8,10 +8,10 @@ namespace Engine
     /// </summary>
     public class GameResourceRandomTexture : IGameResourceRequest
     {
-        /// <summary>
-        /// Engine resource view
-        /// </summary>
-        public EngineShaderResourceView ResourceView { get; private set; } = new EngineShaderResourceView("Random Texture");
+        /// <inheritdoc/>
+        public string Name { get; private set; }
+        /// <inheritdoc/>
+        public EngineShaderResourceView ResourceView { get; private set; }
         /// <summary>
         /// Size
         /// </summary>
@@ -34,14 +34,19 @@ namespace Engine
         public bool Dynamic { get; set; }
 
         /// <summary>
-        /// Creates the resource
+        /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
+        public GameResourceRandomTexture(string name)
+        {
+            Name = name;
+            ResourceView = new EngineShaderResourceView(name);
+        }
+
+        /// <inheritdoc/>
         public void Create(Game game)
         {
-            var resource = game.Graphics.CreateRandomTexture(ResourceView.Name, Size, Min, Max, Seed, Dynamic).GetResource();
-
-            ResourceView.SetResource(resource);
+            var srv = game.Graphics.CreateRandomTexture(Name, Size, Min, Max, Seed, Dynamic).GetResource();
+            ResourceView.SetResource(srv);
         }
     }
 }

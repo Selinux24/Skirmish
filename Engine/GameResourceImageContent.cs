@@ -10,9 +10,9 @@ namespace Engine
     /// </summary>
     public class GameResourceImageContent : IGameResourceRequest
     {
-        /// <summary>
-        /// Engine resource view
-        /// </summary>
+        /// <inheritdoc/>
+        public string Name { get; private set; }
+        /// <inheritdoc/>
         public EngineShaderResourceView ResourceView { get; private set; }
         /// <summary>
         /// Image content
@@ -36,21 +36,18 @@ namespace Engine
         public GameResourceImageContent(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
             ImageContent = imageContent ?? throw new ArgumentNullException(nameof(imageContent), "A image content must be specified.");
+            Name = imageContent.Name;
             MipAutogen = mipAutogen;
             Dynamic = dynamic;
 
             ResourceView = new EngineShaderResourceView(imageContent.GetResourceKey());
         }
 
-        /// <summary>
-        /// Creates the resource
-        /// </summary>
-        /// <param name="game">Game</param>
+        /// <inheritdoc/>
         public void Create(Game game)
         {
-            var resource = ImageContent.CreateResource(game, MipAutogen, Dynamic).GetResource();
-
-            ResourceView.SetResource(resource);
+            var srv = ImageContent.CreateResource(game, Name, MipAutogen, Dynamic).GetResource();
+            ResourceView.SetResource(srv);
         }
     }
 }
