@@ -326,13 +326,28 @@ namespace Engine
                 return false;
             }
 
-            Renderer?.Dispose();
-            Renderer = renderer;
+            ReplaceRenderer(renderer);
             sceneMode = mode;
 
             Counters.ClearAll();
 
             return true;
+        }
+        /// <summary>
+        /// Replaces the renderer
+        /// </summary>
+        /// <param name="renderer">New renderer</param>
+        private void ReplaceRenderer(ISceneRenderer renderer)
+        {
+            if (Renderer != null && renderer != null)
+            {
+                renderer.PostProcessingObjectsEffects = Renderer.PostProcessingObjectsEffects;
+                renderer.PostProcessingUIEffects = Renderer.PostProcessingUIEffects;
+                renderer.PostProcessingFinalEffects = Renderer.PostProcessingFinalEffects;
+            }
+
+            Renderer?.Dispose();
+            Renderer = renderer;
         }
 
         /// <summary>

@@ -240,6 +240,8 @@ namespace Terrain.Rts
                 res.ThrowExceptions();
             }
 
+            Renderer.PostProcessingObjectsEffects.AddToneMapping(Engine.BuiltIn.PostProcess.BuiltInToneMappingTones.Uncharted2);
+
             UpdateLayout();
 
             InitializeModels();

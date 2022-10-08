@@ -66,7 +66,7 @@ namespace Terrain.Start
             {
                 Content = ContentDescription.FromFile("Start", "SkyPlane.json"),
             };
-            backGround = await AddComponentUI<Model, ModelDescription>("Background", "Background", backGroundDesc);
+            backGround = await AddComponent<Model, ModelDescription>("Background", "Background", backGroundDesc);
 
             #endregion
 
@@ -140,6 +140,8 @@ namespace Terrain.Start
             {
                 res.ThrowExceptions();
             }
+
+            Renderer.PostProcessingObjectsEffects.AddToneMapping(Engine.BuiltIn.PostProcess.BuiltInToneMappingTones.Uncharted2);
 
             UpdateLayout();
 
