@@ -365,7 +365,7 @@ namespace SceneTest.SceneMaterials
 
             for (int i = 0; i < count; i++)
             {
-                model[i].MaterialIndex = i;
+                model[i].MaterialIndex = (uint)i;
             }
 
             return model;

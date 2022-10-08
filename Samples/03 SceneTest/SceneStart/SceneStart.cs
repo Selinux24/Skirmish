@@ -43,10 +43,6 @@ namespace SceneTest.SceneStart
             Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
-
-            Renderer.PostProcessingObjectsEffects.AddBlurStrong();
-
-            Renderer.PostProcessingFinalEffects.AddToneMapping(BuiltInToneMappingTones.Filmic);
         }
 
         public override async Task Initialize()

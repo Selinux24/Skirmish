@@ -68,7 +68,7 @@ namespace Engine
         /// <summary>
         /// Material index
         /// </summary>
-        public int MaterialIndex { get; set; } = -1;
+        public uint MaterialIndex { get; set; } = 0;
         /// <summary>
         /// Active
         /// </summary>

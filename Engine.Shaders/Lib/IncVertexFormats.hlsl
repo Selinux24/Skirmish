@@ -88,7 +88,7 @@ struct VSVertexPositionColorI
 	float4 color : COLOR0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionNormalColorI
@@ -98,7 +98,7 @@ struct VSVertexPositionNormalColorI
 	float4 color : COLOR0;
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionTextureI
@@ -108,7 +108,7 @@ struct VSVertexPositionTextureI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionNormalTextureI
@@ -119,7 +119,7 @@ struct VSVertexPositionNormalTextureI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint instanceId : SV_INSTANCEID;
 };
 struct VSVertexPositionNormalTextureTangentI
@@ -131,7 +131,7 @@ struct VSVertexPositionNormalTextureTangentI
 	row_major float4x4 localTransform : LOCALTRANSFORM;
     float4 tintColor : TINTCOLOR;
 	uint textureIndex : TEXTUREINDEX;
-    int materialIndex : MATERIALINDEX;
+    uint materialIndex : MATERIALINDEX;
 	uint instanceId : SV_INSTANCEID;
 };
 
