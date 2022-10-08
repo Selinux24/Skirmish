@@ -31,7 +31,7 @@ namespace Engine
         /// <summary>
         /// Gets or sets the clouds base color
         /// </summary>
-        public Color4 CloudBaseColor { get; set; }
+        public Color3 CloudBaseColor { get; set; }
         /// <summary>
         /// Clouds quad size
         /// </summary>
@@ -79,15 +79,12 @@ namespace Engine
         public SkyPlaneDescription()
             : base()
         {
-            this.Static = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
             this.DepthEnabled = false;
-            this.AlphaEnabled = false;
+            this.BlendMode = BlendModes.Opaque | BlendModes.Additive;
 
             this.MaxBrightness = 0.75f;
             this.MinBrightness = 0.15f;
-            this.CloudBaseColor = new Color4(1f, 1f, 1f, 1f);
+            this.CloudBaseColor = Color3.White;
             this.Size = 100;
             this.Repeat = 2;
             this.PlaneWidth = 50;

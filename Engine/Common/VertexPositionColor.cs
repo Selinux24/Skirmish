@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -31,13 +33,15 @@ namespace Engine.Common
         /// <param name="vertices">Vertices</param>
         /// <param name="color">Color for all vertices</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static VertexPositionColor[] Generate(Vector3[] vertices, Color4 color)
+        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, Color4 color)
         {
-            VertexPositionColor[] res = new VertexPositionColor[vertices.Length];
+            var vArray = vertices.ToArray();
 
-            for (int i = 0; i < vertices.Length; i++)
+            VertexPositionColor[] res = new VertexPositionColor[vArray.Length];
+
+            for (int i = 0; i < vArray.Length; i++)
             {
-                res[i] = new VertexPositionColor() { Position = vertices[i], Color = color };
+                res[i] = new VertexPositionColor() { Position = vArray[i], Color = color };
             }
 
             return res;
@@ -48,15 +52,18 @@ namespace Engine.Common
         /// <param name="vertices">Vertices</param>
         /// <param name="colors">Colors</param>
         /// <returns>Returns the new generated vertex array</returns>
-        public static VertexPositionColor[] Generate(Vector3[] vertices, Color4[] colors)
+        public static IEnumerable<VertexPositionColor> Generate(IEnumerable<Vector3> vertices, IEnumerable<Color4> colors)
         {
-            if (vertices.Length != colors.Length) throw new ArgumentException("Vertices and colors must have the same length");
+            if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
 
-            VertexPositionColor[] res = new VertexPositionColor[vertices.Length];
+            var vArray = vertices.ToArray();
+            var cArray = colors.ToArray();
 
-            for (int i = 0; i < vertices.Length; i++)
+            VertexPositionColor[] res = new VertexPositionColor[vArray.Length];
+
+            for (int i = 0; i < vArray.Length; i++)
             {
-                res[i] = new VertexPositionColor() { Position = vertices[i], Color = colors[i] };
+                res[i] = new VertexPositionColor() { Position = vArray[i], Color = cArray[i] };
             }
 
             return res;
@@ -100,9 +107,9 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
-            else if (channel == VertexDataChannels.Color) return (T)(object)this.Color;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) return (T)(object)Position;
+            else if (channel == VertexDataChannels.Color) return (T)(object)Color;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
         /// <summary>
         /// Sets the channer value
@@ -112,9 +119,9 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Color) this.Color = (Color4)(object)value;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Color) Color = (Color4)(object)value;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <summary>
@@ -134,13 +141,10 @@ namespace Engine.Common
             return Input(slot);
         }
 
-        /// <summary>
-        /// Text representation of vertex
-        /// </summary>
-        /// <returns>Returns the text representation of vertex</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Position: {0}; Color: {1}", this.Position, this.Color);
+            return $"Position: {Position}; Color: {Color};";
         }
     };
 }

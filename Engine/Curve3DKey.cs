@@ -168,7 +168,7 @@ namespace Engine
         /// <returns>A value indicating whether the object is equal to this instance.</returns>
         public override bool Equals(object obj)
         {
-            return (obj is Curve3DKey) && Equals((Curve3DKey)obj);
+            return (obj is Curve3DKey key) && Equals(key);
         }
         /// <summary>
         /// Calculates a hash code unique to the contents of this instance.

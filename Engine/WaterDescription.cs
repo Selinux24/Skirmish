@@ -10,15 +10,13 @@ namespace Engine
         /// <summary>
         /// Creates a default water description
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="planeSize">Plane size</param>
         /// <param name="planeHeight">Plane height</param>
         /// <returns>Returns a water description</returns>
-        public static WaterDescription CreateDefault(string name, float planeSize, float planeHeight)
+        public static WaterDescription CreateDefault(float planeSize, float planeHeight)
         {
             return new WaterDescription()
             {
-                Name = name,
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
             };
@@ -26,15 +24,13 @@ namespace Engine
         /// <summary>
         /// Creates a calm water description
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="planeSize">Plane size</param>
         /// <param name="planeHeight">Plane height</param>
         /// <returns>Returns a water description</returns>
-        public static WaterDescription CreateCalm(string name, float planeSize, float planeHeight)
+        public static WaterDescription CreateCalm(float planeSize, float planeHeight)
         {
             return new WaterDescription()
             {
-                Name = name,
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
                 WaveHeight = 0.2f,
@@ -46,15 +42,13 @@ namespace Engine
         /// <summary>
         /// Creates a ocean water description
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="planeSize">Plane size</param>
         /// <param name="planeHeight">Plane height</param>
         /// <returns>Returns a water description</returns>
-        public static WaterDescription CreateOcean(string name, float planeSize, float planeHeight)
+        public static WaterDescription CreateOcean(float planeSize, float planeHeight)
         {
             return new WaterDescription()
             {
-                Name = name,
                 PlaneHeight = planeHeight,
                 PlaneSize = planeSize,
                 WaveHeight = 1.0f,
@@ -67,11 +61,11 @@ namespace Engine
         /// <summary>
         /// Base color
         /// </summary>
-        public Color BaseColor { get; set; } = new Color(0.1f, 0.19f, 0.22f, 1.0f);
+        public Color3 BaseColor { get; set; } = new Color3(0.1f, 0.19f, 0.22f);
         /// <summary>
         /// Water color
         /// </summary>
-        public Color WaterColor { get; set; } = new Color(0.8f, 0.9f, 0.6f, 1.0f);
+        public Color4 WaterColor { get; set; } = new Color4(0.8f, 0.9f, 0.6f, 0.75f);
         /// <summary>
         /// Wave height
         /// </summary>
@@ -103,27 +97,23 @@ namespace Engine
         /// <summary>
         /// Number of iterations to obtain the wave height
         /// </summary>
-        public int HeightmapIterations { get; set; } = 8;
+        public uint HeightmapIterations { get; set; } = 8;
         /// <summary>
         /// Number of iterations to obtain the wave shape
         /// </summary>
-        public int GeometryIterations { get; set; } = 4;
+        public uint GeometryIterations { get; set; } = 4;
         /// <summary>
         /// Number of iterations to obtain the wave color
         /// </summary>
-        public int ColorIterations { get; set; } = 6;
+        public uint ColorIterations { get; set; } = 6;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public WaterDescription()
-            : base()
+        public WaterDescription() : base()
         {
-            this.Static = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
-            this.DepthEnabled = true;
-            this.AlphaEnabled = false;
+            DeferredEnabled = false;
+            SphericVolume = false;
         }
     }
 }

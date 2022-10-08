@@ -16,6 +16,10 @@ namespace Engine.Common
         /// </summary>
         Billboard,
         /// <summary>
+        /// Font
+        /// </summary>
+        Font,
+        /// <summary>
         /// CPU Particle
         /// </summary>
         CPUParticle,
@@ -27,6 +31,10 @@ namespace Engine.Common
         /// Terrain
         /// </summary>
         Terrain,
+        /// <summary>
+        /// Decal
+        /// </summary>
+        Decal,
 
         /// <summary>
         /// Position

@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -21,6 +23,25 @@ namespace Engine.Common
             {
                 new InputElement("POSITION", 0, SharpDX.DXGI.Format.R32G32B32_Float, 0, slot, InputClassification.PerVertexData, 0),
             };
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="uvs">Uv texture coordinates</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPosition> Generate(IEnumerable<Vector3> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            List<VertexPosition> res = new List<VertexPosition>();
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res.Add(new VertexPosition() { Position = vArray[i] });
+            }
+
+            return res.ToArray();
         }
 
         /// <summary>
@@ -56,8 +77,8 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) return (T)(object)Position;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
         /// <summary>
         /// Sets the channer value
@@ -67,8 +88,8 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <summary>
@@ -88,13 +109,10 @@ namespace Engine.Common
             return VertexPosition.Input(slot);
         }
 
-        /// <summary>
-        /// Text representation of vertex
-        /// </summary>
-        /// <returns>Returns the text representation of vertex</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Position: {0}", this.Position);
+            return $"Position: {Position};";
         }
     };
 }

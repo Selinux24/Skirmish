@@ -32,7 +32,7 @@ namespace Engine.Common
         /// <returns>Returns a value of the specified type from the variable</returns>
         public T GetValue<T>() where T : struct, IBufferData
         {
-            using (var ds = this.variable.GetRawValue(default(T).GetStride()))
+            using (var ds = variable.GetRawValue(default(T).GetStride()))
             {
                 ds.Position = 0;
 
@@ -47,7 +47,7 @@ namespace Engine.Common
         /// <returns>Returns a array of values of the specified type from the variable</returns>
         public T[] GetValue<T>(int length) where T : struct, IBufferData
         {
-            using (var ds = this.variable.GetRawValue(default(T).GetStride() * length))
+            using (var ds = variable.GetRawValue(default(T).GetStride() * length))
             {
                 ds.Position = 0;
 
@@ -66,7 +66,7 @@ namespace Engine.Common
 
             IntPtr ptr = Marshal.AllocHGlobal(sizeInBytes);
             Utilities.Write(ptr, ref value);
-            this.variable.SetRawValue(ptr, 0, sizeInBytes);
+            variable.SetRawValue(ptr, 0, sizeInBytes);
             Marshal.FreeHGlobal(ptr);
         }
         /// <summary>
@@ -81,7 +81,7 @@ namespace Engine.Common
 
             IntPtr ptr = Marshal.AllocHGlobal(sizeInBytes);
             Utilities.Write(ptr, value, 0, length);
-            this.variable.SetRawValue(ptr, 0, sizeInBytes);
+            variable.SetRawValue(ptr, 0, sizeInBytes);
             Marshal.FreeHGlobal(ptr);
         }
     }

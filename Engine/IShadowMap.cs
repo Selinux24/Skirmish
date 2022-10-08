@@ -3,8 +3,8 @@ using System;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Shadow map interface
@@ -43,9 +43,17 @@ namespace Engine
         /// <param name="index">Array index</param>
         void Bind(Graphics graphics, int index);
         /// <summary>
-        /// Gets the effect to draw this shadow map
+        /// Gets the drawer to draw this shadow map
         /// </summary>
-        /// <returns>Returns an effect</returns>
-        IShadowMapDrawer GetEffect();
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="instanced">Use instancing data</param>
+        /// <param name="useTextureAlpha">Uses alpha channel</param>
+        /// <returns>Returns a drawer</returns>
+        IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
+
+        /// <summary>
+        /// Update shadow map globals
+        /// </summary>
+        void UpdateGlobals();
     }
 }

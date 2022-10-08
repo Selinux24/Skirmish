@@ -1,33 +1,35 @@
 ﻿using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Clouds;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Sky plane
     /// </summary>
-    public class SkyPlane : Drawable
+    public sealed class SkyPlane : Drawable<SkyPlaneDescription>
     {
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor vertexBuffer = null;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor indexBuffer = null;
+        private BufferDescriptor indexBuffer = null;
         /// <summary>
         /// Sky texture 1
         /// </summary>
-        private readonly EngineShaderResourceView skyTexture1 = null;
+        private EngineShaderResourceView skyTexture1 = null;
         /// <summary>
         /// Sky texture 2
         /// </summary>
-        private readonly EngineShaderResourceView skyTexture2 = null;
+        private EngineShaderResourceView skyTexture2 = null;
         /// <summary>
         /// Brightness
         /// </summary>
@@ -47,19 +49,15 @@ namespace Engine
         /// <summary>
         /// Plane mode
         /// </summary>
-        private readonly SkyPlaneModes skyMode;
-        /// <summary>
-        /// Traslation direction
-        /// </summary>
-        private Vector2 direction;
-        /// <summary>
-        /// Plane rotation (Y)
-        /// </summary>
-        private Matrix rotation;
+        private SkyPlaneModes skyMode;
         /// <summary>
         /// Clouds color
         /// </summary>
-        private Color4 color;
+        private Color3 color;
+        /// <summary>
+        /// Clouds drawer
+        /// </summary>
+        private BuiltInClouds cloudsDrawer;
 
         /// <summary>
         /// First layer translation
@@ -86,79 +84,49 @@ namespace Engine
         /// </summary>
         public float Velocity { get; set; }
         /// <summary>
-        /// Gets or sets the traslation direction
-        /// </summary>
-        public Vector2 Direction
-        {
-            get
-            {
-                return this.direction;
-            }
-            set
-            {
-                this.direction = value;
-
-                if (this.direction != Vector2.Zero)
-                {
-                    float a = Helper.AngleSigned(Vector2.UnitX, Vector2.Normalize(this.direction));
-
-                    this.rotation = Matrix.RotationY(a);
-                }
-            }
-        }
-        /// <summary>
         /// Perturbation scale
         /// </summary>
         public float PerturbationScale { get; set; }
         /// <summary>
         /// Gets or sets the clouds base color
         /// </summary>
-        public Color4 CloudsBaseColor { get; set; }
+        public Color3 CloudsBaseColor { get; set; }
+        /// <summary>
+        /// Returns true if the buffers were ready
+        /// </summary>
+        public bool BuffersReady
+        {
+            get
+            {
+                if (vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer.Count <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Sky plane description class</param>
-        public SkyPlane(Scene scene, SkyPlaneDescription description)
-            : base(scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public SkyPlane(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            var img1 = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(description.ContentPath, description.Texture1Name),
-            };
-            this.skyTexture1 = this.Game.ResourceManager.CreateResource(img1);
 
-            var img2 = new ImageContent()
-            {
-                Streams = ContentManager.FindContent(description.ContentPath, description.Texture2Name),
-            };
-            this.skyTexture2 = this.Game.ResourceManager.CreateResource(img2);
-
-            this.skyMode = description.SkyMode;
-            this.rotation = Matrix.Identity;
-
-            this.MaxBrightness = description.MaxBrightness;
-            this.MinBrightness = description.MinBrightness;
-            this.FadingDistance = description.FadingDistance;
-            this.Velocity = description.Velocity;
-            this.PerturbationScale = description.PerturbationScale;
-            this.Direction = description.Direction;
-            this.CloudsBaseColor = description.CloudBaseColor;
-
-            //Create sky plane
-            GeometryUtil.CreateCurvePlane(
-                description.Size,
-                description.Repeat,
-                description.PlaneWidth,
-                description.PlaneTop,
-                description.PlaneBottom,
-                out Vector3[] vData, out Vector2[] uvs, out uint[] iData);
-
-            VertexPositionTexture[] vertices = VertexPositionTexture.Generate(vData, uvs);
-
-            this.vertexBuffer = this.BufferManager.Add(description.Name, vertices, false, 0);
-            this.indexBuffer = this.BufferManager.Add(description.Name, iData, false);
         }
         /// <summary>
         /// Destructor
@@ -168,99 +136,116 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Resource releasing
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Updating context</param>
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(SkyPlaneDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            var img1 = new FileArrayImageContent(Description.ContentPath, Description.Texture1Name);
+            skyTexture1 = await Game.ResourceManager.RequestResource(img1);
+
+            var img2 = new FileArrayImageContent(Description.ContentPath, Description.Texture2Name);
+            skyTexture2 = await Game.ResourceManager.RequestResource(img2);
+
+            skyMode = Description.SkyMode;
+
+            MaxBrightness = Description.MaxBrightness;
+            MinBrightness = Description.MinBrightness;
+            FadingDistance = Description.FadingDistance;
+            Velocity = Description.Velocity;
+            PerturbationScale = Description.PerturbationScale;
+            CloudsBaseColor = Description.CloudBaseColor;
+
+            //Create sky plane
+            var cPlane = GeometryUtil.CreateCurvePlane(
+                Description.Size,
+                Description.Repeat,
+                Description.PlaneWidth,
+                Description.PlaneTop,
+                Description.PlaneBottom);
+
+            var vertices = VertexPositionTexture.Generate(cPlane.Vertices, cPlane.Uvs);
+            var indices = cPlane.Indices;
+
+            vertexBuffer = BufferManager.AddVertexData(Name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(Name, false, indices);
+
+            cloudsDrawer = BuiltInShaders.GetDrawer<BuiltInClouds>();
+        }
+
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            float delta = context.GameTime.ElapsedSeconds * this.Velocity * 0.001f;
+            float delta = context.GameTime.TotalSeconds * Velocity * 0.001f;
 
-            this.firstLayerTranslation += this.FirstLayerTranslation * delta;
-            this.secondLayerTranslation += this.SecondLayerTranslation * delta;
+            firstLayerTranslation = FirstLayerTranslation * delta;
+            secondLayerTranslation = SecondLayerTranslation * delta;
 
-            this.translation += delta;
-            this.translation %= 1f;
+            translation = delta;
+            translation %= 1f;
 
             if (context.Lights.KeyLight != null)
             {
-                this.brightness = Math.Min(this.MaxBrightness, context.Lights.KeyLight.Brightness + this.MinBrightness);
+                brightness = Math.Min(MaxBrightness, context.Lights.KeyLight.Brightness + MinBrightness);
             }
 
-            this.color = (this.CloudsBaseColor + context.Lights.SunColor) * 0.5f;
+            color = (CloudsBaseColor + context.Lights.SunColor) * 0.5f;
         }
-        /// <summary>
-        /// Draws content
-        /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
-
-            if (draw && this.indexBuffer.Count > 0)
+            if (!Visible)
             {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-
-                var effect = DrawerPool.EffectDefaultClouds;
-                var technique = this.skyMode == SkyPlaneModes.Static ? effect.CloudsStatic : effect.CloudsPerturbed;
-
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
-
-                effect.UpdatePerFrame(
-                    this.rotation * Matrix.Translation(context.EyePosition),
-                    context.ViewProjection,
-                    this.brightness,
-                    this.color,
-                    this.FadingDistance,
-                    this.skyTexture1,
-                    this.skyTexture2);
-
-                if (this.skyMode == SkyPlaneModes.Static)
-                {
-                    effect.UpdatePerFrameStatic(
-                        this.firstLayerTranslation,
-                        this.secondLayerTranslation);
-                }
-                else
-                {
-                    effect.UpdatePerFramePerturbed(
-                        this.translation,
-                        this.PerturbationScale);
-                }
-
-                var graphics = this.Game.Graphics;
-
-                graphics.SetBlendAdditive();
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
-                }
+                return;
             }
+
+            if (!BuffersReady)
+            {
+                return;
+            }
+
+            bool draw = context.ValidateDraw(BlendMode);
+            if (!draw)
+            {
+                return;
+            }
+
+            var state = new BuiltInCloudsState
+            {
+                Perturbed = skyMode == SkyPlaneModes.Perturbed,
+                Translation = translation,
+                Scale = PerturbationScale,
+                FadingDistance = FadingDistance,
+                FirstTranslation = firstLayerTranslation,
+                SecondTranslation = secondLayerTranslation,
+                Color = color,
+                Brightness = brightness,
+                Clouds1 = skyTexture1,
+                Clouds2 = skyTexture2,
+            };
+            cloudsDrawer.UpdateClouds(state);
+
+            var drawOptions = new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            };
+            cloudsDrawer.Draw(BufferManager, drawOptions);
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
         }
     }
 }

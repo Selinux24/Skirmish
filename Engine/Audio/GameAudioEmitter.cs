@@ -4,24 +4,43 @@ namespace Engine.Audio
     /// <summary>
     /// Game audio emitter
     /// </summary>
-    public class GameAudioEmitter : GameAudioSource
+    class GameAudioEmitter : GameAudioAgent, IGameAudioEmitter
     {
+        /// <summary>
+        /// Sound radius
+        /// </summary>
+        public float Radius { get; set; }
+        /// <summary>
+        /// Cone
+        /// </summary>
+        public GameAudioConeDescription? Cone { get; set; }
+        /// <summary>
+        /// Inner radius
+        /// </summary>
+        public float InnerRadius { get; set; }
+        /// <summary>
+        /// Inner radius angle
+        /// </summary>
+        public float InnerRadiusAngle { get; set; }
+        /// <summary>
+        /// Volume curve
+        /// </summary>
+        public GameAudioCurvePoint[] VolumeCurve { get; set; }
+        /// <summary>
+        /// LFE curve
+        /// </summary>
+        public GameAudioCurvePoint[] LfeCurve { get; set; }
+        /// <summary>
+        /// Reverb curve
+        /// </summary>
+        public GameAudioCurvePoint[] ReverbCurve { get; set; }
+
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="emitterDescription">Emitter description</param>
-        public GameAudioEmitter(GameAudioSourceDescription emitterDescription) : base(emitterDescription)
+        public GameAudioEmitter() : base()
         {
 
-        }
-
-        /// <summary>
-        /// Sets the game audio emitter's source
-        /// </summary>
-        /// <param name="manipulator">Transformable instance</param>
-        public void SetSource(ITransformable3D source)
-        {
-            SetSource(source.Manipulator);
         }
     }
 }

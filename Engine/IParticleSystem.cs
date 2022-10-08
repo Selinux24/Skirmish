@@ -14,7 +14,7 @@ namespace Engine
         /// </summary>
         string Name { get; }
         /// <summary>
-        /// Gets wheter the particles system is active or not
+        /// Gets whether the particles system is active or not
         /// </summary>
         bool Active { get; }
         /// <summary>

@@ -144,7 +144,6 @@ namespace Engine.Helpers.DDS
         private static bool ValidateTexture(DdsHeader header, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
             depth = 0;
-            format = Format.Unknown;
             resDim = ResourceDimension.Unknown;
             arraySize = 1;
             isCubeMap = false;
@@ -161,10 +160,10 @@ namespace Engine.Helpers.DDS
             }
             else
             {
-                if (header.Caps2.HasFlag(DdsCaps2.Cubemap))
+                if (header.Caps2.HasFlag(DdsCaps2Types.Cubemap))
                 {
                     // We require all six faces to be defined
-                    if ((header.Caps2 & DdsCaps2.AllFaces) != DdsCaps2.AllFaces)
+                    if ((header.Caps2 & DdsCaps2Types.AllFaces) != DdsCaps2Types.AllFaces)
                     {
                         return false;
                     }
@@ -195,7 +194,6 @@ namespace Engine.Helpers.DDS
             depth = 0;
             format = Format.Unknown;
             resDim = ResourceDimension.Unknown;
-            arraySize = 1;
             isCubeMap = false;
 
             arraySize = header.ArraySize;
@@ -292,11 +290,11 @@ namespace Engine.Helpers.DDS
         /// <summary>
         /// Specifies the complexity of the surfaces stored.
         /// </summary>
-        public DdsCaps Caps;
+        public DdsCapsTypes Caps;
         /// <summary>
         /// Additional detail about the surfaces stored.
         /// </summary>
-        public DdsCaps2 Caps2;
+        public DdsCaps2Types Caps2;
         /// <summary>
         /// Unused.
         /// </summary>

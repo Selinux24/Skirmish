@@ -1,13 +1,14 @@
-﻿using SharpDX;
-using System;
-using System.Xml.Serialization;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+using SharpDX;
 
 namespace Engine
 {
+    using Engine.Content.Persistence;
+
     /// <summary>
     /// Particle system description
     /// </summary>
-    [Serializable]
     public class ParticleSystemDescription
     {
         /// <summary>
@@ -27,11 +28,12 @@ namespace Engine
         /// Creates a new particle description from another one
         /// </summary>
         /// <param name="particleDesc">The other particle description</param>
+        /// <param name="contentPath">Content path</param>
         /// <param name="scale">Scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        internal static ParticleSystemDescription Initialize(ParticleSystemDescription particleDesc, float scale = 1f)
+        internal static ParticleSystemDescription Initialize(ParticleSystemFile particleDesc, string contentPath, float scale = 1f)
         {
-            return Initialize(particleDesc.ParticleType, particleDesc.ContentPath, particleDesc.TextureName, scale);
+            return Initialize(particleDesc.ParticleType, contentPath, particleDesc.TextureName, scale);
         }
         /// <summary>
         /// Initializes particle system by type
@@ -92,8 +94,7 @@ namespace Engine
                 MinEndSize = 0.5f,
                 MaxEndSize = 1f,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -138,8 +139,7 @@ namespace Engine
 
                 EmitterVelocitySensitivity = 1f,
 
-                Transparent = true,
-                Additive = true
+                BlendMode = BlendModes.Alpha | BlendModes.Additive,
             };
 
             settings.Scale(scale);
@@ -187,8 +187,7 @@ namespace Engine
 
                 EmitterVelocitySensitivity = 1f,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -234,8 +233,7 @@ namespace Engine
                 MinEndSize = 0.5f,
                 MaxEndSize = 1.0f,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -258,31 +256,30 @@ namespace Engine
                 ContentPath = contentPath,
                 TextureName = texture,
 
-                MaxDuration = 1.5f,
-                MaxDurationRandomness = 1,
+                MaxDuration = 1f,
+                MaxDurationRandomness = 1f,
 
-                MinHorizontalVelocity = 1.0f,
-                MaxHorizontalVelocity = 1.5f,
+                MinHorizontalVelocity = 0.5f,
+                MaxHorizontalVelocity = 1.0f,
 
                 MinVerticalVelocity = -1f,
                 MaxVerticalVelocity = 1f,
 
-                EndVelocity = 0,
+                EndVelocity = 1,
 
-                MinColor = Color.DarkGray,
-                MaxColor = Color.Gray,
+                MinColor = Color.White,
+                MaxColor = Color.White,
 
                 MinRotateSpeed = -1,
                 MaxRotateSpeed = 1,
 
-                MinStartSize = 0.25f,
-                MaxStartSize = 0.25f,
+                MinStartSize = 1.0f,
+                MaxStartSize = 2.0f,
 
-                MinEndSize = 5,
-                MaxEndSize = 10,
+                MinEndSize = 3f,
+                MaxEndSize = 5f,
 
-                Transparent = true,
-                Additive = true
+                BlendMode = BlendModes.Alpha | BlendModes.Additive,
             };
 
             settings.Scale(scale);
@@ -329,8 +326,7 @@ namespace Engine
                 MinEndSize = 10,
                 MaxEndSize = 20,
 
-                Transparent = true,
-                Additive = false
+                BlendMode = BlendModes.Alpha,
             };
 
             settings.Scale(scale);
@@ -341,209 +337,103 @@ namespace Engine
         /// <summary>
         /// Particle type
         /// </summary>
-        [XmlAttribute("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
         public ParticleTypes ParticleType { get; set; }
         /// <summary>
         /// Name
         /// </summary>
-        [XmlAttribute("name")]
         public string Name { get; set; }
         /// <summary>
         /// Content path
         /// </summary>
-        [XmlAttribute("contentPath")]
         public string ContentPath { get; set; }
         /// <summary>
         /// Texture name
         /// </summary>
-        [XmlAttribute("textureName")]
         public string TextureName { get; set; }
 
         /// <summary>
         /// Maximum particle duration
         /// </summary>
-        [XmlElement("maxDuration")]
         public float MaxDuration { get; set; }
         /// <summary>
         /// Duration randomness
         /// </summary>
-        [XmlElement("maxDurationRandomness")]
         public float MaxDurationRandomness { get; set; }
 
         /// <summary>
         /// Maximum horizontal velocity
         /// </summary>
-        [XmlElement("maxHorizontalVelocity")]
         public float MaxHorizontalVelocity { get; set; }
         /// <summary>
         /// Minimum horizontal velocity
         /// </summary>
-        [XmlElement("minHorizontalVelocity")]
         public float MinHorizontalVelocity { get; set; }
 
         /// <summary>
         /// Maximum vertical velocity
         /// </summary>
-        [XmlElement("maxVerticalVelocity")]
         public float MaxVerticalVelocity { get; set; }
         /// <summary>
         /// Minimum vertical velocity
         /// </summary>
-        [XmlElement("minVerticalVelocity")]
         public float MinVerticalVelocity { get; set; }
 
         /// <summary>
         /// Gravity
         /// </summary>
-        [XmlIgnore]
-        public Vector3 Gravity { get; set; }
-        /// <summary>
-        /// Gravity vector
-        /// </summary>
-        [XmlElement("gravity")]
-        public string GravityText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2}", Gravity.X, Gravity.Y, Gravity.Z);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 3)
-                {
-                    Gravity = new Vector3(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    Gravity = new Vector3(floats[0]);
-                }
-                else
-                {
-                    Gravity = DefaultGravity;
-                }
-            }
-        }
+        public Direction3 Gravity { get; set; }
 
         /// <summary>
         /// Velocity at end
         /// </summary>
-        [XmlElement("endVelocity")]
         public float EndVelocity { get; set; }
 
         /// <summary>
         /// Minimum color variation
         /// </summary>
-        [XmlIgnore]
-        public Color MinColor { get; set; }
-        /// <summary>
-        /// Minimum color variation
-        /// </summary>
-        [XmlElement("minColor")]
-        public string MinColorText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2} {3}", MinColor.R, MinColor.G, MinColor.B, MinColor.A);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 4)
-                {
-                    MinColor = new Color(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    MinColor = new Color(floats[0]);
-                }
-                else
-                {
-                    MinColor = DefaultMinColor;
-                }
-            }
-        }
+        public ColorRgba MinColor { get; set; }
         /// <summary>
         /// Maximum color variation
         /// </summary>
-        [XmlIgnore]
-        public Color MaxColor { get; set; }
-        /// <summary>
-        /// Maximum color variation
-        /// </summary>
-        [XmlElement("maxColor")]
-        public string MaxColorText
-        {
-            get
-            {
-                return string.Format("{0} {1} {2} {3}", MaxColor.R, MaxColor.G, MaxColor.B, MaxColor.A);
-            }
-            set
-            {
-                var floats = value?.SplitFloats();
-                if (floats?.Length == 4)
-                {
-                    MaxColor = new Color(floats);
-                }
-                else if (floats?.Length == 1)
-                {
-                    MaxColor = new Color(floats[0]);
-                }
-                else
-                {
-                    MaxColor = DefaultMaxColor;
-                }
-            }
-        }
+        public ColorRgba MaxColor { get; set; }
 
         /// <summary>
         /// Minimum rotation speed
         /// </summary>
-        [XmlElement("minRotateSpeed")]
         public float MinRotateSpeed { get; set; }
         /// <summary>
         /// Maximum rotation speed
         /// </summary>
-        [XmlElement("maxRotateSpeed")]
         public float MaxRotateSpeed { get; set; }
 
         /// <summary>
         /// Minimum starting size
         /// </summary>
-        [XmlElement("minStartSize")]
         public float MinStartSize { get; set; }
         /// <summary>
         /// Maximum starting size
         /// </summary>
-        [XmlElement("maxStartSize")]
         public float MaxStartSize { get; set; }
 
         /// <summary>
         /// Minimum ending size
         /// </summary>
-        [XmlElement("minEndSize")]
         public float MinEndSize { get; set; }
         /// <summary>
         /// Maximum ending size
         /// </summary>
-        [XmlElement("maxEndSize")]
         public float MaxEndSize { get; set; }
 
         /// <summary>
-        /// Gets or sets wheter the particles were transparent
+        /// Gets or sets whether the blend mode
         /// </summary>
-        [XmlElement("transparent")]
-        public bool Transparent { get; set; }
-        /// <summary>
-        /// Gets or sets wheter the particles were additive
-        /// </summary>
-        [XmlElement("additive")]
-        public bool Additive { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public BlendModes BlendMode { get; set; }
 
         /// <summary>
         /// Emitter velocity sensitivity
         /// </summary>
-        [XmlElement("emitterVelocitySensitivity")]
         public float EmitterVelocitySensitivity { get; set; }
 
         /// <summary>
@@ -551,29 +441,29 @@ namespace Engine
         /// </summary>
         public ParticleSystemDescription()
         {
-            this.ParticleType = ParticleTypes.None;
-            this.Name = null;
-            this.ContentPath = null;
-            this.TextureName = null;
+            ParticleType = ParticleTypes.None;
+            Name = null;
+            ContentPath = null;
+            TextureName = null;
 
-            this.MaxDuration = 0;
-            this.MaxDurationRandomness = 1;
-            this.MaxHorizontalVelocity = 0;
-            this.MinHorizontalVelocity = 0;
-            this.MaxVerticalVelocity = 0;
-            this.MinVerticalVelocity = 0;
-            this.Gravity = DefaultGravity;
-            this.EndVelocity = 1;
-            this.MinColor = DefaultMinColor;
-            this.MaxColor = DefaultMaxColor;
-            this.MinRotateSpeed = 0;
-            this.MaxRotateSpeed = 0;
-            this.MinStartSize = 1;
-            this.MaxStartSize = 1;
-            this.MinEndSize = 1;
-            this.MaxEndSize = 1;
-            this.Transparent = false;
-            this.EmitterVelocitySensitivity = 0;
+            MaxDuration = 0;
+            MaxDurationRandomness = 1;
+            MaxHorizontalVelocity = 0;
+            MinHorizontalVelocity = 0;
+            MaxVerticalVelocity = 0;
+            MinVerticalVelocity = 0;
+            Gravity = DefaultGravity;
+            EndVelocity = 1;
+            MinColor = DefaultMinColor;
+            MaxColor = DefaultMaxColor;
+            MinRotateSpeed = 0;
+            MaxRotateSpeed = 0;
+            MinStartSize = 1;
+            MaxStartSize = 1;
+            MinEndSize = 1;
+            MaxEndSize = 1;
+            BlendMode = BlendModes.Alpha;
+            EmitterVelocitySensitivity = 0;
         }
 
         /// <summary>
@@ -584,18 +474,18 @@ namespace Engine
         {
             if (scale != 1f)
             {
-                this.MaxHorizontalVelocity *= scale;
-                this.MinHorizontalVelocity *= scale;
-                this.MaxVerticalVelocity *= scale;
-                this.MinVerticalVelocity *= scale;
+                MaxHorizontalVelocity *= scale;
+                MinHorizontalVelocity *= scale;
+                MaxVerticalVelocity *= scale;
+                MinVerticalVelocity *= scale;
 
-                this.Gravity *= scale;
-                this.EndVelocity *= scale;
+                Gravity = (Vector3)Gravity * scale;
+                EndVelocity *= scale;
 
-                this.MinStartSize *= scale;
-                this.MaxStartSize *= scale;
-                this.MinEndSize *= scale;
-                this.MaxEndSize *= scale;
+                MinStartSize *= scale;
+                MaxStartSize *= scale;
+                MinEndSize *= scale;
+                MaxEndSize *= scale;
             }
         }
         /// <summary>
@@ -604,24 +494,24 @@ namespace Engine
         /// <param name="other">The other particle description</param>
         public void Update(ParticleSystemDescription other)
         {
-            this.MaxDuration = other.MaxDuration;
-            this.MaxDurationRandomness = other.MaxDurationRandomness;
-            this.MaxHorizontalVelocity = other.MaxHorizontalVelocity;
-            this.MinHorizontalVelocity = other.MinHorizontalVelocity;
-            this.MaxVerticalVelocity = other.MaxVerticalVelocity;
-            this.MinVerticalVelocity = other.MinVerticalVelocity;
-            this.Gravity = other.Gravity;
-            this.EndVelocity = other.EndVelocity;
-            this.MinColor = other.MinColor;
-            this.MaxColor = other.MaxColor;
-            this.MinRotateSpeed = other.MinRotateSpeed;
-            this.MaxRotateSpeed = other.MaxRotateSpeed;
-            this.MinStartSize = other.MinStartSize;
-            this.MaxStartSize = other.MaxStartSize;
-            this.MinEndSize = other.MinEndSize;
-            this.MaxEndSize = other.MaxEndSize;
-            this.Transparent = other.Transparent;
-            this.EmitterVelocitySensitivity = other.EmitterVelocitySensitivity;
+            MaxDuration = other.MaxDuration;
+            MaxDurationRandomness = other.MaxDurationRandomness;
+            MaxHorizontalVelocity = other.MaxHorizontalVelocity;
+            MinHorizontalVelocity = other.MinHorizontalVelocity;
+            MaxVerticalVelocity = other.MaxVerticalVelocity;
+            MinVerticalVelocity = other.MinVerticalVelocity;
+            Gravity = other.Gravity;
+            EndVelocity = other.EndVelocity;
+            MinColor = other.MinColor;
+            MaxColor = other.MaxColor;
+            MinRotateSpeed = other.MinRotateSpeed;
+            MaxRotateSpeed = other.MaxRotateSpeed;
+            MinStartSize = other.MinStartSize;
+            MaxStartSize = other.MaxStartSize;
+            MinEndSize = other.MinEndSize;
+            MaxEndSize = other.MaxEndSize;
+            BlendMode = other.BlendMode;
+            EmitterVelocitySensitivity = other.EmitterVelocitySensitivity;
         }
     }
 }

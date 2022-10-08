@@ -38,5 +38,14 @@ namespace Engine
 
             base.Add(item);
         }
+        /// <summary>
+        /// Adds a key to this collection.
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="value">Value</param>
+        public void Add(float position, float value)
+        {
+            Add(new CurveKey(position, value));
+        }
     }
 }

@@ -1,139 +1,54 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Animation;
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Deferred;
+    using Engine.BuiltIn.Forward;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class BaseModel : Drawable, IUseMaterials, IUseSkinningData
+    public abstract class BaseModel<T> : Drawable<T>, IUseMaterials, IUseSkinningData where T : BaseModelDescription
     {
         /// <summary>
         /// Meshes by level of detail dictionary
         /// </summary>
-        private LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
+        private readonly Dictionary<LevelOfDetail, DrawingData> meshesByLOD = new Dictionary<LevelOfDetail, DrawingData>();
         /// <summary>
         /// Default level of detail
         /// </summary>
-        private readonly LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
+        private LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
 
         /// <summary>
         /// Gets the texture count for texture index
         /// </summary>
         public int TextureCount { get; private set; }
         /// <summary>
-        /// Gets the material list used by the current drawing data
-        /// </summary>
-        public IEnumerable<MeshMaterial> Materials
-        {
-            get
-            {
-                List<MeshMaterial> matList = new List<MeshMaterial>();
-
-                var drawingData = this.GetDrawingData(LevelOfDetail.High);
-                if (drawingData != null)
-                {
-                    foreach (var meshMaterial in drawingData.Materials.Keys)
-                    {
-                        matList.Add(drawingData.Materials[meshMaterial]);
-                    }
-                }
-
-                return matList.ToArray();
-            }
-        }
-        /// <summary>
         /// Use anisotropic filtering
         /// </summary>
-        public bool UseAnisotropicFiltering { get; set; }
-        /// <summary>
-        /// Gets the skinning list used by the current drawing data
-        /// </summary>
-        public SkinningData SkinningData
-        {
-            get
-            {
-                return this.GetDrawingData(LevelOfDetail.High)?.SkinningData;
-            }
-        }
+        public bool UseAnisotropicFiltering { get; private set; }
+        /// <inheritdoc/>
+        public abstract ISkinningData SkinningData { get; }
         /// <summary>
         /// Use spheric volume for culling test
         /// </summary>
-        public bool SphericVolume { get; set; }
+        public bool SphericVolume { get; private set; }
 
         /// <summary>
         /// Base model
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Object description</param>
-        protected BaseModel(Scene scene, BaseModelDescription description)
-            : base(scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        protected BaseModel(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            var desc = new DrawingDataDescription()
-            {
-                Instanced = description.Instanced,
-                Instances = description.Instances,
-                LoadAnimation = description.LoadAnimation,
-                LoadNormalMaps = description.LoadNormalMaps,
-                TextureCount = this.TextureCount,
-                DynamicBuffers = description.Dynamic,
-            };
 
-            IEnumerable<ModelContent> geo;
-            if (!string.IsNullOrEmpty(description.Content.ModelContentFilename))
-            {
-                string contentFile = Path.Combine(description.Content.ContentFolder, description.Content.ModelContentFilename);
-                var contentDesc = Helper.DeserializeFromFile<ModelContentDescription>(contentFile);
-                var loader = contentDesc.GetLoader();
-                geo = loader.Load(description.Content.ContentFolder, contentDesc);
-            }
-            else if (description.Content.ModelContentDescription != null)
-            {
-                var loader = description.Content.ModelContentDescription.GetLoader();
-                geo = loader.Load(description.Content.ContentFolder, description.Content.ModelContentDescription);
-            }
-            else if (description.Content.ModelContent != null)
-            {
-                geo = new[] { description.Content.ModelContent };
-            }
-            else
-            {
-                throw new EngineException("No geometry found in description.");
-            }
-
-            if (geo.Count() == 1)
-            {
-                var iGeo = geo.First();
-
-                if (description.Optimize) iGeo.Optimize();
-
-                var drawable = DrawingData.Build(this.Game, this.BufferManager, iGeo, desc);
-
-                this.meshesByLOD.Add(LevelOfDetail.High, drawable);
-            }
-            else
-            {
-                var content = new LevelOfDetailModelContent(geo, description.Optimize);
-
-                foreach (var lod in content.Keys)
-                {
-                    if (this.defaultLevelOfDetail == LevelOfDetail.None)
-                    {
-                        this.defaultLevelOfDetail = lod;
-                    }
-
-                    var drawable = DrawingData.Build(this.Game, this.BufferManager, content[lod], desc);
-
-                    this.meshesByLOD.Add(lod, drawable);
-                }
-            }
-
-            this.UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
         /// <summary>
         /// Destructor
@@ -143,18 +58,88 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose model buffers
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                foreach (var mesh in this.meshesByLOD)
+                meshesByLOD.Values.ToList().ForEach(m => m?.Dispose());
+                meshesByLOD.Clear();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
+        {
+            await base.InitializeAssets(description);
+
+            UseAnisotropicFiltering = description?.UseAnisotropicFiltering ?? false;
+        }
+        /// <summary>
+        /// Initializes model geometry
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        protected Task InitializeGeometry(T description, BufferDescriptor instancingBuffer = null)
+        {
+            if (description?.Content == null)
+            {
+                throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
+            }
+
+            return InitializeGeometryInternal(description, instancingBuffer);
+        }
+        /// <summary>
+        /// Initializes model geometry
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        private async Task InitializeGeometryInternal(T description, BufferDescriptor instancingBuffer = null)
+        {
+            var geo = await description.Content.ReadModelContent();
+            if (!geo.Any())
+            {
+                throw new EngineException("Bad content description file. The resource file does not generate any geometry.");
+            }
+
+            var desc = new DrawingDataDescription()
+            {
+                Instanced = description.Instanced,
+                Instances = description.Instances,
+                LoadAnimation = description.LoadAnimation,
+                LoadNormalMaps = description.LoadNormalMaps,
+                DynamicBuffers = description.Dynamic,
+
+                TextureCount = TextureCount,
+            };
+
+            if (geo.Count() == 1)
+            {
+                var iGeo = geo.First();
+
+                if (description.Optimize) iGeo.Optimize();
+
+                var drawable = await DrawingData.Build(Game, Name, iGeo, desc, instancingBuffer);
+
+                meshesByLOD.Add(LevelOfDetail.High, drawable);
+            }
+            else
+            {
+                var content = ContentData.BuildLOD(geo, description.Optimize);
+
+                foreach (var lod in content.Keys)
                 {
-                    mesh.Value?.Dispose();
+                    if (defaultLevelOfDetail == LevelOfDetail.None)
+                    {
+                        defaultLevelOfDetail = lod;
+                    }
+
+                    var drawable = await DrawingData.Build(Game, Name, content[lod], desc, instancingBuffer);
+
+                    meshesByLOD.Add(lod, drawable);
                 }
-                this.meshesByLOD = null;
             }
         }
 
@@ -163,22 +148,22 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the nearest level of detail for the specified level of detail</returns>
-        internal LevelOfDetail GetLODNearest(LevelOfDetail lod)
+        public LevelOfDetail GetLODNearest(LevelOfDetail lod)
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return LevelOfDetail.None;
             }
 
-            if (this.meshesByLOD.Keys.Count == 0)
+            if (meshesByLOD.Keys.Count == 0)
             {
-                return this.defaultLevelOfDetail;
+                return defaultLevelOfDetail;
             }
             else
             {
-                if (this.meshesByLOD.Keys.Count == 1)
+                if (meshesByLOD.Keys.Count == 1)
                 {
-                    return this.meshesByLOD.Keys.First();
+                    return meshesByLOD.Keys.First();
                 }
                 else
                 {
@@ -186,13 +171,13 @@ namespace Engine.Common
 
                     for (int l = i; l > 0; l /= 2)
                     {
-                        if (this.meshesByLOD.ContainsKey((LevelOfDetail)l))
+                        if (meshesByLOD.ContainsKey((LevelOfDetail)l))
                         {
                             return (LevelOfDetail)l;
                         }
                     }
 
-                    return this.defaultLevelOfDetail;
+                    return defaultLevelOfDetail;
                 }
             }
         }
@@ -200,16 +185,16 @@ namespace Engine.Common
         /// Gets the minimum level of detail
         /// </summary>
         /// <returns>Returns the minimum level of detail</returns>
-        internal LevelOfDetail GetLODMinimum()
+        public LevelOfDetail GetLODMinimum()
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return LevelOfDetail.None;
             }
 
             int l = int.MaxValue;
 
-            foreach (var lod in this.meshesByLOD.Keys)
+            foreach (var lod in meshesByLOD.Keys)
             {
                 if ((int)lod < l)
                 {
@@ -223,16 +208,16 @@ namespace Engine.Common
         /// Gets the maximum level of detail
         /// </summary>
         /// <returns>Returns the maximum level of detail</returns>
-        internal LevelOfDetail GetLODMaximum()
+        public LevelOfDetail GetLODMaximum()
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return LevelOfDetail.None;
             }
 
             int l = int.MinValue;
 
-            foreach (var lod in this.meshesByLOD.Keys)
+            foreach (var lod in meshesByLOD.Keys)
             {
                 if ((int)lod > l)
                 {
@@ -247,37 +232,38 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the drawing data object</returns>
-        internal DrawingData GetDrawingData(LevelOfDetail lod)
+        /// <remarks>If the sepecified level of detail not exists, returns the first available drawing data.</remarks>
+        public DrawingData GetDrawingData(LevelOfDetail lod)
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return null;
             }
 
-            if (this.meshesByLOD.ContainsKey(lod))
+            if (meshesByLOD.ContainsKey(lod))
             {
-                return this.meshesByLOD[lod];
+                return meshesByLOD[lod];
             }
 
-            return null;
+            return GetFirstDrawingData(LevelOfDetail.Minimum);
         }
         /// <summary>
         /// Gets the first drawing data avaliable for the specified level of detail, from the specified one
         /// </summary>
         /// <param name="lod">First level of detail</param>
         /// <returns>Returns the first available level of detail drawing data</returns>
-        internal DrawingData GetFirstDrawingData(LevelOfDetail lod)
+        public DrawingData GetFirstDrawingData(LevelOfDetail lod)
         {
-            if (this.meshesByLOD == null)
+            if (meshesByLOD == null)
             {
                 return null;
             }
 
             while (lod > LevelOfDetail.None)
             {
-                if (this.meshesByLOD.ContainsKey(lod))
+                if (meshesByLOD.ContainsKey(lod))
                 {
-                    return this.meshesByLOD[lod];
+                    return meshesByLOD[lod];
                 }
 
                 lod = (LevelOfDetail)((int)lod / 2);
@@ -290,19 +276,67 @@ namespace Engine.Common
         /// Gets the drawing effect for the current instance
         /// </summary>
         /// <param name="mode">Drawing mode</param>
+        /// <param name="vertexType">Vertex type</param>
         /// <returns>Returns the drawing effect</returns>
-        protected IGeometryDrawer GetEffect(DrawerModes mode)
+        protected IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType, bool instanced)
         {
             if (mode.HasFlag(DrawerModes.Forward))
             {
-                return DrawerPool.EffectDefaultBasic;
+                return ForwardDrawerManager.GetDrawer(vertexType, instanced);
             }
-            else if (mode.HasFlag(DrawerModes.Deferred))
+
+            if (mode.HasFlag(DrawerModes.Deferred))
             {
-                return DrawerPool.EffectDeferredBasic;
+                return DeferredDrawerManager.GetDrawer(vertexType, instanced);
             }
 
             return null;
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            var drawingData = GetDrawingData(LevelOfDetail.High);
+            if (drawingData == null)
+            {
+                return Enumerable.Empty<IMeshMaterial>();
+            }
+
+            return drawingData.Materials.Values.ToArray();
+        }
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
+            {
+                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial != null)
+                {
+                    return meshMaterials[meshMaterial];
+                }
+            }
+
+            return null;
+        }
+        /// <inheritdoc/>
+        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            bool updated = false;
+
+            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
+            {
+                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial != null)
+                {
+                    meshMaterials[meshMaterial] = material;
+                    updated = true;
+                }
+            }
+
+            if (updated)
+            {
+                Scene.UpdateMaterialPalette();
+            }
         }
     }
 }

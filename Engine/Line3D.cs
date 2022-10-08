@@ -25,7 +25,7 @@ namespace Engine
         {
             get
             {
-                return Vector3.Distance(this.Point1, this.Point2);
+                return Vector3.Distance(Point1, Point2);
             }
         }
 
@@ -300,7 +300,7 @@ namespace Engine
         {
             List<Line3D> resultList = new List<Line3D>();
 
-            var verts = cylinder.GetVertices(segments);
+            var verts = cylinder.GetVertices(segments).ToArray();
 
             for (int i = 0; i < segments; i++)
             {
@@ -398,17 +398,25 @@ namespace Engine
 
             return lines;
         }
+        public static IEnumerable<Line3D> CreateCross(Vector3 point, float size)
+        {
+            List<Line3D> lines = new List<Line3D>();
+
+            float h = size * 0.5f;
+            lines.Add(new Line3D(point + new Vector3(h, h, h), point - new Vector3(h, h, h)));
+            lines.Add(new Line3D(point + new Vector3(h, h, -h), point - new Vector3(h, h, -h)));
+            lines.Add(new Line3D(point + new Vector3(-h, h, h), point - new Vector3(-h, h, h)));
+            lines.Add(new Line3D(point + new Vector3(-h, h, -h), point - new Vector3(-h, h, -h)));
+
+            return lines;
+        }
         public static IEnumerable<Line3D> CreateCrossList(IEnumerable<Vector3> points, float size)
         {
             List<Line3D> lines = new List<Line3D>();
 
-            foreach (var p in points)
+            foreach (var point in points)
             {
-                float h = size * 0.5f;
-                lines.Add(new Line3D(p + new Vector3(h, h, h), p - new Vector3(h, h, h)));
-                lines.Add(new Line3D(p + new Vector3(h, h, -h), p - new Vector3(h, h, -h)));
-                lines.Add(new Line3D(p + new Vector3(-h, h, h), p - new Vector3(-h, h, h)));
-                lines.Add(new Line3D(p + new Vector3(-h, h, -h), p - new Vector3(-h, h, -h)));
+                lines.AddRange(CreateCross(point, size));
             }
 
             return lines;
@@ -480,19 +488,31 @@ namespace Engine
 
             return lines;
         }
-        public static IEnumerable<Line3D> CreateArrow(Vector3 p, Vector3 q, float s)
+        public static IEnumerable<Line3D> CreateArrow(Vector3 position, Vector3 point, float edgeSize)
         {
             List<Line3D> lines = new List<Line3D>();
 
             float eps = 0.001f;
-            if (Vector3.DistanceSquared(p, q) >= eps * eps)
+            if (Vector3.DistanceSquared(point, position) >= eps * eps)
             {
-                var az = Vector3.Normalize(q - p);
+                var az = Vector3.Normalize(position - point);
                 var ax = Vector3.Cross(Vector3.Up, az);
 
-                lines.Add(new Line3D(p, new Vector3(p.X + az.X * s + ax.X * s / 3, p.Y + az.Y * s + ax.Y * s / 3, p.Z + az.Z * s + ax.Z * s / 3)));
-                lines.Add(new Line3D(p, new Vector3(p.X + az.X * s - ax.X * s / 3, p.Y + az.Y * s - ax.Y * s / 3, p.Z + az.Z * s - ax.Z * s / 3)));
+                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize + ax.X * edgeSize / 3, point.Y + az.Y * edgeSize + ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize + ax.Z * edgeSize / 3)));
+                lines.Add(new Line3D(point, new Vector3(point.X + az.X * edgeSize - ax.X * edgeSize / 3, point.Y + az.Y * edgeSize - ax.Y * edgeSize / 3, point.Z + az.Z * edgeSize - ax.Z * edgeSize / 3)));
             }
+
+            return lines;
+        }
+        public static IEnumerable<Line3D> CreateWiredRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
+        {
+            List<Line3D> lines = new List<Line3D>
+            {
+                new Line3D(v0, v1),
+                new Line3D(v1, v2),
+                new Line3D(v2, v3),
+                new Line3D(v3, v0)
+            };
 
             return lines;
         }
@@ -544,8 +564,8 @@ namespace Engine
         /// <param name="z2">Z coordinate of end point</param>
         public Line3D(float x1, float y1, float z1, float x2, float y2, float z2)
         {
-            this.Point1 = new Vector3(x1, y1, z1);
-            this.Point2 = new Vector3(x2, y2, z2);
+            Point1 = new Vector3(x1, y1, z1);
+            Point2 = new Vector3(x2, y2, z2);
         }
         /// <summary>
         /// Constructor
@@ -554,8 +574,8 @@ namespace Engine
         /// <param name="p2">End point</param>
         public Line3D(Vector3 p1, Vector3 p2)
         {
-            this.Point1 = p1;
-            this.Point2 = p2;
+            Point1 = p1;
+            Point2 = p2;
         }
         /// <summary>
         /// Constructor
@@ -563,29 +583,43 @@ namespace Engine
         /// <param name="ray">Ray</param>
         public Line3D(Ray ray)
         {
-            this.Point1 = ray.Position;
-            this.Point2 = ray.Position + ray.Direction;
+            Point1 = ray.Position;
+            Point2 = ray.Position + ray.Direction;
         }
 
         /// <summary>
         /// Gets vertex position list
         /// </summary>
         /// <returns>Returns the vertex position list</returns>
-        public Vector3[] GetVertices()
+        public IEnumerable<Vector3> GetVertices()
         {
             return new[]
             {
-                this.Point1,
-                this.Point2,
+                Point1,
+                Point2,
             };
         }
-
         /// <summary>
-        /// Text representation
+        /// Gets the vertex list stride
         /// </summary>
+        /// <returns>Returns the list stride</returns>
+        public int GetStride()
+        {
+            return 2;
+        }
+        /// <summary>
+        /// Gets the vertex list topology
+        /// </summary>
+        /// <returns>Returns the list topology</returns>
+        public Topology GetTopology()
+        {
+            return Topology.LineList;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Vertex 1 {0}; Vertex 2 {1};", this.Point1, this.Point2);
+            return $"P1({Point1}) -> P2({Point2});";
         }
     }
 }

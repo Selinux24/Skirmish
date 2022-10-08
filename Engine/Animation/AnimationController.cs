@@ -1,309 +1,356 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Engine.Animation
 {
     /// <summary>
     /// Animation controller
     /// </summary>
-    public class AnimationController
+    public class AnimationController : IHasGameState
     {
         /// <summary>
-        /// Controller clips
+        /// Skinning data object
         /// </summary>
-        private readonly AnimationPlan animationPaths = new AnimationPlan();
+        private readonly IUseSkinningData skinningDataObject;
+        /// <summary>
+        /// Animation plan
+        /// </summary>
+        private readonly AnimationPlan animationPlan = new AnimationPlan();
+        /// <summary>
+        /// Transition animation plan
+        /// </summary>
+        private readonly AnimationPlan transitionPlan = new AnimationPlan();
         /// <summary>
         /// Animation active flag
         /// </summary>
         private bool active = false;
+
         /// <summary>
-        /// Last item time
+        /// Gets the current skinning data
         /// </summary>
-        private float lastItemTime = 0;
-        /// <summary>
-        /// Last clip name
-        /// </summary>
-        private string lastClipName = null;
-        /// <summary>
-        /// Last animation offset
-        /// </summary>
-        private uint lastOffset = 0;
+        protected ISkinningData SkinningData
+        {
+            get
+            {
+                return skinningDataObject?.SkinningData;
+            }
+        }
 
         /// <summary>
         /// Time delta to aply to controller time
         /// </summary>
         public float TimeDelta { get; set; } = 1f;
         /// <summary>
-        /// Gets wheter the controller is currently playing an animation
+        /// Gets whether the controller is currently playing an animation
         /// </summary>
-        public bool Playing { get; private set; } = false;
-        /// <summary>
-        /// Gets the current clip in the clip collection
-        /// </summary>
-        public int CurrentIndex { get; private set; } = 0;
-        /// <summary>
-        /// Current path time
-        /// </summary>
-        public float CurrentPathTime
+        public bool Playing
         {
             get
             {
-                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-                {
-                    var path = this.animationPaths[this.CurrentIndex];
-
-                    return path.Time;
-                }
-
-                return 0;
-            }
-        }
-        /// <summary>
-        /// Current path item time
-        /// </summary>
-        public float CurrentPathItemTime
-        {
-            get
-            {
-                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-                {
-                    var path = this.animationPaths[this.CurrentIndex];
-
-                    return path.ItemTime;
-                }
-
-                return 0;
-            }
-        }
-        /// <summary>
-        /// Gets the current path item clip name
-        /// </summary>
-        public string CurrentPathItemClip
-        {
-            get
-            {
-                if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-                {
-                    var path = this.animationPaths[this.CurrentIndex];
-
-                    var pathItem = path.GetCurrentItem();
-                    if (pathItem != null)
-                    {
-                        return pathItem.ClipName;
-                    }
-                }
-
-                return "None";
-            }
-        }
-        /// <summary>
-        /// Gets the path count in the controller
-        /// </summary>
-        public int PathCount
-        {
-            get
-            {
-                return this.animationPaths.Count;
+                return animationPlan.Active || (transitionPlan?.Active ?? false);
             }
         }
 
         /// <summary>
-        /// On path ending event
+        /// Animation offset in the animation palette
         /// </summary>
-        public event EventHandler PathEnding;
+        public uint AnimationOffset
+        {
+            get
+            {
+                return animationPlan.AnimationOffset;
+            }
+        }
+        /// <summary>
+        /// Transition offset in the animation palette
+        /// </summary>
+        public uint TransitionOffset
+        {
+            get
+            {
+                return transitionPlan.AnimationOffset;
+            }
+        }
+        /// <summary>
+        /// Interpolation value between current animation and transition
+        /// </summary>
+        public float TransitionInterpolationAmount { get; protected set; }
+
+        /// <summary>
+        /// On path changed event
+        /// </summary>
+        public event AnimationControllerEventHandler PathChanged;
+        /// <summary>
+        /// On path updated event
+        /// </summary>
+        public event AnimationControllerEventHandler PathUpdated;
+        /// <summary>
+        /// On animation offset changed
+        /// </summary>
+        public event AnimationControllerEventHandler AnimationOffsetChanged;
+        /// <summary>
+        /// On animation plan ending event
+        /// </summary>
+        public event AnimationControllerEventHandler PlanEnding;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public AnimationController()
+        /// <param name="obj">Skinning data object</param>
+        public AnimationController(IUseSkinningData obj)
         {
-
+            skinningDataObject = obj;
         }
 
         /// <summary>
-        /// Adds clips to the controller clips list
+        /// Calculates an animation plan with initial and end clips, and with a central looping clip
         /// </summary>
-        /// <param name="paths">Animation path list</param>
-        public void AddPath(AnimationPlan paths)
+        /// <param name="clip">Clip name</param>
+        /// <param name="planTime">Total time</param>
+        /// <returns>Returns the created animation plan</returns>
+        public AnimationPlan CalcAnimationPlan(string clip, float planTime)
         {
-            this.AppendPaths(AppendFlagTypes.None, paths);
-        }
-        /// <summary>
-        /// Sets the specified past as current path list
-        /// </summary>
-        /// <param name="paths">Animation path list</param>
-        public void SetPath(AnimationPlan paths)
-        {
-            this.AppendPaths(AppendFlagTypes.ClearCurrent, paths);
-        }
-        /// <summary>
-        /// Adds clips to the controller clips list and ends the current animation
-        /// </summary>
-        /// <param name="paths">Animation path list</param>
-        public void ContinuePath(AnimationPlan paths)
-        {
-            this.AppendPaths(AppendFlagTypes.EndsCurrent, paths);
-        }
-        /// <summary>
-        /// Append animation paths to the controller
-        /// </summary>
-        /// <param name="flags">Append path flags</param>
-        /// <param name="paths">Paths to append</param>
-        private void AppendPaths(AppendFlagTypes flags, AnimationPlan paths)
-        {
-            var clonedPaths = new AnimationPath[paths.Count];
-
-            for (int i = 0; i < paths.Count; i++)
+            if (SkinningData == null)
             {
-                clonedPaths[i] = paths[i].Clone();
+                return new AnimationPlan();
             }
 
-            if (this.animationPaths.Count > 0)
+            AnimationPath path = new AnimationPath()
             {
-                AnimationPath last;
-                AnimationPath next;
+                Name = clip,
+            };
 
-                if (flags == AppendFlagTypes.ClearCurrent)
+            //Retrieve the clip data
+            float clipTime = SkinningData.GetClipDuration(SkinningData.GetClipIndex(clip));
+
+            if (clipTime >= planTime)
+            {
+                float delta = planTime / clipTime;
+
+                path.Add(clip, delta);
+            }
+            else
+            {
+                float loopTime = planTime;
+                int fullLoops = (int)Math.Ceiling(loopTime);
+                float loopDelta = 1f;
+                if (fullLoops - loopTime > 0f)
                 {
-                    last = this.animationPaths[this.animationPaths.Count - 1];
-                    next = clonedPaths[0];
-
-                    //Clear all paths
-                    this.animationPaths.Clear();
-                }
-                else if (flags == AppendFlagTypes.EndsCurrent && this.CurrentIndex < this.animationPaths.Count)
-                {
-                    last = this.animationPaths[this.CurrentIndex];
-                    next = clonedPaths[0];
-
-                    //Remove all paths from current to end
-                    if (this.CurrentIndex + 1 < this.animationPaths.Count)
-                    {
-                        this.animationPaths.RemoveRange(
-                            this.CurrentIndex + 1,
-                            this.animationPaths.Count - (this.CurrentIndex + 1));
-                    }
-
-                    //Mark current path for ending
-                    last.End();
-                }
-                else
-                {
-                    last = this.animationPaths[this.animationPaths.Count - 1];
-                    next = clonedPaths[0];
+                    fullLoops--;
+                    loopDelta = loopTime / fullLoops;
                 }
 
-                //Adds transitions from current path item to the first added item
-                last.ConnectTo(next);
+                path.AddRepeat(clip, Math.Max(1, fullLoops), loopDelta);
+
+                path.UpdateItems(SkinningData);
             }
 
-            this.animationPaths.AddRange(clonedPaths);
+            return new AnimationPlan(path);
+        }
 
-            if (this.CurrentIndex < 0)
+        /// <summary>
+        /// Sets the specified plan as current plan
+        /// </summary>
+        /// <param name="plan">Animation plan</param>
+        public void ReplacePlan(AnimationPlan plan)
+        {
+            AppendPlan(AppendFlagTypes.Replace, plan);
+        }
+        /// <summary>
+        /// Appends the specified plan to de the plan list, at the end
+        /// </summary>
+        /// <param name="plan">Animation plan</param>
+        public void AppendPlan(AnimationPlan plan)
+        {
+            AppendPlan(AppendFlagTypes.Append, plan);
+        }
+        /// <summary>
+        /// Appens a new plan as transition of the current plan.
+        /// </summary>
+        /// <param name="plan">Animation plan</param>
+        public void TransitionToPlan(AnimationPlan plan)
+        {
+            AppendPlan(AppendFlagTypes.Transition, plan);
+        }
+        /// <summary>
+        /// Appends an animation plan to the controller
+        /// </summary>
+        /// <param name="flags">Append plan flags</param>
+        /// <param name="plan">Plan to append</param>
+        private void AppendPlan(AppendFlagTypes flags, AnimationPlan plan)
+        {
+            if (SkinningData == null)
             {
-                this.CurrentIndex = 0;
+                return;
             }
+
+            if (plan?.Any() != true)
+            {
+                return;
+            }
+
+            var clonedPlan = plan.Clone();
+
+            if (!animationPlan.Any())
+            {
+                animationPlan.Add(clonedPlan);
+
+                animationPlan.Reset();
+
+                return;
+            }
+
+            if (flags == AppendFlagTypes.Replace)
+            {
+                //Clear current plan
+                animationPlan.Clear();
+
+                //Add new plan
+                animationPlan.Add(clonedPlan);
+            }
+            else if (flags == AppendFlagTypes.Append)
+            {
+                //Add new plan at the end of the current plan
+                animationPlan.Add(clonedPlan);
+            }
+            else if (flags == AppendFlagTypes.Transition)
+            {
+                //Remove all paths from current to end
+                animationPlan.CutFromCurrent();
+
+                //Sets the transition plan
+                TransitionInterpolationAmount = 0f;
+                transitionPlan.Clear();
+                transitionPlan.Add(clonedPlan);
+            }
+        }
+
+        /// <summary>
+        /// Gets the current animation plan
+        /// </summary>
+        public AnimationPlan GetCurrentPlan()
+        {
+            return animationPlan;
+        }
+        /// <summary>
+        /// Gets the current transition plan
+        /// </summary>
+        public AnimationPlan GetTransitionPlan()
+        {
+            return transitionPlan;
         }
 
         /// <summary>
         /// Updates internal state
         /// </summary>
-        /// <param name="time">Time</param>
-        /// <param name="skData">Skinning data</param>
-        public void Update(float time, SkinningData skData)
+        /// <param name="elapsedSeconds">Elapsed seconds</param>
+        public void Update(float elapsedSeconds)
         {
-            if (this.active && this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
+            if (SkinningData == null)
             {
-                var path = this.animationPaths[this.CurrentIndex];
-                if (!path.Playing)
+                return;
+            }
+
+            float tunedElapsedTime = elapsedSeconds * TimeDelta;
+            if (tunedElapsedTime == 0f)
+            {
+                return;
+            }
+
+            if (!active)
+            {
+                animationPlan.Update(SkinningData, 0);
+
+                TransitionInterpolationAmount = 0f;
+
+                return;
+            }
+
+            var animRes = animationPlan.Update(SkinningData, tunedElapsedTime);
+
+            if (!transitionPlan.Any())
+            {
+                FireEvents(animRes, animationPlan, false);
+
+                TransitionInterpolationAmount = 0f;
+
+                return;
+            }
+
+            var tranRes = transitionPlan.Update(SkinningData, tunedElapsedTime);
+
+            //Update transition interpolation
+            TransitionInterpolationAmount += tunedElapsedTime;
+
+            if (TransitionInterpolationAmount >= 1f)
+            {
+                animationPlan.Clear();
+                animationPlan.Add(transitionPlan, true);
+                transitionPlan.Clear();
+
+                TransitionInterpolationAmount = 0f;
+            }
+
+            FireEvents(tranRes, transitionPlan, true);
+        }
+        /// <summary>
+        /// Fires integration results
+        /// </summary>
+        /// <param name="result">Result</param>
+        /// <param name="plan">Animation plan</param>
+        /// <param name="isTransition">Sets whether then plan is transition or not</param>
+        private void FireEvents(AnimationPlanIntegrationResults result, AnimationPlan plan, bool isTransition)
+        {
+            if (result.HasFlag(AnimationPlanIntegrationResults.PathChanged))
+            {
+                Logger.WriteTrace(this, $"Moved to next animation path: {plan.CurrentPath}");
+                PathChanged?.Invoke(this, new AnimationControllerEventArgs()
                 {
-                    if (this.CurrentIndex < this.animationPaths.Count - 1)
-                    {
-                        //Go to next path
-                        this.CurrentIndex++;
-                    }
-                    else
-                    {
-                        //No paths to do
-                        this.PathEnding?.Invoke(this, new EventArgs());
-                    }
-                }
-
-                //Update current path
-                path.Update(time * this.TimeDelta, skData);
-            }
-        }
-        /// <summary>
-        /// Gets the current animation offset from skinning animation data
-        /// </summary>
-        /// <param name="skData"></param>
-        /// <returns>Returns the current animation offset in skinning animation data</returns>
-        public uint GetAnimationOffset(SkinningData skData)
-        {
-            if (GetClipAndTime(out string clipName, out float time))
-            {
-                skData.GetAnimationOffset(
-                    time,
-                    clipName,
-                    out uint offset);
-
-                lastItemTime = time;
-                lastClipName = clipName;
-                lastOffset = offset;
+                    CurrentOffset = plan.AnimationOffset,
+                    CurrentIndex = plan.CurrentPathIndex,
+                    CurrentPath = plan.CurrentPath,
+                    IsTransition = isTransition,
+                });
             }
 
-            return lastOffset;
-        }
-        /// <summary>
-        /// Gets the transformation matrix list at current time
-        /// </summary>
-        /// <param name="skData">Skinning data</param>
-        /// <returns>Returns the transformation matrix list at current time</returns>
-        public Matrix[] GetCurrentPose(SkinningData skData)
-        {
-            if (GetClipAndTime(out string clipName, out float time))
+            if (result.HasFlag(AnimationPlanIntegrationResults.UpdatedPath))
             {
-                return skData.GetPoseAtTime(time, clipName);
-            }
-
-            return skData.GetPoseAtTime(
-                lastItemTime,
-                lastClipName);
-        }
-        /// <summary>
-        /// Gets the current clip name and time
-        /// </summary>
-        /// <param name="clipName">Clip name</param>
-        /// <param name="time">Time</param>
-        /// <returns>Returns true if the controller is currently playing a clip</returns>
-        private bool GetClipAndTime(out string clipName, out float time)
-        {
-            clipName = null;
-            time = 0;
-
-            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
-            {
-                //Get the path
-                var path = this.animationPaths[this.CurrentIndex];
-                if (path.Playing)
+                Logger.WriteTrace(this, $"Current animation path updated: {plan.CurrentPath}");
+                PathUpdated?.Invoke(this, new AnimationControllerEventArgs()
                 {
-                    //Get the path item
-                    var pathItem = path.GetCurrentItem();
-                    if (pathItem != null)
-                    {
-                        time = path.ItemTime;
-                        clipName = pathItem.ClipName;
-
-                        this.Playing = true;
-
-                        return true;
-                    }
-                }
+                    CurrentOffset = plan.AnimationOffset,
+                    CurrentIndex = plan.CurrentPathIndex,
+                    CurrentPath = plan.CurrentPath,
+                    IsTransition = isTransition,
+                });
             }
 
-            this.Playing = false;
+            if (result.HasFlag(AnimationPlanIntegrationResults.UpdatedOffset))
+            {
+                Logger.WriteTrace(this, $"Animation offset changed: {plan.AnimationOffset}");
+                AnimationOffsetChanged?.Invoke(this, new AnimationControllerEventArgs()
+                {
+                    CurrentOffset = plan.AnimationOffset,
+                    CurrentIndex = plan.CurrentPathIndex,
+                    CurrentPath = plan.CurrentPath,
+                    IsTransition = isTransition,
+                });
+            }
 
-            return false;
+            if (result.HasFlag(AnimationPlanIntegrationResults.EndPlan))
+            {
+                Logger.WriteTrace(this, "All animation paths done");
+                PlanEnding?.Invoke(this, new AnimationControllerEventArgs()
+                {
+                    CurrentOffset = plan.AnimationOffset,
+                    CurrentIndex = plan.CurrentPathIndex,
+                    CurrentPath = plan.CurrentPath,
+                    AtEnd = true,
+                    IsTransition = isTransition,
+                });
+            }
         }
 
         /// <summary>
@@ -312,14 +359,26 @@ namespace Engine.Animation
         /// <param name="time">At time</param>
         public void Start(float time = 0)
         {
-            this.active = true;
-
-            this.CurrentIndex = 0;
-
-            if (this.animationPaths.Count > 0)
+            if (animationPlan == null)
             {
-                this.animationPaths[this.CurrentIndex].SetTime(time);
+                return;
             }
+
+            active = true;
+
+            animationPlan.Reset();
+            animationPlan.SetTime(time);
+        }
+        /// <summary>
+        /// Start
+        /// </summary>
+        /// <param name="plan">Animation plan</param>
+        /// <param name="time">At time</param>
+        public void Start(AnimationPlan plan, float time = 0)
+        {
+            AppendPlan(plan);
+
+            Start(time);
         }
         /// <summary>
         /// Stop
@@ -327,46 +386,81 @@ namespace Engine.Animation
         /// <param name="time">At time</param>
         public void Stop(float time = 0)
         {
-            this.active = false;
-
-            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
+            if (animationPlan == null)
             {
-                this.animationPaths[this.CurrentIndex].SetTime(time);
+                return;
             }
+
+            active = false;
+
+            animationPlan.CurrentPath?.SetTime(time);
         }
         /// <summary>
         /// Resume playback
         /// </summary>
         public void Resume()
         {
-            this.active = true;
+            active = true;
         }
         /// <summary>
         /// Pause playback
         /// </summary>
         public void Pause()
         {
-            this.active = false;
+            active = false;
         }
 
         /// <summary>
-        /// Gets the text representation of the instance
+        /// Gets the transformation matrix list at current time
         /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        /// <returns>Returns the transformation matrix list at current time</returns>
+        public IEnumerable<Matrix> GetCurrentPose()
         {
-            string res = "Inactive";
+            return animationPlan.GetCurrentPose(SkinningData);
+        }
 
-            if (this.CurrentIndex >= 0 && this.CurrentIndex < this.animationPaths.Count)
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new AnimationControllerState
             {
-                res = string.Format("{0}", this.animationPaths[this.CurrentIndex].GetItemList().Join(", "));
-                if (this.CurrentIndex + 1 < this.animationPaths.Count)
-                {
-                    res += string.Format(" {0}", this.animationPaths[this.CurrentIndex + 1].GetItemList().Join(", "));
-                }
+                Active = active,
+                TimeDelta = TimeDelta,
+                AnimationPlan = animationPlan.GetState(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is AnimationControllerState animationControllerState))
+            {
+                return;
             }
 
-            return res;
+            active = animationControllerState.Active;
+            TimeDelta = animationControllerState.TimeDelta;
+            animationPlan.SetState(animationControllerState.AnimationPlan);
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            if (animationPlan.CurrentPath == null)
+            {
+                return "Inactive";
+            }
+
+            StringBuilder res = new StringBuilder();
+
+            res.AppendLine(animationPlan.CurrentPath.GetItemList() ?? string.Empty);
+            res.AppendLine(animationPlan.NextPath?.GetItemList() ?? string.Empty);
+
+            if (transitionPlan.Any())
+            {
+                res.AppendLine($"Transition to {transitionPlan.CurrentPath.GetItemList()}. {TransitionInterpolationAmount:0.0000}");
+            }
+
+            return res.ToString();
         }
 
         /// <summary>
@@ -375,17 +469,17 @@ namespace Engine.Animation
         enum AppendFlagTypes
         {
             /// <summary>
-            /// None
+            /// Replaces current
             /// </summary>
-            None,
+            Replace,
             /// <summary>
-            /// Ends current clip
+            /// Appends as last item, current plays until it's end
             /// </summary>
-            EndsCurrent,
+            Append,
             /// <summary>
-            /// Clear all clips
+            /// Adds the item as transition. Current plays until it's end, interpolating with the new item
             /// </summary>
-            ClearCurrent,
+            Transition,
         }
     }
 }

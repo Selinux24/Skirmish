@@ -8,27 +8,44 @@ namespace Engine
     public class Manipulator2D
     {
         /// <summary>
-        /// Position component
+        /// Game instance
         /// </summary>
-        private Vector2 position = Vector2.Zero;
+        private readonly Game game;
+        /// <summary>
+        /// Update internals flag
+        /// </summary>
+        private bool updateInternals = true;
 
+        /// <summary>
+        /// Gets the size
+        /// </summary>
+        public Vector2 Size { get; private set; } = Vector2.One;
         /// <summary>
         /// Gets Position component
         /// </summary>
-        public Vector2 Position
-        {
-            get
-            {
-                return new Vector2(this.position.X, -this.position.Y);
-            }
-        }
+        public Vector2 Position { get; private set; } = Vector2.Zero;
         /// <summary>
         /// Gets Scale component
         /// </summary>
         public Vector2 Scale { get; private set; } = Vector2.One;
         /// <summary>
+        /// Gets Rotation angle
+        /// </summary>
+        public float Rotation { get; private set; } = 0f;
+        /// <summary>
+        /// Gets the size transform
+        /// </summary>
+        /// <remarks>Scaling matrix based on the size</remarks>
+        public Matrix SizeTransform { get; private set; } = Matrix.Identity;
+        /// <summary>
+        /// Gets the sprite transform
+        /// </summary>
+        /// <remarks>Transform matrix without the size transform</remarks>
+        public Matrix SpriteTransform { get; private set; } = Matrix.Identity;
+        /// <summary>
         /// Gets final transform of controller
         /// </summary>
+        /// <remarks>Size transforms * sprite transform</remarks>
         public Matrix LocalTransform { get; private set; } = Matrix.Identity;
         /// <summary>
         /// Linear velocity modifier
@@ -38,23 +55,38 @@ namespace Engine
         /// <summary>
         /// Contructor
         /// </summary>
-        public Manipulator2D()
+        /// <param name="game">Game</param>
+        public Manipulator2D(Game game)
         {
-
+            this.game = game;
         }
+
         /// <summary>
-        /// Update internal state
+        /// Updates the internal state
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="relativeCenter">Relative window center</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
-        public void Update(GameTime gameTime, Point relativeCenter, float width, float height)
+        /// <param name="parentPosition">Parent position</param>
+        public void Update2D(Vector2? parentPosition)
         {
-            this.LocalTransform =
-                Matrix.Scaling(this.Scale.X * width, this.Scale.Y * height, 1f) *
-                Matrix.Translation(-relativeCenter.X, +relativeCenter.Y, 0f) *
-                Matrix.Translation(this.position.X, this.position.Y, 0f);
+            if (!updateInternals)
+            {
+                return;
+            }
+
+            var localPosition = Position + (Size * 0.5f);
+            var localScrPosition = game.Form.ToScreenSpace(localPosition);
+
+            Vector2 pivotPoint = Vector2.Zero;
+            if (parentPosition.HasValue)
+            {
+                var parentScrPosition = game.Form.ToScreenSpace(parentPosition.Value);
+                pivotPoint = parentScrPosition - localScrPosition;
+            }
+
+            SizeTransform = Matrix.Scaling(new Vector3(Size, 0));
+            SpriteTransform = Matrix.Transformation2D(pivotPoint, 0, Scale, pivotPoint, Rotation, localScrPosition);
+            LocalTransform = SizeTransform * SpriteTransform;
+
+            updateInternals = false;
 
             Counters.UpdatesPerFrame++;
         }
@@ -65,7 +97,9 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveLeft(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitX * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            Position += Vector2.UnitX * -d * LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Increments position component d distance along right vector
@@ -73,7 +107,9 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveRight(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitX * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            Position += Vector2.UnitX * d * LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Increments position component d distance along up vector
@@ -81,7 +117,9 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveUp(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitY * d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            Position += Vector2.UnitY * d * LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Increments position component d distance along down vector
@@ -89,9 +127,32 @@ namespace Engine
         /// <param name="d">Distance</param>
         public void MoveDown(GameTime gameTime, float d = 1f)
         {
-            this.position += Vector2.UnitY * -d * this.LinearVelocity * gameTime.ElapsedSeconds;
+            Position += Vector2.UnitY * -d * LinearVelocity * gameTime.ElapsedSeconds;
+
+            updateInternals = true;
         }
 
+        /// <summary>
+        /// Sets the size
+        /// </summary>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        public void SetSize(float width, float height)
+        {
+            Size = new Vector2(width, height);
+
+            updateInternals = true;
+        }
+        /// <summary>
+        /// Sets the size
+        /// </summary>
+        /// <param name="size">Size</param>
+        public void SetSize(Vector2 size)
+        {
+            Size = size;
+
+            updateInternals = true;
+        }
         /// <summary>
         /// Sets position
         /// </summary>
@@ -99,7 +160,9 @@ namespace Engine
         /// <param name="y">Y component of position</param>
         public void SetPosition(float x, float y)
         {
-            this.position = new Vector2(x, -y);
+            Position = new Vector2(x, y);
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets position
@@ -107,7 +170,9 @@ namespace Engine
         /// <param name="position">Position component</param>
         public void SetPosition(Vector2 position)
         {
-            this.position = new Vector2(position.X, -position.Y);
+            Position = position;
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets scale
@@ -115,7 +180,9 @@ namespace Engine
         /// <param name="scale">Scale component</param>
         public void SetScale(float scale)
         {
-            this.Scale = new Vector2(scale, scale);
+            Scale = new Vector2(scale, scale);
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets scale
@@ -124,7 +191,9 @@ namespace Engine
         /// <param name="y">Y component of scale</param>
         public void SetScale(float x, float y)
         {
-            this.Scale = new Vector2(x, y);
+            Scale = new Vector2(x, y);
+
+            updateInternals = true;
         }
         /// <summary>
         /// Sets scale
@@ -132,7 +201,19 @@ namespace Engine
         /// <param name="scale">Scale component</param>
         public void SetScale(Vector2 scale)
         {
-            this.Scale = scale;
+            Scale = scale;
+
+            updateInternals = true;
+        }
+        /// <summary>
+        /// Stes rotation
+        /// </summary>
+        /// <param name="angle">Rotation angle in radians</param>
+        public void SetRotation(float angle)
+        {
+            Rotation = angle;
+
+            updateInternals = true;
         }
 
         /// <summary>
@@ -141,7 +222,7 @@ namespace Engine
         /// <returns>Returns manipulator text description</returns>
         public override string ToString()
         {
-            return string.Format("{0}", this.LocalTransform.GetDescription());
+            return $"Size: {SizeTransform.GetDescription()}; Sprite: {SpriteTransform.GetDescription()}";
         }
     }
 }

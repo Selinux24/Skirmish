@@ -14,14 +14,17 @@ namespace Engine
         {
             get
             {
+                float brightness = 0.8f;
+                var lightColor = new Color3(1, 0.9607844f, 0.8078432f) * brightness;
+
                 return new SceneLightDirectional(
                     "Key light",
                     true,
-                    new Color4(1, 0.9607844f, 0.8078432f, 1f),
-                    new Color4(1, 0.9607844f, 0.8078432f, 1f) * 0.5f,
+                    lightColor,
+                    lightColor,
                     true,
                     new Vector3(-0.5265408f, -0.5735765f, -0.6275069f),
-                    1f);
+                    brightness);
             }
         }
         /// <summary>
@@ -31,14 +34,17 @@ namespace Engine
         {
             get
             {
+                float brightness = 0.5f;
+                var lightColor = new Color3(0.9647059f, 0.7607844f, 0.4078432f) * brightness;
+
                 return new SceneLightDirectional(
                     "Fill light",
                     false,
-                    new Color4(0.9647059f, 0.7607844f, 0.4078432f, 1f),
-                    new Color4(0, 0, 0, 0),
+                    lightColor,
+                    Color3.Black,
                     true,
                     new Vector3(0.7198464f, 0.3420201f, 0.6040227f),
-                    1f);
+                    brightness);
             }
         }
         /// <summary>
@@ -48,14 +54,17 @@ namespace Engine
         {
             get
             {
+                float brightness = 0.1f;
+                var lightColor = new Color3(0.3231373f, 0.3607844f, 0.3937255f) * brightness;
+
                 return new SceneLightDirectional(
                     "Back light",
                     false,
-                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f),
-                    new Color4(0.3231373f, 0.3607844f, 0.3937255f, 1f) * 0.25f,
+                    lightColor,
+                    lightColor * 0.05f,
                     true,
                     new Vector3(0.4545195f, -0.7660444f, 0.4545195f),
-                    1f);
+                    brightness);
             }
         }
 
@@ -71,7 +80,7 @@ namespace Engine
         /// <summary>
         /// Base brightness
         /// </summary>
-        public float BaseBrightness { get; protected set; } = 1f;
+        public float BaseBrightness { get; set; } = 1f;
         /// <summary>
         /// Light brightness
         /// </summary>
@@ -89,14 +98,9 @@ namespace Engine
             {
                 base.ParentTransform = value;
 
-                this.UpdateLocalTransform();
+                UpdateLocalTransform();
             }
         }
-
-        /// <summary>
-        /// First shadow map index
-        /// </summary>
-        public int ShadowMapIndex { get; set; } = 0;
         /// <summary>
         /// Shadow map count
         /// </summary>
@@ -124,7 +128,7 @@ namespace Engine
         protected SceneLightDirectional()
             : base()
         {
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
         /// <summary>
         /// Constructor
@@ -136,13 +140,13 @@ namespace Engine
         /// <param name="enabled">Lights is enabled</param>
         /// <param name="direction">Direction</param>
         /// <param name="brigthness">Brightness</param>
-        public SceneLightDirectional(string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled, Vector3 direction, float brigthness)
+        public SceneLightDirectional(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, Vector3 direction, float brigthness)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.initialDirection = direction;
-            this.BaseBrightness = this.Brightness = brigthness;
+            initialDirection = direction;
+            BaseBrightness = Brightness = brigthness;
 
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
 
         /// <summary>
@@ -150,20 +154,46 @@ namespace Engine
         /// </summary>
         private void UpdateLocalTransform()
         {
-            this.Direction = Vector3.TransformNormal(this.initialDirection, base.ParentTransform);
+            Direction = Vector3.TransformNormal(initialDirection, ParentTransform);
         }
 
-        /// <summary>
-        /// Clears all light shadow parameters
-        /// </summary>
-        public void ClearShadowParameters()
+        /// <inheritdoc/>
+        public override void ClearShadowParameters()
         {
-            this.ShadowMapIndex = -1;
-            this.ShadowMapCount = 0;
-            this.ToShadowSpace = Matrix.Identity;
-            this.ToCascadeOffsetX = Vector4.Zero;
-            this.ToCascadeOffsetY = Vector4.Zero;
-            this.ToCascadeScale = Vector4.Zero;
+            base.ClearShadowParameters();
+
+            ShadowMapCount = 0;
+            ToShadowSpace = Matrix.Identity;
+            ToCascadeOffsetX = Vector4.Zero;
+            ToCascadeOffsetY = Vector4.Zero;
+            ToCascadeScale = Vector4.Zero;
+        }
+        /// <inheritdoc/>
+        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
+        {
+            CastShadowsMarked = CastShadow;
+
+            return CastShadowsMarked;
+        }
+        /// <inheritdoc/>
+        public override ISceneLight Clone()
+        {
+            return new SceneLightDirectional()
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                State = State,
+
+                Direction = Direction,
+                Brightness = Brightness,
+
+                initialDirection = initialDirection,
+
+                ParentTransform = ParentTransform,
+            };
         }
 
         /// <summary>
@@ -173,31 +203,62 @@ namespace Engine
         /// <returns>Returns light position at specified distance</returns>
         public Vector3 GetPosition(float distance)
         {
-            return distance * -2f * this.Direction;
+            return distance * -2f * Direction;
         }
 
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
-        public override SceneLight Clone()
+        /// <inheritdoc/>
+        public IGameState GetState()
         {
-            return new SceneLightDirectional()
+            return new SceneLightDirectionalState
             {
-                Name = this.Name,
-                Enabled = this.Enabled,
-                CastShadow = this.CastShadow,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                State = this.State,
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
 
-                Direction = this.Direction,
-                Brightness = this.Brightness,
-
-                initialDirection = this.initialDirection,
-
-                ParentTransform = this.ParentTransform,
+                InitialDirection = initialDirection,
+                Direction = Direction,
+                BaseBrightness = BaseBrightness,
+                Brightness = Brightness,
+                ShadowMapCount = ShadowMapCount,
+                ToShadowSpace = ToShadowSpace,
+                ToCascadeOffsetX = ToCascadeOffsetX,
+                ToCascadeOffsetY = ToCascadeOffsetY,
+                ToCascadeScale = ToCascadeScale,
             };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightDirectionalState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            initialDirection = sceneLightsState.InitialDirection;
+            Direction = sceneLightsState.Direction;
+            BaseBrightness = sceneLightsState.BaseBrightness;
+            Brightness = sceneLightsState.Brightness;
+            ShadowMapCount = sceneLightsState.ShadowMapCount;
+            ToShadowSpace = sceneLightsState.ToShadowSpace;
+            ToCascadeOffsetX = sceneLightsState.ToCascadeOffsetX;
+            ToCascadeOffsetY = sceneLightsState.ToCascadeOffsetY;
+            ToCascadeScale = sceneLightsState.ToCascadeScale;
         }
     }
 }

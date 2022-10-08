@@ -15,12 +15,21 @@ namespace Engine.Common
         private DepthStencilView dsv = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="dsv">Depth stencil view</param>
-        internal EngineDepthStencilView(DepthStencilView dsv)
+        /// <param name="name">Name</param>
+        /// <param name="view">Depth stencil view</param>
+        internal EngineDepthStencilView(string name, DepthStencilView view)
         {
-            this.dsv = dsv;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A depth stencil view name must be specified.");
+            dsv = view ?? throw new ArgumentNullException(nameof(view), "A depth stencil view must be specified.");
+
+            dsv.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -46,8 +55,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.dsv?.Dispose();
-                this.dsv = null;
+                dsv?.Dispose();
+                dsv = null;
             }
         }
 
@@ -55,9 +64,9 @@ namespace Engine.Common
         /// Gets the depth stencil
         /// </summary>
         /// <returns></returns>
-        public DepthStencilView GetDepthStencil()
+        internal DepthStencilView GetDepthStencil()
         {
-            return this.dsv;
+            return dsv;
         }
     }
 }

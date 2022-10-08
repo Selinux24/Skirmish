@@ -84,7 +84,7 @@ namespace Engine
                         var newNormal = this.path.GetNormal(this.pathTime);
 
                         manipulator.SetPosition(newPosition, true);
-                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, true, 0.1f);
+                        manipulator.LookAt(newPosition + (newPosition - position), newNormal, Axis.Y, 0.1f);
                     }
                 }
                 else
@@ -92,6 +92,37 @@ namespace Engine
                     this.Clear();
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public override IGameState GetState()
+        {
+            return new SteerManipulatorControllerState
+            {
+                Path = path,
+                PathTime = pathTime,
+                Velocity = Velocity,
+                MaximumSpeed = MaximumSpeed,
+                MaximumForce = MaximumForce,
+                ArrivingThreshold = ArrivingThreshold,
+                ArrivingRadius = ArrivingRadius,
+            };
+        }
+        /// <inheritdoc/>
+        public override void SetState(IGameState state)
+        {
+            if (!(state is SteerManipulatorControllerState steerManipulator))
+            {
+                return;
+            }
+
+            path = steerManipulator.Path;
+            pathTime = steerManipulator.PathTime;
+            Velocity = steerManipulator.Velocity;
+            MaximumForce = steerManipulator.MaximumForce;
+            MaximumSpeed = steerManipulator.MaximumSpeed;
+            ArrivingThreshold = steerManipulator.ArrivingThreshold;
+            ArrivingRadius = steerManipulator.ArrivingRadius;
         }
     }
 }

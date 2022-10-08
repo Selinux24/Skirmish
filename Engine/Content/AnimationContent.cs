@@ -1,4 +1,5 @@
-﻿
+﻿using System.Linq;
+
 namespace Engine.Content
 {
     using Engine.Animation;
@@ -9,27 +10,28 @@ namespace Engine.Content
     public class AnimationContent
     {
         /// <summary>
-        /// Joint
+        /// Joint name
         /// </summary>
-        public string Joint { get; set; }
+        public string JointName { get; set; }
+        /// <summary>
+        /// Transform type
+        /// </summary>
+        public string TransformType { get; set; }
         /// <summary>
         /// Keyframe list
         /// </summary>
         public Keyframe[] Keyframes { get; set; }
 
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Keyframes != null && this.Keyframes.Length > 0)
+            if (Keyframes?.Any() == true)
             {
-                return string.Format("Start: {0}; End: {1};", this.Keyframes[0], this.Keyframes[this.Keyframes.Length - 1]);
+                return $"Start: {Keyframes.First()}; End: {Keyframes.Last()}; {JointName}";
             }
             else
             {
-                return "No animation;";
+                return $"No animation; {JointName}";
             }
         }
     }

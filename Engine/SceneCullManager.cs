@@ -49,7 +49,7 @@ namespace Engine
         /// <param name="index">Results index</param>
         /// <param name="objects">Objects list</param>
         /// <returns>Returns true if any object results inside the volume</returns>
-        public bool Cull(ICullingVolume volume, int index, IEnumerable<ICullable> objects)
+        public bool Cull(IIntersectionVolume volume, int index, IEnumerable<ICullable> objects)
         {
             bool res = false;
 

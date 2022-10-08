@@ -1,6 +1,5 @@
 ﻿using Engine;
 using System;
-using System.IO;
 
 namespace SpriteDrawing
 {
@@ -12,19 +11,38 @@ namespace SpriteDrawing
             try
             {
 #if DEBUG
-                using (Game cl = new Game("1 SpriteDrawing", false, 1600, 900, true, 0, 0))
+                Logger.LogLevel = LogLevel.Debug;
+                Logger.LogStackSize = 0;
+                Logger.EnableConsole = true;
 #else
-                using (Game cl = new Game("1 SpriteDrawing", true, 0, 0, true, 0, 4))
+                Logger.LogLevel = LogLevel.Error;
+#endif
+
+#if DEBUG
+                using (Game cl = new Game("1 SpriteDrawing", EngineForm.ScreenSize * 0.8f))
+#else
+                using (Game cl = new Game("1 SpriteDrawing"))
 #endif
                 {
-                    cl.AddScene<TestScene>();
+                    cl.SetScene<TestScene>();
 
                     cl.Run();
                 }
             }
             catch (Exception ex)
             {
-                File.WriteAllText("dump.txt", ex.ToString());
+                Logger.WriteError(nameof(Program), ex);
+            }
+            finally
+            {
+#if DEBUG
+                Logger.Dump("dumpDEBUG.txt");
+#else
+                if (Logger.HasErrors())
+                {
+                    Logger.Dump($"dump{DateTime.Now:yyyyMMddHHmmss.fff}.txt");
+                }
+#endif
             }
         }
     }

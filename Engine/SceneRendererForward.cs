@@ -1,6 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#if DEBUG
 using System.Diagnostics;
+#endif
+using System.Collections.Generic;
 using System.Linq;
+using SharpDX;
 
 namespace Engine
 {
@@ -22,63 +25,84 @@ namespace Engine
         /// <returns>Returns true if the renderer is valid</returns>
         public static bool Validate(Graphics graphics)
         {
-            return true;
+            return graphics != null;
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        public SceneRendererForward(Game game) : base(game)
+        /// <param name="scene">Scene</param>
+        public SceneRendererForward(Scene scene) : base(scene)
         {
 
         }
 
-        /// <summary>
-        /// Draws scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        public override void Draw(GameTime gameTime, Scene scene)
+        /// <inheritdoc/>
+        public override void Draw(GameTime gameTime)
         {
-            if (this.Updated)
+            if (!Updated)
             {
-                this.Updated = false;
-#if DEBUG
-                this.frameStats.Clear();
-
-                Stopwatch swTotal = Stopwatch.StartNew();
-#endif
-                //Draw visible components
-                var visibleComponents = scene.GetComponents(c => c.Visible);
-                if (visibleComponents.Any())
-                {
-                    //Initialize context data from update context
-                    this.DrawContext.GameTime = gameTime;
-                    this.DrawContext.DrawerMode = DrawerModes.Forward;
-                    this.DrawContext.ViewProjection = this.UpdateContext.ViewProjection;
-                    this.DrawContext.CameraVolume = this.UpdateContext.CameraVolume;
-                    this.DrawContext.EyePosition = this.UpdateContext.EyePosition;
-                    this.DrawContext.EyeTarget = this.UpdateContext.EyeDirection;
-
-                    //Initialize context data from scene
-                    this.DrawContext.Lights = scene.Lights;
-                    this.DrawContext.ShadowMapDirectional = this.ShadowMapperDirectional;
-                    this.DrawContext.ShadowMapPoint = this.ShadowMapperPoint;
-                    this.DrawContext.ShadowMapSpot = this.ShadowMapperSpot;
-
-                    //Shadow mapping
-                    DoShadowMapping(gameTime, scene);
-
-                    //Rendering
-                    DoRender(scene, visibleComponents);
-                }
-#if DEBUG
-                swTotal.Stop();
-
-                this.frameStats.UpdateCounters(swTotal.ElapsedTicks);
-#endif
+                return;
             }
+
+            Updated = false;
+
+            //Select visible components
+            var visibleComponents = Scene.GetComponents<IDrawable>().Where(c => c.Visible);
+            if (!visibleComponents.Any())
+            {
+                return;
+            }
+
+#if DEBUG
+            frameStats.Clear();
+
+            Stopwatch swTotal = Stopwatch.StartNew();
+#endif
+            //Updates the draw context
+            UpdateDrawContext(gameTime, DrawerModes.Forward);
+
+            //Shadow mapping
+            DoShadowMapping(gameTime);
+
+            //Binds the result target
+            SetTarget(Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+
+            var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
+            if (objectComponents.Any())
+            {
+                //Render objects
+                DoRender(Scene, objectComponents);
+                //Post-processing
+                DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
+            }
+
+            //Binds the UI target
+            SetTarget(Targets.UI, true, Color.Transparent);
+
+            var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
+            if (uiComponents.Any())
+            {
+                //Render UI
+                DoRender(Scene, uiComponents);
+                //UI post-processing
+                DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
+            }
+
+            //Combine to result
+            CombineTargets(Targets.Objects, Targets.UI, Targets.Result);
+
+            //Final post-processing
+            DoPostProcessing(Targets.Result, RenderPass.Final, gameTime);
+
+            //Draw to screen
+            DrawToScreen(Targets.Result);
+
+#if DEBUG
+            swTotal.Stop();
+
+            frameStats.UpdateCounters(swTotal.ElapsedTicks);
+#endif
         }
 
         /// <summary>
@@ -86,78 +110,67 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="components">Components</param>
-        private void DoRender(Scene scene, IEnumerable<SceneObject> components)
+        private void DoRender(Scene scene, IEnumerable<IDrawable> components)
         {
-            #region Preparation
-#if DEBUG
-            Stopwatch swPreparation = Stopwatch.StartNew();
-#endif
-            //Set default render target and depth buffer, and clear it
-            var graphics = this.Game.Graphics;
-            graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget();
-#if DEBUG
-            swPreparation.Stop();
+            if (!components.Any())
+            {
+                return;
+            }
 
-            this.frameStats.ForwardStart = swPreparation.ElapsedTicks;
+            bool draw = false;
+
+            #region Cull
+#if DEBUG
+            Stopwatch swCull = Stopwatch.StartNew();
+#endif
+            var toCullVisible = components.OfType<ICullable>();
+
+            if (scene.PerformFrustumCulling)
+            {
+                //Frustum culling
+                draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullVisible);
+            }
+            else
+            {
+                draw = true;
+            }
+
+            if (draw)
+            {
+                var groundVolume = scene.GetSceneVolume();
+                if (groundVolume != null)
+                {
+                    //Ground culling
+                    draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
+                }
+            }
+
+#if DEBUG
+            swCull.Stop();
+
+            frameStats.ForwardCull = swCull.ElapsedTicks;
 #endif
             #endregion
 
-            //Forward rendering
-            if (components.Any())
+            if (!draw)
             {
-                #region Cull
-#if DEBUG
-                Stopwatch swCull = Stopwatch.StartNew();
-#endif
-                var toCullVisible = components.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
-
-                bool draw = false;
-                if (scene.PerformFrustumCulling)
-                {
-                    //Frustum culling
-                    draw = this.cullManager.Cull(this.DrawContext.CameraVolume, CullIndexDrawIndex, toCullVisible);
-                }
-                else
-                {
-                    draw = true;
-                }
-
-                if (draw)
-                {
-                    var groundVolume = scene.GetSceneVolume();
-                    if (groundVolume != null)
-                    {
-                        //Ground culling
-                        draw = this.cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
-                    }
-                }
-
-#if DEBUG
-                swCull.Stop();
-
-                this.frameStats.ForwardCull = swCull.ElapsedTicks;
-#endif
-                #endregion
-
-                #region Draw
-
-                if (draw)
-                {
-#if DEBUG
-                    Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                    //Draw solid
-                    this.DrawResultComponents(this.DrawContext, CullIndexDrawIndex, components);
-#if DEBUG
-                    swDraw.Stop();
-
-                    this.frameStats.ForwardDraw = swDraw.ElapsedTicks;
-#endif
-                }
-
-                #endregion
+                return;
             }
+
+            #region Draw
+
+#if DEBUG
+            Stopwatch swDraw = Stopwatch.StartNew();
+#endif
+            //Draw solid
+            DrawResultComponents(DrawContext, CullIndexDrawIndex, components);
+#if DEBUG
+            swDraw.Stop();
+
+            frameStats.ForwardDraw = swDraw.ElapsedTicks;
+#endif
+
+            #endregion
         }
         /// <summary>
         /// Draw components
@@ -165,19 +178,25 @@ namespace Engine
         /// <param name="context">Context</param>
         /// <param name="index">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<SceneObject> components)
+        private void DrawResultComponents(DrawContext context, int index, IEnumerable<IDrawable> components)
         {
+            BuiltIn.BuiltInShaders.UpdatePerFrame(context);
+
             //Save current drawer mode
             var mode = context.DrawerMode;
-
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
             Stopwatch stopwatch = new Stopwatch();
-
+#endif
             //First opaques
+#if DEBUG
             stopwatch.Start();
-            var opaques = this.GetOpaques(index, components);
+#endif
+            var opaques = GetOpaques(index, components);
+#if DEBUG
             stopwatch.Stop();
             dict.Add("Opaques Selection", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (opaques.Any())
             {
@@ -185,31 +204,47 @@ namespace Engine
                 context.DrawerMode = mode | DrawerModes.OpaqueOnly;
 
                 //Sort items nearest first
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 opaques.Sort((c1, c2) => SortOpaques(index, c1, c2));
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Opaques Sort", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Draw items
+#if DEBUG
                 stopwatch.Restart();
                 int oDIndex = 0;
+#endif
                 opaques.ForEach((c) =>
                 {
+#if DEBUG
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.DrawOpaque(context, c);
+#endif
+                    Draw(context, c);
+#if DEBUG
                     stopwatch2.Stop();
                     dict.Add($"Opaque Draw {oDIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
+#endif
                 });
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Opaques Draw", stopwatch.Elapsed.TotalMilliseconds);
+#endif
             }
 
             //Then transparents
+#if DEBUG
             stopwatch.Restart();
-            var transparents = this.GetTransparents(index, components);
+#endif
+            var transparents = GetTransparents(index, components);
+#if DEBUG
             stopwatch.Stop();
             dict.Add("Transparents Selection", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (transparents.Any())
             {
@@ -217,33 +252,47 @@ namespace Engine
                 context.DrawerMode = mode | DrawerModes.TransparentOnly;
 
                 //Sort items far first
+#if DEBUG
                 stopwatch.Restart();
+#endif
                 transparents.Sort((c1, c2) => SortTransparents(index, c1, c2));
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Transparents Sort", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Draw items
+#if DEBUG
                 stopwatch.Restart();
                 int oTIndex = 0;
+#endif
                 transparents.ForEach((c) =>
                 {
+#if DEBUG
                     Stopwatch stopwatch2 = new Stopwatch();
                     stopwatch2.Start();
-                    this.DrawTransparent(context, c);
+#endif
+                    Draw(context, c);
+#if DEBUG
                     stopwatch2.Stop();
                     dict.Add($"Transparent Draw {oTIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
+#endif
                 });
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add("Transparents Draw", stopwatch.Elapsed.TotalMilliseconds);
+#endif
             }
 
             //Reset drawer mode
             context.DrawerMode = mode;
 
-            if (this.Game.CollectGameStatus)
+#if DEBUG
+            if (Scene.Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
     }
 }

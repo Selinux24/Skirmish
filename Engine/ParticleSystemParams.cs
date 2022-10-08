@@ -91,13 +91,13 @@ namespace Engine
         {
             get
             {
-                return this.maxHorizontalVelocity;
+                return maxHorizontalVelocity;
             }
             set
             {
-                this.maxHorizontalVelocity = value;
+                maxHorizontalVelocity = value;
 
-                this.HorizontalVelocity = new Vector2(this.minHorizontalVelocity, this.maxHorizontalVelocity);
+                HorizontalVelocity = new Vector2(minHorizontalVelocity, maxHorizontalVelocity);
             }
         }
         /// <summary>
@@ -107,13 +107,13 @@ namespace Engine
         {
             get
             {
-                return this.minHorizontalVelocity;
+                return minHorizontalVelocity;
             }
             set
             {
-                this.minHorizontalVelocity = value;
+                minHorizontalVelocity = value;
 
-                this.HorizontalVelocity = new Vector2(this.minHorizontalVelocity, this.maxHorizontalVelocity);
+                HorizontalVelocity = new Vector2(minHorizontalVelocity, maxHorizontalVelocity);
             }
         }
 
@@ -124,13 +124,13 @@ namespace Engine
         {
             get
             {
-                return this.maxVerticalVelocity;
+                return maxVerticalVelocity;
             }
             set
             {
-                this.maxVerticalVelocity = value;
+                maxVerticalVelocity = value;
 
-                this.VerticalVelocity = new Vector2(this.minVerticalVelocity, this.maxVerticalVelocity);
+                VerticalVelocity = new Vector2(minVerticalVelocity, maxVerticalVelocity);
             }
         }
         /// <summary>
@@ -140,13 +140,13 @@ namespace Engine
         {
             get
             {
-                return this.minVerticalVelocity;
+                return minVerticalVelocity;
             }
             set
             {
-                this.minVerticalVelocity = value;
+                minVerticalVelocity = value;
 
-                this.VerticalVelocity = new Vector2(this.minVerticalVelocity, this.maxVerticalVelocity);
+                VerticalVelocity = new Vector2(minVerticalVelocity, maxVerticalVelocity);
             }
         }
 
@@ -175,13 +175,13 @@ namespace Engine
         {
             get
             {
-                return this.minRotateSpeed;
+                return minRotateSpeed;
             }
             set
             {
-                this.minRotateSpeed = value;
+                minRotateSpeed = value;
 
-                this.RotateSpeed = new Vector2(this.minRotateSpeed, this.maxRotateSpeed);
+                RotateSpeed = new Vector2(minRotateSpeed, maxRotateSpeed);
             }
         }
         /// <summary>
@@ -191,13 +191,13 @@ namespace Engine
         {
             get
             {
-                return this.maxRotateSpeed;
+                return maxRotateSpeed;
             }
             set
             {
-                this.maxRotateSpeed = value;
+                maxRotateSpeed = value;
 
-                this.RotateSpeed = new Vector2(this.minRotateSpeed, this.maxRotateSpeed);
+                RotateSpeed = new Vector2(minRotateSpeed, maxRotateSpeed);
             }
         }
 
@@ -208,13 +208,13 @@ namespace Engine
         {
             get
             {
-                return this.minStartSize;
+                return minStartSize;
             }
             set
             {
-                this.minStartSize = value;
+                minStartSize = value;
 
-                this.StartSize = new Vector2(this.minStartSize, this.maxStartSize);
+                StartSize = new Vector2(minStartSize, maxStartSize);
             }
         }
         /// <summary>
@@ -224,13 +224,13 @@ namespace Engine
         {
             get
             {
-                return this.maxStartSize;
+                return maxStartSize;
             }
             set
             {
-                this.maxStartSize = value;
+                maxStartSize = value;
 
-                this.StartSize = new Vector2(this.minStartSize, this.maxStartSize);
+                StartSize = new Vector2(minStartSize, maxStartSize);
             }
         }
 
@@ -241,13 +241,13 @@ namespace Engine
         {
             get
             {
-                return this.minEndSize;
+                return minEndSize;
             }
             set
             {
-                this.minEndSize = value;
+                minEndSize = value;
 
-                this.EndSize = new Vector2(this.minEndSize, this.maxEndSize);
+                EndSize = new Vector2(minEndSize, maxEndSize);
             }
         }
         /// <summary>
@@ -257,24 +257,20 @@ namespace Engine
         {
             get
             {
-                return this.maxEndSize;
+                return maxEndSize;
             }
             set
             {
-                this.maxEndSize = value;
+                maxEndSize = value;
 
-                this.EndSize = new Vector2(this.minEndSize, this.maxEndSize);
+                EndSize = new Vector2(minEndSize, maxEndSize);
             }
         }
 
         /// <summary>
-        /// Gets or sets wheter the particles were transparent
+        /// Gets or sets whether the blend mode
         /// </summary>
-        public bool Transparent { get; set; }
-        /// <summary>
-        /// Gets or sets wheter the particles were additive
-        /// </summary>
-        public bool Additive { get; set; }
+        public BlendModes BlendMode { get; set; }
 
         /// <summary>
         /// Emitter velocity sensitivity
@@ -310,47 +306,46 @@ namespace Engine
         /// <param name="description">Particle system description</param>
         public ParticleSystemParams(ParticleSystemDescription description) : this()
         {
-            this.minHorizontalVelocity = 0f;
-            this.maxHorizontalVelocity = 0f;
-            this.minVerticalVelocity = 0f;
-            this.maxVerticalVelocity = 0f;
-            this.minRotateSpeed = 0f;
-            this.maxRotateSpeed = 0f;
-            this.minStartSize = 0f;
-            this.maxStartSize = 0f;
-            this.minEndSize = 0f;
-            this.maxEndSize = 0f;
+            minHorizontalVelocity = 0f;
+            maxHorizontalVelocity = 0f;
+            minVerticalVelocity = 0f;
+            maxVerticalVelocity = 0f;
+            minRotateSpeed = 0f;
+            maxRotateSpeed = 0f;
+            minStartSize = 0f;
+            maxStartSize = 0f;
+            minEndSize = 0f;
+            maxEndSize = 0f;
 
-            this.HorizontalVelocity = Vector2.Zero;
-            this.VerticalVelocity = Vector2.Zero;
-            this.RotateSpeed = Vector2.Zero;
-            this.StartSize = Vector2.Zero;
-            this.EndSize = Vector2.Zero;
+            HorizontalVelocity = Vector2.Zero;
+            VerticalVelocity = Vector2.Zero;
+            RotateSpeed = Vector2.Zero;
+            StartSize = Vector2.Zero;
+            EndSize = Vector2.Zero;
 
-            this.MaxDuration = description.MaxDuration;
-            this.MaxDurationRandomness = description.MaxDurationRandomness;
+            MaxDuration = description.MaxDuration;
+            MaxDurationRandomness = description.MaxDurationRandomness;
 
-            this.Gravity = description.Gravity;
-            this.EndVelocity = description.EndVelocity;
+            Gravity = description.Gravity;
+            EndVelocity = description.EndVelocity;
 
-            this.MinColor = description.MinColor;
-            this.MaxColor = description.MaxColor;
+            MinColor = description.MinColor;
+            MaxColor = description.MaxColor;
 
-            this.Transparent = description.Transparent;
-            this.Additive = description.Additive;
+            BlendMode = description.BlendMode;
 
-            this.EmitterVelocitySensitivity = description.EmitterVelocitySensitivity;
+            EmitterVelocitySensitivity = description.EmitterVelocitySensitivity;
 
-            this.MinHorizontalVelocity = description.MinHorizontalVelocity;
-            this.MaxHorizontalVelocity = description.MaxHorizontalVelocity;
-            this.MinVerticalVelocity = description.MinVerticalVelocity;
-            this.MaxVerticalVelocity = description.MaxVerticalVelocity;
-            this.MinRotateSpeed = description.MinRotateSpeed;
-            this.MaxRotateSpeed = description.MaxRotateSpeed;
-            this.MinStartSize = description.MinStartSize;
-            this.MaxStartSize = description.MaxStartSize;
-            this.MinEndSize = description.MinEndSize;
-            this.MaxEndSize = description.MaxEndSize;
+            MinHorizontalVelocity = description.MinHorizontalVelocity;
+            MaxHorizontalVelocity = description.MaxHorizontalVelocity;
+            MinVerticalVelocity = description.MinVerticalVelocity;
+            MaxVerticalVelocity = description.MaxVerticalVelocity;
+            MinRotateSpeed = description.MinRotateSpeed;
+            MaxRotateSpeed = description.MaxRotateSpeed;
+            MinStartSize = description.MinStartSize;
+            MaxStartSize = description.MaxStartSize;
+            MinEndSize = description.MinEndSize;
+            MaxEndSize = description.MaxEndSize;
         }
 
         /// <summary>

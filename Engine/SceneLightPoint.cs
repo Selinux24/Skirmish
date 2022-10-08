@@ -40,7 +40,7 @@ namespace Engine
         {
             get
             {
-                return new BoundingSphere(this.Position, this.Radius);
+                return new BoundingSphere(Position, Radius);
             }
         }
         /// <summary>
@@ -56,7 +56,7 @@ namespace Engine
             {
                 base.ParentTransform = value;
 
-                this.UpdateLocalTransform();
+                UpdateLocalTransform();
             }
         }
         /// <summary>
@@ -66,14 +66,9 @@ namespace Engine
         {
             get
             {
-                return Matrix.Scaling(this.Radius) * Matrix.Translation(this.Position);
+                return Matrix.Scaling(Radius) * Matrix.Translation(Position);
             }
         }
-
-        /// <summary>
-        /// Shadow map index
-        /// </summary>
-        public int ShadowMapIndex { get; set; }
 
         /// <summary>
         /// Constructor
@@ -93,15 +88,15 @@ namespace Engine
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
         public SceneLightPoint(
-            string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
+            string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled,
             SceneLightPointDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
-            this.initialTransform = description.Transform;
-            this.initialRadius = description.Radius;
-            this.initialIntensity = description.Intensity;
+            initialTransform = description.Transform;
+            initialRadius = description.Radius;
+            initialIntensity = description.Intensity;
 
-            this.UpdateLocalTransform();
+            UpdateLocalTransform();
         }
 
         /// <summary>
@@ -109,22 +104,44 @@ namespace Engine
         /// </summary>
         private void UpdateLocalTransform()
         {
-            var trn = this.initialTransform * base.ParentTransform;
+            var trn = initialTransform * ParentTransform;
 
-            trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation);
-            this.Radius = initialRadius * scale.X;
-            this.Intensity = initialIntensity * scale.X;
-            this.Position = translation;
+            trn.Decompose(out Vector3 scale, out _, out Vector3 translation);
+            Radius = initialRadius * scale.X;
+            Intensity = initialIntensity * scale.X;
+            Position = translation;
         }
 
-        /// <summary>
-        /// Clears all light shadow parameters
-        /// </summary>
-        public void ClearShadowParameters()
+        /// <inheritdoc/>
+        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
         {
-            this.ShadowMapIndex = -1;
-        }
+            CastShadowsMarked = EvaluateLight(environment, eyePosition, CastShadow, Position, Radius);
 
+            return CastShadowsMarked;
+        }
+        /// <inheritdoc/>
+        public override ISceneLight Clone()
+        {
+            return new SceneLightPoint()
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                State = State,
+
+                Position = Position,
+                Radius = Radius,
+                Intensity = Intensity,
+
+                initialTransform = initialTransform,
+                initialRadius = initialRadius,
+                initialIntensity = initialIntensity,
+
+                ParentTransform = ParentTransform,
+            };
+        }
         /// <summary>
         /// Gets the light volume
         /// </summary>
@@ -133,33 +150,56 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
-            return Line3D.CreateWiredSphere(this.BoundingSphere, sliceCount, stackCount);
+            return Line3D.CreateWiredSphere(BoundingSphere, sliceCount, stackCount);
         }
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
-        public override SceneLight Clone()
+
+        /// <inheritdoc/>
+        public IGameState GetState()
         {
-            return new SceneLightPoint()
+            return new SceneLightPointState
             {
-                Name = this.Name,
-                Enabled = this.Enabled,
-                CastShadow = this.CastShadow,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                State = this.State,
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
 
-                Position = this.Position,
-                Radius = this.Radius,
-                Intensity = this.Intensity,
-
-                initialTransform = this.initialTransform,
-                initialRadius = this.initialRadius,
-                initialIntensity = this.initialIntensity,
-
-                ParentTransform = this.ParentTransform,
+                InitialTransform = initialTransform,
+                InitialRadius = initialRadius,
+                InitialIntensity = initialIntensity,
+                Position = Position,
+                Radius = Radius,
+                Intensity = Intensity,
             };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightPointState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            initialTransform = sceneLightsState.InitialTransform;
+            initialRadius = sceneLightsState.InitialRadius;
+            initialIntensity = sceneLightsState.InitialIntensity;
+            Position = sceneLightsState.Position;
+            Radius = sceneLightsState.Radius;
+            Intensity = sceneLightsState.Intensity;
         }
     }
 }

@@ -1,0 +1,367 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProjectGuid>{F366139B-499B-4557-B1E6-3E74A8F64F74}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Engine.Shaders</RootNamespace>
+    <AssemblyName>Engine.Shaders</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+    <SonarQubeTestProject>False</SonarQubeTestProject>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>Engine.Shaders.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>
+    </CodeAnalysisRuleSet>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <GenerateSerializationAssemblies>Off</GenerateSerializationAssemblies>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Xml" />
+    <PixelShader Include="Forward\PositionNormalColor.ps.hlsl" />
+    <VertexShader Include="Common\PositionNormalColor.vs.hlsl" />
+    <PixelShader Include="Forward\PositionTexture.ps.hlsl" />
+    <VertexShader Include="Common\PositionTexture.vs.hlsl" />
+    <PixelShader Include="Forward\PositionNormalTexture.ps.hlsl" />
+    <VertexShader Include="Common\PositionNormalTexture.vs.hlsl" />
+    <PixelShader Include="Forward\PositionNormalTextureTangent.ps.hlsl" />
+    <VertexShader Include="Common\PositionNormalTextureTangent.vs.hlsl" />
+    <None Include="Engine.Shaders.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\CommonResources.Designer.cs">
+      <DependentUpon>CommonResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\PostProcessResources.Designer.cs">
+      <DependentUpon>PostProcessResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\DeferredRenderingResources.Designer.cs">
+      <DependentUpon>DeferredRenderingResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\ForwardRenderingResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ForwardRenderingResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\ShadowRenderingResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ShadowRenderingResources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\UIRenderingResources.Designer.cs">
+      <DependentUpon>UIRenderingResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Properties\LibResources.Designer.cs">
+      <DependentUpon>LibResources.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="Forward\PositionColor.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShadowsDefault\PositionTextureSkinnedI.vs.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionTextureSkinned.vs.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionTextureI.vs.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionTexture.vs.hlsl" />
+    <PixelShader Include="ForwardFoliage\Foliage.ps.hlsl" />
+    <VertexShader Include="ForwardFoliage\Foliage.vs.hlsl" />
+    <GeometryShader Include="ForwardFoliage\Foliage.gs.hlsl" />
+    <PixelShader Include="Deferred\PositionColor.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionNormalColor.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionTexture.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionNormalTexture.ps.hlsl" />
+    <PixelShader Include="Deferred\PositionNormalTextureTangent.ps.hlsl" />
+    <VertexShader Include="Deferred\DeferredLight.vs.hlsl" />
+    <VertexShader Include="Deferred\DeferredStencil.vs.hlsl" />
+    <PixelShader Include="Deferred\DeferredLightDirectional.ps.hlsl" />
+    <PixelShader Include="Deferred\DeferredLightSpot.ps.hlsl" />
+    <PixelShader Include="Deferred\DeferredLightPoint.ps.hlsl" />
+    <PixelShader Include="Deferred\DeferredComposer.ps.hlsl" />
+    <VertexShader Include="Deferred\DeferredLightOrtho.vs.hlsl" />
+    <PixelShader Include="DeferredTerrain\Terrain.ps.hlsl" />
+    <Content Include="Lib\IncGBuffer.hlsl" />
+    <Content Include="Lib\IncGBufferLights.hlsl" />
+    <GeometryShader Include="ShadowsDefault\ShadowTransparent.gs.hlsl" />
+    <GeometryShader Include="ShadowsDefault\Shadow.gs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncHelpers.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncLights.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncMaterials.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncScattering.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncVertexFormats.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.HLSL.CSharpVB">
+      <Version>1.0.2</Version>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncAnimation.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncMatrix.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Lib\IncQuaternion.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionColor.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionColorSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionColorI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionColorSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionTextureI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionTextureSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionTextureSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalColorI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalColorSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalColorSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalTextureSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalTextureSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalTextureI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalTextureTangentI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalTextureTangentSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="Common\PositionNormalTextureTangentSkinnedI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ForwardCubemap\Cubemap.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ForwardCubemap\Cubemap.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ForwardSkymap\Skymap.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ForwardSkymap\Skymap.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ForwardSkyScattering\SkyScattering.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ForwardSkyScattering\SkyScattering.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ForwardParticles\Particles.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <GeometryShader Include="ForwardParticles\Particles.gs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ForwardParticles\Particles.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShadowsDefault\Position.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShadowsDefault\PositionI.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <VertexShader Include="ShadowsDefault\PositionSkinned.vs.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <PixelShader Include="ForwardDecals\Decal.ps.hlsl" />
+    <VertexShader Include="ForwardDecals\Decal.vs.hlsl" />
+    <GeometryShader Include="ForwardDecals\Decal.gs.hlsl" />
+    <PixelShader Include="UIFont\Font.ps.hlsl" />
+    <VertexShader Include="UIFont\Font.vs.hlsl" />
+    <VertexShader Include="ForwardParticles\Streamout.vs.hlsl" />
+    <GeometryShader Include="ForwardParticles\Streamout.gs.hlsl" />
+    <Content Include="Lib\IncSprites.hlsl" />
+    <Content Include="Lib\IncBuiltIn.hlsl" />
+    <PixelShader Include="ForwardWater\Water.ps.hlsl" />
+    <VertexShader Include="ForwardWater\Water.vs.hlsl" />
+    <PixelShader Include="ForwardBillboards\Billboard.ps.hlsl" />
+    <VertexShader Include="ForwardBillboards\Billboard.vs.hlsl" />
+    <GeometryShader Include="ForwardBillboards\Billboard.gs.hlsl" />
+    <VertexShader Include="Common\Terrain.vs.hlsl" />
+    <PixelShader Include="ForwardTerrain\Terrain.ps.hlsl" />
+    <PixelShader Include="ForwardClouds\Clouds.ps.hlsl" />
+    <VertexShader Include="ForwardClouds\Clouds.vs.hlsl" />
+    <PixelShader Include="UISprites\SpriteTexture.ps.hlsl" />
+    <VertexShader Include="UISprites\SpriteColor.vs.hlsl" />
+    <VertexShader Include="UISprites\SpriteTexture.vs.hlsl" />
+    <PixelShader Include="UISprites\SpriteColor.ps.hlsl" />
+    <VertexShader Include="PostProcess\PostProcess.vs.hlsl" />
+    <PixelShader Include="PostProcess\PostProcess.ps.hlsl" />
+    <PixelShader Include="PostProcess\Combine.ps.hlsl" />
+    <VertexShader Include="ShadowsDefault\PositionSkinnedI.vs.hlsl" />
+    <PixelShader Include="ShadowsDefault\Transparent.ps.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\DeferredRenderingResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>DeferredRenderingResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\CommonResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>CommonResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\PostProcessResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>PostProcessResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\UIRenderingResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>UIRenderingResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\LibResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>LibResources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\ForwardRenderingResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>ForwardRenderingResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\ShadowRenderingResources.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
+      <LastGenOutput>ShadowRenderingResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

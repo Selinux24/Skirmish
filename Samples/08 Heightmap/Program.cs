@@ -1,6 +1,6 @@
 ﻿using Engine;
+using Engine.Content.FmtCollada;
 using System;
-using System.IO;
 
 namespace Heightmap
 {
@@ -12,9 +12,17 @@ namespace Heightmap
             try
             {
 #if DEBUG
-                using (Game cl = new Game("8 Heightmap", false, 1600, 900, true, 0, 0))
+                Logger.LogLevel = LogLevel.Debug;
+                Logger.LogStackSize = 0;
+                Logger.EnableConsole = true;
 #else
-                using (Game cl = new Game("8 Heightmap", true, 0, 0, true, 0, 4))
+                Logger.LogLevel = LogLevel.Error;
+#endif
+
+#if DEBUG
+                using (Game cl = new Game("8 Heightmap", EngineForm.ScreenSize * 0.8f))
+#else
+                using (Game cl = new Game("8 Heightmap"))
 #endif
                 {
 #if DEBUG
@@ -25,14 +33,27 @@ namespace Heightmap
                     cl.LockMouse = true;
 #endif
 
-                    cl.AddScene<TestScene3D>();
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
+
+                    cl.SetScene<TestScene3D>();
 
                     cl.Run();
                 }
             }
             catch (Exception ex)
             {
-                File.WriteAllText("dump.txt", ex.ToString());
+                Logger.WriteError(nameof(Program), ex);
+            }
+            finally
+            {
+#if DEBUG
+                Logger.Dump("dumpDEBUG.txt");
+#else
+                if (Logger.HasErrors())
+                {
+                    Logger.Dump($"dump{DateTime.Now:yyyyMMddHHmmss.fff}.txt");
+                }
+#endif
             }
         }
     }

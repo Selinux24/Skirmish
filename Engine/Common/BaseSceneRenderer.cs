@@ -1,16 +1,74 @@
-﻿using SharpDX;
+﻿#if DEBUG
+using System.Diagnostics;
+#endif
+using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 
 namespace Engine.Common
 {
+    using Engine.BuiltIn.PostProcess;
+
     /// <summary>
     /// Base scene renderer
     /// </summary>
     public abstract class BaseSceneRenderer : ISceneRenderer
     {
+        /// <summary>
+        /// Render targets
+        /// </summary>
+        protected enum Targets
+        {
+            /// <summary>
+            /// Objects target
+            /// </summary>
+            /// <remarks>
+            /// All scene objects and their post-processing effects are drawn to this target
+            /// </remarks>
+            Objects,
+            /// <summary>
+            /// UI target
+            /// </summary>
+            /// <remarks>
+            /// All user interface components and their post-processing effects are drawn to this target
+            /// </remarks>
+            UI,
+            /// <summary>
+            /// Results target
+            /// </summary>
+            Result,
+            /// <summary>
+            /// Screen
+            /// </summary>
+            Screen,
+        }
+
+        /// <summary>
+        /// Post-processing drawer
+        /// </summary>
+        private readonly IPostProcessingDrawer processingDrawer = null;
+        /// <summary>
+        /// Scene objects target
+        /// </summary>
+        private RenderTarget sceneObjectsTarget = null;
+        /// <summary>
+        /// Scene UI target
+        /// </summary>
+        private RenderTarget sceneUITarget = null;
+        /// <summary>
+        /// Scene results target
+        /// </summary>
+        private RenderTarget sceneResultsTarget = null;
+        /// <summary>
+        /// Post-processing render target A
+        /// </summary>
+        private RenderTarget postProcessingTargetA = null;
+        /// <summary>
+        /// Post-processing render target B
+        /// </summary>
+        private RenderTarget postProcessingTargetB = null;
+
         /// <summary>
         /// Shadow map size
         /// </summary>
@@ -23,15 +81,6 @@ namespace Engine.Common
         /// Maximum number of cascade shadow maps per directional light
         /// </summary>
         protected const int MaxDirectionalCascadeShadowMaps = 3;
-        /// <summary>
-        /// Shadow map sampling distances
-        /// </summary>
-        public static float[] CascadeShadowMapsDistances { get; set; } = new[]
-        {
-            GameEnvironment.ShadowDistanceHigh,
-            GameEnvironment.ShadowDistanceMedium,
-            GameEnvironment.ShadowDistanceLow,
-        };
 
         /// <summary>
         /// Cubic shadow map size
@@ -74,9 +123,9 @@ namespace Engine.Common
         protected IShadowMap ShadowMapperSpot { get; private set; }
 
         /// <summary>
-        /// Game
+        /// Scene
         /// </summary>
-        protected Game Game;
+        protected Scene Scene;
         /// <summary>
         /// Renderer width
         /// </summary>
@@ -108,12 +157,7 @@ namespace Engine.Common
         {
             get
             {
-                if (this.ShadowMapperDirectional != null)
-                {
-                    return this.ShadowMapperDirectional.Texture;
-                }
-
-                return null;
+                return ShadowMapperDirectional?.Texture;
             }
         }
         /// <summary>
@@ -123,12 +167,7 @@ namespace Engine.Common
         {
             get
             {
-                if (this.ShadowMapperPoint != null)
-                {
-                    return this.ShadowMapperPoint.Texture;
-                }
-
-                return null;
+                return ShadowMapperPoint?.Texture;
             }
         }
         /// <summary>
@@ -138,12 +177,7 @@ namespace Engine.Common
         {
             get
             {
-                if (this.ShadowMapperSpot != null)
-                {
-                    return this.ShadowMapperSpot.Texture;
-                }
-
-                return null;
+                return ShadowMapperSpot?.Texture;
             }
         }
         /// <summary>
@@ -151,25 +185,59 @@ namespace Engine.Common
         /// </summary>
         protected bool Updated { get; set; }
 
+        /// <inheritdoc/>
+        public bool PostProcessingEnabled
+        {
+            get
+            {
+                if (PostProcessingObjectsEffects?.Ready == true)
+                {
+                    return true;
+                }
+
+                if (PostProcessingUIEffects?.Ready == true)
+                {
+                    return true;
+                }
+
+                if (PostProcessingFinalEffects?.Ready == true)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+        /// <inheritdoc/>
+        public BuiltInPostProcessState PostProcessingObjectsEffects { get; set; } = BuiltInPostProcessState.Empty;
+        /// <inheritdoc/>
+        public BuiltInPostProcessState PostProcessingUIEffects { get; set; } = BuiltInPostProcessState.Empty;
+        /// <inheritdoc/>
+        public BuiltInPostProcessState PostProcessingFinalEffects { get; set; } = BuiltInPostProcessState.Empty;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        protected BaseSceneRenderer(Game game)
+        /// <param name="scene">Scene</param>
+        protected BaseSceneRenderer(Scene scene)
         {
-            this.Game = game;
+            Scene = scene;
 
             // Directional shadow mapper
-            this.ShadowMapperDirectional = new ShadowMapCascade(game,
+            ShadowMapperDirectional = new ShadowMapCascade(
+                scene,
+                "Directional Shadow Mapper",
                 DirectionalShadowMapSize,
                 MaxDirectionalCascadeShadowMaps, MaxDirectionalShadowMaps,
-                CascadeShadowMapsDistances)
+                scene.GameEnvironment.CascadeShadowMapsDistances)
             {
                 HighResolutionMap = true
             };
 
             // Point shadow mapper
-            this.ShadowMapperPoint = new ShadowMapPoint(game,
+            ShadowMapperPoint = new ShadowMapPoint(
+                scene,
+                "Point Shadow Mapper",
                 CubicShadowMapSize, CubicShadowMapSize,
                 MaxCubicShadows)
             {
@@ -177,30 +245,43 @@ namespace Engine.Common
             };
 
             // Spot shadow mapper
-            this.ShadowMapperSpot = new ShadowMapSpot(game,
+            ShadowMapperSpot = new ShadowMapSpot(
+                scene,
+                "Spot Shadow Mapper",
                 SpotShadowMapSize, SpotShadowMapSize,
                 MaxSpotShadows)
             {
                 HighResolutionMap = true
             };
 
-            this.cullManager = new SceneCullManager();
+            cullManager = new SceneCullManager();
 
-            this.UpdateContext = new UpdateContext()
+            UpdateContext = new UpdateContext()
             {
                 Name = "Primary",
             };
 
-            this.DrawContext = new DrawContext()
+            DrawContext = new DrawContext()
             {
                 Name = "Primary",
                 DrawerMode = DrawerModes.Forward,
+                Form = scene.Game.Form,
             };
 
-            this.DrawShadowsContext = new DrawContextShadows()
+            DrawShadowsContext = new DrawContextShadows()
             {
                 Name = "Shadow mapping",
             };
+
+            var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
+
+            sceneObjectsTarget = new RenderTarget(scene.Game, "SceneObjectsTarget", targetFormat, false, 1);
+            sceneUITarget = new RenderTarget(scene.Game, "SceneUITarget", targetFormat, false, 1);
+            sceneResultsTarget = new RenderTarget(scene.Game, "SceneResultsTarget", targetFormat, false, 1);
+
+            postProcessingTargetA = new RenderTarget(scene.Game, "PostProcessingTargetA", targetFormat, false, 1);
+            postProcessingTargetB = new RenderTarget(scene.Game, "PostProcessingTargetB", targetFormat, false, 1);
+            processingDrawer = new PostProcessingDrawer(scene.Game);
         }
         /// <summary>
         /// Destructor
@@ -226,107 +307,136 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                if (this.ShadowMapperDirectional != null)
-                {
-                    this.ShadowMapperDirectional.Dispose();
-                    this.ShadowMapperDirectional = null;
-                }
+                ShadowMapperDirectional?.Dispose();
+                ShadowMapperDirectional = null;
 
-                if (this.ShadowMapperPoint != null)
-                {
-                    this.ShadowMapperPoint.Dispose();
-                    this.ShadowMapperPoint = null;
-                }
+                ShadowMapperPoint?.Dispose();
+                ShadowMapperPoint = null;
 
-                if (this.ShadowMapperSpot != null)
-                {
-                    this.ShadowMapperSpot.Dispose();
-                    this.ShadowMapperSpot = null;
-                }
+                ShadowMapperSpot?.Dispose();
+                ShadowMapperSpot = null;
+
+                sceneObjectsTarget?.Dispose();
+                sceneObjectsTarget = null;
+                sceneUITarget?.Dispose();
+                sceneUITarget = null;
+                sceneResultsTarget?.Dispose();
+                sceneResultsTarget = null;
+                postProcessingTargetA?.Dispose();
+                postProcessingTargetA = null;
+                postProcessingTargetB?.Dispose();
+                postProcessingTargetB = null;
             }
         }
 
-        /// <summary>
-        /// Resizes buffers
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void Resize()
         {
-
+            sceneObjectsTarget?.Resize();
+            sceneUITarget?.Resize();
+            sceneResultsTarget?.Resize();
+            postProcessingTargetA?.Resize();
+            postProcessingTargetB?.Resize();
+            processingDrawer?.Resize();
         }
-        /// <summary>
-        /// Gets renderer resources
-        /// </summary>
-        /// <param name="result">Resource type</param>
-        /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
+        /// <inheritdoc/>
         public virtual EngineShaderResourceView GetResource(SceneRendererResults result)
         {
-            if (result == SceneRendererResults.ShadowMapDirectional) return this.ShadowMapDirectional;
-            if (result == SceneRendererResults.ShadowMapPoint) return this.ShadowMapPoint;
-            if (result == SceneRendererResults.ShadowMapSpot) return this.ShadowMapSpot;
+            if (result == SceneRendererResults.ShadowMapDirectional) return ShadowMapDirectional;
+            if (result == SceneRendererResults.ShadowMapPoint) return ShadowMapPoint;
+            if (result == SceneRendererResults.ShadowMapSpot) return ShadowMapSpot;
             return null;
         }
-        /// <summary>
-        /// Updates scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        public virtual void Update(GameTime gameTime, Scene scene)
+
+        /// <inheritdoc/>
+        public virtual void Update(GameTime gameTime)
         {
-            Dictionary<string, double> dict = new Dictionary<string, double>();
-            Stopwatch swTotal = Stopwatch.StartNew();
-
-            Matrix viewProj = scene.Camera.View * scene.Camera.Projection;
-
-            this.UpdateContext.GameTime = gameTime;
-            this.UpdateContext.View = scene.Camera.View;
-            this.UpdateContext.Projection = scene.Camera.Projection;
-            this.UpdateContext.NearPlaneDistance = scene.Camera.NearPlaneDistance;
-            this.UpdateContext.FarPlaneDistance = scene.Camera.FarPlaneDistance;
-            this.UpdateContext.ViewProjection = viewProj;
-            this.UpdateContext.EyePosition = scene.Camera.Position;
-            this.UpdateContext.EyeDirection = scene.Camera.Direction;
-            this.UpdateContext.Lights = scene.Lights;
-            this.UpdateContext.CameraVolume = new CullingVolumeCamera(viewProj);
+            //Updates the update context
+            UpdateUpdateContext(gameTime);
 
             //Cull lights
-            Stopwatch swLights = Stopwatch.StartNew();
-            scene.Lights.Cull(this.UpdateContext.CameraVolume, this.UpdateContext.EyePosition);
-            swLights.Stop();
+            Scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             //Update active components
-            Stopwatch swUpdate = Stopwatch.StartNew();
-            int uIndex = 0;
-            scene.GetComponents<IUpdatable>(c => c.Active)
-                .ToList().ForEach(c =>
-                {
-                    Stopwatch swCUpdate = Stopwatch.StartNew();
-                    c.Update(this.UpdateContext);
-                    swCUpdate.Stop();
+            var updatables = Scene
+                .GetComponents<IUpdatable>()
+                .Where(c => c.Active);
 
-                    var o = c as BaseSceneObject;
-                    string cName = o?.Description?.Name ?? c.ToString();
-                    dict.Add($"Component Update {uIndex++} {cName}", swCUpdate.Elapsed.TotalMilliseconds);
-                });
-            this.Updated = true;
-            swUpdate.Stop();
-            dict.Add($"Components Update", swUpdate.Elapsed.TotalMilliseconds);
-
-            swTotal.Stop();
-            dict.Add($"Scene Update", swTotal.Elapsed.TotalMilliseconds);
-
-            Counters.SetStatistics("Scene.Update", string.Format("Update = {0:000000}", swTotal.ElapsedTicks));
-
-            if (this.Game.CollectGameStatus)
+            if (updatables.Any())
             {
-                this.Game.GameStatus.Add(dict);
+                updatables
+                    .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                    .ForAll(c => c.EarlyUpdate(UpdateContext));
+
+                updatables
+                    .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                    .ForAll(c => c.Update(UpdateContext));
+
+                updatables
+                    .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                    .ForAll(c => c.LateUpdate(UpdateContext));
             }
+
+            Updated = true;
         }
         /// <summary>
-        /// Draws scene components
+        /// Updates the update context
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        public abstract void Draw(GameTime gameTime, Scene scene);
+        protected virtual void UpdateUpdateContext(GameTime gameTime)
+        {
+            UpdateContext.GameTime = gameTime;
+
+            Matrix viewProj = Scene.Camera.View * Scene.Camera.Projection;
+            UpdateContext.View = Scene.Camera.View;
+            UpdateContext.Projection = Scene.Camera.Projection;
+            UpdateContext.ViewProjection = viewProj;
+            UpdateContext.CameraVolume = new IntersectionVolumeFrustum(viewProj);
+            UpdateContext.NearPlaneDistance = Scene.Camera.NearPlaneDistance;
+            UpdateContext.FarPlaneDistance = Scene.Camera.FarPlaneDistance;
+            UpdateContext.EyePosition = Scene.Camera.Position;
+            UpdateContext.EyeDirection = Scene.Camera.Direction;
+
+            UpdateContext.Lights = Scene.Lights;
+        }
+
+        /// <inheritdoc/>
+        public abstract void Draw(GameTime gameTime);
+        /// <summary>
+        /// Updates the draw context
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        /// <param name="drawMode">Draw mode</param>
+        protected virtual void UpdateDrawContext(GameTime gameTime, DrawerModes drawMode)
+        {
+            DrawContext.GameTime = gameTime;
+
+            DrawContext.DrawerMode = drawMode;
+
+            //Initialize context data from update context
+            DrawContext.ViewProjection = UpdateContext.ViewProjection;
+            DrawContext.CameraVolume = UpdateContext.CameraVolume;
+            DrawContext.EyePosition = UpdateContext.EyePosition;
+            DrawContext.EyeDirection = UpdateContext.EyeDirection;
+
+            //Initialize context data from scene
+            DrawContext.Lights = Scene.Lights;
+            DrawContext.LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow);
+            DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
+            DrawContext.ShadowMapPoint = ShadowMapperPoint;
+            DrawContext.ShadowMapSpot = ShadowMapperSpot;
+        }
+
+        /// <inheritdoc/>
+        public virtual void UpdateGlobals()
+        {
+            ShadowMapperDirectional?.UpdateGlobals();
+            ShadowMapperPoint?.UpdateGlobals();
+            ShadowMapperSpot?.UpdateGlobals();
+        }
 
         /// <summary>
         /// Gets opaque components
@@ -334,16 +444,17 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the opaque components</returns>
-        protected virtual List<SceneObject> GetOpaques(int index, IEnumerable<SceneObject> components)
+        protected virtual List<IDrawable> GetOpaques(int index, IEnumerable<IDrawable> components)
         {
             var opaques = components.Where(c =>
             {
-                if (!c.Is<Drawable>()) return false;
+                if (!(c is IDrawable)) return false;
 
-                var cull = c.Get<ICullable>();
-                if (cull != null)
+                if (!c.BlendMode.HasFlag(BlendModes.Opaque)) return false;
+
+                if (c is ICullable cull)
                 {
-                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                    return !cullManager.GetCullValue(index, cull).Culled;
                 }
 
                 return true;
@@ -358,9 +469,9 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (nearest first)</returns>
-        protected virtual int SortOpaques(int index, SceneObject c1, SceneObject c2)
+        protected virtual int SortOpaques(int index, IDrawable c1, IDrawable c2)
         {
-            int res = c1.Order.CompareTo(c2.Order);
+            int res = c1.Layer.CompareTo(c2.Layer);
 
             if (res == 0)
             {
@@ -369,13 +480,25 @@ namespace Engine.Common
 
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = cullManager.GetCullValue(index, cull1).Distance;
+                }
 
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = cullManager.GetCullValue(index, cull2).Distance;
+                }
 
+                // Nearest first
                 res = -d1.CompareTo(d2);
+            }
+
+            if (res == 0)
+            {
+                res = c1.BlendMode.CompareTo(c2.BlendMode);
             }
 
             return res;
@@ -386,18 +509,18 @@ namespace Engine.Common
         /// <param name="index">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the transparent components</returns>
-        protected virtual List<SceneObject> GetTransparents(int index, IEnumerable<SceneObject> components)
+        protected virtual List<IDrawable> GetTransparents(int index, IEnumerable<IDrawable> components)
         {
             var transparents = components.Where(c =>
             {
-                if (!c.AlphaEnabled) return false;
-
-                if (!c.Is<Drawable>()) return false;
-
-                var cull = c.Get<ICullable>();
-                if (cull != null)
+                if (!c.BlendMode.HasFlag(BlendModes.Alpha) && !c.BlendMode.HasFlag(BlendModes.Transparent))
                 {
-                    return !this.cullManager.GetCullValue(index, cull).Culled;
+                    return false;
+                }
+
+                if (c is ICullable cull)
+                {
+                    return !cullManager.GetCullValue(index, cull).Culled;
                 }
 
                 return true;
@@ -412,131 +535,131 @@ namespace Engine.Common
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (far first)</returns>
-        protected virtual int SortTransparents(int index, SceneObject c1, SceneObject c2)
+        protected virtual int SortTransparents(int index, IDrawable c1, IDrawable c2)
         {
-            int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
+            int res = c1.Layer.CompareTo(c2.Layer);
+
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
-
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(index, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(index, cull2).Distance : float.MaxValue;
-
-                res = -d1.CompareTo(d2);
+                res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             }
 
             if (res == 0)
             {
-                res = -c1.Order.CompareTo(c2.Order);
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = cullManager.GetCullValue(index, cull1).Distance;
+                }
+
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = cullManager.GetCullValue(index, cull2).Distance;
+                }
+
+                // Far objects first
+                res = d1.CompareTo(d2);
             }
 
-            return -res;
+            if (res == 0)
+            {
+                res = c1.BlendMode.CompareTo(c2.BlendMode);
+            }
+
+            return res;
         }
 
         /// <summary>
-        /// Draws an opaque object
+        /// Draws an object
         /// </summary>
         /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        protected virtual void DrawOpaque(DrawContext context, SceneObject c)
+        /// <param name="drawable">Drawable component</param>
+        protected virtual void Draw(DrawContext context, IDrawable drawable)
         {
-            var graphics = this.Game.Graphics;
+            Counters.MaxInstancesPerFrame += drawable.InstanceCount;
 
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-
-            this.SetBlendStateOpaque(context);
-
-            if (c.DepthEnabled)
+            var blend = drawable.BlendMode;
+            if (drawable.Usage.HasFlag(SceneObjectUsages.UI))
             {
-                graphics.SetDepthStencilZEnabled();
+                blend |= BlendModes.PostProcess;
+            }
+
+            SetRasterizer();
+
+            SetBlendState(context.DrawerMode, blend);
+
+            SetDepthStencil(drawable.DepthEnabled);
+
+            drawable.Draw(context);
+        }
+        /// <summary>
+        /// Sets the rasterizer state
+        /// </summary>
+        protected virtual void SetRasterizer()
+        {
+            Scene.Game.Graphics.SetRasterizerDefault();
+        }
+        /// <summary>
+        /// Sets the blend state
+        /// </summary>
+        /// <param name="drawMode">Draw mode</param>
+        /// <param name="blendMode">Blend mode</param>
+        protected virtual void SetBlendState(DrawerModes drawMode, BlendModes blendMode)
+        {
+            Scene.Game.Graphics.SetBlendState(blendMode);
+        }
+        /// <summary>
+        /// Sets the depth-stencil buffer state
+        /// </summary>
+        /// <param name="enableWrite">Enables the z-buffer writing</param>
+        protected virtual void SetDepthStencil(bool enableWrite)
+        {
+            if (enableWrite)
+            {
+                Scene.Game.Graphics.SetDepthStencilWRZEnabled();
             }
             else
             {
-                graphics.SetDepthStencilZDisabled();
+                Scene.Game.Graphics.SetDepthStencilWRZDisabled();
             }
-
-            c.Get<IDrawable>().Draw(context);
-        }
-        /// <summary>
-        /// Draws an transparent object
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="c">Component</param>
-        protected virtual void DrawTransparent(DrawContext context, SceneObject c)
-        {
-            var graphics = this.Game.Graphics;
-
-            Counters.MaxInstancesPerFrame += c.Count;
-
-            graphics.SetRasterizerDefault();
-
-            this.SetBlendStateTransparent(context);
-
-            if (c.DepthEnabled)
-            {
-                graphics.SetDepthStencilZEnabled();
-            }
-            else
-            {
-                graphics.SetDepthStencilZDisabled();
-            }
-
-            c.Get<IDrawable>().Draw(context);
-        }
-        /// <summary>
-        /// Sets the opaque blend state
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void SetBlendStateOpaque(DrawContext context)
-        {
-            this.Game.Graphics.SetBlendDefault();
-        }
-        /// <summary>
-        /// Sets the transparent blend state
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void SetBlendStateTransparent(DrawContext context)
-        {
-            this.Game.Graphics.SetBlendTransparent();
         }
 
         /// <summary>
         /// Draw shadow maps
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
-        protected virtual void DoShadowMapping(GameTime gameTime, Scene scene)
+        protected virtual void DoShadowMapping(GameTime gameTime)
         {
             int cullIndex = CullIndexShadowMaps;
 
-            DoDirectionalShadowMapping(gameTime, scene, ref cullIndex);
+            DoDirectionalShadowMapping(gameTime, ref cullIndex);
 
-            DoPointShadowMapping(gameTime, scene, ref cullIndex);
+            DoPointShadowMapping(gameTime, ref cullIndex);
 
-            DoSpotShadowMapping(gameTime, scene, ref cullIndex);
+            DoSpotShadowMapping(gameTime, ref cullIndex);
         }
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoDirectionalShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
+        protected virtual void DoDirectionalShadowMapping(GameTime gameTime, ref int cullIndex)
         {
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
 
-            //And there were lights
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var shadowCastingLights = scene.Lights.GetDirectionalShadowCastingLights();
+#endif
+            var shadowCastingLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowCastingLights.Any())
             {
@@ -544,10 +667,15 @@ namespace Engine.Common
             }
 
             //Objects that cast shadows
+#if DEBUG
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+#endif
+            var shadowObjs = Scene.GetComponents<IDrawable>()
+                .Where(c => c.Visible && c.CastShadow);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowObjs.Any())
             {
@@ -555,18 +683,22 @@ namespace Engine.Common
             }
 
             //Objects that cast shadows and suitable for culling test
-            var toCullShadowObjs = shadowObjs.Where(s => s.Is<ICullable>()).Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             if (toCullShadowObjs.Any())
             {
                 //All objects suitable for culling
-                bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
-                var camVolume = this.DrawContext.CameraVolume;
+                bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
+                var camVolume = DrawContext.CameraVolume;
 
+#if DEBUG
                 stopwatch.Restart();
-                var shadowSph = new CullingVolumeSphere(camVolume.Position, camVolume.Radius);
-                var doShadows = this.cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
+#endif
+                var shadowSph = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
+                var doShadows = cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoDirectionalShadowMapping - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 if (allCullingObjects && !doShadows)
                 {
@@ -575,7 +707,7 @@ namespace Engine.Common
                 }
             }
 
-            var graphics = this.Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -589,15 +721,19 @@ namespace Engine.Common
                 }
 
                 //Draw shadows
+#if DEBUG
                 stopwatch.Restart();
-                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperDirectional;
-                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+#endif
+                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperDirectional;
+                shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned * MaxDirectionalCascadeShadowMaps);
-                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
+                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
+                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoDirectionalShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
@@ -610,32 +746,36 @@ namespace Engine.Common
                 l++;
             }
 
+#if DEBUG
             gStopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (this.Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
         /// <summary>
         /// Draw point light shadow maps
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoPointShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
+        protected virtual void DoPointShadowMapping(GameTime gameTime, ref int cullIndex)
         {
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
 
-            //And there were lights
             Stopwatch stopwatch = new Stopwatch();
-            var shadowCastingLights = scene.Lights.GetPointShadowCastingLights(scene.Camera.Position);
+#endif
+            var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowCastingLights.Any())
             {
@@ -643,24 +783,27 @@ namespace Engine.Common
             }
 
             //Draw components if drop shadow (opaque)
+#if DEBUG
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+#endif
+            var shadowObjs = Scene.GetComponents<IDrawable>()
+                .Where(c => c.Visible && c.CastShadow);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowObjs.Any())
             {
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs
-                .Where(s => s.Is<ICullable>())
-                .Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
-            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = this.Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -673,12 +816,19 @@ namespace Engine.Common
                     continue;
                 }
 
+                cullIndex++;
+                l++;
+
                 //Cull test
+#if DEBUG
                 stopwatch.Restart();
-                var sph = new CullingVolumeSphere(light.Position, light.Radius);
-                var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+#endif
+                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
+                var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoPointShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 if (allCullingObjects && !doShadows)
                 {
@@ -687,53 +837,57 @@ namespace Engine.Common
                 }
 
                 //Draw shadows
+#if DEBUG
                 stopwatch.Restart();
-                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperPoint;
-                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+#endif
+                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperPoint;
+                shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
-                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
+                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
+                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoPointShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
 
                 assigned++;
-
-                cullIndex++;
-
-                l++;
             }
 
+#if DEBUG
             gStopwatch.Stop();
             dict.Add($"DoPointShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (this.Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
         /// <summary>
         /// Draw spot light shadow maps
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoSpotShadowMapping(GameTime gameTime, Scene scene, ref int cullIndex)
+        protected virtual void DoSpotShadowMapping(GameTime gameTime, ref int cullIndex)
         {
+#if DEBUG
             Dictionary<string, double> dict = new Dictionary<string, double>();
 
             Stopwatch gStopwatch = new Stopwatch();
             gStopwatch.Start();
 
-            //And there were lights
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var shadowCastingLights = scene.Lights.GetSpotShadowCastingLights(scene.Camera.Position);
+#endif
+            var shadowCastingLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowCastingLights.Any())
             {
@@ -741,24 +895,27 @@ namespace Engine.Common
             }
 
             //Draw components if drop shadow (opaque)
+#if DEBUG
             stopwatch.Restart();
-            var shadowObjs = scene.GetComponents(c => c.Visible && c.CastShadow);
+#endif
+            var shadowObjs = Scene.GetComponents<IDrawable>()
+                .Where(c => c.Visible && c.CastShadow);
+#if DEBUG
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             if (!shadowObjs.Any())
             {
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs
-                .Where(s => s.Is<ICullable>())
-                .Select(s => s.Get<ICullable>());
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
 
             //All objects suitable for culling
-            bool allCullingObjects = shadowObjs.Count == toCullShadowObjs.Count();
+            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = this.Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -772,11 +929,15 @@ namespace Engine.Common
                 }
 
                 //Cull test
+#if DEBUG
                 stopwatch.Restart();
-                var sph = new CullingVolumeSphere(light.Position, light.Radius);
-                var doShadows = this.cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+#endif
+                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
+                var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoSpotShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 if (allCullingObjects && !doShadows)
                 {
@@ -785,15 +946,19 @@ namespace Engine.Common
                 }
 
                 //Draw shadows
+#if DEBUG
                 stopwatch.Restart();
-                var shadowMapper = this.DrawShadowsContext.ShadowMap = this.ShadowMapperSpot;
-                shadowMapper.UpdateFromLightViewProjection(scene.Camera, light);
+#endif
+                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperSpot;
+                shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
                 shadowMapper.Bind(graphics, assigned);
-                this.DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                this.DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                this.DrawShadowComponents(this.DrawShadowsContext, cullIndex, shadowObjs);
+                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
+                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
+                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+#if DEBUG
                 stopwatch.Stop();
                 dict.Add($"DoSpotShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
                 //Assign light parameters
                 light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
@@ -807,13 +972,15 @@ namespace Engine.Common
                 l++;
             }
 
+#if DEBUG
             gStopwatch.Stop();
             dict.Add($"DoSpotShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
-            if (this.Game.CollectGameStatus)
+            if (Scene.Game.CollectGameStatus)
             {
-                this.Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(dict);
             }
+#endif
         }
 
         /// <summary>
@@ -822,17 +989,20 @@ namespace Engine.Common
         /// <param name="context">Context</param>
         /// <param name="index">Culling index</param>
         /// <param name="components">Components to draw</param>
-        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<SceneObject> components)
+        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<IDrawable> components)
         {
-            var graphics = this.Game.Graphics;
+            var objects = components
+                .Where(c => IsVisible(c, index))
+                .ToList();
 
-            var objects = components.Where(c => IsVisible(c, index)).ToList();
-            if (objects.Any())
+            if (!objects.Any())
             {
-                objects.Sort((c1, c2) => Sort(c1, c2, index));
-
-                objects.ForEach((c) => DrawShadows(graphics, context, c));
+                return;
             }
+
+            objects.Sort((c1, c2) => Sort(c1, c2, index));
+
+            objects.ForEach((c) => DrawShadows(context, c));
         }
         /// <summary>
         /// Gets if the specified object is not culled by the cull index
@@ -840,14 +1010,11 @@ namespace Engine.Common
         /// <param name="c">Scene object</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns>Returns true if the object is not culled</returns>
-        private bool IsVisible(SceneObject c, int cullIndex)
+        private bool IsVisible(IDrawable c, int cullIndex)
         {
-            if (!c.Is<Drawable>()) return false;
-
-            var cull = c.Get<ICullable>();
-            if (cull != null)
+            if (c is ICullable cull)
             {
-                return !this.cullManager.GetCullValue(cullIndex, cull).Culled;
+                return !cullManager.GetCullValue(cullIndex, cull).Culled;
             }
 
             return true;
@@ -859,23 +1026,29 @@ namespace Engine.Common
         /// <param name="c2">Scene object two</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns></returns>
-        private int Sort(SceneObject c1, SceneObject c2, int cullIndex)
+        private int Sort(IDrawable c1, IDrawable c2, int cullIndex)
         {
             int res = c1.DepthEnabled.CompareTo(c2.DepthEnabled);
             if (res == 0)
             {
-                var cull1 = c1.Get<ICullable>();
-                var cull2 = c2.Get<ICullable>();
+                float d1 = float.MaxValue;
+                if (c1 is ICullable cull1)
+                {
+                    d1 = cullManager.GetCullValue(cullIndex, cull1).Distance;
+                }
 
-                var d1 = cull1 != null ? this.cullManager.GetCullValue(cullIndex, cull1).Distance : float.MaxValue;
-                var d2 = cull2 != null ? this.cullManager.GetCullValue(cullIndex, cull2).Distance : float.MaxValue;
+                float d2 = float.MaxValue;
+                if (c2 is ICullable cull2)
+                {
+                    d2 = cullManager.GetCullValue(cullIndex, cull2).Distance;
+                }
 
                 res = -d1.CompareTo(d2);
             }
 
             if (res == 0)
             {
-                res = c1.Order.CompareTo(c2.Order);
+                res = c1.Layer.CompareTo(c2.Layer);
             }
 
             return res;
@@ -883,24 +1056,300 @@ namespace Engine.Common
         /// <summary>
         /// Draws the specified object shadows
         /// </summary>
-        /// <param name="graphics">Graphics</param>
         /// <param name="context">Context</param>
-        /// <param name="c">Scene object</param>
-        private void DrawShadows(Graphics graphics, DrawContextShadows context, SceneObject c)
+        /// <param name="drawable">Drawable object</param>
+        private void DrawShadows(DrawContextShadows context, IDrawable drawable)
         {
+            var graphics = Scene.Game.Graphics;
+
             graphics.SetRasterizerShadowMapping();
             graphics.SetDepthStencilShadowMapping();
 
-            if (c.AlphaEnabled)
+            if (drawable.BlendMode.HasFlag(BlendModes.Alpha) || drawable.BlendMode.HasFlag(BlendModes.Transparent))
             {
-                graphics.SetBlendTransparent();
+                graphics.SetBlendAlpha();
             }
             else
             {
                 graphics.SetBlendDefault();
             }
 
-            c.Get<IDrawable>().DrawShadows(context);
+            drawable.DrawShadows(context);
+        }
+
+        /// <summary>
+        /// Binds graphics for results pass
+        /// </summary>
+        /// <param name="target">Target type</param>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        protected virtual void SetTarget(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth = false, bool clearStencil = false)
+        {
+            switch (target)
+            {
+                case Targets.Screen:
+                    BindDefaultTarget(clearRT, clearRTColor);
+                    break;
+                case Targets.Objects:
+                    BindObjectsTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    break;
+                case Targets.UI:
+                    BindUITarget(clearRT, clearRTColor);
+                    break;
+                case Targets.Result:
+                    BindResultsTarget(clearRT, clearRTColor);
+                    break;
+                default:
+                    BindDefaultTarget(clearRT, clearRTColor);
+                    break;
+            }
+        }
+        /// <summary>
+        /// Binds the default render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindDefaultTarget(bool clearRT, Color4 clearRTColor)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            //Restore backbuffer as render target and clear it
+            graphics.SetDefaultRenderTarget(clearRT, clearRTColor);
+            graphics.SetDefaultViewport();
+        }
+        /// <summary>
+        /// Binds the objects render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindObjectsTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
+            graphics.SetDefaultViewport();
+        }
+        /// <summary>
+        /// Binds the UI render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindUITarget(bool clearRT, Color4 clearRTColor)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
+            graphics.SetDefaultViewport();
+        }
+        /// <summary>
+        /// Binds the results render target
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindResultsTarget(bool clearRT, Color4 clearRTColor)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
+            graphics.SetDefaultViewport();
+        }
+        /// <summary>
+        /// Binds graphics for post-processing pass
+        /// </summary>
+        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
+        /// <param name="clearRTColor">Target clear color</param>
+        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
+        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        private void BindPostProcessingTarget(bool clearRT, Color4 clearRTColor)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRenderTargets(postProcessingTargetA.Targets, clearRT, clearRTColor);
+
+            //Set local viewport
+            var viewport = Scene.Game.Form.GetViewport();
+            graphics.SetViewport(viewport);
+        }
+        /// <summary>
+        /// Toggles post-processing render targets
+        /// </summary>
+        private void TogglePostProcessingTargets()
+        {
+            var tmp = postProcessingTargetA;
+            postProcessingTargetA = postProcessingTargetB;
+            postProcessingTargetB = tmp;
+        }
+        /// <summary>
+        /// Validates the post-processing render pass
+        /// </summary>
+        /// <param name="renderPass">Render pass</param>
+        /// <param name="state">Gets the render pass state</param>
+        private bool ValidateRenderPass(RenderPass renderPass, out BuiltInPostProcessState state)
+        {
+            if (renderPass == RenderPass.Objects && PostProcessingObjectsEffects.Ready)
+            {
+                state = PostProcessingObjectsEffects;
+
+                return true;
+            }
+
+            if (renderPass == RenderPass.UI && PostProcessingUIEffects.Ready)
+            {
+                state = PostProcessingUIEffects;
+
+                return true;
+            }
+
+            if (renderPass == RenderPass.Final && PostProcessingFinalEffects.Ready)
+            {
+                state = PostProcessingFinalEffects;
+
+                return true;
+            }
+
+            state = null;
+
+            return false;
+        }
+        /// <summary>
+        /// Does the post-processing draw
+        /// </summary>
+        /// <param name="target">Target to set restul</param>
+        /// <param name="renderPass">Render pass</param>
+        /// <param name="gameTime">Game time</param>
+        protected virtual bool DoPostProcessing(Targets target, RenderPass renderPass, GameTime gameTime)
+        {
+            if (!ValidateRenderPass(renderPass, out var state))
+            {
+                return false;
+            }
+
+            //Gets the last used target texture
+            var texture = GetTargetTextures(target)?.FirstOrDefault();
+
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetRasterizerCullNone();
+            graphics.SetDepthStencilNone();
+            graphics.SetBlendDefault();
+
+            var drawer = processingDrawer.UpdateEffectParameters(state);
+            if (drawer == null)
+            {
+                return false;
+            }
+
+            var activeEffects = state.GetEffects();
+
+            for (int i = 0; i < activeEffects.Count(); i++)
+            {
+                var effect = activeEffects.ElementAt(i);
+                if (effect == BuiltInPostProcessEffects.None)
+                {
+                    break;
+                }
+
+                //Toggles post-processing buffers
+                TogglePostProcessingTargets();
+
+                //Use the next buffer as render target
+                BindPostProcessingTarget(false, Color.Transparent);
+
+                processingDrawer.UpdateEffect(texture, effect);
+                processingDrawer.Draw(drawer);
+
+                //Gets the source texture
+                texture = postProcessingTargetA.Textures?.FirstOrDefault();
+            }
+
+            //Set the result render target
+            SetTarget(target, false, Color.Transparent);
+
+            //Draw the result
+            var resultDrawer = processingDrawer.UpdateEffect(texture, BuiltInPostProcessEffects.None);
+            processingDrawer.Draw(resultDrawer);
+
+            return true;
+        }
+        /// <summary>
+        /// Gets the target textures
+        /// </summary>
+        /// <param name="target">Target type</param>
+        /// <returns>Returns the target texture list</returns>
+        protected virtual IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
+        {
+            switch (target)
+            {
+                case Targets.Screen:
+                    return Enumerable.Empty<EngineShaderResourceView>();
+                case Targets.Objects:
+                    return sceneObjectsTarget?.Textures;
+                case Targets.UI:
+                    return sceneUITarget?.Textures;
+                case Targets.Result:
+                    return sceneResultsTarget?.Textures;
+                default:
+                    return Enumerable.Empty<EngineShaderResourceView>();
+            }
+        }
+        /// <summary>
+        /// Combine the specified targets into the result target
+        /// </summary>
+        /// <param name="target1">Target 1</param>
+        /// <param name="target2">Target 2</param>
+        /// <param name="resultTarget">Result target</param>
+        protected virtual void CombineTargets(Targets target1, Targets target2, Targets resultTarget)
+        {
+            SetTarget(resultTarget, false, Color.Transparent);
+
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetDepthStencilNone();
+            graphics.SetRasterizerDefault();
+            graphics.SetBlendDefault();
+
+            var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
+            var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
+
+            var drawer = processingDrawer.UpdateEffectCombine(texture1, texture2);
+            processingDrawer.Draw(drawer);
+        }
+        /// <summary>
+        /// Draws the specified target to screen
+        /// </summary>
+        /// <param name="target">Target</param>
+        protected virtual void DrawToScreen(Targets target)
+        {
+            SetTarget(Targets.Screen, false, Color.Transparent);
+
+            var graphics = Scene.Game.Graphics;
+
+            graphics.SetDepthStencilNone();
+            graphics.SetRasterizerDefault();
+            graphics.SetBlendDefault();
+
+            var texture = GetTargetTextures(target)?.FirstOrDefault();
+
+            var drawer = processingDrawer.UpdateEffect(texture, BuiltInPostProcessEffects.None);
+            processingDrawer.Draw(drawer);
+        }
+
+        /// <inheritdoc/>
+        public void ClearPostProcessingEffects()
+        {
+            PostProcessingObjectsEffects = BuiltInPostProcessState.Empty;
+            PostProcessingUIEffects = BuiltInPostProcessState.Empty;
+            PostProcessingFinalEffects = BuiltInPostProcessState.Empty;
         }
     }
 }

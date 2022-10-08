@@ -1,5 +1,7 @@
 ﻿using SharpDX.DXGI;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -16,6 +18,10 @@ namespace Engine
         protected Game Game { get; private set; }
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
         /// Render target format
         /// </summary>
         public Format RenderTargetFormat { get; protected set; }
@@ -30,7 +36,7 @@ namespace Engine
         /// <summary>
         /// Buffer textures
         /// </summary>
-        public EngineShaderResourceView[] Textures { get; protected set; }
+        public IEnumerable<EngineShaderResourceView> Textures { get; protected set; }
         /// <summary>
         /// Render targets
         /// </summary>
@@ -40,17 +46,19 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
+        /// <param name="name">Name</param>
         /// <param name="format">Format</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <param name="count">Buffer count</param>
-        public RenderTarget(Game game, Format format, bool useSamples, int count)
+        public RenderTarget(Game game, string name, Format format, bool useSamples, int count)
         {
-            this.Game = game;
-            this.RenderTargetFormat = format;
-            this.UseSamples = useSamples;
-            this.BufferCount = count;
+            Game = game;
+            Name = name;
+            RenderTargetFormat = format;
+            UseSamples = useSamples;
+            BufferCount = count;
 
-            this.CreateTargets();
+            CreateTargets();
         }
         /// <summary>
         /// Destructor
@@ -76,7 +84,7 @@ namespace Engine
         {
             if (disposing)
             {
-                this.DisposeTargets();
+                DisposeTargets();
             }
         }
 
@@ -85,8 +93,8 @@ namespace Engine
         /// </summary>
         public void Resize()
         {
-            this.DisposeTargets();
-            this.CreateTargets();
+            DisposeTargets();
+            CreateTargets();
         }
 
         /// <summary>
@@ -94,39 +102,33 @@ namespace Engine
         /// </summary>
         private void CreateTargets()
         {
-            int width = this.Game.Form.RenderWidth;
-            int height = this.Game.Form.RenderHeight;
+            int width = Game.Form.RenderWidth;
+            int height = Game.Form.RenderHeight;
 
-            this.Game.Graphics.CreateRenderTargetTexture(
-                this.RenderTargetFormat,
-                width, height, this.BufferCount, this.UseSamples,
-                out EngineRenderTargetView targets,
-                out EngineShaderResourceView[] textures);
+            var rt = Game.Graphics.CreateRenderTargetTexture(
+                Name,
+                RenderTargetFormat,
+                width, height, BufferCount, UseSamples);
 
-            this.Targets = targets;
-            this.Textures = textures;
+            Targets = rt.RenderTarget;
+            Textures = rt.ShaderResources;
         }
         /// <summary>
         /// Disposes all targets and depth buffer
         /// </summary>
         private void DisposeTargets()
         {
-            if (this.Targets != null)
-            {
-                this.Targets.Dispose();
-                this.Targets = null;
-            }
+            Targets?.Dispose();
+            Targets = null;
 
-            if (this.Textures != null)
+            if (Textures?.Any() == true)
             {
-                for (int i = 0; i < this.Textures.Length; i++)
+                for (int i = 0; i < Textures.Count(); i++)
                 {
-                    this.Textures[i]?.Dispose();
-                    this.Textures[i] = null;
+                    Textures.ElementAt(i)?.Dispose();
                 }
-
-                this.Textures = null;
             }
+            Textures = null;
         }
     }
 }

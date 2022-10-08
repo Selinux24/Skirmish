@@ -1,14 +1,16 @@
 ﻿using SharpDX;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine
 {
     using Engine.Common;
+    using Engine.UI;
 
     /// <summary>
     /// Lens flare
     /// </summary>
-    public class LensFlare : Drawable
+    public sealed class LensFlare : Drawable<LensFlareDescription>
     {
         /// <summary>
         /// Glow sprote
@@ -27,43 +29,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public LensFlare(Scene scene, LensFlareDescription description)
-            : base(scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public LensFlare(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            this.glowSprite = new Sprite(scene, new SpriteDescription()
-            {
-                ContentPath = description.ContentPath,
-                Height = 100,
-                Width = 100,
-                Textures = new string[] { description.GlowTexture }
-            });
 
-            if (description.Flares != null && description.Flares.Length > 0)
-            {
-                this.flares = new Flare[description.Flares.Length];
-
-                for (int i = 0; i < description.Flares.Length; i++)
-                {
-                    var flareDesc = description.Flares[i];
-
-                    SpriteDescription sprDesc = new SpriteDescription()
-                    {
-                        ContentPath = description.ContentPath,
-                        Height = 100,
-                        Width = 100,
-                        Textures = new string[] { flareDesc.Texture }
-                    };
-
-                    this.flares[i] = new Flare()
-                    {
-                        FlareSprite = new Sprite(scene, sprDesc),
-                        Position = flareDesc.Position,
-                        Scale = flareDesc.Scale,
-                        Color = flareDesc.Color,
-                    };
-                }
-            }
         }
         /// <summary>
         /// Destructor
@@ -73,45 +44,86 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose of resources
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                if (glowSprite != null)
-                {
-                    glowSprite.Dispose();
-                    glowSprite = null;
-                }
+                glowSprite?.Dispose();
+                glowSprite = null;
 
-                if (this.flares != null)
+                if (flares != null)
                 {
-                    for (int i = 0; i < this.flares.Length; i++)
+                    for (int i = 0; i < flares.Length; i++)
                     {
-                        this.flares[i]?.Dispose();
-                        this.flares[i] = null;
+                        flares[i]?.Dispose();
+                        flares[i] = null;
                     }
 
-                    this.flares = null;
+                    flares = null;
                 }
             }
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="context">Updating context</param>
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(LensFlareDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            var gl = await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Glow",
+                $"{Name}.Glow",
+                new SpriteDescription()
+                {
+                    ContentPath = Description.ContentPath,
+                    Height = 100,
+                    Width = 100,
+                    Textures = new string[] { Description.GlowTexture },
+                    BlendMode = Description.BlendMode,
+                });
+            glowSprite = gl;
+
+            if (Description.Flares != null && Description.Flares.Length > 0)
+            {
+                flares = new Flare[Description.Flares.Length];
+
+                for (int i = 0; i < Description.Flares.Length; i++)
+                {
+                    var flareDesc = Description.Flares[i];
+
+                    SpriteDescription sprDesc = new SpriteDescription()
+                    {
+                        ContentPath = Description.ContentPath,
+                        Height = 100,
+                        Width = 100,
+                        Textures = new string[] { flareDesc.Texture },
+                        BlendMode = Description.BlendMode,
+                    };
+
+                    flares[i] = new Flare()
+                    {
+                        FlareSprite = await Scene.CreateComponent<Sprite, SpriteDescription>(
+                            $"{Id}.Flare_{i}",
+                            $"{Name}.Flare_{i}",
+                            sprDesc),
+                        Distance = flareDesc.Distance,
+                        Scale = flareDesc.Scale,
+                        Color = flareDesc.Color,
+                    };
+                }
+            }
+        }
+
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             // Don't draw any flares by default
-            this.drawFlares = false;
+            drawFlares = false;
 
             var keyLight = context.Lights.KeyLight;
             if (keyLight?.Enabled == true)
             {
-                if (!this.IsFlareVisible(keyLight, context.EyePosition))
+                if (!IsFlareVisible(keyLight, context.EyePosition))
                 {
                     return;
                 }
@@ -130,7 +142,7 @@ namespace Engine
                 infiniteView.TranslationVector = Vector3.Zero;
 
                 // Project the light position into 2D screen space.
-                var projectedPosition = this.Game.Graphics.Viewport.Project(
+                var projectedPosition = Game.Graphics.Viewport.Project(
                     -keyLight.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
                     context.Projection,
                     infiniteView,
@@ -139,32 +151,35 @@ namespace Engine
                 if (projectedPosition.Z >= 0 && projectedPosition.Z <= 1)
                 {
                     //The light is in front of the camera.
-                    this.drawFlares = true;
+                    drawFlares = true;
 
                     var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-                    var lightProjectedDirection = lightProjectedPosition - this.Game.Form.RelativeCenter;
+                    var lightProjectedDirection = lightProjectedPosition - Game.Form.RenderCenter;
 
                     //Update glow sprite
-                    float glowScale = 50f / this.glowSprite.Width;
-                    this.glowSprite.Color = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
-                    this.glowSprite.Manipulator.SetPosition(lightProjectedPosition - (this.glowSprite.RelativeCenter * glowScale * scale));
-                    this.glowSprite.Manipulator.SetScale(glowScale * scale);
-                    this.glowSprite.Update(context);
+                    float glowScale = scale;
+                    var glowSpritePos = lightProjectedPosition;
+
+                    glowSprite.BaseColor = new Color4(keyLight.DiffuseColor, 0.25f);
+                    glowSprite.Scale = glowScale;
+                    glowSprite.SetPosition(glowSpritePos - glowSprite.LocalCenter);
+                    glowSprite.Update(context);
 
                     //Update flares
-                    if (this.flares?.Length > 0)
+                    if (flares?.Length > 0)
                     {
-                        for (int i = 0; i < this.flares.Length; i++)
+                        for (int i = 0; i < flares.Length; i++)
                         {
-                            var flare = this.flares[i];
+                            var flare = flares[i];
 
                             // Compute the position of this flare sprite.
-                            var flarePosition = (lightProjectedPosition + lightProjectedDirection * flare.Position);
+                            float flareScale = flare.Scale * scale;
+                            var flareSpritePos = lightProjectedPosition + (lightProjectedDirection * flare.Distance);
 
                             // Set the flare alpha based on the angle with view and light directions.
-                            flare.FlareSprite.Color = new Color4(flare.Color.RGB(), 0.5f * transparency);
-                            flare.FlareSprite.Manipulator.SetPosition(flarePosition - (flare.FlareSprite.RelativeCenter * flare.Scale * scale));
-                            flare.FlareSprite.Manipulator.SetScale(flare.Scale * scale);
+                            flare.FlareSprite.BaseColor = new Color4(flare.Color.RGB(), 0.5f * transparency);
+                            flare.FlareSprite.Scale = flareScale;
+                            flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
                             flare.FlareSprite.Update(context);
                         }
                     }
@@ -177,61 +192,72 @@ namespace Engine
         /// <param name="light">Key light</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns true if the flare is visible</returns>
-        private bool IsFlareVisible(SceneLightDirectional light, Vector3 eyePosition)
+        private bool IsFlareVisible(ISceneLightDirectional light, Vector3 eyePosition)
         {
-            if (this.Scene != null)
+            if (Scene == null)
             {
-                var frustum = this.Scene.Camera.Frustum;
-                float maxZ = this.Scene.Camera.FarPlaneDistance;
+                return false;
+            }
 
-                Vector3 lPositionUnit = eyePosition - light.Direction;
+            var frustum = Scene.Camera.Frustum;
+            float maxZ = Scene.Camera.FarPlaneDistance;
 
-                //Is the light into the vision cone?
-                if (frustum.Contains(lPositionUnit) != ContainmentType.Disjoint)
+            Vector3 lPositionUnit = eyePosition - light.Direction;
+
+            //Is the light into the vision cone?
+            if (frustum.Contains(lPositionUnit) != ContainmentType.Disjoint)
+            {
+                //Calculate the ray from light to position
+                Vector3 lightPosition = light.GetPosition(maxZ);
+                var ray = new Ray(lightPosition, -light.Direction);
+
+                var coarseRay = new PickingRay(ray, RayPickingParams.Coarse);
+
+                if (!Scene.PickNearest<Triangle>(coarseRay, SceneObjectUsages.None, out _))
                 {
-                    //Calculate the ray from light to position
-                    Vector3 lightPosition = light.GetPosition(maxZ);
-                    Ray ray = new Ray(lightPosition, -light.Direction);
+                    return true;
+                }
 
-                    if (!this.Scene.PickNearest(ray, RayPickingParams.Coarse, out var res))
-                    {
-                        return true;
-                    }
+                var perfectRay = new PickingRay(ray, RayPickingParams.Objects);
 
-                    if (this.Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
-                        Vector3.Distance(lightPosition, eyePosition) > result.Distance)
-                    {
-                        return false;
-                    }
+                if (Scene.PickNearest<Triangle>(perfectRay, SceneObjectUsages.None, out var result) &&
+                    Vector3.Distance(lightPosition, eyePosition) > result.PickingResult.Distance)
+                {
+                    return false;
                 }
             }
 
             return false;
         }
 
-        /// <summary>
-        /// Draws flare
-        /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
-            var mode = context.DrawerMode;
-
-            if (mode.HasFlag(DrawerModes.TransparentOnly) && this.drawFlares)
+            if (!Visible)
             {
-                // Draw the sprite using additive blending.
-                this.Game.Graphics.SetBlendAdditive();
+                return;
+            }
 
-                // Draw glow
-                this.glowSprite?.Draw(context);
+            if (!drawFlares)
+            {
+                return;
+            }
 
-                //Draw flares if any
-                if (this.flares?.Length > 0)
+            bool draw = context.ValidateDraw(BlendMode, true);
+            if (!draw)
+            {
+                return;
+            }
+
+            // Draw glow
+            glowSprite?.Draw(context);
+
+            //Draw flares if any
+            if (flares?.Length > 0)
+            {
+                for (int i = 0; i < flares.Length; i++)
                 {
-                    for (int i = 0; i < this.flares.Length; i++)
-                    {
-                        this.flares[i].FlareSprite.Draw(context);
-                    }
+                    flares[i].FlareSprite.Draw(context);
                 }
             }
         }

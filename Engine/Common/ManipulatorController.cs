@@ -1,12 +1,13 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 
 namespace Engine.Common
 {
     /// <summary>
     /// Manipulator controller base class
     /// </summary>
-    public abstract class ManipulatorController : IControllable
+    public abstract class ManipulatorController : IControllable, IHasGameState
     {
         /// <summary>
         /// Following path
@@ -28,7 +29,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.Velocity.Length();
+                return Velocity.Length();
             }
         }
         /// <summary>
@@ -46,7 +47,7 @@ namespace Engine.Common
         {
             get
             {
-                return this.path != null && this.path.Length > 0;
+                return (path?.Length ?? 0) > 0;
             }
         }
         /// <summary>
@@ -89,30 +90,38 @@ namespace Engine.Common
         /// <summary>
         /// Sets the path to follow
         /// </summary>
-        /// <param name="path">Path to follow</param>
+        /// <param name="newPath">Path to follow</param>
         /// <param name="time">Path initial time</param>
-        public virtual void Follow(IControllerPath path, float time = 0f)
+        public virtual void Follow(IControllerPath newPath, float time = 0f)
         {
-            this.path = path;
-            this.pathTime = time;
+            path = newPath;
+            pathTime = time;
 
-            if (this.PathStart != null)
-            {
-                this.PathStart.Invoke(this, new EventArgs());
-            }
+            PathStart?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Clears current path
         /// </summary>
         public virtual void Clear()
         {
-            this.path = null;
-            this.pathTime = 0f;
+            path = null;
+            pathTime = 0f;
 
-            if (this.PathEnd != null)
-            {
-                this.PathEnd.Invoke(this, new EventArgs());
-            }
+            PathEnd?.Invoke(this, new EventArgs());
         }
+
+        /// <summary>
+        /// Gets the current controller path
+        /// </summary>
+        /// <returns>Returns the current controller path</returns>
+        public IEnumerable<Vector3> SamplePath(float sampleTime = 0.1f)
+        {
+            return path?.SamplePath(sampleTime) ?? new Vector3[] { };
+        }
+
+        /// <inheritdoc/>
+        public abstract IGameState GetState();
+        /// <inheritdoc/>
+        public abstract void SetState(IGameState state);
     }
 }

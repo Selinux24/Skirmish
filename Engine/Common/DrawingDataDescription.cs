@@ -35,13 +35,5 @@ namespace Engine.Common
         /// Gets or sets the bounding volume constraint for vertex generation
         /// </summary>
         public BoundingBox? Constraint { get; set; } = null;
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public DrawingDataDescription()
-        {
-
-        }
     }
 }

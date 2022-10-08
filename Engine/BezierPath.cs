@@ -248,7 +248,7 @@ namespace Engine
             Vector3 tangent = Vector3.Normalize(p0 - potentialSamplePoint);
             float d2 = (potentialSamplePoint - p1).Length();
             float d1 = (p1 - p0).Length();
-            p1 = p1 + tangent * ((d1 - d2) / 2);
+            p1 += tangent * ((d1 - d2) / 2);
 
             samplePoints.Push(p1);
             samplePoints.Push(potentialSamplePoint);
@@ -382,7 +382,7 @@ namespace Engine
         /// <returns>Returns the next control point in time</returns>
         public Vector3 GetNextControlPoint(float time)
         {
-            this.FindCurve(time, out int segment, out float segmentTime);
+            this.FindCurve(time, out int segment, out _);
 
             return this.controlPoints[segment];
         }
@@ -427,6 +427,25 @@ namespace Engine
             p += ttt * p3; //fourth term
 
             return p;
+        }
+        /// <summary>
+        /// Samples current path in a vector array
+        /// </summary>
+        /// <param name="sampleTime">Time delta</param>
+        /// <returns>Returns a vector array</returns>
+        public IEnumerable<Vector3> SamplePath(float sampleTime)
+        {
+            List<Vector3> returnPath = new List<Vector3>();
+
+            float time = 0;
+            while (time < this.Length)
+            {
+                returnPath.Add(this.GetPosition(time));
+
+                time += sampleTime;
+            }
+
+            return returnPath.ToArray();
         }
     }
 }

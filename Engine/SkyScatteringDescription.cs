@@ -42,7 +42,19 @@ namespace Engine
         /// <summary>
         /// Sun light wave length
         /// </summary>
-        public static readonly Color4 SunLightWaveLength = new Color4(0.650f, 0.570f, 0.475f, 0);
+        public static readonly Color3 SunLightWaveLength = new Color3(0.650f, 0.570f, 0.475f);
+
+        /// <summary>
+        /// Gets the default sky scattering description
+        /// </summary>
+        /// <param name="resolution">Resolution</param>
+        public static SkyScatteringDescription Default(SkyScatteringResolutions resolution = SkyScatteringResolutions.Low)
+        {
+            return new SkyScatteringDescription()
+            {
+                Resolution = resolution,
+            };
+        }
 
         /// <summary>
         /// Planet radius
@@ -75,7 +87,7 @@ namespace Engine
         /// <summary>
         /// Light wave length
         /// </summary>
-        public Color4 WaveLength { get; set; }
+        public Color3 WaveLength { get; set; }
         /// <summary>
         /// Sky brightness
         /// </summary>
@@ -95,25 +107,22 @@ namespace Engine
         public SkyScatteringDescription()
             : base()
         {
-            this.PlanetRadius = EarthRadius;
-            this.PlanetAtmosphereRadius = EarthAtmosphereRadius;
+            PlanetRadius = EarthRadius;
+            PlanetAtmosphereRadius = EarthAtmosphereRadius;
 
-            this.RayleighScattering = RayleighScatteringConstant;
-            this.RayleighScaleDepth = RayleighScaleDepthConstant;
-            this.MieScattering = MieScatteringConstant;
-            this.MiePhaseAssymetry = MiePhaseAssymetryFactor;
-            this.MieScaleDepth = MieScaleDepthConstant;
+            RayleighScattering = RayleighScatteringConstant;
+            RayleighScaleDepth = RayleighScaleDepthConstant;
+            MieScattering = MieScatteringConstant;
+            MiePhaseAssymetry = MiePhaseAssymetryFactor;
+            MieScaleDepth = MieScaleDepthConstant;
 
-            this.WaveLength = SunLightWaveLength;
-            this.Brightness = EarthSkyBrightness;
-            this.HDRExposure = 2.0f;
-            this.Resolution = SkyScatteringResolutions.Low;
+            WaveLength = SunLightWaveLength;
+            Brightness = EarthSkyBrightness;
+            HDRExposure = 2.0f;
+            Resolution = SkyScatteringResolutions.Low;
 
-            this.Static = true;
-            this.CastShadow = false;
-            this.DeferredEnabled = true;
-            this.DepthEnabled = false;
-            this.AlphaEnabled = false;
+            DepthEnabled = false;
+            BlendMode = BlendModes.Opaque;
         }
     }
 }

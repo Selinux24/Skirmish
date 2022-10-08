@@ -12,17 +12,17 @@ namespace Engine
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="direction">Direction</param>
-        /// <param name="angle">Fall-of angle</param>
+        /// <param name="fallOffAngle">Fall-of angle in degrees</param>
         /// <param name="radius">Cone radius</param>
         /// <param name="intensity">Intensity</param>
         /// <returns>Returns the new description</returns>
-        public static SceneLightSpotDescription Create(Vector3 position, Vector3 direction, float angle, float radius, float intensity)
+        public static SceneLightSpotDescription Create(Vector3 position, Vector3 direction, float fallOffAngle, float radius, float intensity)
         {
             return new SceneLightSpotDescription
             {
                 Position = position,
                 Direction = direction,
-                Angle = angle,
+                FallOffAngle = fallOffAngle,
                 Radius = radius,
                 Intensity = intensity,
             };
@@ -37,9 +37,9 @@ namespace Engine
         /// </summary>
         public Vector3 Direction { get; set; }
         /// <summary>
-        /// Fall-of angle
+        /// Fall-of angle in degrees
         /// </summary>
-        public float Angle { get; set; }
+        public float FallOffAngle { get; set; }
         /// <summary>
         /// Radius
         /// </summary>

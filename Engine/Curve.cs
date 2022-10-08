@@ -17,7 +17,7 @@ namespace Engine
         /// <summary>
         /// The collection of curve keys.
         /// </summary>
-        public CurveKeyCollection Keys { get; private set; }
+        public CurveKeyCollection Keys { get; private set; } = new CurveKeyCollection();
         /// <summary>
         /// Defines how to handle weighting values that are greater than the last control point in the curve.
         /// </summary>
@@ -32,7 +32,7 @@ namespace Engine
         /// </summary>
         public Curve()
         {
-            this.Keys = new CurveKeyCollection();
+
         }
 
         /// <summary>
@@ -42,39 +42,39 @@ namespace Engine
         /// <returns>Returns the value at the position on this <see cref="Curve"/>.</returns>
         public float Evaluate(float position)
         {
-            if (this.Keys.Count == 0)
+            if (Keys.Count == 0)
             {
                 return 0f;
             }
 
-            if (this.Keys.Count == 1)
+            if (Keys.Count == 1)
             {
-                return this.Keys[0].Value;
+                return Keys[0].Value;
             }
 
-            if (this.PreLoop == CurveLoopType.Constant)
+            if (PreLoop == CurveLoopType.Constant)
             {
-                return EvaluateConstant(this.Keys, position);
+                return EvaluateConstant(Keys, position);
             }
-            else if (this.PreLoop == CurveLoopType.Linear)
+            else if (PreLoop == CurveLoopType.Linear)
             {
-                return EvaluateLinear(this.Keys, position);
+                return EvaluateLinear(Keys, position);
             }
-            else if (this.PreLoop == CurveLoopType.Cycle)
+            else if (PreLoop == CurveLoopType.Cycle)
             {
-                return EvaluateCycle(this.Keys, position);
+                return EvaluateCycle(Keys, position);
             }
-            else if (this.PreLoop == CurveLoopType.CycleOffset)
+            else if (PreLoop == CurveLoopType.CycleOffset)
             {
-                return EvaluateCycleOffset(this.Keys, position);
+                return EvaluateCycleOffset(Keys, position);
             }
-            else if (this.PreLoop == CurveLoopType.Oscillate)
+            else if (PreLoop == CurveLoopType.Oscillate)
             {
-                return EvaluateOscillate(this.Keys, position);
+                return EvaluateOscillate(Keys, position);
             }
             else
             {
-                throw new EngineException($"Bad curve loop type: {this.PreLoop}");
+                throw new EngineException($"Bad curve loop type: {PreLoop}");
             }
         }
         /// <summary>
@@ -265,7 +265,7 @@ namespace Engine
         /// <param name="tangentType">The tangent type for both in and out.</param>
         public void ComputeTangents(CurveTangent tangentType)
         {
-            this.ComputeTangents(tangentType, tangentType);
+            ComputeTangents(tangentType, tangentType);
         }
         /// <summary>
         /// Computes tangents for all keys in the collection.
@@ -276,7 +276,7 @@ namespace Engine
         {
             for (var i = 0; i < Keys.Count; ++i)
             {
-                this.ComputeTangent(i, tangentInType, tangentOutType);
+                ComputeTangent(i, tangentInType, tangentOutType);
             }
         }
         /// <summary>
@@ -286,7 +286,7 @@ namespace Engine
         /// <param name="tangentType">The tangent type for both in and out.</param>
         public void ComputeTangent(int keyIndex, CurveTangent tangentType)
         {
-            this.ComputeTangent(keyIndex, tangentType, tangentType);
+            ComputeTangent(keyIndex, tangentType, tangentType);
         }
         /// <summary>
         /// Computes tangent for the specific key in the collection.
@@ -298,7 +298,7 @@ namespace Engine
         {
             // See http://msdn.microsoft.com/en-us/library/microsoft.xna.framework.curvetangent.aspx
 
-            var key = this.Keys[keyIndex];
+            var key = Keys[keyIndex];
 
             float p0, p, p1;
             p0 = p = p1 = key.Position;
@@ -308,14 +308,14 @@ namespace Engine
 
             if (keyIndex > 0)
             {
-                p0 = this.Keys[keyIndex - 1].Position;
-                v0 = this.Keys[keyIndex - 1].Value;
+                p0 = Keys[keyIndex - 1].Position;
+                v0 = Keys[keyIndex - 1].Value;
             }
 
-            if (keyIndex < this.Keys.Count - 1)
+            if (keyIndex < Keys.Count - 1)
             {
-                p1 = this.Keys[keyIndex + 1].Position;
-                v1 = this.Keys[keyIndex + 1].Value;
+                p1 = Keys[keyIndex + 1].Position;
+                v1 = Keys[keyIndex + 1].Value;
             }
 
             if (tangentInType == CurveTangent.Flat)

@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using SharpDX.Windows;
+using System;
 using System.Windows.Forms;
 
 namespace Engine
@@ -15,6 +16,10 @@ namespace Engine
         /// Intialization internal flag
         /// </summary>
         private readonly bool initialized = false;
+        /// <summary>
+        /// Previous window state
+        /// </summary>
+        private FormWindowState lastWindowState = FormWindowState.Normal;
 
         /// <summary>
         /// Render width
@@ -25,16 +30,52 @@ namespace Engine
         /// </summary>
         public int RenderHeight { get; private set; }
         /// <summary>
-        /// Relative center
+        /// Render rectangle
         /// </summary>
-        public Point RelativeCenter { get; private set; }
+        public RectangleF RenderRectangle
+        {
+            get
+            {
+                return new RectangleF(0, 0, RenderWidth, RenderHeight);
+            }
+        }
         /// <summary>
-        /// Absolute center
+        /// Rneder area center
         /// </summary>
-        public Point AbsoluteCenter { get; private set; }
+        public Point RenderCenter { get; private set; }
         /// <summary>
-        /// Gets or sets a value indicationg whether the current engine form is in fullscreen
+        /// Screen center
         /// </summary>
+        public Point ScreenCenter { get; private set; }
+        /// <summary>
+        /// The form is manually resizing
+        /// </summary>
+        public bool Resizing { get; private set; }
+        /// <summary>
+        /// The form's size just changed
+        /// </summary>
+        public bool SizeUpdated { get; private set; }
+        /// <summary>
+        /// The form's mode just changed
+        /// </summary>
+        public bool FormModeUpdated
+        {
+            get
+            {
+                return lastWindowState != WindowState;
+            }
+        }
+        /// <summary>
+        /// The form is minimized
+        /// </summary>
+        public bool IsMinimized
+        {
+            get
+            {
+                return WindowState == FormWindowState.Minimized;
+            }
+        }
+        /// <inheritdoc/>
         public new bool IsFullscreen
         {
             get
@@ -44,6 +85,19 @@ namespace Engine
             set
             {
                 base.IsFullscreen = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets the primary screen size
+        /// </summary>
+        public static Vector2 ScreenSize
+        {
+            get
+            {
+                var rect = Screen.PrimaryScreen.Bounds;
+
+                return new Vector2(rect.Width, rect.Height);
             }
         }
 
@@ -58,41 +112,15 @@ namespace Engine
             : base(name)
         {
             base.IsFullscreen = fullScreen;
-            this.AllowUserResizing = !fullScreen;
+            AllowUserResizing = !fullScreen;
 
-            this.Size = new System.Drawing.Size(screenWidth, screenHeight);
+            Size = new System.Drawing.Size(screenWidth, screenHeight);
 
-            this.UpdateSizes(fullScreen);
+            UpdateSizes(fullScreen);
 
-            this.InitializeComponent();
+            InitializeComponent();
 
-            this.initialized = true;
-        }
-        /// <summary>
-        /// Initialize component
-        /// </summary>
-        private void InitializeComponent()
-        {
-            this.SuspendLayout();
-
-            this.Icon = Resources.engine;
-            this.Name = "EngineForm";
-            this.Text = "Engine Form";
-
-            this.ResumeLayout(false);
-        }
-        /// <summary>
-        /// Invalidation override
-        /// </summary>
-        /// <param name="e">Event arguments</param>
-        protected override void OnInvalidated(InvalidateEventArgs e)
-        {
-            base.OnInvalidated(e);
-
-            if (this.initialized)
-            {
-                this.UpdateSizes(this.IsFullscreen);
-            }
+            initialized = true;
         }
         /// <summary>
         /// Update form sizes
@@ -100,19 +128,138 @@ namespace Engine
         /// <param name="fullScreen">Indicates whether the form is windowed or full screen</param>
         private void UpdateSizes(bool fullScreen)
         {
+            SizeUpdated = false;
+
             if (fullScreen)
             {
-                this.RenderWidth = this.Size.Width;
-                this.RenderHeight = this.Size.Height;
+                if (RenderWidth != Size.Width)
+                {
+                    RenderWidth = Size.Width;
+                    SizeUpdated = true;
+                }
+                if (RenderHeight != Size.Height)
+                {
+                    RenderHeight = Size.Height;
+                    SizeUpdated = true;
+                }
             }
             else
             {
-                this.RenderWidth = this.ClientSize.Width;
-                this.RenderHeight = this.ClientSize.Height;
+                if (RenderWidth != ClientSize.Width)
+                {
+                    RenderWidth = ClientSize.Width;
+                    SizeUpdated = true;
+                }
+                if (RenderHeight != ClientSize.Height)
+                {
+                    RenderHeight = ClientSize.Height;
+                    SizeUpdated = true;
+                }
             }
 
-            this.RelativeCenter = new Point(this.RenderWidth / 2, this.RenderHeight / 2);
-            this.AbsoluteCenter = new Point(this.Location.X + this.RelativeCenter.X, this.Location.Y + this.RelativeCenter.Y);
+            if (SizeUpdated)
+            {
+                RenderCenter = new Point(RenderWidth / 2, RenderHeight / 2);
+                ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
+            }
+        }
+        /// <summary>
+        /// Initialize component
+        /// </summary>
+        private void InitializeComponent()
+        {
+            SuspendLayout();
+
+            Icon = Resources.engine;
+            Name = "EngineForm";
+            Text = "Engine Form";
+            KeyPreview = true;
+
+            ResumeLayout(false);
+        }
+
+        /// <inheritdoc/>
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            if (e.KeyData == System.Windows.Forms.Keys.F10)
+            {
+                // Do what you want with the F10 key
+                e.SuppressKeyPress = true;
+            }
+
+            base.OnKeyDown(e);
+        }
+        /// <inheritdoc/>
+        protected override void OnInvalidated(InvalidateEventArgs e)
+        {
+            base.OnInvalidated(e);
+
+            if (initialized)
+            {
+                UpdateSizes(IsFullscreen);
+            }
+        }
+        /// <inheritdoc/>
+        protected override void OnResizeBegin(EventArgs e)
+        {
+            base.OnResizeBegin(e);
+
+            Resizing = true;
+        }
+        /// <inheritdoc/>
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+
+            Resizing = false;
+        }
+        /// <inheritdoc/>
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            lastWindowState = WindowState;
+        }
+
+        /// <summary>
+        /// Gets the render viewport
+        /// </summary>
+        /// <returns></returns>
+        public Viewport GetViewport()
+        {
+            return new Viewport(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
+        }
+        /// <summary>
+        /// Gets the current ortho projection matrix
+        /// </summary>
+        /// <returns>Returns the current ortho projection matrix</returns>
+        public Matrix GetOrthoProjectionMatrix()
+        {
+            Matrix view = Matrix.LookAtLH(
+                Vector3.Zero,
+                Vector3.ForwardLH,
+                Vector3.Up);
+
+            Matrix projection = Matrix.OrthoLH(
+                RenderWidth,
+                RenderHeight,
+                0f, 100f);
+
+            return view * projection;
+        }
+        /// <summary>
+        /// Transform to screen space using the form view ortho projection matrix
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <returns>Returns the screen space position</returns>
+        /// <remarks>Screen space: Center = (0,0) Left = -X Up = +Y</remarks>
+        public Vector2 ToScreenSpace(Vector2 position)
+        {
+            var screenSpace = position - RenderRectangle.Center;
+
+            screenSpace.Y *= -1f;
+
+            return screenSpace;
         }
     }
 }

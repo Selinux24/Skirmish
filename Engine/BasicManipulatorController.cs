@@ -36,13 +36,42 @@ namespace Engine
                     this.Velocity = next - position;
 
                     manipulator.SetPosition(next, true);
-                    manipulator.LookAt(next + this.Velocity, false, 0, true);
+                    manipulator.LookAt(next + this.Velocity, Axis.None, 0, true);
                 }
                 else
                 {
                     this.Clear();
                 }
             }
+        }
+
+        /// <inheritdoc/>
+        public override IGameState GetState()
+        {
+            return new BasicManipulatorControllerState
+            {
+                Path = path,
+                PathTime = pathTime,
+                Velocity = Velocity,
+                MaximumSpeed = MaximumSpeed,
+                MaximumForce = MaximumForce,
+                ArrivingThreshold = ArrivingThreshold,
+            };
+        }
+        /// <inheritdoc/>
+        public override void SetState(IGameState state)
+        {
+            if (!(state is BasicManipulatorControllerState basicManipulator))
+            {
+                return;
+            }
+
+            path = basicManipulator.Path;
+            pathTime = basicManipulator.PathTime;
+            Velocity = basicManipulator.Velocity;
+            MaximumForce = basicManipulator.MaximumForce;
+            MaximumSpeed = basicManipulator.MaximumSpeed;
+            ArrivingThreshold = basicManipulator.ArrivingThreshold;
         }
     }
 }

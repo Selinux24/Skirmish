@@ -1,4 +1,7 @@
 ﻿using SharpDX;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Engine.Common
@@ -24,6 +27,31 @@ namespace Engine.Common
                 new InputElement("NORMAL", 0, SharpDX.DXGI.Format.R32G32B32_Float, 12, slot, InputClassification.PerVertexData, 0),
                 new InputElement("TEXCOORD", 0, SharpDX.DXGI.Format.R32G32_Float, 24, slot, InputClassification.PerVertexData, 0),
             };
+        }
+        /// <summary>
+        /// Generates a vertex array from specified components
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="normals">Normals</param>
+        /// <param name="uvs">UV coordinates</param>
+        /// <returns>Returns the new generated vertex array</returns>
+        public static IEnumerable<VertexPositionNormalTexture> Generate(IEnumerable<Vector3> vertices, IEnumerable<Vector3> normals, IEnumerable<Vector2> uvs)
+        {
+            if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
+            if (vertices.Count() != normals.Count()) throw new ArgumentException("Vertices and normals must have the same length");
+
+            var vArray = vertices.ToArray();
+            var nArray = normals.ToArray();
+            var uvArray = uvs.ToArray();
+
+            VertexPositionNormalTexture[] res = new VertexPositionNormalTexture[vArray.Length];
+
+            for (int i = 0; i < vArray.Length; i++)
+            {
+                res[i] = new VertexPositionNormalTexture() { Position = vArray[i], Normal = nArray[i], Texture = uvArray[i] };
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -69,10 +97,10 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
-            else if (channel == VertexDataChannels.Normal) return (T)(object)this.Normal;
-            else if (channel == VertexDataChannels.Texture) return (T)(object)this.Texture;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) return (T)(object)Position;
+            else if (channel == VertexDataChannels.Normal) return (T)(object)Normal;
+            else if (channel == VertexDataChannels.Texture) return (T)(object)Texture;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
         /// <summary>
         /// Sets the channer value
@@ -82,10 +110,10 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Normal) this.Normal = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Texture) this.Texture = (Vector2)(object)value;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Normal) Normal = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Texture) Texture = (Vector2)(object)value;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <summary>
@@ -105,13 +133,10 @@ namespace Engine.Common
             return Input(slot);
         }
 
-        /// <summary>
-        /// Text representation of vertex
-        /// </summary>
-        /// <returns>Returns the text representation of vertex</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Position: {0}; Normal: {1}; Texture: {2}", this.Position, this.Normal, this.Texture);
+            return $"Position: {Position}; Normal: {Normal}; Texture: {Texture};";
         }
     };
 }

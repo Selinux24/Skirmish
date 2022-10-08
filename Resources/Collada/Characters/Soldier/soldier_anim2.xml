@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ModelContentDescription>
+<ContentDataFile>
   <model_filename>soldier_anim2.dae</model_filename>
   <animation_description>
     <animations>
@@ -26,4 +26,4 @@
       <transition from="run" to="walk" startFrom="0" startTo="0" />
     </transitions>
   </animation_description>
-</ModelContentDescription>
+</ContentDataFile>

@@ -1,4 +1,6 @@
-﻿
+﻿using System;
+using System.Threading.Tasks;
+
 namespace Engine.PathFinding
 {
     /// <summary>
@@ -30,28 +32,49 @@ namespace Engine.PathFinding
         /// Builds a graph from this settings
         /// </summary>
         /// <returns>Returns the generated graph</returns>
-        public IGraph Build()
+        public async Task<IGraph> Build()
         {
-            return this.Input?.CreateGraph(this.Settings);
+            IGraph result;
+
+            try
+            {
+                result = await Input?.CreateGraph(Settings);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Error creating the graph: {ex.Message}", ex);
+                throw;
+            }
+
+            return result;
         }
 
+        /// <summary>
+        /// Gets the path finder hash
+        /// </summary>
+        /// <returns>Returns the path finder hash</returns>
+        public async Task<string> GetHash()
+        {
+            return await Input.GetHash(Settings);
+        }
         /// <summary>
         /// Loads the graph from a file
         /// </summary>
         /// <param name="fileName">File name</param>
+        /// <param name="hash">Source hash</param>
         /// <returns>Returns the loaded graph</returns>
-        public IGraph Load(string filename)
+        public async Task<IGraph> Load(string fileName, string hash = null)
         {
-            return Input.Load(filename);
+            return await Input.Load(fileName, hash);
         }
         /// <summary>
         /// Saves the graph to a file
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <param name="graph">Graph instance</param>
-        public void Save(string filename, IGraph graph)
+        public async Task Save(string fileName, IGraph graph)
         {
-            Input.Save(filename, graph);
+            await Input.Save(fileName, graph);
         }
     }
 }

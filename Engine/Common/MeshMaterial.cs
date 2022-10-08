@@ -1,31 +1,94 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine.Common
 {
+    using Engine.Content;
+
     /// <summary>
     /// Mesh material
     /// </summary>
-    public sealed class MeshMaterial : IEquatable<MeshMaterial>
+    public sealed class MeshMaterial : IMeshMaterial, IEquatable<MeshMaterial>
     {
         /// <summary>
-        /// Default material
+        /// Default phong
         /// </summary>
-        public static MeshMaterial Default
+        public static MeshMaterial DefaultPhong
         {
             get
             {
-                return new MeshMaterial()
+                return new MeshMaterial
                 {
-                    Material = Material.Default
+                    Material = MaterialPhong.Default,
                 };
             }
+        }
+        /// <summary>
+        /// Default blinn-phong
+        /// </summary>
+        public static MeshMaterial DefaultBlinnPhong
+        {
+            get
+            {
+                return new MeshMaterial
+                {
+                    Material = MaterialBlinnPhong.Default,
+                };
+            }
+        }
+        /// <summary>
+        /// Default cook-torrance
+        /// </summary>
+        public static MeshMaterial DefaultCookTorrance
+        {
+            get
+            {
+                return new MeshMaterial
+                {
+                    Material = MaterialCookTorrance.Default,
+                };
+            }
+        }
+        /// <summary>
+        /// Gets a phong material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a phong material from a built-in definition</returns>
+        public static MeshMaterial PhongFromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            return new MeshMaterial
+            {
+                Material = MaterialPhong.FromBuiltIn(builtInMaterial),
+            };
+        }
+        /// <summary>
+        /// Gets a blinn-phong material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a blinn-phong material from a built-in definition</returns>
+        public static MeshMaterial BlinnPhongFromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            return new MeshMaterial
+            {
+                Material = MaterialBlinnPhong.FromBuiltIn(builtInMaterial),
+            };
+        }
+        /// <summary>
+        /// Gets a cook-torrance material from a built-in definition
+        /// </summary>
+        /// <param name="builtInMaterial">Built-in material</param>
+        /// <returns>Returns a cook-torrance material from a built-in definition</returns>
+        public static MeshMaterial CookTorranceFromBuiltIn(BuiltInMaterial builtInMaterial)
+        {
+            return new MeshMaterial
+            {
+                Material = MaterialCookTorrance.FromBuiltIn(builtInMaterial),
+            };
         }
 
         /// <summary>
         /// Material description
         /// </summary>
-        public Material Material { get; set; }
+        public IMaterial Material { get; set; }
         /// <summary>
         /// Emission texture
         /// </summary>
@@ -38,14 +101,6 @@ namespace Engine.Common
         /// Diffuse texture
         /// </summary>
         public EngineShaderResourceView DiffuseTexture { get; set; }
-        /// <summary>
-        /// Specular texture
-        /// </summary>
-        public EngineShaderResourceView SpecularTexture { get; set; }
-        /// <summary>
-        /// Reflective texture
-        /// </summary>
-        public EngineShaderResourceView ReflectiveTexture { get; set; }
         /// <summary>
         /// Normal map
         /// </summary>
@@ -65,52 +120,32 @@ namespace Engine.Common
         public uint ResourceSize { get; set; } = 0;
 
         /// <summary>
-        /// Packs current instance into a Vector4 array
+        /// Updates the data
         /// </summary>
-        /// <returns>Returns the packed material</returns>
-        internal Vector4[] Pack()
+        /// <param name="index">Index</param>
+        /// <param name="offset">Offset</param>
+        /// <param name="size">Size</param>
+        public void UpdateResource(uint index, uint offset, uint size)
         {
-            Vector4[] res = new Vector4[4];
-
-            res[0] = this.Material.EmissiveColor;
-            res[1] = this.Material.AmbientColor;
-            res[2] = this.Material.DiffuseColor;
-            res[3] = this.Material.SpecularColor;
-            res[3].W = this.Material.Shininess;
-
-            return res;
+            ResourceIndex = index;
+            ResourceOffset = offset;
+            ResourceSize = size;
         }
 
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(MeshMaterial other)
         {
             return
-                this.Material.Equals(other.Material) &&
-                this.EmissionTexture == other.EmissionTexture &&
-                this.AmbientTexture == other.AmbientTexture &&
-                this.DiffuseTexture == other.DiffuseTexture &&
-                this.SpecularTexture == other.SpecularTexture &&
-                this.ReflectiveTexture == other.ReflectiveTexture &&
-                this.NormalMap == other.NormalMap;
+                Material?.Equals(other.Material) == true &&
+                EmissionTexture == other.EmissionTexture &&
+                AmbientTexture == other.AmbientTexture &&
+                DiffuseTexture == other.DiffuseTexture &&
+                NormalMap == other.NormalMap;
         }
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0} EmissionTexture: {1}; AmbientTexture: {2}; DiffuseTexture: {3}; SpecularTexture: {4}; ReflectiveTexture: {5}; NormalMapTexture: {6};",
-                this.Material,
-                this.EmissionTexture != null,
-                this.AmbientTexture != null,
-                this.DiffuseTexture != null,
-                this.SpecularTexture != null,
-                this.ReflectiveTexture != null,
-                this.NormalMap != null);
+            return $"{Material} EmissionTexture: {EmissionTexture != null}; AmbientTexture: {AmbientTexture != null}; DiffuseTexture: {DiffuseTexture != null}; NormalMapTexture: {NormalMap != null};";
         }
     }
 }

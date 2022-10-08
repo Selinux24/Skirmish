@@ -1,13 +1,13 @@
-﻿using SharpDX;
-using SharpDX.Direct3D;
-using SharpDX.DXGI;
+﻿using SharpDX.DXGI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Deferred;
     using Engine.Common;
-    using Engine.Effects;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -103,24 +103,31 @@ namespace Engine
         /// <param name="graphics">Graphics</param>
         public SceneRendererDeferredLights(Graphics graphics)
         {
-            this.Graphics = graphics;
+            Graphics = graphics;
 
-            this.globalLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredDirectionalLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            this.pointLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredPointLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            this.spotLightInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredSpotLight.GetSignature(), VertexPosition.Input(BufferSlot));
-            this.combineLightsInputLayout = graphics.CreateInputLayout(DrawerPool.EffectDeferredComposer.DeferredCombineLights.GetSignature(), VertexPosition.Input(BufferSlot));
+            var ld = BuiltInShaders.GetDrawer<BuiltInLightDirectional>();
+            globalLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredDirectionalLight", ld.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+
+            var lp = BuiltInShaders.GetDrawer<BuiltInLightPoint>();
+            pointLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredPointLight", lp.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+
+            var ls = BuiltInShaders.GetDrawer<BuiltInLightSpot>();
+            spotLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredSpotLight", ls.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+
+            var composer = BuiltInShaders.GetDrawer<BuiltInComposer>();
+            combineLightsInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredCombineLights", composer.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
 
             //Stencil pass rasterizer state
-            this.rasterizerStencilPass = EngineRasterizerState.StencilPass(graphics);
+            rasterizerStencilPass = EngineRasterizerState.StencilPass(graphics, nameof(SceneRendererDeferredLights));
 
             //Counter clockwise cull rasterizer state
-            this.rasterizerLightingPass = EngineRasterizerState.LightingPass(graphics);
+            rasterizerLightingPass = EngineRasterizerState.LightingPass(graphics, nameof(SceneRendererDeferredLights));
 
             //Depth-stencil state for volume marking (Value != 0 if object is inside of the current drawing volume)
-            this.depthStencilVolumeMarking = EngineDepthStencilState.VolumeMarking(graphics);
+            depthStencilVolumeMarking = EngineDepthStencilState.VolumeMarking(graphics, nameof(SceneRendererDeferredLights));
 
             //Depth-stencil state for volume drawing (Process pixels if stencil value != stencil reference)
-            this.depthStencilVolumeDrawing = EngineDepthStencilState.VolumeDrawing(graphics);
+            depthStencilVolumeDrawing = EngineDepthStencilState.VolumeDrawing(graphics, nameof(SceneRendererDeferredLights));
         }
         /// <summary>
         /// Destructor
@@ -146,28 +153,28 @@ namespace Engine
         {
             if (disposing)
             {
-                this.lightGeometryVertexBuffer?.Dispose();
-                this.lightGeometryVertexBuffer = null;
-                this.lightGeometryIndexBuffer?.Dispose();
-                this.lightGeometryIndexBuffer = null;
+                lightGeometryVertexBuffer?.Dispose();
+                lightGeometryVertexBuffer = null;
+                lightGeometryIndexBuffer?.Dispose();
+                lightGeometryIndexBuffer = null;
 
-                this.globalLightInputLayout?.Dispose();
-                this.globalLightInputLayout = null;
-                this.pointLightInputLayout?.Dispose();
-                this.pointLightInputLayout = null;
-                this.spotLightInputLayout?.Dispose();
-                this.spotLightInputLayout = null;
-                this.combineLightsInputLayout?.Dispose();
-                this.combineLightsInputLayout = null;
+                globalLightInputLayout?.Dispose();
+                globalLightInputLayout = null;
+                pointLightInputLayout?.Dispose();
+                pointLightInputLayout = null;
+                spotLightInputLayout?.Dispose();
+                spotLightInputLayout = null;
+                combineLightsInputLayout?.Dispose();
+                combineLightsInputLayout = null;
 
-                this.rasterizerStencilPass?.Dispose();
-                this.rasterizerStencilPass = null;
-                this.rasterizerLightingPass?.Dispose();
-                this.rasterizerLightingPass = null;
-                this.depthStencilVolumeMarking?.Dispose();
-                this.depthStencilVolumeMarking = null;
-                this.depthStencilVolumeDrawing?.Dispose();
-                this.depthStencilVolumeDrawing = null;
+                rasterizerStencilPass?.Dispose();
+                rasterizerStencilPass = null;
+                rasterizerLightingPass?.Dispose();
+                rasterizerLightingPass = null;
+                depthStencilVolumeMarking?.Dispose();
+                depthStencilVolumeMarking = null;
+                depthStencilVolumeDrawing?.Dispose();
+                depthStencilVolumeDrawing = null;
             }
         }
 
@@ -188,23 +195,23 @@ namespace Engine
 
             CreateSpotLight(verts, indx);
 
-            if (this.lightGeometryVertexBuffer == null)
+            if (lightGeometryVertexBuffer == null)
             {
-                this.lightGeometryVertexBuffer = graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts, true);
-                this.lightGeometryVertexBufferBinding = new VertexBufferBinding(this.lightGeometryVertexBuffer, verts[0].GetStride(), 0);
+                lightGeometryVertexBuffer = graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts, true);
+                lightGeometryVertexBufferBinding = new VertexBufferBinding(lightGeometryVertexBuffer, verts[0].GetStride(), 0);
             }
             else
             {
-                graphics.WriteDiscardBuffer(this.lightGeometryVertexBuffer, verts);
+                graphics.WriteDiscardBuffer(lightGeometryVertexBuffer, verts);
             }
 
-            if (this.lightGeometryIndexBuffer == null)
+            if (lightGeometryIndexBuffer == null)
             {
-                this.lightGeometryIndexBuffer = graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx, true);
+                lightGeometryIndexBuffer = graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx, true);
             }
             else
             {
-                graphics.WriteDiscardBuffer(this.lightGeometryIndexBuffer, indx);
+                graphics.WriteDiscardBuffer(lightGeometryIndexBuffer, indx);
             }
         }
         /// <summary>
@@ -216,21 +223,18 @@ namespace Engine
         /// <param name="height">Screen height</param>
         private void CreateScreen(List<VertexPosition> verts, List<uint> indx, int width, int height)
         {
-            GeometryUtil.CreateScreen(
-                width, height,
-                out Vector3[] cv,
-                out uint[] indices);
-            var vertices = new VertexPosition[cv.Length];
-            for (int i = 0; i < vertices.Length; i++)
+            var screen = GeometryUtil.CreateScreen(width, height);
+
+            screenGeometry.Offset = indx.Count;
+            screenGeometry.IndexCount = screen.Indices.Count();
+
+            screen.Indices.ToList().ForEach(i =>
             {
-                vertices[i] = new VertexPosition() { Position = cv[i] };
-            }
+                //Sum offsets
+                indx.Add(i + (uint)verts.Count);
+            });
 
-            this.screenGeometry.Offset = indx.Count;
-            this.screenGeometry.IndexCount = indices.Length;
-
-            verts.AddRange(vertices);
-            indx.AddRange(indices);
+            verts.AddRange(VertexPosition.Generate(screen.Vertices));
         }
         /// <summary>
         /// Creates the geometry to draw a point light
@@ -239,27 +243,18 @@ namespace Engine
         /// <param name="indx">Index list</param>
         private void CreatePointLight(List<VertexPosition> verts, List<uint> indx)
         {
-            GeometryUtil.CreateSphere(
-                1, 16, 16,
-                out Vector3[] cv,
-                out uint[] indices);
-            var vertices = new VertexPosition[cv.Length];
-            for (int i = 0; i < vertices.Length; i++)
+            var sphere = GeometryUtil.CreateSphere(1, 16, 16);
+
+            pointLightGeometry.Offset = indx.Count;
+            pointLightGeometry.IndexCount = sphere.Indices.Count();
+
+            sphere.Indices.ToList().ForEach(i =>
             {
-                vertices[i] = new VertexPosition() { Position = cv[i] };
-            }
+                //Sum offsets
+                indx.Add(i + (uint)verts.Count);
+            });
 
-            this.pointLightGeometry.Offset = indx.Count;
-            this.pointLightGeometry.IndexCount = indices.Length;
-
-            //Sum offsets
-            for (int i = 0; i < indices.Length; i++)
-            {
-                indices[i] += (uint)verts.Count;
-            }
-
-            verts.AddRange(vertices);
-            indx.AddRange(indices);
+            verts.AddRange(VertexPosition.Generate(sphere.Vertices));
         }
         /// <summary>
         /// Creates the geometry to draw a spot light
@@ -268,81 +263,45 @@ namespace Engine
         /// <param name="indx">Index list</param>
         private void CreateSpotLight(List<VertexPosition> verts, List<uint> indx)
         {
-            GeometryUtil.CreateSphere(
-                1, 16, 16,
-                out Vector3[] cv,
-                out uint[] indices);
-            var vertices = new VertexPosition[cv.Length];
-            for (int i = 0; i < vertices.Length; i++)
+            var sphere = GeometryUtil.CreateSphere(1, 16, 16);
+
+            spotLightGeometry.Offset = indx.Count;
+            spotLightGeometry.IndexCount = sphere.Indices.Count();
+
+            sphere.Indices.ToList().ForEach(i =>
             {
-                vertices[i] = new VertexPosition() { Position = cv[i] };
-            }
+                //Sum offsets
+                indx.Add(i + (uint)verts.Count);
+            });
 
-            this.spotLightGeometry.Offset = indx.Count;
-            this.spotLightGeometry.IndexCount = indices.Length;
-
-            //Sum offsets
-            for (int i = 0; i < indices.Length; i++)
-            {
-                indices[i] += (uint)verts.Count;
-            }
-
-            verts.AddRange(vertices);
-            indx.AddRange(indices);
+            verts.AddRange(VertexPosition.Generate(sphere.Vertices));
         }
 
         /// <summary>
         /// Draws a single light
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
         /// <param name="geometry">Geometry</param>
-        /// <param name="effectTechnique">Technique</param>
-        private void DrawSingleLight(Graphics graphics, LightGeometry geometry, EngineEffectTechnique effectTechnique)
+        /// <param name="drawer">Drawer</param>
+        private void DrawSingleLight(LightGeometry geometry, IBuiltInDrawer drawer)
         {
-            for (int p = 0; p < effectTechnique.PassCount; p++)
-            {
-                graphics.EffectPassApply(effectTechnique, p, 0);
-
-                graphics.DrawIndexed(geometry.IndexCount, geometry.Offset, 0);
-            }
-        }
-        /// <summary>
-        /// Binds light geometry to the input assembler
-        /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public void BindGeometry(Graphics graphics)
-        {
-            graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
-            graphics.IASetVertexBuffers(BufferSlot, this.lightGeometryVertexBufferBinding);
-            graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
+            drawer.Draw(Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, geometry.IndexCount, geometry.Offset);
         }
         /// <summary>
         /// Binds the hemispheric/directional (global) light input layout to the input assembler
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public void BindGobalLight(Graphics graphics)
+        public void BindGlobalLight(Graphics graphics)
         {
-            graphics.IAInputLayout = this.globalLightInputLayout;
+            graphics.IAInputLayout = globalLightInputLayout;
             Counters.IAInputLayoutSets++;
         }
         /// <summary>
         /// Draws a directional light
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawDirectional(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="drawer">Drawer</param>
+        public void DrawDirectional(BuiltInLightDirectional drawer)
         {
-            var effectTechnique = effect.DeferredDirectionalLight;
-
-            for (int p = 0; p < effectTechnique.PassCount; p++)
-            {
-                graphics.EffectPassApply(effectTechnique, p, 0);
-
-                graphics.DrawIndexed(
-                    this.screenGeometry.IndexCount,
-                    this.screenGeometry.Offset,
-                    0);
-            }
+            drawer.Draw(Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
         /// <summary>
         /// Binds the point light input layout to the input assembler
@@ -350,26 +309,27 @@ namespace Engine
         /// <param name="graphics">Graphics device</param>
         public void BindPoint(Graphics graphics)
         {
-            graphics.IAInputLayout = this.pointLightInputLayout;
+            graphics.IAInputLayout = pointLightInputLayout;
             Counters.IAInputLayoutSets++;
         }
         /// <summary>
         /// Draws a point light
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawPoint(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="stencilDrawer">Stencil drawer</param>
+        /// <param name="drawer">Drawer</param>
+        public void DrawPoint(Graphics graphics, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
         {
-            var geometry = this.pointLightGeometry;
+            var geometry = pointLightGeometry;
 
-            this.SetRasterizerStencilPass();
-            this.SetDepthStencilVolumeMarking();
+            SetRasterizerStencilPass();
+            SetDepthStencilVolumeMarking();
             graphics.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            this.DrawSingleLight(graphics, geometry, effect.DeferredPointStencil);
+            DrawSingleLight(geometry, stencilDrawer);
 
-            this.SetRasterizerLightingPass();
-            this.SetDepthStencilVolumeDrawing();
-            this.DrawSingleLight(graphics, geometry, effect.DeferredPointLight);
+            SetRasterizerLightingPass();
+            SetDepthStencilVolumeDrawing();
+            DrawSingleLight(geometry, drawer);
         }
         /// <summary>
         /// Binds the spot light input layout to the input assembler
@@ -377,26 +337,27 @@ namespace Engine
         /// <param name="graphics">Graphics device</param>
         public void BindSpot(Graphics graphics)
         {
-            graphics.IAInputLayout = this.spotLightInputLayout;
+            graphics.IAInputLayout = spotLightInputLayout;
             Counters.IAInputLayoutSets++;
         }
         /// <summary>
         /// Draws a spot light
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawSpot(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="stencilDrawer">Stencil drawer</param>
+        /// <param name="drawer">Drawer</param>
+        public void DrawSpot(Graphics graphics, BuiltInStencil stencilDrawer, BuiltInLightSpot drawer)
         {
-            var geometry = this.spotLightGeometry;
+            var geometry = spotLightGeometry;
 
-            this.SetRasterizerStencilPass();
-            this.SetDepthStencilVolumeMarking();
+            SetRasterizerStencilPass();
+            SetDepthStencilVolumeMarking();
             graphics.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            this.DrawSingleLight(graphics, geometry, effect.DeferredSpotStencil);
+            DrawSingleLight(geometry, stencilDrawer);
 
-            this.SetRasterizerLightingPass();
-            this.SetDepthStencilVolumeDrawing();
-            this.DrawSingleLight(graphics, geometry, effect.DeferredSpotLight);
+            SetRasterizerLightingPass();
+            SetDepthStencilVolumeDrawing();
+            DrawSingleLight(geometry, drawer);
         }
         /// <summary>
         /// Binds the result box input layout to the input assembler
@@ -404,27 +365,16 @@ namespace Engine
         /// <param name="graphics">Graphics device</param>
         public void BindResult(Graphics graphics)
         {
-            graphics.IAPrimitiveTopology = PrimitiveTopology.TriangleList;
-            graphics.IASetVertexBuffers(BufferSlot, this.lightGeometryVertexBufferBinding);
-            graphics.IASetIndexBuffer(this.lightGeometryIndexBuffer, Format.R32_UInt, 0);
-
-            graphics.IAInputLayout = this.combineLightsInputLayout;
+            graphics.IAInputLayout = combineLightsInputLayout;
+            Counters.IAInputLayoutSets++;
         }
         /// <summary>
         /// Draws the resulting light composition
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        /// <param name="effect">Effect</param>
-        public void DrawResult(Graphics graphics, EffectDeferredComposer effect)
+        /// <param name="Drawer">Effect</param>
+        public void DrawResult(BuiltInComposer drawer)
         {
-            var effectTechnique = effect.DeferredCombineLights;
-
-            for (int p = 0; p < effectTechnique.PassCount; p++)
-            {
-                graphics.EffectPassApply(effectTechnique, p, 0);
-
-                graphics.DrawIndexed(this.screenGeometry.IndexCount, this.screenGeometry.Offset, 0);
-            }
+            drawer.Draw(Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
 
         /// <summary>
@@ -432,28 +382,28 @@ namespace Engine
         /// </summary>
         private void SetRasterizerStencilPass()
         {
-            this.Graphics.SetRasterizerState(this.rasterizerStencilPass);
+            Graphics.SetRasterizerState(rasterizerStencilPass);
         }
         /// <summary>
         /// Stes lighting pass rasterizer
         /// </summary>
         public void SetRasterizerLightingPass()
         {
-            this.Graphics.SetRasterizerState(this.rasterizerLightingPass);
+            Graphics.SetRasterizerState(rasterizerLightingPass);
         }
         /// <summary>
         /// Sets depth stencil for volume marking
         /// </summary>
         public void SetDepthStencilVolumeMarking()
         {
-            this.Graphics.SetDepthStencilState(this.depthStencilVolumeMarking);
+            Graphics.SetDepthStencilState(depthStencilVolumeMarking);
         }
         /// <summary>
         /// Sets depth stencil for volume drawing
         /// </summary>
         public void SetDepthStencilVolumeDrawing()
         {
-            this.Graphics.SetDepthStencilState(this.depthStencilVolumeDrawing);
+            Graphics.SetDepthStencilState(depthStencilVolumeDrawing);
         }
     }
 }

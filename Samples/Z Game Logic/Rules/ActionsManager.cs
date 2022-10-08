@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Engine;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace GameLogic.Rules
@@ -9,7 +10,7 @@ namespace GameLogic.Rules
     {
         public static ActionSpecification[] GetActions(Phase phase, Team team, Soldier soldier, bool onMelee, ActionTypes actionType = ActionTypes.All)
         {
-            var teamActions = GetListForTeam();
+            var teamActions = GetListForTeam(team);
 
             teamActions = FilterTeamActions(teamActions, phase, actionType);
 
@@ -106,8 +107,10 @@ namespace GameLogic.Rules
 
         #region Team actions
 
-        private static IEnumerable<ActionSpecification> GetListForTeam()
+        private static IEnumerable<ActionSpecification> GetListForTeam(Team team)
         {
+            Logger.WriteDebug(nameof(ActionsManager), $"{team?.Name}");
+
             return new ActionSpecification[] { };
         }
 
@@ -134,11 +137,11 @@ namespace GameLogic.Rules
             };
         }
 
-        public static bool Move(Skirmish game, Soldier active, int wastedPoints)
+        public static bool Move(Soldier active, int wastedPoints)
         {
             if (active.IdleForMovement)
             {
-                active.Move(wastedPoints);
+                active.Move(MovementModes.Walk, wastedPoints);
 
                 return true;
             }
@@ -148,11 +151,11 @@ namespace GameLogic.Rules
             }
         }
 
-        public static bool Run(Skirmish game, Soldier active, int wastedPoints)
+        public static bool Run(Soldier active, int wastedPoints)
         {
             if (active.IdleForMovement)
             {
-                active.Run(wastedPoints);
+                active.Move(MovementModes.Run, wastedPoints);
 
                 return true;
             }
@@ -162,11 +165,11 @@ namespace GameLogic.Rules
             }
         }
 
-        public static bool Crawl(Skirmish game, Soldier active, int wastedPoints)
+        public static bool Crawl(Soldier active, int wastedPoints)
         {
             if (active.IdleForMovement)
             {
-                active.Crawl(wastedPoints);
+                active.Move(MovementModes.Crawl, wastedPoints);
 
                 return true;
             }
@@ -176,13 +179,11 @@ namespace GameLogic.Rules
             }
         }
 
-        public static bool Assault(Skirmish game, Soldier active, Soldier passive, int wastedPoints)
+        public static bool Assault(Soldier active, Soldier passive, int wastedPoints)
         {
-            //TODO: This test must be repeated many times
+            // This test must be repeated many times
             if (passive.CurrentHealth != HealthStates.Disabled)
             {
-                game.JoinMelee(active, passive);
-
                 active.Assault(wastedPoints);
                 passive.Assault(0);
 
@@ -194,58 +195,63 @@ namespace GameLogic.Rules
             }
         }
 
-        public static bool CoveringFire(Skirmish game, Soldier active, Weapon weapon, Area area, int wastedPoints)
+        public static bool CoveringFire(Soldier active, Weapon weapon, Area area, int wastedPoints)
         {
+            if (wastedPoints <= 0)
+            {
+                return false;
+            }
+
             active.SetState(SoldierStates.CoveringFire, weapon, area);
 
             return true;
         }
 
-        public static bool Reload(Skirmish game, Soldier active, Weapon weapon, int wastedPoints)
+        public static bool Reload(Soldier active, Weapon weapon, int wastedPoints)
         {
             active.ReloadTest(weapon, wastedPoints);
 
             return true;
         }
 
-        public static bool Repair(Skirmish game, Soldier active, Weapon weapon, int wastedPoints)
+        public static bool Repair(Soldier active, Weapon weapon, int wastedPoints)
         {
             active.RepairTest(weapon, wastedPoints);
 
             return true;
         }
 
-        public static bool Inventory(Skirmish game, Soldier active, int wastedPoints)
+        public static bool Inventory(Soldier active, int wastedPoints)
         {
             active.Inventory(wastedPoints);
 
             return true;
         }
 
-        public static bool UseMovementItem(Skirmish game, Soldier active, Item item, int wastedPoints)
+        public static bool UseMovementItem(Soldier active, Item item, int wastedPoints)
         {
             active.UseItemForMovementPhase(item, wastedPoints);
 
             return true;
         }
 
-        public static bool Communications(Skirmish game, Soldier active)
+        public static bool Communications(Soldier active)
         {
             active.CommunicationsTest();
 
             return true;
         }
 
-        public static bool FindCover(Skirmish game, Soldier active)
+        public static bool FindCover(Soldier active)
         {
-            active.FindCover();
+            active.Move(MovementModes.FindCover, 0);
 
             return true;
         }
 
-        public static bool RunAway(Skirmish game, Soldier active)
+        public static bool RunAway(Soldier active)
         {
-            active.RunAway();
+            active.Move(MovementModes.RunAway, 0);
 
             return true;
         }
@@ -266,7 +272,7 @@ namespace GameLogic.Rules
             };
         }
 
-        public static bool Shoot(Skirmish game, Soldier active, Weapon weapon, float distance, Soldier passive, int wastedPoints)
+        public static bool Shoot(Soldier active, Weapon weapon, float distance, Soldier passive, int wastedPoints)
         {
             if (active.ShootingTest(weapon, distance, wastedPoints))
             {
@@ -276,28 +282,33 @@ namespace GameLogic.Rules
             return true;
         }
 
-        public static bool SupressingFire(Skirmish game, Soldier active, Weapon weapon, Area area, int wastedPoints)
+        public static bool SupressingFire(Soldier active, Weapon weapon, Area area, int wastedPoints)
         {
+            if (wastedPoints <= 0)
+            {
+                return false;
+            }
+
             active.SetState(SoldierStates.SupressingFire, weapon, area);
 
             return true;
         }
 
-        public static bool Support(Skirmish game, Soldier active)
+        public static bool Support(Soldier active)
         {
             active.SupportTest();
 
             return true;
         }
 
-        public static bool UseShootingItem(Skirmish game, Soldier active, Item item, int wastedPoints)
+        public static bool UseShootingItem(Soldier active, Item item, int wastedPoints)
         {
             active.UseItemForShootingPhase(item, wastedPoints);
 
             return true;
         }
 
-        public static bool FirstAid(Skirmish game, Soldier active, Soldier passive, int wastedPoints)
+        public static bool FirstAid(Soldier active, Soldier passive, int wastedPoints)
         {
             if (active.FirstAidTest(wastedPoints))
             {
@@ -320,19 +331,12 @@ namespace GameLogic.Rules
             };
         }
 
-        public static bool Leave(Skirmish game, Soldier active)
+        public static bool Leave(Soldier active)
         {
-            if (active.LeaveMeleeTest())
-            {
-                Melee melee = game.GetMelee(active);
-
-                melee.RemoveFighter(active);
-            }
-
-            return true;
+            return active.LeaveMeleeTest();
         }
 
-        public static bool UseMeleeItem(Skirmish game, Soldier active, Item item)
+        public static bool UseMeleeItem(Soldier active, Item item)
         {
             active.UseItemForMeleePhase(item);
 
@@ -352,14 +356,14 @@ namespace GameLogic.Rules
             };
         }
 
-        public static bool TakeControl(Skirmish game, Soldier active)
+        public static bool TakeControl(Soldier active)
         {
             active.TakeControlTest();
 
             return true;
         }
 
-        public static bool UseMoraleItem(Skirmish game, Soldier active, Item item)
+        public static bool UseMoraleItem(Soldier active, Item item)
         {
             active.UseItemForMoralePhase(item);
 

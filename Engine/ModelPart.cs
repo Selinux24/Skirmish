@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Model part
     /// </summary>
-    public class ModelPart
+    public class ModelPart : IModelPart
     {
         /// <summary>
         /// Part name
@@ -13,7 +13,7 @@ namespace Engine
         /// <summary>
         /// Manipulator
         /// </summary>
-        public Manipulator3D Manipulator { get; private set; }
+        public Manipulator3D Manipulator { get; private set; } = new Manipulator3D();
 
         /// <summary>
         /// Constructor
@@ -21,8 +21,7 @@ namespace Engine
         /// <param name="name">Name</param>
         public ModelPart(string name)
         {
-            this.Name = name;
-            this.Manipulator = new Manipulator3D();
+            Name = name;
         }
     }
 }

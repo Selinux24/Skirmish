@@ -29,7 +29,7 @@ namespace Engine.Common
         /// <returns>Returns the matrix value from the variable</returns>
         public Matrix GetMatrix()
         {
-            return this.variable.GetMatrix();
+            return variable.GetMatrix();
         }
         /// <summary>
         /// Gets a matrix array
@@ -38,7 +38,7 @@ namespace Engine.Common
         /// <returns>Returns a matrix array</returns>
         public Matrix[] GetMatrixArray(int count)
         {
-            return this.variable.GetMatrixArray<Matrix>(count);
+            return variable.GetMatrixArray<Matrix>(count);
         }
 
         /// <summary>
@@ -47,7 +47,7 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetMatrix(Matrix value)
         {
-            this.variable.SetMatrix(value);
+            variable.SetMatrix(value);
         }
         /// <summary>
         /// Set a matrix array
@@ -55,7 +55,7 @@ namespace Engine.Common
         /// <param name="value">Matrix array</param>
         public void SetMatrix(Matrix[] value)
         {
-            this.variable.SetMatrix(value);
+            variable.SetMatrix(value);
         }
     }
 }

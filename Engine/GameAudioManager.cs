@@ -1,6 +1,9 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -13,16 +16,74 @@ namespace Engine
     public class GameAudioManager : IDisposable
     {
         /// <summary>
-        /// Game audios dictionary
+        /// Effect instance helper class
         /// </summary>
-        private readonly Dictionary<string, GameAudio> gameAudioList = new Dictionary<string, GameAudio>();
+        class EffectInstance
+        {
+            /// <summary>
+            /// Effect name
+            /// </summary>
+            public string Name { get; set; }
+            /// <summary>
+            /// Effect instance
+            /// </summary>
+            public IAudioEffect Effect { get; set; }
+        }
+
+        /// <summary>
+        /// Game audio
+        /// </summary>
+        private readonly GameAudio gameAudio;
+        /// <summary>
+        /// Sound dictionary
+        /// </summary>
+        private readonly Dictionary<string, string> soundList = new Dictionary<string, string>();
+        /// <summary>
+        /// Effect parameters library
+        /// </summary>
+        private readonly Dictionary<string, GameAudioEffectParameters> effectParamsLib = new Dictionary<string, GameAudioEffectParameters>();
+        /// <summary>
+        /// Effect instances list
+        /// </summary>
+        private readonly List<EffectInstance> effectInstances = new List<EffectInstance>();
+
+        /// <summary>
+        /// Gets or sets the master volume
+        /// </summary>
+        /// <remarks>From 0 to 1</remarks>
+        public float MasterVolume
+        {
+            get
+            {
+                return gameAudio.MasterVolume;
+            }
+            set
+            {
+                gameAudio.MasterVolume = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets whether the master voice uses a limiter or not
+        /// </summary>
+        public bool UseMasteringLimiter
+        {
+            get
+            {
+                return gameAudio.UseMasteringLimiter;
+            }
+            set
+            {
+                gameAudio.UseMasteringLimiter = value;
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="audio">Game audio instance</param>
         public GameAudioManager()
         {
-
+            this.gameAudio = new GameAudio();
         }
         /// <summary>
         /// Destructor
@@ -48,68 +109,226 @@ namespace Engine
         {
             if (disposing)
             {
-                gameAudioList.Values.ToList().ForEach(a => a.Dispose());
-                gameAudioList.Clear();
+                effectInstances.ForEach(i =>
+                {
+                    i.Effect.Stop(true);
+                    i.Effect.Dispose();
+                });
+                effectInstances.Clear();
+
+                soundList.Clear();
+
+                gameAudio.Dispose();
             }
         }
 
         /// <summary>
         /// Updates the internal state
         /// </summary>
-        public void Update()
+        /// <param name="gameTime">Game time</param>
+        public void Update(GameTime gameTime)
         {
-            gameAudioList?
-                .ToList()
-                .ForEach(a => a.Value?.Update());
+            //Extract a remove the effects due to dispose
+            var toDispose = effectInstances
+                .FindAll(i => i.Effect.DueToDispose)
+                .ToArray();
+
+            if (toDispose.Any())
+            {
+                effectInstances.RemoveAll(i => i.Effect.DueToDispose);
+                Task.Run(() =>
+                {
+                    toDispose.ToList().ForEach(i =>
+                    {
+                        i.Effect.Stop(true);
+                        i.Effect.Dispose();
+                    });
+                });
+            }
+
+            var toUpdate = effectInstances
+                .FindAll(i => !i.Effect.DueToDispose && i.Effect.State == AudioState.Playing && i.Effect.UseAudio3D)
+                .ToArray();
+
+            int effectCount = toUpdate.Length;
+            if (effectCount == 0)
+            {
+                return;
+            }
+
+            Parallel.ForEach(toUpdate, e => e.Effect.Update(gameTime));
         }
 
         /// <summary>
-        /// Creates a list of game audios
+        /// Loads a sound file into the library
         /// </summary>
+        /// <param name="soundName">Sound name</param>
         /// <param name="contentFolder">Content folder</param>
-        /// <param name="fileName">Resource file name</param>
-        /// <returns>Returns a list of game audios</returns>
-        public GameAudio CreateAudio(string name)
-        {
-            if (gameAudioList.ContainsKey(name))
-            {
-                return gameAudioList[name];
-            }
-
-            var audio = new GameAudio();
-
-            gameAudioList.Add(name, audio);
-
-            return audio;
-        }
-        /// <summary>
-        /// Creates a new effect
-        /// </summary>
-        /// <param name="audioName">Audio name</param>
-        /// <param name="effectName">Effect name</param>
-        /// <param name="contentFolder">Conten folder</param>
         /// <param name="fileName">File name</param>
-        /// <returns></returns>
-        public GameAudioEffect CreateEffect(string audioName, string effectName, string contentFolder, string fileName)
+        public void LoadSound(string soundName, string contentFolder, string fileName, bool replaceIfExists = true)
         {
-            var audio = gameAudioList[audioName];
+            string path = ContentManager
+                .FindPaths(contentFolder, fileName)
+                .FirstOrDefault(p => File.Exists(p));
 
-            var paths = ContentManager.FindPaths(contentFolder, fileName);
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new EngineException($"The specified file not exists: [{contentFolder}][{fileName}]");
+            }
 
-            return audio.GetEffect(effectName, paths.FirstOrDefault());
+            if (soundList.ContainsKey(soundName))
+            {
+                if (replaceIfExists)
+                {
+                    //Replaces the sound
+                    soundList[soundName] = path;
+                }
+                else
+                {
+                    throw new EngineException($"{soundName} already exists in the sound dictionary.");
+                }
+            }
+            else
+            {
+                //Adds the sound to the collection
+                soundList.Add(soundName, path);
+            }
+        }
+        /// <summary>
+        /// Adds an effect parametrization to the library
+        /// </summary>
+        /// <param name="effectName">Effect name</param>
+        /// <param name="effectParams">Effect parameters</param>
+        public void AddEffectParams(string effectName, GameAudioEffectParameters effectParams)
+        {
+            if (!effectParamsLib.ContainsKey(effectName))
+            {
+                effectParamsLib.Add(effectName, effectParams);
+            }
+        }
+        /// <summary>
+        /// Creates an effect instance
+        /// </summary>
+        /// <param name="effectName">Effect name</param>
+        /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
+        public IAudioEffect CreateEffectInstance(string effectName)
+        {
+            if (!effectParamsLib.ContainsKey(effectName))
+            {
+                //Not exists
+                return null;
+            }
+
+            if (effectInstances.Exists(i => i.Name == effectName && i.Effect.State != AudioState.Stopped))
+            {
+                //Effect currently playing
+                return null;
+            }
+
+            var effectParams = effectParamsLib[effectName];
+
+            if (!soundList.ContainsKey(effectParams.SoundName))
+            {
+                //Sound not exists
+                return null;
+            }
+
+            //Creates the effect
+            var instance = new GameAudioEffect(gameAudio, soundList[effectParams.SoundName], effectParams);
+
+            //Adds effect to "to delete" effect list
+            effectInstances.Add(new EffectInstance { Name = effectName, Effect = instance });
+
+            return instance;
+        }
+        /// <summary>
+        /// Creates an effect instance
+        /// </summary>
+        /// <param name="effectName">Effect name</param>
+        /// <param name="emitter">Emitter fixed position</param>
+        /// <param name="listener">Listener manipulator object</param>
+        /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
+        public IAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, IManipulator listener)
+        {
+            Manipulator3D emitterManipulator = new Manipulator3D();
+            emitterManipulator.SetPosition(emitter);
+
+            return CreateEffectInstance(effectName, emitterManipulator, listener);
+        }
+        /// <summary>
+        /// Creates an effect instance
+        /// </summary>
+        /// <param name="effectName">Effect name</param>
+        /// <param name="emitter">Emitter manipulator object</param>
+        /// <param name="listener">Listener manipulator object</param>
+        /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
+        public IAudioEffect CreateEffectInstance(string effectName, IManipulator emitter, IManipulator listener)
+        {
+            var instance = CreateEffectInstance(effectName);
+
+            instance?.Emitter.SetSource(emitter);
+            instance?.Listener.SetSource(listener);
+            instance?.Update(new GameTime());
+
+            return instance;
+        }
+        /// <summary>
+        /// Creates an effect instance
+        /// </summary>
+        /// <param name="effectName">Effect name</param>
+        /// <param name="emitter">Emitter 3D transformable object</param>
+        /// <param name="listener">Listener manipulator object</param>
+        /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
+        public IAudioEffect CreateEffectInstance(string effectName, ITransformable3D emitter, IManipulator listener)
+        {
+            var instance = CreateEffectInstance(effectName);
+
+            instance?.Emitter.SetSource(emitter);
+            instance?.Listener.SetSource(listener);
+            instance?.Update(new GameTime());
+
+            return instance;
         }
 
         /// <summary>
-        /// Removes a single audio
+        /// Starts the audio device
         /// </summary>
-        /// <param name="name">Audio to remove</param>
-        public void RemoveAudio(string name)
+        public void Start()
         {
-            if (gameAudioList.ContainsKey(name))
+            gameAudio.Start();
+        }
+        /// <summary>
+        /// Stops the audio device
+        /// </summary>
+        public void Stop()
+        {
+            gameAudio.Stop();
+        }
+
+        /// <summary>
+        /// Clear current effects
+        /// </summary>
+        public void ClearEffects()
+        {
+            var toDispose = effectInstances.ToList();
+            if (toDispose.Any())
             {
-                gameAudioList[name].Dispose();
-                gameAudioList.Remove(name);
+                effectInstances.Clear();
+                Task.Run(() =>
+                {
+                    toDispose.ForEach(i => i.Effect.Dispose());
+                }).ConfigureAwait(false);
             }
+        }
+
+        /// <summary>
+        /// Sets the mastering limiter parameters
+        /// </summary>
+        /// <param name="release">Speed at which the limiter stops affecting audio once it drops below the limiter's threshold</param>
+        /// <param name="loudness">Threshold of the limiter</param>
+        public void SetMasteringLimit(int release, int loudness)
+        {
+            gameAudio.SetMasteringLimit(release, loudness);
         }
     }
 }

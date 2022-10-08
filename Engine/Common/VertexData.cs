@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -143,18 +144,18 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPosition CreateVertexSkinnedPosition(VertexData v, Weight[] vw, string[] skinBoneNames)
+        public static VertexSkinnedPosition CreateVertexSkinnedPosition(VertexData v, IEnumerable<Weight> vw, IEnumerable<string> skinBoneNames)
         {
             return new VertexSkinnedPosition
             {
                 Position = v.Position ?? Vector3.Zero,
-                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
-                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
-                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
-                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Count() > 0 ? vw.ElementAt(0).WeightValue : 0f,
+                Weight2 = vw?.Count() > 1 ? vw.ElementAt(1).WeightValue : 0f,
+                Weight3 = vw?.Count() > 2 ? vw.ElementAt(2).WeightValue : 0f,
+                BoneIndex1 = vw?.Count() > 0 ? FindBoneIndex(skinBoneNames, vw.ElementAt(0).Joint) : ((byte)0),
+                BoneIndex2 = vw?.Count() > 1 ? FindBoneIndex(skinBoneNames, vw.ElementAt(1).Joint) : ((byte)0),
+                BoneIndex3 = vw?.Count() > 2 ? FindBoneIndex(skinBoneNames, vw.ElementAt(2).Joint) : ((byte)0),
+                BoneIndex4 = vw?.Count() > 3 ? FindBoneIndex(skinBoneNames, vw.ElementAt(3).Joint) : ((byte)0)
             };
         }
         /// <summary>
@@ -163,19 +164,19 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionColor CreateVertexSkinnedPositionColor(VertexData v, Weight[] vw, string[] skinBoneNames)
+        public static VertexSkinnedPositionColor CreateVertexSkinnedPositionColor(VertexData v, IEnumerable<Weight> vw, IEnumerable<string> skinBoneNames)
         {
             return new VertexSkinnedPositionColor
             {
                 Position = v.Position ?? Vector3.Zero,
                 Color = v.Color ?? Color4.White,
-                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
-                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
-                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
-                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Count() > 0 ? vw.ElementAt(0).WeightValue : 0f,
+                Weight2 = vw?.Count() > 1 ? vw.ElementAt(1).WeightValue : 0f,
+                Weight3 = vw?.Count() > 2 ? vw.ElementAt(2).WeightValue : 0f,
+                BoneIndex1 = vw?.Count() > 0 ? FindBoneIndex(skinBoneNames, vw.ElementAt(0).Joint) : ((byte)0),
+                BoneIndex2 = vw?.Count() > 1 ? FindBoneIndex(skinBoneNames, vw.ElementAt(1).Joint) : ((byte)0),
+                BoneIndex3 = vw?.Count() > 2 ? FindBoneIndex(skinBoneNames, vw.ElementAt(2).Joint) : ((byte)0),
+                BoneIndex4 = vw?.Count() > 3 ? FindBoneIndex(skinBoneNames, vw.ElementAt(3).Joint) : ((byte)0)
             };
         }
         /// <summary>
@@ -184,20 +185,20 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionNormalColor CreateVertexSkinnedPositionNormalColor(VertexData v, Weight[] vw, string[] skinBoneNames)
+        public static VertexSkinnedPositionNormalColor CreateVertexSkinnedPositionNormalColor(VertexData v, IEnumerable<Weight> vw, IEnumerable<string> skinBoneNames)
         {
             return new VertexSkinnedPositionNormalColor
             {
                 Position = v.Position ?? Vector3.Zero,
                 Normal = v.Normal ?? Vector3.Zero,
                 Color = v.Color ?? Color4.White,
-                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
-                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
-                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
-                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Count() > 0 ? vw.ElementAt(0).WeightValue : 0f,
+                Weight2 = vw?.Count() > 1 ? vw.ElementAt(1).WeightValue : 0f,
+                Weight3 = vw?.Count() > 2 ? vw.ElementAt(2).WeightValue : 0f,
+                BoneIndex1 = vw?.Count() > 0 ? FindBoneIndex(skinBoneNames, vw.ElementAt(0).Joint) : ((byte)0),
+                BoneIndex2 = vw?.Count() > 1 ? FindBoneIndex(skinBoneNames, vw.ElementAt(1).Joint) : ((byte)0),
+                BoneIndex3 = vw?.Count() > 2 ? FindBoneIndex(skinBoneNames, vw.ElementAt(2).Joint) : ((byte)0),
+                BoneIndex4 = vw?.Count() > 3 ? FindBoneIndex(skinBoneNames, vw.ElementAt(3).Joint) : ((byte)0)
             };
         }
         /// <summary>
@@ -206,19 +207,19 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionTexture CreateVertexSkinnedPositionTexture(VertexData v, Weight[] vw, string[] skinBoneNames)
+        public static VertexSkinnedPositionTexture CreateVertexSkinnedPositionTexture(VertexData v, IEnumerable<Weight> vw, IEnumerable<string> skinBoneNames)
         {
             return new VertexSkinnedPositionTexture
             {
                 Position = v.Position ?? Vector3.Zero,
                 Texture = v.Texture ?? Vector2.Zero,
-                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
-                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
-                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
-                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Count() > 0 ? vw.ElementAt(0).WeightValue : 0f,
+                Weight2 = vw?.Count() > 1 ? vw.ElementAt(1).WeightValue : 0f,
+                Weight3 = vw?.Count() > 2 ? vw.ElementAt(2).WeightValue : 0f,
+                BoneIndex1 = vw?.Count() > 0 ? FindBoneIndex(skinBoneNames, vw.ElementAt(0).Joint) : ((byte)0),
+                BoneIndex2 = vw?.Count() > 1 ? FindBoneIndex(skinBoneNames, vw.ElementAt(1).Joint) : ((byte)0),
+                BoneIndex3 = vw?.Count() > 2 ? FindBoneIndex(skinBoneNames, vw.ElementAt(2).Joint) : ((byte)0),
+                BoneIndex4 = vw?.Count() > 3 ? FindBoneIndex(skinBoneNames, vw.ElementAt(3).Joint) : ((byte)0)
             };
         }
         /// <summary>
@@ -227,20 +228,20 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionNormalTexture CreateVertexSkinnedPositionNormalTexture(VertexData v, Weight[] vw, string[] skinBoneNames)
+        public static VertexSkinnedPositionNormalTexture CreateVertexSkinnedPositionNormalTexture(VertexData v, IEnumerable<Weight> vw, IEnumerable<string> skinBoneNames)
         {
             return new VertexSkinnedPositionNormalTexture
             {
                 Position = v.Position ?? Vector3.Zero,
                 Normal = v.Normal ?? Vector3.Zero,
                 Texture = v.Texture ?? Vector2.Zero,
-                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
-                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
-                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
-                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Count() > 0 ? vw.ElementAt(0).WeightValue : 0f,
+                Weight2 = vw?.Count() > 1 ? vw.ElementAt(1).WeightValue : 0f,
+                Weight3 = vw?.Count() > 2 ? vw.ElementAt(2).WeightValue : 0f,
+                BoneIndex1 = vw?.Count() > 0 ? FindBoneIndex(skinBoneNames, vw.ElementAt(0).Joint) : ((byte)0),
+                BoneIndex2 = vw?.Count() > 1 ? FindBoneIndex(skinBoneNames, vw.ElementAt(1).Joint) : ((byte)0),
+                BoneIndex3 = vw?.Count() > 2 ? FindBoneIndex(skinBoneNames, vw.ElementAt(2).Joint) : ((byte)0),
+                BoneIndex4 = vw?.Count() > 3 ? FindBoneIndex(skinBoneNames, vw.ElementAt(3).Joint) : ((byte)0)
             };
         }
         /// <summary>
@@ -249,7 +250,7 @@ namespace Engine.Common
         /// <param name="v">Helper</param>
         /// <param name="vw">Weights</param>
         /// <returns>Returns the generated vertex</returns>
-        public static VertexSkinnedPositionNormalTextureTangent CreateVertexSkinnedPositionNormalTextureTangent(VertexData v, Weight[] vw, string[] skinBoneNames)
+        public static VertexSkinnedPositionNormalTextureTangent CreateVertexSkinnedPositionNormalTextureTangent(VertexData v, IEnumerable<Weight> vw, IEnumerable<string> skinBoneNames)
         {
             return new VertexSkinnedPositionNormalTextureTangent
             {
@@ -257,13 +258,13 @@ namespace Engine.Common
                 Normal = v.Normal ?? Vector3.Zero,
                 Texture = v.Texture ?? Vector2.Zero,
                 Tangent = v.Tangent ?? Vector3.UnitX,
-                Weight1 = vw?.Length > 0 ? vw[0].WeightValue : 0f,
-                Weight2 = vw?.Length > 1 ? vw[1].WeightValue : 0f,
-                Weight3 = vw?.Length > 2 ? vw[2].WeightValue : 0f,
-                BoneIndex1 = vw?.Length > 0 ? (FindBoneIndex(skinBoneNames, vw[0].Joint)) : ((byte)0),
-                BoneIndex2 = vw?.Length > 1 ? (FindBoneIndex(skinBoneNames, vw[1].Joint)) : ((byte)0),
-                BoneIndex3 = vw?.Length > 2 ? (FindBoneIndex(skinBoneNames, vw[2].Joint)) : ((byte)0),
-                BoneIndex4 = vw?.Length > 3 ? (FindBoneIndex(skinBoneNames, vw[3].Joint)) : ((byte)0)
+                Weight1 = vw?.Count() > 0 ? vw.ElementAt(0).WeightValue : 0f,
+                Weight2 = vw?.Count() > 1 ? vw.ElementAt(1).WeightValue : 0f,
+                Weight3 = vw?.Count() > 2 ? vw.ElementAt(2).WeightValue : 0f,
+                BoneIndex1 = vw?.Count() > 0 ? FindBoneIndex(skinBoneNames, vw.ElementAt(0).Joint) : ((byte)0),
+                BoneIndex2 = vw?.Count() > 1 ? FindBoneIndex(skinBoneNames, vw.ElementAt(1).Joint) : ((byte)0),
+                BoneIndex3 = vw?.Count() > 2 ? FindBoneIndex(skinBoneNames, vw.ElementAt(2).Joint) : ((byte)0),
+                BoneIndex4 = vw?.Count() > 3 ? FindBoneIndex(skinBoneNames, vw.ElementAt(3).Joint) : ((byte)0)
             };
         }
         /// <summary>
@@ -288,15 +289,17 @@ namespace Engine.Common
         /// <param name="jointNames">Bone names list</param>
         /// <param name="joint">Bone name</param>
         /// <returns>Returns the bone index or 0 if not found</returns>
-        private static byte FindBoneIndex(string[] jointNames, string joint)
+        private static byte FindBoneIndex(IEnumerable<string> jointNames, string joint)
         {
-            int index = Array.IndexOf(jointNames, joint);
+            byte result = 0;
+
+            int index = Array.IndexOf(jointNames.ToArray(), joint);
             if (index >= 0)
             {
-                return (byte)index;
+                result = (byte)index;
             }
 
-            return 0;
+            return result;
         }
 
         /// <summary>
@@ -452,98 +455,187 @@ namespace Engine.Common
         /// <param name="vertices">Helpers</param>
         /// <param name="weights">Weight information</param>
         /// <returns>Returns generated vertices</returns>
-        public static IEnumerable<IVertexData> Convert(VertexTypes vertexType, IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
+        public static async Task<IEnumerable<IVertexData>> Convert(VertexTypes vertexType, IEnumerable<VertexData> vertices, IEnumerable<Weight> weights, IEnumerable<string> skinBoneNames)
         {
-            List<IVertexData> vertexList = new List<IVertexData>();
-
             if (vertexType == VertexTypes.Position)
             {
-                vertices.ToList().ForEach((v) => { vertexList.Add(CreateVertexPosition(v)); });
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
+                {
+                    var v = vertices.ElementAt(index);
+
+                    res[index] = CreateVertexPosition(v);
+                });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionColor)
             {
-                vertices.ToList().ForEach((v) => { vertexList.Add(CreateVertexPositionColor(v)); });
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
+                {
+                    var v = vertices.ElementAt(index);
+
+                    res[index] = CreateVertexPositionColor(v);
+                });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionNormalColor)
             {
-                vertices.ToList().ForEach((v) => { vertexList.Add(CreateVertexPositionNormalColor(v)); });
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
+                {
+                    var v = vertices.ElementAt(index);
+
+                    res[index] = CreateVertexPositionNormalColor(v);
+                });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionTexture)
             {
-                vertices.ToList().ForEach((v) => { vertexList.Add(CreateVertexPositionTexture(v)); });
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
+                {
+                    var v = vertices.ElementAt(index);
+
+                    res[index] = CreateVertexPositionTexture(v);
+                });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionNormalTexture)
             {
-                vertices.ToList().ForEach((v) => { vertexList.Add(CreateVertexPositionNormalTexture(v)); });
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
+                {
+                    var v = vertices.ElementAt(index);
+
+                    res[index] = CreateVertexPositionNormalTexture(v);
+                });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionNormalTextureTangent)
             {
-                vertices.ToList().ForEach((v) => { vertexList.Add(CreateVertexPositionNormalTextureTangent(v)); });
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
+                {
+                    var v = vertices.ElementAt(index);
+
+                    res[index] = CreateVertexPositionNormalTextureTangent(v);
+                });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionSkinned)
             {
-                vertices.ToList().ForEach((v) =>
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
                 {
+                    var v = vertices.ElementAt(index);
                     var vw = weights.Where(w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(CreateVertexSkinnedPosition(v, vw.ToArray(), skinBoneNames.ToArray()));
+                    res[index] = CreateVertexSkinnedPosition(v, vw, skinBoneNames);
                 });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionColorSkinned)
             {
-                vertices.ToList().ForEach((v) =>
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
                 {
+                    var v = vertices.ElementAt(index);
                     var vw = weights.Where(w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(CreateVertexSkinnedPositionColor(v, vw.ToArray(), skinBoneNames.ToArray()));
+                    res[index] = CreateVertexSkinnedPositionColor(v, vw, skinBoneNames);
                 });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionNormalColorSkinned)
             {
-                vertices.ToList().ForEach((v) =>
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
                 {
+                    var v = vertices.ElementAt(index);
                     var vw = weights.Where(w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(CreateVertexSkinnedPositionNormalColor(v, vw.ToArray(), skinBoneNames.ToArray()));
+                    res[index] = CreateVertexSkinnedPositionNormalColor(v, vw, skinBoneNames);
                 });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionTextureSkinned)
             {
-                vertices.ToList().ForEach((v) =>
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
                 {
+                    var v = vertices.ElementAt(index);
                     var vw = weights.Where(w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(CreateVertexSkinnedPositionTexture(v, vw.ToArray(), skinBoneNames.ToArray()));
+                    res[index] = CreateVertexSkinnedPositionTexture(v, vw, skinBoneNames);
                 });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionNormalTextureSkinned)
             {
-                vertices.ToList().ForEach((v) =>
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
                 {
+                    var v = vertices.ElementAt(index);
                     var vw = weights.Where(w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(CreateVertexSkinnedPositionNormalTexture(v, vw.ToArray(), skinBoneNames.ToArray()));
+                    res[index] = CreateVertexSkinnedPositionNormalTexture(v, vw, skinBoneNames);
                 });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.PositionNormalTextureTangentSkinned)
             {
-                vertices.ToList().ForEach((v) =>
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
                 {
+                    var v = vertices.ElementAt(index);
                     var vw = weights.Where(w => w.VertexIndex == v.VertexIndex);
 
-                    vertexList.Add(CreateVertexSkinnedPositionNormalTextureTangent(v, vw.ToArray(), skinBoneNames.ToArray()));
+                    res[index] = CreateVertexSkinnedPositionNormalTextureTangent(v, vw, skinBoneNames);
                 });
+
+                return await Task.FromResult(res);
             }
             else if (vertexType == VertexTypes.Terrain)
             {
-                vertices.ToList().ForEach((v) => { vertexList.Add(CreateVertexTerrain(v)); });
+                var res = new IVertexData[vertices.Count()];
+
+                Parallel.For(0, vertices.Count(), (index) =>
+                {
+                    var v = vertices.ElementAt(index);
+
+                    res[index] = CreateVertexTerrain(v);
+                });
+
+                return await Task.FromResult(res);
             }
             else
             {
                 throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
             }
-
-            return vertexList.ToArray();
         }
         /// <summary>
         /// Apply weighted transforms to the vertext data
@@ -560,8 +652,8 @@ namespace Engine.Common
                 return position;
             }
 
-            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : null;
-            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : null;
+            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : new byte[] { };
+            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : new float[] { };
             Matrix[] transforms = boneTransforms.ToArray();
 
             Vector3 t = Vector3.Zero;
@@ -584,83 +676,153 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Transforms helper by given matrix
+        /// Transforms the specified vertex list by the given transform matrix
         /// </summary>
-        /// <param name="transform">Transformation matrix</param>
-        public VertexData Transform(Matrix transform)
+        /// <param name="vertices">Vertex list</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the transformed vertex list</returns>
+        public static IEnumerable<VertexData> Transform(IEnumerable<VertexData> vertices, Matrix transform)
         {
-            VertexData result = this;
-
-            if (!transform.IsIdentity)
+            if (vertices?.Any() != true)
             {
-                if (result.Position.HasValue)
-                {
-                    Vector3 position = result.Position.Value;
+                return new VertexData[] { };
+            }
 
-                    Vector3.TransformCoordinate(ref position, ref transform, out Vector3 p);
+            if (transform.IsIdentity)
+            {
+                return vertices.ToArray();
+            }
 
-                    result.Position = p;
-                }
+            VertexData[] result = new VertexData[vertices.Count()];
 
-                if (result.Normal.HasValue)
-                {
-                    Vector3 normal = this.Normal.Value;
+            Parallel.For(0, vertices.Count(), (index) =>
+            {
+                result[index] = Transform(vertices.ElementAt(index), transform);
+            });
 
-                    Vector3.TransformNormal(ref normal, ref transform, out normal);
+            return result;
+        }
+        /// <summary>
+        /// Transforms the specified vertex by the given transform matrix
+        /// </summary>
+        /// <param name="vertex">Vertex</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the transformed vertex</returns>
+        public static VertexData Transform(VertexData vertex, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return vertex;
+            }
 
-                    result.Normal = normal;
-                }
+            VertexData result = vertex;
 
-                if (result.Tangent.HasValue)
-                {
-                    Vector3 tangent = result.Tangent.Value;
+            if (result.Position.HasValue)
+            {
+                result.Position = Vector3.TransformCoordinate(result.Position.Value, transform);
+            }
 
-                    Vector3.TransformNormal(ref tangent, ref transform, out tangent);
+            if (result.Normal.HasValue)
+            {
+                result.Normal = Vector3.TransformNormal(result.Normal.Value, transform);
+            }
 
-                    result.Tangent = tangent;
-                }
+            if (result.Tangent.HasValue)
+            {
+                result.Tangent = Vector3.TransformNormal(result.Tangent.Value, transform);
+            }
 
-                if (result.BiNormal.HasValue)
-                {
-                    Vector3 biNormal = result.BiNormal.Value;
-
-                    Vector3.TransformNormal(ref biNormal, ref transform, out biNormal);
-
-                    result.BiNormal = biNormal;
-                }
+            if (result.BiNormal.HasValue)
+            {
+                result.BiNormal = Vector3.TransformNormal(result.BiNormal.Value, transform);
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// Generates a vertex data array from a geometry descriptor
+        /// </summary>
+        /// <param name="descriptor">Geometry descriptor</param>
+        /// <returns>Returns a vertex array</returns>
+        public static IEnumerable<VertexData> FromDescriptor(GeometryDescriptor descriptor)
+        {
+            var vertices = descriptor.Vertices?.ToArray() ?? new Vector3[] { };
+            var normals = descriptor.Normals?.ToArray() ?? new Vector3[] { };
+            var uvs = descriptor.Uvs?.ToArray() ?? new Vector2[] { };
+            var tangents = descriptor.Tangents?.ToArray() ?? new Vector3[] { };
+            var binormals = descriptor.Binormals?.ToArray() ?? new Vector3[] { };
+
+            VertexData[] res = new VertexData[vertices.Length];
+
+            Parallel.For(0, vertices.Length, (i) =>
+            {
+                res[i] = new VertexData()
+                {
+                    Position = vertices[i],
+                    Normal = normals.Any() ? normals[i] : (Vector3?)null,
+                    Texture = uvs.Any() ? uvs[i] : (Vector2?)null,
+                    Tangent = tangents.Any() ? tangents[i] : (Vector3?)null,
+                    BiNormal = binormals.Any() ? binormals[i] : (Vector3?)null,
+                };
+            });
+
+            return res;
+        }
+
+        /// <summary>
+        /// Transforms this vertex by the given matrix
+        /// </summary>
+        /// <param name="transform">Transformation matrix</param>
+        /// <returns>Returns the transformed vertex</returns>
+        public VertexData Transform(Matrix transform)
+        {
+            return Transform(this, transform);
+        }
+        /// <summary>
+        /// Gets the vertex list stride
+        /// </summary>
+        /// <returns>Returns the list stride</returns>
+        public int GetStride()
+        {
+            return 1;
         }
         /// <summary>
         /// Gets the vertex list
         /// </summary>
         /// <returns>Returns a vertex list</returns>
-        public Vector3[] GetVertices()
+        public IEnumerable<Vector3> GetVertices()
         {
-            return new Vector3[] { this.Position.Value };
+            return new Vector3[] { Position.Value };
         }
         /// <summary>
-        /// Gets text representation of instance
+        /// Gets the vertex list topology
         /// </summary>
+        /// <returns>Returns the list topology</returns>
+        public Topology GetTopology()
+        {
+            return Topology.PointList;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             string text = null;
 
-            if (this.Weights != null && this.Weights.Length > 0) text += "Skinned; ";
+            if (Weights != null && Weights.Length > 0) text += "Skinned; ";
 
-            text += string.Format("FaceIndex: {0}; ", this.FaceIndex);
-            text += string.Format("VertexIndex: {0}; ", this.VertexIndex);
+            text += string.Format("FaceIndex: {0}; ", FaceIndex);
+            text += string.Format("VertexIndex: {0}; ", VertexIndex);
 
-            if (this.Position.HasValue) text += string.Format("Position: {0}; ", this.Position);
-            if (this.Normal.HasValue) text += string.Format("Normal: {0}; ", this.Normal);
-            if (this.Tangent.HasValue) text += string.Format("Tangent: {0}; ", this.Tangent);
-            if (this.BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", this.BiNormal);
-            if (this.Texture.HasValue) text += string.Format("Texture: {0}; ", this.Texture);
-            if (this.Color.HasValue) text += string.Format("Color: {0}; ", this.Color);
-            if (this.Size.HasValue) text += string.Format("Size: {0}; ", this.Size);
-            if (this.Weights != null && this.Weights.Length > 0) text += string.Format("Weights: {0}; ", this.Weights.Length);
-            if (this.BoneIndices != null && this.BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", this.BoneIndices.Length);
+            if (Position.HasValue) text += string.Format("Position: {0}; ", Position);
+            if (Normal.HasValue) text += string.Format("Normal: {0}; ", Normal);
+            if (Tangent.HasValue) text += string.Format("Tangent: {0}; ", Tangent);
+            if (BiNormal.HasValue) text += string.Format("BiNormal: {0}; ", BiNormal);
+            if (Texture.HasValue) text += string.Format("Texture: {0}; ", Texture);
+            if (Color.HasValue) text += string.Format("Color: {0}; ", Color);
+            if (Size.HasValue) text += string.Format("Size: {0}; ", Size);
+            if (Weights != null && Weights.Length > 0) text += string.Format("Weights: {0}; ", Weights.Length);
+            if (BoneIndices != null && BoneIndices.Length > 0) text += string.Format("BoneIndices: {0}; ", BoneIndices.Length);
 
             return text;
         }

@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Engine.Common
 {
+    using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -15,12 +17,28 @@ namespace Engine.Common
         private ShaderResourceView1 srv = null;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="srv">Shader resource view</param>
-        public EngineShaderResourceView(ShaderResourceView1 srv)
+        /// <param name="name">Name</param>
+        public EngineShaderResourceView(string name)
         {
-            this.srv = srv;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A shader resource name must be specified.");
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="view">Shader resource view</param>
+        public EngineShaderResourceView(string name, ShaderResourceView1 view)
+        {
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A shader resource name must be specified.");
+
+            SetResource(view);
         }
         /// <summary>
         /// Destructor
@@ -38,6 +56,7 @@ namespace Engine.Common
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
         /// <summary>
         /// Dispose resources
         /// </summary>
@@ -46,8 +65,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                this.srv?.Dispose();
-                this.srv = null;
+                srv?.Dispose();
+                srv = null;
             }
         }
 
@@ -55,9 +74,42 @@ namespace Engine.Common
         /// Get the internal shader resource view
         /// </summary>
         /// <returns>Returns the internal shader resource view</returns>
-        public ShaderResourceView1 GetResource()
+        internal ShaderResourceView1 GetResource()
         {
-            return this.srv;
+            return srv;
+        }
+        /// <summary>
+        /// Sets the internal shader resource view
+        /// </summary>
+        /// <param name="view">Resource view</param>
+        internal void SetResource(ShaderResourceView1 view)
+        {
+            srv = view ?? throw new ArgumentNullException(nameof(view), "A shader resource must be specified.");
+
+            srv.DebugName = Name;
+        }
+
+        /// <summary>
+        /// Updates the texture data
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="game">Game instance</param>
+        /// <param name="data">New data</param>
+        public void Update<T>(Game game, IEnumerable<T> data) where T : struct
+        {
+            if (srv == null)
+            {
+                return;
+            }
+
+            if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture1D)
+            {
+                game.Graphics.UpdateTexture1D(this, data);
+            }
+            else if (srv.Description1.Dimension == ShaderResourceViewDimension.Texture2D)
+            {
+                game.Graphics.UpdateTexture2D(this, data);
+            }
         }
     }
 }

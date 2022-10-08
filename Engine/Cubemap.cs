@@ -1,17 +1,20 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Cubemap;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Cube-map drawer
     /// </summary>
-    public class Cubemap : Drawable
+    public class Cubemap<T> : Drawable<T>, IHasGameState where T : CubemapDescription
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -22,106 +25,86 @@ namespace Engine
         /// </summary>
         private BufferDescriptor indexBuffer = null;
         /// <summary>
-        /// Local transform
+        /// Texture
         /// </summary>
-        private Matrix local = Matrix.Identity;
+        private EngineShaderResourceView texture = null;
         /// <summary>
-        /// Cube map texture
+        /// Texture cubic
         /// </summary>
-        private EngineShaderResourceView cubeMapTexture = null;
+        private bool textureCubic;
 
         /// <summary>
-        /// Manipulator
+        /// Returns true if the buffers were ready
         /// </summary>
-        public Manipulator3D Manipulator { get; set; }
+        public bool BuffersReady
+        {
+            get
+            {
+                if (vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer.Count <= 0)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+        }
+        /// <summary>
+        /// Texture index
+        /// </summary>
+        public uint TextureIndex { get; set; } = 0;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public Cubemap(Scene scene, CubemapDescription description)
-            : base(scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public Cubemap(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            this.Manipulator = new Manipulator3D();
 
-            this.InitializeBuffers(description.Name, description.Geometry, description.ReverseFaces);
-            this.InitializeTexture(description.ContentPath, description.Texture);
         }
-        /// <summary>
-        /// Resource releasing
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
+
+            base.Dispose(disposing);
         }
 
-        /// <summary>
-        /// Update
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
         {
-            this.Manipulator.Update(context.GameTime);
+            await base.InitializeAssets(description);
 
-            this.local = this.Manipulator.LocalTransform;
-        }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Draw(DrawContext context)
-        {
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
+            textureCubic = Description.IsCubic;
 
-            if (draw && this.indexBuffer.Count > 0)
+            InitializeBuffers(Name, Description.Geometry, Description.ReverseFaces);
+
+            if (textureCubic)
             {
-                var effect = DrawerPool.EffectDefaultCubemap;
-                var technique = DrawerPool.EffectDefaultCubemap.ForwardCubemap;
-
-                if (!mode.HasFlag(DrawerModes.ShadowMap))
-                {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-                }
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
-
-                effect.UpdatePerFrame(this.local, context.ViewProjection);
-                effect.UpdatePerObject(this.cubeMapTexture);
-
-                var graphics = this.Game.Graphics;
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
-                }
+                await InitializeTextureCubic(Description.CubicTexture, Description.Faces);
+            }
+            else
+            {
+                await InitializeTextureArray(Description.PlainTextures);
             }
         }
-
-        /// <summary>
-        /// Set the instance texture
-        /// </summary>
-        /// <param name="texture">Texture</param>
-        public void SetTexture(EngineShaderResourceView texture)
-        {
-            this.cubeMapTexture = texture;
-        }
-
         /// <summary>
         /// Initialize buffers
         /// </summary>
@@ -130,32 +113,154 @@ namespace Engine
         /// <param name="reverse">Reverse faces</param>
         protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometry geometry, bool reverse)
         {
-            Vector3[] vData;
-            uint[] iData;
-            if (geometry == CubemapDescription.CubeMapGeometry.Box) GeometryUtil.CreateBox(1, 10, 10, out vData, out iData);
-            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) GeometryUtil.CreateSphere(1, 10, 10, out vData, out iData);
-            else throw new ArgumentException("Bad geometry enum type");
+            GeometryDescriptor geom;
+            if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Hemispheric) geom = GeometryUtil.CreateHemispheric(1, 10, 10);
+            else throw new ArgumentException("Bad geometry enum type", nameof(geometry));
 
-            var vertices = new List<VertexPosition>();
-            foreach (var v in vData)
+            if (textureCubic)
             {
-                vertices.Add(new VertexPosition() { Position = v });
+                var vertices = VertexPosition.Generate(geom.Vertices);
+                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            }
+            else
+            {
+                var vertices = VertexPositionTexture.Generate(geom.Vertices, geom.Uvs);
+                vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
             }
 
-            if (reverse) iData = GeometryUtil.ChangeCoordinate(iData);
-
-            this.vertexBuffer = this.BufferManager.Add(name, vertices.ToArray(), false, 0);
-            this.indexBuffer = this.BufferManager.Add(name, iData, false);
+            var indices = reverse ? GeometryUtil.ChangeCoordinate(geom.Indices) : geom.Indices;
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
         }
         /// <summary>
-        /// Initialize textures
+        /// Initialize cubic texture
         /// </summary>
-        /// <param name="contentPath">Content path</param>
-        /// <param name="textures">Texture names</param>
-        protected void InitializeTexture(string contentPath, params string[] textures)
+        /// <param name="textureFileName">Texture file name</param>
+        /// <param name="faces">Texture faces</param>
+        protected async Task InitializeTextureCubic(string textureFileName, Rectangle[] faces = null)
         {
-            var image = ImageContent.Cubic(contentPath, textures[0]);
-            this.cubeMapTexture = this.Game.ResourceManager.CreateResource(image);
+            var image = new FileCubicImageContent(textureFileName, faces);
+
+            texture = await Game.ResourceManager.RequestResource(image);
+        }
+        /// <summary>
+        /// Initialize texture array
+        /// </summary>
+        /// <param name="textureFileNames">Texture file names</param>
+        protected async Task InitializeTextureArray(IEnumerable<string> textureFileNames)
+        {
+            var image = new FileArrayImageContent(textureFileNames);
+
+            texture = await Game.ResourceManager.RequestResource(image);
+        }
+
+        /// <inheritdoc/>
+        public override void Draw(DrawContext context)
+        {
+            if (!Visible)
+            {
+                return;
+            }
+
+            if (!BuffersReady)
+            {
+                return;
+            }
+
+            bool draw = context.ValidateDraw(BlendMode);
+            if (!draw)
+            {
+                return;
+            }
+
+            if (textureCubic)
+            {
+                DrawCubic();
+            }
+            else
+            {
+                DrawPlain();
+            }
+        }
+        /// <summary>
+        /// Draws the cubic texture
+        /// </summary>
+        private void DrawCubic()
+        {
+            var drawer = BuiltInShaders.GetDrawer<BuiltInCubemap>();
+            if (drawer == null)
+            {
+                return;
+            }
+
+            drawer.Update(texture);
+
+            drawer.Draw(BufferManager, new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            });
+        }
+        /// <summary>
+        /// Draws the plain texture
+        /// </summary>
+        private void DrawPlain()
+        {
+            var drawer = BuiltInShaders.GetDrawer<BuiltInSkymap>();
+            if (drawer == null)
+            {
+                return;
+            }
+
+            drawer.Update(texture, TextureIndex);
+
+            Game.Graphics.SetRasterizerCullNone();
+
+            drawer.Draw(BufferManager, new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            });
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new CubemapState
+            {
+                Name = Name,
+                Active = Active,
+                Visible = Visible,
+                Usage = Usage,
+                Layer = Layer,
+                OwnerId = Owner?.Name,
+
+                TextureIndex = TextureIndex,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is CubemapState cubemapState))
+            {
+                return;
+            }
+
+            Name = cubemapState.Name;
+            Active = cubemapState.Active;
+            Visible = cubemapState.Visible;
+            Usage = cubemapState.Usage;
+            Layer = cubemapState.Layer;
+
+            if (!string.IsNullOrEmpty(cubemapState.OwnerId))
+            {
+                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == cubemapState.OwnerId);
+            }
+
+            TextureIndex = cubemapState.TextureIndex;
         }
     }
 }

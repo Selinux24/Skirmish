@@ -1,19 +1,29 @@
 ﻿using Engine;
+using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
+using Engine.UI;
 using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Skybox
 {
-    public class TestScene3D : Scene
+    public class TestScene3D : WalkableScene
     {
-        private const int layerHUD = 99;
         private const float alpha = 0.25f;
 
+        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
+        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
+        private readonly Color4 obeliskVolumeColor = new Color4(Color.DarkGreen.RGB(), alpha);
+        private readonly Color4 fountainVolumeColor = new Color4(Color.DarkSeaGreen.RGB(), alpha);
+        private readonly int bsphSlices = 20;
+        private readonly int bsphStacks = 10;
         private readonly Vector2[] firePositions = new[]
         {
             new Vector2(+5, +5),
@@ -21,251 +31,371 @@ namespace Skybox
             new Vector2(+5, -5),
             new Vector2(-5, -5),
         };
-        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
-        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
-        private readonly int bsphSlices = 20;
-        private readonly int bsphStacks = 10;
+        private readonly Vector3[] obeliskPositions = new[]
+        {
+            new Vector3(+100, -0.2f, +100),
+            new Vector3(-100, -10, +100),
+            new Vector3(+100, -1, -100),
+            new Vector3(-100, -1, -100),
+        };
+        private readonly Quaternion[] obeliskRotations = new[]
+        {
+            Quaternion.RotationYawPitchRoll(-MathUtil.PiOverTwo * 0.75f, MathUtil.PiOverTwo*1.03f, 0.45f),
+            Quaternion.RotationYawPitchRoll(0, -0.15f, 0),
+            Quaternion.Identity,
+            Quaternion.Identity,
+        };
 
         private readonly Agent walker = new Agent()
         {
             Name = "Walker",
-            Height = 1.2f,
+            Height = 1.7f,
             Radius = 0.4f,
-            MaxClimb = 0.5f,
-            MaxSlope = 50,
+            MaxClimb = 1.2f,
+            MaxSlope = 45,
         };
 
-        private SceneObject<Cursor> cursor;
+        private Sprite panel = null;
+        private UITextArea title = null;
+        private UITextArea help = null;
+        private UITextArea fps = null;
 
-        private SceneObject<TextDrawer> fps = null;
+        private Scenery ruins = null;
+        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
+        private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
-        private SceneObject<Scenery> ruins = null;
-        private SceneObject<PrimitiveListDrawer<Line3D>> volumesDrawer = null;
-        private SceneObject<PrimitiveListDrawer<Triangle>> graphDrawer = null;
+        private readonly int mapSize = 256;
+        private readonly float terrainSize = 512;
+        private readonly float terrainHeight = 20;
 
-        private SceneObject<ModelInstanced> torchs = null;
+        private ModelInstanced torchs = null;
+        private ModelInstanced obelisks = null;
+        private Model fountain = null;
 
-        private SceneObject<Model> movingFire = null;
+        private Model movingFire = null;
         private ParticleEmitter movingFireEmitter = null;
         private SceneLightPoint movingFireLight = null;
 
+        private ParticleManager pManager = null;
+        private readonly ParticleSystemDescription pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
+        private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
+        private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
+
+        private DecalDrawer decalEmitter = null;
+
         private int directionalLightCount = 0;
 
+        private IAudioEffect fireAudioEffect;
+
+        private bool gameReady = false;
+
         public TestScene3D(Game game)
-            : base(game, SceneModes.ForwardLigthning)
+            : base(game)
         {
 
         }
 
-        public override void Initialize()
+        public override async Task Initialize()
         {
-            base.Initialize();
+            await base.Initialize();
 
-            this.InitializeCamera();
+            InitializeCamera();
 
+            InitializeResources();
+        }
+
+        private void InitializeCamera()
+        {
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000.0f;
+            Camera.Goto(new Vector3(-6, walker.Height, 5));
+            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
+            Camera.MovementDelta = 4f;
+            Camera.SlowMovementDelta = 2f;
+        }
+
+        private void InitializeResources()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeUI(),
+                    InitializeSkydom(),
+                    InitializeLakeBottom(),
+                    InitializeTorchs(),
+                    InitializeObelisks(),
+                    InitializeFountain(),
+                    InitializeRuins(),
+                    InitializeWater(),
+                    InitializeParticles(),
+                    InitializeEmitter(),
+                    InitializeDecalEmitter(),
+                    InitializeDebug(),
+                },
+                InitializeResourcesCompleted);
+        }
+        private async Task InitializeUI()
+        {
             #region Cursor
 
-            var cursorDesc = new CursorDescription()
-            {
-                Name = "Cursor",
-                Textures = new[] { "target.png" },
-                Color = Color.Purple,
-                Width = 16,
-                Height = 16,
-            };
-            this.cursor = this.AddComponent<Cursor>(cursorDesc, SceneObjectUsages.UI, layerHUD + 1);
+            var cursorDesc = UICursorDescription.Default("target.png", 16, 16, true, Color.Purple);
+
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
 
             #endregion
 
             #region Text
 
-            var title = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Tahoma", 18, Color.White), SceneObjectUsages.UI, layerHUD);
-            var help = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
-            this.fps = this.AddComponent<TextDrawer>(TextDrawerDescription.Generate("Lucida Casual", 12, Color.Yellow), SceneObjectUsages.UI, layerHUD);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
 
-            title.Instance.Text = "Collada Scene with Skybox";
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+
+            title.Text = "Collada Scene with Skybox";
 #if DEBUG
-            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
 #else
-            help.Instance.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
 #endif
-            this.fps.Instance.Text = null;
+            fps.Text = "";
 
-            title.Instance.Position = Vector2.Zero;
-            help.Instance.Position = new Vector2(0, 24);
-            this.fps.Instance.Position = new Vector2(0, 40);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
-            var spDesc = new SpriteDescription()
+            #endregion
+        }
+        private async Task InitializeSkydom()
+        {
+            string fileName = "Resources/Daylight Box UV.png";
+            int faceSize = 512;
+            var skydomDesc = SkydomDescription.Sphere(fileName, faceSize, Camera.FarPlaneDistance);
+
+            await AddComponentSky<Skydom, SkydomDescription>("Skydom", "Skydom", skydomDesc);
+        }
+        private async Task InitializeLakeBottom()
+        {
+            // Generates a random terrain using perlin noise
+            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
             {
-                Name = "UI Back pannel",
-                AlphaEnabled = true,
-                Width = this.Game.Form.RenderWidth,
-                Height = this.fps.Instance.Top + this.fps.Instance.Height + 3,
-                Color = new Color4(0, 0, 0, 0.75f),
+                MapWidth = mapSize,
+                MapHeight = mapSize,
+                Scale = 0.5f,
+                Lacunarity = 2f,
+                Persistance = 0.5f,
+                Octaves = 4,
+                Offset = Vector2.One,
+                Seed = 5,
             };
+            var noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
 
-            this.AddComponent<Sprite>(spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            Curve heightCurve = new Curve();
+            heightCurve.Keys.Add(0, 0);
+            heightCurve.Keys.Add(0.4f, 0f);
+            heightCurve.Keys.Add(1f, 1f);
 
-            #endregion
+            float cellSize = terrainSize / mapSize;
 
-            #region Skydom
-
-            this.AddComponent<Skydom>(new SkydomDescription()
+            var textures = new HeightmapTexturesDescription
             {
-                Name = "Skydom",
-                ContentPath = "Resources",
-                Radius = this.Camera.FarPlaneDistance,
-                Texture = "sunset.dds",
-            });
+                ContentPath = "resources/lakebottom",
+                TexturesLR = new[] { "Diffuse.jpg" },
+                NormalMaps = new[] { "Normal.jpg" },
+                Scale = 0.0333f,
+            };
+            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            groundDesc.Heightmap.UseFalloff = true;
+            groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
 
-            #endregion
-
-            #region Torchs
-
-            this.torchs = this.AddComponent<ModelInstanced>(
-                new ModelInstancedDescription()
-                {
-                    Name = "Torchs",
-                    Instances = this.firePositions.Length,
-                    CastShadow = true,
-                    Content = new ContentDescription()
-                    {
-                        ContentFolder = "Resources",
-                        ModelContentFilename = "torch.xml",
-                    }
-                });
-
-            #endregion
-
-            #region Terrain
-
-            GroundDescription desc = new GroundDescription()
+            await AddComponentGround<Scenery, GroundDescription>("Lage Bottom", "Lage Bottom", groundDesc);
+        }
+        private async Task InitializeTorchs()
+        {
+            var torchDesc = new ModelInstancedDescription()
             {
-                Name = "Terrain",
+                Instances = firePositions.Length,
                 CastShadow = true,
-                Content = new ContentDescription()
-                {
-                    ContentFolder = "Resources",
-                    ModelContentFilename = "ruins.xml",
-                }
+                Content = ContentDescription.FromFile("Resources", "torch.json"),
             };
-            this.ruins = this.AddComponent<Scenery>(desc);
 
-            #endregion
+            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", torchDesc);
 
-            #region Water
-
-            var waterDesc = WaterDescription.CreateCalm("Ocean", 5000f, -1f);
-            this.AddComponent<Water>(waterDesc, SceneObjectUsages.None);
-
-            #endregion
-
-            this.SetGround(this.ruins, true);
-            this.AttachToGround(this.torchs, true);
-
-            #region Particle Systems
-
-            var pManager = this.AddComponent<ParticleManager>(new ParticleManagerDescription() { Name = "Particle Systems" });
-
-            var pBigFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.5f);
-            var pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
-
-            #endregion
-
-            #region Moving fire
-
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.Yellow;
-
-            GeometryUtil.CreateSphere(
-                0.05f, 32, 32,
-                out Vector3[] v, out Vector3[] n, out Vector2[] uv, out uint[] ix);
-
-            VertexData[] vertices = new VertexData[v.Length];
-            for (int i = 0; i < v.Length; i++)
+            AttachToGround(torchs, true);
+        }
+        private async Task InitializeObelisks()
+        {
+            var obeliskDesc = new ModelInstancedDescription()
             {
-                vertices[i] = new VertexData()
-                {
-                    Position = v[i],
-                    Normal = n[i],
-                    Texture = uv[i],
-                };
-            }
+                Instances = firePositions.Length,
+                CastShadow = true,
+                Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
+            };
 
-            var content = ModelContent.GenerateTriangleList(vertices, ix, mat);
+            obelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisks", "Obelisks", obeliskDesc, SceneObjectUsages.Ground);
+        }
+        private async Task InitializeFountain()
+        {
+            var fountainDesc = new ModelDescription()
+            {
+                CastShadow = true,
+                Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
+            };
+
+            fountain = await AddComponentGround<Model, ModelDescription>("Fountain", "Fountain", fountainDesc);
+
+            AttachToGround(fountain, true);
+        }
+        private async Task InitializeRuins()
+        {
+            var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.json");
+            ruinsDesc.Quadtree.MaximumDepth = 1;
+
+            ruins = await AddComponentGround<Scenery, GroundDescription>("Ruins", "Ruins", ruinsDesc);
+
+            SetGround(ruins, true);
+        }
+        private async Task InitializeWater()
+        {
+            var waterDesc = WaterDescription.CreateCalm(5000f, -2f);
+            waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
+            waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
+
+            await AddComponentEffect<Water, WaterDescription>("Water", "Water", waterDesc);
+        }
+        private async Task InitializeEmitter()
+        {
+            var mat = MaterialCookTorranceContent.Default;
+            mat.EmissiveColor = Color.Yellow.RGB();
+
+            var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
 
             var mFireDesc = new ModelDescription()
             {
-                Name = "Emitter",
-                Static = false,
                 CastShadow = false,
                 DeferredEnabled = true,
                 DepthEnabled = true,
-                AlphaEnabled = false,
-                Content = new ContentDescription()
-                {
-                    ModelContent = content,
-                }
+                Content = ContentDescription.FromContentData(sphere, mat),
             };
 
-            this.movingFire = this.AddComponent<Model>(mFireDesc);
+            movingFire = await AddComponent<Model, ModelDescription>("Emitter", "Emitter", mFireDesc);
+        }
+        private async Task InitializeParticles()
+        {
+            var pManagerDesc = ParticleManagerDescription.Default();
 
-            this.movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", pManagerDesc);
 
-            pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, this.movingFireEmitter);
+            movingFireEmitter = new ParticleEmitter()
+            {
+                EmissionRate = 0.1f,
+                InfiniteDuration = true,
+                MaximumDistance = GameEnvironment.LODDistanceLow,
+            };
 
-            #endregion
+            await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
+        }
+        private async Task InitializeDecalEmitter()
+        {
+            DecalDrawerDescription desc = new DecalDrawerDescription
+            {
+                BlendMode = BlendModes.Default,
+                TextureName = "resources/bullets/bullet-hole.png",
+                MaxDecalCount = 1000,
+                RotateDecals = true,
+            };
+            decalEmitter = await AddComponent<DecalDrawer, DecalDrawerDescription>("Bullets", "Bullets", desc);
+        }
+        private async Task InitializeDebug()
+        {
+            volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer.Visible = false;
 
-            #region DEBUG drawers
+            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer.Visible = false;
+        }
+        private async Task InitializeResourcesCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
-            this.volumesDrawer = this.AddComponent<PrimitiveListDrawer<Line3D>>(new PrimitiveListDrawerDescription<Line3D>() { AlphaEnabled = true, Count = 10000 });
-            this.volumesDrawer.Visible = false;
+            UpdateLayout();
 
-            this.graphDrawer = this.AddComponent<PrimitiveListDrawer<Triangle>>(new PrimitiveListDrawerDescription<Triangle>() { AlphaEnabled = true, Count = 10000 });
-            this.graphDrawer.Visible = false;
+            InitializeNavigationMesh();
 
-            #endregion
+            await UpdateNavigationGraph();
 
-            #region Positioning and lights
+            PrepareScene();
 
-            this.Lights.DirectionalLights[0].Enabled = true;
-            this.Lights.DirectionalLights[0].CastShadow = true;
+            InitializeSound();
 
-            this.Lights.DirectionalLights[1].Enabled = true;
+            fireAudioEffect = AudioManager.CreateEffectInstance("Sphere", movingFire, Camera);
+            fireAudioEffect.Play();
 
-            this.Lights.DirectionalLights[2].Enabled = false;
+            AudioManager.MasterVolume = 1f;
+            AudioManager.Start();
 
-            this.directionalLightCount = this.Lights.DirectionalLights.Length;
+            gameReady = true;
+        }
+        private void InitializeNavigationMesh()
+        {
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-            this.movingFireLight = new SceneLightPoint(
+            var nvSettings = BuildSettings.Default;
+            nvSettings.TileSize = 32;
+            nvSettings.CellSize = 0.05f;
+            nvSettings.CellHeight = 0.2f;
+            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
+            nvSettings.Agents[0] = walker;
+
+            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
+        }
+        private void PrepareScene()
+        {
+            Lights.DirectionalLights[0].Enabled = true;
+            Lights.DirectionalLights[0].CastShadow = true;
+
+            Lights.DirectionalLights[1].Enabled = true;
+
+            Lights.DirectionalLights[2].Enabled = false;
+
+            directionalLightCount = Lights.DirectionalLights.Length;
+
+            movingFireLight = new SceneLightPoint(
                 "Moving fire light",
                 false,
-                Color.Orange,
-                Color.Orange,
+                Color.Orange.RGB(),
+                Color.Orange.RGB(),
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
-            this.Lights.Add(this.movingFireLight);
+            Lights.Add(movingFireLight);
 
-            Vector3[] firePositions3D = new Vector3[this.firePositions.Length];
-            SceneLightPoint[] torchLights = new SceneLightPoint[this.firePositions.Length];
-            for (int i = 0; i < this.firePositions.Length; i++)
+            Vector3[] firePositions3D = new Vector3[firePositions.Length];
+            SceneLightPoint[] torchLights = new SceneLightPoint[firePositions.Length];
+            Parallel.For(0, firePositions.Length, (i, loopState) =>
             {
-                Color color = Color.Yellow;
-                if (i == 1) color = Color.Red;
-                if (i == 2) color = Color.Green;
-                if (i == 3) color = Color.LightBlue;
+                if (loopState.IsExceptional)
+                {
+                    return;
+                }
 
-                this.FindTopGroundPosition(
-                    this.firePositions[i].X, this.firePositions[i].Y,
-                    out PickingResult<Triangle> result);
+                Color3 color = Color.Yellow.RGB();
+                if (i == 1) color = Color.Red.RGB();
+                if (i == 2) color = Color.Green.RGB();
+                if (i == 3) color = Color.LightBlue.RGB();
+
+                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
                 firePositions3D[i] = result.Position;
 
-                this.torchs.Instance[i].Manipulator.SetScale(0.20f, true);
-                this.torchs.Instance[i].Manipulator.SetPosition(firePositions3D[i], true);
+                torchs[i].Manipulator.SetScale(0.20f, true);
+                torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
 
-                BoundingBox bbox = this.torchs.Instance[i].GetBoundingBox();
+                BoundingBox bbox = torchs[i].GetBoundingBox();
 
                 firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
 
@@ -277,57 +407,64 @@ namespace Skybox
                     true,
                     SceneLightPointDescription.Create(firePositions3D[i], 4f, 20f));
 
-                this.Lights.Add(torchLights[i]);
+                Lights.Add(torchLights[i]);
 
-                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                pManager.Instance.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
-            }
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.2f, MaximumDistance = GameEnvironment.LODDistanceLow });
+            });
 
-            #endregion
+            Parallel.For(0, obeliskPositions.Length, (i, loopState) =>
+            {
+                if (loopState.IsExceptional)
+                {
+                    return;
+                }
 
-            #region Navigation Mesh
+                obelisks[i].Manipulator.SetPosition(obeliskPositions[i]);
+                obelisks[i].Manipulator.SetRotation(obeliskRotations[i]);
+                obelisks[i].Manipulator.SetScale(10f);
+            });
 
-            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
-
-            var nvSettings = BuildSettings.Default;
-            nvSettings.TileSize = 32;
-            nvSettings.CellSize = 0.05f;
-            nvSettings.CellHeight = 0.2f;
-            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
-            nvSettings.Agents[0] = this.walker;
-
-            this.PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
-
-            #endregion
+            fountain.Manipulator.SetScale(2.3f);
         }
-        private void InitializeCamera()
+        private void InitializeSound()
         {
-            this.Camera.NearPlaneDistance = 0.1f;
-            this.Camera.FarPlaneDistance = 5000.0f;
-            this.Camera.Goto(new Vector3(-6, this.walker.Height, 5));
-            this.Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
-            this.Camera.MovementDelta = 4f;
-            this.Camera.SlowMovementDelta = 2f;
+            AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
+
+            AudioManager.AddEffectParams(
+                "Sphere",
+                new GameAudioEffectParameters
+                {
+                    SoundName = "target_balls_single_loop",
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
+                    Volume = 0.25f,
+                    EmitterRadius = 6,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
+                });
         }
 
         public override void Update(GameTime gameTime)
         {
-            Vector3 previousPosition = this.Camera.Position;
-            bool shift = this.Game.Input.KeyPressed(Keys.LShiftKey);
+            if (!gameReady)
+            {
+                return;
+            }
 
-            this.UpdateInput(shift);
+            Vector3 previousPosition = Camera.Position;
+
+            UpdateInput();
 
             #region Walk
 
+            if (Walk(walker, previousPosition, Camera.Position, true, out Vector3 walkerPosition))
             {
-                if (this.Walk(this.walker, previousPosition, this.Camera.Position, out Vector3 walkerPosition))
-                {
-                    this.Camera.Goto(walkerPosition);
-                }
-                else
-                {
-                    this.Camera.Goto(previousPosition);
-                }
+                Camera.Goto(walkerPosition);
+            }
+            else
+            {
+                Camera.Goto(previousPosition);
             }
 
             #endregion
@@ -340,196 +477,254 @@ namespace Skybox
             float v = 0.8f;
 
             Vector3 position = Vector3.Zero;
-            position.X = r * d * (float)Math.Cos(v * this.Game.GameTime.TotalSeconds);
-            position.Y = h + (0.25f * (1f + (float)Math.Sin(this.Game.GameTime.TotalSeconds)));
-            position.Z = r * d * (float)Math.Sin(v * this.Game.GameTime.TotalSeconds);
+            position.X = r * d * (float)Math.Cos(v * Game.GameTime.TotalSeconds);
+            position.Y = h + (0.25f * (1f + (float)Math.Sin(Game.GameTime.TotalSeconds)));
+            position.Z = r * d * (float)Math.Sin(v * Game.GameTime.TotalSeconds);
 
-            this.movingFire.Transform.SetPosition(position);
-            this.movingFireEmitter.Position = position;
-            this.movingFireLight.Position = position;
+            movingFire.Manipulator.SetPosition(position);
+            movingFireEmitter.Position = position;
+            movingFireLight.Position = position;
 
-            this.DEBUGUpdateMovingVolumesDrawer();
+            DEBUGUpdateMovingVolumesDrawer();
 
             #endregion
 
             base.Update(gameTime);
         }
-
-        private void UpdateInput(bool shift)
+        private void UpdateInput()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                this.Game.Exit();
+                Game.Exit();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.R))
+            if (Game.Input.KeyJustReleased(Keys.R))
             {
-                this.SetRenderMode(this.GetRenderMode() == SceneModes.ForwardLigthning ?
+                SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
 
-            this.UpdateInputDebug();
-
-            this.UpdateInputCamera(shift);
-
-            this.UpdateInputLights();
-
-#if DEBUG
-            this.fps.Instance.Text = string.Format(
-                "Mouse (X:{0}; Y:{1}, Wheel: {2}) Absolute (X:{3}; Y:{4}) Cursor ({5})",
-                this.Game.Input.MouseXDelta,
-                this.Game.Input.MouseYDelta,
-                this.Game.Input.MouseWheelDelta,
-                this.Game.Input.MouseX,
-                this.Game.Input.MouseY,
-                this.cursor.Instance.CursorPosition);
-#else
-            this.fps.Instance.Text = this.Game.RuntimeText;
-#endif
-        }
-        private void UpdateInputCamera(bool shift)
-        {
-            if (this.Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.KeyJustReleased(Keys.F7))
             {
-                var pRay = this.GetPickingRay();
+                var m1 = fountain.GetMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountainbro");
+                var bronze1 = MeshMaterial.CookTorranceFromBuiltIn(BuiltInMaterials.Bronze);
+                bronze1.DiffuseTexture = m1.DiffuseTexture;
 
-                if (this.ruins.Instance.PickNearest(pRay, out PickingResult<Triangle> r))
+                var m2 = fountain.GetMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountai.000");
+                var bronze2 = MeshMaterial.CookTorranceFromBuiltIn(BuiltInMaterials.Bronze);
+                bronze2.DiffuseTexture = m2.DiffuseTexture;
+
+                fountain.ReplaceMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountainbro", bronze1);
+                fountain.ReplaceMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountai.000", bronze2);
+            }
+
+            UpdateInputDebug();
+
+            UpdateInputCamera();
+
+            UpdateInputLights();
+
+            var m = fireAudioEffect.GetOutputMatrix();
+            var ep = movingFire.Manipulator.Position.GetDescription();
+            var ev = movingFire.Manipulator.Velocity.GetDescription();
+            var lp = Camera.Position.GetDescription();
+            var lv = Camera.Velocity.GetDescription();
+            var d = Vector3.Distance(movingFire.Manipulator.Position, Camera.Position);
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"Mouse (X:{Game.Input.MouseXDelta}; Y:{Game.Input.MouseYDelta}, Wheel: {Game.Input.MouseWheelDelta}) Absolute (X:{Game.Input.MouseX}; Y:{Game.Input.MouseY})");
+            sb.AppendLine($"L {m[0]:0.000} R {m[1]:0.000} Distance {d}");
+            sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");
+            sb.AppendLine($"Listener pos: {lp} Listener vel: {lv}");
+            fps.Text = sb.ToString();
+        }
+        private void UpdateInputCamera()
+        {
+            if (Game.Input.MouseButtonPressed(MouseButtons.Left))
+            {
+                var pRay = GetPickingRay();
+
+                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
-                    var tri = Line3D.CreateWiredTriangle(r.Item);
+                    var tri = Line3D.CreateWiredTriangle(r.Primitive);
+                    var cross = Line3D.CreateCross(r.Position, 0.1f);
 
-                    this.volumesDrawer.Instance.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.YellowGreen, cross);
+                }
+            }
+
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            {
+                var pRay = GetPickingRay();
+
+                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
+                {
+                    decalEmitter.AddDecal(
+                        r.Position,
+                        r.Primitive.Normal,
+                        Vector2.One * 0.1f,
+                        60);
                 }
             }
 
 #if DEBUG
-            if (this.Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
+            {
+                Camera.RotateMouse(
+                    Game.GameTime,
+                    Game.Input.MouseXDelta,
+                    Game.Input.MouseYDelta);
+            }
+#else
+            Camera.RotateMouse(
+                Game.GameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
 #endif
+
+            if (Game.Input.KeyPressed(Keys.A))
             {
-                this.Camera.RotateMouse(
-                    this.Game.GameTime,
-                    this.Game.Input.MouseXDelta,
-                    this.Game.Input.MouseYDelta);
+                Camera.MoveLeft(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.A))
+            if (Game.Input.KeyPressed(Keys.D))
             {
-                this.Camera.MoveLeft(this.Game.GameTime, shift);
+                Camera.MoveRight(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.D))
+            if (Game.Input.KeyPressed(Keys.W))
             {
-                this.Camera.MoveRight(this.Game.GameTime, shift);
+                Camera.MoveForward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (this.Game.Input.KeyPressed(Keys.W))
+            if (Game.Input.KeyPressed(Keys.S))
             {
-                this.Camera.MoveForward(this.Game.GameTime, shift);
-            }
-
-            if (this.Game.Input.KeyPressed(Keys.S))
-            {
-                this.Camera.MoveBackward(this.Game.GameTime, shift);
+                Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
         }
         private void UpdateInputLights()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Add))
+            if (Game.Input.KeyJustReleased(Keys.Add))
             {
-                this.directionalLightCount++;
-                if (this.directionalLightCount > 3)
+                directionalLightCount++;
+                if (directionalLightCount > 3)
                 {
-                    this.directionalLightCount = 0;
+                    directionalLightCount = 0;
                 }
 
-                this.UpdateInputEnabledLights();
+                UpdateInputEnabledLights();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.Subtract))
+            if (Game.Input.KeyJustReleased(Keys.Subtract))
             {
-                this.directionalLightCount--;
-                if (this.directionalLightCount < 0)
+                directionalLightCount--;
+                if (directionalLightCount < 0)
                 {
-                    this.directionalLightCount = 3;
+                    directionalLightCount = 3;
                 }
 
-                this.UpdateInputEnabledLights();
+                UpdateInputEnabledLights();
             }
         }
         private void UpdateInputEnabledLights()
         {
-            this.Lights.DirectionalLights[0].Enabled = this.directionalLightCount > 0;
-            this.Lights.DirectionalLights[1].Enabled = this.directionalLightCount > 1;
-            this.Lights.DirectionalLights[2].Enabled = this.directionalLightCount > 2;
+            Lights.DirectionalLights[0].Enabled = directionalLightCount > 0;
+            Lights.DirectionalLights[1].Enabled = directionalLightCount > 1;
+            Lights.DirectionalLights[2].Enabled = directionalLightCount > 2;
         }
         private void UpdateInputDebug()
         {
-            if (this.Game.Input.KeyJustReleased(Keys.Home))
+            if (Game.Input.KeyJustReleased(Keys.Home))
             {
-                this.InitializeCamera();
+                InitializeCamera();
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F1))
+            if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                this.volumesDrawer.Visible = !this.volumesDrawer.Visible;
+                volumesDrawer.Visible = !volumesDrawer.Visible;
 
-                if (this.volumesDrawer.Visible)
+                if (volumesDrawer.Visible)
                 {
-                    this.DEBUGUpdateVolumesDrawer();
+                    DEBUGUpdateVolumesDrawer();
                 }
             }
 
-            if (this.Game.Input.KeyJustReleased(Keys.F2))
+            if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                this.graphDrawer.Visible = !this.graphDrawer.Visible;
+                graphDrawer.Visible = !graphDrawer.Visible;
 
-                if (this.graphDrawer.Visible)
+                if (graphDrawer.Visible)
                 {
-                    this.DEBUGUpdateGraphDrawer();
+                    DEBUGUpdateGraphDrawer();
                 }
             }
         }
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            this.volumesDrawer.Instance.SetPrimitives(this.ruinsVolumeColor, Line3D.CreateWiredBox(this.ruins.Instance.GetBoundingBox()));
+            volumesDrawer.SetPrimitives(ruinsVolumeColor, Line3D.CreateWiredBox(ruins.GetBoundingBox()));
 
             List<Line3D> volumesTorchs = new List<Line3D>();
-            for (int i = 0; i < this.torchs.Count; i++)
+            for (int i = 0; i < torchs.InstanceCount; i++)
             {
-                volumesTorchs.AddRange(Line3D.CreateWiredBox(this.torchs.Instance[i].GetBoundingBox()));
+                volumesTorchs.AddRange(Line3D.CreateWiredBox(torchs[i].GetBoundingBox()));
             }
-            this.volumesDrawer.Instance.SetPrimitives(this.torchVolumeColor, volumesTorchs.ToArray());
+            volumesDrawer.SetPrimitives(torchVolumeColor, volumesTorchs);
 
-            for (int i = 1; i < this.Lights.PointLights.Length; i++)
+            List<Line3D> volumesObelisks = new List<Line3D>();
+            for (int i = 0; i < obelisks.InstanceCount; i++)
             {
-                var light = this.Lights.PointLights[i];
+                volumesObelisks.AddRange(Line3D.CreateWiredBox(obelisks[i].GetBoundingBox()));
+            }
+            volumesDrawer.SetPrimitives(obeliskVolumeColor, volumesObelisks);
 
-                this.volumesDrawer.Instance.SetPrimitives(
-                    new Color4(light.DiffuseColor.RGB(), alpha),
-                    Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+            var volumeFountain = Line3D.CreateWiredBox(fountain.GetBoundingBox());
+            volumesDrawer.SetPrimitives(fountainVolumeColor, volumeFountain);
+
+            for (int i = 1; i < Lights.PointLights.Length; i++)
+            {
+                var light = Lights.PointLights[i];
+
+                volumesDrawer.SetPrimitives(
+                    new Color4(light.DiffuseColor, alpha),
+                    Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
             }
         }
         private void DEBUGUpdateMovingVolumesDrawer()
         {
-            var light = this.Lights.PointLights[0];
+            var light = Lights.PointLights[0];
 
-            this.volumesDrawer.Instance.SetPrimitives(
-                new Color4(light.DiffuseColor.RGB(), alpha),
-                Line3D.CreateWiredSphere(light.BoundingSphere, this.bsphSlices, this.bsphStacks));
+            volumesDrawer.SetPrimitives(
+                new Color4(light.DiffuseColor, alpha),
+                Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()
         {
-            var nodes = this.GetNodes(this.walker).OfType<GraphNode>();
+            var nodes = GetNodes(walker).OfType<GraphNode>();
             if (nodes.Any())
             {
-                this.graphDrawer.Instance.Clear();
+                graphDrawer.Clear();
 
                 foreach (var node in nodes)
                 {
-                    this.graphDrawer.Instance.AddPrimitives(node.Color, node.Triangles);
+                    graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            help.SetPosition(new Vector2(0, 24));
+            fps.SetPosition(new Vector2(0, 40));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = 120;
         }
     }
 }

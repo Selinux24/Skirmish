@@ -141,8 +141,6 @@ namespace Engine
         {
             bool result = false;
 
-            sharedEdges = null;
-
             List<SharedEdge> resultList = new List<SharedEdge>();
 
             for (int fp1 = 0; fp1 < first.points.Length; fp1++)

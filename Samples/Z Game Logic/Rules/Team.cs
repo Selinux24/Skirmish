@@ -66,7 +66,7 @@ namespace GameLogic.Rules
 
         public override string ToString()
         {
-            return string.Format("{0} | {1} | {2} -> Soldiers {3}", this.Name, this.Faction, this.Role, this.soldiers.Count);
+            return string.Format("{0} ++ {1} ++ {2} -> Soldiers {3}", this.Name, this.Faction, this.Role, this.soldiers.Count);
         }
     }
 }

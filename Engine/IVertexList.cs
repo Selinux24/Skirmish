@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -11,6 +12,16 @@ namespace Engine
         /// Gets vertex position list
         /// </summary>
         /// <returns>Returns the vertex position list</returns>
-        Vector3[] GetVertices();
+        IEnumerable<Vector3> GetVertices();
+        /// <summary>
+        /// Gets the vertex list stride
+        /// </summary>
+        /// <returns>Returns the list stride</returns>
+        int GetStride();
+        /// <summary>
+        /// Gets the vertex list topology
+        /// </summary>
+        /// <returns>Returns the list topology</returns>
+        Topology GetTopology();
     }
 }

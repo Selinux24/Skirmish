@@ -63,9 +63,9 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
-            else if (channel == VertexDataChannels.Size) return (T)(object)this.Size;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) return (T)(object)Position;
+            else if (channel == VertexDataChannels.Size) return (T)(object)Size;
+            else throw new EngineException($"Channel data not found: {channel};");
         }
         /// <summary>
         /// Sets the channer value
@@ -75,9 +75,9 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
-            else if (channel == VertexDataChannels.Size) this.Size = (Vector2)(object)value;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
+            else if (channel == VertexDataChannels.Size) Size = (Vector2)(object)value;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <summary>
@@ -97,13 +97,10 @@ namespace Engine.Common
             return Input(slot);
         }
 
-        /// <summary>
-        /// Text representation of vertex
-        /// </summary>
-        /// <returns>Returns the text representation of vertex</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Position: {0}; Size: {1}", this.Position, this.Size);
+            return $"Position: {Position}; Size: {Size};";
         }
     };
 }

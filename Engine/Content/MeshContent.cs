@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Linq;
 
 namespace Engine.Content
 {
@@ -10,33 +11,18 @@ namespace Engine.Content
         /// <summary>
         /// Intial transformation
         /// </summary>
-        public Matrix Transform { get; set; }
+        public Matrix Transform { get; set; } = Matrix.Identity;
         /// <summary>
         /// Sub mesh names
         /// </summary>
-        public string[] SubMeshes { get; set; }
+        public string[] SubMeshes { get; set; } = new string[] { };
 
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public MeshContent()
-        {
-            this.Transform = Matrix.Identity;
-        }
-
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation of instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.SubMeshes != null && this.SubMeshes.Length == 1)
+            if (SubMeshes?.Any() == true)
             {
-                return string.Format("{0}", this.SubMeshes[0]);
-            }
-            else if (this.SubMeshes != null && this.SubMeshes.Length > 1)
-            {
-                return string.Format("{0}", string.Join(", ", this.SubMeshes));
+                return $"{string.Join(", ", SubMeshes)}";
             }
             else
             {

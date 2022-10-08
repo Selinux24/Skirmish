@@ -1,48 +1,46 @@
 ﻿using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
     using Engine.Collections.Generic;
+    using Engine.Common;
 
     /// <summary>
     /// Ground class
     /// </summary>
     /// <remarks>Used for picking tests and navigation over surfaces</remarks>
-    public abstract class Ground : Drawable, IRayPickable<Triangle>
+    public abstract class Ground<T> : Drawable<T>, IGround, IRayPickable<Triangle>, IIntersectable where T : GroundDescription
     {
         /// <summary>
         /// Quadtree for base ground picking
         /// </summary>
-        protected PickingQuadTree<Triangle> groundPickingQuadtree = null;
+        protected PickingQuadTree<Triangle> GroundPickingQuadtree = null;
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Ground description</param>
-        protected Ground(Scene scene, GroundDescription description)
-            : base(scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        protected Ground(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
 
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        /// <inheritdoc/>
+        public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
-            if (groundPickingQuadtree == null)
+            if (GroundPickingQuadtree == null)
             {
                 return false;
             }
 
-            bool cull = volume.Contains(groundPickingQuadtree.BoundingBox) == ContainmentType.Disjoint;
+            bool cull = volume.Contains(GroundPickingQuadtree.BoundingBox) == ContainmentType.Disjoint;
             if (!cull)
             {
                 distance = 0;
@@ -51,162 +49,66 @@ namespace Engine
             return cull;
         }
 
-        /// <summary>
-        /// Gets nearest picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickNearest(Ray ray, out PickingResult<Triangle> result)
+        /// <inheritdoc/>
+        public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
         {
-            return PickNearest(ray, RayPickingParams.Default, out result);
-        }
-        /// <summary>
-        /// Pick ground nearest position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
-        {
-            bool res = false;
-
-            result = new PickingResult<Triangle>()
+            if (GroundPickingQuadtree != null)
             {
-                Distance = float.MaxValue,
-            };
-
-            bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
-
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickNearest(ray, facingOnly, out PickingResult<Triangle> gResult))
-            {
-                if (result.Distance > gResult.Distance)
-                {
-                    result = gResult;
-                }
-
-                res = true;
+                // Use quadtree
+                return GroundPickingQuadtree.PickNearest(ray, out result);
             }
 
-            return res;
+            return RayPickingHelper.PickNearest(this, ray, out result);
         }
-        /// <summary>
-        /// Gets first picking position of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickFirst(Ray ray, out PickingResult<Triangle> result)
+        /// <inheritdoc/>
+        public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
         {
-            return PickFirst(ray, RayPickingParams.Default, out result);
-        }
-        /// <summary>
-        /// Pick ground first position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="result">Picking result</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle> result)
-        {
-            bool res = false;
-
-            result = new PickingResult<Triangle>()
+            if (GroundPickingQuadtree != null)
             {
-                Distance = float.MaxValue,
-            };
-
-            bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
-
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickFirst(ray, facingOnly, out PickingResult<Triangle> gResult))
-            {
-                if (result.Distance > gResult.Distance)
-                {
-                    result = gResult;
-                }
-
-                res = true;
+                // Use quadtree
+                return GroundPickingQuadtree.PickFirst(ray, out result);
             }
 
-            return res;
+            return RayPickingHelper.PickFirst(this, ray, out result);
         }
-        /// <summary>
-        /// Get all picking positions of giving ray
-        /// </summary>
-        /// <param name="ray">Picking ray</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if ground position found</returns>
-        public bool PickAll(Ray ray, out PickingResult<Triangle>[] results)
+        /// <inheritdoc/>
+        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Triangle>> results)
         {
-            return PickAll(ray, RayPickingParams.Default, out results);
-        }
-        /// <summary>
-        /// Pick ground positions
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="rayPickingParams">Ray picking params</param>
-        /// <param name="results">Picking results</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(Ray ray, RayPickingParams rayPickingParams, out PickingResult<Triangle>[] results)
-        {
-            bool res = false;
-
-            results = null;
-
-            bool facingOnly = !rayPickingParams.HasFlag(RayPickingParams.AllTriangles);
-
-            if (this.groundPickingQuadtree != null && this.groundPickingQuadtree.PickAll(ray, facingOnly, out PickingResult<Triangle>[] gResults))
+            if (GroundPickingQuadtree != null)
             {
-                results = gResults;
-
-                res = true;
+                // Use quadtree
+                return GroundPickingQuadtree.PickAll(ray, out results);
             }
 
-            return res;
+            return RayPickingHelper.PickAll(this, ray, out results);
         }
 
-        /// <summary>
-        /// Gets bounding sphere
-        /// </summary>
-        /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public virtual BoundingSphere GetBoundingSphere()
+        /// <inheritdoc/>
+        public virtual BoundingSphere GetBoundingSphere(bool refresh = false)
         {
-            return this.groundPickingQuadtree != null ?
-                BoundingSphere.FromBox(this.groundPickingQuadtree.BoundingBox) :
-                new BoundingSphere();
+            return GroundPickingQuadtree != null ? BoundingSphere.FromBox(GroundPickingQuadtree.BoundingBox) : new BoundingSphere();
         }
-        /// <summary>
-        /// Gets bounding box
-        /// </summary>
-        /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public virtual BoundingBox GetBoundingBox()
+        /// <inheritdoc/>
+        public virtual BoundingBox GetBoundingBox(bool refresh = false)
         {
-            return this.groundPickingQuadtree != null ?
-                this.groundPickingQuadtree.BoundingBox :
-                new BoundingBox();
+            return GroundPickingQuadtree != null ? GroundPickingQuadtree.BoundingBox : new BoundingBox();
         }
+        /// <inheritdoc/>
+        public virtual OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)
+        {
+            return new OrientedBoundingBox(GetBoundingBox(refresh));
+        }
+        /// <inheritdoc/>
+        public virtual IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
+        {
+            if (GroundPickingQuadtree == null)
+            {
+                return Enumerable.Empty<Triangle>();
+            }
 
-        /// <summary>
-        /// Gets bounding boxes at specified level
-        /// </summary>
-        /// <param name="level">Level</param>
-        /// <returns>Returns a bounding boxes array</returns>
-        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
-        {
-            return this.groundPickingQuadtree.GetBoundingBoxes(level);
-        }
-
-        /// <summary>
-        /// Gets the ground volume
-        /// </summary>
-        /// <param name="full"></param>
-        /// <returns>Returns all the triangles of the ground</returns>
-        public virtual IEnumerable<Triangle> GetVolume(bool full)
-        {
             List<Triangle> res = new List<Triangle>();
 
-            var leafNodes = this.groundPickingQuadtree.GetLeafNodes();
+            var leafNodes = GroundPickingQuadtree.GetLeafNodes();
 
             foreach (var node in leafNodes)
             {
@@ -216,13 +118,89 @@ namespace Engine
             return res.ToArray();
         }
 
-        /// <summary>
-        /// Gets the culling volume for scene culling tests
-        /// </summary>
-        /// <returns>Return the culling volume</returns>
-        public virtual ICullingVolume GetCullingVolume()
+        /// <inheritdoc/>
+        public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
+        {
+            if (GroundPickingQuadtree == null)
+            {
+                // Brute force
+                var mesh = GetGeometry(GeometryTypes.Hull);
+
+                return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
+            }
+
+            result = new PickingResult<Triangle>()
+            {
+                Distance = float.MaxValue,
+            };
+
+            // Use quadtree
+            var nodes = GroundPickingQuadtree.GetNodesInVolume(sphere);
+            if (!nodes.Any())
+            {
+                return false;
+            }
+
+            bool intersects = false;
+            float minDistance = float.MaxValue;
+            foreach (var node in nodes)
+            {
+                if (Intersection.SphereIntersectsMesh(sphere, node.Items, out var res))
+                {
+                    intersects = true;
+
+                    if (res.Distance < minDistance)
+                    {
+                        minDistance = res.Distance;
+
+                        result = res;
+                    }
+                }
+            }
+
+            return intersects;
+        }
+        /// <inheritdoc/>
+        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectable other, IntersectDetectionMode detectionModeOther)
+        {
+            return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
+        }
+        /// <inheritdoc/>
+        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
+        {
+            return IntersectionHelper.Intersects(this, detectionModeThis, volume);
+        }
+        /// <inheritdoc/>
+        public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
+        {
+            if (detectionMode == IntersectDetectionMode.Box)
+            {
+                return (IntersectionVolumeAxisAlignedBox)GetBoundingBox();
+            }
+            else if (detectionMode == IntersectDetectionMode.Sphere)
+            {
+                return (IntersectionVolumeSphere)GetBoundingSphere();
+            }
+            else
+            {
+                return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Hull).ToArray();
+            }
+        }
+
+        /// <inheritdoc/>
+        public virtual IIntersectionVolume GetCullingVolume()
         {
             return null;
+        }
+        /// <inheritdoc/>
+        public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
+        {
+            if (GroundPickingQuadtree == null)
+            {
+                return Enumerable.Empty<BoundingBox>();
+            }
+
+            return GroundPickingQuadtree.GetBoundingBoxes(level);
         }
     }
 }

@@ -42,63 +42,63 @@ namespace GameLogic.Rules
         {
             get
             {
-                return this.BaseMovingCapacity - this.GetModifiersMovingCapacity();
+                return BaseMovingCapacity - GetModifiersMovingCapacity();
             }
         }
         public int CurrentActionPoints
         {
             get
             {
-                return this.BaseActionPoints - this.GetModifiersActionPoints();
+                return BaseActionPoints - GetModifiersActionPoints();
             }
         }
         public int CurrentMelee
         {
             get
             {
-                return this.BaseMelee - this.GetModifiersMelee();
+                return BaseMelee - GetModifiersMelee();
             }
         }
         public int CurrentSmallWeapons
         {
             get
             {
-                return this.BaseSmallWeapons - this.GetModifiersSmallWeapons();
+                return BaseSmallWeapons - GetModifiersSmallWeapons();
             }
         }
         public int CurrentBigWeapons
         {
             get
             {
-                return this.BaseBigWeapons - this.GetModifiersBigWeapons();
+                return BaseBigWeapons - GetModifiersBigWeapons();
             }
         }
         public int CurrentStrength
         {
             get
             {
-                return this.BaseStrength - this.GetModifiersStrength();
+                return BaseStrength - GetModifiersStrength();
             }
         }
         public int CurrentAgility
         {
             get
             {
-                return this.BaseAgility - this.GetModifiersAgility();
+                return BaseAgility - GetModifiersAgility();
             }
         }
         public int CurrentEndurance
         {
             get
             {
-                return this.BaseEndurance - this.GetModifiersEndurance();
+                return BaseEndurance - GetModifiersEndurance();
             }
         }
         public HealthStates CurrentHealth
         {
             get
             {
-                int health = this.BaseHealth - this.GetModifiersHealth();
+                int health = BaseHealth - GetModifiersHealth();
 
                 if (health >= 50) return HealthStates.Healthy;
                 else if (health >= 0) return HealthStates.Wounded;
@@ -109,7 +109,7 @@ namespace GameLogic.Rules
         {
             get
             {
-                return this.BaseInitiative - this.GetModifiersInitiative();
+                return BaseInitiative - GetModifiersInitiative();
             }
         }
         public MoraleStates CurrentMorale { get; private set; }
@@ -117,7 +117,7 @@ namespace GameLogic.Rules
         {
             get
             {
-                return this.BaseHability - this.GetModifiersHability();
+                return BaseHability - GetModifiersHability();
             }
         }
 
@@ -125,20 +125,22 @@ namespace GameLogic.Rules
         public Weapon CurrentMeleeWeapon { get; set; }
         public Item CurrentItem { get; set; }
 
+        public Area CurrentArea { get; set; }
+
         public bool IsLeader
         {
             get
             {
-                return this.Team.Leader == this;
+                return Team.Leader == this;
             }
         }
         public bool HasItemsForMovingPhase
         {
             get
             {
-                if (this.CurrentItem != null)
+                if (CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Movement;
+                    return CurrentItem.Class == ItemClasses.Movement;
                 }
 
                 return false;
@@ -148,9 +150,9 @@ namespace GameLogic.Rules
         {
             get
             {
-                if (this.CurrentItem != null)
+                if (CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Shooting;
+                    return CurrentItem.Class == ItemClasses.Shooting;
                 }
 
                 return false;
@@ -160,9 +162,9 @@ namespace GameLogic.Rules
         {
             get
             {
-                if (this.CurrentItem != null)
+                if (CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Melee;
+                    return CurrentItem.Class == ItemClasses.Melee;
                 }
 
                 return false;
@@ -172,9 +174,9 @@ namespace GameLogic.Rules
         {
             get
             {
-                if (this.CurrentItem != null)
+                if (CurrentItem != null)
                 {
-                    return this.CurrentItem.Class == ItemClasses.Morale;
+                    return CurrentItem.Class == ItemClasses.Morale;
                 }
 
                 return false;
@@ -185,10 +187,10 @@ namespace GameLogic.Rules
             get
             {
                 return
-                    this.CurrentHealth != HealthStates.Disabled &&
-                    this.canMove &&
-                    !this.onMelee &&
-                    this.CurrentMovingCapacity > 0;
+                    CurrentHealth != HealthStates.Disabled &&
+                    canMove &&
+                    !onMelee &&
+                    CurrentMovingCapacity > 0;
             }
         }
         public bool IdleForShooting
@@ -196,10 +198,10 @@ namespace GameLogic.Rules
             get
             {
                 return
-                    this.CurrentHealth != HealthStates.Disabled &&
-                    this.canShoot &&
-                    !this.onMelee &&
-                    this.CurrentActionPoints > 0;
+                    CurrentHealth != HealthStates.Disabled &&
+                    canShoot &&
+                    !onMelee &&
+                    CurrentActionPoints > 0;
             }
         }
         public bool IdleForMelee
@@ -207,32 +209,32 @@ namespace GameLogic.Rules
             get
             {
                 return
-                    this.CurrentHealth != HealthStates.Disabled &&
-                    this.canFight && this.onMelee;
+                    CurrentHealth != HealthStates.Disabled &&
+                    canFight && onMelee;
             }
         }
 
         public Soldier(string name, SoldierClasses soldierClass, Team team)
         {
-            this.Name = name;
-            this.SoldierClass = soldierClass;
-            this.Team = team;
+            Name = name;
+            SoldierClass = soldierClass;
+            Team = team;
 
-            this.CurrentShootingWeapon = new Weapon("Gun") { Damage = 80, Penetration = 20, };
-            this.CurrentMeleeWeapon = new Weapon("Sword") { Damage = 50, Penetration = 10, };
+            CurrentShootingWeapon = new Weapon("Gun") { Damage = 80, Penetration = 20, };
+            CurrentMeleeWeapon = new Weapon("Sword") { Damage = 50, Penetration = 10, };
         }
 
         private int GetModifiersMovingCapacity()
         {
-            return this.turnMovingCapacity;
+            return turnMovingCapacity;
         }
         private int GetModifiersActionPoints()
         {
-            return this.turnActionPoints;
+            return turnActionPoints;
         }
         private int GetModifiersMelee()
         {
-            return this.turnMelee;
+            return turnMelee;
         }
         private int GetModifiersSmallWeapons()
         {
@@ -244,204 +246,200 @@ namespace GameLogic.Rules
         }
         private int GetModifiersStrength()
         {
-            return this.turnStrength;
+            return turnStrength;
         }
         private int GetModifiersAgility()
         {
-            return this.turnAgility;
+            return turnAgility;
         }
         private int GetModifiersEndurance()
         {
-            return this.turnEndurance;
+            return turnEndurance;
         }
         private int GetModifiersHealth()
         {
-            return this.wounds;
+            return wounds;
         }
         private int GetModifiersInitiative()
         {
-            return this.turnInitiative;
+            return turnInitiative;
         }
         private int GetModifiersHability()
         {
-            return this.turnHability;
+            return turnHability;
         }
 
         public bool IdleForPhase(Phase phase)
         {
-            if (phase == Phase.Movement) return this.IdleForMovement && this.canMove;
-            else if (phase == Phase.Shooting) return this.IdleForShooting && this.canShoot;
-            else if (phase == Phase.Melee) return this.canFight;
+            if (phase == Phase.Movement) return IdleForMovement && canMove;
+            else if (phase == Phase.Shooting) return IdleForShooting && canShoot;
+            else if (phase == Phase.Melee) return canFight;
             else if (phase == Phase.Morale) return true;
             else return false;
         }
         public void NextTurn()
         {
-            if (this.CurrentHealth == HealthStates.Disabled || this.CurrentMorale == MoraleStates.Demoralized)
+            if (CurrentHealth == HealthStates.Disabled || CurrentMorale == MoraleStates.Demoralized)
             {
-                this.canMove = false;
-                this.canShoot = false;
-                this.canFight = false;
+                canMove = false;
+                canShoot = false;
+                canFight = false;
 
-                this.turnMovingCapacity = this.BaseMovingCapacity;
-                this.turnActionPoints = this.BaseMovingCapacity;
+                turnMovingCapacity = BaseMovingCapacity;
+                turnActionPoints = BaseMovingCapacity;
 
-                this.turnMelee = 0;
-                this.turnSmallWeapons = 0;
-                this.turnBigWeapons = 0;
+                turnMelee = 0;
+                turnSmallWeapons = 0;
+                turnBigWeapons = 0;
 
-                this.turnStrength = 0;
-                this.turnAgility = 0;
-                this.turnEndurance = 0;
-                this.turnInitiative = 0;
-                this.turnHability = 0;
+                turnStrength = 0;
+                turnAgility = 0;
+                turnEndurance = 0;
+                turnInitiative = 0;
+                turnHability = 0;
             }
-            else if (this.CurrentMorale == MoraleStates.Cowed)
+            else if (CurrentMorale == MoraleStates.Cowed)
             {
-                this.canMove = !this.onMelee;
-                this.canShoot = false;
-                this.canFight = this.onMelee;
+                canMove = !onMelee;
+                canShoot = false;
+                canFight = onMelee;
 
-                this.turnMovingCapacity = this.onMelee ? this.BaseMovingCapacity : 0;
-                this.turnActionPoints = this.onMelee ? this.BaseMovingCapacity : 0;
+                turnMovingCapacity = onMelee ? BaseMovingCapacity : 0;
+                turnActionPoints = onMelee ? BaseMovingCapacity : 0;
 
-                this.turnMelee = this.BaseMelee / 2;
-                this.turnSmallWeapons = this.BaseSmallWeapons / 2;
-                this.turnBigWeapons = this.BaseBigWeapons / 2;
+                turnMelee = BaseMelee / 2;
+                turnSmallWeapons = BaseSmallWeapons / 2;
+                turnBigWeapons = BaseBigWeapons / 2;
 
-                this.turnStrength = 0;
-                this.turnAgility = 0;
-                this.turnEndurance = 0;
-                this.turnInitiative = 0;
-                this.turnHability = 0;
+                turnStrength = 0;
+                turnAgility = 0;
+                turnEndurance = 0;
+                turnInitiative = 0;
+                turnHability = 0;
             }
             else
             {
-                this.canMove = !this.onMelee;
-                this.canShoot = !this.onMelee;
-                this.canFight = this.onMelee;
+                canMove = !onMelee;
+                canShoot = !onMelee;
+                canFight = onMelee;
 
-                this.turnMovingCapacity = this.onMelee ? this.BaseMovingCapacity : 0;
-                this.turnActionPoints = this.onMelee ? this.BaseMovingCapacity : 0;
+                turnMovingCapacity = onMelee ? BaseMovingCapacity : 0;
+                turnActionPoints = onMelee ? BaseMovingCapacity : 0;
 
-                this.turnMelee = this.BaseMelee;
-                this.turnSmallWeapons = this.BaseSmallWeapons;
-                this.turnBigWeapons = this.BaseBigWeapons;
+                turnMelee = BaseMelee;
+                turnSmallWeapons = BaseSmallWeapons;
+                turnBigWeapons = BaseBigWeapons;
 
-                this.turnStrength = 0;
-                this.turnAgility = 0;
-                this.turnEndurance = 0;
-                this.turnInitiative = 0;
-                this.turnHability = 0;
+                turnStrength = 0;
+                turnAgility = 0;
+                turnEndurance = 0;
+                turnInitiative = 0;
+                turnHability = 0;
             }
         }
 
-        public void Move(int points)
+        public void Move(MovementModes mode, int points)
         {
-            this.ConsumeMovingCapacity(points);
+            ConsumeMovingCapacity(points);
 
-            //Normal move
-            this.canMove = false;
-            this.canShoot = true;
-            this.canFight = false;
-        }
-        public void Run(int points)
-        {
-            this.ConsumeMovingCapacity(points);
+            switch (mode)
+            {
+                case MovementModes.Walk:
+                case MovementModes.Crawl:
+                    canMove = false;
+                    canShoot = true;
+                    canFight = false;
+                    break;
+                case MovementModes.Run:
+                    //Running
+                    canMove = false;
+                    canShoot = false;
+                    canFight = false;
+                    break;
+                case MovementModes.FindCover:
+                case MovementModes.RunAway:
+                    // Automatic movement to nearest cover
+                    turnMovingCapacity = 0;
 
-            //Running
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = false;
-        }
-        public void Crawl(int points)
-        {
-            this.ConsumeMovingCapacity(points);
-
-            //Crawling move
-            this.canMove = false;
-            this.canShoot = true;
-            this.canFight = false;
+                    canMove = false;
+                    canShoot = false;
+                    canFight = false;
+                    break;
+                default:
+                    break;
+            }
         }
         public void Assault(int points)
         {
-            this.ConsumeMovingCapacity(points);
+            ConsumeMovingCapacity(points);
 
-            this.onMelee = true;
+            onMelee = true;
 
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = true;
+            canMove = false;
+            canShoot = false;
+            canFight = true;
         }
         public void ReloadTest(Weapon weapon, int points)
         {
-            this.ConsumeMovingCapacity(points);
+            ConsumeMovingCapacity(points);
 
-            this.canMove = false;
-            this.canShoot = true;
-            this.canFight = false;
+            canMove = false;
+            canShoot = true;
+            canFight = false;
 
             weapon.Reload();
         }
         public void RepairTest(Weapon weapon, int points)
         {
-            this.ConsumeMovingCapacity(points);
+            ConsumeMovingCapacity(points);
 
-            this.canMove = false;
-            this.canShoot = true;
-            this.canFight = false;
+            canMove = false;
+            canShoot = true;
+            canFight = false;
 
             weapon.Repair();
         }
         public void Inventory(int points)
         {
-            this.ConsumeMovingCapacity(points);
+            ConsumeMovingCapacity(points);
 
-            this.canMove = false;
-            this.canShoot = true;
-            this.canFight = false;
+            canMove = false;
+            canShoot = true;
+            canFight = false;
         }
         public void CommunicationsTest()
         {
             // Stationary when doing communications
-            this.turnMovingCapacity = 0;
+            turnMovingCapacity = 0;
 
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = false;
-        }
-        public void FindCover()
-        {
-            // Automatic movement to nearest cover
-            this.turnMovingCapacity = 0;
-
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = false;
-        }
-        public void RunAway()
-        {
-            // Automatic movement to nearest scenery exit
-            this.turnMovingCapacity = 0;
-
-            this.canMove = false;
-            this.canShoot = false;
-            this.canFight = false;
+            canMove = false;
+            canShoot = false;
+            canFight = false;
         }
 
-        public bool ShootingTest(Weapon weapon, float distance, int points)
+        public bool ShootingTest(Weapon weapon, float distanceToTarget, int points)
         {
-            this.ConsumeActionPoints(points);
+            ConsumeActionPoints(points);
 
-            return (Helper.RandomGenerator.Next(0, 6) >= 4);
+            if (weapon == null)
+            {
+                return false;
+            }
+
+            if (distanceToTarget > weapon.Range)
+            {
+                return false;
+            }
+
+            return (Helper.RandomGenerator.Next(0, 6) >= CurrentSmallWeapons);
         }
         public void SupportTest()
         {
-            this.turnActionPoints = 0;
+            turnActionPoints = 0;
         }
         public bool FirstAidTest(int points)
         {
-            this.ConsumeActionPoints(points);
+            ConsumeActionPoints(points);
 
             return (Helper.RandomGenerator.Next(0, 6) > 5);
         }
@@ -454,8 +452,8 @@ namespace GameLogic.Rules
         {
             if (Helper.RandomGenerator.Next(0, 6) > 4)
             {
-                this.canFight = false;
-                this.onMelee = false;
+                canFight = false;
+                onMelee = false;
 
                 return true;
             }
@@ -467,9 +465,9 @@ namespace GameLogic.Rules
         {
             if (Helper.RandomGenerator.Next(0, 6) > 2)
             {
-                this.canMove = true;
-                this.canShoot = true;
-                this.canFight = false;
+                canMove = true;
+                canShoot = true;
+                canFight = false;
             }
         }
 
@@ -477,22 +475,36 @@ namespace GameLogic.Rules
         {
             if (soldierStates != SoldierStates.None)
             {
-                this.turnMovingCapacity = 0;
-                this.turnActionPoints = 0;
+                turnMovingCapacity = 0;
+                turnActionPoints = 0;
             }
+
+            switch (weapon?.WeaponType)
+            {
+                case WeaponTypes.Ranged:
+                    CurrentShootingWeapon = weapon;
+                    break;
+                case WeaponTypes.Melee:
+                    CurrentMeleeWeapon = weapon;
+                    break;
+                default:
+                    break;
+            }
+
+            CurrentArea = area;
         }
 
         public void UseItemForMovementPhase(Item item, int points)
         {
             item.Use();
 
-            this.ConsumeMovingCapacity(points);
+            ConsumeMovingCapacity(points);
         }
         public void UseItemForShootingPhase(Item item, int points)
         {
             item.Use();
 
-            this.ConsumeActionPoints(points);
+            ConsumeActionPoints(points);
         }
         public void UseItemForMeleePhase(Item item)
         {
@@ -505,52 +517,90 @@ namespace GameLogic.Rules
 
         public void HitTest(Weapon weapon)
         {
-            this.wounds += (Helper.RandomGenerator.Next(0, weapon.Damage) + weapon.Penetration);
+            wounds += (Helper.RandomGenerator.Next(0, weapon.Damage) + weapon.Penetration);
         }
         public void HealingTest(int hability)
         {
-            this.wounds -= (Helper.RandomGenerator.Next(-25, 25) + hability);
+            wounds -= (Helper.RandomGenerator.Next(-25, 25) + hability);
         }
 
         private void ConsumeMovingCapacity(int points)
         {
-            this.turnMovingCapacity += points;
+            turnMovingCapacity += points;
 
-            if (this.turnMovingCapacity > this.BaseMovingCapacity) this.turnMovingCapacity = this.BaseMovingCapacity;
+            if (turnMovingCapacity > BaseMovingCapacity) turnMovingCapacity = BaseMovingCapacity;
         }
         private void ConsumeActionPoints(int points)
         {
-            this.turnActionPoints += points;
+            turnActionPoints += points;
 
-            if (this.turnActionPoints > this.BaseActionPoints) this.turnActionPoints = this.BaseActionPoints;
+            if (turnActionPoints > BaseActionPoints) turnActionPoints = BaseActionPoints;
         }
 
         internal void MeleeDisolved()
         {
-            this.onMelee = false;
+            onMelee = false;
         }
 
         public void AnimateHurt(Weapon weapon)
         {
-            // TODO: hurt animation
+            if (weapon == null)
+            {
+                return;
+            }
+
+            switch (weapon.WeaponType)
+            {
+                case WeaponTypes.Ranged:
+                    // Ranged impact animation and sound
+                    AnimateLib("RangedImpact");
+                    break;
+                case WeaponTypes.Melee:
+                    // Melee impact animation and sound
+                    AnimateLib("MeleeImpact");
+                    break;
+                default:
+                    break;
+            }
         }
         public void AnimateKill(Weapon weapon)
         {
-            // TODO: kill animation
+            if (weapon == null)
+            {
+                return;
+            }
+
+            switch (weapon.WeaponType)
+            {
+                case WeaponTypes.Ranged:
+                    // Ranged kill animation and sound
+                    AnimateLib("MeleeKill");
+                    break;
+                case WeaponTypes.Melee:
+                    // Melee kill animation and sound
+                    AnimateLib("MeleeKill");
+                    break;
+                default:
+                    break;
+            }
+        }
+        private void AnimateLib(string animation)
+        {
+            Logger.WriteDebug(this, animation);
         }
 
         public override string ToString()
         {
-            string melee = this.onMelee ? "Can't fight" : "Not on melee";
+            string melee = onMelee ? "Can't fight" : "Not on melee";
 
             return string.Format(
                 "{0} [{1}][{2}] -> {3}, {4}, {5}",
-                this.Name,
-                this.CurrentHealth,
-                this.CurrentMorale,
-                this.IdleForMovement ? "Can move" : "Can't move",
-                this.IdleForShooting ? "Can shoot" : "Can't shoot",
-                this.IdleForMelee ? "Can fight" : melee);
+                Name,
+                CurrentHealth,
+                CurrentMorale,
+                IdleForMovement ? "Can move" : "Can't move",
+                IdleForShooting ? "Can shoot" : "Can't shoot",
+                IdleForMelee ? "Can fight" : melee);
         }
     }
 }

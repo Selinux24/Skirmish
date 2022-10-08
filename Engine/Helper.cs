@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -8,7 +9,6 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
 
 namespace Engine
 {
@@ -22,10 +22,22 @@ namespace Engine
         /// </summary>
         public const float Radian = 0.0174532924f;
 
+        #region Random
+
         /// <summary>
         /// Random number generator
         /// </summary>
         public static readonly Random RandomGenerator = new Random();
+        /// <summary>
+        /// Gets a new random generator
+        /// </summary>
+        /// <param name="seed">Seed</param>
+        public static Random SetRandomGeneratorSeed(int seed)
+        {
+            return new Random(seed);
+        }
+
+        #endregion
 
         #region Memory
 
@@ -57,145 +69,12 @@ namespace Engine
             handle.Free();
             return stuff;
         }
-
-        #endregion
-
-        #region Actions & Functions
-
-        /// <summary>
-        /// Executes especified action with attempts on exception
-        /// </summary>
-        /// <typeparam name="T">Input type</typeparam>
-        /// <param name="action">Action</param>
-        /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
-        public static void Attempt<T>(Action<T> action, T input, int attempts)
-        {
-            Attempt(action, input, attempts, TimeSpan.FromSeconds(0));
-        }
-        /// <summary>
-        /// Executes especified action with attempts on exception
-        /// </summary>
-        /// <typeparam name="T">Input type</typeparam>
-        /// <param name="action">Action</param>
-        /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
-        /// <param name="delay">Delay between attempts</param>
-        public static void Attempt<T>(Action<T> action, T input, int attempts, TimeSpan delay)
-        {
-            Exception lastEx = null;
-
-            do
-            {
-                try
-                {
-                    action.Invoke(input);
-
-                    break;
-                }
-                catch (Exception ex)
-                {
-                    lastEx = ex;
-                    attempts--;
-                }
-
-                Task.Delay(delay).Wait();
-            }
-            while (attempts > 0);
-
-            if (lastEx != null)
-            {
-                throw lastEx;
-            }
-        }
-        /// <summary>
-        /// Executes especified function with attempts on exception
-        /// </summary>
-        /// <typeparam name="T">Input type</typeparam>
-        /// <typeparam name="TResult">Result type</typeparam>
-        /// <param name="func">Function</param>
-        /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
-        /// <returns>Returns the function execution result</returns>
-        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts)
-        {
-            return Attempt(func, input, attempts, TimeSpan.FromSeconds(0));
-        }
-        /// <summary>
-        /// Executes especified function with attempts on exception
-        /// </summary>
-        /// <typeparam name="T">Input type</typeparam>
-        /// <typeparam name="TResult">Result type</typeparam>
-        /// <param name="func">Function</param>
-        /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
-        /// <param name="delay">Delay between attempts</param>
-        /// <returns>Returns the function execution result</returns>
-        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts, TimeSpan delay)
-        {
-            Exception lastEx;
-
-            do
-            {
-                try
-                {
-                    return func.Invoke(input);
-                }
-                catch (Exception ex)
-                {
-                    lastEx = ex;
-                    attempts--;
-                }
-
-                Task.Delay(delay).Wait();
-            }
-            while (attempts > 0);
-
-            throw lastEx;
-        }
-
-        #endregion
-
-        #region Serialization
-
-        /// <summary>
-        /// Serializes the specified object to XML file
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="obj">Object to serialize</param>
-        /// <param name="fileName">File name</param>
-        /// <param name="nameSpace">Name space</param>
-        public static void SerializeToFile<T>(T obj, string fileName, string nameSpace = null)
-        {
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
-
-                sr.Serialize(wr, obj);
-            }
-        }
-        /// <summary>
-        /// Deserializes an object from a XML file
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="fileName">File name</param>
-        /// <param name="nameSpace">Name space</param>
-        /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeFromFile<T>(string fileName, string nameSpace = null)
-        {
-            using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
-            {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
-
-                return (T)sr.Deserialize(rd);
-            }
-        }
         /// <summary>
         /// Writes stream to memory
         /// </summary>
         /// <param name="stream">Stream</param>
         /// <returns>Returns a memory stream</returns>
-        public static MemoryStream WriteToMemory(this Stream stream)
+        public static MemoryStream CopyToMemory(this Stream stream)
         {
             MemoryStream ms = new MemoryStream();
 
@@ -210,13 +89,18 @@ namespace Engine
         /// </summary>
         /// <param name="fileName">File name</param>
         /// <returns>Returns a memory stream</returns>
-        public static MemoryStream WriteToMemory(this string fileName)
+        public static MemoryStream CopyToMemory(this string fileName)
         {
             using (var stream = File.OpenRead(fileName))
             {
-                return stream.WriteToMemory();
+                return stream.CopyToMemory();
             }
         }
+
+        #endregion
+
+        #region Security
+
         /// <summary>
         /// Create the md5 sum string of the specified buffer
         /// </summary>
@@ -286,6 +170,137 @@ namespace Engine
 
         #endregion
 
+        #region Actions & Functions
+
+        /// <summary>
+        /// Executes the specified action a number of times
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <param name="action">Action</param>
+        /// <param name="input">Input</param>
+        /// <param name="retryCount">Retry count</param>
+        public static void Retry<T>(Action<T> action, T input, int retryCount)
+        {
+            Retry(action, input, retryCount, TimeSpan.FromSeconds(0));
+        }
+        /// <summary>
+        /// Executes the specified action a number of times
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <param name="action">Action</param>
+        /// <param name="input">Input</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <param name="delay">Delay between attempts</param>
+        public static void Retry<T>(Action<T> action, T input, int retryCount, TimeSpan delay)
+        {
+            Exception lastEx = null;
+
+            do
+            {
+                try
+                {
+                    action.Invoke(input);
+
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    lastEx = ex;
+                    retryCount--;
+                }
+
+                Task.Delay(delay).Wait();
+            }
+            while (retryCount > 0);
+
+            if (lastEx != null)
+            {
+                throw lastEx;
+            }
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <typeparam name="TResult">Result type</typeparam>
+        /// <param name="func">Function</param>
+        /// <param name="input">Input</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <returns>Returns the function execution result</returns>
+        public static TResult Retry<T, TResult>(Func<T, TResult> func, T input, int retryCount)
+        {
+            return Retry(func, input, retryCount, TimeSpan.FromSeconds(0));
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <typeparam name="T">Input type</typeparam>
+        /// <typeparam name="TResult">Result type</typeparam>
+        /// <param name="func">Function</param>
+        /// <param name="input">Input</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <param name="delay">Delay between attempts</param>
+        /// <returns>Returns the function execution result</returns>
+        public static TResult Retry<T, TResult>(Func<T, TResult> func, T input, int retryCount, TimeSpan delay)
+        {
+            Exception lastEx;
+
+            do
+            {
+                try
+                {
+                    return func.Invoke(input);
+                }
+                catch (Exception ex)
+                {
+                    lastEx = ex;
+                    retryCount--;
+                }
+
+                Task.Delay(delay).Wait();
+            }
+            while (retryCount > 0);
+
+            throw lastEx;
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <param name="func">Function</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <returns>Returns the result of the function</returns>
+        /// <remarks>The method exits on exceptions</remarks>
+        public static bool Retry(Func<bool> func, int retryCount)
+        {
+            return Retry(func, retryCount, TimeSpan.FromSeconds(0));
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <param name="func">Function</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <param name="delay">Delay between attempts</param>
+        /// <returns>Returns the result of the function</returns>
+        /// <remarks>The method exits on exceptions</remarks>
+        public static bool Retry(Func<bool> func, int retryCount, TimeSpan delay)
+        {
+            int retry = retryCount;
+
+            bool res;
+            do
+            {
+                res = func();
+                retry--;
+
+                Task.Delay(delay).Wait();
+            }
+            while (retry > 0 && !res);
+
+            return res;
+        }
+
+        #endregion
+
         #region Array Utils
 
         /// <summary>
@@ -343,22 +358,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Merge two arrays
-        /// </summary>
-        /// <typeparam name="T">Type of array</typeparam>
-        /// <param name="array1">First array</param>
-        /// <param name="array2">Second array</param>
-        /// <returns>Returns an array with both array values merged</returns>
-        public static T[] Merge<T>(this T[] array1, T[] array2)
-        {
-            T[] newArray = new T[array1.Length + array2.Length];
-
-            array1.CopyTo(newArray, 0);
-            array2.CopyTo(newArray, array1.Length);
-
-            return newArray;
-        }
-        /// <summary>
         /// Gets the maximum value of the collection 
         /// </summary>
         /// <typeparam name="T">Type</typeparam>
@@ -366,7 +365,7 @@ namespace Engine
         /// <returns>Return the maximum value of the collection</returns>
         public static T Max<T>(params T[] array) where T : IComparable<T>
         {
-            T res = default(T);
+            T res = default;
 
             for (int i = 0; i < array.Length; i++)
             {
@@ -390,7 +389,7 @@ namespace Engine
         /// <returns>Return the minimum value of the collection</returns>
         public static T Min<T>(params T[] array) where T : IComparable<T>
         {
-            T res = default(T);
+            T res = default;
 
             for (int i = 0; i < array.Length; i++)
             {
@@ -472,11 +471,9 @@ namespace Engine
         /// <param name="list">Collection</param>
         /// <param name="separator">The string to use as a separator</param>
         /// <returns>A string that consists of the members of values delimited by the separator string</returns>
-        public static string Join<T>(this ICollection<T> list, string separator = "")
+        public static string Join<T>(this IEnumerable<T> list, string separator = "")
         {
-            List<string> res = new List<string>();
-
-            list.ToList().ForEach(a => res.Add(a.ToString()));
+            var res = list.Select(a => $"{a}");
 
             return string.Join(separator, res);
         }
@@ -553,6 +550,61 @@ namespace Engine
 
             return true;
         }
+        /// <summary>
+        /// Gets the minimum and maximum values
+        /// </summary>
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, out float min, out float max)
+        {
+            if (value1 < value2)
+            {
+                min = value1;
+                max = value2;
+            }
+            else
+            {
+                min = value2;
+                max = value1;
+            }
+        }
+        /// <summary>
+        /// Gets the minimum and maximum values
+        /// </summary>
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
+        /// <param name="value3">Value 3</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, float value3, out float min, out float max)
+        {
+            min = value1;
+            if (value2 < min) min = value2;
+            if (value3 < min) min = value3;
+
+            max = value1;
+            if (value2 > max) max = value2;
+            if (value3 > max) max = value3;
+        }
+
+        #endregion
+
+        #region Concurrent Utils
+
+        /// <summary>
+        /// Clears a concurrent bag list
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="source">Concurrent bag</param>
+        public static void Clear<T>(this ConcurrentBag<T> source)
+        {
+            while (!source.IsEmpty)
+            {
+                source.TryTake(out T _);
+            }
+        }
 
         #endregion
 
@@ -609,28 +661,28 @@ namespace Engine
             return one.X * two.Y - one.Y * two.X;
         }
         /// <summary>
-        /// Gets angle between two vectors
+        /// Gets the angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value in radians</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Vector2 one, Vector2 two)
         {
             //Get the dot product
             float dot = Vector2.Dot(one, two);
 
             // Divide the dot by the product of the magnitudes of the vectors
-            dot = dot / (one.Length() * two.Length());
+            dot /= one.Length() * two.Length();
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)Math.Acos(dot);
         }
         /// <summary>
-        /// Gets angle between two quaternions
+        /// Gets the angle between two quaternions
         /// </summary>
         /// <param name="one">First quaternions</param>
         /// <param name="two">Second quaternions</param>
-        /// <returns>Returns angle value in radians</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Quaternion one, Quaternion two)
         {
             float dot = Quaternion.Dot(one, two);
@@ -638,37 +690,53 @@ namespace Engine
             return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f)) * 2f;
         }
         /// <summary>
-        /// Gets angle between two vectors
+        /// Gets the angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Vector3 one, Vector3 two)
         {
-            //Get the dot product
             float dot = Vector3.Dot(one, two);
 
-            // Divide the dot by the product of the magnitudes of the vectors
-            dot = dot / (one.Length() * two.Length());
-
-            //Get the arc cosin of the angle, you now have your angle in radians 
-            return (float)Math.Acos(dot);
+            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f));
         }
         /// <summary>
-        /// Gets angle between two vectors in the same plane
+        /// Gets the signed angle between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector2 one, Vector2 two)
+        {
+            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
+        }
+        /// <summary>
+        /// Gets the signed angle between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector3 one, Vector3 two)
+        {
+            float dot = Vector3.Dot(one, two);
+
+            return (float)Math.Acos(Math.Min(dot, 1f));
+        }
+        /// <summary>
+        /// Gets the angle between two vectors in the same plane
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
         /// <param name="planeNormal">Plane normal</param>
-        /// <returns>Returns angle value</returns>
-        /// <remarks>Result signed</remarks>
-        public static float Angle(Vector3 one, Vector3 two, Vector3 planeNormal)
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector3 one, Vector3 two, Vector3 planeNormal)
         {
             Plane p = new Plane(planeNormal, 0);
 
-            float dot = MathUtil.Clamp(Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two)), 0, 1);
+            float dot = Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two));
 
-            float angle = (float)Math.Acos(dot);
+            float angle = (float)Math.Acos(MathUtil.Clamp(dot, 0, 1));
 
             Vector3 cross = Vector3.Cross(one, two);
 
@@ -680,21 +748,11 @@ namespace Engine
             return angle;
         }
         /// <summary>
-        /// Gets angle between two vectors with sign
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value</returns>
-        public static float AngleSigned(Vector2 one, Vector2 two)
-        {
-            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two)) * MathUtil.Pi;
-        }
-        /// <summary>
-        /// Gets yaw and pitch values from vector
+        /// Gets the yaw and pitch values from vector
         /// </summary>
         /// <param name="vec">Vector</param>
-        /// <param name="yaw">Yaw</param>
-        /// <param name="pitch">Pitch</param>
+        /// <param name="yaw">Yaw value</param>
+        /// <param name="pitch">Pitch value</param>
         public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
         {
             yaw = (float)Math.Atan2(vec.X, vec.Y);
@@ -719,7 +777,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Get vector from yaw and pitch angles
+        /// Get the vector from yaw and pitch angles
         /// </summary>
         /// <param name="yaw">Yaw angle</param>
         /// <param name="pitch">Pitch angle</param>
@@ -767,9 +825,9 @@ namespace Engine
         /// <param name="eyePosition">Eye position</param>
         /// <param name="target">Target</param>
         /// <param name="up">Up vector</param>
-        /// <param name="yAxisOnly">Restricts the rotation axis to Y only</param>
+        /// <param name="axis">Relative rotation axis</param>
         /// <returns>Returns rotation quaternion</returns>
-        public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, bool yAxisOnly = true)
+        public static Quaternion LookAt(Vector3 eyePosition, Vector3 target, Vector3 up, Axis axis = Axis.None)
         {
             if (Vector3.Dot(Vector3.Up, Vector3.Normalize(eyePosition - target)) == 1f)
             {
@@ -778,12 +836,38 @@ namespace Engine
 
             Quaternion q = Quaternion.Invert(Quaternion.LookAtLH(target, eyePosition, up));
 
-            if (yAxisOnly)
+            if (axis != Axis.None)
             {
-                q.X = 0;
-                q.Z = 0;
+                q = q.ClampToAxis(axis);
+            }
 
-                q.Normalize();
+            return q;
+        }
+        /// <summary>
+        /// Clamps the rotation to the specified axis
+        /// </summary>
+        /// <param name="q">Quaternion</param>
+        /// <param name="axis">Axis</param>
+        /// <returns>Returns the clamped quaternion</returns>
+        public static Quaternion ClampToAxis(this Quaternion q, Axis axis)
+        {
+            switch (axis)
+            {
+                case Axis.X:
+                    q.Y = 0;
+                    q.Z = 0;
+                    q.Normalize();
+                    break;
+                case Axis.Y:
+                    q.X = 0;
+                    q.Z = 0;
+                    q.Normalize();
+                    break;
+                case Axis.Z:
+                    q.X = 0;
+                    q.Y = 0;
+                    q.Normalize();
+                    break;
             }
 
             return q;
@@ -860,9 +944,7 @@ namespace Engine
             }
 
             // Divide by w, to move from homogeneous coordinates to 3D coordinates again 
-            projected.X = projected.X / projected.W;
-            projected.Y = projected.Y / projected.W;
-            projected.Z = projected.Z / projected.W;
+            projected /= projected.W;
 
             // Perform the viewport scaling, to get the appropiate coordinates inside the viewport 
             projected.X = ((float)(((projected.X + 1.0) * 0.5) * viewPort.Width)) + viewPort.X;
@@ -870,6 +952,106 @@ namespace Engine
             projected.Z = (projected.Z * (viewPort.MaxDepth - viewPort.MinDepth)) + viewPort.MinDepth;
 
             return projected.XY();
+        }
+
+        #endregion
+
+        #region Rectangle & RectangleF
+
+        public static Vector2Int TopLeft(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Top, rectangle.Left);
+        }
+        public static Vector2Int TopRight(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Top, rectangle.Right);
+        }
+        public static Vector2Int BottomLeft(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Bottom, rectangle.Left);
+        }
+        public static Vector2Int BottomRight(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Bottom, rectangle.Right);
+        }
+        public static Vector2Int Center(this Rectangle rectangle)
+        {
+            return new Vector2Int(rectangle.Left + (rectangle.Width / 2), rectangle.Top + (rectangle.Height / 2));
+        }
+        public static Vector2Int[] GetVertices(this Rectangle rectangle)
+        {
+            return new[]
+            {
+                new Vector2Int(rectangle.Left, rectangle.Top),
+                new Vector2Int(rectangle.Right, rectangle.Top),
+                new Vector2Int(rectangle.Right, rectangle.Bottom),
+                new Vector2Int(rectangle.Left, rectangle.Bottom),
+            };
+        }
+        public static Vector2[] GetVertices(this RectangleF rectangle)
+        {
+            return new[]
+            {
+                new Vector2(rectangle.Left, rectangle.Top),
+                new Vector2(rectangle.Right, rectangle.Top),
+                new Vector2(rectangle.Right, rectangle.Bottom),
+                new Vector2(rectangle.Left, rectangle.Bottom),
+            };
+        }
+        public static RectangleF Scale(this RectangleF rectangle, float scale)
+        {
+            float width = rectangle.Width * scale;
+            float height = rectangle.Height * scale;
+            float dWidth = width - rectangle.Width;
+            float dHeight = height - rectangle.Height;
+
+            float left = rectangle.Left - (dWidth * 0.5f);
+            float top = rectangle.Top - (dHeight * 0.5f);
+
+            return new RectangleF(left, top, width, height);
+        }
+
+        #endregion
+
+        #region Bounding Box
+
+        /// <summary>
+        /// Merges the array of bounding boxes into one bounding box
+        /// </summary>
+        /// <param name="boxes">Array of boxes</param>
+        /// <returns>Returns a bounding box containing all the boxes in the array</returns>
+        public static BoundingBox MergeBoundingBox(IEnumerable<BoundingBox> boxes)
+        {
+            BoundingBox fbbox = new BoundingBox();
+
+            if (boxes?.Any() != true)
+            {
+                return fbbox;
+            }
+
+            var defaultBox = new BoundingBox();
+
+            foreach (var bbox in boxes.Where(b => b != defaultBox))
+            {
+                fbbox = MergeBoundingBox(fbbox, bbox);
+            }
+
+            return fbbox;
+        }
+        /// <summary>
+        /// Merges the boxes
+        /// </summary>
+        /// <param name="sourceBox">Source box</param>
+        /// <param name="newBox">New box</param>
+        /// <returns>If source box is null or default, returns new box</returns>
+        private static BoundingBox MergeBoundingBox(BoundingBox? sourceBox, BoundingBox newBox)
+        {
+            if (!sourceBox.HasValue || sourceBox == new BoundingBox())
+            {
+                return newBox;
+            }
+
+            return BoundingBox.Merge(sourceBox.Value, newBox);
         }
 
         #endregion
@@ -886,8 +1068,8 @@ namespace Engine
             if (matrix.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 translation))
             {
                 return string.Format("S:{0,-30} T:{1,-30} R:{2,-30}",
-                    scale.GetDescription(Vector3.One, "None"),
-                    translation.GetDescription(Vector3.Zero, "Zero"),
+                    scale.GetDescription(),
+                    translation.GetDescription(),
                     rotation.GetDescription());
             }
             else
@@ -905,16 +1087,14 @@ namespace Engine
             Vector3 axis = quaternion.Axis;
             float angle = quaternion.Angle;
 
-            return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription(Vector3.One, "None"));
+            return string.Format("Angle: {0:0.00} in axis {1}", angle, axis.GetDescription());
         }
         /// <summary>
         /// Gets vector description
         /// </summary>
         /// <param name="vector">Vector</param>
-        /// <param name="none">Sets the vector who means wath</param>
-        /// <param name="wath">Sets the string to write in description when the specified vector is near equal to none</param>
         /// <returns>Return vector description</returns>
-        public static string GetDescription(this Vector3 vector, Vector3 none, string wath)
+        public static string GetDescription(this Vector3 vector)
         {
             vector.X = (float)Math.Round(vector.X, 3);
             vector.Y = (float)Math.Round(vector.Y, 3);

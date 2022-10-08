@@ -61,7 +61,6 @@ namespace Engine.Common
         public bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
-            if (channel == VertexDataChannels.Color) return true;
             else return false;
         }
         /// <summary>
@@ -72,8 +71,8 @@ namespace Engine.Common
         /// <returns>Returns data for the specified channel</returns>
         public T GetChannelValue<T>(VertexDataChannels channel)
         {
-            if (channel == VertexDataChannels.Position) return (T)(object)this.Position;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) return (T)(object)Position;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
         /// <summary>
         /// Sets the channer value
@@ -83,8 +82,8 @@ namespace Engine.Common
         /// <param name="value">Value</param>
         public void SetChannelValue<T>(VertexDataChannels channel, T value)
         {
-            if (channel == VertexDataChannels.Position) this.Position = (Vector3)(object)value;
-            else throw new EngineException(string.Format("Channel data not found: {0}", channel));
+            if (channel == VertexDataChannels.Position) Position = (Vector3)(object)value;
+            else throw new EngineException($"Channel data not found: {channel}");
         }
 
         /// <summary>
@@ -101,16 +100,13 @@ namespace Engine.Common
         /// <returns>Returns input elements</returns>
         public InputElement[] GetInput(int slot)
         {
-            return VertexCpuParticle.Input(slot);
+            return Input(slot);
         }
 
-        /// <summary>
-        /// Text representation of vertex
-        /// </summary>
-        /// <returns>Returns the text representation of vertex</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Position: {0}", this.Position);
+            return $"Position: {Position};";
         }
     }
 }

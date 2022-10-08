@@ -5,16 +5,19 @@ namespace Engine
     /// <summary>
     /// Hemispheric light
     /// </summary>
-    public class SceneLightHemispheric : SceneLight
+    public class SceneLightHemispheric : SceneLight, ISceneLightHemispheric
     {
+        private static readonly Color3 ambientDown = new Color3(0.0f, 0.0f, 0.0f);
+        private static readonly Color3 ambientUp = new Color3(0.1f, 0.1f, 0.1f);
+
         /// <summary>
         /// Ambient down color
         /// </summary>
-        public Color4 AmbientDown { get; set; }
+        public Color3 AmbientDown { get; set; } = ambientDown;
         /// <summary>
         /// Ambient up color
         /// </summary>
-        public Color4 AmbientUp { get; set; }
+        public Color3 AmbientUp { get; set; } = ambientUp;
 
         /// <summary>
         /// Constructor
@@ -22,8 +25,15 @@ namespace Engine
         protected SceneLightHemispheric()
             : base()
         {
-            this.AmbientDown = Color.White;
-            this.AmbientUp = Color.White;
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public SceneLightHemispheric(string name)
+            : this(name, ambientDown, ambientUp, true)
+        {
+
         }
         /// <summary>
         /// Constructor
@@ -32,7 +42,7 @@ namespace Engine
         /// <param name="ambientDown">Ambient down color contribution</param>
         /// <param name="ambientUp">Ambient up color contribution</param>
         /// <param name="enabled">Lights is enabled</param>
-        public SceneLightHemispheric(string name, Color4 ambientDown, Color4 ambientUp, bool enabled)
+        public SceneLightHemispheric(string name, Color3 ambientDown, Color3 ambientUp, bool enabled)
             : this(name, ambientDown, 1f, ambientUp, 1f, enabled)
         {
 
@@ -46,30 +56,75 @@ namespace Engine
         /// <param name="ambientUp">Ambient up color contribution</param>
         /// <param name="brightnessUp">Brightness up</param>
         /// <param name="enabled">Lights is enabled</param>
-        public SceneLightHemispheric(string name, Color4 ambientDown, float brightnessDown, Color4 ambientUp, float brightnessUp, bool enabled)
-            : base(name, false, Color.Transparent, Color.Transparent, enabled)
+        public SceneLightHemispheric(string name, Color3 ambientDown, float brightnessDown, Color3 ambientUp, float brightnessUp, bool enabled)
+            : base(name, false, Color3.Black, Color3.Black, enabled)
         {
-            this.AmbientDown = new Color4(ambientDown.RGB() * brightnessDown, 1);
-            this.AmbientUp = new Color4(ambientUp.RGB() * brightnessUp, 1);
+            AmbientDown = ambientDown * brightnessDown;
+            AmbientUp = ambientUp * brightnessUp;
         }
 
-        /// <summary>
-        /// Clones current light
-        /// </summary>
-        /// <returns>Returns a new instante with same data</returns>
-        public override SceneLight Clone()
+        /// <inheritdoc/>
+        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
+        {
+            CastShadowsMarked = false;
+
+            return CastShadowsMarked;
+        }
+        /// <inheritdoc/>
+        public override ISceneLight Clone()
         {
             return new SceneLightHemispheric()
             {
-                Name = this.Name,
-                Enabled = this.Enabled,
-                CastShadow = this.CastShadow,
-                AmbientDown = this.AmbientDown,
-                AmbientUp = this.AmbientUp,
-                DiffuseColor = this.DiffuseColor,
-                SpecularColor = this.SpecularColor,
-                State = this.State,
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                AmbientDown = AmbientDown,
+                AmbientUp = AmbientUp,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                State = State,
             };
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightHemisphericState
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
+
+                AmbientDown = AmbientDown,
+                AmbientUp = AmbientUp,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightHemisphericState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            AmbientDown = sceneLightsState.AmbientDown;
+            AmbientUp = sceneLightsState.AmbientUp;
         }
     }
 }

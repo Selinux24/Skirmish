@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -18,29 +20,21 @@ namespace Engine.Animation
         /// <summary>
         /// Animation collection
         /// </summary>
-        public JointAnimation[] Animations { get; private set; }
+        public IEnumerable<JointAnimation> Animations { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Clip name</param>
         /// <param name="animations">Animation list</param>
-        public AnimationClip(string name, JointAnimation[] animations)
+        public AnimationClip(string name, IEnumerable<JointAnimation> animations)
         {
-            this.Name = name;
-            this.Animations = animations;
-            if (animations != null && animations.Length > 0)
-            {
-                float max = float.MinValue;
-                for (int i = 0; i < animations.Length; i++)
-                {
-                    if (animations[i].Duration > max)
-                    {
-                        max = animations[i].Duration;
-                    }
-                }
+            Name = name;
+            Animations = animations;
 
-                this.Duration = max;
+            if (animations?.Any() == true)
+            {
+                Duration = animations.Max(a => a.Duration);
             }
         }
 
@@ -52,9 +46,9 @@ namespace Engine.Animation
         public bool Equals(AnimationClip other)
         {
             return
-                this.Name == other.Name &&
-                this.Duration == other.Duration &&
-                Helper.ListIsEqual(this.Animations, other.Animations);
+                Name == other.Name &&
+                Duration == other.Duration &&
+                Helper.ListIsEqual(Animations, other.Animations);
         }
     }
 }

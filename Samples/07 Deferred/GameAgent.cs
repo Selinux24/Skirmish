@@ -1,6 +1,8 @@
 ﻿using Engine;
 using Engine.Common;
 using Engine.PathFinding;
+using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+using System.Collections.Generic;
 
 namespace Deferred
 {
@@ -12,17 +14,30 @@ namespace Deferred
         /// <summary>
         /// Model
         /// </summary>
-        private readonly SceneObject model;
+        private readonly ModelInstance model;
         /// <summary>
         /// Controller
         /// </summary>
         private readonly T controller;
 
+        /// <inheritdoc/>
+        public string Id { get; private set; }
+        /// <inheritdoc/>
+        public string Name { get; set; }
+        /// <inheritdoc/>
+        public Scene Scene { get; private set; }
+        /// <inheritdoc/>
+        public bool HasOwner { get { return Owner != null; } }
+        /// <inheritdoc/>
+        public ISceneObject Owner { get; set; }
         /// <summary>
         /// Agent type
         /// </summary>
         public AgentType AgentType { get; set; }
-
+        /// <summary>
+        /// Agent identifier
+        /// </summary>
+        public CrowdAgent CrowdAgent { get; set; }
         /// <summary>
         /// Gets or sets if the agent is active
         /// </summary>
@@ -30,11 +45,11 @@ namespace Deferred
         {
             get
             {
-                return this.model.Active;
+                return model.Active;
             }
             set
             {
-                this.model.Active = value;
+                model.Active = value;
             }
         }
         /// <summary>
@@ -44,11 +59,11 @@ namespace Deferred
         {
             get
             {
-                return this.model.Visible;
+                return model.Visible;
             }
             set
             {
-                this.model.Visible = value;
+                model.Visible = value;
             }
         }
         /// <summary>
@@ -58,7 +73,7 @@ namespace Deferred
         {
             get
             {
-                return this.controller.HasPath;
+                return controller.HasPath;
             }
         }
         /// <summary>
@@ -68,7 +83,7 @@ namespace Deferred
         {
             get
             {
-                return this.model.Get<ITransformable3D>()?.Manipulator;
+                return model?.Manipulator;
             }
         }
         /// <summary>
@@ -78,41 +93,64 @@ namespace Deferred
         {
             get
             {
-                return this.controller.MaximumSpeed;
+                return controller.MaximumSpeed;
             }
             set
             {
-                this.controller.MaximumSpeed = value;
+                controller.MaximumSpeed = value;
             }
         }
         /// <summary>
         /// Gets the agent lights
         /// </summary>
-        public SceneLight[] Lights
+        public IEnumerable<ISceneLight> Lights
         {
             get
             {
-                return this.model.Get<Model>()?.Lights;
+                return model?.Lights ?? new ISceneLight[] { };
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(AgentType agentType, SceneObject model, T controller)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="agentType">Agent type</param>
+        /// <param name="model">Model</param>
+        /// <param name="controller">Controller</param>
+        public GameAgent(string id, string name, AgentType agentType, ModelInstance model, T controller)
         {
+            Id = id;
+            Name = name;
+            AgentType = agentType;
             this.model = model;
             this.controller = controller;
-            this.AgentType = agentType;
         }
 
         /// <summary>
         /// Updates internal state
         /// </summary>
         /// <param name="context">Upating context</param>
+        public void EarlyUpdate(UpdateContext context)
+        {
+            //Not applicable
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="context">Upating context</param>
         public void Update(UpdateContext context)
         {
-            this.controller?.UpdateManipulator(context.GameTime, this.Manipulator);
+            controller?.UpdateManipulator(context.GameTime, Manipulator);
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="context">Upating context</param>
+        public void LateUpdate(UpdateContext context)
+        {
+            //Not applicable
         }
         /// <summary>
         /// Updates the specified manipulator
@@ -121,23 +159,44 @@ namespace Deferred
         /// <param name="manipulator">Manipulator</param>
         public void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
         {
-            this.controller.UpdateManipulator(gameTime, manipulator);
+            controller.UpdateManipulator(gameTime, manipulator);
         }
         /// <summary>
         /// Follow the specified path
         /// </summary>
-        /// <param name="path">Path to follow</param>
+        /// <param name="newPath">Path to follow</param>
         /// <param name="time">Path time</param>
-        public void Follow(IControllerPath path, float time = 0)
+        public void Follow(IControllerPath newPath, float time = 0)
         {
-            this.controller.Follow(path, time);
+            controller.Follow(newPath, time);
         }
         /// <summary>
         /// Clears the path
         /// </summary>
         public void Clear()
         {
-            this.controller.Clear();
+            controller.Clear();
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new GameAgentState
+            {
+                Id = Id,
+                Controller = controller.GetState(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is GameAgentState gameAgentState))
+            {
+                return;
+            }
+
+            Id = gameAgentState.Id;
+            controller?.SetState(gameAgentState.Controller);
         }
     }
 }

@@ -1,0 +1,12 @@
+{
+  "modelFilename": "TestModel.dae",
+  "animation": {
+    "clips": [
+      {
+        "name": "rumba",
+        "from": 0,
+        "to": 71
+      }
+    ]
+  }
+}

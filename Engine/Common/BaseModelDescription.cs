@@ -15,7 +15,7 @@ namespace Engine.Common
         /// <summary>
         /// Instancing model
         /// </summary>
-        public bool Instanced { get; protected set; }
+        public bool Instanced { get; protected set; } = false;
         /// <summary>
         /// Instances
         /// </summary>
@@ -40,14 +40,5 @@ namespace Engine.Common
         /// Content info
         /// </summary>
         public ContentDescription Content { get; set; } = new ContentDescription();
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        protected BaseModelDescription()
-            : base()
-        {
-            this.Instanced = false;
-        }
     }
 }

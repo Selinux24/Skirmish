@@ -1,38 +1,54 @@
 ﻿using Engine;
-using SharpDX;
+using Engine.Content.FmtCollada;
 using System;
-using System.IO;
 
 namespace GameLogic
 {
     static class Program
     {
-        private static Game game = null;
-
         [STAThread]
         static void Main()
         {
             try
             {
 #if DEBUG
-                using (game = new Game("Game Logic", false, 1600, 900, true, 0, 0))
+                Logger.LogLevel = LogLevel.Debug;
+                Logger.LogStackSize = 0;
+                Logger.EnableConsole = true;
 #else
-                using (game = new Game("Game Logic", true, 0, 0, true, 0, 4))
+                Logger.LogLevel = LogLevel.Error;
+#endif
+
+#if DEBUG
+                using (Game game = new Game("Game Logic", EngineForm.ScreenSize * 0.8f))
+#else
+                using (Game game = new Game("Game Logic"))
 #endif
                 {
                     game.VisibleMouse = true;
                     game.LockMouse = false;
 
-                    GameEnvironment.Background = Color.CornflowerBlue;
+                    GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    game.AddScene<SceneObjects>();
+                    game.SetScene<SceneObjects>();
 
                     game.Run();
                 }
             }
             catch (Exception ex)
             {
-                File.WriteAllText("dump.txt", ex.ToString());
+                Logger.WriteError(nameof(Program), ex);
+            }
+            finally
+            {
+#if DEBUG
+                Logger.Dump("dumpDEBUG.txt");
+#else
+                if (Logger.HasErrors())
+                {
+                    Logger.Dump($"dump{DateTime.Now:yyyyMMddHHmmss.fff}.txt");
+                }
+#endif
             }
         }
     }

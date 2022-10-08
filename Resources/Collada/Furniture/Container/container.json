@@ -1,0 +1,9 @@
+{
+  "modelFilename": "container.dae",
+  "LODMeshes": [
+    "Container.H",
+    "Container.M",
+    "Container.L"
+  ],
+  "useControllerTransform": false
+}

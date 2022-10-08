@@ -1,10 +1,11 @@
-﻿
+﻿using System;
+
 namespace Engine.Animation
 {
     /// <summary>
     /// Animation path item
     /// </summary>
-    public class AnimationPathItem
+    public class AnimationPathItem : IHasGameState
     {
         /// <summary>
         /// Clip name
@@ -23,10 +24,6 @@ namespace Engine.Animation
         /// </summary>
         public int Repeats { get; private set; }
         /// <summary>
-        /// Is transition
-        /// </summary>
-        public bool IsTranstition { get; private set; }
-        /// <summary>
         /// Clip duration
         /// </summary>
         public float Duration { get; private set; }
@@ -38,7 +35,7 @@ namespace Engine.Animation
         {
             get
             {
-                return this.Duration * this.Repeats / this.TimeDelta;
+                return Duration * Math.Max(1, Repeats);
             }
         }
 
@@ -49,32 +46,35 @@ namespace Engine.Animation
         /// <param name="loop">Loop</param>
         /// <param name="repeats">Number of repeats</param>
         /// <param name="delta">Time delta</param>
-        /// <param name="isTransition">Is transition</param>
-        public AnimationPathItem(string name, bool loop, int repeats, float delta, bool isTransition)
+        public AnimationPathItem(string name, bool loop, int repeats, float delta)
         {
-            this.ClipName = name;
-            this.Loop = loop;
-            this.Repeats = repeats;
-            this.TimeDelta = delta;
-            this.IsTranstition = isTransition;
+            ClipName = name;
+            Loop = loop;
+            Repeats = repeats;
+            TimeDelta = delta;
         }
 
         /// <summary>
         /// Updates internal state with specified skinning data
         /// </summary>
         /// <param name="skData">Skinning data</param>
-        public void UpdateSkinningData(SkinningData skData)
+        public void Update(ISkinningData skData)
         {
-            int clipIndex = skData.GetClipIndex(this.ClipName);
-            this.Duration = skData.GetClipDuration(clipIndex);
+            if (skData == null)
+            {
+                return;
+            }
+
+            int clipIndex = skData.GetClipIndex(ClipName);
+            Duration = skData.GetClipDuration(clipIndex);
         }
         /// <summary>
         /// Sets the item to finish current animation and end
         /// </summary>
         public void End()
         {
-            this.Loop = false;
-            this.Repeats = 1;
+            Loop = false;
+            Repeats = 1;
         }
 
         /// <summary>
@@ -83,20 +83,45 @@ namespace Engine.Animation
         /// <returns>Returns the path item copy instance</returns>
         public AnimationPathItem Clone()
         {
-            return new AnimationPathItem(this.ClipName, this.Loop, this.Repeats, this.TimeDelta, this.IsTranstition);
+            return new AnimationPathItem(ClipName, Loop, Repeats, TimeDelta);
         }
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new AnimationPathItemState
+            {
+                TimeDelta = TimeDelta,
+                Loop = Loop,
+                Repeats = Repeats,
+                Duration = Duration,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is AnimationPathItemState animationPathItemState))
+            {
+                return;
+            }
+
+            TimeDelta = animationPathItemState.TimeDelta;
+            Loop = animationPathItemState.Loop;
+            Repeats = animationPathItemState.Repeats;
+            Duration = animationPathItemState.Duration;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("{0}: {1}; Loop {2}; Repeats: {3}; Delta: {4}",
-                this.IsTranstition ? "Transition" : "Clip",
-                this.ClipName,
-                this.Loop,
-                this.Repeats,
-                this.TimeDelta);
+            if (Repeats > 1)
+            {
+                return $"{ClipName}; Duration: {Duration:00.00}; Total Duration: {TotalDuration:00.00}; Loop {Loop}; Repeats: {Repeats}; Delta: {TimeDelta}";
+            }
+            else
+            {
+                return $"{ClipName}; Duration: {Duration:00.00}; Loop {Loop}; Delta: {TimeDelta}";
+            }
         }
     }
 }

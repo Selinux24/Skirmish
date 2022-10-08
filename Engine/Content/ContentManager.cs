@@ -74,7 +74,7 @@ namespace Engine.Content
 
                     using (var stream = entry.Open())
                     {
-                        return stream.WriteToMemory();
+                        return stream.CopyToMemory();
                     }
                 }
             }
@@ -101,7 +101,7 @@ namespace Engine.Content
                         {
                             using (var stream = entry.Open())
                             {
-                                res.Add(stream.WriteToMemory());
+                                res.Add(stream.CopyToMemory());
                             }
                         }
                     }
@@ -127,7 +127,7 @@ namespace Engine.Content
             var path = Path.Combine(contentSource, resourcePath);
             if (File.Exists(path))
             {
-                return new[] { path.WriteToMemory() };
+                return new[] { path.CopyToMemory() };
             }
 
             var files = Directory.GetFiles(
@@ -139,7 +139,7 @@ namespace Engine.Content
 
                 for (int i = 0; i < files.Length; i++)
                 {
-                    msList[i] = files[i].WriteToMemory();
+                    msList[i] = files[i].CopyToMemory();
                 }
 
                 return msList;
@@ -204,7 +204,7 @@ namespace Engine.Content
 
             if (File.Exists(resourcePath))
             {
-                return new[] { resourcePath.WriteToMemory() };
+                return new[] { resourcePath.CopyToMemory() };
             }
 
             if (Directory.Exists(contentSource))

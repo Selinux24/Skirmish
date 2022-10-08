@@ -1,23 +1,21 @@
 ﻿
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Effects;
-
     /// <summary>
     /// Cascaded shadow map
     /// </summary>
     public class ShadowMapCascade : ShadowMap
     {
         /// <summary>
+        /// Map size
+        /// </summary>
+        protected int Size { get; private set; }
+        /// <summary>
         /// Cascade matrix set
         /// </summary>
         protected ShadowMapCascadeSet MatrixSet { get; set; }
-        
-        /// <summary>
-        /// Gets or sets the high resolution map flag
-        /// </summary>
-        /// <remarks>This property is directly mapped to the AntiFlicker matrix set property</remarks>
+
+        /// <inheritdoc/>
         public override bool HighResolutionMap
         {
             get
@@ -38,51 +36,55 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
+        /// <param name="scene">Scene</param>
         /// <param name="size">Map size</param>
         /// <param name="mapCount">Map count</param>
         /// <param name="cascades">Cascade far clip distances</param>
-        public ShadowMapCascade(Game game, int size, int mapCount, int arraySize, float[] cascades) : base(game, size, size, cascades.Length)
+        public ShadowMapCascade(Scene scene, string name, int size, int mapCount, int arraySize, float[] cascades) : base(scene, name, size, size, cascades.Length)
         {
-            game.Graphics.CreateShadowMapTextureArrays(
-                size, size, mapCount, arraySize,
-                out EngineDepthStencilView[] dsv,
-                out EngineShaderResourceView srv);
+            Size = size;
 
-            this.DepthMap = dsv;
-            this.Texture = srv;
+            var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateShadowMapTextureArrays(name, size, size, mapCount, arraySize);
 
-            this.MatrixSet = new ShadowMapCascadeSet(size, 1, cascades);
+            DepthMap = DepthStencils;
+            Texture = ShaderResource;
+
+            MatrixSet = new ShadowMapCascadeSet(size, 1, cascades);
         }
 
-        /// <summary>
-        /// Updates the from light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public override void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
         {
             if (light is ISceneLightDirectional lightDirectional)
             {
-                this.MatrixSet.Update(camera, lightDirectional.Direction);
+                MatrixSet.Update(camera, lightDirectional.Direction);
 
-                lightDirectional.ToShadowSpace = this.MatrixSet.GetWorldToShadowSpace();
-                lightDirectional.ToCascadeOffsetX = this.MatrixSet.GetToCascadeOffsetX();
-                lightDirectional.ToCascadeOffsetY = this.MatrixSet.GetToCascadeOffsetY();
-                lightDirectional.ToCascadeScale = this.MatrixSet.GetToCascadeScale();
+                lightDirectional.ToShadowSpace = MatrixSet.GetWorldToShadowSpace();
+                lightDirectional.ToCascadeOffsetX = MatrixSet.GetToCascadeOffsetX();
+                lightDirectional.ToCascadeOffsetY = MatrixSet.GetToCascadeOffsetY();
+                lightDirectional.ToCascadeScale = MatrixSet.GetToCascadeScale();
 
-                var vp = this.MatrixSet.GetWorldToCascadeProj();
+                var vp = MatrixSet.GetWorldToCascadeProj();
 
-                this.ToShadowMatrix = vp[0];
-                this.LightPosition = this.MatrixSet.GetLigthPosition();
-                this.FromLightViewProjectionArray = vp;
+                ToShadowMatrix = vp[0];
+                LightPosition = MatrixSet.GetLigthPosition();
+                FromLightViewProjectionArray = vp;
             }
         }
-        /// <summary>
-        /// Gets the effect to draw this shadow map
-        /// </summary>
-        /// <returns>Returns an effect</returns>
-        public override IShadowMapDrawer GetEffect()
+
+        /// <inheritdoc/>
+        public override void UpdateGlobals()
         {
-            return DrawerPool.EffectShadowCascade;
+            MatrixSet = new ShadowMapCascadeSet(Size, 1, Scene.GameEnvironment.CascadeShadowMapsDistances)
+            {
+                AntiFlicker = HighResolutionMap
+            };
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{nameof(ShadowMapCascade)} - LightPosition: {LightPosition} HighResolutionMap: {HighResolutionMap}";
         }
     }
 }

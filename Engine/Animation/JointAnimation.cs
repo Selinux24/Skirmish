@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Animation
 {
@@ -15,7 +17,7 @@ namespace Engine.Animation
         /// <summary>
         /// Keyframe list
         /// </summary>
-        public readonly Keyframe[] Keyframes;
+        public readonly IReadOnlyCollection<Keyframe> Keyframes;
         /// <summary>
         /// Start time
         /// </summary>
@@ -31,25 +33,36 @@ namespace Engine.Animation
         {
             get
             {
-                return this.EndTime - this.StartTime;
+                return EndTime - StartTime;
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public JointAnimation(string jointName, Keyframe[] keyframes)
+        public JointAnimation(string jointName, IEnumerable<Keyframe> keyframes)
         {
-            this.Joint = jointName;
-            this.Keyframes = keyframes;
-            this.StartTime = keyframes[0].Time;
-            this.EndTime = keyframes[keyframes.Length - 1].Time;
+            Joint = jointName;
+
+            if (keyframes?.Any() != true)
+            {
+                Keyframes = new Keyframe[] { };
+                StartTime = 0;
+                EndTime = 0;
+
+                return;
+            }
 
             //Pre-normalize rotations
-            for (int i = 0; i < this.Keyframes.Length; i++)
+            var tmp = new List<Keyframe>(keyframes);
+            for (int i = 0; i < tmp.Count; i++)
             {
-                this.Keyframes[i].Rotation.Normalize();
+                tmp[i].Rotation.Normalize();
             }
+
+            Keyframes = tmp;
+            StartTime = tmp.First().Time;
+            EndTime = tmp.Last().Time;
         }
 
         /// <summary>
@@ -59,7 +72,7 @@ namespace Engine.Animation
         /// <returns>Return interpolated transformation</returns>
         public Matrix Interpolate(float time)
         {
-            this.Interpolate(time, out Vector3 translation, out Quaternion rotation, out Vector3 scale);
+            Interpolate(time, out Vector3 translation, out Quaternion rotation, out Vector3 scale);
 
             //Create the combined transformation matrix
             return
@@ -80,78 +93,131 @@ namespace Engine.Animation
             rotation = Quaternion.Identity;
             scale = Vector3.One;
 
-            if (this.Keyframes != null)
+            if (Keyframes?.Any() != true)
             {
-                var deltaTime = 0.0f;
-                if (this.Duration > 0.0f)
-                {
-                    deltaTime = time % this.Duration;
-                }
+                return;
+            }
 
-                var currFrame = 0;
-                while (currFrame < this.Keyframes.Length - 1)
-                {
-                    if (deltaTime < this.Keyframes[currFrame + 1].Time)
-                    {
-                        break;
-                    }
-                    currFrame++;
-                }
+            var deltaTime = 0f;
+            if (Duration > 0f)
+            {
+                deltaTime = time % Duration;
+            }
 
-                if (currFrame >= this.Keyframes.Length)
-                {
-                    currFrame = 0;
-                }
+            int currFrame = FindFrame(deltaTime);
+            int nextFrame = (currFrame + 1) % Keyframes.Count;
 
-                var nextFrame = (currFrame + 1) % this.Keyframes.Length;
+            var currKeyframe = Keyframes.ElementAt(currFrame);
+            var nextKeyframe = Keyframes.ElementAt(nextFrame);
 
-                var currKey = this.Keyframes[currFrame];
-                var nextKey = this.Keyframes[nextFrame];
+            var diffTime = nextKeyframe.Time - currKeyframe.Time;
+            if (diffTime < 0f)
+            {
+                diffTime += Duration;
+            }
 
-                var diffTime = nextKey.Time - currKey.Time;
-                if (diffTime < 0.0)
-                {
-                    diffTime += this.Duration;
-                }
+            if (diffTime > 0f)
+            {
+                //Interpolate between frames
+                var amount = (deltaTime - currKeyframe.Time) / diffTime;
 
-                if (diffTime > 0.0)
-                {
-                    //Interpolate
-                    var factor = (deltaTime - currKey.Time) / diffTime;
-
-                    translation = currKey.Translation + (nextKey.Translation - currKey.Translation) * factor;
-                    rotation = Quaternion.Slerp(currKey.Rotation, nextKey.Rotation, factor);
-                    scale = currKey.Scale + (nextKey.Scale - currKey.Scale) * factor;
-                }
-                else
-                {
-                    //Use current frame
-                    translation = currKey.Translation;
-                    rotation = currKey.Rotation;
-                    scale = currKey.Scale;
-                }
+                translation = Vector3.Lerp(currKeyframe.Translation, nextKeyframe.Translation, amount);
+                rotation = Quaternion.Slerp(currKeyframe.Rotation, nextKeyframe.Rotation, amount);
+                scale = Vector3.Lerp(currKeyframe.Scale, nextKeyframe.Scale, amount);
+            }
+            else
+            {
+                //Use current frame
+                translation = currKeyframe.Translation;
+                rotation = currKeyframe.Rotation;
+                scale = currKeyframe.Scale;
             }
         }
         /// <summary>
-        /// Gets text representation
+        /// Finds the frame index of the specified key time
         /// </summary>
-        /// <returns>Returns text representation</returns>
+        /// <param name="keyTime">Key time</param>
+        private int FindFrame(float keyTime)
+        {
+            if (Keyframes?.Any() != true)
+            {
+                return 0;
+            }
+
+            int frameIndex = 0;
+
+            while (frameIndex < Keyframes.Count - 1)
+            {
+                if (keyTime < Keyframes.ElementAt(frameIndex + 1).Time)
+                {
+                    break;
+                }
+                frameIndex++;
+            }
+
+            if (frameIndex >= Keyframes.Count)
+            {
+                frameIndex = 0;
+            }
+
+            return frameIndex;
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Start: {0:0.00000}; End: {1:0.00000}; Keyframes: {2}", this.StartTime, this.EndTime, this.Keyframes.Length);
+            return $"Start: {StartTime:0.00000}; End: {EndTime:0.00000}; Keyframes: {Keyframes?.Count ?? 0}";
         }
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(JointAnimation other)
         {
             return
-                this.Joint == other.Joint &&
-                Helper.ListIsEqual(this.Keyframes, other.Keyframes) &&
-                this.StartTime == other.StartTime &&
-                this.EndTime == other.EndTime;
+                Joint == other.Joint &&
+                Helper.ListIsEqual(Keyframes, other.Keyframes) &&
+                StartTime == other.StartTime &&
+                EndTime == other.EndTime;
+        }
+
+        /// <summary>
+        /// Makes a copy of the instance keyframes
+        /// </summary>
+        /// <returns>Returns a copy of the instance keyframes</returns>
+        public JointAnimation Copy()
+        {
+            if (Keyframes?.Any() != true)
+            {
+                return new JointAnimation(Joint, new Keyframe[] { });
+            }
+
+            Keyframe[] kfs = new Keyframe[Keyframes.Count];
+            Array.Copy(Keyframes.ToArray(), kfs, kfs.Length);
+
+            return new JointAnimation(Joint, kfs);
+        }
+        /// <summary>
+        /// Makes a copy of a range of the instance keyframes
+        /// </summary>
+        /// <param name="indexFrom">Keyframe from</param>
+        /// <param name="indexTo">Keyframe to</param>
+        /// <returns>Returns a copy of the instance keyframes</returns>
+        public JointAnimation Copy(int indexFrom, int indexTo)
+        {
+            if (Keyframes?.Any() != true)
+            {
+                return new JointAnimation(Joint, new Keyframe[] { });
+            }
+
+            Keyframe[] kfs = new Keyframe[indexTo - indexFrom + 1];
+            Array.Copy(Keyframes.ToArray(), indexFrom, kfs, 0, kfs.Length);
+
+            //Adjust copy time
+            float dTime = kfs[0].Time;
+            for (int k = 0; k < kfs.Length; k++)
+            {
+                kfs[k].Time -= dTime;
+            }
+
+            return new JointAnimation(Joint, kfs);
         }
     }
 }

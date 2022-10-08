@@ -7,13 +7,13 @@ namespace Engine
     public class SceneObjectDescription
     {
         /// <summary>
-        /// Name
+        /// The object starts active
         /// </summary>
-        public string Name { get; set; } = null;
+        public bool StartsActive { get; set; } = true;
         /// <summary>
-        /// Is Static
+        /// The object starts visible
         /// </summary>
-        public bool Static { get; set; } = false;
+        public bool StartsVisible { get; set; } = true;
         /// <summary>
         /// Gets or sets whether the object cast shadow
         /// </summary>
@@ -27,10 +27,9 @@ namespace Engine
         /// </summary>
         public bool DepthEnabled { get; set; } = true;
         /// <summary>
-        /// Enables transparent blending
+        /// Blend mode
         /// </summary>
-        public bool AlphaEnabled { get; set; } = false;
-
+        public BlendModes BlendMode { get; set; } = BlendModes.Default;
         /// <summary>
         /// Use spheric volume for culling by default
         /// </summary>

@@ -1,8 +1,8 @@
 # Skirmish
 Game and prototypes with SharpDX and Directx 11
 
-[![Build status](https://ci.appveyor.com/api/projects/status/e1lcje4hewpwihxq/branch/master?svg=true)](https://ci.appveyor.com/project/Selinux24/skirmish-a9uwh/branch/master)
-[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish_master)
+![Build](https://github.com/Selinux24/Skirmish/workflows/Build/badge.svg?branch=dev)
+[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish_dev)
 
 ### What is it?
 
@@ -95,5 +95,10 @@ There are several prototypes:
  
  ![screenshot](/Docs/Images/Z.png?raw=true)
  
+ ## Credits
+
+ This project contains a full c# conversion of the [Detour & Recast](https://github.com/recastnavigation/recastnavigation) libraries of Mikko Mononen:
  
+ > copyright (c) 2009 Mikko Mononen memon@inside.org.
  
+ Thanks a lot, Mikko. You are a genius!

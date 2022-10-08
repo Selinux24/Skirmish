@@ -10,12 +10,16 @@ namespace Engine.Common
         /// <summary>
         /// Context name
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; set; } = string.Empty;
         /// <summary>
         /// Drawer mode
         /// </summary>
-        public DrawerModes DrawerMode { get; set; }
+        public DrawerModes DrawerMode { get; set; } = DrawerModes.Forward;
 
+        /// <summary>
+        /// Engine form
+        /// </summary>
+        public EngineForm Form { get; set; }
         /// <summary>
         /// Game time
         /// </summary>
@@ -27,19 +31,23 @@ namespace Engine.Common
         /// <summary>
         /// Camera culling volume
         /// </summary>
-        public CullingVolumeCamera CameraVolume { get; set; }
+        public IntersectionVolumeFrustum CameraVolume { get; set; }
         /// <summary>
         /// Eye position
         /// </summary>
         public Vector3 EyePosition { get; set; }
         /// <summary>
-        /// Eye target
+        /// Eye view direction
         /// </summary>
-        public Vector3 EyeTarget { get; set; }
+        public Vector3 EyeDirection { get; set; }
         /// <summary>
         /// Lights
         /// </summary>
         public SceneLights Lights { get; set; }
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public Vector3 LevelOfDetail { get; set; }
 
         /// <summary>
         /// Directional shadow map
@@ -55,12 +63,43 @@ namespace Engine.Common
         public IShadowMap ShadowMapSpot { get; set; }
 
         /// <summary>
-        /// Constructor
+        /// Validates the drawing stage
         /// </summary>
-        public DrawContext()
+        /// <param name="blendMode">Blend mode</param>
+        /// <returns>Returns true if the specified blend mode is valid for the current drawing stage</returns>
+        public bool ValidateDraw(BlendModes blendMode)
         {
-            this.Name = string.Empty;
-            this.DrawerMode = DrawerModes.Forward;
+            if (DrawerMode.HasFlag(DrawerModes.OpaqueOnly))
+            {
+                return blendMode.HasFlag(BlendModes.Opaque);
+            }
+
+            if (DrawerMode.HasFlag(DrawerModes.TransparentOnly))
+            {
+                return blendMode.HasFlag(BlendModes.Alpha) || blendMode.HasFlag(BlendModes.Transparent);
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Validates the drawing stage
+        /// </summary>
+        /// <param name="blendMode">Blend mode</param>
+        /// <param name="transparent">The component to draw is has transparency</param>
+        /// <returns>Returns true if the specified blend mode is valid for the current drawing stage</returns>
+        public bool ValidateDraw(BlendModes blendMode, bool transparent)
+        {
+            if (DrawerMode.HasFlag(DrawerModes.OpaqueOnly) && !transparent)
+            {
+                return blendMode.HasFlag(BlendModes.Opaque);
+            }
+
+            if (DrawerMode.HasFlag(DrawerModes.TransparentOnly) && transparent)
+            {
+                return blendMode.HasFlag(BlendModes.Alpha) || blendMode.HasFlag(BlendModes.Transparent);
+            }
+
+            return false;
         }
     }
 }

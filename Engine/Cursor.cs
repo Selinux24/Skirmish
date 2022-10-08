@@ -1,19 +1,14 @@
-﻿using SharpDX;
-using Point = System.Drawing.Point;
-
+﻿
 namespace Engine
 {
-    using Engine.Common;
+    using Point = System.Drawing.Point;
+    using SystemCursor = System.Windows.Forms.Cursor;
 
     /// <summary>
     /// Game cursor
     /// </summary>
-    public class Cursor : Sprite
+    public static class Cursor
     {
-        /// <summary>
-        /// Times Cursor.Show() were called
-        /// </summary>
-        private static int showCount = 1;
         /// <summary>
         /// Times Cursor.Hide() were called
         /// </summary>
@@ -26,98 +21,34 @@ namespace Engine
         {
             get
             {
-                return System.Windows.Forms.Cursor.Position;
+                return SystemCursor.Position;
             }
             set
             {
-                System.Windows.Forms.Cursor.Position = value;
+                SystemCursor.Position = value;
             }
         }
-
-        /// <summary>
-        /// Current cursor position
-        /// </summary>
-        public Vector2 CursorPosition { get; private set; }
-        /// <summary>
-        /// Gets or sets whether the cursor is positioned on center of the image
-        /// </summary>
-        public bool Centered { get; set; }
-        /// <summary>
-        /// Position delta
-        /// </summary>
-        public Vector2 Delta { get; set; }
 
         /// <summary>
         /// Shows the cursor
         /// </summary>
         public static void Show()
         {
-            while (hideCount > 0)
+            for (int i = 0; i < hideCount; i++)
             {
-                hideCount--;
-                System.Windows.Forms.Cursor.Show();
+                SystemCursor.Show();
             }
 
-            showCount++;
+            hideCount = 0;
         }
         /// <summary>
         /// Hides the cursor
         /// </summary>
         public static void Hide()
         {
-            while (showCount > 0)
-            {
-                showCount--;
-                System.Windows.Forms.Cursor.Hide();
-            }
+            SystemCursor.Hide();
 
             hideCount++;
-        }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Sprite description</param>
-        public Cursor(Scene scene, CursorDescription description)
-            : base(scene, description)
-        {
-            this.Centered = description.Centered;
-            this.Delta = description.Delta;
-        }
-
-        /// <summary>
-        /// Update cursor state
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Update(UpdateContext context)
-        {
-            float left = 0f;
-            float top = 0f;
-
-            if (this.Centered)
-            {
-                left = (this.Game.Input.MouseX - (this.Width * 0.5f));
-                top = (this.Game.Input.MouseY - (this.Height * 0.5f));
-            }
-            else
-            {
-                left = (this.Game.Input.MouseX);
-                top = (this.Game.Input.MouseY);
-            }
-
-            this.CursorPosition = new Vector2((int)left, (int)top) + this.Delta;
-
-            if (this.Centered && this.Game.Input.LockMouse)
-            {
-                this.Manipulator.SetPosition(this.Game.Form.RelativeCenter);
-            }
-            else
-            {
-                this.Manipulator.SetPosition(this.CursorPosition);
-            }
-
-            base.Update(context);
         }
     }
 }

@@ -1,14 +1,15 @@
-﻿using SharpDX;
+﻿using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Water;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Water drawer
     /// </summary>
-    public class Water : Drawable
+    public sealed class Water : Drawable<WaterDescription>
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -18,15 +19,38 @@ namespace Engine
         /// Index buffer descriptor
         /// </summary>
         private BufferDescriptor indexBuffer = null;
+        /// <summary>
+        /// Water drawer
+        /// </summary>
+        private BuiltInWater waterDrawer = null;
 
         /// <summary>
-        /// Water description
+        /// Water state
         /// </summary>
-        protected new WaterDescription Description
+        public WaterState WaterState { get; private set; }
+        /// <summary>
+        /// Returns true if the buffers were ready
+        /// </summary>
+        public bool BuffersReady
         {
             get
             {
-                return (WaterDescription)base.Description;
+                if (vertexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer?.Ready != true)
+                {
+                    return false;
+                }
+
+                if (indexBuffer.Count <= 0)
+                {
+                    return false;
+                }
+
+                return true;
             }
         }
 
@@ -34,11 +58,12 @@ namespace Engine
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public Water(Scene scene, WaterDescription description)
-            : base(scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public Water(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            this.InitializeBuffers(description.Name, description.PlaneSize, description.PlaneHeight);
+
         }
         /// <summary>
         /// Destructor
@@ -56,63 +81,30 @@ namespace Engine
             if (disposing)
             {
                 //Remove data from buffer manager
-                this.BufferManager?.RemoveVertexData(this.vertexBuffer);
-                this.BufferManager?.RemoveIndexData(this.indexBuffer);
+                BufferManager?.RemoveVertexData(vertexBuffer);
+                BufferManager?.RemoveIndexData(indexBuffer);
             }
         }
 
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
-        public override void Draw(DrawContext context)
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(WaterDescription description)
         {
-            var mode = context.DrawerMode;
-            var draw =
-                (mode.HasFlag(DrawerModes.OpaqueOnly) && !this.Description.AlphaEnabled) ||
-                (mode.HasFlag(DrawerModes.TransparentOnly) && this.Description.AlphaEnabled);
+            await base.InitializeAssets(description);
 
-            if (draw && this.indexBuffer.Count > 0)
+            WaterState = new WaterState
             {
-                var effect = DrawerPool.EffectDefaultWater;
-                var technique = DrawerPool.EffectDefaultWater.Water;
+                BaseColor = Description.BaseColor,
+                WaterColor = Description.WaterColor,
+                WaveHeight = Description.WaveHeight,
+                WaveChoppy = Description.WaveChoppy,
+                WaveSpeed = Description.WaveSpeed,
+                WaveFrequency = Description.WaveFrequency,
+                Steps = Description.HeightmapIterations,
+                GeometryIterations = Description.GeometryIterations,
+                ColorIterations = Description.ColorIterations,
+            };
 
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += this.indexBuffer.Count / 3;
-
-                this.BufferManager.SetIndexBuffer(this.indexBuffer.Slot);
-                this.BufferManager.SetInputAssembler(technique, this.vertexBuffer.Slot, Topology.TriangleList);
-
-                effect.UpdatePerFrame(
-                    context.ViewProjection,
-                    context.EyePosition + new Vector3(0, -Description.PlaneHeight, 0),
-                    context.Lights,
-                    new EffectWaterState
-                    {
-                        BaseColor = this.Description.BaseColor,
-                        WaterColor = this.Description.WaterColor,
-                        WaveHeight = this.Description.WaveHeight,
-                        WaveChoppy = this.Description.WaveChoppy,
-                        WaveSpeed = this.Description.WaveSpeed,
-                        WaveFrequency = this.Description.WaveFrequency,
-                        TotalTime = context.GameTime.TotalSeconds,
-                        Steps = this.Description.HeightmapIterations,
-                        GeometryIterations = this.Description.GeometryIterations,
-                        ColorIterations = this.Description.ColorIterations,
-                    });
-
-                var graphics = this.Game.Graphics;
-
-                for (int p = 0; p < technique.PassCount; p++)
-                {
-                    graphics.EffectPassApply(technique, p, 0);
-
-                    graphics.DrawIndexed(
-                        this.indexBuffer.Count,
-                        this.indexBuffer.Offset,
-                        this.vertexBuffer.Offset);
-                }
-            }
+            InitializeBuffers(Name, Description.PlaneSize, Description.PlaneHeight);
         }
         /// <summary>
         /// Initialize buffers
@@ -122,14 +114,65 @@ namespace Engine
         /// <param name="planeHeight">Plane height</param>
         private void InitializeBuffers(string name, float planeSize, float planeHeight)
         {
-            GeometryUtil.CreateXZPlane(
-                planeSize, planeHeight,
-                out Vector3[] vData, out Vector3[] nData, out Vector2[] uvs, out uint[] iData);
+            var plane = GeometryUtil.CreateXZPlane(planeSize, planeHeight);
 
-            var vertices = VertexPositionTexture.Generate(vData, uvs);
-            this.vertexBuffer = this.BufferManager.Add(name, vertices, false, 0);
+            var vertices = VertexPositionTexture.Generate(plane.Vertices, plane.Uvs);
+            var indices = plane.Indices;
 
-            this.indexBuffer = this.BufferManager.Add(name, iData, false);
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
+
+            waterDrawer = BuiltInShaders.GetDrawer<BuiltInWater>();
+        }
+
+        /// <inheritdoc/>
+        public override void Draw(DrawContext context)
+        {
+            if (!Visible)
+            {
+                return;
+            }
+
+            if (!BuffersReady)
+            {
+                return;
+            }
+
+            if (waterDrawer == null)
+            {
+                return;
+            }
+
+            bool draw = context.ValidateDraw(BlendMode);
+            if (!draw)
+            {
+                return;
+            }
+
+            var waterState = new BuiltInWaterState
+            {
+                BaseColor = WaterState.BaseColor,
+                WaterColor = WaterState.WaterColor,
+                WaveHeight = WaterState.WaveHeight,
+                WaveChoppy = WaterState.WaveChoppy,
+                WaveSpeed = WaterState.WaveSpeed,
+                WaveFrequency = WaterState.WaveFrequency,
+                Steps = WaterState.Steps,
+                GeometryIterations = WaterState.GeometryIterations,
+                ColorIterations = WaterState.ColorIterations,
+            };
+            waterDrawer.UpdateWater(waterState);
+
+            var drawOptions = new DrawOptions
+            {
+                VertexBuffer = vertexBuffer,
+                IndexBuffer = indexBuffer,
+                Topology = Topology.TriangleList,
+            };
+            waterDrawer.Draw(BufferManager, drawOptions);
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
         }
     }
 }
