@@ -314,8 +314,8 @@ namespace Instancing
 
             SetPostProcessingEffects();
 
-            postProcessState.Tween((s, value) => s.BlurIntensity = value, 1, 0, 10000, ScaleFuncs.CubicEaseOut);
-            postProcessState.TweenBounce((s, value) => s.BloomForce = value, 0, 1, 1000, ScaleFuncs.CubicEaseInOut);
+            postProcessState.Tween((s, value) => s.SepiaIntensity = value, 1, 0, 15000, ScaleFuncs.CubicEaseOut);
+            postProcessState.Tween((s, value) => s.BlurIntensity = value, 1, 0, 30000, ScaleFuncs.CubicEaseOut);
 
             gameReady = true;
         }
@@ -465,11 +465,12 @@ namespace Instancing
 
         private void SetPostProcessingEffects()
         {
+            postProcessState.AddSepia();
             postProcessState.AddBlurStrong();
             postProcessState.AddBloom();
             postProcessState.AddToneMapping(BuiltInToneMappingTones.LumaBasedReinhard);
 
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, postProcessState);
+            Renderer.PostProcessingObjectsEffects = postProcessState;
         }
     }
 }

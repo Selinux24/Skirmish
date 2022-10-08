@@ -43,7 +43,7 @@ namespace Engine
 
             var screen = GeometryUtil.CreateScreen((int)graphics.Viewport.Width, (int)graphics.Viewport.Height);
             var vertices = VertexPositionTexture.Generate(screen.Vertices, screen.Uvs);
-        
+
             indexBuffer = bufferManager.AddIndexData("Post processing index buffer", false, screen.Indices);
             vertexBuffer = bufferManager.AddVertexData("Post processing vertex buffer", false, vertices);
 

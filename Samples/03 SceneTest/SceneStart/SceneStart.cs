@@ -44,13 +44,9 @@ namespace SceneTest.SceneStart
 
             GameEnvironment.Background = Color.Black;
 
-            var objectsPostProcessState = new BuiltInPostProcessState();
-            objectsPostProcessState.AddBlurStrong();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, objectsPostProcessState);
+            Renderer.PostProcessingObjectsEffects.AddBlurStrong();
 
-            var finalPostProcessState = new BuiltInPostProcessState();
-            finalPostProcessState.AddToneMapping(BuiltInToneMappingTones.Filmic);
-            Renderer?.SetPostProcessingEffect(RenderPass.Final, finalPostProcessState);
+            Renderer.PostProcessingFinalEffects.AddToneMapping(BuiltInToneMappingTones.Filmic);
         }
 
         public override async Task Initialize()

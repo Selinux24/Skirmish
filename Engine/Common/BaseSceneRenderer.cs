@@ -16,21 +16,6 @@ namespace Engine.Common
     public abstract class BaseSceneRenderer : ISceneRenderer
     {
         /// <summary>
-        /// Post-processing effect descriptor
-        /// </summary>
-        struct PostProcessingEffect
-        {
-            /// <summary>
-            /// Render pass
-            /// </summary>
-            public RenderPass RenderPass { get; set; }
-            /// <summary>
-            /// State
-            /// </summary>
-            public BuiltInPostProcessState State { get; set; }
-        }
-
-        /// <summary>
         /// Render targets
         /// </summary>
         protected enum Targets
@@ -83,10 +68,6 @@ namespace Engine.Common
         /// Post-processing render target B
         /// </summary>
         private RenderTarget postProcessingTargetB = null;
-        /// <summary>
-        /// Post-processing effects
-        /// </summary>
-        private PostProcessingEffect postProcessingEffect;
 
         /// <summary>
         /// Shadow map size
@@ -204,10 +185,35 @@ namespace Engine.Common
         /// </summary>
         protected bool Updated { get; set; }
 
-        /// <summary>
-        /// Gets or sets whether the post processing effect is enabled.
-        /// </summary>
-        public bool PostProcessingEnabled { get; set; } = false;
+        /// <inheritdoc/>
+        public bool PostProcessingEnabled
+        {
+            get
+            {
+                if (PostProcessingObjectsEffects?.Ready == true)
+                {
+                    return true;
+                }
+
+                if (PostProcessingUIEffects?.Ready == true)
+                {
+                    return true;
+                }
+
+                if (PostProcessingFinalEffects?.Ready == true)
+                {
+                    return true;
+                }
+
+                return false;
+            }
+        }
+        /// <inheritdoc/>
+        public BuiltInPostProcessState PostProcessingObjectsEffects { get; set; } = BuiltInPostProcessState.Empty;
+        /// <inheritdoc/>
+        public BuiltInPostProcessState PostProcessingUIEffects { get; set; } = BuiltInPostProcessState.Empty;
+        /// <inheritdoc/>
+        public BuiltInPostProcessState PostProcessingFinalEffects { get; set; } = BuiltInPostProcessState.Empty;
 
         /// <summary>
         /// Constructor
@@ -323,9 +329,7 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Resizes buffers
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void Resize()
         {
             sceneObjectsTarget?.Resize();
@@ -335,11 +339,7 @@ namespace Engine.Common
             postProcessingTargetB?.Resize();
             processingDrawer?.Resize();
         }
-        /// <summary>
-        /// Gets renderer resources
-        /// </summary>
-        /// <param name="result">Resource type</param>
-        /// <returns>Returns renderer specified resource, if renderer produces that resource.</returns>
+        /// <inheritdoc/>
         public virtual EngineShaderResourceView GetResource(SceneRendererResults result)
         {
             if (result == SceneRendererResults.ShadowMapDirectional) return ShadowMapDirectional;
@@ -348,10 +348,7 @@ namespace Engine.Common
             return null;
         }
 
-        /// <summary>
-        /// Updates scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <inheritdoc/>
         public virtual void Update(GameTime gameTime)
         {
             //Updates the update context
@@ -406,11 +403,7 @@ namespace Engine.Common
             UpdateContext.Lights = Scene.Lights;
         }
 
-        /// <summary>
-        /// Draws scene components
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="scene">Scene</param>
+        /// <inheritdoc/>
         public abstract void Draw(GameTime gameTime);
         /// <summary>
         /// Updates the draw context
@@ -437,14 +430,12 @@ namespace Engine.Common
             DrawContext.ShadowMapSpot = ShadowMapperSpot;
         }
 
-        /// <summary>
-        /// Update renderer globals
-        /// </summary>
+        /// <inheritdoc/>
         public virtual void UpdateGlobals()
         {
-            ShadowMapperDirectional.UpdateGlobals();
-            ShadowMapperPoint.UpdateGlobals();
-            ShadowMapperSpot.UpdateGlobals();
+            ShadowMapperDirectional?.UpdateGlobals();
+            ShadowMapperPoint?.UpdateGlobals();
+            ShadowMapperSpot?.UpdateGlobals();
         }
 
         /// <summary>
@@ -1199,6 +1190,38 @@ namespace Engine.Common
             postProcessingTargetB = tmp;
         }
         /// <summary>
+        /// Validates the post-processing render pass
+        /// </summary>
+        /// <param name="renderPass">Render pass</param>
+        /// <param name="state">Gets the render pass state</param>
+        private bool ValidateRenderPass(RenderPass renderPass, out BuiltInPostProcessState state)
+        {
+            if (renderPass == RenderPass.Objects && PostProcessingObjectsEffects.Ready)
+            {
+                state = PostProcessingObjectsEffects;
+
+                return true;
+            }
+
+            if (renderPass == RenderPass.UI && PostProcessingUIEffects.Ready)
+            {
+                state = PostProcessingUIEffects;
+
+                return true;
+            }
+
+            if (renderPass == RenderPass.Final && PostProcessingFinalEffects.Ready)
+            {
+                state = PostProcessingFinalEffects;
+
+                return true;
+            }
+
+            state = null;
+
+            return false;
+        }
+        /// <summary>
         /// Does the post-processing draw
         /// </summary>
         /// <param name="target">Target to set restul</param>
@@ -1206,12 +1229,7 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         protected virtual bool DoPostProcessing(Targets target, RenderPass renderPass, GameTime gameTime)
         {
-            if (!PostProcessingEnabled)
-            {
-                return false;
-            }
-
-            if (postProcessingEffect.RenderPass != renderPass)
+            if (!ValidateRenderPass(renderPass, out var state))
             {
                 return false;
             }
@@ -1225,13 +1243,13 @@ namespace Engine.Common
             graphics.SetDepthStencilNone();
             graphics.SetBlendDefault();
 
-            var drawer = processingDrawer.UpdateEffectParameters(postProcessingEffect.State);
+            var drawer = processingDrawer.UpdateEffectParameters(state);
             if (drawer == null)
             {
                 return false;
             }
 
-            var activeEffects = postProcessingEffect.State.GetEffects();
+            var activeEffects = state.GetEffects();
 
             for (int i = 0; i < activeEffects.Count(); i++)
             {
@@ -1326,28 +1344,12 @@ namespace Engine.Common
             processingDrawer.Draw(drawer);
         }
 
-        /// <summary>
-        /// Sets the post-processing effect
-        /// </summary>
-        /// <param name="renderPass">Render pass</param>
-        /// <param name="state">State</param>
-        public void SetPostProcessingEffect(RenderPass renderPass, BuiltInPostProcessState state)
-        {
-            postProcessingEffect = new PostProcessingEffect
-            {
-                RenderPass = renderPass,
-                State = state,
-            };
-
-            PostProcessingEnabled = true;
-        }
-        /// <summary>
-        /// Clears the post-processing effect
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearPostProcessingEffects()
         {
-            postProcessingEffect = new PostProcessingEffect();
-            PostProcessingEnabled = false;
+            PostProcessingObjectsEffects = BuiltInPostProcessState.Empty;
+            PostProcessingUIEffects = BuiltInPostProcessState.Empty;
+            PostProcessingFinalEffects = BuiltInPostProcessState.Empty;
         }
     }
 }

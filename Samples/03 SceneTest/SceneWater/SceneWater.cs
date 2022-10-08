@@ -1,6 +1,7 @@
 ﻿using Engine;
-using Engine.BuiltIn.PostProcess;
+using Engine.Tween;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace SceneTest.SceneWater
@@ -37,12 +38,9 @@ namespace SceneTest.SceneWater
 
             Lights.BaseFogColor = Color.White;
 
-            var postProcessing = BuiltInPostProcessState.Empty;
-            postProcessing.AddBloomLow();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, postProcessing);
+            Renderer.PostProcessingObjectsEffects.AddBloomLow();
 
             GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
-            //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
 
             InitializeComponents();
         }
@@ -186,6 +184,10 @@ namespace SceneTest.SceneWater
             {
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
+
+            float gradient = (-Vector3.Dot(Lights.KeyLight.Direction, Camera.Direction) + 1f) * 0.5f;
+            gradient = Math.Min(0.5f, gradient);
+            Renderer.PostProcessingObjectsEffects.BloomForce = ScaleFuncs.CubicEaseIn(gradient);
         }
 
         private void ToggleFog()

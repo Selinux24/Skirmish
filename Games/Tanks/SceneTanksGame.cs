@@ -2071,13 +2071,13 @@ You will lost all the game progress.",
         }
         private void SetOnGameEffects()
         {
-            Renderer?.ClearPostProcessingEffects();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, onGamePostProcessing);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = onGamePostProcessing;
         }
         private void SetOnModalEffects()
         {
-            Renderer?.ClearPostProcessingEffects();
-            Renderer?.SetPostProcessingEffect(RenderPass.Objects, modalPostProcessing);
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = modalPostProcessing;
         }
     }
 }

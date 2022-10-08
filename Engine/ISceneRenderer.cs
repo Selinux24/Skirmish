@@ -11,6 +11,23 @@ namespace Engine
     public interface ISceneRenderer : IScreenFitted, IDisposable
     {
         /// <summary>
+        /// Gets whether the post processing drawing is enabled.
+        /// </summary>
+        bool PostProcessingEnabled { get; }
+        /// <summary>
+        /// Post-processing objects effects
+        /// </summary>
+        BuiltInPostProcessState PostProcessingObjectsEffects { get; set; }
+        /// <summary>
+        /// Post-processing UI effects
+        /// </summary>
+        BuiltInPostProcessState PostProcessingUIEffects { get; set; }
+        /// <summary>
+        /// Post-processing final effects
+        /// </summary>
+        BuiltInPostProcessState PostProcessingFinalEffects { get; set; }
+
+        /// <summary>
         /// Updates scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>
@@ -21,12 +38,6 @@ namespace Engine
         /// <param name="gameTime">Game time</param>
         void Draw(GameTime gameTime);
 
-        /// <summary>
-        /// Sets the post-processing effect
-        /// </summary>
-        /// <param name="renderPass">Render pass</param>
-        /// <param name="state">State</param>
-        void SetPostProcessingEffect(RenderPass renderPass, BuiltInPostProcessState state);
         /// <summary>
         /// Clears the post-processing effect
         /// </summary>

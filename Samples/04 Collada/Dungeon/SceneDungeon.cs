@@ -98,7 +98,7 @@ namespace Collada.Dungeon
         private void InitializePostProcessing()
         {
             Renderer.ClearPostProcessingEffects();
-            Renderer.SetPostProcessingEffect(RenderPass.Objects, postProcessing);
+            Renderer.PostProcessingObjectsEffects = postProcessing;
         }
 
         private void LoadGameAssets()
