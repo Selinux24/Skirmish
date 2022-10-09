@@ -65,7 +65,7 @@ namespace Engine.Animation
             return
                 Name == other.Name &&
                 Bone == other.Bone &&
-                Helper.ListIsEqual(Childs, other.Childs) &&
+                Helper.CompareEnumerables(Childs, other.Childs) &&
                 Offset == other.Offset;
         }
     }

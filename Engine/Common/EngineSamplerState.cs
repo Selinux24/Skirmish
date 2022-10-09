@@ -159,5 +159,11 @@ namespace Engine.Common
         {
             return state;
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{nameof(EngineSamplerState)} {Name}";
+        }
     }
 }

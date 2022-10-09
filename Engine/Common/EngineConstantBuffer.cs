@@ -115,5 +115,11 @@ namespace Engine.Common
         {
             return buffer;
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{nameof(EngineConstantBuffer<T>)} {Name}";
+        }
     }
 }

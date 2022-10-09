@@ -150,7 +150,7 @@ namespace Engine.Content
         public static bool operator ==(FileArrayImageContent left, FileArrayImageContent right)
         {
             return
-                Helper.ListIsEqual(left.paths, right.paths) &&
+                Helper.CompareEnumerables(left.paths, right.paths) &&
                 left.cropRectangle == right.cropRectangle;
         }
         /// <inheritdoc/>

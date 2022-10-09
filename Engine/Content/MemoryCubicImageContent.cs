@@ -70,7 +70,7 @@ namespace Engine.Content
         {
             return
                 left.stream == right.stream &&
-                Helper.ListIsEqual(left.faces, right.faces);
+                Helper.CompareEnumerables(left.faces, right.faces);
         }
         /// <inheritdoc/>
         public bool Equals(MemoryCubicImageContent other)

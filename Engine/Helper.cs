@@ -494,58 +494,51 @@ namespace Engine
         /// Compares two enumerable lists, element by element
         /// </summary>
         /// <typeparam name="T">Element type</typeparam>
-        /// <param name="enum1">First list</param>
-        /// <param name="enum2">Second list</param>
-        /// <returns>Returns true if both list are equal</returns>
-        public static bool ListIsEqual<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
+        /// <param name="enum1">First enumerable list</param>
+        /// <param name="enum2">Second enumerable list</param>
+        /// <returns>Returns true if both enumerables contains the same elements</returns>
+        public static bool CompareEnumerables<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
         {
             if (enum1 == null && enum2 == null)
             {
                 return true;
             }
-            else if (enum1 != null && enum2 != null)
+
+            if (!(enum1 != null && enum2 != null))
             {
-                var list1 = enum1.ToList();
-                var list2 = enum2.ToList();
-
-                if (list1.Count == list2.Count)
-                {
-                    if (list1.Count > 0 && !IsEqual(list1, list2))
-                    {
-                        return false;
-                    }
-
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            if (enum1.Count() != enum2.Count())
+            {
+                return false;
+            }
+
+            if (!CompareEnumerableElements(enum1, enum2))
+            {
+                return false;
+            }
+
+            return true;
         }
         /// <summary>
-        /// Compares two lists
+        /// Compares two enumerables item by item
         /// </summary>
-        /// <typeparam name="T">Type of items in the list</typeparam>
-        /// <param name="list1">First list</param>
-        /// <param name="list2">Second list</param>
-        /// <returns>Returns false if the lists were not equal</returns>
-        private static bool IsEqual<T>(List<T> list1, List<T> list2)
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="enum1">First enumerable list</param>
+        /// <param name="enum2">Second enumerable list</param>
+        /// <returns></returns>
+        private static bool CompareEnumerableElements<T>(IEnumerable<T> enum1, IEnumerable<T> enum2)
         {
-            bool equatable = list1[0] is IEquatable<T>;
-
-            for (int i = 0; i < list1.Count; i++)
+            for (int i = 0; i < enum1.Count(); i++)
             {
-                bool equal;
+                var item1 = enum1.ElementAt(i);
+                var item2 = enum2.ElementAt(i);
 
-                if (equatable)
+                if (item1?.Equals(item2) != true)
                 {
-                    equal = ((IEquatable<T>)list1[i]).Equals(list2[i]);
+                    return false;
                 }
-                else
-                {
-                    equal = list1[i].Equals(list2[i]);
-                }
-
-                if (!equal) return false;
             }
 
             return true;

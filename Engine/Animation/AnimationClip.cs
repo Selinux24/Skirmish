@@ -48,7 +48,7 @@ namespace Engine.Animation
             return
                 Name == other.Name &&
                 Duration == other.Duration &&
-                Helper.ListIsEqual(Animations, other.Animations);
+                Helper.CompareEnumerables(Animations, other.Animations);
         }
     }
 }

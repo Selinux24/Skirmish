@@ -34,10 +34,10 @@ namespace Engine.Modular
         /// <param name="state">Initial state</param>
         public ModularSceneryItem(ObjectReference obj, ModelInstance item, ParticleEmitter[] emitters, string state)
         {
-            this.Object = obj;
-            this.Item = item;
-            this.Emitters = emitters;
-            this.CurrentState = state;
+            Object = obj;
+            Item = item;
+            Emitters = emitters;
+            CurrentState = state;
         }
     }
 }

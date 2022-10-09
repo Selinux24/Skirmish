@@ -339,7 +339,7 @@ namespace Engine.BuiltIn
                 streamOutBuffer.DrawAuto();
             }
 
-            Graphics.SetStreamOutputTargets(null);
+            Graphics.SetGeometryShaderStreamOutputTargets(null);
         }
     }
 }

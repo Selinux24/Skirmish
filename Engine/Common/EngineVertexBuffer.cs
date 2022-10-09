@@ -183,7 +183,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetStreamOutputTargets()
         {
-            Graphics.SetStreamOutputTargets(StreamOutBinding);
+            Graphics.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
         }
         /// <inheritdoc/>
         public void Draw(int drawCount)

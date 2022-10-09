@@ -293,7 +293,7 @@ namespace Engine.Animation
         public bool Equals(Skeleton other)
         {
             return
-                Helper.ListIsEqual(jointNames, other.jointNames) &&
+                Helper.CompareEnumerables(jointNames, other.jointNames) &&
                 Root.Equals(other.Root);
         }
     }

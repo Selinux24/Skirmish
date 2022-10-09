@@ -173,7 +173,7 @@ namespace Engine.Animation
         {
             return
                 Joint == other.Joint &&
-                Helper.ListIsEqual(Keyframes, other.Keyframes) &&
+                Helper.CompareEnumerables(Keyframes, other.Keyframes) &&
                 StartTime == other.StartTime &&
                 EndTime == other.EndTime;
         }

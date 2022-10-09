@@ -111,5 +111,11 @@ namespace Engine.Common
                 game.Graphics.UpdateTexture2D(this, data);
             }
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{nameof(EngineShaderResourceView)} {Name}";
+        }
     }
 }

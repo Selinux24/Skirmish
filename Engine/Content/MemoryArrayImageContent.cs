@@ -77,7 +77,7 @@ namespace Engine.Content
         public static bool operator ==(MemoryArrayImageContent left, MemoryArrayImageContent right)
         {
             return
-                Helper.ListIsEqual(left.streams, right.streams) &&
+                Helper.CompareEnumerables(left.streams, right.streams) &&
                 left.cropRectangle == right.cropRectangle;
         }
         /// <inheritdoc/>

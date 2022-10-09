@@ -268,9 +268,9 @@ namespace Engine.Animation
         public bool Equals(SkinningData other)
         {
             return
-                animations.ListIsEqual(other.animations) &&
-                clips.ListIsEqual(other.clips) &&
-                offsets.ListIsEqual(other.offsets) &&
+                animations.CompareEnumerables(other.animations) &&
+                clips.CompareEnumerables(other.clips) &&
+                offsets.CompareEnumerables(other.offsets) &&
                 skeleton.Equals(other.skeleton);
         }
     }
