@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
+using SharpDX.Mathematics.Interop;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -58,26 +59,6 @@ namespace Engine
         private SwapChain4 swapChain = null;
 
         /// <summary>
-        /// Current vertex buffer first slot
-        /// </summary>
-        private int currentVertexBufferFirstSlot = -1;
-        /// <summary>
-        /// Current vertex buffer bindings
-        /// </summary>
-        private VertexBufferBinding[] currentVertexBufferBindings = null;
-        /// <summary>
-        /// Current index buffer reference
-        /// </summary>
-        private Buffer currentIndexBufferRef = null;
-        /// <summary>
-        /// Current index buffer format
-        /// </summary>
-        private Format currentIndexFormat = Format.Unknown;
-        /// <summary>
-        /// Current index buffer offset
-        /// </summary>
-        private int currentIndexOffset = -1;
-        /// <summary>
         /// Current primitive topology set in input assembler
         /// </summary>
         private Topology currentIAPrimitiveTopology = Topology.Undefined;
@@ -85,6 +66,10 @@ namespace Engine
         /// Current input layout set in input assembler
         /// </summary>
         private InputLayout currentIAInputLayout = null;
+        /// <summary>
+        /// Current viewport
+        /// </summary>
+        private IEnumerable<RawViewportF> currentViewports;
 
         /// <summary>
         /// Back buffer format
@@ -507,7 +492,7 @@ namespace Engine
 
             #region Depth Stencil Buffer and View
 
-            depthStencilView = CreateDepthStencil("DefaultDepthStencil", depthFormat, width, height, true);
+            depthStencilView = CreateDepthStencilBuffer("DefaultDepthStencil", depthFormat, width, height, true);
 
             #endregion
 
@@ -610,14 +595,13 @@ namespace Engine
         {
             SetViewport(Viewport);
         }
-
         /// <summary>
         /// Sets viewport
         /// </summary>
         /// <param name="viewport">Viewport</param>
         public void SetViewport(Viewport viewport)
         {
-            deviceContext.Rasterizer.SetViewport(viewport);
+            SetViewPorts(new[] { (RawViewportF)viewport });
         }
         /// <summary>
         /// Sets viewport
@@ -625,7 +609,7 @@ namespace Engine
         /// <param name="viewport">Viewport</param>
         public void SetViewport(ViewportF viewport)
         {
-            deviceContext.Rasterizer.SetViewport(viewport);
+            SetViewPorts(new[] { (RawViewportF)viewport });
         }
         /// <summary>
         /// Sets viewports
@@ -633,9 +617,7 @@ namespace Engine
         /// <param name="viewports">Viewports</param>
         public void SetViewports(IEnumerable<Viewport> viewports)
         {
-            var rawVpArray = viewports.Select(v => (SharpDX.Mathematics.Interop.RawViewportF)v).ToArray();
-
-            deviceContext.Rasterizer.SetViewports(rawVpArray);
+            SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
         }
         /// <summary>
         /// Sets viewports
@@ -643,9 +625,22 @@ namespace Engine
         /// <param name="viewports">Viewports</param>
         public void SetViewports(IEnumerable<ViewportF> viewports)
         {
-            var rawVpArray = viewports.Select(v => (SharpDX.Mathematics.Interop.RawViewportF)v).ToArray();
+            SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
+        }
+        /// <summary>
+        /// Sets viewports
+        /// </summary>
+        /// <param name="viewports">Viewports</param>
+        private void SetViewPorts(IEnumerable<RawViewportF> viewports)
+        {
+            if (Helper.CompareEnumerables(currentViewports, viewports))
+            {
+                return;
+            }
 
-            deviceContext.Rasterizer.SetViewports(rawVpArray);
+            deviceContext.Rasterizer.SetViewports(viewports.ToArray());
+
+            currentViewports = viewports;
         }
 
         /// <summary>
@@ -674,18 +669,16 @@ namespace Engine
                 ClearShaderResources();
             }
 
-            var rtv = renderTargets?.GetRenderTargets()?.ToArray();
-            var rtvCount = renderTargets?.Count ?? 0;
+            var rtv = renderTargets?.GetRenderTargets() ?? Enumerable.Empty<RenderTargetView1>();
+            var rtvCount = rtv.Count();
 
-            deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv);
+            deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv.ToArray());
 
-            if (clearRT && rtv != null && rtvCount > 0)
+            if (clearRT && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(
-                        rtv[i],
-                        clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
                 }
             }
         }
@@ -722,15 +715,16 @@ namespace Engine
             }
 
             var dsv = depthMap?.GetDepthStencil();
-            var rtv = renderTargets?.GetRenderTargets()?.ToArray() ?? new RenderTargetView1[] { };
+            var rtv = renderTargets?.GetRenderTargets() ?? Enumerable.Empty<RenderTargetView1>();
+            var rtvCount = rtv.Count();
 
-            deviceContext.OutputMerger.SetTargets(dsv, 0, new UnorderedAccessView[] { }, new int[] { }, rtv);
+            deviceContext.OutputMerger.SetTargets(dsv, 0, new UnorderedAccessView[] { }, new int[] { }, rtv.ToArray());
 
-            if (clearRT && rtv.Length > 0)
+            if (clearRT && rtvCount > 0)
             {
-                for (int i = 0; i < rtv.Length; i++)
+                for (int i = 0; i < rtvCount; i++)
                 {
-                    deviceContext.ClearRenderTargetView(rtv[i], clearRTColor);
+                    deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
                 }
             }
 
@@ -742,27 +736,10 @@ namespace Engine
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="description">Description</param>
-        /// <param name="stencilRef">Stencil reference</param>
         /// <returns>Returns a new depth stencil state</returns>
-        public EngineDepthStencilState CreateDepthStencilState(string name, EngineDepthStencilStateDescription description, int stencilRef)
+        public EngineDepthStencilState CreateDepthStencilState(string name, EngineDepthStencilStateDescription description)
         {
-            return new EngineDepthStencilState(name, new DepthStencilState(device, (DepthStencilStateDescription)description), stencilRef);
-        }
-        /// <summary>
-        /// Sets depth stencil state
-        /// </summary>
-        /// <param name="state">Depth stencil state</param>
-        public void SetDepthStencilState(EngineDepthStencilState state)
-        {
-            if (currentDepthStencilState != state)
-            {
-                device.ImmediateContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), state.StencilRef);
-                device.ImmediateContext.OutputMerger.DepthStencilReference = state.StencilRef;
-
-                currentDepthStencilState = state;
-
-                Counters.DepthStencilStateChanges++;
-            }
+            return new EngineDepthStencilState(name, new DepthStencilState(device, (DepthStencilStateDescription)description));
         }
 
         /// <summary>
@@ -777,44 +754,6 @@ namespace Engine
         {
             return new EngineBlendState(name, new BlendState1(device, (BlendStateDescription1)description), blendFactor, sampleMask);
         }
-        /// <summary>
-        /// Sets blend state
-        /// </summary>
-        /// <param name="state">Blend state</param>
-        public void SetBlendState(EngineBlendState state)
-        {
-            if (currentBlendState != state)
-            {
-                device.ImmediateContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
-
-                currentBlendState = state;
-
-                Counters.BlendStateChanges++;
-            }
-        }
-        /// <summary>
-        /// Sets blend state
-        /// </summary>
-        /// <param name="blendMode">Blend mode</param>
-        public void SetBlendState(BlendModes blendMode)
-        {
-            if (blendMode.HasFlag(BlendModes.Additive))
-            {
-                SetBlendAdditive();
-            }
-            else if (blendMode.HasFlag(BlendModes.Transparent))
-            {
-                SetBlendTransparent(blendMode.HasFlag(BlendModes.PostProcess));
-            }
-            else if (blendMode.HasFlag(BlendModes.Alpha))
-            {
-                SetBlendAlpha(blendMode.HasFlag(BlendModes.PostProcess));
-            }
-            else
-            {
-                SetBlendDefault();
-            }
-        }
 
         /// <summary>
         /// Creates a new rasterizer state
@@ -824,21 +763,6 @@ namespace Engine
         public EngineRasterizerState CreateRasterizerState(string name, EngineRasterizerStateDescription description)
         {
             return new EngineRasterizerState(name, new RasterizerState2(device, (RasterizerStateDescription2)description));
-        }
-        /// <summary>
-        /// Sets rasterizer state
-        /// </summary>
-        /// <param name="state">Rasterizer state</param>
-        public void SetRasterizerState(EngineRasterizerState state)
-        {
-            if (currentRasterizerState != state)
-            {
-                device.ImmediateContext.Rasterizer.State = state.GetRasterizerState();
-
-                currentRasterizerState = state;
-
-                Counters.RasterizerStateChanges++;
-            }
         }
 
         /// <summary>
@@ -853,7 +777,7 @@ namespace Engine
         }
 
         /// <summary>
-        /// Create depth stencil view
+        /// Create depth stencil buffer view
         /// </summary>
         /// <param name="name">Name</param>
         /// <param name="format">Format</param>
@@ -861,7 +785,7 @@ namespace Engine
         /// <param name="height">Height</param>
         /// <param name="useSamples">Use samples if available</param>
         /// <returns>Returns a depth stencil view</returns>
-        public EngineDepthStencilView CreateDepthStencil(string name, Format format, int width, int height, bool useSamples)
+        public EngineDepthStencilView CreateDepthStencilBuffer(string name, Format format, int width, int height, bool useSamples)
         {
             bool multiSampled = false;
             SampleDescription sampleDescription = new SampleDescription(1, 0);
@@ -1027,8 +951,10 @@ namespace Engine
                 CpuAccessFlags = CpuAccessFlags.None,
                 OptionFlags = ResourceOptionFlags.None
             };
-            var texture = new Texture2D1(device, desc);
-            texture.DebugName = name;
+            var texture = new Texture2D1(device, desc)
+            {
+                DebugName = name
+            };
             using (texture)
             {
                 var rtvDesc = new RenderTargetViewDescription1()
@@ -1093,8 +1019,10 @@ namespace Engine
                 OptionFlags = ResourceOptionFlags.None
             };
 
-            var depthMap = new Texture2D1(device, desc);
-            depthMap.DebugName = name;
+            var depthMap = new Texture2D1(device, desc)
+            {
+                DebugName = name
+            };
             using (depthMap)
             {
                 var dsDescription = new DepthStencilViewDescription
@@ -1148,8 +1076,10 @@ namespace Engine
                 OptionFlags = ResourceOptionFlags.None
             };
 
-            var depthMap = new Texture2D1(device, desc);
-            depthMap.DebugName = name;
+            var depthMap = new Texture2D1(device, desc)
+            {
+                DebugName = name
+            };
             using (depthMap)
             {
                 var dsDescription = new DepthStencilViewDescription
@@ -1206,8 +1136,10 @@ namespace Engine
                 OptionFlags = ResourceOptionFlags.None
             };
 
-            var depthMap = new Texture2D1(device, desc);
-            depthMap.DebugName = name;
+            var depthMap = new Texture2D1(device, desc)
+            {
+                DebugName = name
+            };
             using (depthMap)
             {
                 var dsv = new EngineDepthStencilView[arraySize];
@@ -1270,8 +1202,10 @@ namespace Engine
                 TextureLayout = TextureLayout.Undefined,
             };
 
-            var depthMap = new Texture2D1(device, desc);
-            depthMap.DebugName = name;
+            var depthMap = new Texture2D1(device, desc)
+            {
+                DebugName = name
+            };
             using (depthMap)
             {
                 var dsDescription = new DepthStencilViewDescription
@@ -1328,8 +1262,10 @@ namespace Engine
                 TextureLayout = TextureLayout.Undefined,
             };
 
-            var depthMap = new Texture2D1(device, desc);
-            depthMap.DebugName = name;
+            var depthMap = new Texture2D1(device, desc)
+            {
+                DebugName = name
+            };
             using (depthMap)
             {
                 var dsv = new EngineDepthStencilView[arraySize];

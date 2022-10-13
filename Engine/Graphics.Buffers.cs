@@ -16,13 +16,34 @@ namespace Engine
     public sealed partial class Graphics
     {
         /// <summary>
+        /// Current vertex buffer first slot
+        /// </summary>
+        private int currentVertexBufferFirstSlot = -1;
+        /// <summary>
+        /// Current vertex buffer bindings
+        /// </summary>
+        private VertexBufferBinding[] currentVertexBufferBindings = null;
+        /// <summary>
+        /// Current index buffer reference
+        /// </summary>
+        private Buffer currentIndexBufferRef = null;
+        /// <summary>
+        /// Current index buffer format
+        /// </summary>
+        private Format currentIndexFormat = Format.Unknown;
+        /// <summary>
+        /// Current index buffer offset
+        /// </summary>
+        private int currentIndexOffset = -1;
+
+        /// <summary>
         /// Bind an array of vertex buffers to the input-assembler stage.
         /// </summary>
         /// <param name="firstSlot">The first input slot for binding</param>
         /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
         public void IASetVertexBuffers(int firstSlot, params VertexBufferBinding[] vertexBufferBindings)
         {
-            if (currentVertexBufferFirstSlot != firstSlot || currentVertexBufferBindings != vertexBufferBindings)
+            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
             {
                 deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
                 Counters.IAVertexBuffersSets++;
@@ -388,26 +409,17 @@ namespace Engine
                 return true;
             }
 
-            try
+            deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            using (stream)
             {
-                deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-                using (stream)
-                {
-                    stream.Position = Marshal.SizeOf(default(T)) * offset;
-                    stream.WriteRange(data.ToArray());
-                }
-                deviceContext.UnmapSubresource(buffer, 0);
-
-                Counters.BufferWrites++;
-
-                return true;
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+                stream.WriteRange(data.ToArray());
             }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ex);
+            deviceContext.UnmapSubresource(buffer, 0);
 
-                return false;
-            }
+            Counters.BufferWrites++;
+
+            return true;
         }
         /// <summary>
         /// Writes data into buffer
@@ -442,26 +454,17 @@ namespace Engine
                 return true;
             }
 
-            try
+            deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+            using (stream)
             {
-                deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
-                using (stream)
-                {
-                    stream.Position = Marshal.SizeOf(default(T)) * offset;
-                    stream.WriteRange(data.ToArray());
-                }
-                deviceContext.UnmapSubresource(buffer, 0);
-
-                Counters.BufferWrites++;
-
-                return true;
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+                stream.WriteRange(data.ToArray());
             }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ex);
+            deviceContext.UnmapSubresource(buffer, 0);
 
-                return false;
-            }
+            Counters.BufferWrites++;
+
+            return true;
         }
 
         /// <summary>

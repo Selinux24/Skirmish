@@ -19,6 +19,10 @@ namespace Engine.Common
         /// Name
         /// </summary>
         public string Name { get; private set; }
+        /// <summary>
+        /// Description
+        /// </summary>
+        public EngineSamplerStateDescription Description { get; private set; }
 
         /// <summary>
         /// Creates a point sampler state
@@ -121,6 +125,8 @@ namespace Engine.Common
             Name = name ?? throw new ArgumentNullException(nameof(name), "A sampler state name must be specified.");
             state = samplerState ?? throw new ArgumentNullException(nameof(samplerState), "A sampler state must be specified.");
             state.DebugName = name;
+
+            Description = (EngineSamplerStateDescription)state.Description;
         }
         /// <summary>
         /// Destructor

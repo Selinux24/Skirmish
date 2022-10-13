@@ -23,6 +23,10 @@ namespace Engine
         /// </summary>
         private EngineDepthStencilState currentDepthStencilState = null;
         /// <summary>
+        /// Current depth-stencil reference
+        /// </summary>
+        private int currentDepthStencilRef = 0;
+        /// <summary>
         /// Current blend state
         /// </summary>
         private EngineBlendState currentBlendState = null;
@@ -275,6 +279,25 @@ namespace Engine
 
             SetDepthStencilState(depthStencilShadowMapping);
         }
+        /// <summary>
+        /// Sets depth stencil state
+        /// </summary>
+        /// <param name="state">Depth stencil state</param>
+        /// <param name="stencilRef">Stencil reference</param>
+        public void SetDepthStencilState(EngineDepthStencilState state, int stencilRef = 0)
+        {
+            if (currentDepthStencilState == state && currentDepthStencilRef == stencilRef)
+            {
+                return;
+            }
+
+            device.ImmediateContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), stencilRef);
+
+            Counters.DepthStencilStateChanges++;
+
+            currentDepthStencilState = state;
+            currentDepthStencilRef = stencilRef;
+        }
 
         /// <summary>
         /// Sets default blend state
@@ -348,6 +371,46 @@ namespace Engine
 
             SetBlendState(blendAdditive);
         }
+        /// <summary>
+        /// Sets blend state
+        /// </summary>
+        /// <param name="state">Blend state</param>
+        public void SetBlendState(EngineBlendState state)
+        {
+            if (currentBlendState == state)
+            {
+                return;
+            }
+
+            device.ImmediateContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+
+            currentBlendState = state;
+
+            Counters.BlendStateChanges++;
+        }
+        /// <summary>
+        /// Sets blend state
+        /// </summary>
+        /// <param name="blendMode">Blend mode</param>
+        public void SetBlendState(BlendModes blendMode)
+        {
+            if (blendMode.HasFlag(BlendModes.Additive))
+            {
+                SetBlendAdditive();
+            }
+            else if (blendMode.HasFlag(BlendModes.Transparent))
+            {
+                SetBlendTransparent(blendMode.HasFlag(BlendModes.PostProcess));
+            }
+            else if (blendMode.HasFlag(BlendModes.Alpha))
+            {
+                SetBlendAlpha(blendMode.HasFlag(BlendModes.PostProcess));
+            }
+            else
+            {
+                SetBlendDefault();
+            }
+        }
 
         /// <summary>
         /// Sets default rasterizer
@@ -408,6 +471,23 @@ namespace Engine
             }
 
             SetRasterizerState(rasterizerShadowMapping);
+        }
+        /// <summary>
+        /// Sets rasterizer state
+        /// </summary>
+        /// <param name="state">Rasterizer state</param>
+        public void SetRasterizerState(EngineRasterizerState state)
+        {
+            if (currentRasterizerState == state)
+            {
+                return;
+            }
+
+            device.ImmediateContext.Rasterizer.State = state.GetRasterizerState();
+
+            currentRasterizerState = state;
+
+            Counters.RasterizerStateChanges++;
         }
     }
 }

@@ -14,210 +14,15 @@ namespace Engine
     public sealed partial class Graphics
     {
         /// <summary>
-        /// Shader stage state helper
-        /// </summary>
-        /// <typeparam name="T">Type of resource</typeparam>
-        class ShaderStageState<T>
-        {
-            /// <summary>
-            /// Start slot of the last call
-            /// </summary>
-            public int StartSlot { get; set; }
-            /// <summary>
-            /// Resource list of the last call
-            /// </summary>
-            public IEnumerable<T> Resources { get; set; }
-            /// <summary>
-            /// Number of resources of the last call
-            /// </summary>
-            public int Count
-            {
-                get
-                {
-                    return Resources?.Count() ?? 0;
-                }
-            }
-
-            /// <summary>
-            /// Finds out whether the specfied resource, was attached in the same slot in the las call
-            /// </summary>
-            /// <param name="slot">Slot</param>
-            /// <param name="resource">Resource</param>
-            /// <returns>Returns true if the resource is in the specified slot since the las call</returns>
-            private bool LookupResource(int slot, T resource)
-            {
-                int index = Resources?.ToList()?.IndexOf(resource) ?? -1;
-                if (index < 0)
-                {
-                    //The resource is not into the collection
-                    return false;
-                }
-
-                int currentSlot = index + StartSlot;
-                if (currentSlot != slot)
-                {
-                    //The resource is in another slot
-                    return false;
-                }
-
-                //The resource is part of the current collection, and is assigned to the specified slot
-                return true;
-            }
-            /// <summary>
-            /// Finds out whether the specfied resource list, were attached in the same slot in the last call
-            /// </summary>
-            /// <param name="startSlot">Start slot</param>
-            /// <param name="resourceList">Resource list</param>
-            /// <returns>Returns true if all the elements in the resource list are in the specified slot since the last call</returns>
-            private bool LookupResource(int startSlot, IEnumerable<T> resourceList)
-            {
-                if (resourceList?.Any() != true)
-                {
-                    //Nothing to compare
-                    return true;
-                }
-
-                if (Resources?.Any() != true)
-                {
-                    //Resources is empty
-                    return false;
-                }
-
-                if (StartSlot == startSlot && Helper.CompareEnumerables(Resources, resourceList))
-                {
-                    //Same data
-                    return true;
-                }
-
-                //Look up coincidences
-                int currentMaxSlot = StartSlot + Resources.Count();
-                int newMaxSlot = startSlot + resourceList.Count();
-                if (newMaxSlot > currentMaxSlot)
-                {
-                    return false;
-                }
-
-                //Get range
-                var range = Resources.Skip(startSlot).Take(resourceList.Count());
-                if (!Helper.CompareEnumerables(range, resourceList))
-                {
-                    //The specified list is not into the current resource list
-                    return false;
-                }
-
-                return true;
-            }
-
-            /// <summary>
-            /// Updates the resource state
-            /// </summary>
-            /// <param name="slot">Slot</param>
-            /// <param name="resource">Resource</param>
-            /// <returns>Returns true if the update must change the current resource state in the device</returns>
-            public bool Update(int slot, T resource)
-            {
-                if (resource == null)
-                {
-                    return false;
-                }
-
-                if (LookupResource(slot, resource))
-                {
-                    return false;
-                }
-
-                if (Resources?.Any() != true)
-                {
-                    //Empty resource state
-                    StartSlot = slot;
-                    Resources = new[] { resource };
-
-                    return true;
-                }
-
-                int setSlot = slot + StartSlot;
-                if (setSlot < Resources.Count())
-                {
-                    //Update the slot
-                    var array = Resources.ToArray();
-                    array[setSlot] = resource;
-                    Resources = array;
-
-                    return true;
-                }
-
-                //Add space to the new resource
-                var list = Resources.ToList();
-                list.Add(resource);
-                Resources = list;
-
-                return true;
-            }
-            /// <summary>
-            /// Updates the resource state
-            /// </summary>
-            /// <param name="startSlot">Start slot</param>
-            /// <param name="resourceList">Resource list</param>
-            /// <returns>Returns true if the update must change the current resource state in the device</returns>
-            public bool Update(int startSlot, IEnumerable<T> resourceList)
-            {
-                if (resourceList?.Any() != true)
-                {
-                    return false;
-                }
-
-                if (LookupResource(startSlot, resourceList))
-                {
-                    return false;
-                }
-
-                if (resourceList?.Any() != true)
-                {
-                    //Nothing to do
-                    return false;
-                }
-
-                if (Resources?.Any() != true)
-                {
-                    StartSlot = startSlot;
-                    Resources = resourceList;
-
-                    return true;
-                }
-
-                //Get the range to update
-                var list = Resources.ToList();
-                for (int i = 0; i < resourceList.Count(); i++)
-                {
-                    int listSlot = i + startSlot;
-                    if (listSlot < list.Count)
-                    {
-                        list[i + startSlot] = resourceList.ElementAt(i);
-                        continue;
-                    }
-
-                    list.Add(resourceList.ElementAt(i));
-                }
-
-                Resources = list;
-
-                return true;
-            }
-
-            /// <summary>
-            /// Clears the state
-            /// </summary>
-            public void Clear()
-            {
-                StartSlot = 0;
-                Resources = Enumerable.Empty<T>();
-            }
-        }
-        /// <summary>
         /// Shader constant buffers state
         /// </summary>
-        class ShaderConstantBufferState : ShaderStageState<IEngineConstantBuffer>
+        class ShaderConstantBufferState : EngineShaderStageState<IEngineConstantBuffer>
         {
+            /// <summary>
+            /// Null constant buffers for shader clearing
+            /// </summary>
+            private static readonly Buffer[] nullBuffers = new Buffer[CommonShaderStage.ConstantBufferApiSlotCount];
+
             public void SetConstantBuffer(CommonShaderStage shaderStage, int slot, IEngineConstantBuffer buffer)
             {
                 if (!Update(slot, buffer))
@@ -239,12 +44,29 @@ namespace Engine
                 var buffers = Resources.Select(r => r?.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
             }
+
+            public void Clear(CommonShaderStage shaderStage)
+            {
+                if (Resources?.Any() != true)
+                {
+                    return;
+                }
+
+                shaderStage.SetConstantBuffers(StartSlot, nullBuffers.Length, nullBuffers);
+
+                Clear();
+            }
         }
         /// <summary>
         /// Shader resources state
         /// </summary>
-        class ShaderResourceState : ShaderStageState<EngineShaderResourceView>
+        class ShaderResourceState : EngineShaderStageState<EngineShaderResourceView>
         {
+            /// <summary>
+            /// Null shader resources for shader clearing
+            /// </summary>
+            private static readonly ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
+
             public void SetShaderResource(CommonShaderStage shaderStage, int slot, EngineShaderResourceView resourceView)
             {
                 if (!Update(slot, resourceView))
@@ -266,12 +88,29 @@ namespace Engine
                 var resources = Resources.Select(r => r?.GetResource()).ToArray();
                 shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
             }
+
+            public void Clear(CommonShaderStage shaderStage)
+            {
+                if (Resources?.Any() != true)
+                {
+                    return;
+                }
+
+                shaderStage.SetShaderResources(StartSlot, nullSrv.Length, nullSrv);
+
+                Clear();
+            }
         }
         /// <summary>
         /// Shader samplers state
         /// </summary>
-        class ShaderSamplerState : ShaderStageState<EngineSamplerState>
+        class ShaderSamplerState : EngineShaderStageState<EngineSamplerState>
         {
+            /// <summary>
+            /// Null samplers for shader clearing
+            /// </summary>
+            private static readonly SamplerState[] nullSamplers = new SamplerState[CommonShaderStage.SamplerSlotCount];
+
             public void SetSampler(CommonShaderStage shaderStage, int slot, EngineSamplerState samplerState)
             {
                 if (!Update(slot, samplerState))
@@ -293,12 +132,19 @@ namespace Engine
                 var samplers = Resources.Select(r => r?.GetSamplerState()).ToArray();
                 shaderStage.SetSamplers(StartSlot, samplers.Length, samplers);
             }
-        }
 
-        /// <summary>
-        /// Null shader resources for shader clearing
-        /// </summary>
-        private readonly ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
+            public void Clear(CommonShaderStage shaderStage)
+            {
+                if (Resources?.Any() != true)
+                {
+                    return;
+                }
+
+                shaderStage.SetSamplers(StartSlot, nullSamplers.Length, nullSamplers);
+
+                Clear();
+            }
+        }
 
         /// <summary>
         /// Current vertex shader
@@ -316,6 +162,40 @@ namespace Engine
         /// Current vertex shader sampler state
         /// </summary>
         private readonly ShaderSamplerState currentVertexShaderSamplerState = new ShaderSamplerState();
+
+        /// <summary>
+        /// Current hull shader
+        /// </summary>
+        private EngineHullShader currentHullShader;
+        /// <summary>
+        /// Current hull shader constants buffer state
+        /// </summary>
+        private readonly ShaderConstantBufferState currentHullShaderConstantBufferState = new ShaderConstantBufferState();
+        /// <summary>
+        /// Current hull shader resource views state
+        /// </summary>
+        private readonly ShaderResourceState currentHullShaderResourceViewState = new ShaderResourceState();
+        /// <summary>
+        /// Current hull shader sampler state
+        /// </summary>
+        private readonly ShaderSamplerState currentHullShaderSamplerState = new ShaderSamplerState();
+
+        /// <summary>
+        /// Current domain shader
+        /// </summary>
+        private EngineDomainShader currentDomainShader;
+        /// <summary>
+        /// Current domain shader constants buffer state
+        /// </summary>
+        private readonly ShaderConstantBufferState currentDomainShaderConstantBufferState = new ShaderConstantBufferState();
+        /// <summary>
+        /// Current domain shader resource views state
+        /// </summary>
+        private readonly ShaderResourceState currentDomainShaderResourceViewState = new ShaderResourceState();
+        /// <summary>
+        /// Current domain shader sampler state
+        /// </summary>
+        private readonly ShaderSamplerState currentDomainShaderSamplerState = new ShaderSamplerState();
 
         /// <summary>
         /// Current geometry shader
@@ -357,6 +237,23 @@ namespace Engine
         private readonly ShaderSamplerState currentPixelShaderSamplerState = new ShaderSamplerState();
 
         /// <summary>
+        /// Current compute shader
+        /// </summary>
+        private EngineComputeShader currentComputeShader;
+        /// <summary>
+        /// Current compute shader constants buffer state
+        /// </summary>
+        private readonly ShaderConstantBufferState currentComputeShaderConstantBufferState = new ShaderConstantBufferState();
+        /// <summary>
+        /// Current compute shader resource views state
+        /// </summary>
+        private readonly ShaderResourceState currentComputeShaderResourceViewState = new ShaderResourceState();
+        /// <summary>
+        /// Current compute shader sampler state
+        /// </summary>
+        private readonly ShaderSamplerState currentComputeShaderSamplerState = new ShaderSamplerState();
+
+        /// <summary>
         /// Creates a new Input Layout for a Shader
         /// </summary>
         /// <param name="name">Name</param>
@@ -376,15 +273,29 @@ namespace Engine
         /// </summary>
         private void ClearShaderResources()
         {
-            deviceContext.VertexShader.SetShaderResources(0, nullSrv);
-            deviceContext.HullShader.SetShaderResources(0, nullSrv);
-            deviceContext.DomainShader.SetShaderResources(0, nullSrv);
-            deviceContext.GeometryShader.SetShaderResources(0, nullSrv);
-            deviceContext.PixelShader.SetShaderResources(0, nullSrv);
+            currentVertexShaderConstantBufferState.Clear(deviceContext.VertexShader);
+            currentVertexShaderResourceViewState.Clear(deviceContext.VertexShader);
+            currentVertexShaderSamplerState.Clear(deviceContext.VertexShader);
 
-            currentVertexShaderResourceViewState.Clear();
-            currentGeometryShaderResourceViewState.Clear();
-            currentPixelShaderResourceViewState.Clear();
+            currentHullShaderConstantBufferState.Clear(deviceContext.HullShader);
+            currentHullShaderResourceViewState.Clear(deviceContext.HullShader);
+            currentHullShaderSamplerState.Clear(deviceContext.HullShader);
+
+            currentDomainShaderConstantBufferState.Clear(deviceContext.DomainShader);
+            currentDomainShaderResourceViewState.Clear(deviceContext.DomainShader);
+            currentDomainShaderSamplerState.Clear(deviceContext.DomainShader);
+
+            currentGeometryShaderConstantBufferState.Clear(deviceContext.GeometryShader);
+            currentGeometryShaderResourceViewState.Clear(deviceContext.GeometryShader);
+            currentGeometryShaderSamplerState.Clear(deviceContext.GeometryShader);
+
+            currentPixelShaderConstantBufferState.Clear(deviceContext.PixelShader);
+            currentPixelShaderResourceViewState.Clear(deviceContext.PixelShader);
+            currentPixelShaderSamplerState.Clear(deviceContext.PixelShader);
+
+            currentComputeShaderConstantBufferState.Clear(deviceContext.ComputeShader);
+            currentComputeShaderResourceViewState.Clear(deviceContext.ComputeShader);
+            currentComputeShaderSamplerState.Clear(deviceContext.ComputeShader);
         }
 
         /// <summary>
@@ -592,6 +503,412 @@ namespace Engine
         public void SetVertexShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentVertexShaderSamplerState.SetSamplers(deviceContext.VertexShader, startSlot, samplerStates);
+        }
+
+        /// <summary>
+        /// Loads a hull shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns hull shader description</returns>
+        public EngineHullShader CompileHullShader(string name, string entryPoint, string filename, string profile)
+        {
+            var res = CompileHullShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineHullShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a hull shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns hull shader description</returns>
+        public EngineHullShader CompileHullShader(string name, string entryPoint, string filename, string profile, out string compilationErrors)
+        {
+            return CompileHullShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a hull shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns hull shader description</returns>
+        public EngineHullShader CompileHullShader(string name, string entryPoint, byte[] byteCode, string profile)
+        {
+            var res = CompileHullShader(
+                name,
+                entryPoint,
+                byteCode,
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineHullShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a hull shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns hull shader description</returns>
+        public EngineHullShader CompileHullShader(string name, string entryPoint, byte[] byteCode, string profile, out string compilationErrors)
+        {
+            compilationErrors = null;
+
+            var shaderFlags = GetShaderCompilationFlags();
+            using (var includeManager = new ShaderIncludeManager())
+            using (var cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                profile,
+                shaderFlags,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                if (cmpResult.HasErrors)
+                {
+                    compilationErrors = cmpResult.Message;
+                }
+
+                return new EngineHullShader(name, new HullShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
+            }
+        }
+        /// <summary>
+        /// Loads a hull shader from pre-compiled file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded shader</returns>
+        public EngineHullShader LoadHullShader(string name, byte[] bytes)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var code = ShaderBytecode.FromStream(ms))
+                {
+                    return new EngineHullShader(name, new HullShader(device, code.Data), code);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the hull shader in the current device context
+        /// </summary>
+        /// <param name="hullShader">Hull shader</param>
+        public void SetHullShader(EngineHullShader hullShader)
+        {
+            if (currentHullShader == hullShader)
+            {
+                return;
+            }
+
+            deviceContext.HullShader.Set(hullShader?.GetShader());
+
+            currentHullShader = hullShader;
+        }
+        /// <summary>
+        /// Removes the hull shader from the current device context
+        /// </summary>
+        public void ClearHullShader()
+        {
+            if (currentHullShader == null)
+            {
+                return;
+            }
+
+            deviceContext.HullShader.Set(null);
+
+            currentHullShader = null;
+        }
+        /// <summary>
+        /// Sets the constant buffer to the current hull shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="slot">Slot</param>
+        /// <param name="buffer">Buffer</param>
+        public void SetHullShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        {
+            currentHullShaderConstantBufferState.SetConstantBuffer(deviceContext.HullShader, slot, buffer);
+        }
+        /// <summary>
+        /// Sets the constant buffer list to the current hull shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="bufferList">Buffer list</param>
+        public void SetHullShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        {
+            currentHullShaderConstantBufferState.SetConstantBuffers(deviceContext.HullShader, startSlot, bufferList);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current hull shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetHullShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        {
+            currentHullShaderResourceViewState.SetShaderResource(deviceContext.HullShader, slot, resourceView);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current hull shader shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetHullShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        {
+            currentHullShaderResourceViewState.SetShaderResources(deviceContext.HullShader, startSlot, resourceViews);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current hull shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="samplerState">Sampler</param>
+        public void SetHullShaderSampler(int slot, EngineSamplerState samplerState)
+        {
+            currentHullShaderSamplerState.SetSampler(deviceContext.HullShader, slot, samplerState);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current hull shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="samplerStates">Samplers</param>
+        public void SetHullShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        {
+            currentHullShaderSamplerState.SetSamplers(deviceContext.HullShader, startSlot, samplerStates);
+        }
+
+        /// <summary>
+        /// Loads a domain shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns domain shader description</returns>
+        public EngineDomainShader CompileDomainShader(string name, string entryPoint, string filename, string profile)
+        {
+            var res = CompileDomainShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineDomainShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a domain shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns domain shader description</returns>
+        public EngineDomainShader CompileDomainShader(string name, string entryPoint, string filename, string profile, out string compilationErrors)
+        {
+            return CompileDomainShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a domain shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns domain shader description</returns>
+        public EngineDomainShader CompileDomainShader(string name, string entryPoint, byte[] byteCode, string profile)
+        {
+            var res = CompileDomainShader(
+                name,
+                entryPoint,
+                byteCode,
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineDomainShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a domain shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns domain shader description</returns>
+        public EngineDomainShader CompileDomainShader(string name, string entryPoint, byte[] byteCode, string profile, out string compilationErrors)
+        {
+            compilationErrors = null;
+
+            var shaderFlags = GetShaderCompilationFlags();
+            using (var includeManager = new ShaderIncludeManager())
+            using (var cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                profile,
+                shaderFlags,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                if (cmpResult.HasErrors)
+                {
+                    compilationErrors = cmpResult.Message;
+                }
+
+                return new EngineDomainShader(name, new DomainShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
+            }
+        }
+        /// <summary>
+        /// Loads a domain shader from pre-compiled file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded shader</returns>
+        public EngineDomainShader LoadDomainShader(string name, byte[] bytes)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var code = ShaderBytecode.FromStream(ms))
+                {
+                    return new EngineDomainShader(name, new DomainShader(device, code.Data), code);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the domain shader in the current device context
+        /// </summary>
+        /// <param name="domainShader">Domain shader</param>
+        public void SetDomainShader(EngineDomainShader domainShader)
+        {
+            if (currentDomainShader == domainShader)
+            {
+                return;
+            }
+
+            deviceContext.DomainShader.Set(domainShader?.GetShader());
+
+            currentDomainShader = domainShader;
+        }
+        /// <summary>
+        /// Removes the domain shader from the current device context
+        /// </summary>
+        public void ClearDomainShader()
+        {
+            if (currentDomainShader == null)
+            {
+                return;
+            }
+
+            deviceContext.DomainShader.Set(null);
+
+            currentDomainShader = null;
+        }
+        /// <summary>
+        /// Sets the constant buffer to the current domain shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="slot">Slot</param>
+        /// <param name="buffer">Buffer</param>
+        public void SetDomainShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        {
+            currentDomainShaderConstantBufferState.SetConstantBuffer(deviceContext.DomainShader, slot, buffer);
+        }
+        /// <summary>
+        /// Sets the constant buffer list to the current domain shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="bufferList">Buffer list</param>
+        public void SetDomainShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        {
+            currentDomainShaderConstantBufferState.SetConstantBuffers(deviceContext.DomainShader, startSlot, bufferList);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current domain shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetDomainShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        {
+            currentDomainShaderResourceViewState.SetShaderResource(deviceContext.DomainShader, slot, resourceView);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current domain shader shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetDomainShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        {
+            currentDomainShaderResourceViewState.SetShaderResources(deviceContext.DomainShader, startSlot, resourceViews);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current domain shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="samplerState">Sampler</param>
+        public void SetDomainShaderSampler(int slot, EngineSamplerState samplerState)
+        {
+            currentDomainShaderSamplerState.SetSampler(deviceContext.DomainShader, slot, samplerState);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current domain shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="samplerStates">Samplers</param>
+        public void SetDomainShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        {
+            currentDomainShaderSamplerState.SetSamplers(deviceContext.DomainShader, startSlot, samplerStates);
         }
 
         /// <summary>
@@ -1144,6 +1461,209 @@ namespace Engine
         public void SetPixelShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentPixelShaderSamplerState.SetSamplers(deviceContext.PixelShader, startSlot, samplerStates);
+        }
+
+        /// <summary>
+        /// Loads a compute shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns compute shader description</returns>
+        public EngineComputeShader CompileComputeShader(string name, string entryPoint, string filename, string profile)
+        {
+            var res = CompileComputeShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineComputeShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a compute shader from file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="filename">Path to file</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns compute shader description</returns>
+        public EngineComputeShader CompileComputeShader(string name, string entryPoint, string filename, string profile, out string compilationErrors)
+        {
+            return CompileComputeShader(
+                name,
+                entryPoint,
+                File.ReadAllBytes(filename),
+                profile,
+                out compilationErrors);
+        }
+        /// <summary>
+        /// Loads a compute shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <returns>Returns compute shader description</returns>
+        public EngineComputeShader CompileComputeShader(string name, string entryPoint, byte[] byteCode, string profile)
+        {
+            var res = CompileComputeShader(
+                name,
+                entryPoint,
+                byteCode,
+                profile,
+                out string compilationErrors);
+
+            if (!string.IsNullOrEmpty(compilationErrors))
+            {
+                Logger.WriteError(this, $"EngineComputeShader: {compilationErrors}");
+            }
+
+            return res;
+        }
+        /// <summary>
+        /// Loads a compute shader from byte code
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="byteCode">Byte code</param>
+        /// <param name="entryPoint">Entry point</param>
+        /// <param name="profile">Compilation profile</param>
+        /// <param name="compilationErrors">Gets compilation errors if any</param>
+        /// <returns>Returns compute shader description</returns>
+        public EngineComputeShader CompileComputeShader(string name, string entryPoint, byte[] byteCode, string profile, out string compilationErrors)
+        {
+            compilationErrors = null;
+
+            var shaderFlags = GetShaderCompilationFlags();
+            using (var includeManager = new ShaderIncludeManager())
+            using (var cmpResult = ShaderBytecode.Compile(
+                byteCode,
+                entryPoint,
+                profile,
+                shaderFlags,
+                EffectFlags.None,
+                null,
+                includeManager))
+            {
+                if (cmpResult.HasErrors)
+                {
+                    compilationErrors = cmpResult.Message;
+                }
+
+                return new EngineComputeShader(name, new ComputeShader(device, cmpResult.Bytecode), cmpResult.Bytecode);
+            }
+        }
+        /// <summary>
+        /// Loads a compute shader from pre-compiled file
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Pre-compiled byte code</param>
+        /// <returns>Returns loaded shader</returns>
+        public EngineComputeShader LoadComputeShader(string name, byte[] bytes)
+        {
+            using (var ms = new MemoryStream(bytes))
+            {
+                ms.Position = 0;
+
+                using (var code = ShaderBytecode.FromStream(ms))
+                {
+                    return new EngineComputeShader(name, new ComputeShader(device, code.Data), code);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sets the compute shader in the current device context
+        /// </summary>
+        /// <param name="computeShader">Compute shader</param>
+        public void SetComputeShader(EngineComputeShader computeShader)
+        {
+            if (currentComputeShader == computeShader)
+            {
+                return;
+            }
+
+            deviceContext.ComputeShader.Set(computeShader?.GetShader());
+
+            currentComputeShader = computeShader;
+        }
+        /// <summary>
+        /// Removes the compute shader from the current device context
+        /// </summary>
+        public void ClearComputeShader()
+        {
+            if (currentComputeShader == null)
+            {
+                return;
+            }
+
+            deviceContext.ComputeShader.Set(null);
+
+            currentComputeShader = null;
+        }
+        /// <summary>
+        /// Sets the constant buffer to the current compute shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="slot">Slot</param>
+        /// <param name="buffer">Buffer</param>
+        public void SetComputeShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
+        {
+            currentComputeShaderConstantBufferState.SetConstantBuffer(deviceContext.ComputeShader, slot, buffer);
+        }
+        /// <summary>
+        /// Sets the constant buffer list to the current compute shader
+        /// </summary>
+        /// <typeparam name="T">Type o buffer</typeparam>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="bufferList">Buffer list</param>
+        public void SetComputeShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
+        {
+            currentComputeShaderConstantBufferState.SetConstantBuffers(deviceContext.ComputeShader, startSlot, bufferList);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current compute shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetComputeShaderResourceView(int slot, EngineShaderResourceView resourceView)
+        {
+            currentComputeShaderResourceViewState.SetShaderResource(deviceContext.ComputeShader, slot, resourceView);
+        }
+        /// <summary>
+        /// Sets the specified resource in the current compute shader shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="resourceView">Resource</param>
+        public void SetComputeShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
+        {
+            currentComputeShaderResourceViewState.SetShaderResources(deviceContext.ComputeShader, startSlot, resourceViews);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current compute shader
+        /// </summary>
+        /// <param name="slot">Slot</param>
+        /// <param name="samplerState">Sampler</param>
+        public void SetComputeShaderSampler(int slot, EngineSamplerState samplerState)
+        {
+            currentComputeShaderSamplerState.SetSampler(deviceContext.ComputeShader, slot, samplerState);
+        }
+        /// <summary>
+        /// Sets the specified sampler state in the current compute shader
+        /// </summary>
+        /// <param name="startSlot">Start slot</param>
+        /// <param name="samplerStates">Samplers</param>
+        public void SetComputeShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
+        {
+            currentComputeShaderSamplerState.SetSamplers(deviceContext.ComputeShader, startSlot, samplerStates);
         }
     }
 }
