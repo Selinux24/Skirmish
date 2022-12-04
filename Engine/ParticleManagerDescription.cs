@@ -21,7 +21,6 @@ namespace Engine
             : base()
         {
             DeferredEnabled = false;
-            BlendMode = BlendModes.Default;
         }
     }
 }

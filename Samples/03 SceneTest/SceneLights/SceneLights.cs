@@ -95,9 +95,7 @@ namespace SceneTest.SceneLights
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
@@ -109,7 +107,7 @@ namespace SceneTest.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
             };
@@ -120,7 +118,7 @@ namespace SceneTest.SceneLights
         {
             var desc = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
@@ -140,9 +138,6 @@ namespace SceneTest.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
@@ -170,9 +165,6 @@ namespace SceneTest.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 3,
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
@@ -200,7 +192,6 @@ namespace SceneTest.SceneLights
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                DepthEnabled = true,
                 Count = 5000
             };
 

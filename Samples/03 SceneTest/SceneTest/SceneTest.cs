@@ -282,8 +282,8 @@ namespace SceneTest.SceneTest
         {
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                SphericVolume = false,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("SceneTest/Trees", "Tree.json"),
@@ -292,8 +292,8 @@ namespace SceneTest.SceneTest
 
             var descI = new ModelInstancedDescription()
             {
-                CastShadow = true,
-                SphericVolume = false,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 50,
@@ -327,22 +327,18 @@ namespace SceneTest.SceneTest
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.Opaque,
-                SphericVolume = false,
+                CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
             var descI = new ModelInstancedDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.Opaque,
-                SphericVolume = false,
+                CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 Instances = 8,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
@@ -371,8 +367,8 @@ namespace SceneTest.SceneTest
                 "Obelisk",
                 new ModelDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
                 });
@@ -382,8 +378,8 @@ namespace SceneTest.SceneTest
                 "ObeliskI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     UseAnisotropicFiltering = true,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
@@ -416,7 +412,7 @@ namespace SceneTest.SceneTest
                 new ModelDescription()
                 {
                     TextureIndex = 1,
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
                 });
 
@@ -425,7 +421,7 @@ namespace SceneTest.SceneTest
                 "SoldierI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
                 });
@@ -462,8 +458,8 @@ namespace SceneTest.SceneTest
                 "Challenger",
                 new ModelDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/Challenger", "Challenger.json"),
                 });
 
@@ -472,8 +468,8 @@ namespace SceneTest.SceneTest
                 "LeopardI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/leopard", "Leopard.json"),
                 });
@@ -511,8 +507,8 @@ namespace SceneTest.SceneTest
                 "Lamp",
                 new ModelDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
                 });
 
@@ -521,8 +517,8 @@ namespace SceneTest.SceneTest
                 "LampI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
                 });
@@ -561,8 +557,8 @@ namespace SceneTest.SceneTest
                 "Street Lamp",
                 new ModelDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
                 });
 
@@ -571,8 +567,8 @@ namespace SceneTest.SceneTest
                 "Street LampI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 9,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
                 });
@@ -626,8 +622,8 @@ namespace SceneTest.SceneTest
                 "Container",
                 new ModelDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
                 });
 
@@ -636,8 +632,8 @@ namespace SceneTest.SceneTest
                 "ContainerI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
-                    SphericVolume = false,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = instances,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
                 });
@@ -731,7 +727,6 @@ namespace SceneTest.SceneTest
             {
                 Primitives = cubeTris.ToArray(),
                 Color = Color.Red,
-                DepthEnabled = true,
             };
 
             await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
@@ -802,7 +797,7 @@ namespace SceneTest.SceneTest
         }
         private async Task InitializeDebug()
         {
-            var desc = new PrimitiveListDrawerDescription<Line3D>() { DepthEnabled = true, Count = 20000 };
+            var desc = new PrimitiveListDrawerDescription<Line3D>() { Count = 20000 };
             lightsVolumeDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DebugVolumes",
                 "DebugLightsVolumeDrawer",

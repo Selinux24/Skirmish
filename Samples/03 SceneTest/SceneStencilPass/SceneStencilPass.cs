@@ -82,9 +82,7 @@ namespace SceneTest.SceneStencilPass
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
@@ -95,7 +93,7 @@ namespace SceneTest.SceneStencilPass
         {
             var desc = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile("SceneStencilPass/buildings/obelisk", "Obelisk.json"),
             };
@@ -114,9 +112,6 @@ namespace SceneTest.SceneStencilPass
 
             var desc = new ModelDescription()
             {
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
@@ -139,7 +134,6 @@ namespace SceneTest.SceneStencilPass
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                DepthEnabled = true,
                 Count = 5000
             };
 

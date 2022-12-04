@@ -226,7 +226,7 @@ namespace Heightmap
             sw.Restart();
             var rDesc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 250,
                 Content = ContentDescription.FromFile(@"Resources/Rocks", @"boulder.json"),
             };
@@ -243,7 +243,7 @@ namespace Heightmap
             sw.Restart();
             var treeDesc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.json"),
@@ -261,7 +261,7 @@ namespace Heightmap
             sw.Restart();
             var tree2Desc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"Resources/Trees2", @"tree.json"),
@@ -281,7 +281,7 @@ namespace Heightmap
             var sDesc = new ModelDescription()
             {
                 TextureIndex = 0,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
             soldier = await AddComponentAgent<Model, ModelDescription>("Soldier", "Soldier", sDesc);
@@ -298,7 +298,7 @@ namespace Heightmap
             var tDesc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
@@ -314,7 +314,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 3,
                 Content = ContentDescription.FromFile(@"Resources/m24", @"m24.json"),
             };
@@ -332,7 +332,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/Bradley", @"Bradley.json"),
             };
@@ -350,7 +350,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/buildings", @"Affgan1.json"),
             };
@@ -368,7 +368,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile(@"Resources/Watch Tower", @"Watch Tower.json"),
             };
             watchTower = await AddComponent<Model, ModelDescription>("Watch Tower", "Watch Tower", mDesc);
@@ -385,8 +385,8 @@ namespace Heightmap
             sw.Restart();
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = true,
-                SphericVolume = false,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/container", "Container.json"),
             };
@@ -405,7 +405,6 @@ namespace Heightmap
             var tcDesc = new ModelInstancedDescription()
             {
                 Instances = 50,
-                CastShadow = false,
                 Content = ContentDescription.FromFile(@"Resources/Scenery/Objects", @"torch.json"),
             };
             torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", tcDesc);
@@ -543,7 +542,6 @@ namespace Heightmap
                 "DEBUG++ Terrain nodes bounding boxes",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
-                    DepthEnabled = true,
                     Dynamic = true,
                     Count = 50000,
                 });
@@ -554,7 +552,6 @@ namespace Heightmap
                 "DEBUG++ Terrain nodes bounding boxes faces",
                 new PrimitiveListDrawerDescription<Triangle>()
                 {
-                    DepthEnabled = true,
                     Count = 1000,
                 });
             bboxesTriDrawer.Visible = false;
@@ -564,7 +561,6 @@ namespace Heightmap
                 "DEBUG++ Lines drawer",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
-                    DepthEnabled = true,
                     Count = 1000,
                 });
             linesDrawer.Visible = false;
@@ -574,7 +570,6 @@ namespace Heightmap
                 "DEBUG++ Light Volumes",
                 new PrimitiveListDrawerDescription<Line3D>()
                 {
-                    DepthEnabled = true,
                     Count = 10000
                 });
 
@@ -639,7 +634,7 @@ namespace Heightmap
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
                 PlantingArea = gardenerArea,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "grass_v.dds" },
@@ -694,7 +689,6 @@ namespace Heightmap
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map_flowers.png",
                 PlantingArea = gardenerArea2,
-                CastShadow = false,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "flower0.dds" },

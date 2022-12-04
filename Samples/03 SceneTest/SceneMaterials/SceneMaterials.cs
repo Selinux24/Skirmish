@@ -143,9 +143,7 @@ namespace SceneTest.SceneMaterials
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
@@ -161,9 +159,6 @@ namespace SceneTest.SceneMaterials
 
             var desc = new ModelDescription()
             {
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(sphere, mat),
             };
 
@@ -355,7 +350,7 @@ namespace SceneTest.SceneMaterials
 
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Instances = count,
                 Content = ContentDescription.FromContentData(vertices, indices, materials),

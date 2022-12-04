@@ -42,7 +42,6 @@ namespace Engine.UI
         public UIMinimapDescription()
             : base()
         {
-            CastShadow = ShadowCastingAlgorihtms.None;
             DeferredEnabled = false;
             DepthEnabled = false;
             BlendMode = BlendModes.Alpha;

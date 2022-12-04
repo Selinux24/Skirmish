@@ -153,7 +153,6 @@ namespace ModelDrawing
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 20000,
-                DepthEnabled = true,
             };
             pManagerLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DebugParticleDrawer",

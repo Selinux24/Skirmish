@@ -139,5 +139,77 @@ namespace Engine.Common
 
             return orientedBox;
         }
+
+        /// <summary>
+        /// Performs culling test
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        /// <param name="volumeType">Culling volume type</param>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public bool Cull(Manipulator3D manipulator, CullingVolumeTypes volumeType, IIntersectionVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            if (volumeType == CullingVolumeTypes.None)
+            {
+                return false;
+            }
+
+            if (volumeType == CullingVolumeTypes.SphericVolume)
+            {
+                return CullBoundingSphere(manipulator, volume, out distance);
+            }
+
+            if (volumeType == CullingVolumeTypes.BoxVolume)
+            {
+                return CullBoundingBox(manipulator, volume, out distance);
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Performs culling test against the spheric volume
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public bool CullBoundingSphere(Manipulator3D manipulator, IIntersectionVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            bool cull = volume.Contains(GetBoundingSphere(manipulator)) == ContainmentType.Disjoint;
+            if (!cull)
+            {
+                var eyePosition = volume.Position;
+
+                distance = Vector3.DistanceSquared(manipulator.Position, eyePosition);
+            }
+
+            return cull;
+        }
+        /// <summary>
+        /// Performs culling test against the box volume
+        /// </summary>
+        /// <param name="manipulator">Manipulator</param>
+        /// <param name="volume">Culling volume</param>
+        /// <param name="distance">If the object is inside the volume, returns the distance</param>
+        /// <returns>Returns true if the object is outside of the frustum</returns>
+        public bool CullBoundingBox(Manipulator3D manipulator, IIntersectionVolume volume, out float distance)
+        {
+            distance = float.MaxValue;
+
+            bool cull = volume.Contains(GetBoundingBox(manipulator)) == ContainmentType.Disjoint;
+            if (!cull)
+            {
+                var eyePosition = volume.Position;
+
+                distance = Vector3.DistanceSquared(manipulator.Position, eyePosition);
+            }
+
+            return cull;
+        }
     }
 }

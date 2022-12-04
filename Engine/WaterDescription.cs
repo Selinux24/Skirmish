@@ -113,7 +113,7 @@ namespace Engine
         public WaterDescription() : base()
         {
             DeferredEnabled = false;
-            SphericVolume = false;
+            CullingVolumeType = CullingVolumeTypes.None;
         }
     }
 }

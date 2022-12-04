@@ -156,7 +156,6 @@ namespace GameLogic
                 "Cursor3D",
                 new ModelDescription()
                 {
-                    CastShadow = false,
                     DepthEnabled = false,
                     Content = ContentDescription.FromFile("Resources3D", "cursor.json"),
                 },
@@ -168,7 +167,7 @@ namespace GameLogic
                 new ModelInstancedDescription()
                 {
                     Instances = skirmishGame.AllSoldiers.Length,
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Content = ContentDescription.FromFile("Resources3D", "soldier_anim2.json"),
                 });
 

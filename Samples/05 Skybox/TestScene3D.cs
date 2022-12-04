@@ -217,7 +217,7 @@ namespace Skybox
             var torchDesc = new ModelInstancedDescription()
             {
                 Instances = firePositions.Length,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile("Resources", "torch.json"),
             };
 
@@ -230,7 +230,7 @@ namespace Skybox
             var obeliskDesc = new ModelInstancedDescription()
             {
                 Instances = firePositions.Length,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
             };
 
@@ -240,7 +240,7 @@ namespace Skybox
         {
             var fountainDesc = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
             };
 
@@ -274,9 +274,6 @@ namespace Skybox
 
             var mFireDesc = new ModelDescription()
             {
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(sphere, mat),
             };
 
@@ -301,7 +298,6 @@ namespace Skybox
         {
             DecalDrawerDescription desc = new DecalDrawerDescription
             {
-                BlendMode = BlendModes.Default,
                 TextureName = "resources/bullets/bullet-hole.png",
                 MaxDecalCount = 1000,
                 RotateDecals = true,

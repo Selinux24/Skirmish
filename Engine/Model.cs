@@ -420,27 +420,9 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Cull(IIntersectionVolume volume, out float distance)
         {
-            bool cull;
-            distance = float.MaxValue;
-
-            if (SphericVolume)
-            {
-                cull = volume.Contains(GetBoundingSphere()) == ContainmentType.Disjoint;
-            }
-            else
-            {
-                cull = volume.Contains(GetBoundingBox()) == ContainmentType.Disjoint;
-            }
-
-            if (!cull)
-            {
-                var eyePosition = volume.Position;
-
-                distance = Vector3.DistanceSquared(Manipulator.Position, eyePosition);
-            }
-
-            return cull;
+            return boundsHelper.Cull(Manipulator, CullingVolumeType, volume, out distance);
         }
+
         /// <summary>
         /// Set level of detail values
         /// </summary>

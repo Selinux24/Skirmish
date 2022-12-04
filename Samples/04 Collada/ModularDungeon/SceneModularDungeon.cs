@@ -319,7 +319,6 @@ namespace Collada.ModularDungeon
 
             var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                CastShadow = false,
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
             };
@@ -521,7 +520,7 @@ namespace Collada.ModularDungeon
             var res = new ModularSceneryDescription()
             {
                 UseAnisotropic = true,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.json"),
                 AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
@@ -559,7 +558,7 @@ namespace Collada.ModularDungeon
                 new ModelDescription()
                 {
                     TextureIndex = 0,
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/rat"), "rat.json"),
                 });
@@ -596,7 +595,7 @@ namespace Collada.ModularDungeon
                 "Human Instanced",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/human2"), "Human2.json"),

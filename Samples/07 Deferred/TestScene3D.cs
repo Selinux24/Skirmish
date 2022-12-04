@@ -176,7 +176,7 @@ namespace Deferred
         {
             var desc1 = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 TextureIndex = 2,
                 Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
@@ -185,7 +185,7 @@ namespace Deferred
 
             var desc2 = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 2,
                 Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
@@ -201,7 +201,7 @@ namespace Deferred
         {
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile("Resources", "leopard.json"),
                 Instances = 5,
             };
@@ -269,8 +269,7 @@ namespace Deferred
         {
             var desc1 = new ModelDescription()
             {
-                CastShadow = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("resources/trees", "birch_a.json"),
             };
@@ -278,8 +277,7 @@ namespace Deferred
 
             var desc2 = new ModelInstancedDescription()
             {
-                CastShadow = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 10,
                 Content = ContentDescription.FromFile("resources/trees", "birch_b.json"),
@@ -328,7 +326,6 @@ namespace Deferred
 
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                DepthEnabled = true,
                 Count = 50000,
             };
             graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);

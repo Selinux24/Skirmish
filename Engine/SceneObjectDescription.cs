@@ -32,9 +32,9 @@ namespace Engine
         /// </summary>
         public BlendModes BlendMode { get; set; } = BlendModes.Default;
         /// <summary>
-        /// Use spheric volume for culling by default
+        /// Culling volume by default
         /// </summary>
-        public bool SphericVolume { get; set; } = true;
+        public CullingVolumeTypes CullingVolumeType { get; set; } = CullingVolumeTypes.SphericVolume;
     }
 
     /// <summary>
@@ -59,5 +59,24 @@ namespace Engine
         /// Point shadow casting
         /// </summary>
         Point = 4,
+    }
+
+    /// <summary>
+    /// Culling volume types
+    /// </summary>
+    public enum CullingVolumeTypes : uint
+    {
+        /// <summary>
+        /// None
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Box volume
+        /// </summary>
+        BoxVolume = 1,
+        /// <summary>
+        /// Spheric volume
+        /// </summary>
+        SphericVolume = 2,
     }
 }

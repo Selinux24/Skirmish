@@ -75,7 +75,7 @@ namespace Collada.DungeonWall
             var desc = new ModelInstancedDescription()
             {
                 Instances = 7,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile(resourcesFolder, "wall.json"),
             };
@@ -106,9 +106,6 @@ namespace Collada.DungeonWall
 
             var desc = new ModelDescription()
             {
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 

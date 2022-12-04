@@ -35,9 +35,9 @@ namespace Engine.Common
         /// <inheritdoc/>
         public abstract ISkinningData SkinningData { get; }
         /// <summary>
-        /// Use spheric volume for culling test
+        /// Culling volume for culling test
         /// </summary>
-        public bool SphericVolume { get; private set; }
+        public CullingVolumeTypes CullingVolumeType { get; private set; }
 
         /// <summary>
         /// Base model
@@ -76,6 +76,7 @@ namespace Engine.Common
             await base.InitializeAssets(description);
 
             UseAnisotropicFiltering = description?.UseAnisotropicFiltering ?? false;
+            CullingVolumeType = description?.CullingVolumeType ?? CullingVolumeTypes.SphericVolume;
         }
         /// <summary>
         /// Initializes model geometry

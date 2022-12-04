@@ -178,9 +178,7 @@ namespace SceneTest.SceneCascadedShadows
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
@@ -192,7 +190,7 @@ namespace SceneTest.SceneCascadedShadows
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
             };
@@ -203,7 +201,7 @@ namespace SceneTest.SceneCascadedShadows
         {
             var desc = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
