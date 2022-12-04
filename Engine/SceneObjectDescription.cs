@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Engine
 {
     /// <summary>
@@ -15,9 +16,9 @@ namespace Engine
         /// </summary>
         public bool StartsVisible { get; set; } = true;
         /// <summary>
-        /// Gets or sets whether the object cast shadow
+        /// Gets or sets whether the object cast shadows or not
         /// </summary>
-        public bool CastShadow { get; set; } = false;
+        public ShadowCastingAlgorihtms CastShadow { get; set; } = ShadowCastingAlgorihtms.None;
         /// <summary>
         /// Can be renderer by the deferred renderer
         /// </summary>
@@ -34,5 +35,29 @@ namespace Engine
         /// Use spheric volume for culling by default
         /// </summary>
         public bool SphericVolume { get; set; } = true;
+    }
+
+    /// <summary>
+    /// Shadow casting algorihtms
+    /// </summary>
+    [Flags]
+    public enum ShadowCastingAlgorihtms : uint
+    {
+        /// <summary>
+        /// None
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Directional shadow casting
+        /// </summary>
+        Directional = 1,
+        /// <summary>
+        /// Spot shadow casting
+        /// </summary>
+        Spot = 2,
+        /// <summary>
+        /// Point shadow casting
+        /// </summary>
+        Point = 4,
     }
 }

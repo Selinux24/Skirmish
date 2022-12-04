@@ -188,7 +188,7 @@ namespace Engine.UI
         public TextDrawerDescription()
             : base()
         {
-            CastShadow = false;
+            CastShadow = ShadowCastingAlgorihtms.None;
             DeferredEnabled = false;
             DepthEnabled = false;
             BlendMode = BlendModes.Alpha;

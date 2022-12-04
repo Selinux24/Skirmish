@@ -24,7 +24,7 @@ namespace Engine.Modular
             return new ModularSceneryDescription()
             {
                 UseAnisotropic = true,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Content = ContentDescription.FromFile(contentFolder, "assets.json"),
                 AssetsConfigurationFile = "assetsmap.json",
                 LevelsFile = "levels.json",

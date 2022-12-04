@@ -140,7 +140,7 @@ namespace Engine
         public GroundGardenerDescription()
             : base()
         {
-            CastShadow = true;
+            CastShadow = ShadowCastingAlgorihtms.Directional;
             DeferredEnabled = false;
             BlendMode = BlendModes.Transparent;
         }

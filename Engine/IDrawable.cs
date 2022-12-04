@@ -13,9 +13,9 @@ namespace Engine
         /// </summary>
         bool Visible { get; set; }
         /// <summary>
-        /// Gets or sets whether the object cast shadow
+        /// Gets or sets whether the object cast shadows or not
         /// </summary>
-        bool CastShadow { get; }
+        ShadowCastingAlgorihtms CastShadow { get; }
         /// <summary>
         /// Gets or sets whether the object is enabled to draw with the deferred renderer
         /// </summary>

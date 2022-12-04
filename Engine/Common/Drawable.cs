@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual bool Visible { get; set; }
         /// <inheritdoc/>
-        public virtual bool CastShadow { get; protected set; }
+        public virtual ShadowCastingAlgorihtms CastShadow { get; protected set; }
         /// <inheritdoc/>
         public virtual bool DeferredEnabled { get; protected set; }
         /// <inheritdoc/>

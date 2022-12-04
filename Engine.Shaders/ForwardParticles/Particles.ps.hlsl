@@ -32,7 +32,6 @@ struct PSParticle
 {
     uint primitiveID : SV_PRIMITIVEID;
     float4 positionHomogeneous : SV_POSITION;
-    float3 positionWorld : POSITION;
     float4 rotationWorld : ROTATION;
     float2 tex : TEXCOORD0;
     float4 color : COLOR0;

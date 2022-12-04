@@ -45,7 +45,6 @@ struct PSParticle
 {
     uint primitiveID : SV_PRIMITIVEID;
     float4 positionHomogeneous : SV_POSITION;
-    float3 positionWorld : POSITION;
     float4 rotationWorld : ROTATION;
     float2 tex : TEXCOORD0;
     float4 color : COLOR0;
@@ -85,7 +84,6 @@ void main(point GSParticle input[1], uint primID : SV_PrimitiveID, inout Triangl
     for (int i = 0; i < 4; ++i)
     {
         gout.positionHomogeneous = mul(v[i], gPerFrame.ViewProjection);
-        gout.positionWorld = v[i].xyz;
         gout.tex = quadTexC[i];
 
         outputStream.Append(gout);

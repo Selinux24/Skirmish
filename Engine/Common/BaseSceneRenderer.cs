@@ -671,7 +671,7 @@ namespace Engine.Common
             stopwatch.Restart();
 #endif
             var shadowObjs = Scene.GetComponents<IDrawable>()
-                .Where(c => c.Visible && c.CastShadow);
+                .Where(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
@@ -787,7 +787,7 @@ namespace Engine.Common
             stopwatch.Restart();
 #endif
             var shadowObjs = Scene.GetComponents<IDrawable>()
-                .Where(c => c.Visible && c.CastShadow);
+                .Where(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
@@ -899,7 +899,7 @@ namespace Engine.Common
             stopwatch.Restart();
 #endif
             var shadowObjs = Scene.GetComponents<IDrawable>()
-                .Where(c => c.Visible && c.CastShadow);
+                .Where(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
