@@ -28,21 +28,71 @@ namespace Engine.UI
             };
         }
         /// <summary>
+        /// Gets the default progress bar description
+        /// </summary>
+        /// <param name="font">Font description</param>
+        public static UIProgressBarDescription Default(TextDrawerDescription font)
+        {
+            return new UIProgressBarDescription()
+            {
+                Font = font,
+            };
+        }
+        /// <summary>
+        /// Gets the default progress bar description
+        /// </summary>
+        /// <param name="font">Font description</param>
+        /// <param name="baseColor">Base color</param>
+        /// <param name="progressColor">Progress color</param>
+        public static UIProgressBarDescription Default(TextDrawerDescription font, Color4 baseColor, Color4 progressColor)
+        {
+            return new UIProgressBarDescription()
+            {
+                Font = font,
+                BaseColor = baseColor,
+                ProgressColor = progressColor,
+            };
+        }
+      
+        /// <summary>
+        /// Gets the default progress bar description from a font family name
+        /// </summary>
+        /// <param name="fontFamilyName">Font family name</param>
+        /// <param name="size">Font size</param>
+        /// <param name="fineSampling">Fine sampling</param>
+        public static UIProgressBarDescription DefaultFromFamily(string fontFamilyName, int size, bool fineSampling = false)
+        {
+            return new UIProgressBarDescription()
+            {
+                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fineSampling),
+            };
+        }
+        /// <summary>
         /// Gets the default progress bar description from a font family name
         /// </summary>
         /// <param name="fontFamilyName">Font family name</param>
         /// <param name="size">Font size</param>
         /// <param name="fontStyle">Font style</param>
-        public static UIProgressBarDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular)
+        /// <param name="fineSampling">Fine sampling</param>
+        public static UIProgressBarDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle, bool fineSampling = false)
         {
             return new UIProgressBarDescription()
             {
-                Font = new TextDrawerDescription()
-                {
-                    FontFamily = fontFamilyName,
-                    FontSize = size,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
+            };
+        }
+        
+        /// <summary>
+        /// Gets the default progress bar description from a font file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="size">Size</param>
+        /// <param name="lineAdjust">Line adjust</param>
+        public static UIProgressBarDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false)
+        {
+            return new UIProgressBarDescription()
+            {
+                Font = TextDrawerDescription.FromFile(fileName, size, lineAdjust),
             };
         }
         /// <summary>
@@ -52,19 +102,14 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UIProgressBarDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
+        public static UIProgressBarDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle, bool lineAdjust = false)
         {
             return new UIProgressBarDescription()
             {
-                Font = new TextDrawerDescription
-                {
-                    FontFileName = fileName,
-                    FontSize = size,
-                    LineAdjust = lineAdjust,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
+        
         /// <summary>
         /// Gets the default progress bar description from a font map 
         /// </summary>
@@ -74,15 +119,7 @@ namespace Engine.UI
         {
             return new UIProgressBarDescription
             {
-                Font = new TextDrawerDescription()
-                {
-                    FontMapping = new FontMapping
-                    {
-                        ImageFile = fontImageFileName,
-                        MapFile = fontMapFileName,
-                    },
-                    UseTextureColor = true,
-                },
+                Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };
         }
 
@@ -115,11 +152,11 @@ namespace Engine.UI
         /// <summary>
         /// Text horizontal alignement
         /// </summary>
-        public HorizontalTextAlign TextHorizontalAlign { get; set; } = HorizontalTextAlign.Center;
+        public TextHorizontalAlign TextHorizontalAlign { get; set; } = TextHorizontalAlign.Center;
         /// <summary>
         /// Text vertical alignement
         /// </summary>
-        public VerticalTextAlign TextVerticalAlign { get; set; } = VerticalTextAlign.Middle;
+        public TextVerticalAlign TextVerticalAlign { get; set; } = TextVerticalAlign.Middle;
 
         /// <summary>
         /// Constructor
@@ -127,7 +164,7 @@ namespace Engine.UI
         public UIProgressBarDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

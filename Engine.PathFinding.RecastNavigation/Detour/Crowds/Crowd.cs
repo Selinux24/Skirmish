@@ -308,7 +308,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="pos">The requested position of the agent.</param>
         /// <param name="param">The configutation of the agent.</param>
         /// <returns>The new agent.</returns>
-        public CrowdAgent AddAgent(Vector3 pos, CrowdAgentParams param)
+        public CrowdAgent AddAgent(Vector3 pos, CrowdAgentParameters param)
         {
             // Find nearest position on navmesh and place the agent there.
             Status status = m_navquery.FindNearestPoly(
@@ -563,7 +563,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             if (!m_navquery.IsValidPolyRef(agentRef, m_filters[ag.Params.QueryFilterTypeIndex]))
             {
                 // Current location is not valid, try to reposition.
-                // TODO: this can snap agents, how to handle that?
+                // FIX: this can snap agents, how to handle that?
                 m_navquery.FindNearestPoly(
                     ag.NPos, m_agentPlacementHalfExtents, m_filters[ag.Params.QueryFilterTypeIndex],
                     out agentRef, out Vector3 nearest);
@@ -1124,7 +1124,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 }
 
                 // Calculate speed scale, which tells the agent to slowdown at the end of the path.
-                float slowDownRadius = ag.Params.Radius * 2; // TODO: make less hacky.
+                float slowDownRadius = ag.Params.Radius * ag.Params.SlowDownRadiusFactor;
                 float speedScale = GetDistanceToGoal(ag, slowDownRadius) / slowDownRadius;
 
                 ag.DesiredSpeed = ag.Params.MaxSpeed;
@@ -1145,10 +1145,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float w = 0;
             Vector3 disp = Vector3.Zero;
 
-            foreach (var crowdNei in ag.GetNeighbours())
-            {
-                var nei = crowdNei.Agent;
+            var crowdNeiAgents = ag
+                .GetNeighbours()
+                .Select(crowdNei => crowdNei.Agent)
+                .ToArray();
 
+            foreach (var nei in crowdNeiAgents)
+            {
                 Vector3 diff = ag.NPos - nei.NPos;
                 diff.Y = 0;
 
@@ -1211,9 +1214,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_obstacleQuery.Reset();
 
             // Add neighbours as obstacles.
-            foreach (var crowdNei in ag.GetNeighbours())
+            var crowdNeiAgents = ag
+                .GetNeighbours()
+                .Select(crowdNei => crowdNei.Agent)
+                .ToArray();
+
+            foreach (var nei in crowdNeiAgents)
             {
-                var nei = crowdNei.Agent;
                 m_obstacleQuery.AddCircle(nei.NPos, nei.Params.Radius, nei.Vel, nei.DVel);
             }
 
@@ -1298,10 +1305,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             float w = 0;
 
-            foreach (var crowdNei in ag.GetNeighbours())
-            {
-                var nei = crowdNei.Agent;
+            var crowdNeiAgents = ag
+                .GetNeighbours()
+                .Select(crowdNei => crowdNei.Agent)
+                .ToArray();
 
+            foreach (var nei in crowdNeiAgents)
+            {
                 Vector3 diff = ag.NPos - nei.NPos;
                 diff.Y = 0;
 

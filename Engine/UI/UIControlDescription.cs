@@ -61,7 +61,6 @@ namespace Engine.UI
         /// </summary>
         protected UIControlDescription() : base()
         {
-            CastShadow = false;
             DeferredEnabled = false;
             DepthEnabled = false;
             BlendMode = BlendModes.Alpha;

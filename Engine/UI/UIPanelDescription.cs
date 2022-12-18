@@ -98,7 +98,7 @@ namespace Engine.UI
         public UIPanelDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

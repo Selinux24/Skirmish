@@ -7,15 +7,16 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Common;
     using Engine.Collections.Generic;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Terrain class
     /// </summary>
-    public class Terrain : Ground, IUseMaterials
+    public sealed class Terrain : Ground<GroundDescription>, IUseMaterials
     {
         #region Helper classes
 
@@ -86,32 +87,35 @@ namespace Engine
             private QuadTreeNode<VertexData> lastNode = null;
 
             /// <summary>
-            /// Constructor
+            /// Creates a new grid
             /// </summary>
             /// <param name="game">Game instance</param>
             /// <param name="mapName">Map name</param>
             /// <param name="vertices">Vertices to map</param>
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
-            public MapGrid(Game game, string mapName, IEnumerable<VertexData> vertices, int trianglesPerNode)
+            public static async Task<MapGrid> Create(Game game, string mapName, IEnumerable<VertexData> vertices, int trianglesPerNode)
             {
-                Game = game;
+                MapGrid res = new MapGrid
+                {
+                    Game = game,
+                };
 
                 //Populate collections
-                for (int i = 0; i < NodesHigh.Length; i++)
+                for (int i = 0; i < res.NodesHigh.Length; i++)
                 {
-                    NodesHigh[i] = new MapGridNode();
+                    res.NodesHigh[i] = new MapGridNode();
                 }
-                for (int i = 0; i < NodesMedium.Length; i++)
+                for (int i = 0; i < res.NodesMedium.Length; i++)
                 {
-                    NodesMedium[i] = new MapGridNode();
+                    res.NodesMedium[i] = new MapGridNode();
                 }
-                for (int i = 0; i < NodesLow.Length; i++)
+                for (int i = 0; i < res.NodesLow.Length; i++)
                 {
-                    NodesLow[i] = new MapGridNode();
+                    res.NodesLow[i] = new MapGridNode();
                 }
-                for (int i = 0; i < NodesMinimum.Length; i++)
+                for (int i = 0; i < res.NodesMinimum.Length; i++)
                 {
-                    NodesMinimum[i] = new MapGridNode();
+                    res.NodesMinimum[i] = new MapGridNode();
                 }
 
                 var lodList = new[]
@@ -143,20 +147,22 @@ namespace Engine
                     {
                         var id = new MapGridShapeId() { LevelOfDetail = lod, Shape = shape };
 
-                        dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, game.BufferManager));
+                        res.dictIB.Add(id, CreateDescriptor(id, trianglesPerNode, game.BufferManager));
                     }
                 }
 
-                drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
+                res.drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
 
                 //Populate nodes dictionary
-                var nodes = drawingQuadTree.GetLeafNodes();
+                var nodes = res.drawingQuadTree.GetLeafNodes();
                 foreach (var node in nodes)
                 {
-                    var data = VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
+                    var data = await VertexData.Convert(VertexTypes.Terrain, node.Items, null, null);
 
-                    dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
+                    res.dictVB.Add(node.Id, game.BufferManager.AddVertexData(mapName, false, data));
                 }
+
+                return res;
             }
             /// <summary>
             /// Destructor
@@ -345,77 +351,74 @@ namespace Engine
                 }
             }
             /// <summary>
-            /// Draw shadows 
+            /// Cull non contained nodes
+            /// </summary>
+            /// <param name="volume">Volume</param>
+            private (MapGridNode[] visibleNodesHigh, MapGridNode[] visibleNodesMedium, MapGridNode[] visibleNodesLow, MapGridNode[] visibleNodesMinimum) Cull(IIntersectionVolume volume)
+            {
+                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+
+                return (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum);
+            }
+
+            /// <summary>
+            /// Draws shadows
             /// </summary>
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="terrainTechnique">Technique for drawing</param>
-            public void DrawShadows(DrawContextShadows context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
+            /// <param name="drawer">Drawer</param>
+            public void DrawShadows(DrawContextShadows context, BufferManager bufferManager, IBuiltInDrawer drawer)
             {
-                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.Frustum.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Frustum);
 
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesHigh);
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMedium);
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesLow);
-                DrawNodeList(DrawerModes.ShadowMap, bufferManager, terrainTechnique, visibleNodesMinimum);
+                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
+                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
+                DrawNodeList(bufferManager, drawer, visibleNodesLow);
+                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
             }
             /// <summary>
-            /// Draw
+            /// Draws
             /// </summary>
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="terrainTechnique">Technique for drawing</param>
-            public void Draw(DrawContext context, BufferManager bufferManager, EngineEffectTechnique terrainTechnique)
+            /// <param name="drawer">Drawer</param>
+            public void Draw(DrawContext context, BufferManager bufferManager, IBuiltInDrawer drawer)
             {
-                var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesLow = Array.FindAll(NodesLow, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
-                var visibleNodesMinimum = Array.FindAll(NodesMinimum, n => n.Node != null && context.CameraVolume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
+                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull(context.CameraVolume);
 
-                var mode = context.DrawerMode;
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesHigh);
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMedium);
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesLow);
-                DrawNodeList(mode, bufferManager, terrainTechnique, visibleNodesMinimum);
+                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
+                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
+                DrawNodeList(bufferManager, drawer, visibleNodesLow);
+                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
             }
             /// <summary>
             /// Draws the visible node list
             /// </summary>
-            /// <param name="mode">Drawer mode</param>
             /// <param name="bufferManager">Buffer manager</param>
-            /// <param name="terrainTechnique">Technique for drawing</param>
+            /// <param name="drawer">Drawer</param>
             /// <param name="nodeList">Node list</param>
-            private void DrawNodeList(DrawerModes mode, BufferManager bufferManager, EngineEffectTechnique terrainTechnique, MapGridNode[] nodeList)
+            private void DrawNodeList(BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
             {
-                var graphics = Game.Graphics;
-
                 for (int i = 0; i < nodeList.Length; i++)
                 {
                     var gNode = nodeList[i];
-                    if (gNode.IBDesc.Count > 0)
+                    if (gNode.IBDesc.Count <= 0)
                     {
-                        bufferManager.SetInputAssembler(terrainTechnique, gNode.VBDesc, Topology.TriangleList);
-                        bufferManager.SetIndexBuffer(gNode.IBDesc);
-
-                        if (!mode.HasFlag(DrawerModes.ShadowMap))
-                        {
-                            Counters.InstancesPerFrame++;
-                            Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
-                        }
-
-                        for (int p = 0; p < terrainTechnique.PassCount; p++)
-                        {
-                            graphics.EffectPassApply(terrainTechnique, p, 0);
-
-                            graphics.DrawIndexed(
-                                gNode.IBDesc.Count,
-                                gNode.IBDesc.BufferOffset,
-                                gNode.VBDesc.BufferOffset);
-                        }
+                        continue;
                     }
+
+                    drawer.Draw(bufferManager, new DrawOptions
+                    {
+                        IndexBuffer = gNode.IBDesc,
+                        VertexBuffer = gNode.VBDesc,
+                        Topology = Topology.TriangleList,
+                    });
+
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
                 }
             }
         }
@@ -630,24 +633,19 @@ namespace Engine
         /// <summary>
         /// Heightmap texture resolution
         /// </summary>
-        private readonly float textureResolution;
+        private float textureResolution;
         /// <summary>
         /// Terrain material
         /// </summary>
-        private readonly MeshMaterial terrainMaterial;
-
+        private IMeshMaterial terrainMaterial;
         /// <summary>
-        /// Gets or sets whether use alpha mapping or not
+        /// Gets or sets the terrain drawing mode
         /// </summary>
-        private readonly bool useAlphaMap;
-        /// <summary>
-        /// Gets or sets whether use slope texturing or not
-        /// </summary>
-        private readonly bool useSlopes;
+        private BuiltInTerrainModes terrainMode;
         /// <summary>
         /// Lerping proportion between alhpa mapping and slope texturing
         /// </summary>
-        private readonly float proportion;
+        private float proportion;
         /// <summary>
         /// Terrain low res textures
         /// </summary>
@@ -661,10 +659,6 @@ namespace Engine
         /// </summary>
         private EngineShaderResourceView terrainNormalMaps = null;
         /// <summary>
-        /// Terrain specular maps
-        /// </summary>
-        private EngineShaderResourceView terrainSpecularMaps = null;
-        /// <summary>
         /// Color textures for alpha map
         /// </summary>
         private EngineShaderResourceView colorTextures = null;
@@ -675,88 +669,22 @@ namespace Engine
         /// <summary>
         /// Use anisotropic
         /// </summary>
-        private readonly bool useAnisotropic = false;
+        private bool useAnisotropic = false;
         /// <summary>
         /// Slope ranges
         /// </summary>
-        private readonly Vector2 slopeRanges = Vector2.Zero;
-
-        /// <summary>
-        /// Gets the used material list
-        /// </summary>
-        public virtual IEnumerable<MeshMaterial> Materials
-        {
-            get
-            {
-                return new[] { terrainMaterial };
-            }
-        }
+        private Vector2 slopeRanges = Vector2.Zero;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Terrain description</param>
-        public Terrain(string name, Scene scene, GroundDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public Terrain(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            useAnisotropic = description.UseAnisotropic;
 
-            if (description.Heightmap == null)
-            {
-                throw new EngineException($"Terrain initialization error. Heightmap description not found.");
-            }
-
-            // Read heightmap
-            heightMap = HeightMap.FromDescription(description.Heightmap);
-            float heightMapCellSize = description.Heightmap.CellSize;
-            float heightMapHeight = description.Heightmap.MaximumHeight;
-            Curve heightMapCurve = description.Heightmap.HeightCurve;
-            float uvScale = 1;
-            Vector2 uvDisplacement = Vector2.Zero;
-
-            if (description.Heightmap.Textures != null)
-            {
-                // Read texture data
-                uvScale = description.Heightmap.Textures.Scale;
-                uvDisplacement = description.Heightmap.Textures.Displacement;
-                useAlphaMap = description.Heightmap.Textures.UseAlphaMapping;
-                useSlopes = description.Heightmap.Textures.UseSlopes;
-                proportion = description.Heightmap.Textures.Proportion;
-                textureResolution = description.Heightmap.Textures.Resolution;
-                slopeRanges = description.Heightmap.Textures.SlopeRanges;
-
-                ReadHeightmapTextures(description.Heightmap.ContentPath, description.Heightmap.Textures);
-            }
-
-            // Read material
-            terrainMaterial = new MeshMaterial()
-            {
-                Material = description.Heightmap.Material?.GetMaterial() ?? Material.Default
-            };
-
-            // Get vertices and indices from heightmap
-            heightMap.BuildGeometry(
-                heightMapCellSize,
-                heightMapHeight,
-                heightMapCurve,
-                uvScale,
-                uvDisplacement,
-                out var vertices, out var indices);
-
-            // Compute triangles for ray - mesh picking
-            var tris = Triangle.ComputeTriangleList(
-                Topology.TriangleList,
-                vertices.Select(v => v.Position.Value).ToArray(),
-                indices.ToArray());
-
-            // Initialize quadtree for ray picking
-            groundPickingQuadtree = description.ReadQuadTree(tris);
-
-            //Initialize map
-            int trianglesPerNode = heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
-            mapGrid = new MapGrid(Game, $"Terrain.{Name}", vertices, trianglesPerNode);
         }
         /// <summary>
         /// Destructor
@@ -783,13 +711,74 @@ namespace Engine
                 terrainTexturesHR = null;
                 terrainNormalMaps?.Dispose();
                 terrainNormalMaps = null;
-                terrainSpecularMaps?.Dispose();
-                terrainSpecularMaps = null;
                 colorTextures?.Dispose();
                 colorTextures = null;
                 alphaMap?.Dispose();
                 alphaMap = null;
             }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(GroundDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.Heightmap == null)
+            {
+                throw new EngineException($"Terrain initialization error. Heightmap description not found.");
+            }
+
+            useAnisotropic = Description.UseAnisotropic;
+
+            // Read heightmap
+            heightMap = HeightMap.FromDescription(Description.Heightmap);
+            float heightMapCellSize = Description.Heightmap.CellSize;
+            float heightMapHeight = Description.Heightmap.MaximumHeight;
+            Curve heightMapCurve = Description.Heightmap.HeightCurve;
+            float uvScale = 1;
+            Vector2 uvDisplacement = Vector2.Zero;
+
+            if (Description.Heightmap.Textures != null)
+            {
+                // Read texture data
+                uvScale = Description.Heightmap.Textures.Scale;
+                uvDisplacement = Description.Heightmap.Textures.Displacement;
+                proportion = Description.Heightmap.Textures.Proportion;
+                textureResolution = Description.Heightmap.Textures.Resolution;
+                slopeRanges = Description.Heightmap.Textures.SlopeRanges;
+
+                bool useAlphaMap = Description.Heightmap.Textures.UseAlphaMapping;
+                bool useSlopes = Description.Heightmap.Textures.UseSlopes;
+                terrainMode = BuiltInTerrainModes.AlphaMap;
+                if (useAlphaMap && useSlopes) { terrainMode = BuiltInTerrainModes.Full; }
+                if (useSlopes) { terrainMode = BuiltInTerrainModes.Slopes; }
+
+                await ReadHeightmapTextures(Description.Heightmap.ContentPath, Description.Heightmap.Textures);
+            }
+
+            // Read material
+            terrainMaterial = MeshMaterial.DefaultBlinnPhong;
+
+            // Get vertices and indices from heightmap
+            var (Vertices, Indices) = await heightMap.BuildGeometry(
+                heightMapCellSize,
+                heightMapHeight,
+                heightMapCurve,
+                uvScale,
+                uvDisplacement);
+
+            // Compute triangles for ray - mesh picking
+            var tris = Triangle.ComputeTriangleList(
+                Topology.TriangleList,
+                Vertices.Select(v => v.Position.Value).ToArray(),
+                Indices.ToArray());
+
+            // Initialize quadtree for ray picking
+            GroundPickingQuadtree = Description.ReadQuadTree(tris);
+
+            //Initialize map
+            int trianglesPerNode = heightMap.CalcTrianglesPerNode(MapGrid.LODLevels);
+            mapGrid = await MapGrid.Create(Game, $"Terrain.{Name}", Vertices, trianglesPerNode);
         }
 
         /// <inheritdoc/>
@@ -810,11 +799,21 @@ namespace Engine
                 return;
             }
 
-            var terrainTechnique = SetTechniqueTerrainShadowMap(context);
-            if (terrainTechnique != null)
+            var shadowDrawer = context.ShadowMap?.GetDrawer(VertexTypes.Terrain, false, false);
+            if (shadowDrawer == null)
             {
-                mapGrid?.DrawShadows(context, BufferManager, terrainTechnique);
+                return;
             }
+
+            shadowDrawer.UpdateCastingLight(context);
+
+            var meshState = new BuiltInDrawerMeshState
+            {
+                Local = Matrix.Identity,
+            };
+            shadowDrawer.UpdateMesh(meshState);
+
+            mapGrid?.DrawShadows(context, BufferManager, shadowDrawer);
         }
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
@@ -824,113 +823,56 @@ namespace Engine
                 return;
             }
 
-            var terrainTechnique = SetTechniqueTerrain(context);
-            if (terrainTechnique != null)
+            var terrainDrawer = GetDrawer(context);
+            if (terrainDrawer == null)
             {
-                mapGrid?.Draw(context, BufferManager, terrainTechnique);
+                return;
             }
+
+            mapGrid?.Draw(context, BufferManager, terrainDrawer);
         }
         /// <summary>
-        /// Sets thecnique for terrain drawing
+        /// Gets the terrain drawer, based on the drawing context
         /// </summary>
         /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrain(DrawContext context)
+        private IBuiltInDrawer GetDrawer(DrawContext context)
         {
-            var mode = context.DrawerMode;
-
-            EngineEffectTechnique terrainTechnique = null;
-            if (mode.HasFlag(DrawerModes.Forward)) terrainTechnique = SetTechniqueTerrainDefault(context);
-            if (mode.HasFlag(DrawerModes.Deferred)) terrainTechnique = SetTechniqueTerrainDeferred(context);
-
-            return terrainTechnique;
-        }
-        /// <summary>
-        /// Sets thecnique for terrain drawing with forward renderer
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrainDefault(DrawContext context)
-        {
-            var effect = DrawerPool.EffectDefaultTerrain;
-
-            effect.UpdatePerFrame(
-                textureResolution,
-                context);
-
-            var state = new EffectTerrainState
+            if (context.DrawerMode.HasFlag(DrawerModes.Forward))
             {
-                UseAnisotropic = useAnisotropic,
-                NormalMap = terrainNormalMaps,
-                SpecularMap = terrainSpecularMaps,
-                UseAlphaMap = useAlphaMap,
-                AlphaMap = alphaMap,
-                ColorTextures = colorTextures,
-                UseSlopes = useSlopes,
-                SlopeRanges = slopeRanges,
-                DiffuseMapLR = terrainTexturesLR,
-                DiffuseMapHR = terrainTexturesHR,
-                Proportion = proportion,
-                MaterialIndex = terrainMaterial.ResourceIndex,
-            };
+                var dr = BuiltInShaders.GetDrawer<BuiltIn.Forward.BuiltInTerrain>();
+                dr.Update(GetTerrainState());
+                return dr;
+            }
 
-            effect.UpdatePerObject(state);
-
-            if (useAlphaMap && useSlopes) { return effect.TerrainFullForward; }
-            if (useAlphaMap) { return effect.TerrainAlphaMapForward; }
-            if (useSlopes) { return effect.TerrainSlopesForward; }
+            if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
+            {
+                var dr = BuiltInShaders.GetDrawer<BuiltIn.Deferred.BuiltInTerrain>();
+                dr.Update(GetTerrainState());
+                return dr;
+            }
 
             return null;
         }
         /// <summary>
-        /// Sets thecnique for terrain drawing with deferred renderer
+        /// Gets the terrain state
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrainDeferred(DrawContext context)
+        private BuiltInTerrainState GetTerrainState()
         {
-            var effect = DrawerPool.EffectDeferredTerrain;
-
-            effect.UpdatePerFrame(
-                context.ViewProjection,
-                textureResolution);
-
-            var state = new EffectTerrainState
+            return new BuiltInTerrainState
             {
-                UseAnisotropic = useAnisotropic,
-                NormalMap = terrainNormalMaps,
-                SpecularMap = terrainSpecularMaps,
-                UseAlphaMap = useAlphaMap,
-                AlphaMap = alphaMap,
-                ColorTextures = colorTextures,
-                UseSlopes = useSlopes,
-                SlopeRanges = slopeRanges,
-                DiffuseMapLR = terrainTexturesLR,
-                DiffuseMapHR = terrainTexturesHR,
-                Proportion = proportion,
+                TintColor = Color.White,
                 MaterialIndex = terrainMaterial.ResourceIndex,
+                Mode = terrainMode,
+                TextureResolution = textureResolution,
+                Proportion = proportion,
+                SlopeRanges = slopeRanges,
+                AlphaMap = alphaMap,
+                MormalMap = terrainNormalMaps,
+                ColorTexture = colorTextures,
+                LowResolutionTexture = terrainTexturesLR,
+                HighResolutionTexture = terrainTexturesHR,
+                UseAnisotropic = useAnisotropic,
             };
-
-            effect.UpdatePerObject(state);
-
-            if (useAlphaMap && useSlopes) { return effect.TerrainFullDeferred; }
-            if (useAlphaMap) { return effect.TerrainAlphaMapDeferred; }
-            if (useSlopes) { return effect.TerrainSlopesDeferred; }
-
-            return null;
-        }
-        /// <summary>
-        /// Sets thecnique for terrain drawing in shadow mapping
-        /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <returns>Returns the selected technique</returns>
-        private EngineEffectTechnique SetTechniqueTerrainShadowMap(DrawContextShadows context)
-        {
-            var effect = DrawerPool.EffectShadowTerrain;
-
-            effect.UpdatePerFrame(context.ViewProjection);
-
-            return effect.TerrainShadowMap;
         }
 
         /// <summary>
@@ -938,62 +880,53 @@ namespace Engine
         /// </summary>
         /// <param name="baseContentPath">Base content path</param>
         /// <param name="description">Textures description</param>
-        private void ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
+        private async Task ReadHeightmapTextures(string baseContentPath, HeightmapTexturesDescription description)
         {
             string tContentPath = Path.Combine(baseContentPath, description.ContentPath);
 
-            var normalMapTextures = ImageContent.Array(tContentPath, description.NormalMaps);
-            terrainNormalMaps = Game.ResourceManager.RequestResource(normalMapTextures);
-
-            var specularMapTextures = ImageContent.Array(tContentPath, description.SpecularMaps);
-            terrainSpecularMaps = Game.ResourceManager.RequestResource(specularMapTextures);
+            var normalMapTextures = new FileArrayImageContent(tContentPath, description.NormalMaps);
+            terrainNormalMaps = await Game.ResourceManager.RequestResource(normalMapTextures);
 
             if (description.UseSlopes)
             {
-                var texturesLR = ImageContent.Array(tContentPath, description.TexturesLR);
-                var texturesHR = ImageContent.Array(tContentPath, description.TexturesHR);
+                var texturesLR = new FileArrayImageContent(tContentPath, description.TexturesLR);
+                var texturesHR = new FileArrayImageContent(tContentPath, description.TexturesHR);
 
-                terrainTexturesLR = Game.ResourceManager.RequestResource(texturesLR);
-                terrainTexturesHR = Game.ResourceManager.RequestResource(texturesHR);
+                terrainTexturesLR = await Game.ResourceManager.RequestResource(texturesLR);
+                terrainTexturesHR = await Game.ResourceManager.RequestResource(texturesHR);
             }
 
             if (description.UseAlphaMapping)
             {
-                var colors = ImageContent.Array(tContentPath, description.ColorTextures);
-                var aMap = ImageContent.Texture(tContentPath, description.AlphaMap);
+                var colors = new FileArrayImageContent(tContentPath, description.ColorTextures);
+                var aMap = new FileArrayImageContent(tContentPath, description.AlphaMap);
 
-                colorTextures = Game.ResourceManager.RequestResource(colors);
-                alphaMap = Game.ResourceManager.RequestResource(aMap);
+                colorTextures = await Game.ResourceManager.RequestResource(colors);
+                alphaMap = await Game.ResourceManager.RequestResource(aMap);
             }
         }
-    }
 
-    /// <summary>
-    /// Terrain extensions
-    /// </summary>
-    public static class TerrainExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<Terrain> AddComponentTerrain(this Scene scene, string name, GroundDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        /// <inheritdoc/>
+        public IEnumerable<IMeshMaterial> GetMaterials()
         {
-            Terrain component = null;
-
-            await Task.Run(() =>
+            return terrainMaterial != null ? new[] { terrainMaterial } : Enumerable.Empty<IMeshMaterial>();
+        }
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            return terrainMaterial;
+        }
+        /// <inheritdoc/>
+        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            if (terrainMaterial == material)
             {
-                component = new Terrain(name, scene, description);
+                return;
+            }
 
-                scene.AddComponent(component, usage, order);
-            });
+            terrainMaterial = material;
 
-            return component;
+            Scene.UpdateMaterialPalette();
         }
     }
 }

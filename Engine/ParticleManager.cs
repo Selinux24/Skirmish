@@ -11,7 +11,7 @@ namespace Engine
     /// <summary>
     /// CPU particle manager
     /// </summary>
-    public class ParticleManager : Drawable
+    public sealed class ParticleManager : Drawable<ParticleManagerDescription>
     {
         /// <summary>
         /// Concurrent particle list
@@ -54,11 +54,11 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Particle manager description</param>
-        public ParticleManager(string name, Scene scene, ParticleManagerDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public ParticleManager(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
 
         }
@@ -70,9 +70,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Resource disposal
-        /// </summary>
+        /// <inheritdoc/>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -87,10 +85,7 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Updates the internal state
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
             //Copy collection
@@ -147,10 +142,8 @@ namespace Engine
                 particleSystems.Add(p);
             });
         }
-        /// <summary>
-        /// Draws the active particle systems
-        /// </summary>
-        /// <param name="context">Context</param>
+
+        /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
             if (!particleSystems.Any())
@@ -169,12 +162,8 @@ namespace Engine
                 }
             });
         }
-        /// <summary>
-        /// Performs culling with the active emitters
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the at least one of the internal emitters is visible, returns the distance to the item</param>
-        /// <returns>Returns true if all emitters were culled</returns>
+
+        /// <inheritdoc/>
         public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
@@ -214,9 +203,9 @@ namespace Engine
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
         /// <returns>Returns the new particle system</returns>
-        public IParticleSystem AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
+        public async Task<IParticleSystem> AddParticleSystem(ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
-            return AddParticleSystem($"{Name}.{type}.{description.Name}", type, description, emitter);
+            return await AddParticleSystem($"{Name}.{type}.{description.Name}", type, description, emitter);
         }
         /// <summary>
         /// Adds a new particle system to the collection
@@ -226,17 +215,17 @@ namespace Engine
         /// <param name="description">Particle system description</param>
         /// <param name="emitter">Particle emitter</param>
         /// <returns>Returns the new particle system</returns>
-        public IParticleSystem AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
+        public async Task<IParticleSystem> AddParticleSystem(string name, ParticleSystemTypes type, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             IParticleSystem pSystem;
 
             if (type == ParticleSystemTypes.CPU)
             {
-                pSystem = new ParticleSystemCpu(Game, name, description, emitter);
+                pSystem = await ParticleSystemCpu.Create(Game, name, description, emitter);
             }
             else if (type == ParticleSystemTypes.GPU)
             {
-                pSystem = new ParticleSystemGpu(Game, name, description, emitter);
+                pSystem = await ParticleSystemGpu.Create(Game, name, description, emitter);
             }
             else
             {
@@ -293,42 +282,10 @@ namespace Engine
             }
         }
 
-        /// <summary>
-        /// Gets the text representation of the particle manager
-        /// </summary>
-        /// <returns>Returns the text representation of the particle manager</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"Particle systems: {particleSystems.Count}; Allocated particles: {AllocatedParticleCount}";
-        }
-    }
-
-    /// <summary>
-    /// Particle manager extensions
-    /// </summary>
-    public static class ParticleManagerExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<ParticleManager> AddComponentParticleManager(this Scene scene, string name, ParticleManagerDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
-        {
-            ParticleManager component = null;
-
-            await Task.Run(() =>
-            {
-                component = new ParticleManager(name, scene, description);
-
-                scene.AddComponent(component, usage, order);
-            });
-
-            return component;
         }
     }
 }

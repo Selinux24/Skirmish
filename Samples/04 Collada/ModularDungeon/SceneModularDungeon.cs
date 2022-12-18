@@ -1,9 +1,12 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Audio;
+using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj;
+using Engine.Modular;
+using Engine.Modular.Persistence;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
@@ -17,10 +20,8 @@ using System.Threading.Tasks;
 
 namespace Collada.ModularDungeon
 {
-    public class SceneModularDungeon : Scene
+    public class SceneModularDungeon : WalkableScene
     {
-        private const int layerHUD = 99;
-
         private const float maxDistance = 35;
 
         private readonly string resourcesFolder = "modulardungeon/resources";
@@ -37,7 +38,7 @@ namespace Collada.ModularDungeon
         private readonly Color ambientDown = new Color(0, 31, 0, 255);
 
         private Player playerAgentType = null;
-        private readonly Color agentTorchLight = new Color(255, 249, 224, 255);
+        private readonly Color3 agentTorchLight = new Color(255, 249, 224).RGB();
         private readonly Vector3 cameraInitialPosition = new Vector3(1000, 1000, 1000);
         private readonly Vector3 cameraInitialInterest = new Vector3(1001, 1000, 1000);
 
@@ -89,6 +90,8 @@ namespace Collada.ModularDungeon
         private string ratSoundTalk = null;
         private IAudioEffect ratSoundInstance = null;
 
+        private readonly BuiltInPostProcessState postProcessingState = BuiltInPostProcessState.Empty;
+
         private bool userInterfaceInitialized = false;
         private bool gameAssetsInitialized = false;
         private bool levelInitialized = false;
@@ -110,11 +113,7 @@ namespace Collada.ModularDungeon
             this.dungeonMapFile = dungeonMapFile;
 
             Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(SceneModularDungeon); });
-        }
 
-        public override async Task Initialize()
-        {
-            await base.Initialize();
 
 #if DEBUG
             Game.VisibleMouse = true;
@@ -123,6 +122,15 @@ namespace Collada.ModularDungeon
             Game.VisibleMouse = false;
             Game.LockMouse = true;
 #endif
+
+            postProcessingState.AddToneMapping(BuiltInToneMappingTones.SimpleReinhard);
+            postProcessingState.AddBlurVignette();
+            postProcessingState.AddBloomLow();
+        }
+
+        public override async Task Initialize()
+        {
+            await base.Initialize();
 
             LoadUI();
         }
@@ -134,7 +142,6 @@ namespace Collada.ModularDungeon
 
                 pbLevels.Caption.Text = $"{value.Progress * 100f:0}%";
                 pbLevels.ProgressValue = value.Progress;
-                pbLevels.Visible = true;
 
                 return;
             }
@@ -174,17 +181,17 @@ namespace Collada.ModularDungeon
 
             _ = Task.Run(async () =>
             {
-                 try
-                 {
-                     Logger.WriteDebug(this, $"Saving graph file. {fileName}");
+                try
+                {
+                    Logger.WriteDebug(this, $"Saving graph file. {fileName}");
 
-                     await PathFinderDescription.Save(fileName, NavigationGraph);
-                 }
-                 catch (Exception ex)
-                 {
-                     Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
-                 }
-             });
+                    await PathFinderDescription.Save(fileName, NavigationGraph);
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, $"Error saving graph file. {ex.Message}", ex);
+                }
+            });
         }
         public override void NavigationGraphUpdated()
         {
@@ -218,6 +225,8 @@ namespace Collada.ModularDungeon
                 SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
+
+                InitializePostProcessing();
             }
 
             if (!userInterfaceInitialized)
@@ -249,12 +258,13 @@ namespace Collada.ModularDungeon
             UpdateEntities();
             UpdateWind();
 
-            UpdateDebugInput();
+            UpdateDebugInput(gameTime);
             UpdateGraphInput();
             UpdateRatInput();
             UpdatePlayerInput();
             UpdateEntitiesInput();
 
+            UpdatePlayerState(gameTime);
             UpdateSelection();
         }
         public override void GameGraphicsResized()
@@ -266,51 +276,34 @@ namespace Collada.ModularDungeon
 
         private void LoadUI()
         {
-            _ = LoadResourcesAsync(
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeUI(),
                     InitializeMapTexture()
                 },
-                (res) =>
-                {
-                    try
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        userInterfaceInitialized = true;
-
-                        UpdateLayout();
-
-                        LoadAssets();
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.WriteError(this, ex);
-
-                        PrepareMessage(true, $"Error loading UI: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
-                    }
-                });
+                LoadUICompleted);
         }
         private async Task InitializeUI()
         {
-            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(), layerHUD + 1);
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui1", "Console", UIConsoleDescription.Default(), LayerUI + 1);
             console.Visible = false;
 
-            pbLevels = await this.AddComponentUIProgressBar("PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green), layerHUD);
+            pbLevels = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ui2", "PbLevels", UIProgressBarDescription.Default(Color.Transparent, Color.Green));
             pbLevels.Visible = false;
 
-            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 48), TextForeColor = Color.Red, TextShadowColor = Color.DarkRed }, layerHUD + 1);
+            var messagesFont = TextDrawerDescription.FromFamily("Viner Hand ITC, Microsoft Sans Serif", 48);
+            var messagesDesc = UITextAreaDescription.Default(messagesFont);
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Messages", messagesDesc, LayerUI + 1);
             messages.Text = null;
+            messages.TextForeColor = Color.Red;
+            messages.TextShadowColor = Color.DarkRed;
             messages.SetPosition(new Vector2(0, 0));
             messages.Visible = false;
 
             var dialogDesc = UIDialogDescription.Default(Game.Form.RenderWidth * 0.5f, Game.Form.RenderHeight * 0.5f);
             dialogDesc.DialogButtons = UIDialogButtons.Accept;
-            dialog = await this.AddComponentUIDialog("Dialog", dialogDesc, layerHUD + 1);
+            dialog = await AddComponentUI<UIDialog, UIDialogDescription>("ui4", "Dialog", dialogDesc, LayerUI + 1);
             dialog.OnAcceptHandler += (s, e) =>
             {
                 dialog.CloseDialog(async () =>
@@ -326,11 +319,10 @@ namespace Collada.ModularDungeon
 
             var drawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                CastShadow = false,
                 Count = 50000,
                 BlendMode = BlendModes.Opaque | BlendModes.Additive,
             };
-            selectedItemDrawer = await this.AddComponentPrimitiveListDrawer("SelectedItemsDrawer", drawerDesc, SceneObjectUsages.UI, layerHUD);
+            selectedItemDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("ui5", "SelectedItemsDrawer", drawerDesc);
             selectedItemDrawer.Visible = false;
         }
         private async Task InitializeMapTexture()
@@ -342,12 +334,36 @@ namespace Collada.ModularDungeon
 
             string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
 
-            dungeonMap = await this.AddComponentSprite("DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), SceneObjectUsages.UI, layerHUD + 2);
+            dungeonMap = await AddComponentUI<Sprite, SpriteDescription>("map1", "DungeonMap", SpriteDescription.Default(Path.Combine(onePageResourcesFolder, dungeonMapFile)), LayerUI + 2);
             dungeonMap.Visible = false;
+        }
+        private void LoadUICompleted(LoadResourcesResult res)
+        {
+            try
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
+                userInterfaceInitialized = true;
+
+                UpdateLayout();
+
+                LoadAssets();
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, ex);
+
+                PrepareMessage(true, $"Error loading UI: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
+            }
         }
 
         private void LoadAssets()
         {
+            pbLevels.Visible = true;
+
             var tasks = new[]
             {
                 InitializeDebug(),
@@ -356,41 +372,9 @@ namespace Collada.ModularDungeon
                 InitializeNPCs(),
                 InitializeAudio(),
             };
+            var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", tasks);
 
-            _ = LoadResourcesAsync(
-                LoadResourceGroup.FromTasks("LoadAssets", tasks),
-                (res) =>
-                {
-                    try
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        gameAssetsInitialized = true;
-
-                        InitializeEnvironment();
-                        InitializeLights();
-
-                        StartCamera();
-
-                        AudioManager.Start();
-
-                        ChangeToLevel(null);
-                    }
-                    catch (AggregateException ex)
-                    {
-                        Logger.WriteError(this, ex);
-
-                        string[] exceptions = ex.Flatten().InnerExceptions
-                            .Select(e => e.Message)
-                            .ToArray();
-
-                        string msg = $"Error loading Assets: {ex.Message}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, exceptions)}";
-                        dialog.ShowDialog(msg, () => { dialog.Show(100); });
-                    }
-                });
+            LoadResourcesAsync(resourceGroup, LoadAssetsCompleted);
         }
         private async Task InitializeDebug()
         {
@@ -398,7 +382,7 @@ namespace Collada.ModularDungeon
             {
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc);
+            graphDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("db1", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
 
             var bboxesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -406,7 +390,7 @@ namespace Collada.ModularDungeon
                 Color = new Color4(1.0f, 0.0f, 0.0f, 0.25f),
                 Count = 10000,
             };
-            bboxesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Bounding volumes", bboxesDrawerDesc);
+            bboxesDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db2", "DEBUG++ Bounding volumes", bboxesDrawerDesc);
             bboxesDrawer.Visible = false;
 
             var ratDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -414,7 +398,7 @@ namespace Collada.ModularDungeon
                 Color = new Color4(0.0f, 1.0f, 1.0f, 0.25f),
                 Count = 10000,
             };
-            ratDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Rat", ratDrawerDesc);
+            ratDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db3", "DEBUG++ Rat", ratDrawerDesc);
             ratDrawer.Visible = false;
 
             var obstacleDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
@@ -422,7 +406,7 @@ namespace Collada.ModularDungeon
                 DepthEnabled = false,
                 Count = 10000,
             };
-            obstacleDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Obstacles", obstacleDrawerDesc);
+            obstacleDrawer = await AddComponentUI<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("db4", "DEBUG++ Obstacles", obstacleDrawerDesc);
             obstacleDrawer.Visible = false;
 
             var connectionDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
@@ -430,7 +414,7 @@ namespace Collada.ModularDungeon
                 Color = connectionColor,
                 Count = 10000,
             };
-            connectionDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Connections", connectionDrawerDesc);
+            connectionDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("db5", "DEBUG++ Connections", connectionDrawerDesc);
             connectionDrawer.Visible = false;
         }
         private async Task InitializeDungeon()
@@ -447,7 +431,7 @@ namespace Collada.ModularDungeon
                 desc = ModularSceneryDescription.FromFolder(Path.Combine(resourcesFolder, dungeonDefFile));
             }
 
-            scenery = await this.AddComponentModularScenery("Scenery", desc, SceneObjectUsages.Ground);
+            scenery = await AddComponentGround<ModularScenery, ModularSceneryDescription>("Scenery", "Scenery", desc);
             scenery.TriggerEnd += TriggerEnds;
 
             SetGround(scenery, true);
@@ -456,53 +440,53 @@ namespace Collada.ModularDungeon
         {
             var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(fileName);
 
-            ModularSceneryObjectStateTransition toOpen = new ModularSceneryObjectStateTransition
+            ObjectStateTransition toOpen = new ObjectStateTransition
             {
                 State = "open",
             };
-            ModularSceneryObjectStateTransition toClose = new ModularSceneryObjectStateTransition
+            ObjectStateTransition toClose = new ObjectStateTransition
             {
                 State = "close",
             };
 
-            ModularSceneryObjectState openState = new ModularSceneryObjectState
+            ObjectState openState = new ObjectState
             {
                 Name = "open",
                 Transitions = new[] { toClose },
             };
-            ModularSceneryObjectState closeState = new ModularSceneryObjectState
+            ObjectState closeState = new ObjectState
             {
                 Name = "close",
                 Transitions = new[] { toOpen },
             };
 
-            ModularSceneryObjectAction openAction = new ModularSceneryObjectAction
+            ObjectAction openAction = new ObjectAction
             {
                 Name = "open",
                 StateFrom = "close",
                 StateTo = "open",
                 AnimationPlan = "open",
-                Items = new[] { new ModularSceneryObjectActionItem { Action = "open" } },
+                Items = new[] { new ObjectActionItem { Action = "open" } },
             };
 
-            ModularSceneryObjectAction closeAction = new ModularSceneryObjectAction
+            ObjectAction closeAction = new ObjectAction
             {
                 Name = "close",
                 StateFrom = "open",
                 StateTo = "close",
                 AnimationPlan = "close",
-                Items = new[] { new ModularSceneryObjectActionItem { Action = "close" } },
+                Items = new[] { new ObjectActionItem { Action = "close" } },
             };
 
-            ModularSceneryObjectAnimationPlan openPlan = new ModularSceneryObjectAnimationPlan
+            ObjectAnimationPlan openPlan = new ObjectAnimationPlan
             {
                 Name = "open",
-                Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "open" } }
+                Paths = new[] { new ObjectAnimationPath { Name = "open" } }
             };
-            ModularSceneryObjectAnimationPlan closePlan = new ModularSceneryObjectAnimationPlan
+            ObjectAnimationPlan closePlan = new ObjectAnimationPlan
             {
                 Name = "close",
-                Paths = new[] { new ModularSceneryObjectAnimationPath { Name = "close" } }
+                Paths = new[] { new ObjectAnimationPath { Name = "close" } }
             };
 
             Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]> doors = new Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]>
@@ -536,9 +520,9 @@ namespace Collada.ModularDungeon
             var res = new ModularSceneryDescription()
             {
                 UseAnisotropic = true,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.xml"),
+                Content = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.json"),
                 AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
                 Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
             };
@@ -568,14 +552,15 @@ namespace Collada.ModularDungeon
         }
         private async Task InitializeRat()
         {
-            rat = await this.AddComponentModel(
+            rat = await AddComponent<Model, ModelDescription>(
+                "char1",
                 "Rat",
                 new ModelDescription()
                 {
                     TextureIndex = 0,
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/rat"), "rat.xml"),
+                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/rat"), "rat.json"),
                 });
 
             ratAgentType = new Player()
@@ -600,19 +585,20 @@ namespace Collada.ModularDungeon
             p0.AddLoop("walk");
             ratPaths.Add("walk", new AnimationPlan(p0));
 
-            rat.AnimationController.AddPath(ratPaths["walk"]);
+            rat.AnimationController.Start(ratPaths["walk"]);
             rat.AnimationController.TimeDelta = 1.5f;
         }
         private async Task InitializeHuman()
         {
-            human = await this.AddComponentModelInstanced(
+            human = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "char2",
                 "Human Instanced",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/human2"), "Human2.xml"),
+                    Content = ContentDescription.FromFile(Path.Combine(resourcesFolder, "characters/human2"), "Human2.json"),
                 });
 
             human.Visible = false;
@@ -719,6 +705,38 @@ namespace Collada.ModularDungeon
 
             await Task.CompletedTask;
         }
+        private void LoadAssetsCompleted(LoadResourcesResult res)
+        {
+            try
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
+
+                gameAssetsInitialized = true;
+
+                InitializeEnvironment();
+                InitializeLights();
+
+                StartCamera();
+
+                AudioManager.Start();
+
+                ChangeToLevel(null);
+            }
+            catch (AggregateException ex)
+            {
+                Logger.WriteError(this, ex);
+
+                var exceptions = ex.Flatten().InnerExceptions
+                    .Select(e => e.Message)
+                    .ToArray();
+
+                string msg = $"Error loading Assets: {ex.Message}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, exceptions)}";
+                dialog.ShowDialog(msg, () => { dialog.Show(100); });
+            }
+        }
         private void InitializeEnvironment()
         {
             //Navigation settings
@@ -748,7 +766,7 @@ namespace Collada.ModularDungeon
         }
         private void InitializeLights()
         {
-            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown, ambientUp, true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("hemi_light", ambientDown.RGB(), ambientUp.RGB(), true);
             Lights.KeyLight.Enabled = false;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
@@ -757,10 +775,15 @@ namespace Collada.ModularDungeon
             Lights.FogRange = 10f;
             Lights.FogStart = maxDistance - 15f;
 
-            var desc = SceneLightPointDescription.Create(Vector3.Zero, 10f, 25f);
+            var desc = SceneLightPointDescription.Create(Vector3.Zero, 10f, 0.5f);
 
             torch = new SceneLightPoint("player_torch", true, agentTorchLight, agentTorchLight, true, desc);
             Lights.Add(torch);
+        }
+        private void InitializePostProcessing()
+        {
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessingState;
         }
 
         private void StartCamera()
@@ -813,26 +836,33 @@ namespace Collada.ModularDungeon
         }
         private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)
         {
-            if (e.Items.Any())
+            if (!e.Items.Any())
             {
-                var obs = obstacles.Where(o => e.Items.Select(i => i.Item).Contains(o.Item)).ToList();
-                if (obs.Any())
-                {
-                    //Refresh affected obstacles (if any)
-                    obs.ForEach(o =>
-                    {
-                        var obb = OrientedBoundingBoxExtensions.FromPoints(
-                            o.Item.GetPoints(true),
-                            o.Item.Manipulator.FinalTransform);
-
-                        RemoveObstacle(o.Index);
-                        o.Index = AddObstacle(obb);
-                        o.Obstacle = obb;
-                    });
-
-                    PaintObstacles();
-                }
+                return;
             }
+
+            var obs = obstacles
+                .Where(o => e.Items.Select(i => i.Item).Contains(o.Item))
+                .ToList();
+
+            if (!obs.Any())
+            {
+                return;
+            }
+
+            //Refresh affected obstacles (if any)
+            obs.ForEach(o =>
+            {
+                var obb = OrientedBoundingBoxExtensions.FromPoints(
+                    o.Item.GetPoints(true),
+                    o.Item.Manipulator.FinalTransform);
+
+                RemoveObstacle(o.Index);
+                o.Index = AddObstacle(obb);
+                o.Obstacle = obb;
+            });
+
+            PaintObstacles();
         }
 
         private void UpdatePlayerInput()
@@ -860,7 +890,7 @@ namespace Collada.ModularDungeon
             }
 
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -896,11 +926,12 @@ namespace Collada.ModularDungeon
                 torch.Enabled = !torch.Enabled;
             }
         }
-        private void UpdateDebugInput()
+        private void UpdateDebugInput(GameTime gameTime)
         {
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
                 graphDrawer.Visible = !graphDrawer.Visible;
+                connectionDrawer.Visible = graphDrawer.Visible;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F2))
@@ -929,6 +960,16 @@ namespace Collada.ModularDungeon
             if (Game.Input.KeyJustReleased(Keys.Oem5))
             {
                 console.Toggle();
+            }
+
+            if (Game.Input.KeyPressed(Keys.Left))
+            {
+                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity - gameTime.ElapsedSeconds, 0, 100);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Right))
+            {
+                postProcessingState.BloomIntensity = MathUtil.Clamp(postProcessingState.BloomIntensity + gameTime.ElapsedSeconds, 0, 100);
             }
         }
         private void UpdateGraphInput()
@@ -996,6 +1037,10 @@ namespace Collada.ModularDungeon
             }
         }
 
+        private void UpdatePlayerState(GameTime gameTime)
+        {
+            postProcessingState.VignetteInner = 0.66f + ((float)Math.Sin(gameTime.TotalSeconds * 2f) * 0.1f);
+        }
         private void UpdateSelection()
         {
             if (selectedItem == null)
@@ -1125,8 +1170,8 @@ namespace Collada.ModularDungeon
                         extents *= minDist;
 
                         var sBbox = new BoundingBox(center - extents, center + extents);
-
-                        return sBbox.Intersects(ref ray);
+                        Ray rRay = ray;
+                        return sBbox.Intersects(ref rRay);
                     }
                 })
                 .ToList();
@@ -1149,7 +1194,7 @@ namespace Collada.ModularDungeon
                 SetSelectedItem(null);
             }
         }
-        private float CalcItemPickingDistance(Ray ray, ModularSceneryItem item)
+        private float CalcItemPickingDistance(PickingRay ray, ModularSceneryItem item)
         {
             if (item.Item.PickNearest(ray, out var res))
             {
@@ -1158,8 +1203,8 @@ namespace Collada.ModularDungeon
             else
             {
                 var sph = item.Item.GetBoundingSphere();
-
-                return Intersection.DistanceFromPointToLine(ray, sph.Center);
+                Intersection.ClosestPointInRay(ray, sph.Center, out float distance);
+                return distance;
             }
         }
 
@@ -1206,7 +1251,11 @@ namespace Collada.ModularDungeon
         }
         private void SetSelectedItemTrigger(ModularSceneryItem item)
         {
-            var triggers = scenery.GetTriggersByObject(item);
+            var triggers = scenery
+                .GetTriggersByObject(item)
+                .Where(t => t.Actions.Any())
+                .ToArray();
+
             if (triggers.Any())
             {
                 int index = 1;
@@ -1271,6 +1320,7 @@ namespace Collada.ModularDungeon
         {
             var triggers = scenery
                 .GetTriggersByObject(item)
+                .Where(t => t.Actions.Any())
                 .ToArray();
 
             if (triggers.Any())
@@ -1398,31 +1448,7 @@ namespace Collada.ModularDungeon
         private void ChangeToLevel(string name)
         {
             levelInitialized = false;
-            _ = LoadResourcesAsync(
-                LoadResourceGroup.FromTasks($"Level.{name ?? "Default"}", ChangeToLevelAsync(name)),
-                (res) =>
-                {
-                    try
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
 
-                        levelInitialized = true;
-
-                        pbLevels.Visible = false;
-                    }
-                    catch (Exception ex)
-                    {
-                        Logger.WriteError(this, ex);
-
-                        PrepareMessage(true, $"Error loading level {name ?? "Default"}: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
-                    }
-                });
-        }
-        private async Task ChangeToLevelAsync(string name)
-        {
             gameReady = false;
 
             Camera.Position = cameraInitialPosition;
@@ -1439,6 +1465,12 @@ namespace Collada.ModularDungeon
 
             SetSelectedItem(null);
 
+            var resourceGroup = LoadResourceGroup.FromTasks("LoadAssets", ChangeToLevelAsync(name));
+
+            LoadResourcesAsync(resourceGroup, ChangeToLevelCompleted);
+        }
+        private async Task ChangeToLevelAsync(string name)
+        {
             if (string.IsNullOrWhiteSpace(name))
             {
                 await scenery.LoadFirstLevel();
@@ -1451,27 +1483,49 @@ namespace Collada.ModularDungeon
             ConfigureNavigationGraph();
 
             await UpdateNavigationGraph();
+        }
+        private void ChangeToLevelCompleted(LoadResourcesResult res)
+        {
+            try
+            {
+                if (!res.Completed)
+                {
+                    res.ThrowExceptions();
+                }
 
-            StartEntities();
+                StartEntities();
 
-            var pos = scenery.CurrentLevel.StartPosition;
-            var dir = scenery.CurrentLevel.LookingVector;
-            pos.Y += playerAgentType.Height;
-            Camera.Position = pos;
-            Camera.Interest = pos + dir;
+                Vector3 pos = scenery.CurrentLevel.StartPosition;
+                Vector3 dir = scenery.CurrentLevel.LookingVector;
+                pos.Y += playerAgentType.Height;
+                Camera.Position = pos;
+                Camera.Interest = pos + dir;
 
-            Lights.Add(torch);
+                Lights.Add(torch);
 
-            AudioManager.Start();
+                AudioManager.Start();
 
-            gameReady = true;
+                InitializePostProcessing();
+
+                levelInitialized = true;
+
+                pbLevels.Hide(1000);
+
+                gameReady = true;
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, ex);
+
+                PrepareMessage(true, $"Error loading level: {ex.Message}{Environment.NewLine}Press Esc to return to the start screen.");
+            }
         }
 
         private void ConfigureNavigationGraph()
         {
             PathFinderDescription.Input.ClearConnections();
 
-            if (scenery.CurrentLevel?.Name == "Lvl1")
+            if (scenery.CurrentLevel.Name == "Lvl1")
             {
                 PathFinderDescription.Input.AddConnection(
                     new Vector3(-8.98233700f, 4.76837158e-07f, 0.0375497341f),
@@ -1514,7 +1568,7 @@ namespace Collada.ModularDungeon
             AnimationPath p0 = new AnimationPath();
             p0.AddLoop("stand");
 
-            if (scenery.CurrentLevel?.Name != "Lvl1")
+            if (scenery.CurrentLevel.Name != "Lvl1")
             {
                 human.Visible = false;
             }
@@ -1524,8 +1578,7 @@ namespace Collada.ModularDungeon
                 human[i].Manipulator.SetPosition(31, 0, i == 0 ? -31 : -29, true);
                 human[i].Manipulator.SetRotation(-MathUtil.PiOverTwo, 0, 0, true);
 
-                human[i].AnimationController.AddPath(new AnimationPlan(p0));
-                human[i].AnimationController.Start(i * 1f);
+                human[i].AnimationController.Start(new AnimationPlan(p0), i * 1f);
                 human[i].AnimationController.TimeDelta = 0.5f + (i * 0.1f);
             }
 
@@ -1653,10 +1706,8 @@ namespace Collada.ModularDungeon
         {
             obstacleDrawer.Clear(obstacleColor);
 
-            foreach (var item in obstacles)
+            foreach (var obstacle in obstacles.Select(o => o.Obstacle))
             {
-                var obstacle = item.Obstacle;
-
                 IEnumerable<Triangle> obstacleTris = null;
 
                 if (obstacle is BoundingCylinder bc)
@@ -1697,8 +1748,6 @@ namespace Collada.ModularDungeon
                     var cirlinesT = Line3D.CreateCircle(conn.End, conn.Radius, 32);
                     connectionDrawer.AddPrimitives(connectionColor, cirlinesT);
                 }
-
-                connectionDrawer.Visible = true;
             }
         }
 

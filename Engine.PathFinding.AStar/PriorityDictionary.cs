@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
@@ -24,7 +25,7 @@ namespace Engine.PathFinding.AStar
         {
             get
             {
-                return this.capacity;
+                return capacity;
             }
             set
             {
@@ -35,12 +36,12 @@ namespace Engine.PathFinding.AStar
                     newCap = DefaultCapacity;
                 }
 
-                if (newCap < this.Count)
+                if (newCap < Count)
                 {
                     throw new ArgumentOutOfRangeException("value", "The new capacity is not enough for the elements currently in the queue");
                 }
 
-                this.capacity = newCap;
+                capacity = newCap;
 
                 if (items == null)
                 {
@@ -95,9 +96,9 @@ namespace Engine.PathFinding.AStar
         /// <param name="comparer">An object that implements IComparer for elements of type TPriority</param>
         public PriorityDictionary(int initialCapacity, IComparer<TPriority> comparer)
         {
-            this.Count = 0;
-            this.compareFunc = new Comparison<TPriority>(comparer.Compare);
-            this.Capacity = initialCapacity;
+            Count = 0;
+            compareFunc = new Comparison<TPriority>(comparer.Compare);
+            Capacity = initialCapacity;
         }
         /// <summary>
         /// Constructor
@@ -106,9 +107,9 @@ namespace Engine.PathFinding.AStar
         /// <param name="comparison">Comparison function</param>
         public PriorityDictionary(int initialCapacity, Comparison<TPriority> comparison)
         {
-            this.Count = 0;
-            this.compareFunc = comparison;
-            this.Capacity = initialCapacity;
+            Count = 0;
+            compareFunc = comparison;
+            Capacity = initialCapacity;
         }
 
         /// <summary>
@@ -118,16 +119,16 @@ namespace Engine.PathFinding.AStar
         /// <param name="priority">Priority</param>
         public void Enqueue(TValue value, TPriority priority)
         {
-            if (this.Count == capacity)
+            if (Count == capacity)
             {
                 //Increase capacity
-                this.Capacity = (int)(Capacity * 1.5);
+                Capacity = (int)(Capacity * 1.5);
             }
 
             // Create the new item
             PriorityDictionaryItem<TValue, TPriority> newItem = new PriorityDictionaryItem<TValue, TPriority>(value, priority);
 
-            int i = this.Count++;
+            int i = Count++;
 
             while ((i > 0) && (compareFunc(items[i / 2].Priority, newItem.Priority) > 0))
             {
@@ -165,7 +166,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="comp">Object that implements IEqualityComparer for the type of item in the collection</param>
         public void Remove(TValue item, IEqualityComparer comparer)
         {
-            for (int index = 0; index < this.Count; ++index)
+            for (int index = 0; index < Count; ++index)
             {
                 if (comparer.Equals(item, items[index].Value))
                 {
@@ -194,18 +195,18 @@ namespace Engine.PathFinding.AStar
         /// </summary>
         public void Clear()
         {
-            this.Count = 0;
+            Count = 0;
 
-            this.TrimExcess();
+            TrimExcess();
         }
         /// <summary>
         /// Sets the capacity to the actual number of elements in the queue if the number is less than 90% of current capacity
         /// </summary>
         public void TrimExcess()
         {
-            if (this.Count < (0.9 * this.capacity))
+            if (Count < (0.9 * capacity))
             {
-                this.Capacity = this.Count;
+                Capacity = Count;
             }
         }
         /// <summary>
@@ -215,15 +216,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns true if the element is in the queue. False in all other cases</returns>
         public bool Contains(TValue item)
         {
-            foreach (PriorityDictionaryItem<TValue, TPriority> qItem in items)
-            {
-                if (qItem.Value.Equals(item))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return items.Any(qItem => qItem.Value.Equals(item));
         }
         /// <summary>
         /// Copies the elements in a queue, starting from the specified index
@@ -240,10 +233,10 @@ namespace Engine.PathFinding.AStar
                 throw new ArgumentException("the array is multidimensional");
             if (arrayIndex >= array.Length)
                 throw new ArgumentException("arrayIndex is greater or equal to the number of array elements");
-            if (this.Count > (array.Length - arrayIndex))
+            if (Count > (array.Length - arrayIndex))
                 throw new ArgumentException("The number of items in the collection destination is greater than the available space from arrayIndex detonation to the end of array");
 
-            Array.Copy(items, 0, array, arrayIndex, this.Count);
+            Array.Copy(items, 0, array, arrayIndex, Count);
         }
         /// <summary>
         /// Copies the elements to an array 
@@ -251,9 +244,9 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns an array with the list of items in the queue</returns>
         public PriorityDictionaryItem<TValue, TPriority>[] ToArray()
         {
-            PriorityDictionaryItem<TValue, TPriority>[] newItems = new PriorityDictionaryItem<TValue, TPriority>[this.Count];
+            PriorityDictionaryItem<TValue, TPriority>[] newItems = new PriorityDictionaryItem<TValue, TPriority>[Count];
 
-            Array.Copy(items, newItems, this.Count);
+            Array.Copy(items, newItems, Count);
 
             return newItems;
         }
@@ -279,10 +272,10 @@ namespace Engine.PathFinding.AStar
         private PriorityDictionaryItem<TValue, TPriority> RemoveAt(int index)
         {
             PriorityDictionaryItem<TValue, TPriority> o = items[index];
-            PriorityDictionaryItem<TValue, TPriority> tmp = items[this.Count - 1];
+            PriorityDictionaryItem<TValue, TPriority> tmp = items[Count - 1];
 
-            items[--this.Count] = default(PriorityDictionaryItem<TValue, TPriority>);
-            if (this.Count > 0)
+            items[--Count] = default;
+            if (Count > 0)
             {
                 int i = index;
                 int j = i + 1;
@@ -313,21 +306,21 @@ namespace Engine.PathFinding.AStar
         /// <param name="arrayIndex">Index from which to start copying the elements</param>
         void ICollection.CopyTo(Array array, int index)
         {
-            this.CopyTo((PriorityDictionaryItem<TValue, TPriority>[])array, index);
+            CopyTo((PriorityDictionaryItem<TValue, TPriority>[])array, index);
         }
         /// <summary>
         /// Gets whether access to the ICollection is safe for multithreaded (Thread Safe)
         /// </summary>
         bool ICollection.IsSynchronized
         {
-            get { return this.IsSynchronized; }
+            get { return IsSynchronized; }
         }
         /// <summary>
         /// Gets a value that can be used to synchronize access to the ICollection
         /// </summary>
         object ICollection.SyncRoot
         {
-            get { return this.SyncRoot; }
+            get { return SyncRoot; }
         }
         /// <summary>
         /// Returns an enumerator that iterates through a collection
@@ -335,7 +328,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns an enumerator that iterates through a collection</returns>
         public IEnumerator<PriorityDictionaryItem<TValue, TPriority>> GetEnumerator()
         {
-            for (int i = 0; i < this.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 yield return items[i];
             }

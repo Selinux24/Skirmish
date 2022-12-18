@@ -13,8 +13,6 @@ namespace Animation.SimpleAnimation
 {
     public class SceneSimpleAnimation : Scene
     {
-        private const int layerHUD = 99;
-
         private UITextArea title = null;
         private UITextArea runtime = null;
         private UITextArea animText = null;
@@ -98,68 +96,74 @@ namespace Animation.SimpleAnimation
         public SceneSimpleAnimation(Game game)
             : base(game)
         {
-
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override async Task Initialize()
         {
-            await InitializeUI();
+            await base.Initialize();
 
-            UpdateLayout();
-
-            try
-            {
-                await LoadResourcesAsync(
-                    new[]
-                    {
-                        InitializeLadder(),
-                        InitializeLadder2(),
-                        InitializeSoldier(),
-                        InitializeRat(),
-                        InitializeDoors(),
-                        InitializeJails(),
-                        InitializeFloor(),
-                        InitializeDebug()
-                    },
-                    (res) =>
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        InitializeEnvironment();
-
-                        gameReady = true;
-                    });
-            }
-            catch (Exception ex)
-            {
-                messages.Text = ex.Message;
-                messages.Visible = true;
-            }
+            InitializeUI();
         }
 
-        private async Task InitializeUI()
+        private void InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            runtime = await this.AddComponentUITextArea("Runtime", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
-            animText = await this.AddComponentUITextArea("AnimText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
-            messages = await this.AddComponentUITextArea("Messages", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 15), TextForeColor = Color.Orange }, layerHUD);
+            LoadResourcesAsync(
+                InitializeUITitle(),
+                InitializeUICompleted);
+        }
+        private async Task InitializeUITitle()
+        {
+            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
+            var defaultFont15 = TextDrawerDescription.FromFamily("Consolas", 15);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Consolas", 11);
+
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtime = await AddComponentUI<UITextArea, UITextAreaDescription>("Runtime", "Runtime", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            animText = await AddComponentUI<UITextArea, UITextAreaDescription>("AnimText", "AnimText", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
+            messages = await AddComponentUI<UITextArea, UITextAreaDescription>("Messages", "Messages", new UITextAreaDescription { Font = defaultFont15, TextForeColor = Color.Orange });
 
             title.Text = "Animation test";
             runtime.Text = "";
             animText.Text = "";
             messages.Text = "";
 
-            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
             consoleDesc.LogFilterFunc = (l) => l.LogLevel > LogLevel.Trace || (l.LogLevel == LogLevel.Trace && l.CallerTypeName == nameof(AnimationController));
-            console = await this.AddComponentUIConsole("Console", consoleDesc, layerHUD + 1);
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
+        }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeLadder(),
+                    InitializeLadder2(),
+                    InitializeSoldier(),
+                    InitializeRat(),
+                    InitializeDoors(),
+                    InitializeJails(),
+                    InitializeFloor(),
+                    InitializeDebug()
+                },
+                InitializeComponentsCompleted);
         }
         private async Task InitializeFloor()
         {
@@ -180,32 +184,31 @@ namespace Animation.SimpleAnimation
                     1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SimpleAnimation/resources/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SimpleAnimation/resources/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SimpleAnimation/resources/d_road_asphalt_stripes_specular.dds";
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeLadder()
         {
-            var ladder = await this.AddComponentModelInstanced(
+            var ladder = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Ladder",
                 "Ladder",
                 new ModelInstancedDescription()
                 {
                     Instances = 2,
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder","Dn_Anim_Ladder.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder.json"),
                 });
 
             ladder[0].Manipulator.SetPosition(-4f, 1, 0, true);
@@ -228,31 +231,33 @@ namespace Animation.SimpleAnimation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.AddPath(ladderPaths["pull"]);
-            ladder[1].AnimationController.AddPath(ladderPaths["pull"]);
+            ladder[0].AnimationController.AppendPlan(ladderPaths["pull"]);
+            ladder[1].AnimationController.AppendPlan(ladderPaths["pull"]);
 
             animObjects.Add(ladder);
         }
         private async Task InitializeLadder2()
         {
-            var ladder = await this.AddComponentModelInstanced(
+            var ladder = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Ladder2",
                 "Ladder2",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_2.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_2.json"),
                 });
 
-            var ladder2 = await this.AddComponentModelInstanced(
+            var ladder2 = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Ladder22",
                 "Ladder22",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_22.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_22.json"),
                 });
 
             ladder[0].Manipulator.SetPosition(-3f, 1, 0, true);
@@ -281,74 +286,71 @@ namespace Animation.SimpleAnimation
                 { "push", new AnimationPlan(push) }
             };
 
-            ladder[0].AnimationController.AddPath(ladder2Paths["pull"]);
-            ladder[1].AnimationController.AddPath(ladder2Paths["pull"]);
+            ladder[0].AnimationController.AppendPlan(ladder2Paths["pull"]);
+            ladder[1].AnimationController.AppendPlan(ladder2Paths["pull"]);
 
-            ladder2[0].AnimationController.AddPath(ladder2Paths["push"]);
-            ladder2[1].AnimationController.AddPath(ladder2Paths["push"]);
+            ladder2[0].AnimationController.AppendPlan(ladder2Paths["push"]);
+            ladder2[1].AnimationController.AppendPlan(ladder2Paths["push"]);
 
             animObjects.Add(ladder);
             animObjects.Add(ladder2);
         }
         private async Task InitializeSoldier()
         {
-            var soldier = await this.AddComponentModelInstanced(
+            var soldier = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Soldier",
                 "Soldier",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Soldier", "soldier_anim2.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Soldier", "soldier_anim2.json"),
                 });
 
             soldier[0].Manipulator.SetPosition(0, 0, 0, true);
             soldier[1].Manipulator.SetPosition(0.5f, 0, 5, true);
 
-            soldier[0].AnimationController.PathEnding += SoldierControllerPathEnding;
-            soldier[1].AnimationController.PathEnding += SoldierControllerPathEnding;
-
-            AnimationPath p0 = new AnimationPath();
-            p0.Add("idle1");
-            p0.AddRepeat("idle2", 5);
-            p0.Add("idle1");
-            p0.Add("stand");
-            p0.Add("idle1");
-            p0.AddRepeat("walk", 5);
-            p0.AddRepeat("run", 10);
-            p0.AddRepeat("walk", 1);
-            p0.AddRepeat("idle2", 5);
-            p0.Add("idle1");
+            soldier[0].AnimationController.PlanEnding += SoldierControllerPathEnding;
+            soldier[1].AnimationController.PlanEnding += SoldierControllerPathEnding;
 
             AnimationPath p1 = new AnimationPath();
             p1.Add("idle1");
 
             AnimationPath p2 = new AnimationPath();
-            p2.AddRepeat("idle2", 2);
+            p2.Add("idle2");
 
             AnimationPath p3 = new AnimationPath();
-            p3.AddRepeat("stand", 5);
+            p3.Add("stand");
 
-            soldierPaths.Add("complex", new AnimationPlan(p0));
+            AnimationPath p4 = new AnimationPath();
+            p4.Add("walk");
+
+            AnimationPath p5 = new AnimationPath();
+            p5.Add("run");
+
             soldierPaths.Add("idle1", new AnimationPlan(p1));
             soldierPaths.Add("idle2", new AnimationPlan(p2));
             soldierPaths.Add("stand", new AnimationPlan(p3));
+            soldierPaths.Add("walk", new AnimationPlan(p4));
+            soldierPaths.Add("run", new AnimationPlan(p5));
 
-            soldier[0].AnimationController.AddPath(soldierPaths["complex"]);
-            soldier[1].AnimationController.AddPath(soldierPaths["complex"]);
+            soldier[0].AnimationController.AppendPlan(soldierPaths["idle1"]);
+            soldier[1].AnimationController.AppendPlan(soldierPaths["idle1"]);
 
             animObjects.Add(soldier);
         }
         private async Task InitializeRat()
         {
-            var rat = await this.AddComponentModelInstanced(
+            var rat = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Rat",
                 "Rat",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Rat", "rat.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Rat", "rat.json"),
                 });
 
             rat[0].Manipulator.SetPosition(2, 0, 0, true);
@@ -359,31 +361,33 @@ namespace Animation.SimpleAnimation
 
             ratPaths.Add("walk", new AnimationPlan(p0));
 
-            rat[0].AnimationController.AddPath(ratPaths["walk"]);
-            rat[1].AnimationController.AddPath(ratPaths["walk"]);
+            rat[0].AnimationController.AppendPlan(ratPaths["walk"]);
+            rat[1].AnimationController.AppendPlan(ratPaths["walk"]);
 
             animObjects.Add(rat);
         }
         private async Task InitializeDoors()
         {
-            var doors = await this.AddComponentModelInstanced(
+            var doors = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Doors",
                 "Doors",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Doors.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Doors.json"),
                 });
 
-            var walls = await this.AddComponentModelInstanced(
-                "Walls",
+            var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "DoorWalls",
+                "DoorWalls",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall1.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall1.json"),
                 });
 
             doors[0].Manipulator.SetPosition(-10, 0, 8, true);
@@ -412,34 +416,36 @@ namespace Animation.SimpleAnimation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.AddPath(doorsPaths["rep"]);
+            doors[0].AnimationController.AppendPlan(doorsPaths["rep"]);
 
             animObjects.Add(doors);
         }
         private async Task InitializeJails()
         {
-            var walls = await this.AddComponentModelInstanced(
+            var walls = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Walls",
                 "Walls",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall2.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall2.json"),
                 });
 
             walls[0].Manipulator.SetPosition(10, 0, 8, true);
             walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             walls[0].Manipulator.SetScale(2.5f);
 
-            var doors = await this.AddComponentModelInstanced(
+            var doors = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Jails",
                 "Jails",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Jails.xml"),
+                    Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Jails.json"),
                 });
 
             doors[0].Manipulator.SetPosition(10, 0, 8, true);
@@ -464,33 +470,52 @@ namespace Animation.SimpleAnimation
                 { "rep", new AnimationPlan(rep) }
             };
 
-            doors[0].AnimationController.AddPath(jailsPaths["rep"]);
+            doors[0].AnimationController.AppendPlan(jailsPaths["rep"]);
 
             animObjects.Add(doors);
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
-            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "DebugItemTris",
+                "DebugItemTris",
+                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000, Color = itemTrisColor });
+
+            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DebugItemLines",
+                "DebugItemLines",
+                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000, Color = itemLinesColor });
+        }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                messages.Text = res.GetExceptions().FirstOrDefault()?.Message;
+                messages.Visible = true;
+
+                return;
+            }
+
+            InitializeEnvironment();
+
+            gameReady = true;
         }
 
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
-
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
 
             BoundingBox bbox = new BoundingBox();
             animObjects.ForEach(item =>
             {
                 for (int i = 0; i < item.InstanceCount; i++)
                 {
-                    bbox = BoundingBox.Merge(bbox, item[i].GetBoundingBox());
+                    bbox = SharpDX.BoundingBox.Merge(bbox, item[i].GetBoundingBox());
                 }
             });
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
@@ -534,19 +559,12 @@ namespace Animation.SimpleAnimation
             var itemController = animObjects[itemIndex][0].AnimationController;
 
             runtime.Text = Game.RuntimeText;
-            animText.Text = string.Format(
-                "Paths: {0:00}; Delta: {1:0.0}; Index: {2}; Clip: {3}; Time: {4:0.00}; Item Time: {5:0.00}",
-                itemController.PathCount,
-                itemController.TimeDelta,
-                itemController.CurrentIndex,
-                itemController.CurrentPathItemClip,
-                itemController.CurrentPathTime,
-                itemController.CurrentPathItemTime);
+            animText.Text = $"Paths: {itemController}";
         }
         private void UpdateInputCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -683,18 +701,41 @@ namespace Animation.SimpleAnimation
             }
         }
 
-        private void SoldierControllerPathEnding(object sender, EventArgs e)
+        private void SoldierControllerPathEnding(object sender, AnimationControllerEventArgs e)
         {
             if (sender is AnimationController controller)
             {
+                var transitionPlan = controller.GetTransitionPlan();
+                var currentPlan = controller.GetCurrentPlan();
+
+                if (!e.IsTransition && (transitionPlan?.Active ?? true))
+                {
+                    //Current plan ends, transition plan continues
+                    return;
+                }
+
+                if (e.IsTransition && currentPlan.Active)
+                {
+                    //Transition ends, current plan continues
+                    return;
+                }
+
                 var keys = soldierPaths.Keys.ToArray();
 
-                int index = Math.Min(Helper.RandomGenerator.Next(1, 3), keys.Length - 1);
+                while (true)
+                {
+                    int index = Helper.RandomGenerator.Next(0, 100) % keys.Length;
 
-                var key = keys[index];
+                    string planName = keys[index];
+                    var newPlan = soldierPaths[planName];
 
-                controller.SetPath(soldierPaths[key]);
-                controller.Start(0);
+                    if (newPlan.CurrentPath?.CurrentItem?.ClipName != currentPlan.CurrentPath?.CurrentItem?.ClipName)
+                    {
+                        controller.TransitionToPlan(newPlan);
+
+                        break;
+                    }
+                }
             }
         }
 
@@ -712,14 +753,14 @@ namespace Animation.SimpleAnimation
             }
 
             title.SetPosition(Vector2.Zero);
-            runtime.SetPosition(new Vector2(5, title.Rectangle.Bottom + 3));
-            animText.SetPosition(new Vector2(5, runtime.Rectangle.Bottom + 3));
-            messages.SetPosition(new Vector2(5, animText.Rectangle.Bottom + 3));
+            runtime.SetPosition(new Vector2(5, title.AbsoluteRectangle.Bottom + 3));
+            animText.SetPosition(new Vector2(5, runtime.AbsoluteRectangle.Bottom + 3));
+            messages.SetPosition(new Vector2(5, animText.AbsoluteRectangle.Bottom + 3));
 
             backPanel.Width = Game.Form.RenderWidth;
-            backPanel.Height = messages.Rectangle.Bottom + 3;
+            backPanel.Height = messages.AbsoluteRectangle.Bottom + 3;
 
-            console.Top = backPanel.Rectangle.Bottom;
+            console.Top = backPanel.AbsoluteRectangle.Bottom;
             console.Width = Game.Form.RenderWidth;
         }
     }

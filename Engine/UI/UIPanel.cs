@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -7,33 +8,125 @@ namespace Engine.UI
     /// <summary>
     /// User interface panel
     /// </summary>
-    public class UIPanel : UIControl
+    public sealed class UIPanel : UIControl<UIPanelDescription>, IScrollable
     {
         /// <summary>
         /// Background
         /// </summary>
-        private readonly Sprite background;
+        private Sprite background;
         /// <summary>
         /// Grid layout
         /// </summary>
         private GridLayout gridLayout;
+        /// <summary>
+        /// Vertical scroll offset (in pixels)
+        /// </summary>
+        private float verticalScrollOffset = 0;
+        /// <summary>
+        /// Vertical scroll position (from 0 to 1)
+        /// </summary>
+        private float verticalScrollPosition = 0;
+        /// <summary>
+        /// Horizontal scroll offset (in pixels)
+        /// </summary>
+        private float horizontalScrollOffset = 0;
+        /// <summary>
+        /// Horizontal scroll position (from 0 to 1)
+        /// </summary>
+        private float horizontalScrollPosition = 0;
+
+        /// <inheritdoc/>
+        public ScrollModes Scroll { get; set; }
+        /// <inheritdoc/>
+        public float ScrollbarSize { get; set; }
+        /// <inheritdoc/>
+        public ScrollVerticalAlign ScrollVerticalAlign { get; set; }
+        /// <inheritdoc/>
+        public float ScrollVerticalOffset
+        {
+            get
+            {
+                return verticalScrollOffset;
+            }
+            set
+            {
+                verticalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumVerticalOffset());
+                verticalScrollPosition = this.ConvertVerticalOffsetToPosition(verticalScrollOffset);
+            }
+        }
+        /// <inheritdoc/>
+        public float ScrollVerticalPosition
+        {
+            get
+            {
+                return verticalScrollPosition;
+            }
+            set
+            {
+                verticalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                verticalScrollOffset = this.ConvertVerticalPositionToOffset(verticalScrollPosition);
+            }
+        }
+        /// <inheritdoc/>
+        public ScrollHorizontalAlign ScrollHorizontalAlign { get; set; }
+        /// <inheritdoc/>
+        public float ScrollHorizontalOffset
+        {
+            get
+            {
+                return horizontalScrollOffset;
+            }
+            set
+            {
+                horizontalScrollOffset = MathUtil.Clamp(value, 0f, this.GetMaximumHorizontalOffset());
+                horizontalScrollPosition = this.ConvertHorizontalOffsetToPosition(horizontalScrollOffset);
+            }
+        }
+        /// <inheritdoc/>
+        public float ScrollHorizontalPosition
+        {
+            get
+            {
+                return horizontalScrollPosition;
+            }
+            set
+            {
+                horizontalScrollPosition = MathUtil.Clamp(value, 0f, 1f);
+                horizontalScrollOffset = this.ConvertHorizontalPositionToOffset(horizontalScrollPosition);
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public UIPanel(string name, Scene scene, UIPanelDescription description) : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public UIPanel(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            if (description.Background != null)
-            {
-                background = new Sprite($"{name}.Background", scene, description.Background);
 
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIPanelDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.Background != null)
+            {
+                background = await CreateBackground();
                 AddChild(background);
             }
 
-            SetGridLayout(description.GridLayout);
+            SetGridLayout(Description.GridLayout);
+        }
+        private async Task<Sprite> CreateBackground()
+        {
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Background",
+                $"{Name}.Background",
+                Description.Background);
         }
 
         /// <inheritdoc/>
@@ -42,7 +135,7 @@ namespace Engine.UI
             var childs = Children.Where(c => c != background).ToArray();
             if (childs.Any())
             {
-                GridLayout.UpdateLayout(childs, gridLayout, new RectangleF(0, 0, AbsoluteWidth, AbsoluteHeight), Padding, Spacing);
+                GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);
             }
 
             base.UpdateInternalState();
@@ -76,33 +169,54 @@ namespace Engine.UI
                 FitY = gridLayout.FitY,
             };
         }
-    }
 
-    /// <summary>
-    /// UI Panel extensions
-    /// </summary>
-    public static class UIPanelExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIPanel> AddComponentUIPanel(this Scene scene, string name, UIPanelDescription description, int order = 0)
+        /// <inheritdoc/>
+        public void ScrollUp(float amount)
         {
-            UIPanel component = null;
+            ScrollVerticalOffset -= amount * Game.GameTime.ElapsedSeconds;
+            ScrollVerticalOffset = Math.Max(0, ScrollVerticalOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollDown(float amount)
+        {
+            float maxOffset = this.GetMaximumVerticalOffset();
 
-            await Task.Run(() =>
+            ScrollVerticalOffset += amount * Game.GameTime.ElapsedSeconds;
+            ScrollVerticalOffset = Math.Min(maxOffset, ScrollVerticalOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollLeft(float amount)
+        {
+            float maxOffset = this.GetMaximumHorizontalOffset();
+
+            ScrollHorizontalOffset += amount * Game.GameTime.ElapsedSeconds;
+            ScrollHorizontalOffset = Math.Min(maxOffset, ScrollHorizontalOffset);
+        }
+        /// <inheritdoc/>
+        public void ScrollRight(float amount)
+        {
+            ScrollHorizontalOffset -= amount * Game.GameTime.ElapsedSeconds;
+            ScrollHorizontalOffset = Math.Max(0, ScrollHorizontalOffset);
+        }
+
+        /// <inheritdoc/>
+        public override RectangleF GetControlArea()
+        {
+            RectangleF rect = RectangleF.Empty;
+
+            foreach (var item in Children)
             {
-                component = new UIPanel(name, scene, description);
+                if (rect == RectangleF.Empty)
+                {
+                    rect = item.GetControlArea();
 
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
-            });
+                    continue;
+                }
 
-            return component;
+                rect = RectangleF.Union(rect, item.GetControlArea());
+            }
+
+            return rect;
         }
     }
 }

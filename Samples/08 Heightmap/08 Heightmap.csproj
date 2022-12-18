@@ -35,6 +35,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Bradley\Bradley.json" />
+    <None Remove="Resources\Buildings\Affgan1.json" />
+    <None Remove="Resources\Container\container.json" />
+    <None Remove="Resources\M24\m24.json" />
+    <None Remove="Resources\Rocks\boulder.json" />
+    <None Remove="Resources\Scenery\Objects\torch.json" />
+    <None Remove="Resources\Soldier\soldier_anim2.json" />
+    <None Remove="Resources\Trees2\Tree.json" />
+    <None Remove="Resources\Trees\Tree.json" />
+    <None Remove="Resources\Watch Tower\Watch Tower.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\Bradley\Bradley.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -42,22 +55,22 @@
     <Content Include="Resources\Bradley\Bradley.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Bradley\Bradley.xml">
+    <Content Include="Resources\Bradley\Bradley.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Buildings\Affgan1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Container\container.dae">
+    <Content Include="Resources\Buildings\Affgan1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Buildings\Affgan1.xml">
+    <Content Include="Resources\Container\container.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Buildings\afghan_building.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Container\container.xml">
+    <Content Include="Resources\Container\container.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Container\ikube azul-1.png">
@@ -81,7 +94,7 @@
     <Content Include="Resources\M24\m24.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\M24\m24.xml">
+    <Content Include="Resources\M24\m24.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Particles\dust.png">
@@ -93,7 +106,7 @@
     <Content Include="Resources\Particles\smoke.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Rocks\boulder.xml">
+    <Content Include="Resources\Rocks\boulder.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Rocks\boulder_1.dae">
@@ -226,7 +239,7 @@
     <Content Include="Resources\Scenery\Objects\torch.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Scenery\Objects\torch.xml">
+    <Content Include="Resources\Scenery\Objects\torch.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Sky\cloud001.dds">
@@ -244,7 +257,7 @@
     <Content Include="Resources\Soldier\soldier_anim2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Soldier\soldier_anim2.xml">
+    <Content Include="Resources\Soldier\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\target.png">
@@ -256,7 +269,7 @@
     <Content Include="Resources\Trees2\Leafs_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees2\Tree.xml">
+    <Content Include="Resources\Trees2\Tree.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees2\tree_1.dae">
@@ -274,7 +287,7 @@
     <Content Include="Resources\Trees\Leafs_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\tree.xml">
+    <Content Include="Resources\Trees\Tree.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees\tree_1.dae">
@@ -292,7 +305,7 @@
     <Content Include="Resources\Watch Tower\Watch Tower.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Watch Tower\Watch Tower.xml">
+    <Content Include="Resources\Watch Tower\Watch Tower.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Watch Tower\Wood.jpg">

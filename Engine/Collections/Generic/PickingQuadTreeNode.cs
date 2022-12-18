@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -42,46 +41,48 @@ namespace Engine.Collections.Generic
             int maxDepth,
             int treeDepth)
         {
-            if (treeDepth <= maxDepth)
+            if (treeDepth > maxDepth)
             {
-                //Find triangles into the bounding box
-                var nodeItems = items
-                    .Where(t =>
-                    {
-                        var tbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
-
-                        return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
-                    })
-                    .ToList(); //Break the reference
-
-                if (nodeItems.Any())
-                {
-                    // Creates a new node
-                    var node = new PickingQuadTreeNode<T>(quadTree, parent)
-                    {
-                        Id = -1,
-                        Level = treeDepth,
-                        BoundingBox = bbox,
-                    };
-
-                    bool haltByDepth = treeDepth == maxDepth;
-                    if (haltByDepth)
-                    {
-                        // Maximum tree depth reached. Stop the process
-                        node.Id = quadTree.GetNextNodeId();
-                        node.Items = nodeItems;
-                    }
-                    else
-                    {
-                        // Initialize node partitions
-                        InitializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1);
-                    }
-
-                    return node;
-                }
+                return null;
             }
 
-            return null;
+            //Find triangles into the bounding box
+            var nodeItems = items
+                .Where(t =>
+                {
+                    var tbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
+
+                    return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
+                })
+                .ToList(); //Break the reference
+
+            if (!nodeItems.Any())
+            {
+                return null;
+            }
+
+            // Creates a new node
+            var node = new PickingQuadTreeNode<T>(quadTree, parent)
+            {
+                Id = -1,
+                Level = treeDepth,
+                BoundingBox = bbox,
+            };
+
+            bool haltByDepth = treeDepth == maxDepth;
+            if (haltByDepth)
+            {
+                // Maximum tree depth reached. Stop the process
+                node.Id = quadTree.GetNextNodeId();
+                node.Items = nodeItems;
+            }
+            else
+            {
+                // Initialize node partitions
+                InitializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1);
+            }
+
+            return node;
         }
         /// <summary>
         /// Initializes node partitinos
@@ -125,13 +126,18 @@ namespace Engine.Collections.Generic
 
             if (childList.Count > 0)
             {
-                node.Children = childList.ToArray();
+                node.children.AddRange(childList);
                 node.TopLeftChild = topLeftChild;
                 node.TopRightChild = topRightChild;
                 node.BottomLeftChild = bottomLeftChild;
                 node.BottomRightChild = bottomRightChild;
             }
         }
+
+        /// <summary>
+        /// Children list
+        /// </summary>
+        private readonly List<PickingQuadTreeNode<T>> children = new List<PickingQuadTreeNode<T>>();
 
         /// <summary>
         /// Bounding box
@@ -217,7 +223,14 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Children list
         /// </summary>
-        public PickingQuadTreeNode<T>[] Children { get; set; }
+        public IEnumerable<PickingQuadTreeNode<T>> Children
+        {
+            get
+            {
+                //Copy collection
+                return children.AsEnumerable();
+            }
+        }
         /// <summary>
         /// Node items
         /// </summary>
@@ -248,12 +261,14 @@ namespace Engine.Collections.Generic
             BottomLeftNeighbor = BottomNeighbor?.FindNeighborNodeAtLeft();
             BottomRightNeighbor = BottomNeighbor?.FindNeighborNodeAtRight();
 
-            if (Children != null && Children.Length > 0)
+            if (!children.Any())
             {
-                for (int i = 0; i < Children.Length; i++)
-                {
-                    Children[i].ConnectNodes();
-                }
+                return;
+            }
+
+            foreach (var child in children)
+            {
+                child.ConnectNodes();
             }
         }
         /// <summary>
@@ -405,80 +420,31 @@ namespace Engine.Collections.Generic
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
+        /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickNearest(Ray ray, out Vector3 position, out T item)
+        public bool PickNearest(PickingRay ray, out PickingResult<T> result)
         {
-            return PickNearest(ray, true, out position, out item);
-        }
-        /// <summary>
-        /// Pick nearest position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(Ray ray, bool facingOnly, out Vector3 position, out T item)
-        {
-            return PickNearest(ray, facingOnly, out position, out item, out _);
-        }
-        /// <summary>
-        /// Pick nearest position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <param name="distance">Distance to hit</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
-        {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
-
-            if (Children == null)
+            if (!children.Any())
             {
-                if (PickNearestItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
-                {
-                    position = iPosition;
-                    item = iItem;
-                    distance = iDistance;
-
-                    return true;
-                }
+                return PickNearestItem(ray, out result);
             }
             else
             {
-                if (PickNearestNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
-                {
-                    position = nPosition;
-                    item = nItem;
-                    distance = nDistance;
-
-                    return true;
-                }
+                return PickNearestNode(ray, out result);
             }
-
-            return false;
         }
         /// <summary>
         /// Pick nearest position in the item collection
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <param name="distance">Distance to hit</param>
+        /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickNearestItem(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickNearestItem(PickingRay ray, out PickingResult<T> result)
         {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue,
+            };
 
             if (!Items.Any())
             {
@@ -491,88 +457,66 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            var inItem = Intersection.IntersectNearest(ray, Items, facingOnly, out Vector3 pos, out T tri, out float d);
-            if (inItem)
-            {
-                position = pos;
-                item = tri;
-                distance = d;
-
-                return true;
-            }
-
-            return false;
+            return RayPickingHelper.PickNearest(Items, ray, out result);
         }
         /// <summary>
         /// Pick nearest position in the node collection
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <param name="distance">Distance to hit</param>
+        /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickNearestNode(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickNearestNode(PickingRay ray, out PickingResult<T> result)
         {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
-
             var boxHitsByDistance = FindContacts(ray);
-            if (boxHitsByDistance.Any())
+            if (!boxHitsByDistance.Any())
             {
-                bool intersect = false;
-
-                #region Find closest item node by node, from closest to farthest
-
-                Vector3 bestHit = Vector3.Zero;
-                T bestTri = default;
-                float bestD = float.MaxValue;
-
-                foreach (var node in boxHitsByDistance.Values)
+                result = new PickingResult<T>
                 {
-                    // check that the intersection is closer than the nearest intersection found thus far
-                    var inItem = node.PickNearest(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
-                    if (!inItem)
-                    {
-                        continue;
-                    }
+                    Distance = float.MaxValue,
+                };
 
-                    if (thisD < bestD)
-                    {
-                        // if we have found a closer intersection store the new closest intersection
-                        bestHit = thisHit;
-                        bestTri = thisTri;
-                        bestD = thisD;
-                    }
+                return false;
+            }
+
+            bool intersect = false;
+
+            PickingResult<T> bestHit = new PickingResult<T>
+            {
+                Distance = float.MaxValue,
+            };
+
+            foreach (var node in boxHitsByDistance.Values)
+            {
+                // check that the intersection is closer than the nearest intersection found thus far
+                var inItem = node.PickNearest(ray, out var thisHit);
+                if (!inItem)
+                {
+                    continue;
+                }
+
+                if (thisHit.Distance < bestHit.Distance)
+                {
+                    // if we have found a closer intersection store the new closest intersection
+                    bestHit = thisHit;
 
                     intersect = true;
                 }
-
-                if (intersect)
-                {
-                    position = bestHit;
-                    item = bestTri;
-                    distance = bestD;
-                }
-
-                #endregion
-
-                return intersect;
             }
 
-            return false;
+            result = bestHit;
+
+            return intersect;
         }
         /// <summary>
         /// Finds children contacts by distance to hit in bounding box
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <returns>Returns a sorted by distance node list</returns>
-        private SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(Ray ray)
+        private SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(PickingRay ray)
         {
             SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
 
-            foreach (var node in Children)
+            foreach (var node in children)
             {
                 if (Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d))
                 {
@@ -593,80 +537,31 @@ namespace Engine.Collections.Generic
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
+        /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickFirst(Ray ray, out Vector3 position, out T item)
+        public bool PickFirst(PickingRay ray, out PickingResult<T> result)
         {
-            return PickFirst(ray, true, out position, out item);
-        }
-        /// <summary>
-        /// Pick first position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(Ray ray, bool facingOnly, out Vector3 position, out T item)
-        {
-            return PickFirst(ray, facingOnly, out position, out item, out _);
-        }
-        /// <summary>
-        /// Pick first position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <param name="distance">Distance to hit</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
-        {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
-
-            if (Children == null)
+            if (!children.Any())
             {
-                if (PickFirstItem(ray, facingOnly, out var iPosition, out var iItem, out var iDistance))
-                {
-                    position = iPosition;
-                    item = iItem;
-                    distance = iDistance;
-
-                    return true;
-                }
+                return PickFirstItem(ray, out result);
             }
             else
             {
-                if (PickFirstNode(ray, facingOnly, out var nPosition, out var nItem, out var nDistance))
-                {
-                    position = nPosition;
-                    item = nItem;
-                    distance = nDistance;
-
-                    return true;
-                }
+                return PickFirstNode(ray, out result);
             }
-
-            return false;
         }
         /// <summary>
         /// Pick first position in the item collection
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <param name="distance">Distance to hit</param>
+        /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickFirstItem(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickFirstItem(PickingRay ray, out PickingResult<T> result)
         {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue,
+            };
 
             if (!Items.Any())
             {
@@ -679,34 +574,17 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            var inItem = Intersection.IntersectFirst(ray, Items, facingOnly, out Vector3 pos, out T tri, out float d);
-            if (inItem)
-            {
-                position = pos;
-                item = tri;
-                distance = d;
-
-                return true;
-            }
-
-            return false;
+            return RayPickingHelper.PickFirst(Items, ray, out result);
         }
         /// <summary>
         /// Pick first position in the node collection
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="position">Hit position</param>
-        /// <param name="item">Hit item</param>
-        /// <param name="distance">Distance to hit</param>
+        /// <param name="result">Pick result</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickFirstNode(Ray ray, bool facingOnly, out Vector3 position, out T item, out float distance)
+        private bool PickFirstNode(PickingRay ray, out PickingResult<T> result)
         {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
-
-            foreach (var node in Children)
+            foreach (var node in children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out _);
                 if (!inBox)
@@ -714,19 +592,22 @@ namespace Engine.Collections.Generic
                     continue;
                 }
 
-                var inItem = node.PickFirst(ray, facingOnly, out Vector3 thisHit, out T thisTri, out float thisD);
+                var inItem = node.PickFirst(ray, out var thisHit);
                 if (!inItem)
                 {
                     continue;
                 }
 
-                position = thisHit;
-                item = thisTri;
-                distance = thisD;
+                result = thisHit;
 
                 return true;
             }
 
+            result = new PickingResult<T>
+            {
+                Distance = float.MaxValue,
+            };
+
             return false;
         }
 
@@ -734,80 +615,28 @@ namespace Engine.Collections.Generic
         /// Pick all position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="positions">Hit positions</param>
-        /// <param name="items">Hit items</param>
+        /// <param name="results">Pick results</param>
         /// <returns>Returns true if picked position found</returns>
-        /// <remarks>By default, result is constrained to front faces only</remarks>
-        public bool PickAll(Ray ray, out Vector3[] positions, out T[] items)
+        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
-            return PickAll(ray, true, out positions, out items);
-        }
-        /// <summary>
-        /// Pick all position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="positions">Hit positions</param>
-        /// <param name="items">Hit items</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items)
-        {
-            return PickAll(ray, facingOnly, out positions, out items, out _);
-        }
-        /// <summary>
-        /// Pick all position
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="positions">Hit positions</param>
-        /// <param name="items">Hit items</param>
-        /// <param name="distances">Distances to hits</param>
-        /// <returns>Returns true if picked position found</returns>
-        public bool PickAll(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
-        {
-            positions = null;
-            items = null;
-            distances = null;
-
-            if (Children == null)
+            if (!children.Any())
             {
-                if (PickAllItem(ray, facingOnly, out var iPositions, out var iItems, out var iDistances))
-                {
-                    positions = iPositions;
-                    items = iItems;
-                    distances = iDistances;
-
-                    return true;
-                }
+                return PickAllItem(ray, out results);
             }
             else
             {
-                if (PickAllNode(ray, facingOnly, out var nPositions, out var nItems, out var nDistances))
-                {
-                    positions = nPositions;
-                    items = nItems;
-                    distances = nDistances;
-
-                    return true;
-                }
+                return PickAllNode(ray, out results);
             }
-
-            return false;
         }
         /// <summary>
         /// Pick all position in the item collection
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="positions">Hit positions</param>
-        /// <param name="items">Hit items</param>
-        /// <param name="distances">Distances to hits</param>
+        /// <param name="results">Pick results</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickAllItem(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        private bool PickAllItem(PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
-            positions = null;
-            items = null;
-            distances = null;
+            results = Enumerable.Empty<PickingResult<T>>();
 
             if (!Items.Any())
             {
@@ -820,40 +649,21 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            var inItem = Intersection.IntersectAll(ray, Items, facingOnly, out Vector3[] pos, out T[] tri, out float[] ds);
-            if (inItem)
-            {
-                positions = pos;
-                items = tri;
-                distances = ds;
-
-                return true;
-            }
-
-            return false;
+            return RayPickingHelper.PickAll(Items, ray, out results);
         }
         /// <summary>
         /// Pick all position in the node collection
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing items</param>
-        /// <param name="positions">Hit positions</param>
-        /// <param name="items">Hit items</param>
-        /// <param name="distances">Distances to hits</param>
+        /// <param name="results">Pick results</param>
         /// <returns>Returns true if picked position found</returns>
-        private bool PickAllNode(Ray ray, bool facingOnly, out Vector3[] positions, out T[] items, out float[] distances)
+        private bool PickAllNode(PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
-            positions = null;
-            items = null;
-            distances = null;
-
             bool intersect = false;
 
-            List<Vector3> hits = new List<Vector3>();
-            List<T> tris = new List<T>();
-            List<float> dists = new List<float>();
+            List<PickingResult<T>> hits = new List<PickingResult<T>>();
 
-            foreach (var node in Children)
+            foreach (var node in children)
             {
                 var inBox = Intersection.RayIntersectsBox(ray, node.BoundingBox, out float d);
                 if (!inBox)
@@ -861,28 +671,24 @@ namespace Engine.Collections.Generic
                     continue;
                 }
 
-                var inItem = node.PickAll(ray, facingOnly, out Vector3[] thisHits, out T[] thisTris, out float[] thisDs);
+                var inItem = node.PickAll(ray, out var thisHits);
                 if (!inItem)
                 {
                     continue;
                 }
 
-                for (int i = 0; i < thisHits.Length; i++)
+                for (int i = 0; i < thisHits.Count(); i++)
                 {
-                    if (!hits.Contains(thisHits[i]))
+                    if (!hits.Contains(thisHits.ElementAt(i)))
                     {
-                        hits.Add(thisHits[i]);
-                        tris.Add(thisTris[i]);
-                        dists.Add(thisDs[i]);
+                        hits.Add(thisHits.ElementAt(i));
                     }
                 }
 
                 intersect = true;
             }
 
-            positions = hits.ToArray();
-            items = tris.ToArray();
-            distances = dists.ToArray();
+            results = hits;
 
             return intersect;
         }
@@ -896,30 +702,22 @@ namespace Engine.Collections.Generic
         {
             List<BoundingBox> bboxes = new List<BoundingBox>();
 
-            if (Children != null)
+            if (!children.Any())
             {
-                bool haltByDepth = maxDepth > 0 && Level == maxDepth;
-                if (haltByDepth)
-                {
-                    Array.ForEach(Children, (c) =>
-                    {
-                        bboxes.Add(c.BoundingBox);
-                    });
-                }
-                else
-                {
-                    Array.ForEach(Children, (c) =>
-                    {
-                        bboxes.AddRange(c.GetBoundingBoxes(maxDepth));
-                    });
-                }
+                bboxes.Add(BoundingBox);
+
+                return bboxes;
+            }
+
+            bool haltByDepth = maxDepth > 0 && Level == maxDepth;
+            if (haltByDepth)
+            {
+                return children.Select(c => c.BoundingBox);
             }
             else
             {
-                bboxes.Add(BoundingBox);
+                return children.SelectMany(c => c.GetBoundingBoxes(maxDepth));
             }
-
-            return bboxes.ToArray();
         }
         /// <summary>
         /// Gets maximum level value
@@ -927,23 +725,12 @@ namespace Engine.Collections.Generic
         /// <returns></returns>
         public int GetMaxLevel()
         {
-            int level = 0;
-
-            if (Children != null)
+            if (!children.Any())
             {
-                for (int i = 0; i < Children.Length; i++)
-                {
-                    int cLevel = Children[i].GetMaxLevel();
-
-                    if (cLevel > level) level = cLevel;
-                }
-            }
-            else
-            {
-                level = Level;
+                return Level;
             }
 
-            return level;
+            return children.Max(c => c.GetMaxLevel());
         }
 
         /// <summary>
@@ -955,7 +742,7 @@ namespace Engine.Collections.Generic
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
-            if (Children == null)
+            if (!children.Any())
             {
                 if (volume.Contains(BoundingBox) != ContainmentType.Disjoint)
                 {
@@ -964,9 +751,9 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < Children.Length; i++)
+                foreach (var child in children)
                 {
-                    var childNodes = Children[i].GetNodesInVolume(volume);
+                    var childNodes = child.GetNodesInVolume(volume);
                     if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
@@ -984,15 +771,15 @@ namespace Engine.Collections.Generic
         {
             List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
 
-            if (Children == null)
+            if (!children.Any())
             {
                 nodes.Add(this);
             }
             else
             {
-                for (int i = 0; i < Children.Length; i++)
+                foreach (var child in children)
                 {
-                    var childNodes = Children[i].GetLeafNodes();
+                    var childNodes = child.GetLeafNodes();
                     if (childNodes.Any())
                     {
                         nodes.AddRange(childNodes);
@@ -1009,7 +796,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf node wich contains the specified position</returns>
         public PickingQuadTreeNode<T> GetNode(Vector3 position)
         {
-            if (Children == null)
+            if (!children.Any())
             {
                 if (BoundingBox.Contains(position) != ContainmentType.Disjoint)
                 {
@@ -1018,9 +805,9 @@ namespace Engine.Collections.Generic
             }
             else
             {
-                for (int i = 0; i < Children.Length; i++)
+                foreach (var child in children)
                 {
-                    var childNode = Children[i].GetNode(position);
+                    var childNode = child.GetNode(position);
                     if (childNode != null)
                     {
                         return childNode;
@@ -1034,15 +821,15 @@ namespace Engine.Collections.Generic
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (Children == null)
+            if (!children.Any())
             {
                 //Leaf node
-                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Items {2}", Id, Level, Items.Count());
+                return $"{nameof(PickingQuadTreeNode<T>)} {Id}.Leaf; Depth {Level}; Items {Items.Count()}";
             }
             else
             {
                 //Node
-                return string.Format("PickingQuadTreeNode {0}; Depth {1}; Childs {2}", Id, Level, Children.Length);
+                return $"{nameof(PickingQuadTreeNode<T>)} {Id}.Node; Depth {Level}; Childs {children.Count}";
             }
         }
     }

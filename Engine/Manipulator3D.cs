@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// 3D manipulator
     /// </summary>
-    public class Manipulator3D : IManipulator
+    public class Manipulator3D : IManipulator, IHasGameState
     {
         /// <summary>
         /// State updated event
@@ -591,6 +591,36 @@ namespace Engine
         public override string ToString()
         {
             return $"{FinalTransform.GetDescription()}";
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new Manipulator3DState
+            {
+                LocalTransform = localTransform,
+                Rotation = rotation,
+                Scaling = scaling,
+                Position = position,
+                Parent = Parent?.GetState(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is Manipulator3DState manipulator3DState))
+            {
+                return;
+            }
+
+            localTransform = manipulator3DState.LocalTransform;
+            rotation = manipulator3DState.Rotation;
+            scaling = manipulator3DState.Scaling;
+            position = manipulator3DState.Position;
+            if (manipulator3DState.Parent != null)
+            {
+                Parent.SetState(manipulator3DState.Parent);
+            }
         }
     }
 }

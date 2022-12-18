@@ -1,13 +1,13 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Particles;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Particle system
@@ -22,43 +22,15 @@ namespace Engine
         /// <summary>
         /// Emitter initialization buffer
         /// </summary>
-        private Buffer emittersBuffer;
+        private EngineVertexBuffer<VertexGpuParticle> emittersBuffer;
         /// <summary>
         /// Drawing buffer
         /// </summary>
-        private Buffer drawingBuffer;
+        private EngineVertexBuffer<VertexGpuParticle> drawingBuffer;
         /// <summary>
         /// Stream out buffer
         /// </summary>
-        private Buffer streamOutBuffer;
-        /// <summary>
-        /// Buffer binding for emitter buffer
-        /// </summary>
-        private readonly VertexBufferBinding[] emitterBinding;
-        /// <summary>
-        /// Buffer binding for drawing buffer
-        /// </summary>
-        private VertexBufferBinding[] drawingBinding;
-        /// <summary>
-        /// Buffer binding for stream output buffer
-        /// </summary>
-        private StreamOutputBufferBinding[] streamOutBinding;
-        /// <summary>
-        /// Input layout for stream out
-        /// </summary>
-        private InputLayout streamOutInputLayout;
-        /// <summary>
-        /// Input layout for rotating particles
-        /// </summary>
-        private InputLayout rotatingInputLayout;
-        /// <summary>
-        /// Input layout for non rotating particles
-        /// </summary>
-        private InputLayout nonRotatingInputLayout;
-        /// <summary>
-        /// Vertex input stride
-        /// </summary>
-        private readonly int inputStride;
+        private EngineVertexBuffer<VertexGpuParticle> streamOutBuffer;
         /// <summary>
         /// First run flag
         /// </summary>
@@ -67,6 +39,14 @@ namespace Engine
         /// Particle parameters
         /// </summary>
         private ParticleSystemParams parameters;
+        /// <summary>
+        /// Drawer
+        /// </summary>
+        private BuiltInParticles particleDrawer;
+        /// <summary>
+        /// Stream-out
+        /// </summary>
+        private BuiltInStreamOut particleStreamOut;
 
         /// <summary>
         /// Game instance
@@ -114,55 +94,52 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates a new CPU particle system
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        /// <param name="emitter"></param>
+        /// <returns></returns>
+        public static async Task<ParticleSystemGpu> Create(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        {
+            var pParameters = new ParticleSystemParams(description) * emitter.Scale;
+
+            var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
+            var texture = await game.ResourceManager.RequestResource(imgContent);
+            var textureCount = (uint)imgContent.Count;
+
+            emitter.UpdateBounds(pParameters);
+            int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            float timeToEnd = emitter.Duration + pParameters.MaxDuration;
+
+            ParticleSystemGpu res = new ParticleSystemGpu
+            {
+                Game = game,
+                Name = name,
+
+                parameters = pParameters,
+
+                Texture = texture,
+                TextureCount = textureCount,
+
+                Emitter = emitter,
+                MaxConcurrentParticles = maxConcurrentParticles,
+
+                TimeToEnd = timeToEnd
+            };
+
+            res.InitializeBuffers();
+
+            return res;
+        }
+
+        /// <summary>
         /// Contructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Particle system description</param>
-        /// <param name="emitter">Emitter</param>
-        public ParticleSystemGpu(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        protected ParticleSystemGpu()
         {
-            Game = game;
-            Name = name;
 
-            parameters = new ParticleSystemParams(description) * emitter.Scale;
-
-            var imgContent = ImageContent.Texture(description.ContentPath, description.TextureName);
-            Texture = game.ResourceManager.RequestResource(imgContent);
-            TextureCount = (uint)imgContent.Count;
-
-            Emitter = emitter;
-            Emitter.UpdateBounds(parameters);
-            MaxConcurrentParticles = Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
-
-            TimeToEnd = Emitter.Duration + parameters.MaxDuration;
-
-            var data = Helper.CreateArray(1, new VertexGpuParticle()
-            {
-                Position = Emitter.Position,
-                Velocity = Emitter.Velocity,
-                RandomValues = new Vector4(),
-                MaxAge = 0,
-
-                Type = 0,
-                EmissionTime = Emitter.Duration,
-            });
-
-            int size = GetBufferSize();
-
-            emittersBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, data, ResourceUsage.Default, BindFlags.VertexBuffer, CpuAccessFlags.None);
-            drawingBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            streamOutBuffer = game.Graphics.CreateBuffer<VertexGpuParticle>(description.Name, size, ResourceUsage.Default, BindFlags.VertexBuffer | BindFlags.StreamOutput, CpuAccessFlags.None);
-            inputStride = default(VertexGpuParticle).GetStride();
-
-            emitterBinding = new[] { new VertexBufferBinding(emittersBuffer, inputStride, 0) };
-            drawingBinding = new[] { new VertexBufferBinding(drawingBuffer, inputStride, 0) };
-            streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
-
-            var effect = DrawerPool.EffectDefaultGPUParticles;
-            streamOutInputLayout = game.Graphics.CreateInputLayout(effect.ParticleStreamOut.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            rotatingInputLayout = game.Graphics.CreateInputLayout(effect.RotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
-            nonRotatingInputLayout = game.Graphics.CreateInputLayout(effect.NonRotationDraw.GetSignature(), VertexGpuParticle.Input(BufferSlot));
         }
         /// <summary>
         /// Destructor
@@ -188,49 +165,56 @@ namespace Engine
         {
             if (disposing)
             {
-                if (emittersBuffer != null)
-                {
-                    emittersBuffer.Dispose();
-                    emittersBuffer = null;
-                }
-                if (drawingBuffer != null)
-                {
-                    drawingBuffer.Dispose();
-                    drawingBuffer = null;
-                }
-                if (streamOutBuffer != null)
-                {
-                    streamOutBuffer.Dispose();
-                    streamOutBuffer = null;
-                }
-                if (streamOutInputLayout != null)
-                {
-                    streamOutInputLayout.Dispose();
-                    streamOutInputLayout = null;
-                }
-                if (rotatingInputLayout != null)
-                {
-                    rotatingInputLayout.Dispose();
-                    rotatingInputLayout = null;
-                }
-                if (nonRotatingInputLayout != null)
-                {
-                    nonRotatingInputLayout.Dispose();
-                    nonRotatingInputLayout = null;
-                }
+                emittersBuffer?.Dispose();
+                emittersBuffer = null;
+
+                drawingBuffer?.Dispose();
+                drawingBuffer = null;
+
+                streamOutBuffer?.Dispose();
+                streamOutBuffer = null;
             }
         }
 
         /// <summary>
-        /// Estimates the size of the buffer based on the maximum number of particles, and the maximum duration of each particle
+        /// Estimates the length of the buffer based on the maximum number of particles, and the maximum duration of each particle
         /// </summary>
-        /// <returns>Returns the estimated buffer size</returns>
-        /// <remarks>The maximum size of the buffer is 5000</remarks>
-        protected int GetBufferSize()
+        /// <returns>Returns the estimated buffer length</returns>
+        /// <remarks>The maximum length of the buffer is 5000</remarks>
+        protected int GetBufferLength()
         {
-            int size = (int)(MaxConcurrentParticles * (Emitter.Duration == 0 ? 60 : Emitter.Duration));
+            int length = (int)(MaxConcurrentParticles * (Emitter.Duration == 0 ? 60 : Emitter.Duration));
 
-            return Math.Min(size, 5000);
+            return Math.Min(length, 5000);
+        }
+        /// <summary>
+        /// Initialize buffers
+        /// </summary>
+        protected void InitializeBuffers()
+        {
+            var data = Helper.CreateArray(1, new VertexGpuParticle()
+            {
+                Position = Emitter.Position,
+                Velocity = Emitter.Velocity,
+                RandomValues = new Vector4(),
+                MaxAge = 0,
+
+                Type = 0,
+                EmissionTime = Emitter.Duration,
+            });
+
+            particleDrawer = BuiltInShaders.GetDrawer<BuiltInParticles>();
+            var particleVsSignature = particleDrawer.GetVertexShader().Shader.GetShaderBytecode();
+            emittersBuffer = new EngineVertexBuffer<VertexGpuParticle>(Game.Graphics, $"{Name}_Emitter", data, VertexBufferParams.Default);
+            emittersBuffer.CreateInputLayout(nameof(ParticlesVs), particleVsSignature, BufferSlot);
+
+            particleStreamOut = BuiltInShaders.GetDrawer<BuiltInStreamOut>();
+            var streamoutVsSignature = particleStreamOut.GetVertexShader().Shader.GetShaderBytecode();
+            int length = GetBufferLength();
+            drawingBuffer = new EngineVertexBuffer<VertexGpuParticle>(Game.Graphics, $"{Name}_SO1", length, VertexBufferParams.StreamOut);
+            drawingBuffer.CreateInputLayout($"{Name}_SO1_IL", streamoutVsSignature, BufferSlot);
+            streamOutBuffer = new EngineVertexBuffer<VertexGpuParticle>(Game.Graphics, $"{Name}_SO2", length, VertexBufferParams.StreamOut);
+            streamOutBuffer.CreateInputLayout($"{Name}_SO2_IL", streamoutVsSignature, BufferSlot);
         }
 
         /// <summary>
@@ -256,44 +240,11 @@ namespace Engine
                 return;
             }
 
-            var effect = DrawerPool.EffectDefaultGPUParticles;
-
-            #region Per frame update
-
-            var state = new EffectParticleState
-            {
-                TotalTime = Emitter.TotalTime,
-                ElapsedTime = Emitter.ElapsedTime,
-                EmissionRate = Emitter.EmissionRate,
-                VelocitySensitivity = parameters.EmitterVelocitySensitivity,
-                HorizontalVelocity = parameters.HorizontalVelocity,
-                VerticalVelocity = parameters.VerticalVelocity,
-                RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
-                MaxDuration = parameters.MaxDuration,
-                MaxDurationRandomness = parameters.MaxDurationRandomness,
-                EndVelocity = parameters.EndVelocity,
-                Gravity = parameters.Gravity,
-                StartSize = parameters.StartSize,
-                EndSize = parameters.EndSize,
-                MinColor = parameters.MinColor,
-                MaxColor = parameters.MaxColor,
-                RotateSpeed = parameters.RotateSpeed,
-            };
-
-            effect.UpdatePerFrame(
-                context.ViewProjection,
-                context.EyePosition,
-                state,
-                TextureCount,
-                Texture);
-
-            #endregion
-
-            StreamOut(effect);
+            StreamOut();
 
             ToggleBuffers();
 
-            Draw(effect, context.DrawerMode);
+            Draw(context.DrawerMode);
         }
 
         /// <summary>
@@ -319,36 +270,32 @@ namespace Engine
         /// Stream output
         /// </summary>
         /// <param name="effect">Effect for stream out</param>
-        private void StreamOut(EffectDefaultGpuParticles effect)
+        private void StreamOut()
         {
-            var graphics = Game.Graphics;
+            Game.Graphics.SetDepthStencilNone();
 
-            graphics.IAInputLayout = streamOutInputLayout;
-            graphics.IASetVertexBuffers(BufferSlot, firstRun ? emitterBinding : drawingBinding);
-            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
-            graphics.SetDepthStencilNone();
-
-            graphics.SetStreamOutputTargets(streamOutBinding);
-
-            var techniqueForStreamOut = effect.ParticleStreamOut;
-
-            for (int p = 0; p < techniqueForStreamOut.PassCount; p++)
+            var soState = new BuiltInStreamOutState
             {
-                graphics.EffectPassApply(techniqueForStreamOut, p, 0);
+                EmissionRate = Emitter.EmissionRate,
+                VelocitySensitivity = parameters.EmitterVelocitySensitivity,
+                TotalTime = Emitter.TotalTime,
+                ElapsedTime = Emitter.ElapsedTime,
+                HorizontalVelocity = parameters.HorizontalVelocity,
+                VerticalVelocity = parameters.VerticalVelocity,
+                RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
+            };
+            particleStreamOut.Update(soState);
 
-                if (firstRun)
-                {
-                    graphics.Draw(1, 0);
+            particleStreamOut.StreamOut(
+                firstRun,
+                firstRun ? emittersBuffer : drawingBuffer,
+                streamOutBuffer,
+                Topology.PointList);
 
-                    firstRun = false;
-                }
-                else
-                {
-                    graphics.DrawAuto();
-                }
+            if (firstRun)
+            {
+                firstRun = false;
             }
-
-            graphics.SetStreamOutputTargets(null);
         }
         /// <summary>
         /// Toggle stream out and drawing buffers
@@ -358,40 +305,46 @@ namespace Engine
             var temp = drawingBuffer;
             drawingBuffer = streamOutBuffer;
             streamOutBuffer = temp;
-
-            drawingBinding = new[] { new VertexBufferBinding(drawingBuffer, inputStride, 0) };
-            streamOutBinding = new[] { new StreamOutputBufferBinding(streamOutBuffer, 0) };
         }
         /// <summary>
         /// Drawing
         /// </summary>
         /// <param name="effect">Effect for drawing</param>
         /// <param name="drawerMode">Drawe mode</param>
-        private void Draw(EffectDefaultGpuParticles effect, DrawerModes drawerMode)
+        private void Draw(DrawerModes drawerMode)
         {
-            var rot = parameters.RotateSpeed != Vector2.Zero;
+            var graphics = Game.Graphics;
+            graphics.SetDepthStencilRDZEnabled();
+            graphics.SetBlendState(parameters.BlendMode);
 
-            var techniqueForDrawing = rot ? effect.RotationDraw : effect.NonRotationDraw;
+            var useRotation = parameters.RotateSpeed != Vector2.Zero;
+            var state = new BuiltInParticlesState
+            {
+                TotalTime = Emitter.TotalTime,
+                ElapsedTime = Emitter.ElapsedTime,
+                EmissionRate = Emitter.EmissionRate,
+                VelocitySensitivity = parameters.EmitterVelocitySensitivity,
+                HorizontalVelocity = parameters.HorizontalVelocity,
+                VerticalVelocity = parameters.VerticalVelocity,
+                RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
+                MaxDuration = parameters.MaxDuration,
+                MaxDurationRandomness = parameters.MaxDurationRandomness,
+                EndVelocity = parameters.EndVelocity,
+                Gravity = parameters.Gravity,
+                StartSize = parameters.StartSize,
+                EndSize = parameters.EndSize,
+                MinColor = parameters.MinColor,
+                MaxColor = parameters.MaxColor,
+                UseRotation = useRotation,
+                RotateSpeed = parameters.RotateSpeed,
+            };
+            particleDrawer.Update(state, TextureCount, Texture);
+
+            particleDrawer.DrawAuto(drawingBuffer, Topology.PointList);
 
             if (!drawerMode.HasFlag(DrawerModes.ShadowMap))
             {
                 Counters.InstancesPerFrame++;
-            }
-
-            var graphics = Game.Graphics;
-
-            graphics.IAInputLayout = rot ? rotatingInputLayout : nonRotatingInputLayout;
-            graphics.IASetVertexBuffers(BufferSlot, drawingBinding);
-            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
-
-            graphics.SetDepthStencilRDZEnabled();
-            graphics.SetBlendState(parameters.BlendMode);
-
-            for (int p = 0; p < techniqueForDrawing.PassCount; p++)
-            {
-                graphics.EffectPassApply(techniqueForDrawing, p, 0);
-
-                graphics.DrawAuto();
             }
         }
 

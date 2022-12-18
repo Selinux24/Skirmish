@@ -4,6 +4,7 @@ using System;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Particle emitter
@@ -203,7 +204,7 @@ namespace Engine
             EmissionRate = 1f;
             Duration = 0f;
             InfiniteDuration = false;
-            MaximumDistance = GameEnvironment.LODDistanceLow;
+            MaximumDistance = 100f;
             Distance = 0f;
         }
         /// <summary>
@@ -211,6 +212,21 @@ namespace Engine
         /// </summary>
         /// <param name="desc">Description</param>
         public ParticleEmitter(ParticleEmitterDescription desc)
+        {
+            Position = desc.Position;
+            Velocity = desc.Velocity;
+            Scale = desc.Scale;
+            EmissionRate = desc.EmissionRate;
+            Duration = desc.Duration;
+            InfiniteDuration = desc.InfiniteDuration;
+            MaximumDistance = desc.MaximumDistance;
+            Distance = desc.Distance;
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="desc">Description</param>
+        public ParticleEmitter(ParticleEmitterFile desc)
         {
             Position = desc.Position;
             Velocity = desc.Velocity;

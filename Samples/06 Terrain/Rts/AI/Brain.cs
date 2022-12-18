@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.PathFinding;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,13 +19,13 @@ namespace Terrain.Rts.AI
         /// <summary>
         /// Ground instance
         /// </summary>
-        public Scene Scene { get; set; }
+        public WalkableScene Scene { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
-        public Brain(Scene scene)
+        public Brain(WalkableScene scene)
         {
             Scene = scene;
         }

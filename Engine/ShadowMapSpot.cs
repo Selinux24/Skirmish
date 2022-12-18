@@ -2,9 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Effects;
-
     /// <summary>
     /// Spot shadow map
     /// </summary>
@@ -13,29 +10,26 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        public ShadowMapSpot(Game game, int width, int height, int arraySize) : base(game, width, height, arraySize)
+        public ShadowMapSpot(Scene scene, string name, int width, int height, int arraySize) : base(scene, name, width, height, arraySize)
         {
-            game.Graphics.CreateShadowMapTextureArrays(
-                width, height, 1, arraySize,
-                out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
+            var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateShadowMapTextureArrays(name, width, height, 1, arraySize);
 
-            DepthMap = dsv;
-            Texture = srv;
+            DepthMap = DepthStencils;
+            Texture = ShaderResource;
         }
 
-        /// <summary>
-        /// Updates the from light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public override void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
         {
             if (light is ISceneLightSpot lightSpot)
             {
                 var near = 1f;
-                var projection = Matrix.PerspectiveFovLH(lightSpot.AngleRadians * 2f, 1f, near, lightSpot.Radius);
+                var projection = Matrix.PerspectiveFovLH(lightSpot.FallOffAngleRadians * 2f, 1f, near, lightSpot.Radius);
 
                 var pos = lightSpot.Position;
                 var look = lightSpot.Position + (lightSpot.Direction * lightSpot.Radius);
@@ -48,13 +42,11 @@ namespace Engine
                 FromLightViewProjectionArray = new[] { vp };
             }
         }
-        /// <summary>
-        /// Gets the effect to draw this shadow map
-        /// </summary>
-        /// <returns>Returns an effect</returns>
-        public override IShadowMapDrawer GetEffect()
+
+        /// <inheritdoc/>
+        public override void UpdateGlobals()
         {
-            return DrawerPool.EffectShadowBasic;
+
         }
 
         /// <inheritdoc/>

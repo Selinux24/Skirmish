@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Audio;
 using Engine.Audio.Tween;
+using Engine.BuiltIn.PostProcess;
 using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
@@ -14,19 +15,14 @@ namespace SceneTest.SceneStart
 {
     class SceneStart : Scene
     {
-        private const int layerHUD = 50;
-        private const int layerCursor = 100;
-
         private Model backGround = null;
         private UITextArea title = null;
-        private UIButton[] sceneButtons = null;
         private UIButton sceneMaterialsButton = null;
         private UIButton sceneWaterButton = null;
         private UIButton sceneStencilPassButton = null;
         private UIButton sceneLightsButton = null;
         private UIButton sceneCascadedShadowsButton = null;
         private UIButton sceneTestButton = null;
-        private UIButton sceneTanksGameButton = null;
         private UIButton exitButton = null;
         private UIPanel buttonPanel = null;
         private UIButton optsButton = null;
@@ -43,17 +39,23 @@ namespace SceneTest.SceneStart
 
         public SceneStart(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
+        }
 
-            var assetTasks = new[] {
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            var assetTasks = new[]
+            {
                 InitializeCursor(),
                 InitializeBackground(),
                 InitializeTitle(),
@@ -63,71 +65,71 @@ namespace SceneTest.SceneStart
                 InitializeMusic(),
             };
 
-            await LoadResourcesAsync(assetTasks, PrepareAssets);
+            LoadResourcesAsync(
+                assetTasks,
+                InitializeComponentsCompleted);
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = new UICursorDescription()
-            {
-                ContentPath = "Common",
-                Textures = new[] { "pointer.png" },
-                Height = 48,
-                Width = 48,
-                Centered = false,
-                Delta = new Vector2(-14f, -7f),
-                BaseColor = Color.White,
-            };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
+            var cursorDesc = UICursorDescription.Default("Common/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
+
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
         }
         private async Task InitializeBackground()
         {
             var backGroundDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile("SceneStart", "SkyPlane.xml"),
+                Content = ContentDescription.FromFile("SceneStart", "SkyPlane.json"),
             };
-            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
+
+            backGround = await AddComponent<Model, ModelDescription>("Background", "Background", backGroundDesc);
         }
         private async Task InitializeTitle()
         {
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
             titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
-            titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc);
             title.GrowControlWithText = false;
         }
         private async Task InitializeButtonPanel()
         {
-            buttonPanel = await this.AddComponentUIPanel("ButtonPanel", UIPanelDescription.Default(Color.Transparent), layerHUD);
+            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
             buttonPanel.SetGridLayout(GridLayout.FixedRows(1));
             buttonPanel.Spacing = 20;
+            buttonPanel.EventsEnabled = true;
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
+            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             startButtonDesc.Width = 150;
             startButtonDesc.Height = 55;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
-            startButtonDesc.Font = buttonsFont;
             startButtonDesc.TextForeColor = Color.Gold;
-            startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            sceneMaterialsButton = new UIButton("ButtonMaterials", this, startButtonDesc);
-            sceneWaterButton = new UIButton("ButtonWater", this, startButtonDesc);
-            sceneStencilPassButton = new UIButton("ButtonStencilPass", this, startButtonDesc);
-            sceneLightsButton = new UIButton("ButtonLights", this, startButtonDesc);
-            sceneCascadedShadowsButton = new UIButton("ButtonCascadedShadows", this, startButtonDesc);
-            sceneTestButton = new UIButton("ButtonTest", this, startButtonDesc);
-            sceneTanksGameButton = new UIButton("ButtonTanksGame", this, startButtonDesc);
+            sceneMaterialsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonMaterials", "ButtonMaterials", startButtonDesc);
+            sceneMaterialsButton.Visible = false;
+            sceneWaterButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonWater", "ButtonWater", startButtonDesc);
+            sceneWaterButton.Visible = false;
+            sceneStencilPassButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonStencilPass", "ButtonStencilPass", startButtonDesc);
+            sceneStencilPassButton.Visible = false;
+            sceneLightsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonLights", "ButtonLights", startButtonDesc);
+            sceneLightsButton.Visible = false;
+            sceneCascadedShadowsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonCascadedShadows", "ButtonCascadedShadows", startButtonDesc);
+            sceneCascadedShadowsButton.Visible = false;
+            sceneTestButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonTest", "ButtonTest", startButtonDesc);
+            sceneTestButton.Visible = false;
 
-            sceneButtons = new[]
+            var sceneButtons = new[]
             {
                 sceneMaterialsButton,
                 sceneWaterButton,
@@ -135,27 +137,25 @@ namespace SceneTest.SceneStart
                 sceneLightsButton,
                 sceneCascadedShadowsButton,
                 sceneTestButton,
-                sceneTanksGameButton,
             };
 
             for (int i = 0; i < sceneButtons.Length; i++)
             {
-                sceneButtons[i].JustReleased += SceneButtonJustReleased;
+                sceneButtons[i].MouseClick += SceneButtonClick;
                 sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
                 sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             exitButtonDesc.Width = 150;
             exitButtonDesc.Height = 55;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
-            exitButtonDesc.Font = buttonsFont;
-            exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            exitButton = new UIButton("ButtonExit", this, exitButtonDesc);
-            exitButton.JustReleased += ExitButtonJustReleased;
+            exitButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc);
+            exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
 
@@ -164,13 +164,14 @@ namespace SceneTest.SceneStart
         }
         private async Task InitializeOptionsButton()
         {
-            optsButton = await this.AddComponentUIButton("ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
-            optsButton.JustReleased += OptsButtonJustReleased;
+            optsButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonOptions", "ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
+            optsButton.Visible = false;
+            optsButton.MouseClick += OptsButtonClick;
 
-            var optsBackground = new Sprite("ButtonOptions.Background", this, SpriteDescription.Default(Color.White))
-            {
-                EventsEnabled = false
-            };
+            var optsBackground = await CreateComponent<Sprite, SpriteDescription>("ButtonOptions.Background", "ButtonOptions.Background", SpriteDescription.Default(Color.White));
+            optsBackground.Visible = false;
+            optsBackground.EventsEnabled = false;
+
             optsButton.InsertChild(0, optsBackground);
         }
         private async Task InitializeTabPanel()
@@ -181,12 +182,12 @@ namespace SceneTest.SceneStart
             tabDesc.TabCaptions = new[] { "But 1", "But 2", "But 3" };
             tabDesc.TabButtonsSpacing = new Spacing() { Horizontal = 5f };
 
-            tabsPanel = await this.AddComponentUITabPanel("TabPanel", tabDesc, layerHUD + 1);
+            tabsPanel = await AddComponentUI<UITabPanel, UITabPanelDescription>("TabPanel", "TabPanel", tabDesc, LayerUI + 1);
             tabsPanel.Visible = false;
-            tabsPanel.TabJustReleased += TabsPanelTabJustReleased;
+            tabsPanel.TabClick += TabsPanelTabClick;
 
             var pan1Desc = UIPanelDescription.Default(@"SceneStart/TanksGame.png");
-            tabsPanel.SetTabPanel(1, pan1Desc);
+            await tabsPanel.SetTabPanel(1, pan1Desc);
 
             var p = GridLayout.FixedRows(1);
             tabsPanel.TabPanels[0].SetGridLayout(p);
@@ -196,7 +197,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 5; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel("TabPanel.Level1", this, panDesc);
+                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level1_{i}", $"TabPanel.Level1_{i}", panDesc);
                 tabsPanel.TabPanels[0].AddChild(pan, false);
             }
 
@@ -208,7 +209,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 2; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel("TabPanel.Level2", this, panDesc);
+                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level2_{i}", $"TabPanel.Level2_{i}", panDesc);
                 lastPan.AddChild(pan, false);
             }
 
@@ -220,7 +221,7 @@ namespace SceneTest.SceneStart
             for (int i = 0; i < 4; i++)
             {
                 var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = new UIPanel("TabPanel.Level3", this, panDesc);
+                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level3_{i}", $"TabPanel.Level3_{i}", panDesc);
                 lastPan2.AddChild(pan, false);
             }
 
@@ -243,12 +244,14 @@ namespace SceneTest.SceneStart
 
             await Task.CompletedTask;
         }
-        private void PrepareAssets(LoadResourcesResult res)
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
                 res.ThrowExceptions();
             }
+
+            Lights.KeyLight.Direction = Vector3.ForwardLH;
 
             AudioManager.MasterVolume = 1f;
             AudioManager.Start();
@@ -267,7 +270,6 @@ namespace SceneTest.SceneStart
             sceneLightsButton.Caption.Text = $"{Color.Red}L{Color.Gold}ights";
             sceneCascadedShadowsButton.Caption.Text = $"{Color.Red}C{Color.Gold}ascaded";
             sceneTestButton.Caption.Text = $"{Color.Red}T{Color.Gold}est";
-            sceneTanksGameButton.Caption.Text = $"{Color.Gold}Tanks {Color.Red}G{Color.Gold}ame";
 
             exitButton.Caption.Text = $"{Color.Red}E{Color.Gold}xit";
 
@@ -313,7 +315,6 @@ namespace SceneTest.SceneStart
 
             UpdateLayout();
         }
-
         private void UpdateLayout()
         {
             tabsPanel.Width = Game.Form.RenderWidth * 0.9f;
@@ -337,6 +338,14 @@ namespace SceneTest.SceneStart
             optsButton.Width = 50;
             optsButton.Height = 50;
             optsButton.SetPosition(Game.Form.RenderWidth - 10 - optsButton.Width, 10);
+            optsButton.Visible = true;
+
+            sceneMaterialsButton.Visible = true;
+            sceneWaterButton.Visible = true;
+            sceneStencilPassButton.Visible = true;
+            sceneLightsButton.Visible = true;
+            sceneCascadedShadowsButton.Visible = true;
+            sceneTestButton.Visible = true;
         }
 
         private void OpenPanel()
@@ -360,9 +369,14 @@ namespace SceneTest.SceneStart
             tabsPanel.Hide(100);
         }
 
-        private void SceneButtonJustReleased(object sender, EventArgs e)
+        private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
                 return;
             }
@@ -391,41 +405,42 @@ namespace SceneTest.SceneStart
             {
                 Game.SetScene<SceneTest.SceneTest>();
             }
-            else if (sender == sceneTanksGameButton)
-            {
-                Game.SetScene<SceneTanksGame.SceneTanksGame>();
-            }
         }
-        private void SceneButtonMouseEnter(object sender, EventArgs e)
+        private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.ScaleInScaleOut(1.0f, 1.10f, 250);
-            }
+            sender.PivotAnchor = PivotAnchors.Center;
+            sender.ScaleInScaleOut(1.0f, 1.10f, 250);
         }
-        private void SceneButtonMouseLeave(object sender, EventArgs e)
+        private void SceneButtonMouseLeave(IUIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.ClearTween();
-                ctrl.TweenScale(ctrl.Scale, 1.0f, 500, ScaleFuncs.Linear);
-            }
+            sender.ClearTween();
+            sender.TweenScale(sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
         }
-        private void TabsPanelTabJustReleased(object sender, UITabPanelEventArgs e)
+        private void TabsPanelTabClick(object sender, UITabPanelEventArgs e)
         {
             Logger.WriteDebug(this, $"Clicked button {e.TabButton.Caption.Text}");
         }
-        private void ExitButtonJustReleased(object sender, EventArgs e)
+        private void ExitButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
             {
                 return;
             }
 
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             Game.Exit();
         }
-        private void OptsButtonJustReleased(object sender, EventArgs e)
+        private void OptsButtonClick(IUIControl sender, MouseEventArgs e)
         {
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
             OpenPanel();
         }
     }

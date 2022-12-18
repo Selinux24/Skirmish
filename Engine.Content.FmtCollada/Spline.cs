@@ -25,7 +25,7 @@ namespace Engine.Collada
     public class SplineControlVertices
     {
         [XmlElement("input", typeof(InputLocal))]
-        public InputLocal[] input { get; set; }
+        public InputLocal[] Input { get; set; }
         [XmlElement("extra", typeof(Extra))]
         public Extra[] Extras { get; set; }
     }

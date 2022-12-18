@@ -72,57 +72,31 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return dirs[((y + 1) << 1) + x];
         }
 
-        public static int CalcAreaOfPolygon2D(Int4[] verts, int nverts)
+        public static int CalcAreaOfPolygon2D(IEnumerable<Int4> verts, int nverts)
         {
             int area = 0;
+
             for (int i = 0, j = nverts - 1; i < nverts; j = i++)
             {
-                var vi = verts[i];
-                var vj = verts[j];
+                var vi = verts.ElementAt(i);
+                var vj = verts.ElementAt(j);
                 area += vi.X * vj.Z - vj.X * vi.Z;
             }
+
             return (area + 1) / 2;
         }
 
-        public static int Triangulate(Int4[] verts, ref int[] indices, out Int3[] tris)
+        public static int Triangulate(IEnumerable<Int4> verts, ref int[] indices, out IEnumerable<Int3> tris)
         {
-            int n = verts.Length;
-
-            // The last bit of the index is used to indicate if the vertex can be removed.
-            for (int i = 0; i < n; i++)
-            {
-                int i1 = Next(i, n);
-                int i2 = Next(i1, n);
-                if (Diagonal(i, i2, n, verts, indices))
-                {
-                    indices[i1] |= 0x8000;
-                }
-            }
-
             List<Int3> dst = new List<Int3>();
 
+            // The last bit of the index is used to indicate if the vertex can be removed.
+            SetRemovableIndices(verts, ref indices);
+
+            int n = verts.Count();
             while (n > 3)
             {
-                int minLen = -1;
-                int mini = -1;
-                for (int ix = 0; ix < n; ix++)
-                {
-                    int i1x = Next(ix, n);
-                    if ((indices[i1x] & 0x8000) != 0)
-                    {
-                        var p0 = verts[(indices[ix] & 0x7fff)];
-                        var p2 = verts[(indices[Next(i1x, n)] & 0x7fff)];
-
-                        int dx = p2.X - p0.X;
-                        int dz = p2.Z - p0.Z;
-                        int len = dx * dx + dz * dz;
-                        if (minLen < 0 || len < minLen)
-                        {
-                            minLen = len;
-                            mini = ix;
-                        }
-                    }
-                }
+                int mini = FindMinIndex(n, verts, indices);
 
                 if (mini == -1)
                 {
@@ -144,13 +118,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 // Removes P[i1] by copying P[i+1]...P[n-1] left one index.
                 n--;
-                for (int k = i1; k < n; k++)
+                RemoveIndex(i1, n, ref indices);
+
+                if (i1 >= n)
                 {
-                    indices[k] = indices[k + 1];
+                    i1 = 0;
                 }
 
-                if (i1 >= n) i1 = 0;
                 i = Prev(i1, n);
+
                 // Update diagonal flags.
                 if (Diagonal(Prev(i, n), i1, n, verts, indices))
                 {
@@ -183,7 +159,56 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return dst.Count;
         }
+        private static void SetRemovableIndices(IEnumerable<Int4> verts, ref int[] indices)
+        {
+            int n = verts.Count();
 
+            for (int i = 0; i < n; i++)
+            {
+                int i1 = Next(i, n);
+                int i2 = Next(i1, n);
+                if (Diagonal(i, i2, n, verts, indices))
+                {
+                    indices[i1] |= 0x8000;
+                }
+            }
+        }
+        private static int FindMinIndex(int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
+        {
+            int minLen = -1;
+            int mini = -1;
+
+            for (int ix = 0; ix < n; ix++)
+            {
+                int i1x = Next(ix, n);
+
+                if ((indices.ElementAt(i1x) & 0x8000) == 0)
+                {
+                    continue;
+                }
+
+                var p0 = verts.ElementAt(indices.ElementAt(ix) & 0x7fff);
+                var p2 = verts.ElementAt(indices.ElementAt(Next(i1x, n)) & 0x7fff);
+
+                int dx = p2.X - p0.X;
+                int dz = p2.Z - p0.Z;
+                int len = dx * dx + dz * dz;
+                if (minLen < 0 || len < minLen)
+                {
+                    minLen = len;
+                    mini = ix;
+                }
+            }
+
+            return mini;
+        }
+        private static void RemoveIndex(int i1, int n, ref int[] indices)
+        {
+            for (int k = i1; k < n; k++)
+            {
+                indices[k] = indices[k + 1];
+            }
+        }
         private static bool VEqual(Int4 a, Int4 b)
         {
             return a.X == b.X && a.Z == b.Z;
@@ -289,10 +314,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             return Area2(aV, bV, cV) == 0;
         }
-        private static bool Diagonalie(int i, int j, int n, Int4[] verts, int[] indices)
+        private static bool Diagonalie(int i, int j, int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
         {
-            var d0 = verts[(indices[i] & 0x7fff)];
-            var d1 = verts[(indices[j] & 0x7fff)];
+            var d0 = verts.ElementAt(indices.ElementAt(i) & 0x7fff);
+            var d1 = verts.ElementAt(indices.ElementAt(j) & 0x7fff);
 
             // For each edge (k,k+1) of P
             for (int k = 0; k < n; k++)
@@ -301,8 +326,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 // Skip edges incident to i or j
                 if (!((k == i) || (k1 == i) || (k == j) || (k1 == j)))
                 {
-                    var p0 = verts[(indices[k] & 0x7fff)];
-                    var p1 = verts[(indices[k1] & 0x7fff)];
+                    var p0 = verts.ElementAt(indices.ElementAt(k) & 0x7fff);
+                    var p1 = verts.ElementAt(indices.ElementAt(k1) & 0x7fff);
 
                     if (VEqual(d0, p0) || VEqual(d1, p0) || VEqual(d0, p1) || VEqual(d1, p1))
                         continue;
@@ -313,12 +338,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             return true;
         }
-        private static bool InCone(int i, int j, int n, Int4[] verts, int[] indices)
+        private static bool InCone(int i, int j, int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
         {
-            var pi = verts[(indices[i] & 0x7fff)];
-            var pj = verts[(indices[j] & 0x7fff)];
-            var pi1 = verts[(indices[Next(i, n)] & 0x7fff)];
-            var pin1 = verts[(indices[Prev(i, n)] & 0x7fff)];
+            var pi = verts.ElementAt(indices.ElementAt(i) & 0x7fff);
+            var pj = verts.ElementAt(indices.ElementAt(j) & 0x7fff);
+            var pi1 = verts.ElementAt(indices.ElementAt(Next(i, n)) & 0x7fff);
+            var pin1 = verts.ElementAt(indices.ElementAt(Prev(i, n)) & 0x7fff);
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn(pin1, pi, pi1))
@@ -329,7 +354,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // else P[i] is reflex.
             return !(LeftOn(pi, pj, pi1) && LeftOn(pj, pi, pin1));
         }
-        private static bool Diagonal(int i, int j, int n, Int4[] verts, int[] indices)
+        private static bool Diagonal(int i, int j, int n, IEnumerable<Int4> verts, IEnumerable<int> indices)
         {
             return InCone(i, j, n, verts, indices) && Diagonalie(i, j, n, verts, indices);
         }
@@ -485,25 +510,26 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             return c ? -dmin : dmin;
         }
-        public static float PolyMinExtent(Vector3[] verts)
+        public static float PolyMinExtent(IEnumerable<Vector3> verts)
         {
             float minDist = float.MaxValue;
-            for (int i = 0; i < verts.Length; i++)
-            {
-                int ni = (i + 1) % verts.Length;
 
-                Vector3 p1 = verts[i];
-                Vector3 p2 = verts[ni];
+            for (int i = 0; i < verts.Count(); i++)
+            {
+                int ni = (i + 1) % verts.Count();
+
+                Vector3 p1 = verts.ElementAt(i);
+                Vector3 p2 = verts.ElementAt(ni);
 
                 float maxEdgeDist = 0;
-                for (int j = 0; j < verts.Length; j++)
+                for (int j = 0; j < verts.Count(); j++)
                 {
                     if (j == i || j == ni)
                     {
                         continue;
                     }
 
-                    float d = DistancePtSeg2D(verts[j], p1, p2);
+                    float d = DistancePtSeg2D(verts.ElementAt(j), p1, p2);
                     maxEdgeDist = Math.Max(maxEdgeDist, d);
                 }
 
@@ -512,7 +538,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return (float)Math.Sqrt(minDist);
         }
-        public static void TriangulateHull(Vector3[] verts, int nhull, int[] hull, int nin, List<Int3> tris)
+        public static void TriangulateHull(IEnumerable<Vector3> verts, int nhull, IEnumerable<int> hull, int nin, List<Int3> tris)
         {
             int start = 0, left = 1, right = nhull - 1;
 
@@ -521,16 +547,16 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float dmin = float.MaxValue;
             for (int i = 0; i < nhull; i++)
             {
-                if (hull[i] >= nin)
+                if (hull.ElementAt(i) >= nin)
                 {
                     continue; // Ears are triangles with original vertices as middle vertex while others are actually line segments on edges
                 }
 
                 int pi = Prev(i, nhull);
                 int ni = Next(i, nhull);
-                var pv = verts[hull[pi]];
-                var cv = verts[hull[i]];
-                var nv = verts[hull[ni]];
+                var pv = verts.ElementAt(hull.ElementAt(pi));
+                var cv = verts.ElementAt(hull.ElementAt(i));
+                var nv = verts.ElementAt(hull.ElementAt(ni));
 
                 float d =
                     Vector2.Distance(new Vector2(pv.X, pv.Z), new Vector2(cv.X, cv.Z)) +
@@ -548,9 +574,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Add first triangle
             tris.Add(new Int3()
             {
-                X = hull[start],
-                Y = hull[left],
-                Z = hull[right],
+                X = hull.ElementAt(start),
+                Y = hull.ElementAt(left),
+                Z = hull.ElementAt(right),
             });
 
             // Triangulate the polygon by moving left or right,
@@ -563,10 +589,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 int nleft = Next(left, nhull);
                 int nright = Prev(right, nhull);
 
-                var cvleft = verts[hull[left]];
-                var nvleft = verts[hull[nleft]];
-                var cvright = verts[hull[right]];
-                var nvright = verts[hull[nright]];
+                var cvleft = verts.ElementAt(hull.ElementAt(left));
+                var nvleft = verts.ElementAt(hull.ElementAt(nleft));
+                var cvright = verts.ElementAt(hull.ElementAt(right));
+                var nvright = verts.ElementAt(hull.ElementAt(nright));
                 float dleft =
                     Vector2.Distance(new Vector2(cvleft.X, cvleft.Z), new Vector2(nvleft.X, nvleft.Z)) +
                     Vector2.Distance(new Vector2(nvleft.X, nvleft.Z), new Vector2(cvright.X, cvright.Z));
@@ -579,9 +605,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     tris.Add(new Int3()
                     {
-                        X = hull[left],
-                        Y = hull[nleft],
-                        Z = hull[right],
+                        X = hull.ElementAt(left),
+                        Y = hull.ElementAt(nleft),
+                        Z = hull.ElementAt(right),
                     });
 
                     left = nleft;
@@ -590,9 +616,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 {
                     tris.Add(new Int3()
                     {
-                        X = hull[left],
-                        Y = hull[nright],
-                        Z = hull[right],
+                        X = hull.ElementAt(left),
+                        Y = hull.ElementAt(nright),
+                        Z = hull.ElementAt(right),
                     });
 
                     right = nright;
@@ -622,11 +648,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return false;
             }
         }
-        public static bool InCone(int i, int n, Int4[] verts, Int4 pj)
+        public static bool InCone(int i, int n, IEnumerable<Int4> verts, Int4 pj)
         {
-            var pi = verts[i];
-            var pi1 = verts[Next(i, n)];
-            var pin1 = verts[Prev(i, n)];
+            var pi = verts.ElementAt(i);
+            var pi1 = verts.ElementAt(Next(i, n));
+            var pin1 = verts.ElementAt(Prev(i, n));
 
             // If P[i] is a convex vertex [ i+1 left or on (i-1,i) ].
             if (LeftOn(pin1, pi, pi1))

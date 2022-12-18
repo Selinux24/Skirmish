@@ -35,11 +35,61 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Skyboxes\Sky_horiz_10_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_14_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_15_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_18_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_1_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_22_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_3_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_4_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_5_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_7_4096.jpg" />
+    <None Remove="Resources\Skyboxes\Sky_horiz_9_4096.jpg" />
+    <None Remove="Resources\Soldier\soldier_anim2.json" />
+    <None Remove="Resources\Trees\tree.json" />
+    <None Remove="Resources\Wall\Wall.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\Ground\gravel_01_diffuse.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Ground\gravel_01_normal.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_10_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_14_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_15_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_18_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_1_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_22_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_3_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_4_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_5_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_7_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Skyboxes\Sky_horiz_9_4096.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Soldier\soldier0.jpg">
@@ -54,7 +104,7 @@
     <Content Include="Resources\Soldier\soldier_anim2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Soldier\soldier_anim2.xml">
+    <Content Include="Resources\Soldier\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees\Bark_d.png">
@@ -63,7 +113,7 @@
     <Content Include="Resources\Trees\Leafs_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\tree.xml">
+    <Content Include="Resources\Trees\tree.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees\tree_1.dae">
@@ -88,7 +138,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="Resources\Wall\Wall.xml">
+    <Content Include="Resources\Wall\Wall.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

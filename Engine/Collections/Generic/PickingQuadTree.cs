@@ -34,44 +34,29 @@ namespace Engine.Collections.Generic
         {
             var bbox = GeometryUtil.CreateBoundingBox(items);
 
-            this.BoundingBox = bbox;
+            BoundingBox = bbox;
 
-            this.Root = PickingQuadTreeNode<T>.CreatePartitions(
+            Root = PickingQuadTreeNode<T>.CreatePartitions(
                 this, null,
                 bbox, items,
                 description.MaximumDepth,
                 0);
 
-            this.Root.ConnectNodes();
+            Root.ConnectNodes();
         }
 
         /// <summary>
         /// Pick nearest position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickNearest(Ray ray, bool facingOnly, out PickingResult<T> result)
+        public bool PickNearest(PickingRay ray, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                result = new PickingResult<T>()
-                {
-                    Distance = float.MaxValue,
-                };
-
-                if (this.Root.PickNearest(ray, facingOnly, out Vector3 position, out T item, out float distance))
-                {
-                    result.Position = position;
-                    result.Item = item;
-                    result.Distance = distance;
-
-                    return true;
-                }
-
-                return false;
+                return Root.PickNearest(ray, out result);
             }
             finally
             {
@@ -84,29 +69,14 @@ namespace Engine.Collections.Generic
         /// Pick first position
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="result">Picking result</param>
         /// <returns>Returns true if picked position found</returns>
-        public bool PickFirst(Ray ray, bool facingOnly, out PickingResult<T> result)
+        public bool PickFirst(PickingRay ray, out PickingResult<T> result)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                result = new PickingResult<T>()
-                {
-                    Distance = float.MaxValue,
-                };
-
-                if (this.Root.PickFirst(ray, facingOnly, out Vector3 position, out T item, out float distance))
-                {
-                    result.Position = position;
-                    result.Item = item;
-                    result.Distance = distance;
-
-                    return true;
-                }
-
-                return false;
+                return Root.PickFirst(ray, out result);
             }
             finally
             {
@@ -119,34 +89,14 @@ namespace Engine.Collections.Generic
         /// Pick all positions
         /// </summary>
         /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Select only facing triangles</param>
         /// <param name="results">Picking results</param>
         /// <returns>Returns true if picked positions found</returns>
-        public bool PickAll(Ray ray, bool facingOnly, out PickingResult<T>[] results)
+        public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results)
         {
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                results = null;
-
-                if (this.Root.PickAll(ray, facingOnly, out Vector3[] positions, out T[] items, out float[] distances))
-                {
-                    results = new PickingResult<T>[positions.Length];
-
-                    for (int i = 0; i < results.Length; i++)
-                    {
-                        results[i] = new PickingResult<T>()
-                        {
-                            Position = positions[i],
-                            Item = items[i],
-                            Distance = distances[i],
-                        };
-                    }
-
-                    return true;
-                }
-
-                return false;
+                return Root.PickAll(ray, out results);
             }
             finally
             {
@@ -162,7 +112,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            return this.Root.GetBoundingBoxes(maxDepth);
+            return Root.GetBoundingBoxes(maxDepth);
         }
         /// <summary>
         /// Gets the nodes contained into the specified volume
@@ -174,7 +124,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(volume);
+                return Root.GetNodesInVolume(volume);
             }
             finally
             {
@@ -189,7 +139,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns all leaf nodel</returns>
         public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
         {
-            return this.Root.GetLeafNodes();
+            return Root.GetLeafNodes();
         }
         /// <summary>
         /// Gets the closest node to the specified position
@@ -198,12 +148,12 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the closest node to the specified position</returns>
         public PickingQuadTreeNode<T> FindNode(Vector3 position)
         {
-            var node = this.Root.GetNode(position);
+            var node = Root.GetNode(position);
 
             if (node == null)
             {
                 //Look for the closest node
-                var leafNodes = this.GetLeafNodes();
+                var leafNodes = GetLeafNodes();
 
                 float dist = float.MaxValue;
                 foreach (var leafNode in leafNodes)
@@ -229,19 +179,16 @@ namespace Engine.Collections.Generic
             return nodeId++;
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            if (this.Root != null)
+            if (Root != null)
             {
-                return string.Format("PickingQuadTree Levels {0}", this.Root.GetMaxLevel() + 1);
+                return $"{nameof(PickingQuadTree<T>)} Levels {Root.GetMaxLevel() + 1}";
             }
             else
             {
-                return "PickingQuadTree Empty";
+                return $"{nameof(PickingQuadTree<T>)} Empty";
             }
         }
     }

@@ -85,13 +85,45 @@ namespace Engine.UI
         }
 
         /// <summary>
+        /// First color
+        /// </summary>
+        public Color4 Color1 { get; set; }
+        /// <summary>
+        /// Second color
+        /// </summary>
+        public Color4 Color2 { get; set; }
+        /// <summary>
+        /// Third color
+        /// </summary>
+        public Color4 Color3 { get; set; }
+        /// <summary>
+        /// Fourth color
+        /// </summary>
+        public Color4 Color4 { get; set; }
+        /// <summary>
+        /// First percentage
+        /// </summary>
+        public float Percentage1 { get; set; }
+        /// <summary>
+        /// Second percentage
+        /// </summary>
+        public float Percentage2 { get; set; }
+        /// <summary>
+        /// Third percentage
+        /// </summary>
+        public float Percentage3 { get; set; }
+        /// <summary>
+        /// Draw direction
+        /// </summary>
+        public SpriteDrawDirections DrawDirection { get; set; } = SpriteDrawDirections.Horizontal;
+        /// <summary>
         /// Sprite textures
         /// </summary>
         public string[] Textures { get; set; }
         /// <summary>
         /// Initial texture index
         /// </summary>
-        public int TextureIndex { get; set; } = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
         /// UV map
         /// </summary>
@@ -103,7 +135,7 @@ namespace Engine.UI
         public SpriteDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

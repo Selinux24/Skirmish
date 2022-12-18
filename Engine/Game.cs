@@ -1,4 +1,5 @@
-﻿using SharpDX.DXGI;
+﻿using SharpDX;
+using SharpDX.DXGI;
 using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
@@ -9,7 +10,6 @@ using System.Threading.Tasks;
 namespace Engine
 {
     using Engine.Common;
-    using Engine.Effects;
     using Engine.UI;
 
     /// <summary>
@@ -29,6 +29,10 @@ namespace Engine
         /// Application exiting flag
         /// </summary>
         private bool exiting = false;
+        /// <summary>
+        /// Game paused
+        /// </summary>
+        private bool paused = false;
 
         /// <summary>
         /// Name
@@ -143,6 +147,10 @@ namespace Engine
         /// </summary>
         public readonly IProgress<LoadResourceProgress> Progress;
         /// <summary>
+        /// Buffer progress reporter
+        /// </summary>
+        public readonly IProgress<LoadResourceProgress> ProgressBuffers;
+        /// <summary>
         /// Gets wheter a resource loading is running
         /// </summary>
         public bool ResourceLoadRuning { get; private set; } = false;
@@ -155,14 +163,6 @@ namespace Engine
         /// Game status collected event
         /// </summary>
         public event GameStatusCollectedHandler GameStatusCollected;
-        /// <summary>
-        /// Fires when a resource load starts
-        /// </summary>
-        public event GameLoadResourcesEventHandler ResourcesLoading;
-        /// <summary>
-        /// Fires when a resource load ends
-        /// </summary>
-        public event GameLoadResourcesEventHandler ResourcesLoaded;
 
         /// <summary>
         /// Gets desktop mode description
@@ -184,23 +184,102 @@ namespace Engine
                 }
             }
         }
+        /// <summary>
+        /// Gets the log level base on frame time
+        /// </summary>
+        /// <param name="frameTime">Frame time</param>
+        /// <returns>Returns the log level</returns>
+        private static LogLevel EvaluateTime(long frameTime)
+        {
+            if (frameTime > 500) return LogLevel.Warning;
+            if (frameTime > 30) return LogLevel.Information;
+            else return LogLevel.Debug;
+        }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, true, 0, 0, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="name">Name, for the game form</param>
         /// <param name="screenWidth">Window width</param>
         /// <param name="screenHeight">Window height</param>
-        /// <param name="fullScreen">Full screen window</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multi-sampling</param>
-        public Game(string name, bool fullScreen = true, int screenWidth = 0, int screenHeight = 0, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0)
+        public Game(string name, int screenWidth, int screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, screenWidth, screenHeight, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenWidth">Window width</param>
+        /// <param name="screenHeight">Window height</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, float screenWidth, float screenHeight, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, (int)screenWidth, (int)screenHeight, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenSize">Window size</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, Vector2Int screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, screenSize.X, screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="screenSize">Window size</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        public Game(string name, Vector2 screenSize, bool vsyncEnabled = true, int refreshRate = 0, int multiSampling = 0) :
+            this(name, false, (int)screenSize.X, (int)screenSize.Y, vsyncEnabled, refreshRate, multiSampling)
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="name">Name, for the game form</param>
+        /// <param name="fullScreen">Full screen window</param>
+        /// <param name="screenWidth">Window width</param>
+        /// <param name="screenHeight">Window height</param>
+        /// <param name="vsyncEnabled">Vertical Sync</param>
+        /// <param name="refreshRate">Refresh rate</param>
+        /// <param name="multiSampling">Enable multi-sampling</param>
+        private Game(string name, bool fullScreen, int screenWidth, int screenHeight, bool vsyncEnabled, int refreshRate, int multiSampling)
         {
             Name = name;
 
             GameTime = new GameTime();
 
             Progress = new Progress<LoadResourceProgress>(ReportProgress);
+            ProgressBuffers = new Progress<LoadResourceProgress>(ReportProgressBuffers);
 
             BufferManager = new BufferManager(this);
 
@@ -210,22 +289,65 @@ namespace Engine
 
             #region Form
 
+            bool isFullScreen = fullScreen;
             if (screenWidth == 0 || screenHeight == 0)
             {
                 var mode = GetDesktopMode();
 
+                isFullScreen = true;
                 screenWidth = mode.DesktopCoordinates.Right - mode.DesktopCoordinates.Left;
                 screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
             }
 
-            Form = new EngineForm(name, screenWidth, screenHeight, fullScreen);
+            Form = new EngineForm(name, screenWidth, screenHeight, isFullScreen);
 
-            Form.UserResized += (sender, eventArgs) =>
+            Form.ResizeBegin += (sender, e) =>
             {
-                if (Graphics != null)
+                paused = true;
+                GameTime.Pause();
+            };
+            Form.ResizeEnd += (sender, e) =>
+            {
+                paused = false;
+                GameTime.Resume();
+                if (Form.SizeUpdated)
                 {
-                    Graphics.PrepareDevice(Form.RenderWidth, Form.RenderHeight, true);
+                    OnResize();
                 }
+            };
+            Form.Activated += (sender, e) =>
+            {
+                paused = false;
+                GameTime.Resume();
+            };
+            Form.Deactivate += (sender, e) =>
+            {
+                paused = true;
+                GameTime.Pause();
+            };
+            Form.Resize += (sender, e) =>
+            {
+                if (Form.Resizing)
+                {
+                    return;
+                }
+
+                if (Form.IsMinimized)
+                {
+                    paused = true;
+                    GameTime.Pause();
+                    return;
+                }
+
+                paused = false;
+                GameTime.Resume();
+
+                if (!Form.FormModeUpdated)
+                {
+                    return;
+                }
+
+                OnResize();
             };
 
             #endregion
@@ -234,7 +356,7 @@ namespace Engine
 
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
-            DrawerPool.Initialize(Graphics);
+            BuiltIn.BuiltInShaders.Initialize(Graphics);
         }
         /// <summary>
         /// Destructor
@@ -274,7 +396,7 @@ namespace Engine
                     scenes = null;
                 }
 
-                DrawerPool.DisposeResources();
+                BuiltIn.BuiltInShaders.DisposeResources();
 
                 FontMapCache.Clear();
 
@@ -305,6 +427,14 @@ namespace Engine
             Logger.WriteInformation(this, "**************************************************************************");
 
             RenderLoop.Run(Form, Frame);
+        }
+
+        /// <summary>
+        /// On render form resize
+        /// </summary>
+        private void OnResize()
+        {
+            Graphics?.PrepareDevice(Form.RenderWidth, Form.RenderHeight, true);
         }
 
         /// <summary>
@@ -376,6 +506,9 @@ namespace Engine
         /// <param name="scene">New scene</param>
         private async Task StartScene(Scene scene)
         {
+            // Start background thread
+            await Task.Delay(1).ConfigureAwait(false);
+
             Logger.WriteInformation(this, "Game: Begin StartScene");
 
             try
@@ -404,210 +537,369 @@ namespace Engine
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
         public void ReportProgress(LoadResourceProgress value)
         {
-            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            var activeScene = scenes?.FirstOrDefault(s => s.Active);
             activeScene?.OnReportProgress(value);
         }
+        /// <summary>
+        /// Report buffer progress callback
+        /// </summary>
+        /// <param name="value">Progress value from 0.0f to 1.0f</param>
+        public void ReportProgressBuffers(LoadResourceProgress value)
+        {
+            var activeScene = scenes?.FirstOrDefault(s => s.Active);
+            activeScene?.OnReportProgressBuffers(value);
+        }
 
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback = null)
+        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
         {
-            bool res = false;
-
-            while (!res)
+            return Task.Run(async () =>
             {
-                res = await InternalLoadResourcesAsync(scene, taskGroup, callback);
+                LoadResourcesResult<T> result = null;
 
-                if (res) break;
+                while (true)
+                {
+                    if (ResourceLoadRuning)
+                    {
+                        await Task.Delay(100);
 
-                await Task.Delay(100);
-            }
+                        continue;
+                    }
 
-            return res;
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal async Task<bool> LoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback = null)
-        {
-            bool res = false;
+                    ResourceLoadRuning = true;
+                    try
+                    {
+                        result = await InternalLoadResourcesAsync(taskGroup);
 
-            while (!res)
-            {
-                res = await InternalLoadResourcesAsync(scene, taskGroup, callback);
+                        break;
+                    }
+                    finally
+                    {
+                        ResourceLoadRuning = false;
+                    }
+                }
 
-                if (res) break;
-
-                await Task.Delay(100);
-            }
-
-            return res;
+                if (result != null)
+                {
+                    result.ThrowExceptions();
+                }
+            });
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        private async Task<bool> InternalLoadResourcesAsync<T>(Scene scene, LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback = null)
+        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
         {
-            if (ResourceLoadRuning)
+            return Task.Run(async () =>
             {
-                return false;
-            }
+                LoadResourcesResult<T> result = null;
 
-            ResourceLoadRuning = true;
+                while (true)
+                {
+                    if (ResourceLoadRuning)
+                    {
+                        await Task.Delay(100);
 
+                        continue;
+                    }
+
+                    ResourceLoadRuning = true;
+                    try
+                    {
+                        result = await InternalLoadResourcesAsync(taskGroup);
+
+                        break;
+                    }
+                    finally
+                    {
+                        ResourceLoadRuning = false;
+                    }
+                }
+
+                if (result != null)
+                {
+                    result.ThrowExceptions();
+
+                    callback?.Invoke(result);
+                }
+            });
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <typeparam name="T">Response type</typeparam>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Func<LoadResourcesResult<T>, Task> callback)
+        {
+            return Task.Run(async () =>
+            {
+                LoadResourcesResult<T> result = null;
+
+                while (true)
+                {
+                    if (ResourceLoadRuning)
+                    {
+                        await Task.Delay(100);
+
+                        continue;
+                    }
+
+                    ResourceLoadRuning = true;
+                    try
+                    {
+                        result = await InternalLoadResourcesAsync(taskGroup);
+
+                        break;
+                    }
+                    finally
+                    {
+                        ResourceLoadRuning = false;
+                    }
+                }
+
+                if (result != null)
+                {
+                    result.ThrowExceptions();
+
+                    await callback?.Invoke(result);
+                }
+            });
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup)
+        {
+            return Task.Run(async () =>
+            {
+                LoadResourcesResult result = null;
+
+                while (true)
+                {
+                    if (ResourceLoadRuning)
+                    {
+                        await Task.Delay(100);
+
+                        continue;
+                    }
+
+                    ResourceLoadRuning = true;
+                    try
+                    {
+                        result = await InternalLoadResourcesAsync(taskGroup);
+
+                        break;
+                    }
+                    finally
+                    {
+                        ResourceLoadRuning = false;
+                    }
+                }
+
+                if (result != null)
+                {
+                    result.ThrowExceptions();
+                }
+            });
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback)
+        {
+            return Task.Run(async () =>
+            {
+                LoadResourcesResult result = null;
+
+                while (true)
+                {
+                    if (ResourceLoadRuning)
+                    {
+                        await Task.Delay(100);
+
+                        continue;
+                    }
+
+                    ResourceLoadRuning = true;
+                    try
+                    {
+                        result = await InternalLoadResourcesAsync(taskGroup);
+
+                        break;
+                    }
+                    finally
+                    {
+                        ResourceLoadRuning = false;
+                    }
+                }
+
+                if (result != null)
+                {
+                    result.ThrowExceptions();
+
+                    callback?.Invoke(result);
+                }
+            });
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <param name="callback">Callback</param>
+        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
+        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
+        {
+            Task.Run(async () =>
+            {
+                LoadResourcesResult result = null;
+
+                while (true)
+                {
+                    if (ResourceLoadRuning)
+                    {
+                        await Task.Delay(100);
+
+                        continue;
+                    }
+
+                    ResourceLoadRuning = true;
+                    try
+                    {
+                        result = await InternalLoadResourcesAsync(taskGroup);
+
+                        break;
+                    }
+                    finally
+                    {
+                        ResourceLoadRuning = false;
+                    }
+                }
+
+                if (result != null)
+                {
+                    result.ThrowExceptions();
+
+                    await callback?.Invoke(result);
+                }
+            });
+
+            return Task.CompletedTask;
+        }
+        /// <summary>
+        /// Executes a list of resource load tasks
+        /// </summary>
+        /// <param name="taskGroup">Resource load tasks</param>
+        /// <returns>Returns a load resource result.</returns>
+        private async Task<LoadResourcesResult<T>> InternalLoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
+        {
             List<TaskResult<T>> loadResult = new List<TaskResult<T>>();
 
-            try
+            var taskList = taskGroup.Tasks.ToList();
+
+            int totalTasks = taskList.Count;
+            int currentTask = 0;
+            while (taskList.Any())
             {
-                var taskList = taskGroup.Tasks.ToList();
+                var t = await Task.WhenAny(taskList);
 
-                int totalTasks = taskList.Count;
-                int currentTask = 0;
-                while (taskList.Any())
+                taskList.Remove(t);
+
+                bool completedOk = t.Status == TaskStatus.RanToCompletion;
+
+                TaskResult<T> res = new TaskResult<T>
                 {
-                    var t = await Task.WhenAny(taskList);
-
-                    taskList.Remove(t);
-
-                    bool completedOk = t.Status == TaskStatus.RanToCompletion;
-
-                    TaskResult<T> res = new TaskResult<T>
-                    {
-                        Completed = completedOk,
-                        Exception = t.Exception, // Store the excetion
-                        Result = completedOk ? (await t) : default, // Avoid throwing the exception now
-                    };
-
-                    loadResult.Add(res);
-
-                    Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
-                }
-
-                IntegrateResources(taskGroup.Id, scene);
-            }
-            finally
-            {
-                ResourceLoadRuning = false;
-
-                var res = new LoadResourcesResult<T>
-                {
-                    Results = loadResult,
+                    Completed = completedOk,
+                    Exception = t.Exception, // Store the excetion
+                    Result = completedOk ? (await t) : default, // Avoid throwing the exception now
                 };
 
-                if (callback != null)
-                {
-                    callback.Invoke(res);
-                }
-                else
-                {
-                    res.ThrowExceptions();
-                }
+                loadResult.Add(res);
+
+                Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
             }
 
-            return true;
+            await IntegrateResources(taskGroup.Id);
+
+            return new LoadResourcesResult<T>
+            {
+                Results = loadResult,
+            };
         }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>
-        /// <param name="scene">Scene</param>
         /// <param name="taskGroup">Resource load tasks</param>
-        /// <param name="callback">Callback</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        private async Task<bool> InternalLoadResourcesAsync(Scene scene, LoadResourceGroup taskGroup, Action<LoadResourcesResult> callback = null)
+        /// <returns>Returns a load resource result.</returns>
+        private async Task<LoadResourcesResult> InternalLoadResourcesAsync(LoadResourceGroup taskGroup)
         {
-            if (ResourceLoadRuning)
-            {
-                return false;
-            }
-
-            ResourceLoadRuning = true;
-
             List<TaskResult> loadResult = new List<TaskResult>();
 
-            try
+            var taskList = taskGroup.Tasks.ToList();
+
+            int totalTasks = taskList.Count;
+            int currentTask = 0;
+            while (taskList.Any())
             {
-                var taskList = taskGroup.Tasks.ToList();
+                var t = await Task.WhenAny(taskList);
 
-                int totalTasks = taskList.Count;
-                int currentTask = 0;
-                while (taskList.Any())
+                taskList.Remove(t);
+
+                TaskResult res = new TaskResult
                 {
-                    var t = await Task.WhenAny(taskList);
-
-                    taskList.Remove(t);
-
-                    TaskResult res = new TaskResult
-                    {
-                        Completed = t.Status == TaskStatus.RanToCompletion,
-                        Exception = t.Exception, // Store the excetion
-                    };
-
-                    loadResult.Add(res);
-
-                    Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
-                }
-
-                IntegrateResources(taskGroup.Id, scene);
-            }
-            finally
-            {
-                ResourceLoadRuning = false;
-
-                var res = new LoadResourcesResult
-                {
-                    Results = loadResult,
+                    Completed = t.Status == TaskStatus.RanToCompletion,
+                    Exception = t.Exception, // Store the excetion
                 };
 
-                if (callback != null)
-                {
-                    callback.Invoke(res);
-                }
-                else
-                {
-                    res.ThrowExceptions();
-                }
+                loadResult.Add(res);
+
+                Progress?.Report(new LoadResourceProgress { Id = taskGroup.Id, Progress = ++currentTask / (float)totalTasks });
             }
 
-            return true;
+            await IntegrateResources(taskGroup.Id);
+
+            return new LoadResourcesResult
+            {
+                Results = loadResult,
+            };
         }
+
         /// <summary>
         /// Integrates the requested resources into the resource manager
         /// </summary>
-        /// <param name="scene">Scene</param>
-        private void IntegrateResources(string id, Scene scene)
+        /// <param name="id">Resource group id</param>
+        private async Task IntegrateResources(string id)
         {
             try
             {
-                ResourcesLoading?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Recreating buffers");
+                await BufferManager.CreateBuffersAsync(id, ProgressBuffers);
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => BufferManager: Buffers recreated");
 
-                Logger.WriteInformation(this, "BufferManager: Recreating buffers");
-                BufferManager.CreateBuffers(id, Progress);
-                Logger.WriteInformation(this, "BufferManager: Buffers recreated");
-
-                Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                ResourceManager.CreateResources(id, Progress);
-                Logger.WriteInformation(this, "ResourceManager: New resources created");
-
-                ResourcesLoaded?.Invoke(this, new GameLoadResourcesEventArgs() { Scene = scene });
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: Creating new resources");
+                ResourceManager.CreateResources(id, ProgressBuffers);
+                Logger.WriteInformation(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => ResourceManager: New resources created");
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"ResourceManager error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(Game)}.{nameof(IntegrateResources)}.{id ?? "no-id"} => error: {ex.Message}", ex);
+
+                throw;
             }
         }
 
@@ -636,6 +928,11 @@ namespace Engine
                 return;
             }
 
+            if (paused)
+            {
+                return;
+            }
+
             GameTime.Update();
 
             if (nextScene != null)
@@ -661,13 +958,16 @@ namespace Engine
 
             FrameInput();
 
-            FrameBegin();
-
             FrameSceneUpdate(activeScene);
 
-            FrameSceneDraw(activeScene);
+            if (BufferManager.SetVertexBuffers())
+            {
+                FrameBegin(activeScene);
 
-            FrameEnd();
+                FrameSceneDraw(activeScene);
+
+                FrameEnd();
+            }
 
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
@@ -720,13 +1020,14 @@ namespace Engine
         /// <summary>
         /// Begin frame
         /// </summary>
-        private void FrameBegin()
+        /// <param name="scene">Scene</param>
+        private void FrameBegin(Scene scene)
         {
             try
             {
                 Stopwatch pSW = new Stopwatch();
                 pSW.Start();
-                Graphics.Begin();
+                Graphics.Begin(scene);
                 pSW.Stop();
                 GameStatus.Add("Begin", pSW);
             }
@@ -762,11 +1063,6 @@ namespace Engine
         /// <param name="scene">Scene</param>
         private void FrameSceneDraw(Scene scene)
         {
-            if (!BufferManager.SetVertexBuffers())
-            {
-                return;
-            }
-
             try
             {
                 Stopwatch dSW = new Stopwatch();
@@ -852,18 +1148,6 @@ namespace Engine
             {
                 Logger.WriteError(this, $"Frame: Collecto Game Status error: {ex.Message}", ex);
             }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="frameTime"></param>
-        /// <returns></returns>
-        private static LogLevel EvaluateTime(long frameTime)
-        {
-            if (frameTime > 500) return LogLevel.Error;
-            if (frameTime > 30) return LogLevel.Warning;
-            else return LogLevel.Information;
         }
     }
 }

@@ -8,42 +8,29 @@ namespace Engine.UI
     /// <summary>
     /// Sprite progress bar
     /// </summary>
-    public class UIProgressBar : UIControl
+    public sealed class UIProgressBar : UIControl<UIProgressBarDescription>
     {
         /// <summary>
         /// Progress sprite
         /// </summary>
-        private readonly Sprite spriteProgress = null;
+        private Sprite spriteProgress = null;
         /// <summary>
-        /// Base sprite
+        /// Base color
         /// </summary>
-        private readonly Sprite spriteBase = null;
+        private Color4 baseColor;
+        /// <summary>
+        /// Alpha component
+        /// </summary>
+        private float alpha;
 
+        /// <summary>
+        /// Gets the caption
+        /// </summary>
+        public UITextArea Caption { get; private set; } = null;
         /// <summary>
         /// Gets or sets the progress value
         /// </summary>
         public float ProgressValue { get; set; }
-        /// <summary>
-        /// Gets the caption
-        /// </summary>
-        public UITextArea Caption { get; } = null;
-        /// <inheritdoc/>
-        public override float Alpha
-        {
-            get
-            {
-                return base.Alpha;
-            }
-            set
-            {
-                base.Alpha = value;
-
-                if (Caption != null)
-                {
-                    Caption.Alpha = value;
-                }
-            }
-        }
         /// <summary>
         /// Gets or sets the progress color
         /// </summary>
@@ -51,84 +38,108 @@ namespace Engine.UI
         {
             get
             {
-                return spriteProgress.BaseColor;
+                return spriteProgress.Color2;
             }
             set
             {
-                spriteProgress.BaseColor = value;
+                spriteProgress.Color2 = value;
             }
         }
-        /// <summary>
-        /// Gets or sets the back color
-        /// </summary>
+        /// <inheritdoc/>
         public override Color4 BaseColor
         {
             get
             {
-                return spriteBase.BaseColor;
+                return baseColor;
             }
             set
             {
-                spriteBase.BaseColor = value;
+                baseColor = value;
+
+                spriteProgress.Color1 = baseColor;
+            }
+        }
+        /// <inheritdoc/>
+        public override float Alpha
+        {
+            get
+            {
+                return alpha;
+            }
+            set
+            {
+                alpha = value;
+
+                base.Alpha = alpha;
+
+                if (Caption != null)
+                {
+                    Caption.Alpha = alpha;
+                }
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Button description</param>
-        public UIProgressBar(string name, Scene scene, UIProgressBarDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public UIProgressBar(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
+
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIProgressBarDescription description)
+        {
+            await base.InitializeAssets(description);
+
             ProgressValue = 0;
 
-            spriteBase = new Sprite(
-                $"{name}.Base",
-                scene,
-                new SpriteDescription()
-                {
-                    BaseColor = description.BaseColor,
-                    Width = description.Width,
-                    Height = description.Height,
-                    EventsEnabled = false,
-                });
+            spriteProgress = await CreateSpriteProgress();
+            AddChild(spriteProgress, true);
 
-            AddChild(spriteBase, false);
-
-            spriteProgress = new Sprite(
-                $"{name}.Progress",
-                scene,
-                new SpriteDescription()
-                {
-                    BaseColor = description.ProgressColor,
-                    Width = description.Width,
-                    Height = description.Height,
-                    EventsEnabled = false,
-                });
-
-            AddChild(spriteProgress, false);
-
-            if (description.Font != null)
+            if (Description.Font != null)
             {
-                Caption = new UITextArea(
-                    $"{name}.Caption",
-                    scene,
-                    new UITextAreaDescription
-                    {
-                        Font = description.Font,
-                        Text = description.Text,
-                        TextForeColor = description.TextForeColor,
-                        TextShadowColor = description.TextShadowColor,
-                        TextShadowDelta = description.TextShadowDelta,
-                        TextHorizontalAlign = description.TextHorizontalAlign,
-                        TextVerticalAlign = description.TextVerticalAlign,
-                        EventsEnabled = false,
-                    });
-
+                Caption = await CreateCaption();
                 AddChild(Caption, true);
             }
+        }
+        private async Task<Sprite> CreateSpriteProgress()
+        {
+            var desc = new SpriteDescription()
+            {
+                Color1 = Description.ProgressColor,
+                Color2 = Description.BaseColor,
+                DrawDirection = SpriteDrawDirections.Horizontal,
+                EventsEnabled = false,
+            };
+
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Progress",
+                $"{Name}.Progress",
+                desc);
+        }
+        private async Task<UITextArea> CreateCaption()
+        {
+            var desc = new UITextAreaDescription
+            {
+                Font = Description.Font,
+                Text = Description.Text,
+                TextForeColor = Description.TextForeColor,
+                TextShadowColor = Description.TextShadowColor,
+                TextShadowDelta = Description.TextShadowDelta,
+                TextHorizontalAlign = Description.TextHorizontalAlign,
+                TextVerticalAlign = Description.TextVerticalAlign,
+                EventsEnabled = false,
+            };
+
+            return await Scene.CreateComponent<UITextArea, UITextAreaDescription>(
+                $"{Id}.Caption",
+                $"{Name}.Caption",
+                desc);
         }
 
         /// <inheritdoc/>
@@ -141,45 +152,7 @@ namespace Engine.UI
                 return;
             }
 
-            int width = (int)(ProgressValue * Width);
-
-            spriteProgress.Width = width;
-            spriteProgress.Height = Height;
-            spriteProgress.Left = 0;
-            spriteProgress.Top = 0;
-
-            spriteBase.Width = Width - width;
-            spriteBase.Height = Height;
-            spriteBase.Left = width;
-            spriteBase.Top = 0;
-        }
-    }
-
-    /// <summary>
-    /// Progress bar extensions
-    /// </summary>
-    public static class UIProgressBarExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIProgressBar> AddComponentUIProgressBar(this Scene scene, string name, UIProgressBarDescription description, int order = 0)
-        {
-            UIProgressBar component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIProgressBar(name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
-            });
-
-            return component;
+            spriteProgress.SetPercentage(ProgressValue);
         }
     }
 }

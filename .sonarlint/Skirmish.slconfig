@@ -4,8 +4,8 @@
     "Key": "selinux24-github",
     "Name": "Raúl"
   },
-  "ProjectKey": "Selinux24_Skirmish_dev",
-  "ProjectName": "Skirmish-dev",
+  "ProjectKey": "Selinux24_Skirmish_master",
+  "ProjectName": "Skirmish",
   "Profiles": {
     "CSharp": {
       "ProfileKey": "AWaQhLn9qD2OhLzHK6Zv",

@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Triangle
     /// </summary>
-    public struct Triangle : IVertexList, IRayIntersectable
+    public struct Triangle : IVertexList, IRayIntersectable, IEquatable<Triangle>
     {
         /// <summary>
         /// First point
@@ -414,7 +414,7 @@ namespace Engine
 
             if (topology == Topology.TriangleList)
             {
-                var verts = cylinder.GetVertices(segments);
+                var verts = cylinder.GetVertices(segments).ToArray();
 
                 for (int i = 0; i < segments - 2; i++)
                 {
@@ -504,7 +504,7 @@ namespace Engine
         {
             if (triangles?.Any() != true)
             {
-                return triangles;
+                return Enumerable.Empty<Triangle>();
             }
 
             List<Triangle> res = new List<Triangle>(triangles.Count());
@@ -515,6 +515,52 @@ namespace Engine
             }
 
             return res.ToArray();
+        }
+        /// <summary>
+        /// Reverses the normal of all the triangles of the list
+        /// </summary>
+        /// <param name="vertices">Point list</param>
+        /// <returns>Returns a new point list</returns>
+        public static IEnumerable<Vector3> Reverse(IEnumerable<Vector3> vertices)
+        {
+            if (vertices.Count() % 3 != 0)
+            {
+                throw new ArgumentException("The point list must be divisible by three.", nameof(vertices));
+            }
+
+            List<Vector3> result = new List<Vector3>();
+
+            for (int i = 0; i < vertices.Count(); i += 3)
+            {
+                result.Add(vertices.ElementAt(i + 0));
+                result.Add(vertices.ElementAt(i + 2));
+                result.Add(vertices.ElementAt(i + 1));
+            }
+
+            return result;
+        }
+        /// <summary>
+        /// Reverses the normal of all the triangles of the list
+        /// </summary>
+        /// <param name="indices">Index list</param>
+        /// <returns>Returns a new index list</returns>
+        public static IEnumerable<uint> Reverse(IEnumerable<uint> indices)
+        {
+            if (indices.Count() % 3 != 0)
+            {
+                throw new ArgumentException("The index list must be divisible by three.", nameof(indices));
+            }
+
+            List<uint> result = new List<uint>();
+
+            for (int i = 0; i < indices.Count(); i += 3)
+            {
+                result.Add(indices.ElementAt(i + 0));
+                result.Add(indices.ElementAt(i + 2));
+                result.Add(indices.ElementAt(i + 1));
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -567,26 +613,37 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="v1X">Point 1 X</param>
+        /// <param name="v1Y">Point 1 Y</param>
+        /// <param name="v1Z">Point 1 Z</param>
+        /// <param name="v2X">Point 2 X</param>
+        /// <param name="v2Y">Point 2 Y</param>
+        /// <param name="v2Z">Point 2 Z</param>
+        /// <param name="v3X">Point 3 X</param>
+        /// <param name="v3Y">Point 3 Y</param>
+        /// <param name="v3Z">Point 3 Z</param>
+        public Triangle(float v1X, float v1Y, float v1Z, float v2X, float v2Y, float v2Z, float v3X, float v3Y, float v3Z)
+            : this(new Vector3(v1X, v1Y, v1Z), new Vector3(v2X, v2Y, v2Z), new Vector3(v3X, v3Y, v3Z))
+        {
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
         /// <param name="points">Point array</param>
         public Triangle(Vector3[] points) : this(points[0], points[1], points[2])
         {
 
         }
 
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            return string.Format("Vertex 1 {0}; Vertex 2 {1}; Vertex 3 {2};", Point1, Point2, Point3);
-        }
-
         /// <summary>
         /// Intersection test between ray and triangle
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(Ray ray)
+        public bool Intersects(PickingRay ray)
         {
-            return Intersects(ray, false, out _, out _);
+            return Intersects(ray, out _, out _);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -594,9 +651,9 @@ namespace Engine
         /// <param name="ray">Ray</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(Ray ray, out float distance)
+        public bool Intersects(PickingRay ray, out float distance)
         {
-            return Intersects(ray, false, out _, out distance);
+            return Intersects(ray, out _, out distance);
         }
         /// <summary>
         /// Intersection test between ray and triangle
@@ -605,59 +662,21 @@ namespace Engine
         /// <param name="point">Intersection point, if any</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(Ray ray, out Vector3 point, out float distance)
+        public bool Intersects(PickingRay ray, out Vector3 point, out float distance)
         {
-            return Intersects(ray, false, out point, out distance);
-        }
-        /// <summary>
-        /// Intersection test between ray and triangle
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Test facing only triangles</param>
-        /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(Ray ray, bool facingOnly)
-        {
-            return Intersects(ray, facingOnly, out _, out _);
-        }
-        /// <summary>
-        /// Intersection test between ray and triangle
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Test facing only triangles</param>
-        /// <param name="distance">Distance from ray origin and intersection point, if any</param>
-        /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(Ray ray, bool facingOnly, out float distance)
-        {
-            return Intersects(ray, facingOnly, out _, out distance);
-        }
-        /// <summary>
-        /// Intersection test between ray and triangle
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="facingOnly">Test facing only triangles</param>
-        /// <param name="point">Intersection point, if any</param>
-        /// <param name="distance">Distance from ray origin and intersection point, if any</param>
-        /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(Ray ray, bool facingOnly, out Vector3 point, out float distance)
-        {
-            point = Vector3.Zero;
-            distance = 0;
-
-            bool cull = false;
-            if (facingOnly)
+            if (ray.FacingOnly)
             {
-                cull = Vector3.Dot(ray.Direction, Normal) >= 0f;
+                bool cull = Vector3.Dot(ray.Direction, Normal) >= 0f;
+                if (cull)
+                {
+                    point = Vector3.Zero;
+                    distance = float.MaxValue;
+
+                    return false;
+                }
             }
 
-            if (!cull)
-            {
-                var p1 = Point1;
-                var p2 = Point2;
-                var p3 = Point3;
-                return Intersection.RayIntersectsTriangle(ref ray, ref p1, ref p2, ref p3, out point, out distance);
-            }
-
-            return false;
+            return Intersection.RayIntersectsTriangle(ray, this, out point, out distance);
         }
 
         /// <summary>
@@ -691,6 +710,19 @@ namespace Engine
         }
 
         /// <summary>
+        /// Retrieves the three edges of the triangle.
+        /// </summary>
+        /// <returns>An array of vectors representing the three edges of the triangle.</returns>
+        public IEnumerable<(Vector3 P1, Vector3 P2)> GetEdges()
+        {
+            return new[]
+            {
+                (Point2, Point1),
+                (Point3, Point2),
+                (Point1, Point2),
+            };
+        }
+        /// <summary>
         /// Gets the edge vector between points 2 and 1
         /// </summary>
         public Vector3 GetEdge1()
@@ -698,48 +730,18 @@ namespace Engine
             return Vector3.Subtract(Point2, Point1);
         }
         /// <summary>
-        /// Gets the edge vector between points 3 and 1
+        /// Gets the edge vector between points 3 and 2
         /// </summary>
         public Vector3 GetEdge2()
         {
-            return Vector3.Subtract(Point3, Point1);
+            return Vector3.Subtract(Point3, Point2);
         }
         /// <summary>
-        /// Gets the edge vector between points 2 and 3
+        /// Gets the edge vector between points 1 and 3
         /// </summary>
         public Vector3 GetEdge3()
         {
-            return Vector3.Subtract(Point2, Point3);
-        }
-        /// <summary>
-        /// Gets ray edgest by edge index (0 to 2)
-        /// </summary>
-        /// <param name="index">Edge index</param>
-        public Ray GetEdgeRay(int index)
-        {
-            if (index == 0)
-            {
-                var pos = Point1;
-                var dir = Vector3.Subtract(Point2, Point1);
-
-                return new Ray(pos, dir);
-            }
-            else if (index == 1)
-            {
-                var pos = Point1;
-                var dir = Vector3.Subtract(Point3, Point1);
-
-                return new Ray(pos, dir);
-            }
-            else if (index == 2)
-            {
-                var pos = Point3;
-                var dir = Vector3.Subtract(Point2, Point3);
-
-                return new Ray(pos, dir);
-            }
-
-            throw new ArgumentException($"Bad edge index", nameof(index));
+            return Vector3.Subtract(Point1, Point3);
         }
 
         /// <summary>
@@ -749,6 +751,58 @@ namespace Engine
         public Triangle ReverseNormal()
         {
             return new Triangle(Point1, Point3, Point2);
+        }
+
+        /// <inheritdoc/>
+        public static bool operator ==(Triangle left, Triangle right)
+        {
+            return left.Equals(ref right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(Triangle left, Triangle right)
+        {
+            return !left.Equals(ref right);
+        }
+        /// <inheritdoc/>
+        public bool Equals(Triangle other)
+        {
+            return Equals(ref other);
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Triangle))
+            {
+                return false;
+            }
+
+            var strongValue = (Triangle)obj;
+            return Equals(ref strongValue);
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(ref Triangle other)
+        {
+            return
+                other.Point1.Equals(Point1) &&
+                other.Point2.Equals(Point2) &&
+                other.Point3.Equals(Point3);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Point1.GetHashCode();
+                hashCode = (hashCode * 397) ^ Point2.GetHashCode();
+                hashCode = (hashCode * 397) ^ Point3.GetHashCode();
+                return hashCode;
+            }
+        }
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Vertex 1 {Point1}; Vertex 2 {Point2}; Vertex 3 {Point3};";
         }
     }
 }

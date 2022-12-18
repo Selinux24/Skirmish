@@ -7,7 +7,7 @@ namespace Engine.Animation
     /// <summary>
     /// Animation path
     /// </summary>
-    public class AnimationPath
+    public class AnimationPath : IHasGameState
     {
         /// <summary>
         /// Animation path items list
@@ -16,36 +16,12 @@ namespace Engine.Animation
         /// <summary>
         /// Current item index
         /// </summary>
-        private int currentIndex;
+        private int currentItemIndex;
 
         /// <summary>
-        /// Gets if the animation path is running
+        /// Name
         /// </summary>
-        public bool Playing { get; private set; } = true;
-        /// <summary>
-        /// Path time
-        /// </summary>
-        public float Time { get; private set; } = 0f;
-        /// <summary>
-        /// Total item time
-        /// </summary>
-        public float TotalItemTime { get; private set; } = 0f;
-        /// <summary>
-        /// Item time
-        /// </summary>
-        public float ItemTime
-        {
-            get
-            {
-                var item = CurrentItem;
-                if (item?.Duration > 0f)
-                {
-                    return TotalItemTime % item.Duration;
-                }
-
-                return 0;
-            }
-        }
+        public string Name { get; set; }
         /// <summary>
         /// Gets the total duration of the path
         /// </summary>
@@ -53,16 +29,14 @@ namespace Engine.Animation
         {
             get
             {
-                float d = 0;
-
-                for (int i = 0; i < items.Count; i++)
-                {
-                    d += items[i].TotalDuration;
-                }
-
-                return d;
+                return items.Sum(i => i.TotalDuration);
             }
         }
+        /// <summary>
+        /// Gets whether the animation path's items were updated or not
+        /// </summary>
+        public bool Updated { get; private set; }
+
         /// <summary>
         /// Gets the current path item
         /// </summary>
@@ -71,7 +45,35 @@ namespace Engine.Animation
         {
             get
             {
-                return items.ElementAtOrDefault(currentIndex);
+                return items.ElementAtOrDefault(currentItemIndex);
+            }
+        }
+        /// <summary>
+        /// Gets if the animation path is running
+        /// </summary>
+        public bool Playing { get; private set; } = true;
+        /// <summary>
+        /// Path elapsed time
+        /// </summary>
+        public float PathElapsedTime { get; private set; } = 0f;
+        /// <summary>
+        /// Path item elapsed time
+        /// </summary>
+        public float PathItemInterpolationValue { get; private set; } = 0f;
+        /// <summary>
+        /// Path item partial time (without loops)
+        /// </summary>
+        public float PartialPathItemInterpolationValue
+        {
+            get
+            {
+                float itemDuration = CurrentItem?.Duration ?? 0f;
+                if (itemDuration > 0f)
+                {
+                    return PathItemInterpolationValue % itemDuration;
+                }
+
+                return 0f;
             }
         }
 
@@ -97,8 +99,7 @@ namespace Engine.Animation
         /// <param name="time">Time to set</param>
         public void SetTime(float time)
         {
-            Time = time;
-            TotalItemTime = time;
+            PathElapsedTime = time;
             Playing = true;
         }
         /// <summary>
@@ -138,173 +139,279 @@ namespace Engine.Animation
         /// <param name="timeDelta">Delta time to apply on this animation clip</param>
         private void Add(string clipName, bool loop, int repeats, float timeDelta)
         {
-            AnimationPathItem prev = null;
-            if (items.Count > 0)
-            {
-                //Gets last item
-                prev = items[items.Count - 1];
-            }
-
-            if (prev != null)
-            {
-                var transition = new AnimationPathItem(prev.ClipName + clipName, false, 1, timeDelta, true);
-
-                items.Add(transition);
-            }
-
-            var newItem = new AnimationPathItem(clipName, loop, repeats, timeDelta, false);
+            //Adds the new item to the path
+            var newItem = new AnimationPathItem(clipName, loop, repeats, timeDelta);
 
             items.Add(newItem);
+
+            Updated = false;
         }
 
         /// <summary>
         /// Connects the specified path to the current path adding transitions between them
         /// </summary>
+        /// <param name="skData">Skinning data</param>
         /// <param name="animationPath">Animation path to connect with current path</param>
-        public void ConnectTo(AnimationPath animationPath)
+        public AnimationPath ConnectTo(ISkinningData skData, AnimationPath animationPath)
         {
-            var lastItem = items[items.Count - 1];
-            var nextItem = animationPath.items[0];
-
-            if (lastItem.ClipName != nextItem.ClipName)
+            if (animationPath?.items?.Any() != true)
             {
-                var newItem = new AnimationPathItem(lastItem.ClipName + nextItem.ClipName, false, 1, 1f, true);
-
-                animationPath.items.Insert(0, newItem);
+                return new AnimationPath();
             }
+
+            var clonedPath = animationPath.Clone();
+
+            clonedPath.UpdateItems(skData);
+
+            return clonedPath;
         }
         /// <summary>
         /// Sets the items to terminate and end
         /// </summary>
         public void End()
         {
-            var index = currentIndex;
-            if (index >= 0)
+            if (currentItemIndex < 0)
             {
-                if (items[index].IsTranstition) index++;
-
-                var current = items[index];
-
-                //Remove items from current to end
-                if (items.Count > index + 1)
-                {
-                    items.RemoveRange(index + 1, items.Count - (index + 1));
-                }
-
-                //Calcs total time of all clips
-                float t = 0;
-                items.ForEach(i => t += i != current ? i.TotalDuration : 0f);
-
-                //Fix time and item time
-                Time = t + ItemTime;
-                TotalItemTime = ItemTime;
-
-                //Set current item for ending
-                current.End();
+                return;
             }
+
+            if (!items.Any())
+            {
+                return;
+            }
+
+            int index = currentItemIndex;
+
+            var current = items[index];
+
+            //Remove items from current to end
+            if (items.Count > index + 1)
+            {
+                items.RemoveRange(index + 1, items.Count - (index + 1));
+            }
+
+            //Calcs total duration of all clips except current clip
+            float duration = items.Where(i => i != current).Sum(i => i.TotalDuration);
+
+            //Fix time and item time
+            PathElapsedTime = duration + PartialPathItemInterpolationValue;
+            PathItemInterpolationValue = PartialPathItemInterpolationValue;
+
+            //Set current item for ending
+            current.End();
         }
 
         /// <summary>
-        /// Updates internal state
+        /// Integrates internal state
         /// </summary>
-        /// <param name="delta">Delta time</param>
         /// <param name="skData">Skinning data</param>
-        /// <param name="updated">Returns true when the internal path index change</param>
+        /// <param name="elapsedSeconds">Elapsed seconds</param>
         /// <param name="atEnd">Returns true when the internal path ends</param>
-        public void Update(float delta, SkinningData skData, out bool updated, out bool atEnd)
+        /// <returns>Returns true when the internal path index changes</returns>
+        public bool Integrate(ISkinningData skData, float elapsedSeconds, out bool atEnd)
         {
-            updated = false;
             atEnd = false;
+
+            if (skData == null)
+            {
+                return false;
+            }
+
+            UpdateItems(skData);
+
+            if (elapsedSeconds == 0f)
+            {
+                return false;
+            }
 
             int itemIndex = 0;
 
-            float nextTime = Time + delta;
-            float clipTime = nextTime;
+            float nextTime = PathElapsedTime + elapsedSeconds;
+            float acumDuration = 0;
+            float itemInterpolationValue = 0;
 
-            float time = 0;
-
-            if (nextTime > 0)
+            //Find the path item, base in the current path time
+            for (int i = 0; i < items.Count; i++)
             {
-                for (int i = 0; i < items.Count; i++)
+                //Set current item index
+                itemIndex = i;
+                bool isLast = i == items.Count - 1;
+
+                var current = items[i];
+
+                var lookUpResult = TimeInItem(nextTime, acumDuration, current, isLast);
+                acumDuration += lookUpResult.PathItemDuration;
+                itemInterpolationValue = lookUpResult.PathItemInterpolationValue;
+                atEnd = lookUpResult.AtEnd;
+
+                if (lookUpResult.Result == TimeInItemResults.Found)
                 {
-                    //Set current item index
-                    itemIndex = i;
-                    bool isLast = i == items.Count - 1;
-
-                    var current = items[i];
-
-                    //Update current item
-                    current.UpdateSkinningData(skData);
-
-                    bool? continuePath = UpdateItem(current, isLast, nextTime, ref time, out atEnd, out float t);
-                    if (continuePath.HasValue)
-                    {
-                        if (!continuePath.Value)
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        clipTime -= t;
-                    }
+                    break;
                 }
             }
 
-            Time = atEnd ? time : nextTime;
+            PathElapsedTime = atEnd ? acumDuration : nextTime;
             Playing = !atEnd;
-            TotalItemTime = Math.Max(0, clipTime);
+            PathItemInterpolationValue = itemInterpolationValue;
 
-            if (currentIndex != itemIndex)
+            if (currentItemIndex != itemIndex)
             {
-                currentIndex = itemIndex;
+                currentItemIndex = itemIndex;
 
-                updated = true;
+                return true;
             }
+
+            return false;
         }
         /// <summary>
-        /// Updates the current item
+        /// Finds whether the specified time is into the specified path item 
         /// </summary>
-        /// <param name="item">Item to update</param>
+        /// <param name="targetTime">Target time</param>
+        /// <param name="acumDuration">Accumulated duration</param>
+        /// <param name="item">Path item</param>
         /// <param name="isLastItem">It's the last item in the path</param>
-        /// <param name="nextTime">Next time</param>
-        /// <param name="time">Current time</param>
-        /// <param name="atEnd">Returns if the path is at end</param>
-        /// <param name="t">Evaluated time</param>
-        /// <returns>Returns false if the path has to stop or true if it has to continue</returns>
-        private bool? UpdateItem(AnimationPathItem item, bool isLastItem, float nextTime, ref float time, out bool atEnd, out float t)
+        /// <param name="pathDuration">Path duration</param>
+        /// <param name="interpolationValue">Path item interpolation value</param>
+        /// <param name="atEnd">Returns whether the path is at end or not</param>
+        /// <returns>Returns true if the time is into the path</returns>
+        private TimeInItemData TimeInItem(float targetTime, float acumDuration, AnimationPathItem item, bool isLastItem)
         {
-            atEnd = false;
-            t = item.TotalDuration;
-            if (t == 0) return true;
-
-            if (item.Loop)
+            var itemTotalDuration = item.TotalDuration * item.TimeDelta;
+            if (itemTotalDuration == 0)
             {
-                //Adjust time in the loop
-                float d = nextTime - time;
-                t = d % t;
+                return new TimeInItemData
+                {
+                    Result = TimeInItemResults.NotFound,
+                    PathItemDuration = 0,
+                    PathItemInterpolationValue = 0,
+                    AtEnd = false,
+                    LoopCount = 0,
+                };
             }
 
-            time += t;
-
-            if (time - t <= nextTime && time > nextTime)
+            if (targetTime - acumDuration < itemTotalDuration)
             {
-                //This is the item, stop the path
-                return false;
+                float interpolationValue = (targetTime - acumDuration) / item.TimeDelta;
+
+                //This is the item
+                return new TimeInItemData
+                {
+                    Result = TimeInItemResults.Found,
+                    PathItemDuration = targetTime - acumDuration,
+                    PathItemInterpolationValue = interpolationValue % item.Duration,
+                    AtEnd = false,
+                    LoopCount = (int)Math.Ceiling(interpolationValue / item.Duration),
+                };
             }
             else if (item.Loop)
             {
+                float interpolationValue = (targetTime - acumDuration) / item.TimeDelta;
+
                 //Do loop, continue path
-                return true;
+                return new TimeInItemData
+                {
+                    Result = TimeInItemResults.InLoop,
+                    PathItemDuration = targetTime - acumDuration,
+                    PathItemInterpolationValue = interpolationValue % item.Duration,
+                    AtEnd = false,
+                    LoopCount = (int)Math.Ceiling(interpolationValue / item.Duration),
+                };
             }
-            else if (nextTime >= time && isLastItem)
+            else if (targetTime - acumDuration >= itemTotalDuration && isLastItem)
             {
                 //Item passed, it's the end item
-                atEnd = true;
-                return false;
+                return new TimeInItemData
+                {
+                    Result = TimeInItemResults.Found,
+                    PathItemDuration = targetTime - acumDuration,
+                    PathItemInterpolationValue = item.TotalDuration,
+                    AtEnd = true,
+                    LoopCount = 0,
+                };
+            }
+            else
+            {
+                //Not in time
+                return new TimeInItemData
+                {
+                    Result = TimeInItemResults.NotFound,
+                    PathItemDuration = itemTotalDuration,
+                    PathItemInterpolationValue = 0,
+                    AtEnd = false,
+                    LoopCount = 0,
+                };
+            }
+        }
+        /// <summary>
+        /// Time in item method results
+        /// </summary>
+        private struct TimeInItemData
+        {
+            /// <summary>
+            /// Look up result
+            /// </summary>
+            public TimeInItemResults Result { get; set; }
+            /// <summary>
+            /// Processed path item duration
+            /// </summary>
+            public float PathItemDuration { get; set; }
+            /// <summary>
+            /// Processed path item interpolation value
+            /// </summary>
+            public float PathItemInterpolationValue { get; set; }
+            /// <summary>
+            /// Gets whether the path is at end or not
+            /// </summary>
+            /// <remarks>The processed path item is the last, and the time is greater of it's total duration</remarks>
+            public bool AtEnd { get; set; }
+            /// <summary>
+            /// Processed path item loop count
+            /// </summary>
+            public int LoopCount { get; set; }
+        }
+        /// <summary>
+        /// Time in item results
+        /// </summary>
+        private enum TimeInItemResults
+        {
+            /// <summary>
+            /// Item found
+            /// </summary>
+            Found,
+            /// <summary>
+            /// Item not found
+            /// </summary>
+            NotFound,
+            /// <summary>
+            /// Currently in loop
+            /// </summary>
+            InLoop,
+        }
+
+        /// <summary>
+        /// Updates the internal item list
+        /// </summary>
+        /// <param name="skData">Skinning data</param>
+        public void UpdateItems(ISkinningData skData)
+        {
+            if (Updated)
+            {
+                return;
             }
 
-            return null;
+            if (skData == null)
+            {
+                return;
+            }
+
+            Updated = true;
+
+            if (!items.Any())
+            {
+                return;
+            }
+
+            items.ForEach(i => i.Update(skData));
         }
 
         /// <summary>
@@ -313,9 +420,9 @@ namespace Engine.Animation
         /// <returns>Returns the clip names of the path</returns>
         public string GetItemList()
         {
-            string[] itemList = items.Select(i => i.ClipName).ToArray();
-
-            return itemList.Join(", ");
+            return items
+                .Select(i => $"{i.ClipName}{(i.Loop ? ".Loop" : "")}{(i.Repeats > 1 ? $".R{i.Repeats}" : "")} x t{i.TimeDelta:0.00}")
+                .Join(" => ");
         }
         /// <summary>
         /// Creates a copy of the current path
@@ -323,29 +430,66 @@ namespace Engine.Animation
         /// <returns>Returns the path copy instance</returns>
         public AnimationPath Clone()
         {
-            List<AnimationPathItem> clonedItems = new List<AnimationPathItem>();
-
-            foreach (var item in items)
-            {
-                clonedItems.Add(item.Clone());
-            }
+            var clonedItems = items.Select(i => i.Clone()).ToArray();
 
             return new AnimationPath(clonedItems)
             {
-                currentIndex = currentIndex,
-                TotalItemTime = TotalItemTime,
+                Name = Name,
+                currentItemIndex = currentItemIndex,
+                PathItemInterpolationValue = PathItemInterpolationValue,
                 Playing = Playing,
-                Time = Time,
+                PathElapsedTime = PathElapsedTime,
             };
         }
 
-        /// <summary>
-        /// Gets the text representation of the instance
-        /// </summary>
-        /// <returns>Returns the text representation of the instance</returns>
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new AnimationPathState
+            {
+                Name = Name,
+                CurrentIndex = currentItemIndex,
+                Playing = Playing,
+                Time = PathElapsedTime,
+                TotalItemTime = PathItemInterpolationValue,
+                PathItems = items.Select(i => i.GetState()).ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is AnimationPathState animationPathState))
+            {
+                return;
+            }
+
+            Name = animationPathState.Name;
+            currentItemIndex = animationPathState.CurrentIndex;
+            Playing = animationPathState.Playing;
+            PathElapsedTime = animationPathState.Time;
+            PathItemInterpolationValue = animationPathState.TotalItemTime;
+            for (int i = 0; i < animationPathState.PathItems.Count(); i++)
+            {
+                var itemState = animationPathState.PathItems.ElementAt(i);
+                items[i].SetState(itemState);
+            }
+        }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return $"Items: {items.Count}; Time: {Time:00.00}; Item Time: {ItemTime:00.00}";
+            if (CurrentItem == null)
+            {
+                return $"{Name ?? "NoName"} - {items.Count} items.";
+            }
+            else if (CurrentItem.Loop)
+            {
+                return $"{Name ?? "NoName"} - {items.Count} items. Time: {PathElapsedTime:00.00}; Interpolation: {PartialPathItemInterpolationValue:00.00} of {PathItemInterpolationValue:00.00}; Item: {CurrentItem}";
+            }
+            else
+            {
+                return $"{Name ?? "NoName"} - {items.Count} items. Time: {PathElapsedTime:00.00}; Interpolation: {PartialPathItemInterpolationValue:00.00}; Item: {CurrentItem}";
+            }
         }
     }
 }

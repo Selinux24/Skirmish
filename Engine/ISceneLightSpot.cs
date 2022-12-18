@@ -6,7 +6,7 @@ namespace Engine
     /// <summary>
     /// Spot light
     /// </summary>
-    public interface ISceneLightSpot : ISceneLight
+    public interface ISceneLightSpot : ISceneLight, IHasGameState
     {
         /// <summary>
         /// Position
@@ -19,11 +19,11 @@ namespace Engine
         /// <summary>
         /// Cone angle in degrees
         /// </summary>
-        float Angle { get; set; }
+        float FallOffAngle { get; set; }
         /// <summary>
         /// Cone angle in radians
         /// </summary>
-        float AngleRadians { get; set; }
+        float FallOffAngleRadians { get; set; }
         /// <summary>
         /// Light radius
         /// </summary>

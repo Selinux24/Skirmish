@@ -38,10 +38,10 @@ namespace Engine
             /// <param name="texture">Texture name</param>
             public Flare(float distance, float scale, Color color, string texture)
             {
-                this.Distance = distance;
-                this.Scale = scale;
-                this.Color = color;
-                this.Texture = texture;
+                Distance = distance;
+                Scale = scale;
+                Color = color;
+                Texture = texture;
             }
         }
 
@@ -64,9 +64,9 @@ namespace Engine
         public LensFlareDescription()
             : base()
         {
-            this.DeferredEnabled = false;
-            this.DepthEnabled = false;
-            this.BlendMode = BlendModes.Alpha | BlendModes.Additive;
+            DeferredEnabled = false;
+            DepthEnabled = false;
+            BlendMode = BlendModes.Alpha | BlendModes.Additive;
         }
     }
 }

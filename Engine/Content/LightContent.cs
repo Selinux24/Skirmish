@@ -37,19 +37,19 @@ namespace Engine.Content
         /// <summary>
         /// Initial position
         /// </summary>
-        public Vector3 Position { get; private set; }
+        public Vector3 Position { get; private set; } = Vector3.Zero;
         /// <summary>
         /// Initial rotation
         /// </summary>
-        public Quaternion Rotation { get; private set; }
+        public Quaternion Rotation { get; private set; } = Quaternion.Identity;
         /// <summary>
         /// Initial scale
         /// </summary>
-        public Vector3 Scale { get; private set; }
+        public Vector3 Scale { get; private set; } = Vector3.One;
         /// <summary>
         /// Light color
         /// </summary>
-        public Color4 Color { get; set; }
+        public Color3 Color { get; set; } = Color3.White;
         /// <summary>
         /// Constant attenuation
         /// </summary>
@@ -85,7 +85,7 @@ namespace Engine.Content
             {
                 Position = Position,
                 Direction = direction,
-                Angle = FallOffAngle,
+                FallOffAngle = FallOffAngle,
                 Radius = radius,
                 Intensity = intensity,
             };

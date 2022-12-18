@@ -36,6 +36,7 @@ namespace Engine.PathFinding.RecastNavigation
             /// </summary>
             public BoundingBox BoundingBox { get; set; }
 
+            /// <inheritdoc/>
             public override string ToString()
             {
                 return $"X:{X}; Y:{Y};";
@@ -394,13 +395,9 @@ namespace Engine.PathFinding.RecastNavigation
             return (dx * dx + dz * dz) < (radius * radius) && Math.Abs(dy) < height;
         }
 
-        /// <summary>
-        /// On graph updating event
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler Updating;
-        /// <summary>
-        /// On graph updated event
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler Updated;
         /// <summary>
         /// Updated flag
@@ -416,9 +413,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = new Dictionary<Crowd, List<CrowdAgentDebugInfo>>();
 
-        /// <summary>
-        /// Gets whether the graph is initialized
-        /// </summary>
+        /// <inheritdoc/>
         public bool Initialized { get; set; }
         /// <summary>
         /// Input geometry
@@ -452,9 +447,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -468,13 +461,13 @@ namespace Engine.PathFinding.RecastNavigation
         {
             if (disposing)
             {
-                foreach (var item in this.AgentQueries)
+                foreach (var item in AgentQueries)
                 {
                     item?.Dispose();
                 }
 
-                this.AgentQueries.Clear();
-                this.AgentQueries = null;
+                AgentQueries.Clear();
+                AgentQueries = null;
             }
         }
 
@@ -511,7 +504,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 for (int x = xMin; x <= xMax; x++)
                 {
-                    BoundingBox tileBounds = NavMesh.GetTileBounds(x, y, this.Input, this.Settings);
+                    BoundingBox tileBounds = NavMesh.GetTileBounds(x, y, Input, Settings);
 
                     cornerTiles.Add(new UpdateTileData
                     {
@@ -639,120 +632,147 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
 
-        /// <summary>
-        /// Creates the graph at specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        public void CreateAt(Vector3 position)
+        /// <inheritdoc/>
+        public bool CreateAt(Vector3 position)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            Updating?.Invoke(this, new EventArgs());
 
-            this.BuildTiles(new[] { position }, false);
+            BuildTiles(new[] { position }, false);
 
-            this.Updated?.Invoke(this, new EventArgs());
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Creates the graph at specified box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        public void CreateAt(BoundingBox bbox)
+        /// <inheritdoc/>
+        public bool CreateAt(BoundingBox bbox)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (LookupTiles(bbox).Any())
+            {
+                return false;
+            }
 
-            this.BuildTiles(bbox, false);
+            Updating?.Invoke(this, new EventArgs());
 
-            this.Updated?.Invoke(this, new EventArgs());
+            BuildTiles(bbox, false);
+
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Creates the graph at specified position list
-        /// </summary>
-        /// <param name="positions">Position list</param>
-        public void CreateAt(IEnumerable<Vector3> positions)
+        /// <inheritdoc/>
+        public bool CreateAt(IEnumerable<Vector3> positions)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (LookupTiles(positions).Any())
+            {
+                return false;
+            }
 
-            this.BuildTiles(positions, false);
+            Updating?.Invoke(this, new EventArgs());
 
-            this.Updated?.Invoke(this, new EventArgs());
+            BuildTiles(positions, false);
+
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Updates the graph at specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        public void UpdateAt(Vector3 position)
+        /// <inheritdoc/>
+        public bool UpdateAt(Vector3 position)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (!LookupTiles(new[] { position }).Any())
+            {
+                return false;
+            }
 
-            this.BuildTiles(new[] { position }, true);
+            Updating?.Invoke(this, new EventArgs());
 
-            this.Updated?.Invoke(this, new EventArgs());
+            BuildTiles(new[] { position }, true);
+
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Updates the graph at specified box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        public void UpdateAt(BoundingBox bbox)
+        /// <inheritdoc/>
+        public bool UpdateAt(BoundingBox bbox)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (!LookupTiles(bbox).Any())
+            {
+                return false;
+            }
 
-            this.BuildTiles(bbox, true);
+            Updating?.Invoke(this, new EventArgs());
 
-            this.Updated?.Invoke(this, new EventArgs());
+            BuildTiles(bbox, true);
+
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Updates the graph at specified position list
-        /// </summary>
-        /// <param name="positions">Position list</param>
-        public void UpdateAt(IEnumerable<Vector3> positions)
+        /// <inheritdoc/>
+        public bool UpdateAt(IEnumerable<Vector3> positions)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (!LookupTiles(positions).Any())
+            {
+                return false;
+            }
 
-            this.BuildTiles(positions, true);
+            Updating?.Invoke(this, new EventArgs());
 
-            this.Updated?.Invoke(this, new EventArgs());
+            BuildTiles(positions, true);
+
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Removes the graph node at specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        public void RemoveAt(Vector3 position)
+        /// <inheritdoc/>
+        public bool RemoveAt(Vector3 position)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (!LookupTiles(new[] { position }).Any())
+            {
+                return false;
+            }
+
+            Updating?.Invoke(this, new EventArgs());
 
             RemoveTiles(new[] { position });
 
-            this.Updated?.Invoke(this, new EventArgs());
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Removes the graph node at specified box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        public void RemoveAt(BoundingBox bbox)
+        /// <inheritdoc/>
+        public bool RemoveAt(BoundingBox bbox)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (!LookupTiles(bbox).Any())
+            {
+                return false;
+            }
+
+            Updating?.Invoke(this, new EventArgs());
 
             RemoveTiles(bbox);
 
-            this.Updated?.Invoke(this, new EventArgs());
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
-        /// <summary>
-        /// Removes the graph node at specified position list
-        /// </summary>
-        /// <param name="positions">Position list</param>
-        public void RemoveAt(IEnumerable<Vector3> positions)
+        /// <inheritdoc/>
+        public bool RemoveAt(IEnumerable<Vector3> positions)
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            if (!LookupTiles(positions).Any())
+            {
+                return false;
+            }
+
+            Updating?.Invoke(this, new EventArgs());
 
             RemoveTiles(positions);
 
-            this.Updated?.Invoke(this, new EventArgs());
+            Updated?.Invoke(this, new EventArgs());
+
+            return true;
         }
 
-        /// <summary>
-        /// Gets the node collection of the graph for the specified agent type
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <returns>Returns the node collection for the agent type</returns>
+        /// <inheritdoc/>
         public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
             List<GraphNode> nodes = new List<GraphNode>();
@@ -767,13 +787,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return nodes.ToArray();
         }
-        /// <summary>
-        /// Find path from point to point for the specified agent type
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="from">Start point</param>
-        /// <param name="to">End point</param>
-        /// <returns>Return path if exists</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             var graphQuery = GetAgentQuery(agent);
@@ -796,13 +810,7 @@ namespace Engine.PathFinding.RecastNavigation
                 return new Vector3[] { };
             }
         }
-        /// <summary>
-        /// Find path from point to point for the specified agent type
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="from">Start point</param>
-        /// <param name="to">End point</param>
-        /// <returns>Return path if exists</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
             IEnumerable<Vector3> result = new Vector3[] { };
@@ -829,24 +837,13 @@ namespace Engine.PathFinding.RecastNavigation
             return result;
         }
 
-        /// <summary>
-        /// Gets wether the specified position is walkable for the specified agent type
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="position">Position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(AgentType agent, Vector3 position)
+        /// <inheritdoc/>
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
         {
-            return IsWalkable(agent, position, out _);
+            return IsWalkable(agent, position, distanceThreshold, out _);
         }
-        /// <summary>
-        /// Gets wether the specified position is walkable for the specified agent type
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="position">Position</param>
-        /// <param name="nearest">Gets the nearest walkable position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
+        /// <inheritdoc/>
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             nearest = null;
 
@@ -855,7 +852,7 @@ namespace Engine.PathFinding.RecastNavigation
             if (query != null)
             {
                 //Set extents based upon agent height
-                var agentExtents = new Vector3(agent.Height, agent.Height * 2, agent.Height);
+                var agentExtents = new Vector3(agent.Height);
 
                 var status = query.FindNearestPoly(
                     position, agentExtents, new QueryFilter(),
@@ -865,21 +862,19 @@ namespace Engine.PathFinding.RecastNavigation
                 {
                     nearest = nPoint;
 
-                    return nPoint.X == position.X && nPoint.Z == position.Z;
+                    return
+                        nPoint.XZ() == position.XZ() &&
+                        Vector3.Distance(nPoint, position) <= distanceThreshold;
                 }
             }
 
             return false;
         }
 
-        /// <summary>
-        /// Adds an obstacle
-        /// </summary>
-        /// <param name="obstacle">Obstacle</param>
-        /// <returns>Returns the obstacle id</returns>
+        /// <inheritdoc/>
         public int AddObstacle(IObstacle obstacle)
         {
-            this.updated = false;
+            updated = false;
 
             List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
 
@@ -908,41 +903,25 @@ namespace Engine.PathFinding.RecastNavigation
 
             return o.Id;
         }
-        /// <summary>
-        /// Adds a cylinder obstacle
-        /// </summary>
-        /// <param name="cylinder">Bounding Cylinder</param>
-        /// <returns>Returns the obstacle id</returns>
+        /// <inheritdoc/>
         public int AddObstacle(BoundingCylinder cylinder)
         {
             return AddObstacle(new ObstacleCylinder(cylinder));
         }
-        /// <summary>
-        /// Adds a bounding box obstacle
-        /// </summary>
-        /// <param name="bbox">Bounding Box</param>
-        /// <returns>Returns the obstacle id</returns>
+        /// <inheritdoc/>
         public int AddObstacle(BoundingBox bbox)
         {
             return AddObstacle(new ObstacleBox(bbox));
         }
-        /// <summary>
-        /// Adds a oriented bounding box obstacle
-        /// </summary>
-        /// <param name="obb">Oriented Bounding Box</param>
-        /// <returns>Returns the obstacle id</returns>
-        /// <remarks>Only applies rotation if the obb's transform has rotation in the Y axis</remarks>
+        /// <inheritdoc/>
         public int AddObstacle(OrientedBoundingBox obb)
         {
             return AddObstacle(new ObstacleOrientedBox(obb));
         }
-        /// <summary>
-        /// Removes an obstacle by obstacle id
-        /// </summary>
-        /// <param name="obstacleId">Obstacle id</param>
+        /// <inheritdoc/>
         public void RemoveObstacle(int obstacleId)
         {
-            this.updated = false;
+            updated = false;
 
             var instance = itemIndices.Find(o => o.Id == obstacleId);
             if (instance != null)
@@ -960,10 +939,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
         }
 
-        /// <summary>
-        /// Finds a random point over the graph
-        /// </summary>
-        /// <returns>Returns a valid random position over the graph</returns>
+        /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent)
         {
             var query = GetAgentQuery(agent)?.CreateQuery();
@@ -978,13 +954,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             return null;
         }
-        /// <summary>
-        /// Finds a random point around a circle
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="position">Position</param>
-        /// <param name="radius">Radius</param>
-        /// <returns>Returns a valid random position over the graph</returns>
+        /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
         {
             var query = GetAgentQuery(agent)?.CreateQuery();
@@ -1010,30 +980,28 @@ namespace Engine.PathFinding.RecastNavigation
             return null;
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <inheritdoc/>
         public void Update(GameTime gameTime)
         {
-            foreach (var agentQ in AgentQueries)
-            {
-                var nm = agentQ.NavMesh;
-                if (nm.TileCache != null)
-                {
-                    var status = nm.TileCache.Update(out bool upToDate);
-                    if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
-                    {
-                        updated = upToDate;
+            var agentNms = AgentQueries
+                .Select(agentQ => agentQ.NavMesh)
+                .Where(nm => nm.TileCache != null)
+                .ToArray();
 
-                        if (updated)
-                        {
-                            this.Updated?.Invoke(this, new EventArgs());
-                        }
-                        else
-                        {
-                            this.Updating?.Invoke(this, new EventArgs());
-                        }
+            foreach (var nm in agentNms)
+            {
+                var status = nm.TileCache.Update(out bool upToDate);
+                if (status.HasFlag(Status.DT_SUCCESS) && updated != upToDate)
+                {
+                    updated = upToDate;
+
+                    if (updated)
+                    {
+                        Updated?.Invoke(this, new EventArgs());
+                    }
+                    else
+                    {
+                        Updating?.Invoke(this, new EventArgs());
                     }
                 }
             }
@@ -1057,7 +1025,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             Crowd cr = new Crowd(navMesh, settings);
 
-            this.Crowds.Add(cr);
+            Crowds.Add(cr);
 
             return cr;
         }
@@ -1068,7 +1036,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="pos">Position</param>
         /// <param name="param">Agent parameters</param>
         /// <returns>Returns the agent</returns>
-        public CrowdAgent AddCrowdAgent(Crowd crowd, Vector3 pos, CrowdAgentParams param)
+        public CrowdAgent AddCrowdAgent(Crowd crowd, Vector3 pos, CrowdAgentParameters param)
         {
             return crowd.AddAgent(pos, param);
         }

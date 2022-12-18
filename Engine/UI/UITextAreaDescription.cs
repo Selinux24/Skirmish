@@ -31,22 +31,46 @@ namespace Engine.UI
                 Text = text,
             };
         }
+
+        /// <summary>
+        /// Gets the default text area description from a font family name
+        /// </summary>
+        /// <param name="fontFamilyName">Font family name</param>
+        /// <param name="size">Font size</param>
+        /// <param name="fineSampling">Fine sampling</param>
+        public static UITextAreaDescription DefaultFromFamily(string fontFamilyName, int size, bool fineSampling = false)
+        {
+            return new UITextAreaDescription
+            {
+                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fineSampling),
+            };
+        }
         /// <summary>
         /// Gets the default text area description from a font family name
         /// </summary>
         /// <param name="fontFamilyName">Font family name</param>
         /// <param name="size">Font size</param>
         /// <param name="fontStyle">Font style</param>
-        public static UITextAreaDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle = FontMapStyles.Regular)
+        /// <param name="fineSampling">Fine sampling</param>
+        public static UITextAreaDescription DefaultFromFamily(string fontFamilyName, int size, FontMapStyles fontStyle, bool fineSampling = false)
         {
             return new UITextAreaDescription
             {
-                Font = new TextDrawerDescription()
-                {
-                    FontFamily = fontFamilyName,
-                    FontSize = size,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFamily(fontFamilyName, size, fontStyle, fineSampling),
+            };
+        }
+
+        /// <summary>
+        /// Gets the default text area description from a font file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="size">Size</param>
+        /// <param name="lineAdjust">Line adjust</param>
+        public static UITextAreaDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false)
+        {
+            return new UITextAreaDescription()
+            {
+                Font = TextDrawerDescription.FromFile(fileName, size, lineAdjust),
             };
         }
         /// <summary>
@@ -56,19 +80,14 @@ namespace Engine.UI
         /// <param name="size">Size</param>
         /// <param name="fontStyle">Font style</param>
         /// <param name="lineAdjust">Line adjust</param>
-        public static UITextAreaDescription DefaultFromFile(string fileName, int size, bool lineAdjust = false, FontMapStyles fontStyle = FontMapStyles.Regular)
+        public static UITextAreaDescription DefaultFromFile(string fileName, int size, FontMapStyles fontStyle, bool lineAdjust = false)
         {
             return new UITextAreaDescription()
             {
-                Font = new TextDrawerDescription
-                {
-                    FontFileName = fileName,
-                    FontSize = size,
-                    LineAdjust = lineAdjust,
-                    Style = fontStyle,
-                },
+                Font = TextDrawerDescription.FromFile(fileName, size, fontStyle, lineAdjust),
             };
         }
+
         /// <summary>
         /// Gets the default text area description from a font map 
         /// </summary>
@@ -78,15 +97,7 @@ namespace Engine.UI
         {
             return new UITextAreaDescription
             {
-                Font = new TextDrawerDescription()
-                {
-                    FontMapping = new FontMapping
-                    {
-                        ImageFile = fontImageFileName,
-                        MapFile = fontMapFileName,
-                    },
-                    UseTextureColor = true,
-                },
+                Font = TextDrawerDescription.FromMap(fontImageFileName, fontMapFileName),
             };
         }
 
@@ -119,11 +130,39 @@ namespace Engine.UI
         /// <summary>
         /// Text horizontal alignement
         /// </summary>
-        public HorizontalTextAlign TextHorizontalAlign { get; set; } = HorizontalTextAlign.Left;
+        public TextHorizontalAlign TextHorizontalAlign { get; set; } = TextHorizontalAlign.Left;
         /// <summary>
         /// Text vertical alignement
         /// </summary>
-        public VerticalTextAlign TextVerticalAlign { get; set; } = VerticalTextAlign.Top;
+        public TextVerticalAlign TextVerticalAlign { get; set; } = TextVerticalAlign.Top;
+        /// <summary>
+        /// Scroll
+        /// </summary>
+        public ScrollModes Scroll { get; set; } = ScrollModes.None;
+        /// <summary>
+        /// Scroll bar size
+        /// </summary>
+        public float ScrollbarSize { get; set; } = 15;
+        /// <summary>
+        /// Scroll bar base color
+        /// </summary>
+        public Color4 ScrollbarBaseColor { get; set; } = UIConfiguration.BaseColor;
+        /// <summary>
+        /// Scroll bar marker color
+        /// </summary>
+        public Color4 ScrollbarMarkerColor { get; set; } = UIConfiguration.HighlightColor;
+        /// <summary>
+        /// Scroll bar marker size
+        /// </summary>
+        public float ScrollbarMarkerSize { get; set; } = 50;
+        /// <summary>
+        /// Vertical scroll bar alignment
+        /// </summary>
+        public ScrollVerticalAlign ScrollVerticalAlign { get; set; } = ScrollVerticalAlign.Right;
+        /// <summary>
+        /// Horizontal scroll bar alignment
+        /// </summary>
+        public ScrollHorizontalAlign ScrollHorizontalAlign { get; set; } = ScrollHorizontalAlign.Bottom;
 
         /// <summary>
         /// Constructor
@@ -131,7 +170,7 @@ namespace Engine.UI
         public UITextAreaDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

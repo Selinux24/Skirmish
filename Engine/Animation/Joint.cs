@@ -13,6 +13,10 @@ namespace Engine.Animation
         /// </summary>
         public string Name { get; private set; }
         /// <summary>
+        /// Bone name
+        /// </summary>
+        public string Bone { get; private set; }
+        /// <summary>
         /// Parent joint
         /// </summary>
         public Joint Parent { get; set; }
@@ -37,36 +41,32 @@ namespace Engine.Animation
         /// Constructor
         /// </summary>
         /// <param name="name">Joint name</param>
+        /// <param name="bone">Bone name</param>
         /// <param name="parent">Parent joint</param>
         /// <param name="local">Local transform</param>
         /// <param name="global">Global transform</param>
-        public Joint(string name, Joint parent, Matrix local, Matrix global)
+        public Joint(string name, string bone, Joint parent, Matrix local, Matrix global)
         {
-            this.Name = name;
-            this.Parent = parent;
-            this.LocalTransform = local;
-            this.GlobalTransform = global;
+            Name = name;
+            Bone = bone;
+            Parent = parent;
+            LocalTransform = local;
+            GlobalTransform = global;
         }
 
-        /// <summary>
-        /// Gets text representation
-        /// </summary>
-        /// <returns>Return text representation</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Name: {0}; Root: {1}", this.Name, this.Parent == null);
+            return $"Name: {Name}; Bone: {Bone}; Root: {Parent}";
         }
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(Joint other)
         {
             return
-                this.Name == other.Name &&
-                Helper.ListIsEqual(this.Childs, other.Childs) &&
-                this.Offset == other.Offset;
+                Name == other.Name &&
+                Bone == other.Bone &&
+                Helper.CompareEnumerables(Childs, other.Childs) &&
+                Offset == other.Offset;
         }
     }
 }

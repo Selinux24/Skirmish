@@ -4,6 +4,9 @@ using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
+    using Engine.Modular;
+    using Engine.Modular.Persistence;
+
     public class DungeonAssetConfiguration
     {
         private Random randomGenerator = Helper.RandomGenerator;
@@ -11,7 +14,7 @@ namespace Engine.Content.OnePageDungeon
 
         public float PositionDelta { get; set; } = 1;
 
-        public IEnumerable<string> Volumes { get; set; } = new[] { "volume", "_volume", "_volume", "_volumes" };
+        public IEnumerable<string> Hulls { get; set; } = new[] { "volume", "_volume", "_volume", "_volumes" };
 
         public IEnumerable<string> Floors { get; set; } = new string[] { };
         public IEnumerable<string> Walls { get; set; } = new string[] { };
@@ -19,9 +22,9 @@ namespace Engine.Content.OnePageDungeon
         public IEnumerable<string> Columns { get; set; } = new string[] { };
 
         public IDictionary<DoorTypes, string[]> Doors { get; set; } = new Dictionary<DoorTypes, string[]> { };
-        public IEnumerable<ModularSceneryObjectAnimationPlan> DoorAnimationPlans { get; set; }
-        public IEnumerable<ModularSceneryObjectAction> DoorActions { get; set; }
-        public IEnumerable<ModularSceneryObjectState> DoorStates { get; set; }
+        public IEnumerable<ObjectAnimationPlan> DoorAnimationPlans { get; set; }
+        public IEnumerable<ObjectAction> DoorActions { get; set; }
+        public IEnumerable<ObjectState> DoorStates { get; set; }
 
         public int RandomSeed
         {

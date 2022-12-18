@@ -1,135 +1,54 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using Engine.Animation;
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Deferred;
+    using Engine.BuiltIn.Forward;
     using Engine.Content;
-    using Engine.Effects;
-    using System;
 
     /// <summary>
     /// Model basic implementation
     /// </summary>
-    public abstract class BaseModel : Drawable, IUseMaterials, IUseSkinningData
+    public abstract class BaseModel<T> : Drawable<T>, IUseMaterials, IUseSkinningData where T : BaseModelDescription
     {
         /// <summary>
         /// Meshes by level of detail dictionary
         /// </summary>
-        private readonly LevelOfDetailDictionary meshesByLOD = new LevelOfDetailDictionary();
+        private readonly Dictionary<LevelOfDetail, DrawingData> meshesByLOD = new Dictionary<LevelOfDetail, DrawingData>();
         /// <summary>
         /// Default level of detail
         /// </summary>
-        private readonly LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
-
-        /// <summary>
-        /// Instancing buffer
-        /// </summary>
-        protected BufferDescriptor InstancingBuffer { get; private set; } = null;
+        private LevelOfDetail defaultLevelOfDetail = LevelOfDetail.Minimum;
 
         /// <summary>
         /// Gets the texture count for texture index
         /// </summary>
         public int TextureCount { get; private set; }
         /// <summary>
-        /// Gets the material list used by the current drawing data
-        /// </summary>
-        public IEnumerable<MeshMaterial> Materials
-        {
-            get
-            {
-                List<MeshMaterial> matList = new List<MeshMaterial>();
-
-                var drawingData = GetDrawingData(LevelOfDetail.High);
-                if (drawingData != null)
-                {
-                    foreach (var meshMaterial in drawingData.Materials.Keys)
-                    {
-                        matList.Add(drawingData.Materials[meshMaterial]);
-                    }
-                }
-
-                return matList.ToArray();
-            }
-        }
-        /// <summary>
         /// Use anisotropic filtering
         /// </summary>
-        public bool UseAnisotropicFiltering { get; set; }
+        public bool UseAnisotropicFiltering { get; private set; }
+        /// <inheritdoc/>
+        public abstract ISkinningData SkinningData { get; }
         /// <summary>
-        /// Gets the skinning list used by the current drawing data
+        /// Culling volume for culling test
         /// </summary>
-        public SkinningData SkinningData
-        {
-            get
-            {
-                return GetDrawingData(LevelOfDetail.High)?.SkinningData;
-            }
-        }
-        /// <summary>
-        /// Use spheric volume for culling test
-        /// </summary>
-        public bool SphericVolume { get; set; }
+        public CullingVolumeTypes CullingVolumeType { get; private set; }
 
         /// <summary>
         /// Base model
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Object description</param>
-        protected BaseModel(string name, Scene scene, BaseModelDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        protected BaseModel(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            if (description.Content == null)
-            {
-                throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
-            }
 
-            var desc = new DrawingDataDescription()
-            {
-                Instanced = description.Instanced,
-                Instances = description.Instances,
-                LoadAnimation = description.LoadAnimation,
-                LoadNormalMaps = description.LoadNormalMaps,
-                DynamicBuffers = description.Dynamic,
-
-                TextureCount = TextureCount,
-            };
-
-            if (desc.Instanced)
-            {
-                InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, desc.Instances);
-            }
-
-            var geo = description.Content.ReadModelContent();
-            if (geo.Count() == 1)
-            {
-                var iGeo = geo.First();
-
-                if (description.Optimize) iGeo.Optimize();
-
-                var drawable = DrawingData.Build(Game, Name, iGeo, desc, InstancingBuffer).GetAwaiter().GetResult();
-
-                meshesByLOD.Add(LevelOfDetail.High, drawable);
-            }
-            else
-            {
-                var content = LevelOfDetailModelContent.Build(geo, description.Optimize);
-
-                foreach (var lod in content.Keys)
-                {
-                    if (defaultLevelOfDetail == LevelOfDetail.None)
-                    {
-                        defaultLevelOfDetail = lod;
-                    }
-
-                    var drawable = DrawingData.Build(Game, Name, content[lod], desc, InstancingBuffer).GetAwaiter().GetResult();
-
-                    meshesByLOD.Add(lod, drawable);
-                }
-            }
-
-            UseAnisotropicFiltering = description.UseAnisotropicFiltering;
         }
         /// <summary>
         /// Destructor
@@ -146,11 +65,81 @@ namespace Engine.Common
             {
                 meshesByLOD.Values.ToList().ForEach(m => m?.Dispose());
                 meshesByLOD.Clear();
+            }
 
-                if (InstancingBuffer != null)
+            base.Dispose(disposing);
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
+        {
+            await base.InitializeAssets(description);
+
+            UseAnisotropicFiltering = description?.UseAnisotropicFiltering ?? false;
+            CullingVolumeType = description?.CullingVolumeType ?? CullingVolumeTypes.SphericVolume;
+        }
+        /// <summary>
+        /// Initializes model geometry
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        protected Task InitializeGeometry(T description, BufferDescriptor instancingBuffer = null)
+        {
+            if (description?.Content == null)
+            {
+                throw new ArgumentException($"{nameof(description)} must have a {nameof(description.Content)} instance specified.", nameof(description));
+            }
+
+            return InitializeGeometryInternal(description, instancingBuffer);
+        }
+        /// <summary>
+        /// Initializes model geometry
+        /// </summary>
+        /// <param name="description">Description</param>
+        /// <param name="instancingBuffer">Instancing buffer descriptor</param>
+        private async Task InitializeGeometryInternal(T description, BufferDescriptor instancingBuffer = null)
+        {
+            var geo = await description.Content.ReadModelContent();
+            if (!geo.Any())
+            {
+                throw new EngineException("Bad content description file. The resource file does not generate any geometry.");
+            }
+
+            var desc = new DrawingDataDescription()
+            {
+                Instanced = description.Instanced,
+                Instances = description.Instances,
+                LoadAnimation = description.LoadAnimation,
+                LoadNormalMaps = description.LoadNormalMaps,
+                DynamicBuffers = description.Dynamic,
+
+                TextureCount = TextureCount,
+            };
+
+            if (geo.Count() == 1)
+            {
+                var iGeo = geo.First();
+
+                if (description.Optimize) iGeo.Optimize();
+
+                var drawable = await DrawingData.Build(Game, Name, iGeo, desc, instancingBuffer);
+
+                meshesByLOD.Add(LevelOfDetail.High, drawable);
+            }
+            else
+            {
+                var content = ContentData.BuildLOD(geo, description.Optimize);
+
+                foreach (var lod in content.Keys)
                 {
-                    BufferManager.RemoveInstancingData(InstancingBuffer);
-                    InstancingBuffer = null;
+                    if (defaultLevelOfDetail == LevelOfDetail.None)
+                    {
+                        defaultLevelOfDetail = lod;
+                    }
+
+                    var drawable = await DrawingData.Build(Game, Name, content[lod], desc, instancingBuffer);
+
+                    meshesByLOD.Add(lod, drawable);
                 }
             }
         }
@@ -244,6 +233,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the drawing data object</returns>
+        /// <remarks>If the sepecified level of detail not exists, returns the first available drawing data.</remarks>
         public DrawingData GetDrawingData(LevelOfDetail lod)
         {
             if (meshesByLOD == null)
@@ -256,7 +246,7 @@ namespace Engine.Common
                 return meshesByLOD[lod];
             }
 
-            return null;
+            return GetFirstDrawingData(LevelOfDetail.Minimum);
         }
         /// <summary>
         /// Gets the first drawing data avaliable for the specified level of detail, from the specified one
@@ -287,19 +277,67 @@ namespace Engine.Common
         /// Gets the drawing effect for the current instance
         /// </summary>
         /// <param name="mode">Drawing mode</param>
+        /// <param name="vertexType">Vertex type</param>
         /// <returns>Returns the drawing effect</returns>
-        protected IGeometryDrawer GetEffect(DrawerModes mode)
+        protected IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType, bool instanced)
         {
             if (mode.HasFlag(DrawerModes.Forward))
             {
-                return DrawerPool.EffectDefaultBasic;
+                return ForwardDrawerManager.GetDrawer(vertexType, instanced);
             }
-            else if (mode.HasFlag(DrawerModes.Deferred))
+
+            if (mode.HasFlag(DrawerModes.Deferred))
             {
-                return DrawerPool.EffectDeferredBasic;
+                return DeferredDrawerManager.GetDrawer(vertexType, instanced);
             }
 
             return null;
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            var drawingData = GetDrawingData(LevelOfDetail.High);
+            if (drawingData == null)
+            {
+                return Enumerable.Empty<IMeshMaterial>();
+            }
+
+            return drawingData.Materials.Values.ToArray();
+        }
+        /// <inheritdoc/>
+        public IMeshMaterial GetMaterial(string meshMaterialName)
+        {
+            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
+            {
+                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial != null)
+                {
+                    return meshMaterials[meshMaterial];
+                }
+            }
+
+            return null;
+        }
+        /// <inheritdoc/>
+        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            bool updated = false;
+
+            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
+            {
+                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+                if (meshMaterial != null)
+                {
+                    meshMaterials[meshMaterial] = material;
+                    updated = true;
+                }
+            }
+
+            if (updated)
+            {
+                Scene.UpdateMaterialPalette();
+            }
         }
     }
 }

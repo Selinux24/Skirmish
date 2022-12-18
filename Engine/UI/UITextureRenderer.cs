@@ -4,27 +4,28 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Sprites;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Render to texture control
     /// </summary>
-    public class UITextureRenderer : UIControl
+    public sealed class UITextureRenderer : UIControl<UITextureRendererDescription>
     {
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor vertexBuffer = null;
+        private BufferDescriptor vertexBuffer = null;
         /// <summary>
         /// Index buffer descriptor
         /// </summary>
-        private readonly BufferDescriptor indexBuffer = null;
+        private BufferDescriptor indexBuffer = null;
         /// <summary>
-        /// View * projection for 2D projection
+        /// Effect
         /// </summary>
-        private Matrix viewProjection;
+        private readonly BuiltInSpriteTexture spriteDrawer;
 
         /// <summary>
         /// Texture
@@ -33,11 +34,11 @@ namespace Engine.UI
         /// <summary>
         /// Texture index
         /// </summary>
-        public int TextureIndex { get; set; } = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
-        /// Drawing channels
+        /// Color channel
         /// </summary>
-        public UITextureRendererChannels Channels { get; set; }
+        public ColorChannels Channel { get; set; }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -52,25 +53,13 @@ namespace Engine.UI
         /// <summary>
         /// Contructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Sprite texture description</param>
-        public UITextureRenderer(string name, Scene scene, UITextureRendererDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public UITextureRenderer(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            var sprite = GeometryUtil.CreateSprite(Vector2.Zero, 1, 1);
-
-            var vertices = VertexPositionTexture.Generate(sprite.Vertices, sprite.Uvs);
-            var indices = sprite.Indices;
-
-            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
-            indexBuffer = BufferManager.AddIndexData(name, false, indices);
-
-            Texture = InitializeTexture(description.ContentPath, description.Textures);
-            TextureIndex = description.TextureIndex;
-            Channels = description.Channel;
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
+            spriteDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -85,20 +74,37 @@ namespace Engine.UI
             base.Dispose(disposing);
         }
 
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UITextureRendererDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            var sprite = GeometryUtil.CreateUnitSprite();
+
+            var vertices = VertexPositionTexture.Generate(sprite.Vertices, sprite.Uvs);
+            var indices = sprite.Indices;
+
+            vertexBuffer = BufferManager.AddVertexData(Name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(Name, false, indices);
+
+            Texture = await InitializeTexture(Description.ContentPath, Description.Textures);
+            TextureIndex = Description.TextureIndex;
+            Channel = Description.Channel;
+        }
         /// <summary>
         /// Initialize textures
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        private EngineShaderResourceView InitializeTexture(string contentPath, string[] textures)
+        private async Task<EngineShaderResourceView> InitializeTexture(string contentPath, string[] textures)
         {
             if (textures?.Any() != true)
             {
                 return null;
             }
 
-            var image = ImageContent.Array(contentPath, textures);
-            return Game.ResourceManager.RequestResource(image);
+            var image = new FileArrayImageContent(contentPath, textures);
+            return await Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>
@@ -120,67 +126,26 @@ namespace Engine.UI
                 return;
             }
 
-            var effect = DrawerPool.EffectDefaultSprite;
-            var technique = effect.GetTechnique(
-                VertexTypes.PositionTexture,
-                Channels);
+            spriteDrawer.UpdateSprite(new BuiltInSpriteState
+            {
+                Local = Manipulator.LocalTransform,
+                Color1 = Color4.White,
+                Texture = Texture,
+                TextureIndex = TextureIndex,
+                Channel = Channel,
+            });
+
+            spriteDrawer.Draw(BufferManager, new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            });
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
-
-            effect.UpdatePerFrame(Manipulator.LocalTransform, viewProjection);
-            effect.UpdatePerObject(Color4.White, Texture, TextureIndex);
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
-            }
-        }
-
-        /// <inheritdoc/>
-        public override void Resize()
-        {
-            base.Resize();
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
-        }
-    }
-
-    /// <summary>
-    /// Sprite texture extensions
-    /// </summary>
-    public static class UITextureRendererExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UITextureRenderer> AddComponentUITextureRenderer(this Scene scene, string name, UITextureRendererDescription description, int order = 0)
-        {
-            UITextureRenderer component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UITextureRenderer(name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
-            });
-
-            return component;
+            base.Draw(context);
         }
     }
 }

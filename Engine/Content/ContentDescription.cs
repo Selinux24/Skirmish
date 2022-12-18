@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace Engine.Content
 {
     using Engine.Common;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Content description
@@ -43,7 +45,7 @@ namespace Engine.Content
         /// <param name="indices">Index data</param>
         /// <param name="material">Material</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent? material = null)
+        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IMaterialContent material = null)
         {
             var contentData = ContentData.GenerateTriangleList(vertices, indices, material);
 
@@ -59,7 +61,7 @@ namespace Engine.Content
         /// <param name="indices">Index data</param>
         /// <param name="materials">Materials</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        public static ContentDescription FromContentData(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
         {
             var contentData = ContentData.GenerateTriangleList(vertices, indices, materials);
 
@@ -74,7 +76,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="material">Material</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(GeometryDescriptor geometry, MaterialContent? material = null)
+        public static ContentDescription FromContentData(GeometryDescriptor geometry, IMaterialContent material = null)
         {
             var contentData = ContentData.GenerateTriangleList(geometry, material);
 
@@ -89,7 +91,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns a new content description</returns>
-        public static ContentDescription FromContentData(GeometryDescriptor geometry, IEnumerable<MaterialContent> materials)
+        public static ContentDescription FromContentData(GeometryDescriptor geometry, IEnumerable<IMaterialContent> materials)
         {
             var contentData = ContentData.GenerateTriangleList(geometry, materials);
 
@@ -116,20 +118,21 @@ namespace Engine.Content
         /// Reads the model content file
         /// </summary>
         /// <returns></returns>
-        public IEnumerable<ContentData> ReadModelContent()
+        public async Task<IEnumerable<ContentData>> ReadModelContent()
         {
             if (!string.IsNullOrEmpty(ContentFilename))
             {
                 string fileName = Path.GetFileName(ContentFilename);
                 string directory = Path.Combine(ContentFolder ?? "", Path.GetDirectoryName(ContentFilename));
+                string resource = Path.Combine(directory, fileName);
+                var contentDesc = SerializationHelper.DeserializeFromFile<ContentDataFile>(resource);
 
-                var contentDesc = SerializationHelper.DeserializeXmlFromFile<ContentDataDescription>(Path.Combine(directory, fileName));
                 var loader = GameResourceManager.GetLoaderForFile(contentDesc.ModelFileName);
-                return loader.Load(directory, contentDesc);
+                return await loader.Load(directory, contentDesc);
             }
             else if (ContentData != null)
             {
-                return new[] { ContentData };
+                return await Task.FromResult(new[] { ContentData });
             }
             else
             {

@@ -35,11 +35,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources3D\cursor.json" />
+    <None Remove="Resources3D\soldier_anim2.json" />
+    <None Remove="Resources3D\terrain.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources3D\cursor.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources3D\cursor.xml">
+    <Content Include="Resources3D\cursor.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources3D\soldier0.jpg">
@@ -51,16 +57,16 @@
     <Content Include="Resources3D\soldier_anim2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources3D\soldier_anim2.xml">
+    <Content Include="Resources3D\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources3D\terrain.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources3D\terrain.png">
+    <Content Include="Resources3D\terrain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources3D\terrain.xml">
+    <Content Include="Resources3D\terrain.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources3D\terrain_nmap.png">

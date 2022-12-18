@@ -8,17 +8,12 @@ namespace Engine.Common
     /// </summary>
     public class TimerTick
     {
-        #region Fields
-
         private long startRawTime;
         private long lastRawTime;
+        private long acumPausedRawTime;
         private int pauseCount;
         private long pauseStartTime;
         private long timePaused;
-
-        #endregion
-
-        #region Constructors and Destructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TimerTick"/> class.
@@ -28,25 +23,22 @@ namespace Engine.Common
             Reset();
         }
 
-        #endregion
-
-        #region Public Properties
-
+        /// <summary>
+        /// Gets the total adjusted time since the previous call to <see cref="Tick"/> taking into account <see cref="Pause"/> time.
+        /// </summary>
+        public TimeSpan TotalAdjustedTime { get; private set; }
         /// <summary>
         /// Gets the total time elapsed since the last reset or when this timer was created.
         /// </summary>
         public TimeSpan TotalTime { get; private set; }
-
         /// <summary>
         /// Gets the elapsed adjusted time since the previous call to <see cref="Tick"/> taking into account <see cref="Pause"/> time.
         /// </summary>
         public TimeSpan ElapsedAdjustedTime { get; private set; }
-
         /// <summary>
         /// Gets the elapsed time since the previous call to <see cref="Tick"/>.
         /// </summary>
         public TimeSpan ElapsedTime { get; private set; }
-
         /// <summary>
         /// Gets a value indicating whether this instance is paused.
         /// </summary>
@@ -59,20 +51,16 @@ namespace Engine.Common
             }
         }
 
-        #endregion
-
-        #region Public Methods and Operators
-
         /// <summary>
-        /// Resets this instance. <see cref="TotalTime"/> is set to zero.
+        /// Resets this instance. <see cref="TotalTime"/> is set to zero or ticks (when specified).
         /// </summary>
-        public void Reset()
+        /// <param name="ticks">Ticks to set</param>
+        public void Reset(long ticks = 0)
         {
-            TotalTime = TimeSpan.Zero;
-            startRawTime = Stopwatch.GetTimestamp();
+            TotalTime = TimeSpan.FromTicks(ticks);
+            startRawTime = Stopwatch.GetTimestamp() - ticks;
             lastRawTime = startRawTime;
         }
-
         /// <summary>
         /// Resumes this instance, only if a call to <see cref="Pause"/> has been already issued.
         /// </summary>
@@ -82,38 +70,10 @@ namespace Engine.Common
             if (pauseCount <= 0)
             {
                 timePaused += Stopwatch.GetTimestamp() - pauseStartTime;
+                acumPausedRawTime += timePaused;
                 pauseStartTime = 0L;
             }
         }
-
-        /// <summary>
-        /// Update the <see cref="TotalTime"/> and <see cref="ElapsedTime"/>,
-        /// </summary>
-        /// <remarks>
-        /// This method must be called on a regular basis at every *tick*.
-        /// </remarks>
-        public void Tick()
-        {
-            // Don't tick when this instance is paused.
-            if (IsPaused)
-            {
-                return;
-            }
-
-            var rawTime = Stopwatch.GetTimestamp();
-            TotalTime = ConvertRawToTimestamp(rawTime - startRawTime);
-            ElapsedTime = ConvertRawToTimestamp(rawTime - lastRawTime);
-            ElapsedAdjustedTime = ConvertRawToTimestamp(rawTime - (lastRawTime + timePaused));
-
-            if (ElapsedAdjustedTime < TimeSpan.Zero)
-            {
-                ElapsedAdjustedTime = TimeSpan.Zero;
-            }
-
-            timePaused = 0;
-            lastRawTime = rawTime;
-        }
-
         /// <summary>
         /// Pauses this instance.
         /// </summary>
@@ -125,10 +85,37 @@ namespace Engine.Common
                 pauseStartTime = Stopwatch.GetTimestamp();
             }
         }
+        /// <summary>
+        /// Update the <see cref="TotalTime"/> and <see cref="ElapsedTime"/>,
+        /// </summary>
+        /// <remarks>
+        /// This method must be called on a regular basis at every *tick*.
+        /// </remarks>
+        public void Tick()
+        {
+            // Don't tick when this instance is paused.
+            if (IsPaused)
+            {
+                ElapsedTime = TimeSpan.Zero;
+                ElapsedAdjustedTime = TimeSpan.Zero;
 
-        #endregion
+                return;
+            }
 
-        #region Methods
+            var rawTime = Stopwatch.GetTimestamp();
+            TotalTime = ConvertRawToTimestamp(rawTime - startRawTime - acumPausedRawTime);
+            ElapsedTime = ConvertRawToTimestamp(rawTime - lastRawTime - acumPausedRawTime);
+            TotalAdjustedTime = ConvertRawToTimestamp(rawTime - startRawTime + timePaused);
+            ElapsedAdjustedTime = ConvertRawToTimestamp(rawTime - lastRawTime + timePaused);
+
+            if (ElapsedAdjustedTime < TimeSpan.Zero)
+            {
+                ElapsedAdjustedTime = TimeSpan.Zero;
+            }
+
+            timePaused = 0;
+            lastRawTime = rawTime;
+        }
 
         /// <summary>
         /// Converts a <see cref="Stopwatch" /> raw time to a <see cref="TimeSpan" />.
@@ -137,9 +124,7 @@ namespace Engine.Common
         /// <returns>The <see cref="TimeSpan" />.</returns>
         private static TimeSpan ConvertRawToTimestamp(long delta)
         {
-            return TimeSpan.FromTicks((delta * 10000000) / Stopwatch.Frequency);
+            return TimeSpan.FromTicks(delta * 10000000 / Stopwatch.Frequency);
         }
-
-        #endregion
     }
 }

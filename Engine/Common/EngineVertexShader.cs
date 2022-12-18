@@ -7,26 +7,33 @@ namespace Engine.Common
     /// <summary>
     /// Vertex shader description
     /// </summary>
-    public class EngineVertexShader : IDisposable
+    public class EngineVertexShader : IEngineVertexShader
     {
         /// <summary>
         /// Vertex shader
         /// </summary>
-        private VertexShader shader = null;
+        private readonly VertexShader shader;
         /// <summary>
-        /// Input layout
+        /// Shader byte code
         /// </summary>
-        private InputLayout layout = null;
+        private readonly byte[] shaderByteCode;
+
+        /// <inheritdoc/>
+        public string Name { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="shader">Vertex shader</param>
-        /// <param name="layout">Input layout</param>
-        internal EngineVertexShader(VertexShader shader, InputLayout layout)
+        /// <param name="name">Name</param>
+        /// <param name="vertexShader">Vertex shader</param>
+        /// <param name="byteCode">Shader byte code</param>
+        internal EngineVertexShader(string name, VertexShader vertexShader, byte[] byteCode)
         {
-            this.shader = shader;
-            this.layout = layout;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A vertex shader name must be specified.");
+            shader = vertexShader ?? throw new ArgumentNullException(nameof(vertexShader), "A vertex shader must be specified.");
+            shaderByteCode = byteCode ?? throw new ArgumentNullException(nameof(byteCode), "The vertex shader byte code must be specified.");
+
+            shader.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -53,11 +60,21 @@ namespace Engine.Common
             if (disposing)
             {
                 shader?.Dispose();
-                shader = null;
-
-                layout?.Dispose();
-                layout = null;
             }
+        }
+
+        /// <inheritdoc/>
+        public byte[] GetShaderBytecode()
+        {
+            return shaderByteCode;
+        }
+
+        /// <summary>
+        /// Gets the internal shader
+        /// </summary>
+        internal VertexShader GetShader()
+        {
+            return shader;
         }
     }
 }

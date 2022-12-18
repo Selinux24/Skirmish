@@ -74,11 +74,10 @@ namespace Terrain.Rts.AI
         /// <summary>
         /// Performs an attack
         /// </summary>
-        /// <param name="brain"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        public float Shoot(Brain brain, AIAgent from, AIAgent to)
+        public float Shoot(AIAgent from, AIAgent to)
         {
             if (CanShoot && from.EnemyOnSight(to))
             {

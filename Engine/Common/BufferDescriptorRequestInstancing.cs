@@ -1,4 +1,6 @@
-﻿namespace Engine.Common
+﻿using System.Threading.Tasks;
+
+namespace Engine.Common
 {
     class BufferDescriptorRequestInstancing : IBufferDescriptorRequest
     {
@@ -25,7 +27,7 @@
         /// <summary>
         /// Gets wheter the descriptor is processed into the buffer manager or not
         /// </summary>
-        public bool Processed { get; set; } = false;
+        public ProcessedStages Processed { get; set; } = ProcessedStages.Requested;
 
         /// <summary>
         /// Updates the buffer
@@ -33,6 +35,8 @@
         /// <param name="request">Buffer request</param>
         public void Process(BufferManager bufferManager)
         {
+            Processed = ProcessedStages.InProcess;
+
             if (Action == BufferDescriptorRequestActions.Add)
             {
                 Add(bufferManager);
@@ -42,7 +46,15 @@
                 Remove(bufferManager);
             }
 
-            Processed = true;
+            Processed = ProcessedStages.Processed;
+        }
+        /// <summary>
+        /// Updates the buffer descriptor
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        public async Task ProcessAsync(BufferManager bufferManager)
+        {
+            await Task.Run(() => Process(bufferManager));
         }
         /// <summary>
         /// Assign the descriptor to the buffer manager

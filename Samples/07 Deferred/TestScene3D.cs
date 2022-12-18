@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
 using Engine.UI;
@@ -13,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Deferred
 {
-    public class TestScene3D : Scene
+    public class TestScene3D : WalkableScene
     {
         private const int MaxGridDrawer = 10000;
 
@@ -23,8 +24,6 @@ namespace Deferred
         private const float far = 1000f;
         private const float fogStart = 0.01f;
         private const float fogRange = 0.10f;
-        private const int layerEffects = 2;
-        private const int layerHUD = 99;
 
         private UITextArea title = null;
         private UITextArea load = null;
@@ -147,9 +146,9 @@ namespace Deferred
 
                     var nmInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
-                    PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nmsettings, nmInput);
+                    PathFinderDescription = new PathFinderDescription(nmsettings, nmInput);
 
-                    Task.WhenAll(UpdateNavigationGraph());
+                    Task.WhenAll(UpdateNavigationGraph()).GetAwaiter().GetResult();
 
                     gameReady = true;
                 });
@@ -164,42 +163,33 @@ namespace Deferred
         }
         private async Task InitializeCursor()
         {
-            var cursorDesc = new UICursorDescription()
-            {
-                Textures = new[] { "target.png" },
-                Width = 16,
-                Height = 16,
-            };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
+            var cursorDesc = UICursorDescription.Default("target.png", 15, 15, true);
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
         }
         private async Task InitializeSkydom()
         {
-            var desc = new SkydomDescription()
-            {
-                ContentPath = "Resources",
-                Radius = far,
-                Texture = "sunset.dds",
-            };
-            await this.AddComponentSkydom("Sky", desc);
+            var desc = SkydomDescription.Sphere(@"Resources/sunset.dds", far);
+
+            await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
         }
         private async Task InitializeHelicopters()
         {
             var desc1 = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 TextureIndex = 2,
-                Content = ContentDescription.FromFile("Resources", "m24.xml"),
+                Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
-            helicopter = await this.AddComponentModel("Helicopter", desc1);
+            helicopter = await AddComponent<Model, ModelDescription>("Helicopter", "Helicopter", desc1);
             Lights.AddRange(helicopter.Lights);
 
             var desc2 = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = 2,
-                Content = ContentDescription.FromFile("Resources", "m24.xml"),
+                Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
-            helicopters = await this.AddComponentModelInstanced("Bunch of Helicopters", desc2);
+            helicopters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of Helicopters", "Bunch of Helicopters", desc2);
             for (int i = 0; i < helicopters.InstanceCount; i++)
             {
                 Lights.AddRange(helicopters[i].Lights);
@@ -211,11 +201,11 @@ namespace Deferred
         {
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = true,
-                Content = ContentDescription.FromFile("Resources", "leopard.xml"),
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                Content = ContentDescription.FromFile("Resources", "leopard.json"),
                 Instances = 5,
             };
-            var tanks = await this.AddComponentModelInstanced("Tanks", desc);
+            var tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", desc);
 
             tanks[0].Manipulator.SetScale(0.2f, true);
             var tankbbox = tanks[0].GetBoundingBox();
@@ -243,7 +233,12 @@ namespace Deferred
                 ArrivingRadius = 7.5f,
             };
 
-            var tankAgent = new GameAgent<SteerManipulatorController>(tankAgentType, tank, tankController);
+            var tankAgent = new GameAgent<SteerManipulatorController>(
+                $"tankAgent.{tank.Id}",
+                $"tankAgent",
+                tankAgentType,
+                tank,
+                tankController);
 
             tankAgents.Add(tankAgent);
 
@@ -251,7 +246,7 @@ namespace Deferred
         }
         private async Task InitializeTerrain()
         {
-            terrain = await this.AddComponentScenery("Terrain", GroundDescription.FromFile("Resources", "terrain.xml", 2));
+            terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", GroundDescription.FromFile("Resources", "terrain.json", 2));
         }
         private async Task InitializeGardener()
         {
@@ -268,44 +263,49 @@ namespace Deferred
                     MaxSize = Vector2.One * 0.25f,
                 }
             };
-            await this.AddComponentGroundGardener("Vegetation", desc);
+            await this.AddComponentEffect<GroundGardener, GroundGardenerDescription>("Vegetation", "Vegetation", desc);
         }
         private async Task InitializeTrees()
         {
             var desc1 = new ModelDescription()
             {
-                CastShadow = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile("resources/trees", "birch_a.xml"),
+                Content = ContentDescription.FromFile("resources/trees", "birch_a.json"),
             };
-            tree = await this.AddComponentModel("Lonely tree", desc1);
+            tree = await AddComponent<Model, ModelDescription>("Lonely tree", "Lonely tree", desc1);
 
             var desc2 = new ModelInstancedDescription()
             {
-                CastShadow = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 10,
-                Content = ContentDescription.FromFile("resources/trees", "birch_b.xml"),
+                Content = ContentDescription.FromFile("resources/trees", "birch_b.json"),
             };
-            trees = await this.AddComponentModelInstanced("Bunch of trees", desc2);
+            trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bunch of trees", "Bunch of trees", desc2);
         }
         private async Task InitializeUI()
         {
-            var dTitle = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White };
-            var dLoad = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow };
-            var dHelp = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow };
-            var dStats = new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 10), TextForeColor = Color.Red };
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Tahoma", 10);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+            defaultFont10.LineAdjust = true;
 
-            title = await this.AddComponentUITextArea("Title", dTitle, layerHUD);
-            load = await this.AddComponentUITextArea("Load", dLoad, layerHUD);
-            help = await this.AddComponentUITextArea("Help", dHelp, layerHUD);
-            statistics = await this.AddComponentUITextArea("Statistics", dStats, layerHUD);
+            var dTitle = new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White };
+            var dLoad = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
+            var dHelp = new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow };
+            var dStats = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.Red };
 
-            upperPanel = await this.AddComponentSprite("Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", dTitle);
+            load = await AddComponentUI<UITextArea, UITextAreaDescription>("Load", "Load", dLoad);
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", dHelp);
+            statistics = await AddComponentUI<UITextArea, UITextAreaDescription>("Statistics", "Statistics", dStats);
 
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBuferDrawer", UITextureRendererDescription.Default(), layerEffects);
+            upperPanel = await AddComponentUI<Sprite, SpriteDescription>("Upperpanel", "Upperpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
+
+            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBuferDrawer", "DebugBuferDrawer", UITextureRendererDescription.Default());
             bufferDrawer.Visible = false;
         }
         private async Task InitializeDebug()
@@ -314,29 +314,28 @@ namespace Deferred
             {
                 Count = 1000,
             };
-            lineDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Lines", lineDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Lines", "DEBUG++ Lines", lineDrawerDesc);
             lineDrawer.Visible = false;
 
             var terrainGraphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
                 Count = MaxGridDrawer,
             };
-            terrainGraphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Terrain Graph", terrainGraphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            terrainGraphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Terrain Graph", "DEBUG++ Terrain Graph", terrainGraphDrawerDesc);
             terrainGraphDrawer.Visible = false;
 
             var graphDrawerDesc = new PrimitiveListDrawerDescription<Triangle>()
             {
-                DepthEnabled = true,
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", volumesDrawerDesc, SceneObjectUsages.None, layerEffects + 1);
+            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
             volumesDrawer.Visible = false;
         }
 
@@ -391,7 +390,7 @@ namespace Deferred
                 if (FindTopGroundPosition<Triangle>((i * 10) - (tankAgents.Count * 10 / 2), 40, out var t1Pos))
                 {
                     tankAgents[i].Manipulator.SetPosition(t1Pos.Position);
-                    tankAgents[i].Manipulator.SetNormal(t1Pos.Item.Normal);
+                    tankAgents[i].Manipulator.SetNormal(t1Pos.Primitive.Normal);
                     cameraPosition += t1Pos.Position;
                     modelCount++;
                 }
@@ -407,9 +406,8 @@ namespace Deferred
                 modelCount++;
             }
 
-            helicopter.AnimationController.AddPath(animations["default"]);
+            helicopter.AnimationController.Start(animations["default"]);
             helicopter.AnimationController.TimeDelta = 3f;
-            helicopter.AnimationController.Start();
 
             for (int i = 0; i < helicopters.InstanceCount; i++)
             {
@@ -423,9 +421,8 @@ namespace Deferred
                     modelCount++;
                 }
 
-                helicopters[i].AnimationController.AddPath(animations["default"]);
+                helicopters[i].AnimationController.Start(animations["default"]);
                 helicopters[i].AnimationController.TimeDelta = 3f;
-                helicopters[i].AnimationController.Start();
             }
         }
 
@@ -468,7 +465,7 @@ namespace Deferred
         private void UpdateInputCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -510,15 +507,14 @@ namespace Deferred
         }
         private void UpdateInputMouse()
         {
-            if (Game.Input.LeftMouseButtonJustReleased)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay();
-                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+                var pRay = GetPickingRay(RayPickingParams.Perfect);
 
-                if (PickNearest<Triangle>(pRay, rayPParams, out var r))
+                if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
                 {
-                    var tri = Line3D.CreateWiredTriangle(r.Item);
-                    var cross = Line3D.CreateCross(r.Position, 0.25f);
+                    var tri = Line3D.CreateWiredTriangle(r.PickingResult.Primitive);
+                    var cross = Line3D.CreateCross(r.PickingResult.Position, 0.25f);
 
                     volumesDrawer.SetPrimitives(Color.White, tri);
                     volumesDrawer.SetPrimitives(Color.Red, cross);
@@ -527,11 +523,11 @@ namespace Deferred
 
                     if (Game.Input.ShiftPressed)
                     {
-                        graph.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, tankAgentType, r.Position);
+                        graph.RequestMoveAgent(crowd, tankAgents[0].CrowdAgent, tankAgentType, r.PickingResult.Position);
                     }
                     else
                     {
-                        graph.RequestMoveCrowd(crowd, tankAgentType, r.Position);
+                        graph.RequestMoveCrowd(crowd, tankAgentType, r.PickingResult.Position);
                     }
                 }
             }
@@ -797,7 +793,7 @@ namespace Deferred
 
             //Colors
             bufferDrawer.Texture = colorMap;
-            bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+            bufferDrawer.Channel = ColorChannels.NoAlpha;
             help.Text = "Colors";
 
             bufferDrawer.Visible = true;
@@ -809,18 +805,18 @@ namespace Deferred
             var normalMap = Renderer.GetResource(bufferType);
 
             if (bufferDrawer.Texture == normalMap &&
-                bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
+                bufferDrawer.Channel == ColorChannels.NoAlpha)
             {
                 //Specular Power
                 bufferDrawer.Texture = normalMap;
-                bufferDrawer.Channels = UITextureRendererChannels.Alpha;
+                bufferDrawer.Channel = ColorChannels.Alpha;
                 help.Text = "Specular Power";
             }
             else
             {
                 //Normals
                 bufferDrawer.Texture = normalMap;
-                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                bufferDrawer.Channel = ColorChannels.NoAlpha;
                 help.Text = "Normals";
             }
             bufferDrawer.Visible = true;
@@ -832,18 +828,18 @@ namespace Deferred
             var depthMap = Renderer.GetResource(bufferType);
 
             if (bufferDrawer.Texture == depthMap &&
-                bufferDrawer.Channels == UITextureRendererChannels.NoAlpha)
+                bufferDrawer.Channel == ColorChannels.NoAlpha)
             {
                 //Specular Factor
                 bufferDrawer.Texture = depthMap;
-                bufferDrawer.Channels = UITextureRendererChannels.Alpha;
+                bufferDrawer.Channel = ColorChannels.Alpha;
                 help.Text = "Specular Intensity";
             }
             else
             {
                 //Position
                 bufferDrawer.Texture = depthMap;
-                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                bufferDrawer.Channel = ColorChannels.NoAlpha;
                 help.Text = "Position";
             }
             bufferDrawer.Visible = true;
@@ -861,12 +857,12 @@ namespace Deferred
                 {
                     bufferDrawer.Texture = shadowMap;
                     bufferDrawer.TextureIndex = 0;
-                    bufferDrawer.Channels = UITextureRendererChannels.Red;
+                    bufferDrawer.Channel = ColorChannels.Red;
                     bufferDrawer.Visible = true;
                 }
                 else
                 {
-                    int tIndex = bufferDrawer.TextureIndex;
+                    uint tIndex = bufferDrawer.TextureIndex;
                     if (!shift)
                     {
                         tIndex++;
@@ -901,7 +897,7 @@ namespace Deferred
             {
                 //Light map
                 bufferDrawer.Texture = lightMap;
-                bufferDrawer.Channels = UITextureRendererChannels.NoAlpha;
+                bufferDrawer.Channel = ColorChannels.NoAlpha;
                 bufferDrawer.Visible = true;
                 help.Text = "Light map";
             }
@@ -971,7 +967,7 @@ namespace Deferred
                 Lights.DirectionalLights.Length,
                 Lights.PointLights.Length,
                 Lights.SpotLights.Length,
-                Lights.GetDirectionalShadowCastingLights(Camera.Position).Count());
+                Lights.GetDirectionalShadowCastingLights(GameEnvironment, Camera.Position).Count());
 
             if (Counters.Statistics.Length == 0)
             {
@@ -1070,7 +1066,7 @@ namespace Deferred
                         lightPosition.Y += 1f;
                     }
 
-                    var color = new Color4(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), 1.0f);
+                    var color = new Color3(Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1), Helper.RandomGenerator.NextFloat(0, 1));
 
                     var pointLight = new SceneLightPoint(
                         string.Format("Point {0}", Lights.PointLights.Length),
@@ -1097,8 +1093,8 @@ namespace Deferred
                 spotLight = new SceneLightSpot(
                     "Spot the dog",
                     castShadows,
-                    Color.Yellow,
-                    Color.Yellow,
+                    Color.Yellow.RGB(),
+                    Color.Yellow.RGB(),
                     true,
                     SceneLightSpotDescription.Create(lightPosition, Vector3.Down, 25, 25, 25f));
 
@@ -1123,7 +1119,7 @@ namespace Deferred
 
             crowd = graph.AddCrowd(settings);
 
-            var par = new CrowdAgentParams()
+            var par = new CrowdAgentParameters()
             {
                 Radius = tankAgentType.Radius,
                 Height = tankAgentType.Height,

@@ -24,173 +24,97 @@ namespace Engine.Common
         /// <param name="t2">Triangle 2</param>
         public static bool Intersection(Triangle t1, Triangle t2)
         {
-            // Compute distance signs of p1, q1 and r1 to the plane of triangle(p2,q2,r2)
-
-            Vector3 N2 = Vector3.Cross(Vector3.Subtract(t2.Point1, t2.Point3), Vector3.Subtract(t2.Point2, t2.Point3));
-            float dp1 = Vector3.Dot(Vector3.Subtract(t1.Point1, t2.Point3), N2);
-            float dq1 = Vector3.Dot(Vector3.Subtract(t1.Point2, t2.Point3), N2);
-            float dr1 = Vector3.Dot(Vector3.Subtract(t1.Point3, t2.Point3), N2);
-
-            if (((dp1 * dq1) > 0.0f) && ((dp1 * dr1) > 0.0f))
+            var res = Intersection(t1, t2, out var coplanar, out var test1, out var test2, out var distances);
+            if (!res)
             {
+                // Not intersection.
                 return false;
             }
 
-            // Compute distance signs of p2, q2 and r2 to the plane of triangle(p1,q1,r1)
-
-            Vector3 N1 = Vector3.Cross(Vector3.Subtract(t1.Point2, t1.Point1), Vector3.Subtract(t1.Point3, t1.Point1));
-            float dp2 = Vector3.Dot(Vector3.Subtract(t2.Point1, t1.Point3), N1);
-            float dq2 = Vector3.Dot(Vector3.Subtract(t2.Point2, t1.Point3), N1);
-            float dr2 = Vector3.Dot(Vector3.Subtract(t2.Point3, t1.Point3), N1);
-
-            if (((dp2 * dq2) > 0.0f) && ((dp2 * dr2) > 0.0f))
+            if (coplanar)
             {
-                return false;
+                // May be coplanar.
+                return Coplanar3D(t1, t2, t1.Normal);
             }
 
-            /* Permutation in a canonical form of T1's vertices */
-            Triangle test1;
-            Triangle test2;
-            Vector3 distances;
-
-            if (dp1 > 0.0f)
+            var intRes = DetectIntersection3D(test1, test2, distances, out var inTest1, out var inTest2);
+            if (!intRes)
             {
-                if (dq1 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                    test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                    distances = new Vector3(dp2, dr2, dq2);
-                }
-                else if (dr1 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                    test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                    distances = new Vector3(dp2, dr2, dq2);
-                }
-                else
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    distances = new Vector3(dp2, dq2, dr2);
-                }
-            }
-            else if (dp1 < 0.0f)
-            {
-                if (dq1 < 0.0f)
-                {
-                    test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    distances = new Vector3(dp2, dq2, dr2);
-                }
-                else if (dr1 < 0.0f)
-                {
-                    test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    distances = new Vector3(dp2, dq2, dr2);
-                }
-                else
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                    distances = new Vector3(dp2, dr2, dq2);
-                }
-            }
-            else
-            {
-                if (dq1 < 0.0f)
-                {
-                    if (dr1 >= 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                        test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                        distances = new Vector3(dp2, dr2, dq2);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                        distances = new Vector3(dp2, dq2, dr2);
-                    }
-                }
-                else if (dq1 > 0.0f)
-                {
-                    if (dr1 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                        distances = new Vector3(dp2, dr2, dq2);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point2, t1.Point3, t1.Point1);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                        distances = new Vector3(dp2, dq2, dr2);
-                    }
-                }
-                else
-                {
-                    if (dr1 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                        distances = new Vector3(dp2, dq2, dr2);
-                    }
-                    else if (dr1 < 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point3, t1.Point1, t1.Point2);
-                        test2 = new Triangle(t2.Point1, t2.Point3, t2.Point2);
-                        distances = new Vector3(dp2, dr2, dq2);
-                    }
-                    else
-                    {
-                        // triangles are co-planar
-                        return Coplanar3D(t1, t2, N1);
-                    }
-                }
+                // Not intersection or coplanar.
+                return Coplanar3D(test1, test2, t1.Normal);
             }
 
-            return DetectIntersection3D(test1, test2, distances, N1);
+            return CheckMinMax(inTest1, inTest2);
         }
         /// <summary>
         /// Gets whether the specified triangles intersects or not
         /// </summary>
         /// <param name="t1">Triangle 1</param>
         /// <param name="t2">Triangle 2</param>
-        /// <param name="coplanar">Returns true when the triangles are coplanar and there was intersection</param>
         /// <param name="segment">If the triangles are not coplanar and there was intersection, returns de intersections segment</param>
-        public static bool Intersection(Triangle t1, Triangle t2, out bool coplanar, out Line3D segment)
+        public static bool Intersection(Triangle t1, Triangle t2, out Line3D? segment)
+        {
+            var res = Intersection(t1, t2, out var coplanar, out var test1, out var test2, out var distances);
+            if (!res)
+            {
+                // Not intersection.
+                segment = null;
+                return false;
+            }
+
+            if (coplanar)
+            {
+                // May be coplanar.
+                segment = null;
+                return Coplanar3D(t1, t2, t1.Normal);
+            }
+
+            var intRes = DetectIntersection3D(test1, test2, distances, out var inTest1, out var inTest2);
+            if (!intRes)
+            {
+                // Not intersection or coplanar.
+                segment = null;
+                return Coplanar3D(test1, test2, t1.Normal);
+            }
+
+            return ConstructIntersection3D(inTest1, inTest2, t1.Normal, t2.Normal, out segment);
+        }
+
+        private static bool Intersection(Triangle t1, Triangle t2, out bool coplanar, out Triangle test1, out Triangle test2, out Vector3 distances)
         {
             coplanar = false;
-            segment = new Line3D();
 
             // Compute distance signs of p1, q1 and r1 to the plane of triangle(p2,q2,r2)
 
-            Vector3 N2 = Vector3.Cross(Vector3.Subtract(t2.Point1, t2.Point3), Vector3.Subtract(t2.Point2, t2.Point3));
-            float dp1 = Vector3.Dot(Vector3.Subtract(t1.Point1, t2.Point3), N2);
-            float dq1 = Vector3.Dot(Vector3.Subtract(t1.Point2, t2.Point3), N2);
-            float dr1 = Vector3.Dot(Vector3.Subtract(t1.Point3, t2.Point3), N2);
+            float dp1 = Vector3.Dot(Vector3.Subtract(t1.Point1, t2.Point3), t2.Normal);
+            float dq1 = Vector3.Dot(Vector3.Subtract(t1.Point2, t2.Point3), t2.Normal);
+            float dr1 = Vector3.Dot(Vector3.Subtract(t1.Point3, t2.Point3), t2.Normal);
 
             if (((dp1 * dq1) > 0.0f) && ((dp1 * dr1) > 0.0f))
             {
+                test1 = new Triangle();
+                test2 = new Triangle();
+                distances = new Vector3(float.MaxValue);
+
                 return false;
             }
 
             // Compute distance signs of p2, q2 and r2 to the plane of triangle(p1,q1,r1)
 
-            Vector3 N1 = Vector3.Cross(Vector3.Subtract(t1.Point2, t1.Point1), Vector3.Subtract(t1.Point3, t1.Point1));
-            float dp2 = Vector3.Dot(Vector3.Subtract(t2.Point1, t1.Point3), N1);
-            float dq2 = Vector3.Dot(Vector3.Subtract(t2.Point2, t1.Point3), N1);
-            float dr2 = Vector3.Dot(Vector3.Subtract(t2.Point3, t1.Point3), N1);
+            float dp2 = Vector3.Dot(Vector3.Subtract(t2.Point1, t1.Point3), t1.Normal);
+            float dq2 = Vector3.Dot(Vector3.Subtract(t2.Point2, t1.Point3), t1.Normal);
+            float dr2 = Vector3.Dot(Vector3.Subtract(t2.Point3, t1.Point3), t1.Normal);
 
             if (((dp2 * dq2) > 0.0f) && ((dp2 * dr2) > 0.0f))
             {
+                test1 = new Triangle();
+                test2 = new Triangle();
+                distances = new Vector3(float.MaxValue);
+
                 return false;
             }
 
             // Permutation in a canonical form of T1's vertices
-            Triangle test1;
-            Triangle test2;
-            Vector3 distances;
 
             if (dp1 > 0.0f)
             {
@@ -284,43 +208,26 @@ namespace Engine.Common
                     {
                         // triangles are co-planar
                         coplanar = true;
-                        return Coplanar3D(t1, t2, N1);
+                        test1 = new Triangle();
+                        test2 = new Triangle();
+                        distances = new Vector3(float.MaxValue);
+
+                        return true;
                     }
                 }
             }
 
-            return DetectIntersection3D(
-                test1, test2, distances, N1, N2,
-                out coplanar, out segment);
-        }
-        /// <summary>
-        /// Gets whether the specified triangles are coplanar or not
-        /// </summary>
-        /// <param name="t1"></param>
-        /// <param name="t2"></param>
-        /// <returns></returns>
-        public static bool Coplanar(Triangle t1, Triangle t2)
-        {
-            Vector3 n1 = Vector3.Cross(Vector3.Subtract(t1.Point2, t1.Point1), Vector3.Subtract(t1.Point3, t1.Point1));
-
-            return Coplanar3D(t1, t2, n1);
+            return true;
         }
 
-        /// <summary>
-        /// Permutation in a canonical form of T2's vertices
-        /// </summary>
-        private static bool DetectIntersection3D(
-            Triangle t1,
-            Triangle t2,
-            Vector3 distances,
-            Vector3 n1)
+        private static bool DetectIntersection3D(Triangle t1, Triangle t2, Vector3 distances, out Triangle test1, out Triangle test2)
         {
+            test1 = new Triangle();
+            test2 = new Triangle();
+
             float dp2 = distances.X;
             float dq2 = distances.Y;
             float dr2 = distances.Z;
-
-            Triangle test1;
-            Triangle test2;
 
             if (dp2 > 0.0f)
             {
@@ -400,134 +307,16 @@ namespace Engine.Common
                     }
                     else
                     {
-                        return Coplanar3D(t1, t2, n1);
+                        return false;
                     }
                 }
             }
 
-            return CheckMinMax(test1, test2);
+            return true;
         }
-        /// <summary>
-        /// Permutation in a canonical form of T2's vertices, returning intersection segment
-        /// </summary>
-        private static bool DetectIntersection3D(
-            Triangle t1,
-            Triangle t2,
-            Vector3 distances,
-            Vector3 n1, Vector3 n2,
-            out bool coplanar,
-            out Line3D segment)
+
+        private static bool ConstructIntersection3D(Triangle t1, Triangle t2, Vector3 n1, Vector3 n2, out Line3D? segment)
         {
-            float dp2 = distances.X;
-            float dq2 = distances.Y;
-            float dr2 = distances.Z;
-
-            coplanar = false;
-            segment = new Line3D();
-
-            Triangle test1;
-            Triangle test2;
-
-            if (dp2 > 0.0f)
-            {
-                if (dq2 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                    test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
-                }
-                else if (dr2 > 0.0f)
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                    test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
-                }
-                else
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                }
-            }
-            else if (dp2 < 0.0f)
-            {
-                if (dq2 < 0.0f)
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
-                }
-                else if (dr2 < 0.0f)
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                    test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
-                }
-                else
-                {
-                    test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                    test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                }
-            }
-            else
-            {
-                if (dq2 < 0.0f)
-                {
-                    if (dr2 >= 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                        test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    }
-                }
-                else if (dq2 > 0.0f)
-                {
-                    if (dr2 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                        test2 = new Triangle(t2.Point1, t2.Point2, t2.Point3);
-                    }
-                    else
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point2, t2.Point3, t2.Point1);
-                    }
-                }
-                else
-                {
-                    if (dr2 > 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point2, t1.Point3);
-                        test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
-                    }
-                    else if (dr2 < 0.0f)
-                    {
-                        test1 = new Triangle(t1.Point1, t1.Point3, t1.Point2);
-                        test2 = new Triangle(t2.Point3, t2.Point1, t2.Point2);
-                    }
-                    else
-                    {
-                        coplanar = true;
-                        return Coplanar3D(t1, t2, n1);
-                    }
-                }
-            }
-
-            return ConstructIntersection3D(
-                test1, test2,
-                n1, n2,
-                out segment);
-        }
-        /// <summary>
-        /// Construct the intersection between two triangles if they are not coplanar
-        /// </summary>
-        private static bool ConstructIntersection3D(
-            Triangle t1,
-            Triangle t2,
-            Vector3 n1, Vector3 n2,
-            out Line3D segment)
-        {
-            segment = new Line3D();
-
             Vector3 v1 = Vector3.Subtract(t1.Point2, t1.Point1);
             Vector3 v2 = Vector3.Subtract(t2.Point3, t1.Point1);
             Vector3 N = Vector3.Cross(v1, v2);
@@ -535,114 +324,119 @@ namespace Engine.Common
 
             if (Vector3.Dot(v, N) > 0.0f)
             {
-                v1 = Vector3.Subtract(t1.Point3, t1.Point1);
-                N = Vector3.Cross(v1, v2);
-                if (Vector3.Dot(v, N) <= 0.0f)
-                {
-                    v2 = Vector3.Subtract(t2.Point2, t1.Point1);
-                    N = Vector3.Cross(v1, v2);
-                    if (Vector3.Dot(v, N) > 0.0f)
-                    {
-                        v1 = Vector3.Subtract(t1.Point1, t2.Point1);
-                        v2 = Vector3.Subtract(t1.Point1, t1.Point3);
-                        float alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
-                        v1 = v2 * alpha;
-
-                        Vector3 source = Vector3.Subtract(t1.Point1, v1);
-
-                        v1 = Vector3.Subtract(t2.Point1, t1.Point1);
-                        v2 = Vector3.Subtract(t2.Point1, t2.Point3);
-                        alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
-                        v1 = v2 * alpha;
-
-                        Vector3 target = Vector3.Subtract(t2.Point1, v1);
-
-                        segment = new Line3D(source, target);
-
-                        return true;
-                    }
-                    else
-                    {
-                        v1 = Vector3.Subtract(t2.Point1, t1.Point1);
-                        v2 = Vector3.Subtract(t2.Point1, t2.Point2);
-                        float alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
-                        v1 = v2 * alpha;
-                        Vector3 source = Vector3.Subtract(t2.Point1, v1);
-
-                        v1 = Vector3.Subtract(t2.Point1, t1.Point1);
-                        v2 = Vector3.Subtract(t2.Point1, t2.Point3);
-                        alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
-                        v1 = v2 * alpha;
-                        Vector3 target = Vector3.Subtract(t2.Point1, v1);
-
-                        segment = new Line3D(source, target);
-
-                        return true;
-                    }
-                }
-                else
-                {
-                    return false;
-                }
+                return ConstructAxis0(t1, t2, v, v2, n1, n2, out segment);
             }
             else
             {
-                v2 = Vector3.Subtract(t2.Point2, t1.Point1);
-                N = Vector3.Cross(v1, v2);
-                if (Vector3.Dot(v, N) < 0.0f)
-                {
-                    return false;
-                }
-                else
-                {
-                    v1 = Vector3.Subtract(t1.Point3, t1.Point1);
-                    N = Vector3.Cross(v1, v2);
-                    if (Vector3.Dot(v, N) >= 0.0f)
-                    {
-                        v1 = Vector3.Subtract(t1.Point1, t2.Point1);
-                        v2 = Vector3.Subtract(t1.Point1, t1.Point3);
-                        float alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
-                        v1 = v2 * alpha;
-                        Vector3 source = Vector3.Subtract(t1.Point1, v1);
-
-                        v1 = Vector3.Subtract(t1.Point1, t2.Point1);
-                        v2 = Vector3.Subtract(t1.Point1, t1.Point2);
-                        alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
-                        v1 = v2 * alpha;
-                        Vector3 target = Vector3.Subtract(t1.Point1, v1);
-
-                        segment = new Line3D(source, target);
-
-                        return true;
-                    }
-                    else
-                    {
-                        v1 = Vector3.Subtract(t2.Point1, t1.Point1);
-                        v2 = Vector3.Subtract(t2.Point1, t2.Point2);
-                        float alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
-                        v1 = v2 * alpha;
-                        Vector3 source = Vector3.Subtract(t2.Point1, v1);
-
-                        v1 = Vector3.Subtract(t1.Point1, t2.Point1);
-                        v2 = Vector3.Subtract(t1.Point1, t1.Point2);
-                        alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
-                        v1 = v2 * alpha;
-                        Vector3 target = Vector3.Subtract(t1.Point1, v1);
-
-                        segment = new Line3D(source, target);
-
-                        return true;
-                    }
-                }
+                return ConstructAxis1(t1, t2, v, v1, n1, n2, out segment);
             }
         }
-        /// <summary>
-        /// Gets whether two triangles are coplanar or not
-        /// </summary>
-        private static bool Coplanar3D(
-            Triangle t1,
-            Triangle t2,
-            Vector3 n1)
+
+        private static bool ConstructAxis0(Triangle t1, Triangle t2, Vector3 s1, Vector3 s2, Vector3 n1, Vector3 n2, out Line3D? segment)
+        {
+            segment = null;
+
+            Vector3 v1 = Vector3.Subtract(t1.Point3, t1.Point1);
+            Vector3 N = Vector3.Cross(v1, s2);
+            if (Vector3.Dot(s1, N) > 0.0f)
+            {
+                return false;
+            }
+
+            Vector3 v2 = Vector3.Subtract(t2.Point2, t1.Point1);
+            N = Vector3.Cross(v1, v2);
+            if (Vector3.Dot(s1, N) > 0.0f)
+            {
+                v1 = Vector3.Subtract(t1.Point1, t2.Point1);
+                v2 = Vector3.Subtract(t1.Point1, t1.Point3);
+                float alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
+                v1 = v2 * alpha;
+
+                Vector3 source = Vector3.Subtract(t1.Point1, v1);
+
+                v1 = Vector3.Subtract(t2.Point1, t1.Point1);
+                v2 = Vector3.Subtract(t2.Point1, t2.Point3);
+                alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
+                v1 = v2 * alpha;
+
+                Vector3 target = Vector3.Subtract(t2.Point1, v1);
+
+                segment = new Line3D(source, target);
+
+                return true;
+            }
+            else
+            {
+                v1 = Vector3.Subtract(t2.Point1, t1.Point1);
+                v2 = Vector3.Subtract(t2.Point1, t2.Point2);
+                float alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
+                v1 = v2 * alpha;
+                Vector3 source = Vector3.Subtract(t2.Point1, v1);
+
+                v1 = Vector3.Subtract(t2.Point1, t1.Point1);
+                v2 = Vector3.Subtract(t2.Point1, t2.Point3);
+                alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
+                v1 = v2 * alpha;
+                Vector3 target = Vector3.Subtract(t2.Point1, v1);
+
+                segment = new Line3D(source, target);
+
+                return true;
+            }
+        }
+
+        private static bool ConstructAxis1(Triangle t1, Triangle t2, Vector3 s1, Vector3 s2, Vector3 n1, Vector3 n2, out Line3D? segment)
+        {
+            segment = null;
+
+            Vector3 v2 = Vector3.Subtract(t2.Point2, t1.Point1);
+            Vector3 N = Vector3.Cross(s2, v2);
+            if (Vector3.Dot(s1, N) < 0.0f)
+            {
+                return false;
+            }
+
+            Vector3 v1 = Vector3.Subtract(t1.Point3, t1.Point1);
+            N = Vector3.Cross(v1, v2);
+            if (Vector3.Dot(s1, N) >= 0.0f)
+            {
+                v1 = Vector3.Subtract(t1.Point1, t2.Point1);
+                v2 = Vector3.Subtract(t1.Point1, t1.Point3);
+                float alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
+                v1 = v2 * alpha;
+                Vector3 source = Vector3.Subtract(t1.Point1, v1);
+
+                v1 = Vector3.Subtract(t1.Point1, t2.Point1);
+                v2 = Vector3.Subtract(t1.Point1, t1.Point2);
+                alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
+                v1 = v2 * alpha;
+                Vector3 target = Vector3.Subtract(t1.Point1, v1);
+
+                segment = new Line3D(source, target);
+
+                return true;
+            }
+            else
+            {
+                v1 = Vector3.Subtract(t2.Point1, t1.Point1);
+                v2 = Vector3.Subtract(t2.Point1, t2.Point2);
+                float alpha = Vector3.Dot(v1, n1) / Vector3.Dot(v2, n1);
+                v1 = v2 * alpha;
+                Vector3 source = Vector3.Subtract(t2.Point1, v1);
+
+                v1 = Vector3.Subtract(t1.Point1, t2.Point1);
+                v2 = Vector3.Subtract(t1.Point1, t1.Point2);
+                alpha = Vector3.Dot(v1, n2) / Vector3.Dot(v2, n2);
+                v1 = v2 * alpha;
+                Vector3 target = Vector3.Subtract(t1.Point1, v1);
+
+                segment = new Line3D(source, target);
+
+                return true;
+            }
+        }
+
+        private static bool Coplanar3D(Triangle t1, Triangle t2, Vector3 n1)
         {
             Vector2 p1;
             Vector2 q1;
@@ -695,9 +489,7 @@ namespace Engine.Common
             return Overlap2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
         }
 
-        private static bool CheckMinMax(
-            Triangle t1,
-            Triangle t2)
+        private static bool CheckMinMax(Triangle t1, Triangle t2)
         {
             Vector3 n1 = Vector3.Cross(Vector3.Subtract(t2.Point1, t1.Point2), Vector3.Subtract(t1.Point1, t1.Point2));
 
@@ -716,17 +508,6 @@ namespace Engine.Common
             return true;
         }
 
-        private static float Orient2D(Triangle2D t)
-        {
-            Vector2 a = t.Point1;
-            Vector2 b = t.Point2;
-            Vector2 c = t.Point3;
-
-            return (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
-        }
-        /// <summary>
-        /// Two dimensional Triangle-Triangle Overlap Test
-        /// </summary>
         private static bool Overlap2D(Triangle2D t1, Triangle2D t2)
         {
             Vector2 p1 = t1.Point1;
@@ -759,6 +540,15 @@ namespace Engine.Common
                     return DetectIntersection2D(new Triangle2D(p1, q1, r1), new Triangle2D(p2, q2, r2));
                 }
             }
+        }
+
+        private static float Orient2D(Triangle2D t)
+        {
+            Vector2 a = t.Point1;
+            Vector2 b = t.Point2;
+            Vector2 c = t.Point3;
+
+            return (a.X - c.X) * (b.Y - c.Y) - (a.Y - c.Y) * (b.X - c.X);
         }
 
         private static bool DetectIntersection2D(Triangle2D t1, Triangle2D t2)
@@ -834,12 +624,9 @@ namespace Engine.Common
                     {
                         return Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f;
                     }
-                    else
+                    else if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
                     {
-                        if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
-                        {
-                            return Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f;
-                        }
+                        return Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f;
                     }
                 }
                 else if (Orient2D(new Triangle2D(p1, q2, q1)) <= 0.0f)
@@ -880,29 +667,21 @@ namespace Engine.Common
                 {
                     return Orient2D(new Triangle2D(p1, q1, r2)) >= 0.0f;
                 }
-                else
+                else if (Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f)
                 {
-                    if (Orient2D(new Triangle2D(q1, r1, p2)) >= 0.0f)
-                    {
-                        return Orient2D(new Triangle2D(r1, p1, p2)) >= 0.0f;
-                    }
+                    return Orient2D(new Triangle2D(r1, p1, p2)) >= 0.0f;
                 }
             }
-            else
+            else if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f)
             {
-                if (Orient2D(new Triangle2D(r2, p2, r1)) >= 0.0f)
+                if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
                 {
-                    if (Orient2D(new Triangle2D(p1, p2, r1)) >= 0.0f)
+                    if (Orient2D(new Triangle2D(p1, r1, r2)) >= 0.0f)
                     {
-                        if (Orient2D(new Triangle2D(p1, r1, r2)) >= 0.0f)
-                        {
-                            return true;
-                        }
-                        else
-                        {
-                            return Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f;
-                        }
+                        return true;
                     }
+
+                    return Orient2D(new Triangle2D(q1, r1, r2)) >= 0.0f;
                 }
             }
 

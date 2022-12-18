@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,17 +10,15 @@ namespace Engine
     /// <summary>
     /// Mesh intersection volume
     /// </summary>
-    public class IntersectionVolumeMesh : IIntersectionVolume
+    public struct IntersectionVolumeMesh : IIntersectionVolume
     {
         /// <summary>
         /// Triangle list
         /// </summary>
         private readonly IEnumerable<Triangle> mesh;
 
-        /// <summary>
-        /// Gets the center of the mesh
-        /// </summary>
-        public Vector3 Position { get; private set; } = Vector3.Zero;
+        /// <inheritdoc/>
+        public Vector3 Position { get; private set; }
 
         /// <summary>
         /// Constructor
@@ -27,53 +26,38 @@ namespace Engine
         /// <param name="mesh">Mesh</param>
         public IntersectionVolumeMesh(IEnumerable<Triangle> mesh)
         {
-            this.mesh = mesh;
-
-            if (mesh.Any())
+            this.mesh = mesh ?? throw new ArgumentNullException(nameof(mesh), "Must specify a mesh.");
+            if (!mesh.Any())
             {
-                Vector3 center = Vector3.Zero;
-                for (int i = 0; i < mesh.Count(); i++)
-                {
-                    center += mesh.ElementAt(i).Center;
-                }
-
-                this.Position = center / mesh.Count();
+                throw new ArgumentOutOfRangeException(nameof(mesh), "Must specify at least one triangle in the mesh.");
             }
+
+            Vector3 center = Vector3.Zero;
+            for (int i = 0; i < mesh.Count(); i++)
+            {
+                center += mesh.ElementAt(i).Center;
+            }
+
+            Position = center / mesh.Count();
         }
 
-        /// <summary>
-        /// Gets if the current volume contains the bounding box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingBox bbox)
         {
-            return Intersection.BoxContainsMesh(bbox, this.mesh);
+            return Intersection.MeshContainsBox(mesh, bbox);
         }
-        /// <summary>
-        /// Gets if the current volume contains the bounding sphere
-        /// </summary>
-        /// <param name="sph">Bounding sphere</param>
-        /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(BoundingSphere sph)
+        /// <inheritdoc/>
+        public ContainmentType Contains(BoundingSphere sphere)
         {
-            return Intersection.SphereContainsMesh(sph, this.mesh);
+            return Intersection.MeshContainsSphere(mesh, sphere);
         }
-        /// <summary>
-        /// Gets if the current volume contains the bounding frustum
-        /// </summary>
-        /// <param name="frustum">Bounding frustum</param>
-        /// <returns>Returns the containment type</returns>
+        /// <inheritdoc/>
         public ContainmentType Contains(BoundingFrustum frustum)
         {
-            return ContainmentType.Disjoint;
+            return Intersection.MeshContainsFrustum(mesh, frustum);
         }
-        /// <summary>
-        /// Gets if the current volume contains the mesh
-        /// </summary>
-        /// <param name="mesh">Mesh</param>
-        /// <returns>Returns the containment type</returns>
-        public ContainmentType Contains(Triangle[] mesh)
+        /// <inheritdoc/>
+        public ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
             return Intersection.MeshContainsMesh(this.mesh, mesh);
         }

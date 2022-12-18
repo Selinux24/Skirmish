@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Engine.Content
 {
-    using Engine.Animation;
     using Engine.Common;
+    using Engine.Content.Persistence;
 
     /// <summary>
     /// Model content
@@ -27,471 +25,38 @@ namespace Engine.Content
         /// </summary>
         public const string DefaultMaterial = "_base_material_default_";
 
-        #region Classes
-
-        /// <summary>
-        /// Lights dictionary by light name
-        /// </summary>
-        [Serializable]
-        public class LightDictionary : Dictionary<string, LightContent>
-        {
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public LightDictionary()
-                : base()
-            {
-
-            }
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected LightDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-
-            }
-        }
-        /// <summary>
-        /// Images dictionary by image name
-        /// </summary>
-        [Serializable]
-        public class ImageDictionary : Dictionary<string, ImageContent>
-        {
-            /// <summary>
-            /// Gets next image name
-            /// </summary>
-            private string NextImageName
-            {
-                get
-                {
-                    return string.Format("_image_{0}_", Count + 1);
-                }
-            }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public ImageDictionary()
-                : base()
-            {
-
-            }
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected ImageDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-
-            }
-
-            /// <summary>
-            /// Imports material texture data to image dictionary
-            /// </summary>
-            /// <param name="material">Material content</param>
-            /// <remarks>Replaces texture path with assigned name</remarks>
-            public void Import(ref MaterialContent material)
-            {
-                if (!string.IsNullOrEmpty(material.AmbientTexture))
-                {
-                    string imageName = NextImageName;
-
-                    Add(imageName, ImageContent.Texture("", material.AmbientTexture));
-
-                    material.AmbientTexture = imageName;
-                }
-
-                if (!string.IsNullOrEmpty(material.DiffuseTexture))
-                {
-                    string imageName = NextImageName;
-
-                    Add(imageName, ImageContent.Texture("", material.DiffuseTexture));
-
-                    material.DiffuseTexture = imageName;
-                }
-
-                if (!string.IsNullOrEmpty(material.EmissionTexture))
-                {
-                    string imageName = NextImageName;
-
-                    Add(imageName, ImageContent.Texture("", material.EmissionTexture));
-
-                    material.EmissionTexture = imageName;
-                }
-
-                if (!string.IsNullOrEmpty(material.NormalMapTexture))
-                {
-                    string imageName = NextImageName;
-
-                    Add(imageName, ImageContent.Texture("", material.NormalMapTexture));
-
-                    material.NormalMapTexture = imageName;
-                }
-
-                if (!string.IsNullOrEmpty(material.SpecularTexture))
-                {
-                    string imageName = NextImageName;
-
-                    Add(imageName, ImageContent.Texture("", material.SpecularTexture));
-
-                    material.SpecularTexture = imageName;
-                }
-            }
-        }
-        /// <summary>
-        /// Materials dictionary by material name
-        /// </summary>
-        [Serializable]
-        public class MaterialDictionary : Dictionary<string, MaterialContent>
-        {
-            /// <summary>
-            /// Images name list
-            /// </summary>
-            public string[] Images
-            {
-                get
-                {
-                    List<string> images = new List<string>();
-
-                    foreach (var item in Values)
-                    {
-                        var itemImages = item.GetImages();
-                        foreach (var image in itemImages)
-                        {
-                            if (!images.Contains(image)) images.Add(image);
-                        }
-                    }
-
-                    return images.ToArray();
-                }
-            }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public MaterialDictionary()
-                : base()
-            {
-
-            }
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected MaterialDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-
-            }
-        }
-        /// <summary>
-        /// Geometry dictionary by mesh name
-        /// </summary>
-        /// <remarks>Each mesh has one or more submeshes in a dictionary by material name</remarks>
-        [Serializable]
-        public class GeometryDictionary : Dictionary<string, Dictionary<string, SubMeshContent>>
-        {
-            /// <summary>
-            /// Materials name list
-            /// </summary>
-            public string[] Materials
-            {
-                get
-                {
-                    List<string> materials = new List<string>();
-
-                    foreach (var meshDict in Values)
-                    {
-                        foreach (var subMesh in meshDict.Values)
-                        {
-                            if (!materials.Contains(subMesh.Material)) materials.Add(subMesh.Material);
-                        }
-                    }
-
-                    return materials.ToArray();
-                }
-            }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public GeometryDictionary()
-                : base()
-            {
-
-            }
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected GeometryDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-
-            }
-
-            /// <summary>
-            /// Adds a submesh to mesh by mesh and material names
-            /// </summary>
-            /// <param name="meshName">Mesh name</param>
-            /// <param name="materialName">Material name</param>
-            /// <param name="meshContent">Submesh</param>
-            public void Add(string meshName, string materialName, SubMeshContent meshContent)
-            {
-                if (!ContainsKey(meshName))
-                {
-                    Add(meshName, new Dictionary<string, SubMeshContent>());
-                }
-
-                var matDict = this[meshName];
-
-                if (string.IsNullOrEmpty(materialName) || materialName == ContentData.NoMaterial)
-                {
-                    if (!matDict.ContainsKey(ContentData.NoMaterial))
-                    {
-                        matDict.Add(ContentData.NoMaterial, meshContent);
-                    }
-                }
-                else
-                {
-                    if (matDict.ContainsKey(materialName))
-                    {
-                        throw new EngineException($"{materialName} already exists for {meshName}");
-                    }
-
-                    matDict.Add(materialName, meshContent);
-                }
-            }
-            /// <summary>
-            /// Gets all meshes with the specified material
-            /// </summary>
-            /// <param name="material">Materia name</param>
-            /// <returns>Returns a submesh collection</returns>
-            /// <remarks>The submesh collection returned may have differents vertex types</remarks>
-            public SubMeshContent[] GetMeshesByMaterial(string material)
-            {
-                List<SubMeshContent> res = new List<SubMeshContent>();
-
-                foreach (string mesh in Keys)
-                {
-                    SubMeshContent meshContent = this[mesh][material];
-                    if (meshContent != null)
-                    {
-                        res.Add(meshContent);
-                    }
-                }
-
-                return res.ToArray();
-            }
-        }
-        /// <summary>
-        /// Controller dictionary by controller name
-        /// </summary>
-        [Serializable]
-        public class ControllerDictionary : Dictionary<string, ControllerContent>
-        {
-            /// <summary>
-            /// Skin name list
-            /// </summary>
-            public string[] Skins
-            {
-                get
-                {
-                    List<string> skins = new List<string>();
-
-                    foreach (var item in Values)
-                    {
-                        if (!skins.Contains(item.Skin)) skins.Add(item.Skin);
-                    }
-
-                    return skins.ToArray();
-                }
-            }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public ControllerDictionary()
-                : base()
-            {
-
-            }
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected ControllerDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-
-            }
-
-            /// <summary>
-            /// Get controller for mesh by mesh name
-            /// </summary>
-            /// <param name="meshName">Mesh name</param>
-            /// <returns>Returns the controller attached to the mesh</returns>
-            public ControllerContent GetControllerForMesh(string meshName)
-            {
-                foreach (ControllerContent controller in Values)
-                {
-                    if (controller.Skin == meshName) return controller;
-                }
-
-                return null;
-            }
-        }
-        /// <summary>
-        /// Skinning dictionary by armature name
-        /// </summary>
-        [Serializable]
-        public class SkinningDictionary : Dictionary<string, SkinningContent>
-        {
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public SkinningDictionary()
-                : base()
-            {
-
-            }
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected SkinningDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-
-            }
-
-            /// <summary>
-            /// Gets whether the specified joint has skinning data attached or not
-            /// </summary>
-            /// <param name="jointName">Joint name</param>
-            public bool HasJointData(string jointName)
-            {
-                foreach (var value in Values)
-                {
-                    if (value.Skeleton.GetJointNames().Any(j => j == jointName))
-                    {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-        }
-        /// <summary>
-        /// Animation dictionary by animation name
-        /// </summary>
-        [Serializable]
-        public class AnimationDictionary : Dictionary<string, AnimationContent[]>
-        {
-            /// <summary>
-            /// Animation definition
-            /// </summary>
-            public AnimationDescription Definition { get; set; }
-
-            /// <summary>
-            /// Constructor
-            /// </summary>
-            public AnimationDictionary()
-                : base()
-            {
-
-            }
-
-            /// <summary>
-            /// Constructor de serialización
-            /// </summary>
-            /// <param name="info">Info</param>
-            /// <param name="context">Context</param>
-            protected AnimationDictionary(SerializationInfo info, StreamingContext context)
-                : base(info, context)
-            {
-                Definition = info.GetValue<AnimationDescription>(nameof(Definition));
-            }
-            /// <summary>
-            /// Populates a SerializationInfo with the data needed to serialize the target object.
-            /// </summary>
-            /// <param name="info">The SerializationInfo to populate with data.</param>
-            /// <param name="context">The destination for this serialization.</param>
-            [SecurityPermission(SecurityAction.Demand, SerializationFormatter = true)]
-            public override void GetObjectData(SerializationInfo info, StreamingContext context)
-            {
-                base.GetObjectData(info, context);
-
-                info.AddValue(nameof(Definition), Definition);
-            }
-
-            /// <summary>
-            /// Gets the animation list for the specified skin content
-            /// </summary>
-            /// <param name="skInfo">Skin content</param>
-            /// <returns>Returns the list of animations for the specified skin content</returns>
-            public string[] GetAnimationsForSkin(SkinningContent skInfo)
-            {
-                List<string> result = new List<string>();
-
-                var jointNames = skInfo.Skeleton.GetJointNames();
-
-                foreach (var animation in this)
-                {
-                    if (result.Contains(animation.Key))
-                    {
-                        continue;
-                    }
-
-                    if (animation.Value.Any(a => Array.Exists(jointNames, j => j == a.Joint)))
-                    {
-                        result.Add(animation.Key);
-                    }
-                }
-
-                return result.ToArray();
-            }
-        }
-
-        #endregion
-
         /// <summary>
         /// Light dictionary
         /// </summary>
-        public LightDictionary Lights { get; set; } = new LightDictionary();
+        public Dictionary<string, LightContent> Lights { get; private set; } = new Dictionary<string, LightContent>();
         /// <summary>
         /// Texture dictionary
         /// </summary>
-        public ImageDictionary Images { get; set; } = new ImageDictionary();
+        public Dictionary<string, IImageContent> Images { get; private set; } = new Dictionary<string, IImageContent>();
         /// <summary>
         /// Material dictionary
         /// </summary>
-        public MaterialDictionary Materials { get; set; } = new MaterialDictionary();
+        public Dictionary<string, IMaterialContent> Materials { get; private set; } = new Dictionary<string, IMaterialContent>();
         /// <summary>
         /// Geometry dictionary
         /// </summary>
-        public GeometryDictionary Geometry { get; set; } = new GeometryDictionary();
+        public Dictionary<string, Dictionary<string, SubMeshContent>> Geometry { get; private set; } = new Dictionary<string, Dictionary<string, SubMeshContent>>();
         /// <summary>
         /// Controller dictionary
         /// </summary>
-        public ControllerDictionary Controllers { get; set; } = new ControllerDictionary();
+        public Dictionary<string, ControllerContent> Controllers { get; private set; } = new Dictionary<string, ControllerContent>();
+        /// <summary>
+        /// Animation definition
+        /// </summary>
+        public AnimationFile AnimationDefinition { get; set; }
         /// <summary>
         /// Animation dictionary
         /// </summary>
-        public AnimationDictionary Animations { get; set; } = new AnimationDictionary();
+        public Dictionary<string, IEnumerable<AnimationContent>> Animations { get; set; } = new Dictionary<string, IEnumerable<AnimationContent>>();
         /// <summary>
         /// Skinning information
         /// </summary>
-        public SkinningDictionary SkinningInfo { get; set; } = new SkinningDictionary();
+        public Dictionary<string, SkinningContent> SkinningInfo { get; set; } = new Dictionary<string, SkinningContent>();
 
         /// <summary>
         /// Generates a triangle list model content from scratch
@@ -500,9 +65,9 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, MaterialContent? material = null)
+        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IMaterialContent material = null)
         {
-            var materials = new[] { material ?? MaterialContent.Default };
+            var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
             return Generate(Topology.TriangleList, vertices, indices, materials);
         }
@@ -513,7 +78,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        public static ContentData GenerateTriangleList(IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
         {
             return Generate(Topology.TriangleList, vertices, indices, materials);
         }
@@ -523,10 +88,10 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="material">Material</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, MaterialContent? material = null)
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IMaterialContent material = null)
         {
             var vertices = VertexData.FromDescriptor(geometry);
-            var materials = new[] { material ?? MaterialContent.Default };
+            var materials = new[] { material ?? MaterialBlinnPhongContent.Default };
 
             return Generate(Topology.TriangleList, vertices, geometry.Indices, materials);
         }
@@ -536,7 +101,7 @@ namespace Engine.Content
         /// <param name="geometry">Geometry descriptor</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IEnumerable<MaterialContent> materials)
+        public static ContentData GenerateTriangleList(GeometryDescriptor geometry, IEnumerable<IMaterialContent> materials)
         {
             var vertices = VertexData.FromDescriptor(geometry);
 
@@ -550,7 +115,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         /// <param name="materials">Material list</param>
         /// <returns>Returns new model content</returns>
-        private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<MaterialContent> materials)
+        private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
         {
             ContentData modelContent = new ContentData();
             string materialName = NoMaterial;
@@ -581,10 +146,32 @@ namespace Engine.Content
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
 
-            modelContent.Geometry.Add(StaticMesh, materialName, geo);
+            modelContent.ImportMaterial(StaticMesh, materialName, geo);
             modelContent.Optimize();
 
             return modelContent;
+        }
+        /// <summary>
+        /// Builds a content dictionary by level of detail
+        /// </summary>
+        /// <param name="geo">Model content list</param>
+        /// <param name="optimize">Sets whether the content must be optimized or not</param>
+        /// <returns>Returns the content dictionary by level of detail</returns>
+        public static Dictionary<LevelOfDetail, ContentData> BuildLOD(IEnumerable<ContentData> geo, bool optimize)
+        {
+            Dictionary<LevelOfDetail, ContentData> res = new Dictionary<LevelOfDetail, ContentData>();
+
+            int lastLod = 1;
+            foreach (var iGeo in geo)
+            {
+                if (optimize) iGeo.Optimize();
+
+                res.Add((LevelOfDetail)lastLod, iGeo);
+
+                lastLod = Helper.NextPowerOfTwo(lastLod + 1);
+            }
+
+            return res;
         }
 
         /// <summary>
@@ -592,8 +179,146 @@ namespace Engine.Content
         /// </summary>
         public ContentData()
         {
-            //Adding default material for non material geometry, like volumes
-            Materials.Add(NoMaterial, MaterialContent.Default);
+            //Adding default material for non material geometry, like hulls
+            Materials.Add(NoMaterial, MaterialBlinnPhongContent.Default);
+        }
+
+        /// <summary>
+        /// Imports material texture data to image dictionary
+        /// </summary>
+        /// <param name="material">Material content</param>
+        /// <remarks>Replaces texture path with assigned name</remarks>
+        public void ImportImage(ref IMaterialContent material)
+        {
+            material.AmbientTexture = ImportImage(material.AmbientTexture);
+            material.DiffuseTexture = ImportImage(material.DiffuseTexture);
+            material.EmissiveTexture = ImportImage(material.EmissiveTexture);
+            material.NormalMapTexture = ImportImage(material.NormalMapTexture);
+            material.SpecularTexture = ImportImage(material.SpecularTexture);
+        }
+        /// <summary>
+        /// Gets next image name
+        /// </summary>
+        /// <returns>Returns next image name</returns>
+        private string NextImageName()
+        {
+            return string.Format("_image_{0}_", Images.Count + 1);
+        }
+        /// <summary>
+        /// Imports a texture
+        /// </summary>
+        /// <param name="textureName">Texture name</param>
+        /// <returns>Returns the assigned texture name in the content data instance</returns>
+        private string ImportImage(string textureName)
+        {
+            if (string.IsNullOrEmpty(textureName))
+            {
+                return textureName;
+            }
+
+            var content = new FileArrayImageContent(textureName);
+            var img = Images.Where(v => v.Value.Equals(content));
+            if (!img.Any())
+            {
+                string imageName = NextImageName();
+
+                Images.Add(imageName, content);
+
+                return imageName;
+            }
+
+            return img.First().Key;
+        }
+        /// <summary>
+        /// Adds a submesh to mesh by mesh and material names
+        /// </summary>
+        /// <param name="meshName">Mesh name</param>
+        /// <param name="materialName">Material name</param>
+        /// <param name="meshContent">Submesh</param>
+        public void ImportMaterial(string meshName, string materialName, SubMeshContent meshContent)
+        {
+            if (!Geometry.ContainsKey(meshName))
+            {
+                Geometry.Add(meshName, new Dictionary<string, SubMeshContent>());
+            }
+
+            var matDict = Geometry[meshName];
+
+            if (string.IsNullOrEmpty(materialName) || materialName == NoMaterial)
+            {
+                if (!matDict.ContainsKey(NoMaterial))
+                {
+                    matDict.Add(NoMaterial, meshContent);
+                }
+            }
+            else
+            {
+                if (matDict.ContainsKey(materialName))
+                {
+                    throw new EngineException($"{materialName} already exists for {meshName}");
+                }
+
+                matDict.Add(materialName, meshContent);
+            }
+        }
+        /// <summary>
+        /// Skin name list
+        /// </summary>
+        /// <returns>Returns the skin name list</returns>
+        public IEnumerable<string> GetControllerSkins()
+        {
+            return Controllers.Values
+                .Select(item => item.Skin)
+                .Distinct()
+                .ToArray();
+        }
+        /// <summary>
+        /// Get controller for mesh by mesh name
+        /// </summary>
+        /// <param name="meshName">Mesh name</param>
+        /// <returns>Returns the controller attached to the mesh</returns>
+        public ControllerContent GetControllerForMesh(string meshName)
+        {
+            foreach (ControllerContent controller in Controllers.Values)
+            {
+                if (controller.Skin == meshName) return controller;
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Gets whether the specified joint has skinning data attached or not
+        /// </summary>
+        /// <param name="jointName">Joint name</param>
+        public bool SkinHasJointData(string jointName)
+        {
+            return SkinningInfo.Values.Any(value => value.Skeleton.GetJointNames().Any(j => j == jointName));
+        }
+        /// <summary>
+        /// Gets the animation list for the specified skin content
+        /// </summary>
+        /// <param name="skInfo">Skin content</param>
+        /// <returns>Returns the list of animations for the specified skin content</returns>
+        public IEnumerable<string> GetAnimationsForSkin(SkinningContent skInfo)
+        {
+            List<string> result = new List<string>();
+
+            var jointNames = skInfo.Skeleton.GetJointNames();
+
+            foreach (var animation in Animations)
+            {
+                if (result.Contains(animation.Key))
+                {
+                    continue;
+                }
+
+                if (animation.Value.Any(a => jointNames.Any(j => j == a.JointName)))
+                {
+                    result.Add(animation.Key);
+                }
+            }
+
+            return result.ToArray();
         }
 
         /// <summary>
@@ -601,58 +326,64 @@ namespace Engine.Content
         /// </summary>
         public void Optimize()
         {
-            GeometryDictionary newDict = new GeometryDictionary();
-
-            if (Materials.Count > 0)
+            if (Materials.Count <= 0)
             {
-                if (Controllers.Skins.Length > 0)
-                {
-                    //Skinned
-                    foreach (string skin in Controllers.Skins)
-                    {
-                        foreach (string material in Materials.Keys)
-                        {
-                            OptimizeSkinnedMesh(newDict, skin, material);
-                        }
-                    }
-                }
+                return;
+            }
 
-                foreach (string material in Materials.Keys)
+            //Copy dictionary
+            var tmp = new Dictionary<string, Dictionary<string, SubMeshContent>>(Geometry);
+
+            //Clear actual dictionary
+            Geometry.Clear();
+
+            var skins = GetControllerSkins();
+            if (skins.Any())
+            {
+                //Skinned
+                foreach (string skin in skins)
                 {
-                    OptimizeStaticMesh(newDict, material);
+                    foreach (string material in Materials.Keys)
+                    {
+                        OptimizeSkinnedMesh(tmp, skin, material);
+                    }
                 }
             }
 
-            Geometry = newDict;
+            foreach (string material in Materials.Keys)
+            {
+                OptimizeStaticMesh(tmp, material);
+            }
         }
         /// <summary>
         /// Optimizes the skinned mesh
         /// </summary>
-        /// <param name="newDict">New geometry dictionary</param>
+        /// <param name="geometry">Current geometry dictionary</param>
         /// <param name="skin">Skin name</param>
         /// <param name="material">Material name</param>
-        private void OptimizeSkinnedMesh(GeometryDictionary newDict, string skin, string material)
+        private void OptimizeSkinnedMesh(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string skin, string material)
         {
-            var skinnedM = ComputeSubmeshContent(newDict, skin, skin, material);
+            var skinnedM = ComputeSubmeshContent(geometry, skin, skin, material);
             if (skinnedM != null)
             {
-                OptimizeSubmeshContent(newDict, skin, material, new[] { skinnedM });
+                OptimizeSubmeshContent(skin, material, new[] { skinnedM });
             }
         }
         /// <summary>
         /// Optimizes the static mesh
         /// </summary>
-        /// <param name="newDict">New geometry dictionary</param>
+        /// <param name="geometry">Current geometry dictionary</param>
         /// <param name="material">Material name</param>
-        private void OptimizeStaticMesh(GeometryDictionary newDict, string material)
+        private void OptimizeStaticMesh(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string material)
         {
             List<SubMeshContent> staticM = new List<SubMeshContent>();
 
-            foreach (string mesh in Geometry.Keys)
+            foreach (string mesh in geometry.Keys)
             {
-                if (!Array.Exists(Controllers.Skins, s => s == mesh))
+                var skins = GetControllerSkins();
+                if (!skins.Any(s => s == mesh))
                 {
-                    var submesh = ComputeSubmeshContent(newDict, mesh, StaticMesh, material);
+                    var submesh = ComputeSubmeshContent(geometry, mesh, StaticMesh, material);
                     if (submesh != null)
                     {
                         staticM.Add(submesh);
@@ -662,32 +393,32 @@ namespace Engine.Content
 
             if (staticM.Count > 0)
             {
-                OptimizeSubmeshContent(newDict, StaticMesh, material, staticM);
+                OptimizeSubmeshContent(StaticMesh, material, staticM);
             }
         }
         /// <summary>
         /// Computes the specified source mesh
         /// </summary>
-        /// <param name="newDict">New geometry dictionary</param>
+        /// <param name="geometry">Current geometry dictionary</param>
         /// <param name="sourceMesh">Source mesh name</param>
         /// <param name="targetMesh">Target mesh name</param>
         /// <param name="material">Material name</param>
-        /// <returns>Returns a submesh content if source mesh isn't a volume</returns>
-        private SubMeshContent ComputeSubmeshContent(GeometryDictionary newDict, string sourceMesh, string targetMesh, string material)
+        /// <returns>Returns a submesh content if source mesh isn't a hull</returns>
+        private SubMeshContent ComputeSubmeshContent(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string sourceMesh, string targetMesh, string material)
         {
-            if (!Geometry.ContainsKey(sourceMesh))
+            if (!geometry.ContainsKey(sourceMesh))
             {
                 return null;
             }
 
-            var dict = Geometry[sourceMesh];
+            var dict = geometry[sourceMesh];
 
             if (dict.ContainsKey(material))
             {
-                if (dict[material].IsVolume)
+                if (dict[material].IsHull)
                 {
                     //Group into new dictionary
-                    newDict.Add(targetMesh, material, dict[material]);
+                    ImportMaterial(targetMesh, material, dict[material]);
                 }
                 else
                 {
@@ -701,23 +432,22 @@ namespace Engine.Content
         /// <summary>
         /// Optimizes the submesh content list
         /// </summary>
-        /// <param name="newDict">New geometry dictionary</param>
         /// <param name="mesh">Mesh name</param>
         /// <param name="material">Material name</param>
         /// <param name="meshList">Mesh list to optimize</param>
-        private void OptimizeSubmeshContent(GeometryDictionary newDict, string mesh, string material, IEnumerable<SubMeshContent> meshList)
+        private void OptimizeSubmeshContent(string mesh, string material, IEnumerable<SubMeshContent> meshList)
         {
             if (SubMeshContent.OptimizeMeshes(meshList, out var gmesh))
             {
                 //Mesh grouped
-                newDict.Add(mesh, material, gmesh);
+                ImportMaterial(mesh, material, gmesh);
             }
             else
             {
                 //Cannot group
                 foreach (var m in meshList)
                 {
-                    newDict.Add(mesh, material, m);
+                    ImportMaterial(mesh, material, m);
                 }
             }
         }
@@ -1004,17 +734,17 @@ namespace Engine.Content
                 res.Animations.Add(a.Key, a.Value);
             }
 
-            var clips = Animations.Definition.Clips
+            var clips = AnimationDefinition.Clips
                 .Where(c => string.Equals(armatureName, c.Skeleton, StringComparison.OrdinalIgnoreCase));
 
             if (clips.Any())
             {
-                if (res.Animations.Definition == null)
+                if (res.AnimationDefinition == null)
                 {
-                    res.Animations.Definition = new AnimationDescription();
+                    res.AnimationDefinition = new AnimationFile();
                 }
 
-                res.Animations.Definition.Clips.AddRange(clips);
+                res.AnimationDefinition.Clips.AddRange(clips);
             }
         }
         /// <summary>
@@ -1068,9 +798,8 @@ namespace Engine.Content
             //Add textures
             TryAddImage(mat.AmbientTexture, ref res);
             TryAddImage(mat.DiffuseTexture, ref res);
-            TryAddImage(mat.EmissionTexture, ref res);
+            TryAddImage(mat.EmissiveTexture, ref res);
             TryAddImage(mat.NormalMapTexture, ref res);
-            TryAddImage(mat.ReflectiveTexture, ref res);
             TryAddImage(mat.SpecularTexture, ref res);
         }
         /// <summary>
@@ -1123,11 +852,11 @@ namespace Engine.Content
         }
 
         /// <summary>
-        /// Marks volume flag for all the geometry contained into the model
+        /// Marks hull flag for all the geometry contained into the model
         /// </summary>
-        /// <param name="isVolume">Flag value</param>
+        /// <param name="isHull">Hull flag value</param>
         /// <returns>Returns the number of meshes setted</returns>
-        public int SetVolumeMark(bool isVolume)
+        public int SetHullMark(bool isHull)
         {
             int count = 0;
 
@@ -1137,7 +866,7 @@ namespace Engine.Content
                 {
                     foreach (var s in g.Value.Values)
                     {
-                        s.IsVolume = isVolume;
+                        s.IsHull = isHull;
                         count++;
                     }
                 }
@@ -1146,22 +875,22 @@ namespace Engine.Content
             return count;
         }
         /// <summary>
-        /// Marks volume flag for all the geometry filtered by the specified mask
+        /// Marks hull flag for all the geometry filtered by the specified mask
         /// </summary>
-        /// <param name="isVolume">Flag value</param>
+        /// <param name="isHull">Hull flag value</param>
         /// <param name="mask">Asset name flag</param>
         /// <returns>Returns the number of meshes setted</returns>
-        public int SetVolumeMark(bool isVolume, string mask)
+        public int SetHullMark(bool isHull, string mask)
         {
-            return SetVolumeMark(isVolume, new[] { mask });
+            return SetHullMark(isHull, new[] { mask });
         }
         /// <summary>
-        /// Marks volume flag for all the geometry filtered by the specified mask list
+        /// Marks hull flag for all the geometry filtered by the specified mask list
         /// </summary>
-        /// <param name="isVolume">Flag value</param>
+        /// <param name="isHull">Hull flag value</param>
         /// <param name="masks">Asset name flag list</param>
         /// <returns>Returns the number of meshes setted</returns>
-        public int SetVolumeMark(bool isVolume, IEnumerable<string> masks)
+        public int SetHullMark(bool isHull, IEnumerable<string> masks)
         {
             int count = 0;
 
@@ -1169,7 +898,7 @@ namespace Engine.Content
             {
                 foreach (var mask in masks)
                 {
-                    count += SetVolumeMarkGeo(mask, isVolume);
+                    count += SetHullMarkGeo(mask, isHull);
                 }
             }
 
@@ -1179,9 +908,9 @@ namespace Engine.Content
         /// Marks the geometry dictionary
         /// </summary>
         /// <param name="mask">Mask name</param>
-        /// <param name="isVolume">Mask value</param>
+        /// <param name="isHull">Hull mask value</param>
         /// <returns>Returns the number of meshes setted</returns>
-        private int SetVolumeMarkGeo(string mask, bool isVolume)
+        private int SetHullMarkGeo(string mask, bool isHull)
         {
             int count = 0;
 
@@ -1195,7 +924,7 @@ namespace Engine.Content
                 {
                     foreach (var s in g.Value.Values)
                     {
-                        s.IsVolume = isVolume;
+                        s.IsHull = isHull;
                         count++;
                     }
                 }
@@ -1233,10 +962,51 @@ namespace Engine.Content
         /// </summary>
         /// <param name="name">Material name</param>
         /// <param name="material">Material content</param>
-        public void AddMaterial(string name, MaterialContent material)
+        public void AddMaterial(string name, IMaterialContent material)
         {
-            Images.Import(ref material);
+            ImportImage(ref material);
             Materials.Add(name, material);
+        }
+        /// <summary>
+        /// Adds animation content to the model content
+        /// </summary>
+        /// <param name="animationLib">Animation library name</param>
+        /// <param name="animationContent">Animation content</param>
+        public void AddAnimationContent(string animationLib, IEnumerable<AnimationContent> animationContent)
+        {
+            if (animationContent?.Any() != true)
+            {
+                return;
+            }
+
+            if (SkinningInfo != null)
+            {
+                //Filter content by existing joints
+                Animations[animationLib] = animationContent.Where(a => SkinHasJointData(a.JointName)).ToArray();
+            }
+            else
+            {
+                Animations[animationLib] = animationContent.ToArray();
+            }
+        }
+        /// <summary>
+        /// Adds animation content to the model content
+        /// </summary>
+        /// <param name="animationContent">Animation content</param>
+        public void AddAnimationContent(AnimationLibContentData animationContent)
+        {
+            if (animationContent?.Animations?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var animationLib in animationContent.Animations)
+            {
+                foreach (var animation in animationLib)
+                {
+                    AddAnimationContent(animation.Key, animation.Value);
+                }
+            }
         }
     }
 }

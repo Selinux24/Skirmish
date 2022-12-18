@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 namespace Engine
 {
+    using Engine.BuiltIn.Foliage;
+
     /// <summary>
     /// Ground gardener description
     /// </summary>
@@ -31,10 +33,6 @@ namespace Engine
             /// </summary>
             public Vector2 MaxSize { get; set; } = Vector2.One * 2f;
             /// <summary>
-            /// Delta
-            /// </summary>
-            public Vector3 Delta { get; set; } = new Vector3(0.5f, 0.0f, 0.5f);
-            /// <summary>
             /// Drawing radius for vegetation
             /// </summary>
             public float StartRadius { get; set; } = 0f;
@@ -59,9 +57,17 @@ namespace Engine
             /// </summary>
             public bool Enabled { get; set; } = true;
             /// <summary>
-            /// Geometry output count
+            /// Geometry output instances
             /// </summary>
-            public int Count { get; set; } = 1;
+            public GroundGardenerPatchInstances Instances { get; set; } = GroundGardenerPatchInstances.Default;
+            /// <summary>
+            /// Delta added to instance position
+            /// </summary>
+            /// <remarks>
+            /// Y value applies to all of the instances
+            /// X and Z values only applies to additional instances
+            /// </remarks>
+            public Vector3 Delta { get; set; } = new Vector3(0.5f, 0.0f, 0.5f);
         }
 
         /// <summary>
@@ -82,9 +88,9 @@ namespace Engine
             {
                 float vRadius = 0;
 
-                for (int i = 0; i < this.Channels.Length; i++)
+                for (int i = 0; i < Channels.Length; i++)
                 {
-                    vRadius = Math.Max(vRadius, this.Channels[i].EndRadius);
+                    vRadius = Math.Max(vRadius, Channels[i].EndRadius);
                 }
 
                 return vRadius;
@@ -94,10 +100,6 @@ namespace Engine
         /// Quadtree maximum node size
         /// </summary>
         public float NodeSize { get; set; } = 128f;
-        /// <summary>
-        /// Material
-        /// </summary>
-        public MaterialDescription Material { get; set; } = new MaterialDescription();
         /// <summary>
         /// Red vegetation channel from map
         /// </summary>
@@ -119,9 +121,9 @@ namespace Engine
             {
                 List<Channel> channels = new List<Channel>
                 {
-                    this.ChannelRed,
-                    this.ChannelGreen,
-                    this.ChannelBlue
+                    ChannelRed,
+                    ChannelGreen,
+                    ChannelBlue
                 };
 
                 return channels.ToArray();
@@ -138,9 +140,28 @@ namespace Engine
         public GroundGardenerDescription()
             : base()
         {
-            this.CastShadow = true;
-            this.DeferredEnabled = false;
-            this.BlendMode = BlendModes.Transparent;
+            CastShadow = ShadowCastingAlgorihtms.Directional;
+            DeferredEnabled = false;
+            BlendMode = BlendModes.Transparent;
         }
+    }
+
+    /// <summary>
+    /// Additional instances enumeration
+    /// </summary>
+    public enum GroundGardenerPatchInstances : uint
+    {
+        /// <summary>
+        /// One instance
+        /// </summary>
+        Default = BuiltInFoliageInstances.Default,
+        /// <summary>
+        /// Two instances
+        /// </summary>
+        Two = BuiltInFoliageInstances.Two,
+        /// <summary>
+        /// Four instances
+        /// </summary>
+        Four = BuiltInFoliageInstances.Four,
     }
 }

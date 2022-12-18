@@ -17,6 +17,10 @@ namespace Engine.Common
         public DrawerModes DrawerMode { get; set; } = DrawerModes.Forward;
 
         /// <summary>
+        /// Engine form
+        /// </summary>
+        public EngineForm Form { get; set; }
+        /// <summary>
         /// Game time
         /// </summary>
         public GameTime GameTime { get; set; }
@@ -33,13 +37,17 @@ namespace Engine.Common
         /// </summary>
         public Vector3 EyePosition { get; set; }
         /// <summary>
-        /// Eye target
+        /// Eye view direction
         /// </summary>
-        public Vector3 EyeTarget { get; set; }
+        public Vector3 EyeDirection { get; set; }
         /// <summary>
         /// Lights
         /// </summary>
         public SceneLights Lights { get; set; }
+        /// <summary>
+        /// Level of detail
+        /// </summary>
+        public Vector3 LevelOfDetail { get; set; }
 
         /// <summary>
         /// Directional shadow map

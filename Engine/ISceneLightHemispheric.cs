@@ -5,15 +5,15 @@ namespace Engine
     /// <summary>
     /// Hemispheric light interface
     /// </summary>
-    public interface ISceneLightHemispheric : ISceneLight
+    public interface ISceneLightHemispheric : ISceneLight, IHasGameState
     {
         /// <summary>
         /// Ambient down color
         /// </summary>
-        Color4 AmbientDown { get; set; }
+        Color3 AmbientDown { get; set; }
         /// <summary>
         /// Ambient up color
         /// </summary>
-        Color4 AmbientUp { get; set; }
+        Color3 AmbientUp { get; set; }
     }
 }

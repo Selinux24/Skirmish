@@ -1,8 +1,13 @@
 # Skirmish
 Game and prototypes with SharpDX and Directx 11
 
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/github/selinux24/skirmish?svg=true&branch=dev)](https://ci.appveyor.com/project/Selinux24/skirmish/branch/dev)
-[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish_dev)
+![Build](https://github.com/Selinux24/Skirmish/workflows/Build/badge.svg?branch=master)
+[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_master&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish_master) 
+<sup>master</sup>
+
+![Build](https://github.com/Selinux24/Skirmish/workflows/Build/badge.svg?branch=dev)
+[![SonarQube](https://sonarcloud.io/api/project_badges/measure?project=Selinux24_Skirmish_dev&metric=alert_status)](https://sonarcloud.io/dashboard?id=Selinux24_Skirmish_dev) 
+<sup>development</sup>
 
 ### What is it?
 

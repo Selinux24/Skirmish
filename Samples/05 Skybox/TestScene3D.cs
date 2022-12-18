@@ -2,6 +2,7 @@
 using Engine.Audio;
 using Engine.Common;
 using Engine.Content;
+using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
 using SharpDX;
@@ -13,10 +14,8 @@ using System.Threading.Tasks;
 
 namespace Skybox
 {
-    public class TestScene3D : Scene
+    public class TestScene3D : WalkableScene
     {
-        private const int layerHUD = 99;
-        private const int layerObjs = 50;
         private const float alpha = 0.25f;
 
         private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
@@ -56,6 +55,9 @@ namespace Skybox
             MaxSlope = 45,
         };
 
+        private Sprite panel = null;
+        private UITextArea title = null;
+        private UITextArea help = null;
         private UITextArea fps = null;
 
         private Scenery ruins = null;
@@ -79,6 +81,8 @@ namespace Skybox
         private readonly ParticleSystemDescription pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png", 0.1f);
         private readonly ParticleSystemDescription pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png", 0.1f);
 
+        private DecalDrawer decalEmitter = null;
+
         private int directionalLightCount = 0;
 
         private IAudioEffect fireAudioEffect;
@@ -93,9 +97,26 @@ namespace Skybox
 
         public override async Task Initialize()
         {
+            await base.Initialize();
+
             InitializeCamera();
 
-            await LoadResourcesAsync(
+            InitializeResources();
+        }
+
+        private void InitializeCamera()
+        {
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 5000.0f;
+            Camera.Goto(new Vector3(-6, walker.Height, 5));
+            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
+            Camera.MovementDelta = 4f;
+            Camera.SlowMovementDelta = 2f;
+        }
+
+        private void InitializeResources()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeUI(),
@@ -108,95 +129,31 @@ namespace Skybox
                     InitializeWater(),
                     InitializeParticles(),
                     InitializeEmitter(),
+                    InitializeDecalEmitter(),
                     InitializeDebug(),
                 },
-                async (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    InitializeNavigationMesh();
-
-                    await UpdateNavigationGraph();
-
-                    PrepareScene();
-
-                    InitializeSound();
-
-                    fireAudioEffect = AudioManager.CreateEffectInstance("Sphere", movingFire, Camera);
-                    fireAudioEffect.Play();
-
-                    AudioManager.MasterVolume = 1f;
-                    AudioManager.Start();
-                });
+                InitializeResourcesCompleted);
         }
-        private void InitializeCamera()
-        {
-            Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 5000.0f;
-            Camera.Goto(new Vector3(-6, walker.Height, 5));
-            Camera.LookTo(Vector3.UnitY + Vector3.UnitZ);
-            Camera.MovementDelta = 4f;
-            Camera.SlowMovementDelta = 2f;
-        }
-        private void InitializeNavigationMesh()
-        {
-            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
-
-            var nvSettings = BuildSettings.Default;
-            nvSettings.TileSize = 32;
-            nvSettings.CellSize = 0.05f;
-            nvSettings.CellHeight = 0.2f;
-            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
-            nvSettings.Agents[0] = walker;
-
-            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
-        }
-        private void InitializeSound()
-        {
-            AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
-
-            AudioManager.AddEffectParams(
-                "Sphere",
-                new GameAudioEffectParameters
-                {
-                    SoundName = "target_balls_single_loop",
-                    IsLooped = true,
-                    UseAudio3D = true,
-                    ReverbPreset = ReverbPresets.StoneRoom,
-                    Volume = 0.25f,
-                    EmitterRadius = 6,
-                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
-                });
-        }
-
-        public override void NavigationGraphUpdated()
-        {
-            gameReady = true;
-        }
-
         private async Task InitializeUI()
         {
             #region Cursor
 
-            var cursorDesc = new UICursorDescription()
-            {
-                Textures = new[] { "target.png" },
-                BaseColor = Color.Purple,
-                Width = 16,
-                Height = 16,
-            };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerHUD + 1);
+            var cursorDesc = UICursorDescription.Default("target.png", 16, 16, true, Color.Purple);
+
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
 
             #endregion
 
             #region Text
 
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            var help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
 
             title.Text = "Collada Scene with Skybox";
 #if DEBUG
@@ -206,31 +163,18 @@ namespace Skybox
 #endif
             fps.Text = "";
 
-            title.SetPosition(Vector2.Zero);
-            help.SetPosition(new Vector2(0, 24));
-            fps.SetPosition(new Vector2(0, 40));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = 120,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
             #endregion
         }
         private async Task InitializeSkydom()
         {
-            var skydomDesc = new SkydomDescription()
-            {
-                ContentPath = "Resources",
-                Radius = Camera.FarPlaneDistance,
-                Texture = "sunset.dds",
-            };
+            string fileName = "Resources/Daylight Box UV.png";
+            int faceSize = 512;
+            var skydomDesc = SkydomDescription.Sphere(fileName, faceSize, Camera.FarPlaneDistance);
 
-            await this.AddComponentSkydom("Skydom", skydomDesc);
+            await AddComponentSky<Skydom, SkydomDescription>("Skydom", "Skydom", skydomDesc);
         }
         private async Task InitializeLakeBottom()
         {
@@ -266,18 +210,18 @@ namespace Skybox
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
 
-            await this.AddComponentScenery("Lage Bottom", groundDesc, SceneObjectUsages.None, layerObjs);
+            await AddComponentGround<Scenery, GroundDescription>("Lage Bottom", "Lage Bottom", groundDesc);
         }
         private async Task InitializeTorchs()
         {
             var torchDesc = new ModelInstancedDescription()
             {
                 Instances = firePositions.Length,
-                CastShadow = true,
-                Content = ContentDescription.FromFile("Resources", "torch.xml"),
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                Content = ContentDescription.FromFile("Resources", "torch.json"),
             };
 
-            torchs = await this.AddComponentModelInstanced("Torchs", torchDesc, SceneObjectUsages.None, layerObjs);
+            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", torchDesc);
 
             AttachToGround(torchs, true);
         }
@@ -286,29 +230,30 @@ namespace Skybox
             var obeliskDesc = new ModelInstancedDescription()
             {
                 Instances = firePositions.Length,
-                CastShadow = true,
-                Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.xml"),
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
             };
 
-            obelisks = await this.AddComponentModelInstanced("Obelisks", obeliskDesc, SceneObjectUsages.Ground, layerObjs);
+            obelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisks", "Obelisks", obeliskDesc, SceneObjectUsages.Ground);
         }
         private async Task InitializeFountain()
         {
             var fountainDesc = new ModelDescription()
             {
-                CastShadow = true,
-                Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.xml"),
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
             };
 
-            fountain = await this.AddComponentModel("Fountain", fountainDesc, SceneObjectUsages.Ground, layerObjs);
+            fountain = await AddComponentGround<Model, ModelDescription>("Fountain", "Fountain", fountainDesc);
 
             AttachToGround(fountain, true);
         }
         private async Task InitializeRuins()
         {
-            var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.xml");
+            var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.json");
+            ruinsDesc.Quadtree.MaximumDepth = 1;
 
-            ruins = await this.AddComponentScenery("Ruins", ruinsDesc, SceneObjectUsages.Ground, layerObjs);
+            ruins = await AddComponentGround<Scenery, GroundDescription>("Ruins", "Ruins", ruinsDesc);
 
             SetGround(ruins, true);
         }
@@ -318,44 +263,93 @@ namespace Skybox
             waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
             waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
 
-            await this.AddComponentWater("Water", waterDesc, SceneObjectUsages.None, layerObjs + 1);
+            await AddComponentEffect<Water, WaterDescription>("Water", "Water", waterDesc);
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.Yellow;
+            var mat = MaterialCookTorranceContent.Default;
+            mat.EmissiveColor = Color.Yellow.RGB();
 
             var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
 
             var mFireDesc = new ModelDescription()
             {
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(sphere, mat),
             };
 
-            movingFire = await this.AddComponentModel("Emitter", mFireDesc);
+            movingFire = await AddComponent<Model, ModelDescription>("Emitter", "Emitter", mFireDesc);
         }
         private async Task InitializeParticles()
         {
             var pManagerDesc = ParticleManagerDescription.Default();
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", pManagerDesc);
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", pManagerDesc);
 
-            movingFireEmitter = new ParticleEmitter() { EmissionRate = 0.1f, InfiniteDuration = true };
+            movingFireEmitter = new ParticleEmitter()
+            {
+                EmissionRate = 0.1f,
+                InfiniteDuration = true,
+                MaximumDistance = GameEnvironment.LODDistanceLow,
+            };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
+            await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pBigFire, movingFireEmitter);
+        }
+        private async Task InitializeDecalEmitter()
+        {
+            DecalDrawerDescription desc = new DecalDrawerDescription
+            {
+                TextureName = "resources/bullets/bullet-hole.png",
+                MaxDecalCount = 1000,
+                RotateDecals = true,
+            };
+            decalEmitter = await AddComponent<DecalDrawer, DecalDrawerDescription>("Bullets", "Bullets", desc);
         }
         private async Task InitializeDebug()
         {
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
+            volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugVolumesDrawer", "DebugVolumesDrawer", new PrimitiveListDrawerDescription<Line3D>() { Count = 10000 });
             volumesDrawer.Visible = false;
 
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
+            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DebugGraphDrawer", "DebugGraphDrawer", new PrimitiveListDrawerDescription<Triangle>() { Count = 10000 });
             graphDrawer.Visible = false;
         }
+        private async Task InitializeResourcesCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
+            UpdateLayout();
+
+            InitializeNavigationMesh();
+
+            await UpdateNavigationGraph();
+
+            PrepareScene();
+
+            InitializeSound();
+
+            fireAudioEffect = AudioManager.CreateEffectInstance("Sphere", movingFire, Camera);
+            fireAudioEffect.Play();
+
+            AudioManager.MasterVolume = 1f;
+            AudioManager.Start();
+
+            gameReady = true;
+        }
+        private void InitializeNavigationMesh()
+        {
+            var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            var nvSettings = BuildSettings.Default;
+            nvSettings.TileSize = 32;
+            nvSettings.CellSize = 0.05f;
+            nvSettings.CellHeight = 0.2f;
+            nvSettings.PartitionType = SamplePartitionTypes.Monotone;
+            nvSettings.Agents[0] = walker;
+
+            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
+        }
         private void PrepareScene()
         {
             Lights.DirectionalLights[0].Enabled = true;
@@ -370,8 +364,8 @@ namespace Skybox
             movingFireLight = new SceneLightPoint(
                 "Moving fire light",
                 false,
-                Color.Orange,
-                Color.Orange,
+                Color.Orange.RGB(),
+                Color.Orange.RGB(),
                 true,
                 SceneLightPointDescription.Create(Vector3.Zero, 15f, 20f));
 
@@ -386,10 +380,10 @@ namespace Skybox
                     return;
                 }
 
-                Color color = Color.Yellow;
-                if (i == 1) color = Color.Red;
-                if (i == 2) color = Color.Green;
-                if (i == 3) color = Color.LightBlue;
+                Color3 color = Color.Yellow.RGB();
+                if (i == 1) color = Color.Red.RGB();
+                if (i == 2) color = Color.Green.RGB();
+                if (i == 3) color = Color.LightBlue.RGB();
 
                 FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
                 firePositions3D[i] = result.Position;
@@ -411,8 +405,8 @@ namespace Skybox
 
                 Lights.Add(torchLights[i]);
 
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f });
-                pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.5f });
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.2f, MaximumDistance = GameEnvironment.LODDistanceLow });
             });
 
             Parallel.For(0, obeliskPositions.Length, (i, loopState) =>
@@ -428,6 +422,23 @@ namespace Skybox
             });
 
             fountain.Manipulator.SetScale(2.3f);
+        }
+        private void InitializeSound()
+        {
+            AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
+
+            AudioManager.AddEffectParams(
+                "Sphere",
+                new GameAudioEffectParameters
+                {
+                    SoundName = "target_balls_single_loop",
+                    IsLooped = true,
+                    UseAudio3D = true,
+                    ReverbPreset = ReverbPresets.StoneRoom,
+                    Volume = 0.25f,
+                    EmitterRadius = 6,
+                    ListenerCone = GameAudioConeDescription.DefaultListenerCone,
+                });
         }
 
         public override void Update(GameTime gameTime)
@@ -490,6 +501,20 @@ namespace Skybox
                     SceneModes.ForwardLigthning);
             }
 
+            if (Game.Input.KeyJustReleased(Keys.F7))
+            {
+                var m1 = fountain.GetMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountainbro");
+                var bronze1 = MeshMaterial.CookTorranceFromBuiltIn(BuiltInMaterials.Bronze);
+                bronze1.DiffuseTexture = m1.DiffuseTexture;
+
+                var m2 = fountain.GetMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountai.000");
+                var bronze2 = MeshMaterial.CookTorranceFromBuiltIn(BuiltInMaterials.Bronze);
+                bronze2.DiffuseTexture = m2.DiffuseTexture;
+
+                fountain.ReplaceMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountainbro", bronze1);
+                fountain.ReplaceMaterial("World_Expansion03_doodads_gilneas_fountains_gilneas_fountai.000", bronze2);
+            }
+
             UpdateInputDebug();
 
             UpdateInputCamera();
@@ -511,20 +536,36 @@ namespace Skybox
         }
         private void UpdateInputCamera()
         {
-            if (Game.Input.LeftMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Left))
             {
                 var pRay = GetPickingRay();
 
                 if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
                 {
-                    var tri = Line3D.CreateWiredTriangle(r.Item);
+                    var tri = Line3D.CreateWiredTriangle(r.Primitive);
+                    var cross = Line3D.CreateCross(r.Position, 0.1f);
 
                     volumesDrawer.SetPrimitives(Color.White, tri);
+                    volumesDrawer.SetPrimitives(Color.YellowGreen, cross);
+                }
+            }
+
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            {
+                var pRay = GetPickingRay();
+
+                if (ruins.PickNearest(pRay, out PickingResult<Triangle> r))
+                {
+                    decalEmitter.AddDecal(
+                        r.Position,
+                        r.Primitive.Normal,
+                        Vector2.One * 0.1f,
+                        60);
                 }
             }
 
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -642,7 +683,7 @@ namespace Skybox
                 var light = Lights.PointLights[i];
 
                 volumesDrawer.SetPrimitives(
-                    new Color4(light.DiffuseColor.RGB(), alpha),
+                    new Color4(light.DiffuseColor, alpha),
                     Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
             }
         }
@@ -651,7 +692,7 @@ namespace Skybox
             var light = Lights.PointLights[0];
 
             volumesDrawer.SetPrimitives(
-                new Color4(light.DiffuseColor.RGB(), alpha),
+                new Color4(light.DiffuseColor, alpha),
                 Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
         }
         private void DEBUGUpdateGraphDrawer()
@@ -666,6 +707,20 @@ namespace Skybox
                     graphDrawer.AddPrimitives(node.Color, node.Triangles);
                 }
             }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            help.SetPosition(new Vector2(0, 24));
+            fps.SetPosition(new Vector2(0, 40));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = 120;
         }
     }
 }

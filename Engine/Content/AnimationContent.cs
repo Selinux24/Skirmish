@@ -10,9 +10,13 @@ namespace Engine.Content
     public class AnimationContent
     {
         /// <summary>
-        /// Joint
+        /// Joint name
         /// </summary>
-        public string Joint { get; set; }
+        public string JointName { get; set; }
+        /// <summary>
+        /// Transform type
+        /// </summary>
+        public string TransformType { get; set; }
         /// <summary>
         /// Keyframe list
         /// </summary>
@@ -23,11 +27,11 @@ namespace Engine.Content
         {
             if (Keyframes?.Any() == true)
             {
-                return $"Start: {Keyframes.First()}; End: {Keyframes.Last()};";
+                return $"Start: {Keyframes.First()}; End: {Keyframes.Last()}; {JointName}";
             }
             else
             {
-                return "No animation;";
+                return $"No animation; {JointName}";
             }
         }
     }

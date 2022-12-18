@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
@@ -10,38 +11,41 @@ namespace Engine.PathFinding.AStar
     /// </summary>
     public class Grid : IGraph
     {
-        /// <summary>
-        /// On graph updating event
-        /// </summary>
+        private readonly List<GridNode> nodes = new List<GridNode>();
+
+        /// <inheritdoc/>
         public event EventHandler Updating;
-        /// <summary>
-        /// On graph updated event
-        /// </summary>
+        /// <inheritdoc/>
         public event EventHandler Updated;
 
-        /// <summary>
-        /// Gets whether the graph is initialized
-        /// </summary>
+        /// <inheritdoc/>
         public bool Initialized { get; set; }
         /// <summary>
         /// Geometry input
         /// </summary>
-        public PathFinderInput Input { get; set; }
+        public PathFinderInput Input { get; private set; }
         /// <summary>
         /// Build settings
         /// </summary>
-        public GridGenerationSettings BuildSettings { get; set; }
+        public GridGenerationSettings Settings { get; private set; }
         /// <summary>
         /// Graph node list
         /// </summary>
-        public GridNode[] Nodes { get; set; }
+        public IEnumerable<GridNode> Nodes
+        {
+            get
+            {
+                return nodes.ToArray();
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Grid()
+        public Grid(GridGenerationSettings settings, PathFinderInput input)
         {
-
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings), "Must specify the grid generation settings.");
+            Input = input ?? throw new ArgumentNullException(nameof(input), "Must specify the path finder input helper.");
         }
         /// <summary>
         /// Destructor
@@ -67,12 +71,34 @@ namespace Engine.PathFinding.AStar
         {
             if (disposing)
             {
-                this.Input = null;
-                this.BuildSettings = null;
-                this.Nodes = null;
+                Input = null;
+                Settings = null;
+
+                nodes.Clear();
             }
         }
 
+        /// <summary>
+        /// Adds a new node
+        /// </summary>
+        /// <param name="node">Node</param>
+        public void Add(GridNode node)
+        {
+            nodes.Add(node);
+        }
+        /// <summary>
+        /// Adds a list of nodes
+        /// </summary>
+        /// <param name="nodes">Node list</param>
+        public void AddRange(IEnumerable<GridNode> nodes)
+        {
+            if (nodes?.Any() != true)
+            {
+                return;
+            }
+
+            this.nodes.AddRange(nodes);
+        }
         /// <summary>
         /// Gets node wich contains specified point
         /// </summary>
@@ -83,97 +109,62 @@ namespace Engine.PathFinding.AStar
             float minDistance = float.MaxValue;
             GridNode bestNode = null;
 
-            for (int i = 0; i < this.Nodes.Length; i++)
+            foreach (var node in nodes)
             {
-                if (this.Nodes[i].Contains(point, out float distance) && distance < minDistance)
+                if (node.Contains(point, out float distance) && distance < minDistance)
                 {
                     minDistance = distance;
-                    bestNode = this.Nodes[i];
+                    bestNode = node;
                 }
             }
 
             return bestNode;
         }
 
-        /// <summary>
-        /// Gets the node collection of the grid
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <returns>Returns the node collection of the grid</returns>
+        /// <inheritdoc/>
         public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
-            return Array.ConvertAll(this.Nodes, (n) => { return (IGraphNode)n; });
+            return nodes.Cast<IGraphNode>().ToArray();
         }
-        /// <summary>
-        /// Find path from point to point
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="from">Start point</param>
-        /// <param name="to">End point</param>
-        /// <returns>Return path if exists</returns>
+        /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             return AStarQuery.FindPath(this, from, to);
         }
-        /// <summary>
-        /// Find path from point to point
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="from">Start point</param>
-        /// <param name="to">End point</param>
-        /// <returns>Return path if exists</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            Vector3[] result = new Vector3[] { };
+            IEnumerable<Vector3> result = null;
 
             await Task.Run(() =>
             {
                 result = AStarQuery.FindPath(this, from, to);
             });
 
-            return result;
+            return result ?? Enumerable.Empty<Vector3>();
         }
-        /// <summary>
-        /// Gets wether the specified position is walkable
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="position">Position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(AgentType agent, Vector3 position)
+        /// <inheritdoc/>
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
         {
-            for (int i = 0; i < this.Nodes.Length; i++)
-            {
-                if (this.Nodes[i].Contains(position))
-                {
-                    return true;
-                }
-            }
-
-            return false;
+            return nodes.Any(n => n.Contains(position));
         }
-        /// <summary>
-        /// Gets wether the specified position is walkable
-        /// </summary>
-        /// <param name="agent">Agent type</param>
-        /// <param name="position">Position</param>
-        /// <param name="nearest">Gets the nearest walkable position</param>
-        /// <returns>Returns true if the specified position is walkable</returns>
-        public bool IsWalkable(AgentType agent, Vector3 position, out Vector3? nearest)
+        /// <inheritdoc/>
+        public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)
         {
             bool contains = false;
             nearest = null;
             float nearestDistance = float.MaxValue;
 
-            for (int i = 0; i < this.Nodes.Length; i++)
+            foreach (var node in nodes)
             {
-                if (this.Nodes[i].Contains(position, out float distance))
+                if (node.Contains(position, out float distance))
                 {
                     contains = true;
 
                     if (distance < nearestDistance)
                     {
                         nearestDistance = distance;
-                        nearest = this.Nodes[i].Center;
+                        nearest = node.Center;
                     }
                 }
             }
@@ -181,168 +172,108 @@ namespace Engine.PathFinding.AStar
             return contains;
         }
 
-        /// <summary>
-        /// Creates the graph at specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        public void CreateAt(Vector3 position)
+        /// <inheritdoc/>
+        public bool CreateAt(Vector3 position)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Creates the graph at specified box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        public void CreateAt(BoundingBox bbox)
+        /// <inheritdoc/>
+        public bool CreateAt(BoundingBox bbox)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Creates the graph at specified position list
-        /// </summary>
-        /// <param name="positions">Position list</param>
-        public void CreateAt(IEnumerable<Vector3> positions)
+        /// <inheritdoc/>
+        public bool CreateAt(IEnumerable<Vector3> positions)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Updates the graph at specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        public void UpdateAt(Vector3 position)
+        /// <inheritdoc/>
+        public bool UpdateAt(Vector3 position)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Updates the graph at specified box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        public void UpdateAt(BoundingBox bbox)
+        /// <inheritdoc/>
+        public bool UpdateAt(BoundingBox bbox)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Updates the graph at specified position list
-        /// </summary>
-        /// <param name="positions">Position list</param>
-        public void UpdateAt(IEnumerable<Vector3> positions)
+        /// <inheritdoc/>
+        public bool UpdateAt(IEnumerable<Vector3> positions)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Removes the graph node at specified position
-        /// </summary>
-        /// <param name="position">Position</param>
-        public void RemoveAt(Vector3 position)
+        /// <inheritdoc/>
+        public bool RemoveAt(Vector3 position)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Removes the graph node at specified box
-        /// </summary>
-        /// <param name="bbox">Bounding box</param>
-        public void RemoveAt(BoundingBox bbox)
+        /// <inheritdoc/>
+        public bool RemoveAt(BoundingBox bbox)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Removes the graph node at specified position list
-        /// </summary>
-        /// <param name="positions">Position list</param>
-        public void RemoveAt(IEnumerable<Vector3> positions)
+        /// <inheritdoc/>
+        public bool RemoveAt(IEnumerable<Vector3> positions)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Adds a cylinder obstacle
-        /// </summary>
-        /// <param name="cylinder">Bounding Cylinder</param>
-        /// <returns>Returns the obstacle id</returns>
+        /// <inheritdoc/>
         public int AddObstacle(BoundingCylinder cylinder)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Adds a bounding box obstacle
-        /// </summary>
-        /// <param name="bbox">Bounding Box</param>
-        /// <returns>Returns the obstacle id</returns>
+        /// <inheritdoc/>
         public int AddObstacle(BoundingBox bbox)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Adds a oriented bounding box obstacle
-        /// </summary>
-        /// <param name="obb">Oriented Bounding Box</param>
-        /// <returns>Returns the obstacle id</returns>
-        /// <remarks>Only applies rotation if the obb's transform has rotation in the Y axis</remarks>
+        /// <inheritdoc/>
         public int AddObstacle(OrientedBoundingBox obb)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Removes an obstacle by obstacle id
-        /// </summary>
-        /// <param name="obstacleId">Obstacle id</param>
+        /// <inheritdoc/>
         public void RemoveObstacle(int obstacleId)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Finds a random point over the graph
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <returns>Returns a valid random position over the graph</returns>
+        /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent)
         {
             throw new NotImplementedException();
         }
-        /// <summary>
-        /// Finds a random point around a circle
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="position">Position</param>
-        /// <param name="radius">Radius</param>
-        /// <returns>Returns a valid random position over the graph</returns>
+        /// <inheritdoc/>
         public Vector3? FindRandomPoint(AgentType agent, Vector3 position, float radius)
         {
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Updates internal state
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <inheritdoc/>
         public void Update(GameTime gameTime)
         {
             //Updates the internal state
-
         }
         /// <summary>
         /// Fires the updated event
         /// </summary>
         protected void FireUpdated()
         {
-            this.Updated?.Invoke(this, new EventArgs());
+            Updated?.Invoke(this, new EventArgs());
         }
         /// <summary>
         /// Fires the updating event
         /// </summary>
         protected void FireUpdating()
         {
-            this.Updating?.Invoke(this, new EventArgs());
+            Updating?.Invoke(this, new EventArgs());
         }
 
-        /// <summary>
-        /// Gets text representation of instance
-        /// </summary>
-        /// <returns>Returns text representation</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Nodes {0}; Side {1:0.00};", this.Nodes.Length, this.BuildSettings.NodeSize);
+            return $"Nodes {nodes.Count}; Side {Settings.NodeSize:0.00};";
         }
     }
 }

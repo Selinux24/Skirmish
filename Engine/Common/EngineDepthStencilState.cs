@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using DepthStencilState = SharpDX.Direct3D11.DepthStencilState;
 
     /// <summary>
     /// Engine depth stencil state
@@ -15,18 +15,23 @@ namespace Engine.Common
         private DepthStencilState state = null;
 
         /// <summary>
-        /// Stencil reference
+        /// Name
         /// </summary>
-        public int StencilRef { get; set; } = 0;
+        public string Name { get; private set; }
+        /// <summary>
+        /// Description
+        /// </summary>
+        public EngineDepthStencilStateDescription Description { get; private set; }
 
         /// <summary>
         /// Creates a Z-buffer enabled for write depth-stencil state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the Z-buffer enabled for write depth-stencil state</returns>
-        public static EngineDepthStencilState ZBufferEnabled(Graphics graphics)
+        public static EngineDepthStencilState WRzBufferEnabled(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = true,
                 DepthWriteMask = DepthWriteMask.All,
@@ -53,16 +58,17 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(WRzBufferEnabled)}", desc);
         }
         /// <summary>
         /// Creates a Z-buffer disabled for write depth-stencil state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the Z-buffer disabled for write depth-stencil state</returns>
-        public static EngineDepthStencilState ZBufferDisabled(Graphics graphics)
+        public static EngineDepthStencilState WRzBufferDisabled(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = false,
                 DepthWriteMask = DepthWriteMask.Zero,
@@ -89,48 +95,51 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(WRzBufferDisabled)}", desc);
         }
         /// <summary>
         /// Creates a Z-buffer enabled for read depth-stencil state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the Z-buffer enabled for read depth-stencil state</returns>
-        public static EngineDepthStencilState RDzBufferEnabled(Graphics graphics)
+        public static EngineDepthStencilState RDzBufferEnabled(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = true,
                 DepthWriteMask = DepthWriteMask.Zero,
                 DepthComparison = Comparison.Less,
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(RDzBufferEnabled)}", desc);
         }
         /// <summary>
         /// Creates a Z-buffer disabled for read depth-stencil state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the Z-buffer disabled for read depth-stencil state</returns>
-        public static EngineDepthStencilState RDzBufferDisabled(Graphics graphics)
+        public static EngineDepthStencilState RDzBufferDisabled(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = false,
                 DepthWriteMask = DepthWriteMask.Zero,
                 DepthComparison = Comparison.Never,
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(RDzBufferDisabled)}", desc);
         }
         /// <summary>
         /// Creates a No depth, no stencil state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the No depth, no stencil state</returns>
-        public static EngineDepthStencilState None(Graphics graphics)
+        public static EngineDepthStencilState None(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = false,
                 DepthWriteMask = DepthWriteMask.Zero,
@@ -141,16 +150,17 @@ namespace Engine.Common
                 StencilWriteMask = 0xFF,
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(None)}", desc);
         }
         /// <summary>
         /// Creates a depth state for shadow mapping
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the shadow mapping depth state</returns>
-        public static EngineDepthStencilState ShadowMapping(Graphics graphics)
+        public static EngineDepthStencilState ShadowMapping(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = true,
                 DepthWriteMask = DepthWriteMask.All,
@@ -177,17 +187,18 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(ShadowMapping)}", desc);
         }
         /// <summary>
         /// Creates a Depth-stencil state for volume marking
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the Depth-stencil state for volume marking</returns>
         /// <remarks>Value != 0 if object is inside of the current drawing volume</remarks>
-        public static EngineDepthStencilState VolumeMarking(Graphics graphics)
+        public static EngineDepthStencilState VolumeMarking(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = true,
                 DepthWriteMask = DepthWriteMask.Zero,
@@ -214,17 +225,18 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(VolumeMarking)}", desc);
         }
         /// <summary>
         /// Creates a Depth-stencil state for volume drawing
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the Depth-stencil state for volume drawing</returns>
         /// <remarks>Process pixels if stencil value != stencil reference</remarks>
-        public static EngineDepthStencilState VolumeDrawing(Graphics graphics)
+        public static EngineDepthStencilState VolumeDrawing(Graphics graphics, string name)
         {
-            var desc = new DepthStencilStateDescription()
+            var desc = new EngineDepthStencilStateDescription()
             {
                 IsDepthEnabled = false,
                 DepthWriteMask = DepthWriteMask.Zero,
@@ -251,17 +263,21 @@ namespace Engine.Common
                 },
             };
 
-            return graphics.CreateDepthStencilState(desc, 0);
+            return graphics.CreateDepthStencilState($"{name}.{nameof(VolumeDrawing)}", desc);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="state">Depth stencil state state</param>
-        internal EngineDepthStencilState(DepthStencilState state, int stencilRef)
+        /// <param name="name">Name</param>
+        /// <param name="stencilState">Depth stencil state</param>
+        internal EngineDepthStencilState(string name, DepthStencilState stencilState)
         {
-            this.state = state;
-            StencilRef = stencilRef;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A stencil state name must be specified.");
+            state = stencilState ?? throw new ArgumentNullException(nameof(stencilState), "A stencil state must be specified.");
+            state.DebugName = name;
+
+            Description = (EngineDepthStencilStateDescription)state.Description;
         }
         /// <summary>
         /// Destructor

@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Model part
     /// </summary>
-    public class ModelPart
+    public class ModelPart : IModelPart
     {
         /// <summary>
         /// Part name

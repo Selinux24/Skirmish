@@ -10,12 +10,12 @@ namespace Engine.UI
     /// <summary>
     /// Minimap
     /// </summary>
-    public class UIMinimap : Drawable, IScreenFitted
+    public sealed class UIMinimap : Drawable<UIMinimapDescription>, IScreenFitted
     {
         /// <summary>
         /// Viewport to match the minimap texture size
         /// </summary>
-        private readonly Viewport viewport;
+        private Viewport viewport;
         /// <summary>
         /// Surface to draw
         /// </summary>
@@ -35,7 +35,7 @@ namespace Engine.UI
         /// <summary>
         /// Minimap rendered area
         /// </summary>
-        private readonly BoundingBox minimapArea;
+        private BoundingBox minimapArea;
 
         /// <summary>
         /// Reference to the objects that we render in the minimap
@@ -49,28 +49,13 @@ namespace Engine.UI
         /// <summary>
         /// Contructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Minimap description</param>
-        public UIMinimap(string name, Scene scene, UIMinimapDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public UIMinimap(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            Drawables = description.Drawables;
-            BackColor = description.BackColor;
 
-            minimapArea = description.MinimapArea;
-
-            minimapBox = new UITextureRenderer($"{name}.TextureRenderer", scene, UITextureRendererDescription.Default(description.Left, description.Top, description.Width, description.Height));
-
-            viewport = new Viewport(0, 0, description.Width, description.Height);
-
-            Game.Graphics.CreateRenderTargetTexture(
-                Format.R8G8B8A8_UNorm,
-                description.Width, description.Height, false,
-                out renderTarget,
-                out renderTexture);
-
-            InitializeContext();
         }
         /// <summary>
         /// Destructor
@@ -96,6 +81,40 @@ namespace Engine.UI
             }
         }
 
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIMinimapDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Drawables = Description.Drawables;
+            BackColor = Description.BackColor;
+
+            minimapArea = Description.MinimapArea;
+
+            viewport = new Viewport(0, 0, Description.Width, Description.Height);
+
+            minimapBox = await CreateRenderer();
+
+            var rt = Game.Graphics.CreateRenderTargetTexture(
+                $"RenderTexture_{Name}",
+                Format.R8G8B8A8_UNorm,
+                Description.Width, Description.Height, false);
+
+            renderTarget = rt.RenderTarget;
+            renderTexture = rt.ShaderResource;
+
+            InitializeContext();
+        }
+        private async Task<UITextureRenderer> CreateRenderer()
+        {
+            var desc = UITextureRendererDescription.Default(Description.Left, Description.Top, Description.Width, Description.Height);
+
+            return await Scene.CreateComponent<UITextureRenderer, UITextureRendererDescription>(
+                $"{Id}.TextureRenderer",
+                $"{Name}.TextureRenderer",
+                desc);
+        }
+
         /// <summary>
         /// Initialize terrain context
         /// </summary>
@@ -108,12 +127,12 @@ namespace Engine.UI
             float aspect = minimapBox.Height / minimapBox.Width;
             float near = 0.1f;
 
-            Vector3 eyePos = new Vector3(0, y + near, 0);
-            Vector3 target = Vector3.Zero;
+            Vector3 eyePosition = new Vector3(0, y + near, 0);
+            Vector3 eyeDirection = Vector3.Zero;
 
             Matrix view = Matrix.LookAtLH(
-                eyePos,
-                target,
+                eyePosition,
+                eyeDirection,
                 Vector3.UnitZ);
 
             Matrix proj = Matrix.OrthoLH(
@@ -126,8 +145,8 @@ namespace Engine.UI
             {
                 DrawerMode = DrawerModes.Forward | DrawerModes.OpaqueOnly,
                 ViewProjection = view * proj,
-                EyePosition = eyePos,
-                EyeTarget = target,
+                EyePosition = eyePosition,
+                EyeDirection = eyeDirection,
                 Lights = SceneLights.CreateDefault(Scene),
             };
         }
@@ -161,7 +180,6 @@ namespace Engine.UI
 
             graphics.SetRenderTargets(
                 renderTarget, true, BackColor,
-                null, false, false,
                 false);
 
             foreach (var item in Drawables)
@@ -170,16 +188,18 @@ namespace Engine.UI
             }
 
             graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget(false, false, false);
+            graphics.SetDefaultRenderTarget(false, Color.Transparent);
 
             minimapBox.Texture = renderTexture;
             minimapBox.Draw(context);
+
+            base.Draw(context);
         }
 
         /// <summary>
         /// Resize
         /// </summary>
-        public virtual void Resize()
+        public void Resize()
         {
             minimapBox.Resize();
         }
@@ -187,37 +207,9 @@ namespace Engine.UI
         /// <inheritdoc/>
         public override bool Cull(IIntersectionVolume volume, out float distance)
         {
-            drawContext.Lights.Cull(volume, drawContext.EyePosition);
+            drawContext.Lights.Cull(volume, drawContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             return base.Cull(volume, out distance);
-        }
-    }
-
-    /// <summary>
-    /// Minimap extensions
-    /// </summary>
-    public static class UIMinimapExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIMinimap> AddComponentUIMinimap(this Scene scene, string name, UIMinimapDescription description, int order = 0)
-        {
-            UIMinimap component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIMinimap(name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
-            });
-
-            return component;
         }
     }
 }

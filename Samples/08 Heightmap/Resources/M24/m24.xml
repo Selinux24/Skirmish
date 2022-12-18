@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<ContentDataDescription>
-  <model_filename>m24.dae</model_filename>
-  <animation_description>
-    <animations>
-      <animation name="fly" from="1" to="5" />
-    </animations>
-  </animation_description>
-</ContentDataDescription>

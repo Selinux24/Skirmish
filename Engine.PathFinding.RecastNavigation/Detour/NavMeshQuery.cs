@@ -281,7 +281,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Add or update the node.
                     neighbourNode.PIdx = m_nodePool.GetNodeIdx(bestNode);
                     neighbourNode.Id = neighbourRef;
-                    neighbourNode.Flags = (neighbourNode.Flags & ~NodeFlagTypes.Closed);
+                    neighbourNode.Flags &= ~NodeFlagTypes.Closed;
                     neighbourNode.Cost = cost;
                     neighbourNode.Total = total;
 

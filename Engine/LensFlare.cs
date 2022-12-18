@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Lens flare
     /// </summary>
-    public class LensFlare : Drawable
+    public sealed class LensFlare : Drawable<LensFlareDescription>
     {
         /// <summary>
         /// Glow sprote
@@ -28,47 +28,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public LensFlare(string name, Scene scene, LensFlareDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public LensFlare(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            glowSprite = new Sprite($"{name}.Glow", scene, new SpriteDescription()
-            {
-                ContentPath = description.ContentPath,
-                Height = 100,
-                Width = 100,
-                Textures = new string[] { description.GlowTexture },
-                BlendMode = description.BlendMode,
-            });
 
-            if (description.Flares != null && description.Flares.Length > 0)
-            {
-                flares = new Flare[description.Flares.Length];
-
-                for (int i = 0; i < description.Flares.Length; i++)
-                {
-                    var flareDesc = description.Flares[i];
-
-                    SpriteDescription sprDesc = new SpriteDescription()
-                    {
-                        ContentPath = description.ContentPath,
-                        Height = 100,
-                        Width = 100,
-                        Textures = new string[] { flareDesc.Texture },
-                        BlendMode = description.BlendMode,
-                    };
-
-                    flares[i] = new Flare()
-                    {
-                        FlareSprite = new Sprite($"{name}.Flare_{i}", scene, sprDesc),
-                        Distance = flareDesc.Distance,
-                        Scale = flareDesc.Scale,
-                        Color = flareDesc.Color,
-                    };
-                }
-            }
         }
         /// <summary>
         /// Destructor
@@ -83,11 +49,8 @@ namespace Engine
         {
             if (disposing)
             {
-                if (glowSprite != null)
-                {
-                    glowSprite.Dispose();
-                    glowSprite = null;
-                }
+                glowSprite?.Dispose();
+                glowSprite = null;
 
                 if (flares != null)
                 {
@@ -98,6 +61,55 @@ namespace Engine
                     }
 
                     flares = null;
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(LensFlareDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            var gl = await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Glow",
+                $"{Name}.Glow",
+                new SpriteDescription()
+                {
+                    ContentPath = Description.ContentPath,
+                    Height = 100,
+                    Width = 100,
+                    Textures = new string[] { Description.GlowTexture },
+                    BlendMode = Description.BlendMode,
+                });
+            glowSprite = gl;
+
+            if (Description.Flares != null && Description.Flares.Length > 0)
+            {
+                flares = new Flare[Description.Flares.Length];
+
+                for (int i = 0; i < Description.Flares.Length; i++)
+                {
+                    var flareDesc = Description.Flares[i];
+
+                    SpriteDescription sprDesc = new SpriteDescription()
+                    {
+                        ContentPath = Description.ContentPath,
+                        Height = 100,
+                        Width = 100,
+                        Textures = new string[] { flareDesc.Texture },
+                        BlendMode = Description.BlendMode,
+                    };
+
+                    flares[i] = new Flare()
+                    {
+                        FlareSprite = await Scene.CreateComponent<Sprite, SpriteDescription>(
+                            $"{Id}.Flare_{i}",
+                            $"{Name}.Flare_{i}",
+                            sprDesc),
+                        Distance = flareDesc.Distance,
+                        Scale = flareDesc.Scale,
+                        Color = flareDesc.Color,
+                    };
                 }
             }
         }
@@ -148,9 +160,9 @@ namespace Engine
                     float glowScale = scale;
                     var glowSpritePos = lightProjectedPosition;
 
-                    glowSprite.BaseColor = new Color4(keyLight.DiffuseColor.RGB(), 0.25f);
+                    glowSprite.BaseColor = new Color4(keyLight.DiffuseColor, 0.25f);
                     glowSprite.Scale = glowScale;
-                    glowSprite.SetPosition(glowSpritePos - glowSprite.Center);
+                    glowSprite.SetPosition(glowSpritePos - glowSprite.LocalCenter);
                     glowSprite.Update(context);
 
                     //Update flares
@@ -167,7 +179,7 @@ namespace Engine
                             // Set the flare alpha based on the angle with view and light directions.
                             flare.FlareSprite.BaseColor = new Color4(flare.Color.RGB(), 0.5f * transparency);
                             flare.FlareSprite.Scale = flareScale;
-                            flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.Center);
+                            flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
                             flare.FlareSprite.Update(context);
                         }
                     }
@@ -197,15 +209,19 @@ namespace Engine
             {
                 //Calculate the ray from light to position
                 Vector3 lightPosition = light.GetPosition(maxZ);
-                Ray ray = new Ray(lightPosition, -light.Direction);
+                var ray = new Ray(lightPosition, -light.Direction);
 
-                if (!Scene.PickNearest<Triangle>(ray, RayPickingParams.Coarse, out _))
+                var coarseRay = new PickingRay(ray, RayPickingParams.Coarse);
+
+                if (!Scene.PickNearest<Triangle>(coarseRay, SceneObjectUsages.None, out _))
                 {
                     return true;
                 }
 
-                if (Scene.PickNearest(ray, RayPickingParams.Perfect, out PickingResult<Triangle> result) &&
-                    Vector3.Distance(lightPosition, eyePosition) > result.Distance)
+                var perfectRay = new PickingRay(ray, RayPickingParams.Objects);
+
+                if (Scene.PickNearest<Triangle>(perfectRay, SceneObjectUsages.None, out var result) &&
+                    Vector3.Distance(lightPosition, eyePosition) > result.PickingResult.Distance)
                 {
                     return false;
                 }
@@ -244,35 +260,6 @@ namespace Engine
                     flares[i].FlareSprite.Draw(context);
                 }
             }
-        }
-    }
-
-    /// <summary>
-    /// Lens flare extensions
-    /// </summary>
-    public static class LensFlareExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<LensFlare> AddComponentLensFlare(this Scene scene, string name, LensFlareDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
-        {
-            LensFlare component = null;
-
-            await Task.Run(() =>
-            {
-                component = new LensFlare(name, scene, description);
-
-                scene.AddComponent(component, usage, order);
-            });
-
-            return component;
         }
     }
 }

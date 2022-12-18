@@ -11,7 +11,6 @@ namespace SceneTest.SceneStencilPass
     {
         private readonly float spaceSize = 10;
 
-        private Model buildingObelisk = null;
         private Model lightEmitter1 = null;
         private Model lightEmitter2 = null;
 
@@ -23,11 +22,6 @@ namespace SceneTest.SceneStencilPass
 
         public SceneStencilPass(Game game)
             : base(game)
-        {
-
-        }
-
-        public override async Task Initialize()
         {
 #if DEBUG
             Game.VisibleMouse = false;
@@ -41,8 +35,18 @@ namespace SceneTest.SceneStencilPass
             Camera.FarPlaneDistance = 500;
             Camera.Goto(-10, 8, 20f);
             Camera.LookTo(0, 0, 0);
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeFloorAsphalt(),
@@ -52,7 +56,6 @@ namespace SceneTest.SceneStencilPass
                     InitializeLightsDrawer()
                 });
         }
-
         private async Task InitializeFloorAsphalt()
         {
             float l = spaceSize;
@@ -72,38 +75,36 @@ namespace SceneTest.SceneStencilPass
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
-            buildingObelisk = await this.AddComponentModel(
-                "Obelisk",
-                new ModelDescription()
-                {
-                    CastShadow = true,
-                    UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("SceneStencilPass/buildings/obelisk", "Obelisk.xml"),
-                });
+            var desc = new ModelDescription()
+            {
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                UseAnisotropicFiltering = true,
+                Content = ContentDescription.FromFile("SceneStencilPass/buildings/obelisk", "Obelisk.json"),
+            };
+
+            var buildingObelisk = await AddComponent<Model, ModelDescription>("Obelisk", "Obelisk", desc);
             buildingObelisk.Manipulator.SetPosition(0, 0, 0);
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.White;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color.White.RGB();
 
             var sphere = GeometryUtil.CreateSphere(0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(sphere);
@@ -111,14 +112,11 @@ namespace SceneTest.SceneStencilPass
 
             var desc = new ModelDescription()
             {
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lightEmitter1 = await this.AddComponentModel("Emitter1", desc);
-            lightEmitter2 = await this.AddComponentModel("Emitter2", desc);
+            lightEmitter1 = await AddComponent<Model, ModelDescription>("Emitter1", "Emitter1", desc);
+            lightEmitter2 = await AddComponent<Model, ModelDescription>("Emitter2", "Emitter2", desc);
         }
         private async Task InitializeLights()
         {
@@ -126,9 +124,9 @@ namespace SceneTest.SceneStencilPass
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = true;
 
-            Lights.Add(new SceneLightPoint("Point1", false, Color.White, Color.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
+            Lights.Add(new SceneLightPoint("Point1", false, Color3.White, Color3.White, true, SceneLightPointDescription.Create(Vector3.Zero, 5, 5)));
 
-            Lights.Add(new SceneLightSpot("Spot1", false, Color.White, Color.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
+            Lights.Add(new SceneLightSpot("Spot1", false, Color3.White, Color3.White, true, SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 20, 5, 5)));
 
             await Task.CompletedTask;
         }
@@ -136,10 +134,10 @@ namespace SceneTest.SceneStencilPass
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                DepthEnabled = true,
                 Count = 5000
             };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsDrawer", desc);
+
+            lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsDrawer", "DebugLightsDrawer", desc);
         }
 
         public override void Update(GameTime gameTime)
@@ -176,7 +174,7 @@ namespace SceneTest.SceneStencilPass
         private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -223,7 +221,7 @@ namespace SceneTest.SceneStencilPass
             position.Z = r * (float)Math.Sin(av * Game.GameTime.TotalSeconds);
 
             var pos1 = position + new Vector3(0, h, 0);
-            var col1 = animateLightColors ? new Color4(pos1.X, pos1.Y, pos1.Z, 1.0f) : Color.White;
+            var col1 = animateLightColors ? new Color3(pos1.X, pos1.Y, pos1.Z) : Color3.White;
 
             lightEmitter1.Manipulator.SetPosition(pos1);
             Lights.PointLights[0].Position = pos1;
@@ -231,7 +229,7 @@ namespace SceneTest.SceneStencilPass
             Lights.PointLights[0].SpecularColor = col1;
 
             var pos2 = (position * -1) + new Vector3(0, h, 0);
-            var col2 = animateLightColors ? new Color4(pos2.X, pos2.Y, pos2.Z, 1.0f) : Color.White;
+            var col2 = animateLightColors ? new Color3(pos2.X, pos2.Y, pos2.Z) : Color3.White;
 
             lightEmitter2.Manipulator.SetPosition(pos2);
             Lights.SpotLights[0].Position = pos2;
@@ -261,7 +259,7 @@ namespace SceneTest.SceneStencilPass
             {
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var color = new Color4(spot.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(spot.DiffuseColor, 0.25f);
 
                     var lines = spot.GetVolume(30);
 
@@ -270,7 +268,7 @@ namespace SceneTest.SceneStencilPass
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var color = new Color4(point.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(point.DiffuseColor, 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 

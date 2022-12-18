@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Engine.Content
 {
+    using Engine.Content.Persistence;
+
     /// <summary>
     /// Content loader interface
     /// </summary>
@@ -24,6 +27,6 @@ namespace Engine.Content
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        IEnumerable<ContentData> Load(string contentFolder, ContentDataDescription content);
+        Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content);
     }
 }

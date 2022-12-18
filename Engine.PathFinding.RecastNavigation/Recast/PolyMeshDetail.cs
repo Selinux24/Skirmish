@@ -27,71 +27,35 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return null;
             }
 
-            int nvp = mesh.NVP;
-            float cs = mesh.CS;
-            float ch = mesh.CH;
             Vector3 orig = mesh.BMin;
             int borderSize = mesh.BorderSize;
             int heightSearchRadius = Math.Max(1, (int)Math.Ceiling(mesh.MaxEdgeError));
 
-            HeightPatch hp = new HeightPatch();
-            int nPolyVerts = 0;
-            int maxhw = 0, maxhh = 0;
+            var (Bounds, MaxHWidth, MaxHHeight) = FindBounds(mesh, chf);
+            var bounds = Bounds;
+            int maxhw = MaxHWidth;
+            int maxhh = MaxHHeight;
 
-            Int4[] bounds = new Int4[mesh.NPolys];
-
-            // Find max size for a polygon area.
-            for (int i = 0; i < mesh.NPolys; ++i)
+            HeightPatch hp = new HeightPatch()
             {
-                var p = mesh.Polys[i];
-                int xmin = chf.Width;
-                int xmax = 0;
-                int ymin = chf.Height;
-                int ymax = 0;
-                for (int j = 0; j < nvp; ++j)
-                {
-                    if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX) break;
-                    var v = mesh.Verts[p[j]];
-                    xmin = Math.Min(xmin, v.X);
-                    xmax = Math.Max(xmax, v.X);
-                    ymin = Math.Min(ymin, v.Z);
-                    ymax = Math.Max(ymax, v.Z);
-                    nPolyVerts++;
-                }
-                xmin = Math.Max(0, xmin - 1);
-                xmax = Math.Min(chf.Width, xmax + 1);
-                ymin = Math.Max(0, ymin - 1);
-                ymax = Math.Min(chf.Height, ymax + 1);
-                bounds[i] = new Int4(xmin, xmax, ymin, ymax);
-                if (xmin >= xmax || ymin >= ymax) continue;
-                maxhw = Math.Max(maxhw, xmax - xmin);
-                maxhh = Math.Max(maxhh, ymax - ymin);
-            }
-
-            hp.Data = new int[maxhw * maxhh];
+                Data = new int[maxhw * maxhh],
+            };
 
             dmesh = new PolyMeshDetail();
 
-            List<Vector3> poly = new List<Vector3>(nvp);
-
             for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.Polys[i];
+                var iPoly = mesh.Polys.ElementAt(i);
+                var region = mesh.Regs.ElementAt(i);
+                var b = bounds.ElementAt(i);
 
                 // Store polygon vertices for processing.
-                poly.Clear();
-                for (int j = 0; j < nvp; ++j)
-                {
-                    if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX) break;
-                    var v = mesh.Verts[p[j]];
-                    var pv = new Vector3(v.X * cs, v.Y * ch, v.Z * cs);
-                    poly.Add(pv);
-                }
+                var poly = BuildPolyVertices(iPoly, mesh);
 
                 // Get the height data from the area of the polygon.
-                hp.Bounds = new Rectangle(bounds[i].X, bounds[i].Z, bounds[i].Y - bounds[i].X, bounds[i].W - bounds[i].Z);
+                hp.Bounds = new Rectangle(b.X, b.Z, b.Y - b.X, b.W - b.Z);
 
-                chf.GetHeightData(p, mesh.Verts, borderSize, hp, mesh.Regs[i]);
+                chf.GetHeightData(iPoly, mesh.Verts, borderSize, hp, region);
 
                 // Build detail mesh.
                 BuildPolyDetailParams param = new BuildPolyDetailParams
@@ -100,48 +64,159 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     SampleMaxError = sampleMaxError,
                     HeightSearchRadius = heightSearchRadius,
                 };
-                chf.BuildPolyDetail(poly.ToArray(), param, hp, out var verts, out var tris);
+                chf.BuildPolyDetail(poly, param, hp, out var verts, out var tris);
 
                 // Move detail verts to world space.
-                for (int j = 0; j < verts.Length; ++j)
-                {
-                    verts[j].X += orig.X;
-                    verts[j].Y += orig.Y + chf.CellHeight; // Is this offset necessary?
-                    verts[j].Z += orig.Z;
-                }
+                verts = MoveToWorldSpace(verts, orig, chf.CellHeight);
+
                 // Offset poly too, will be used to flag checking.
-                for (int j = 0; j < poly.Count; ++j)
-                {
-                    poly[j] += orig;
-                }
+                poly = MoveToWorldSpace(poly, orig);
 
                 // Store detail submesh.
-                PolyMeshDetailIndices tmp = new PolyMeshDetailIndices
+                dmesh.Meshes.Add(new PolyMeshDetailIndices
                 {
                     VertBase = dmesh.Vertices.Count,
-                    VertCount = verts.Length,
+                    VertCount = verts.Count(),
                     TriBase = dmesh.Triangles.Count,
-                    TriCount = tris.Length,
-                };
-                dmesh.Meshes.Add(tmp);
+                    TriCount = tris.Count(),
+                });
 
+                // Store vertices
                 dmesh.Vertices.AddRange(verts);
 
                 // Store triangles
-                foreach (var t in tris)
-                {
-                    dmesh.Triangles.Add(new PolyMeshTriangleIndices
-                    {
-                        Point1 = t.X,
-                        Point2 = t.Y,
-                        Point3 = t.Z,
-                        Flags = GetTriFlags(verts[t.X], verts[t.Y], verts[t.Z], poly),
-                    });
-                }
+                var triIndices = BuildTriangleList(tris, verts, poly);
+                dmesh.Triangles.AddRange(triIndices);
             }
 
             return dmesh;
         }
+        private static (IEnumerable<Int4> Bounds, int MaxHWidth, int MaxHHeight) FindBounds(PolyMesh mesh, CompactHeightfield chf)
+        {
+            List<Int4> bounds = new List<Int4>();
+
+            int nPolyVerts = 0;
+            int maxhw = 0;
+            int maxhh = 0;
+
+            // Find max size for a polygon area.
+            for (int i = 0; i < mesh.NPolys; ++i)
+            {
+                var p = mesh.Polys.ElementAt(i);
+
+                var (XMin, XMax, YMin, YMax, PolyVerts) = FindMaxSizeArea(mesh, chf, p);
+
+                bounds.Add(new Int4(XMin, XMax, YMin, YMax));
+                nPolyVerts += PolyVerts;
+
+                // Try to store max size
+                if (XMin >= XMax || YMin >= YMax)
+                {
+                    continue;
+                }
+
+                maxhw = Math.Max(maxhw, XMax - XMin);
+                maxhh = Math.Max(maxhh, YMax - YMin);
+            }
+
+            return (bounds, maxhw, maxhh);
+        }
+        private static (int XMin, int XMax, int YMin, int YMax, int PolyVerts) FindMaxSizeArea(PolyMesh mesh, CompactHeightfield chf, IndexedPolygon p)
+        {
+            int xmin = chf.Width;
+            int xmax = 0;
+            int ymin = chf.Height;
+            int ymax = 0;
+            int polyVerts = 0;
+
+            for (int j = 0; j < mesh.NVP; ++j)
+            {
+                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
+                {
+                    break;
+                }
+
+                var v = mesh.Verts[p[j]];
+                xmin = Math.Min(xmin, v.X);
+                xmax = Math.Max(xmax, v.X);
+                ymin = Math.Min(ymin, v.Z);
+                ymax = Math.Max(ymax, v.Z);
+                polyVerts++;
+            }
+            xmin = Math.Max(0, xmin - 1);
+            xmax = Math.Min(chf.Width, xmax + 1);
+            ymin = Math.Max(0, ymin - 1);
+            ymax = Math.Min(chf.Height, ymax + 1);
+
+            return (xmin, xmax, ymin, ymax, polyVerts);
+        }
+        private static IEnumerable<Vector3> BuildPolyVertices(IndexedPolygon p, PolyMesh mesh)
+        {
+            List<Vector3> res = new List<Vector3>();
+
+            float cs = mesh.CS;
+            float ch = mesh.CH;
+
+            for (int j = 0; j < mesh.NVP; ++j)
+            {
+                if (p[j] == IndexedPolygon.RC_MESH_NULL_IDX)
+                {
+                    break;
+                }
+
+                var v = mesh.Verts[p[j]];
+                var pv = new Vector3(v.X * cs, v.Y * ch, v.Z * cs);
+
+                res.Add(pv);
+            }
+
+            return res.ToArray();
+        }
+        private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> verts, Vector3 orig, float cellHeight)
+        {
+            List<Vector3> res = new List<Vector3>();
+
+            for (int j = 0; j < verts.Count(); ++j)
+            {
+                var v = verts.ElementAt(j) + orig;
+                v.Y += cellHeight;// Is this offset necessary?
+
+                res.Add(v);
+            }
+
+            return res.ToArray();
+        }
+        private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> poly, Vector3 orig)
+        {
+            List<Vector3> res = new List<Vector3>();
+
+            for (int j = 0; j < poly.Count(); ++j)
+            {
+                var p = poly.ElementAt(j) + orig;
+
+                res.Add(p);
+            }
+
+            return res.ToArray();
+        }
+        private static IEnumerable<PolyMeshTriangleIndices> BuildTriangleList(IEnumerable<Int3> tris, IEnumerable<Vector3> verts, IEnumerable<Vector3> poly)
+        {
+            List<PolyMeshTriangleIndices> res = new List<PolyMeshTriangleIndices>();
+
+            foreach (var t in tris)
+            {
+                res.Add(new PolyMeshTriangleIndices
+                {
+                    Point1 = t.X,
+                    Point2 = t.Y,
+                    Point3 = t.Z,
+                    Flags = GetTriFlags(verts.ElementAt(t.X), verts.ElementAt(t.Y), verts.ElementAt(t.Z), poly),
+                });
+            }
+
+            return res.ToArray();
+        }
+ 
         /// <summary>
         /// Merges a list of polygon mesh details
         /// </summary>

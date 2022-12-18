@@ -8,8 +8,13 @@ namespace Engine.UI
     /// <summary>
     /// User interface sprite cursor
     /// </summary>
-    public class UICursor : Sprite
+    public sealed class UICursor : UIControl<UICursorDescription>
     {
+        /// <summary>
+        /// Sprite
+        /// </summary>
+        private Sprite cursorSprite;
+
         /// <summary>
         /// Current cursor position
         /// </summary>
@@ -26,15 +31,33 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Sprite description</param>
-        public UICursor(string name, Scene scene, UICursorDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public UICursor(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            Centered = description.Centered;
-            Delta = description.Delta;
+
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UICursorDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Centered = Description.Centered;
+            Delta = Description.Delta;
             EventsEnabled = false;
+
+            cursorSprite = await CreateSprite();
+            AddChild(cursorSprite, false);
+        }
+        private async Task<Sprite> CreateSprite()
+        {
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Sprite",
+                $"{Name}.Sprite",
+                Description);
         }
 
         /// <inheritdoc/>
@@ -45,60 +68,22 @@ namespace Engine.UI
                 return;
             }
 
-            float left;
-            float top;
+            float left = Game.Input.MouseX;
+            float top = Game.Input.MouseY;
+            Vector2 centerDelta = Centered ? new Vector2(-Width * 0.5f, -Height * 0.5f) : Vector2.Zero;
 
-            if (Centered)
-            {
-                left = Game.Input.MouseX - (Width * 0.5f);
-                top = Game.Input.MouseY - (Height * 0.5f);
-            }
-            else
-            {
-                left = Game.Input.MouseX;
-                top = Game.Input.MouseY;
-            }
-
-            CursorPosition = new Vector2(left, top) + Delta;
+            CursorPosition = new Vector2(left, top);
 
             if (Game.Input.LockMouse)
             {
-                SetPosition(Game.Form.RenderCenter);
+                cursorSprite.SetPosition(Game.Form.RenderCenter + centerDelta + Delta);
             }
             else
             {
-                SetPosition(CursorPosition);
+                cursorSprite.SetPosition(CursorPosition + centerDelta + Delta);
             }
 
             base.Update(context);
-        }
-    }
-
-    /// <summary>
-    /// Cursor extensions
-    /// </summary>
-    public static class CursorExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UICursor> AddComponentUICursor(this Scene scene, string name, UICursorDescription description, int order = 0)
-        {
-            UICursor component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UICursor(name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
-            });
-
-            return component;
         }
     }
 }

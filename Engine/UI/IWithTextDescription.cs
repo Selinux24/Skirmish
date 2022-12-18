@@ -31,10 +31,10 @@ namespace Engine.UI
         /// <summary>
         /// Text horizontal alignement
         /// </summary>
-        HorizontalTextAlign TextHorizontalAlign { get; set; }
+        TextHorizontalAlign TextHorizontalAlign { get; set; }
         /// <summary>
         /// Text vertical alignement
         /// </summary>
-        VerticalTextAlign TextVerticalAlign { get; set; }
+        TextVerticalAlign TextVerticalAlign { get; set; }
     }
 }

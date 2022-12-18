@@ -35,8 +35,34 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="DungeonWall\Resources\Wall.json" />
+    <None Remove="Dungeon\Resources\Dungeon.json" />
+    <None Remove="ModularDungeon\Resources\BasicDungeon\Assets.json" />
+    <None Remove="ModularDungeon\Resources\BasicDungeon\AssetsMap.json" />
+    <None Remove="ModularDungeon\Resources\BasicDungeon\Levels.json" />
+    <None Remove="ModularDungeon\Resources\BasicDungeon\Levels2.json" />
+    <None Remove="ModularDungeon\Resources\Characters\Human2\Human2.json" />
+    <None Remove="ModularDungeon\Resources\Characters\Rat\Rat.json" />
+    <None Remove="NavMeshTest\Resources\dungeon.json" />
+    <None Remove="NavMeshTest\Resources\modular_dungeon.json" />
+    <None Remove="Start\Resources\SkyPlane.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="DungeonWall\Resources\diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="DungeonWall\Resources\Wall.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Dungeon\Resources\Dungeon.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Assets.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\AssetsMap.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\BasicDungeon\BasicDungeon.png">
@@ -48,13 +74,7 @@
     <Content Include="DungeonWall\Resources\Wall.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="DungeonWall\Resources\Wall.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Dungeon\Resources\Dungeon.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Dungeon\Resources\Dungeon.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\Audio\Effects\door.wav">
@@ -82,12 +102,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\BasicDungeon\Assets.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ModularDungeon\Resources\BasicDungeon\Assets.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ModularDungeon\Resources\BasicDungeon\AssetsMap.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\BasicDungeon\atlas1.jpg">
@@ -162,7 +176,10 @@
     <Content Include="ModularDungeon\Resources\BasicDungeon\lava_n.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ModularDungeon\Resources\BasicDungeon\Levels.xml">
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Levels.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\BasicDungeon\Levels2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\BasicDungeon\marble_d.png">
@@ -216,13 +233,13 @@
     <Content Include="ModularDungeon\Resources\Characters\Human2\Human2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ModularDungeon\Resources\Characters\Human2\Human2.xml">
+    <Content Include="ModularDungeon\Resources\Characters\Human2\Human2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\Characters\Rat\Rat.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="ModularDungeon\Resources\Characters\Rat\Rat.xml">
+    <Content Include="ModularDungeon\Resources\Characters\Rat\Rat.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\Characters\Rat\Rat_d.png">
@@ -258,16 +275,16 @@
     <Content Include="ModularDungeon\Resources\OnePageDungeons\ragerock_fortress.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="NavMeshTest\Resources\dungeon.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="NavMeshTest\Resources\dungeon.obj">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="NavMeshTest\Resources\dungeon.xml">
+    <Content Include="NavMeshTest\Resources\modular_dungeon.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="NavMeshTest\Resources\modular_dungeon.obj">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="NavMeshTest\Resources\modular_dungeon.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\backGround.jpg">
@@ -297,7 +314,7 @@
     <Content Include="Start\Resources\SkyPlane.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Start\Resources\SkyPlane.xml">
+    <Content Include="Start\Resources\SkyPlane.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

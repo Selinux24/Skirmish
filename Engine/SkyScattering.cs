@@ -4,13 +4,14 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.SkyScattering;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Scattered sky
     /// </summary>
-    public class SkyScattering : Drawable
+    public sealed class SkyScattering : Drawable<SkyScatteringDescription>
     {
         /// <summary>
         /// Vernier scale
@@ -46,6 +47,10 @@ namespace Engine
         /// </summary>
         private BufferDescriptor indexBuffer = null;
         /// <summary>
+        /// Sky drawer
+        /// </summary>
+        private BuiltInSkyScattering skyDrawer = null;
+        /// <summary>
         /// Rayleigh scattering constant value
         /// </summary>
         private float rayleighScattering;
@@ -56,7 +61,7 @@ namespace Engine
         /// <summary>
         /// Wave length
         /// </summary>
-        private Color4 wavelength;
+        private Color3 wavelength;
         /// <summary>
         /// Sphere inner radius
         /// </summary>
@@ -77,7 +82,7 @@ namespace Engine
         /// <summary>
         /// Inverse wave length * 4
         /// </summary>
-        public Color4 InvWaveLength4 { get; private set; }
+        public Color3 InvWaveLength4 { get; private set; }
         /// <summary>
         /// Scattering Scale
         /// </summary>
@@ -136,7 +141,7 @@ namespace Engine
         /// <summary>
         /// Light wave length
         /// </summary>
-        public Color4 WaveLength
+        public Color3 WaveLength
         {
             get
             {
@@ -145,11 +150,10 @@ namespace Engine
             set
             {
                 wavelength = value;
-                InvWaveLength4 = new Color4(
+                InvWaveLength4 = new Color3(
                     1f / (float)Math.Pow(value.Red, 4.0f),
                     1f / (float)Math.Pow(value.Green, 4.0f),
-                    1f / (float)Math.Pow(value.Blue, 4.0f),
-                    1.0f);
+                    1f / (float)Math.Pow(value.Blue, 4.0f));
             }
         }
         /// <summary>
@@ -225,31 +229,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Sky scattering description class</param>
-        public SkyScattering(string name, Scene scene, SkyScatteringDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public SkyScattering(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            PlanetRadius = description.PlanetRadius;
-            PlanetAtmosphereRadius = description.PlanetAtmosphereRadius;
 
-            RayleighScattering = description.RayleighScattering;
-            RayleighScaleDepth = description.RayleighScaleDepth;
-            MieScattering = description.MieScattering;
-            MiePhaseAssymetry = description.MiePhaseAssymetry;
-            MieScaleDepth = description.MieScaleDepth;
-
-            WaveLength = description.WaveLength;
-            Brightness = description.Brightness;
-            HDRExposure = description.HDRExposure;
-            Resolution = description.Resolution;
-
-            sphereInnerRadius = 1.0f;
-            sphereOuterRadius = sphereInnerRadius * 1.025f;
-            CalcScale();
-
-            InitializeBuffers(name);
         }
         /// <summary>
         /// Destructor
@@ -268,6 +254,48 @@ namespace Engine
                 BufferManager?.RemoveVertexData(vertexBuffer);
                 BufferManager?.RemoveIndexData(indexBuffer);
             }
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(SkyScatteringDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            PlanetRadius = Description.PlanetRadius;
+            PlanetAtmosphereRadius = Description.PlanetAtmosphereRadius;
+
+            RayleighScattering = Description.RayleighScattering;
+            RayleighScaleDepth = Description.RayleighScaleDepth;
+            MieScattering = Description.MieScattering;
+            MiePhaseAssymetry = Description.MiePhaseAssymetry;
+            MieScaleDepth = Description.MieScaleDepth;
+
+            WaveLength = Description.WaveLength;
+            Brightness = Description.Brightness;
+            HDRExposure = Description.HDRExposure;
+            Resolution = Description.Resolution;
+
+            sphereInnerRadius = 1.0f;
+            sphereOuterRadius = sphereInnerRadius * 1.025f;
+            CalcScale();
+
+            InitializeBuffers(Name);
+        }
+        /// <summary>
+        /// Initialize buffers
+        /// </summary>
+        /// <param name="name">Buffer name</param>
+        private void InitializeBuffers(string name)
+        {
+            var sphere = GeometryUtil.CreateSphere(1, 10, 75);
+
+            var vertices = VertexPosition.Generate(sphere.Vertices);
+            var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);
+
+            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
+            indexBuffer = BufferManager.AddIndexData(name, false, indices);
+
+            skyDrawer = BuiltInShaders.GetDrawer<BuiltInSkyScattering>();
         }
 
         /// <inheritdoc/>
@@ -298,90 +326,50 @@ namespace Engine
                 return;
             }
 
+            if (skyDrawer == null)
+            {
+                return;
+            }
+
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
                 return;
             }
 
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            var effect = DrawerPool.EffectDefaultSkyScattering;
-            var technique = GetScatteringTechnique(effect);
-
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
-
-            effect.UpdatePerFrame(
-                Matrix.Translation(context.EyePosition),
-                context.ViewProjection,
-                keyLight.Direction,
-                new EffectSkyScatterState
-                {
-                    PlanetRadius = PlanetRadius,
-                    PlanetAtmosphereRadius = PlanetAtmosphereRadius,
-                    SphereOuterRadius = SphereOuterRadius,
-                    SphereInnerRadius = SphereInnerRadius,
-                    SkyBrightness = Brightness,
-                    RayleighScattering = RayleighScattering,
-                    RayleighScattering4PI = RayleighScattering4PI,
-                    MieScattering = MieScattering,
-                    MieScattering4PI = MieScattering4PI,
-                    InvWaveLength4 = InvWaveLength4,
-                    Scale = ScatteringScale,
-                    RayleighScaleDepth = RayleighScaleDepth,
-                    BackColor = context.Lights.FogColor,
-                    HdrExposure = HDRExposure,
-                });
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
+            var skyState = new BuiltInSkyScatteringState
             {
-                graphics.EffectPassApply(technique, p, 0);
+                PlanetRadius = PlanetRadius,
+                PlanetAtmosphereRadius = PlanetAtmosphereRadius,
+                SphereOuterRadius = SphereOuterRadius,
+                SphereInnerRadius = SphereInnerRadius,
+                SkyBrightness = Brightness,
+                RayleighScattering = RayleighScattering,
+                RayleighScattering4PI = RayleighScattering4PI,
+                MieScattering = MieScattering,
+                MieScattering4PI = MieScattering4PI,
+                InvWaveLength4 = InvWaveLength4,
+                Scale = ScatteringScale,
+                RayleighScaleDepth = RayleighScaleDepth,
+                BackColor = context.Lights.FogColor,
+                HdrExposure = HDRExposure,
+                Samples = (uint)Resolution,
+            };
+            skyDrawer.Update(keyLight.Direction, skyState);
 
-                graphics.DrawIndexed(indexBuffer.Count, indexBuffer.BufferOffset, vertexBuffer.BufferOffset);
+            var drawOptions = new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            };
+            if (skyDrawer.Draw(BufferManager, drawOptions))
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
             }
         }
-        /// <summary>
-        /// Gets the sky scatterfing effect technique base on resolution
-        /// </summary>
-        /// <param name="effect">Effect</param>
-        /// <returns>Returns the sky scatterfing effect technique</returns>
-        private EngineEffectTechnique GetScatteringTechnique(EffectDefaultSkyScattering effect)
-        {
-            EngineEffectTechnique technique;
-            if (Resolution == SkyScatteringResolutions.High)
-            {
-                technique = effect.SkyScatteringHigh;
-            }
-            else if (Resolution == SkyScatteringResolutions.Medium)
-            {
-                technique = effect.SkyScatteringMedium;
-            }
-            else
-            {
-                technique = effect.SkyScatteringLow;
-            }
 
-            return technique;
-        }
-
-        /// <summary>
-        /// Initialize buffers
-        /// </summary>
-        /// <param name="name">Buffer name</param>
-        private void InitializeBuffers(string name)
-        {
-            var sphere = GeometryUtil.CreateSphere(1, 10, 75);
-
-            var vertices = VertexPosition.Generate(sphere.Vertices);
-            var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);
-
-            vertexBuffer = BufferManager.AddVertexData(name, false, vertices);
-            indexBuffer = BufferManager.AddIndexData(name, false, indices);
-        }
         /// <summary>
         /// Calc current scattering scale from sphere radius values
         /// </summary>
@@ -491,7 +479,7 @@ namespace Engine
                 samplePoint += sampleRay;
             }
 
-            Color3 rayleighColor = frontColor * (InvWaveLength4.RGB() * rayleighBrightness);
+            Color3 rayleighColor = frontColor * (InvWaveLength4 * rayleighBrightness);
 
             Vector3 direction = Vector3.Normalize(eyePosition - position);
             float miePhase = GetMiePhase(Vector3.Dot(-lightDirection, direction));
@@ -506,35 +494,6 @@ namespace Engine
             expColor.Normalize();
 
             outColor = new Color4(expColor, 1f);
-        }
-    }
-
-    /// <summary>
-    /// Sky scattering extensions
-    /// </summary>
-    public static class SkyScatteringExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<SkyScattering> AddComponentSkyScattering(this Scene scene, string name, SkyScatteringDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
-        {
-            SkyScattering component = null;
-
-            await Task.Run(() =>
-            {
-                component = new SkyScattering(name, scene, description);
-
-                scene.AddComponent(component, usage, order);
-            });
-
-            return component;
         }
     }
 }

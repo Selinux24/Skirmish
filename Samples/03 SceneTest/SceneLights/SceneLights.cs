@@ -14,7 +14,6 @@ namespace SceneTest.SceneLights
     /// </summary>
     public class SceneLights : Scene
     {
-        private const int layerEffects = 2;
         private const float spaceSize = 20;
 
         private ModelInstanced buildingObelisks = null;
@@ -33,11 +32,6 @@ namespace SceneTest.SceneLights
         /// <param name="game">Game</param>
         public SceneLights(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
 #if DEBUG
             Game.VisibleMouse = false;
             Game.LockMouse = false;
@@ -50,8 +44,18 @@ namespace SceneTest.SceneLights
             Camera.FarPlaneDistance = 500;
             Camera.Goto(-10, 8, 20f);
             Camera.LookTo(0, 0, 0);
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeFloorAsphalt(),
@@ -63,20 +67,8 @@ namespace SceneTest.SceneLights
                     InitializeVolumeDrawer(),
                     InitializeBufferDrawer()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
-                    buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
-                    buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
-                    buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
-                });
+                InitializeComponentsCompleted);
         }
-
         private async Task InitializeFloorAsphalt()
         {
             float l = spaceSize;
@@ -96,50 +88,48 @@ namespace SceneTest.SceneLights
                 1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeBuildingObelisk()
         {
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.xml"),
+                Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
             };
 
-            buildingObelisks = await this.AddComponentModelInstanced("Obelisk", desc);
+            buildingObelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
         }
         private async Task InitializeTree()
         {
             var desc = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile("SceneLights/trees", "Tree.xml"),
+                Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
             };
 
-            await this.AddComponentModel("Tree", desc);
+            await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);
         }
         private async Task InitializeEmitter()
         {
-            MaterialContent mat = MaterialContent.Default;
-            mat.EmissionColor = Color.White;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color.White.RGB();
 
             var s = GeometryUtil.CreateSphere(0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(s);
@@ -148,17 +138,14 @@ namespace SceneTest.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lightEmitters = await this.AddComponentModelInstanced("Emitter", desc);
+            lightEmitters = await AddComponent<ModelInstanced, ModelInstancedDescription>("Emitter", "Emitter", desc);
         }
         private async Task InitializeLanterns()
         {
-            MaterialContent mat = MaterialContent.Default;
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
 
             var cone = GeometryUtil.CreateCone(0.25f, 16, 0.5f);
 
@@ -178,13 +165,10 @@ namespace SceneTest.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 3,
-                CastShadow = false,
-                DeferredEnabled = true,
-                DepthEnabled = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            lanterns = await this.AddComponentModelInstanced("Lanterns", desc);
+            lanterns = await AddComponent<ModelInstanced, ModelInstancedDescription>("Lanterns", "Lanterns", desc);
         }
         private async Task InitializeLights()
         {
@@ -195,12 +179,12 @@ namespace SceneTest.SceneLights
             Lights.FillLight.CastShadow = false;
 
             var pointDesc = SceneLightPointDescription.Create(Vector3.Zero, 25, 25);
-            Lights.Add(new SceneLightPoint("Point1", true, Color.White, Color.White, true, pointDesc));
+            Lights.Add(new SceneLightPoint("Point1", true, Color3.White, Color3.White, true, pointDesc));
 
             var spotDesc = SceneLightSpotDescription.Create(Vector3.Zero, Vector3.Down, 50, 25, 25);
-            Lights.Add(new SceneLightSpot("Spot1", true, Color.White, Color.White, true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot2", true, Color.White, Color.White, true, spotDesc));
-            Lights.Add(new SceneLightSpot("Spot3", true, Color.White, Color.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot1", true, Color3.White, Color3.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot2", true, Color3.White, Color3.White, true, spotDesc));
+            Lights.Add(new SceneLightSpot("Spot3", true, Color3.White, Color3.White, true, spotDesc));
 
             await Task.CompletedTask;
         }
@@ -208,10 +192,10 @@ namespace SceneTest.SceneLights
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
-                DepthEnabled = true,
                 Count = 5000
             };
-            lightsVolumeDrawer = await this.AddComponentPrimitiveListDrawer("DebugLightsVolumeDrawer", desc);
+
+            lightsVolumeDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DebugLightsVolumeDrawer", "DebugLightsVolumeDrawer", desc);
         }
         private async Task InitializeBufferDrawer()
         {
@@ -220,8 +204,20 @@ namespace SceneTest.SceneLights
             int smLeft = Game.Form.RenderWidth - width;
             int smTop = Game.Form.RenderHeight - height;
 
-            bufferDrawer = await this.AddComponentUITextureRenderer("DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), layerEffects);
+            bufferDrawer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("DebugBufferDrawer", "DebugBufferDrawer", UITextureRendererDescription.Default(smLeft, smTop, width, height), LayerEffects);
             bufferDrawer.Visible = false;
+        }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            buildingObelisks[0].Manipulator.SetPosition(+5, 0, +5);
+            buildingObelisks[1].Manipulator.SetPosition(+5, 0, -5);
+            buildingObelisks[2].Manipulator.SetPosition(-5, 0, +5);
+            buildingObelisks[3].Manipulator.SetPosition(-5, 0, -5);
         }
 
         public override void Update(GameTime gameTime)
@@ -256,7 +252,7 @@ namespace SceneTest.SceneLights
         private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -385,7 +381,7 @@ namespace SceneTest.SceneLights
             {
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var color = new Color4(spot.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(spot.DiffuseColor, 0.25f);
 
                     var lines = spot.GetVolume(30);
 
@@ -394,7 +390,7 @@ namespace SceneTest.SceneLights
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var color = new Color4(point.DiffuseColor.RGB(), 0.25f);
+                    var color = new Color4(point.DiffuseColor, 0.25f);
 
                     var lines = point.GetVolume(30, 30);
 
@@ -465,7 +461,7 @@ namespace SceneTest.SceneLights
 
             bufferDrawer.Texture = buffer;
             bufferDrawer.TextureIndex = 0;
-            bufferDrawer.Channels = UITextureRendererChannels.Red;
+            bufferDrawer.Channel = ColorChannels.Red;
             bufferDrawer.Visible = true;
         }
     }

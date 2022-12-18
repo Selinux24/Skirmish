@@ -81,7 +81,7 @@ namespace Engine.Common
         {
             get
             {
-                return VertexBuffer.Ready && (IndexBuffer?.Ready ?? true);
+                return (VertexBuffer?.Ready ?? false) && (IndexBuffer?.Ready ?? true);
             }
         }
         /// <summary>
@@ -91,7 +91,7 @@ namespace Engine.Common
         {
             get
             {
-                int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer.Count;
+                int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
                 switch (Topology)
                 {
                     case Topology.LineList:
@@ -178,9 +178,9 @@ namespace Engine.Common
         /// Draw mesh geometry
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        /// <param name="startInstanceLocation">Start instance location</param>
         /// <param name="count">Instance count</param>
-        public virtual void Draw(Graphics graphics, int startInstanceLocation, int count)
+        /// <param name="startInstanceLocation">Start instance location</param>
+        public virtual void Draw(Graphics graphics, int count, int startInstanceLocation)
         {
             if (count <= 0)
             {
@@ -241,7 +241,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or position list</returns>
-        public IEnumerable<Vector3> GetPoints(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             if (refresh || positionCache == null)
             {
@@ -301,7 +301,7 @@ namespace Engine.Common
         /// <param name="boneTransforms">Bone transforms</param>
         /// <param name="refresh">Sets if the cache must be refresehd or not</param>
         /// <returns>Returns null or triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(Matrix[] boneTransforms, bool refresh = false)
+        public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
             if (refresh || triangleCache == null)
             {
@@ -324,6 +324,19 @@ namespace Engine.Common
             }
 
             return triangleCache?.ToArray() ?? new Triangle[] { };
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            if (Indexed)
+            {
+                return $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}; Indices: {Indices?.Count() ?? 0}";
+            }
+            else
+            {
+                return $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}";
+            }
         }
     }
 }

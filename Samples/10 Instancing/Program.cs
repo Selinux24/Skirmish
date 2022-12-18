@@ -1,7 +1,6 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
 using System;
-using System.IO;
 
 namespace Instancing
 {
@@ -13,18 +12,24 @@ namespace Instancing
             try
             {
 #if DEBUG
-                int sWidth = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Width * .8f);
-                int sHeight = (int)(System.Windows.Forms.SystemInformation.VirtualScreen.Height * .8f);
-
-                using (Game cl = new Game("10 Instancing", false, sWidth, sHeight, true, 0, 0))
+                Logger.LogLevel = LogLevel.Debug;
+                Logger.LogStackSize = 0;
+                Logger.EnableConsole = true;
 #else
-                using (Game cl = new Game("10 Instancing", true, 0, 0, true, 0, 4))
+                Logger.LogLevel = LogLevel.Error;
+#endif
+
+#if DEBUG
+                using (Game cl = new Game("10 Instancing", EngineForm.ScreenSize * 0.8f))
+#else
+                using (Game cl = new Game("10 Instancing"))
 #endif
                 {
-                    cl.VisibleMouse = false;
 #if DEBUG
+                    cl.VisibleMouse = false;
                     cl.LockMouse = false;
 #else
+                    cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
@@ -37,7 +42,18 @@ namespace Instancing
             }
             catch (Exception ex)
             {
-                File.WriteAllText("dump.txt", ex.ToString());
+                Logger.WriteError(nameof(Program), ex);
+            }
+            finally
+            {
+#if DEBUG
+                Logger.Dump("dumpDEBUG.txt");
+#else
+                if (Logger.HasErrors())
+                {
+                    Logger.Dump($"dump{DateTime.Now:yyyyMMddHHmmss.fff}.txt");
+                }
+#endif
             }
         }
     }

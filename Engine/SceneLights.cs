@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Scene lights
     /// </summary>
-    public class SceneLights
+    public class SceneLights : IHasGameState
     {
         #region Preconfigured lights
 
@@ -26,7 +26,10 @@ namespace Engine
                 SceneLightDirectional.BackLight,
             };
 
-            var defLights = new SceneLights(scene);
+            var defLights = new SceneLights(scene)
+            {
+                HemisphericLigth = new SceneLightHemispheric("Default")
+            };
 
             defLights.AddRange(lights);
 
@@ -135,11 +138,7 @@ namespace Engine
         /// <summary>
         /// Fog color
         /// </summary>
-        public Color4 FogColor { get; protected set; }
-        /// <summary>
-        /// Albedo
-        /// </summary>
-        public float Albedo { get; protected set; } = 0.5f;
+        public Color4 FogColor { get; set; }
         /// <summary>
         /// Gets light by name
         /// </summary>
@@ -186,11 +185,16 @@ namespace Engine
         /// <summary>
         /// Sun color palette
         /// </summary>
-        public List<Tuple<float, Color4>> SunColorPalette { get; set; }
+        public List<Tuple<float, Color3>> SunColorPalette { get; set; }
         /// <summary>
         /// Sun color
         /// </summary>
-        public Color4 SunColor { get; set; }
+        public Color3 SunColor { get; set; }
+        /// <summary>
+        /// Gets or sets the shadow intensity value
+        /// </summary>
+        /// <remarks>From 0 (darker) to 1 (lighter)</remarks>
+        public float ShadowIntensity { get; set; }
 
         /// <summary>
         /// Constructor
@@ -204,19 +208,21 @@ namespace Engine
             FogRange = 0;
             FarLightsDistance = 1000000f;
 
-            SunColor = Color.White;
+            SunColor = Color3.White;
 
             UseSunColorPalette = true;
-            SunColorPalette = new List<Tuple<float, Color4>>();
+            SunColorPalette = new List<Tuple<float, Color3>>();
             SunColorPalette.AddRange(new[]
             {
-                new Tuple<float, Color4>(MathUtil.Pi * -1.00f, Color.Black),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.02f, Color.Orange),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.20f, Color.White),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.70f, Color.White),
-                new Tuple<float, Color4>(MathUtil.Pi * 0.98f, Color.Orange),
-                new Tuple<float, Color4>(MathUtil.Pi * 2.00f, Color.Black),
+                new Tuple<float, Color3>(MathUtil.Pi * -1.00f, Color.Black.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.02f, Color.Orange.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.20f, Color.White.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.70f, Color.White.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 0.98f, Color.Orange.RGB()),
+                new Tuple<float, Color3>(MathUtil.Pi * 2.00f, Color.Black.RGB()),
             });
+
+            ShadowIntensity = 0.5f;
         }
 
         /// <summary>
@@ -358,13 +364,14 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        public void Cull(IIntersectionVolume volume, Vector3 viewerPosition)
+        /// <param name="distance">Light maximum distance</param>
+        public void Cull(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
         {
             visibleLights.Clear();
 
             visibleLights.AddRange(CullDirectionalLights());
-            visibleLights.AddRange(CullPointLights(volume, viewerPosition));
-            visibleLights.AddRange(CullSpotLights(volume, viewerPosition));
+            visibleLights.AddRange(CullPointLights(volume, viewerPosition, distance));
+            visibleLights.AddRange(CullSpotLights(volume, viewerPosition, distance));
         }
         /// <summary>
         /// Cull test for directional lighs
@@ -380,16 +387,17 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private IEnumerable<ISceneLight> CullPointLights(IIntersectionVolume volume, Vector3 viewerPosition)
+        /// <param name="distance">Light maximum distance</param>
+        private IEnumerable<ISceneLight> CullPointLights(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
         {
             var pLights = pointLights
                 .Where(l =>
                 {
                     if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                     {
-                        float d = Vector3.DistanceSquared(viewerPosition, l.Position);
+                        float d = Vector3.Distance(viewerPosition, l.Position) - l.Radius;
 
-                        return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                        return d <= distance;
                     }
 
                     return false;
@@ -417,16 +425,17 @@ namespace Engine
         /// </summary>
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
-        private IEnumerable<ISceneLight> CullSpotLights(IIntersectionVolume volume, Vector3 viewerPosition)
+        /// <param name="distance">Light maximum distance</param>
+        private IEnumerable<ISceneLight> CullSpotLights(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
         {
             var sLights = spotLights
                 .Where(l =>
                 {
                     if (l.Enabled && volume.Contains(l.BoundingSphere) != ContainmentType.Disjoint)
                     {
-                        float d = Vector3.DistanceSquared(viewerPosition, l.Position);
+                        float d = Vector3.Distance(viewerPosition, l.Position) - l.Radius;
 
-                        return (l.Radius / d) >= (1f / GameEnvironment.LODDistanceLow);
+                        return d <= distance;
                     }
 
                     return false;
@@ -491,38 +500,41 @@ namespace Engine
         /// <summary>
         /// Gets a collection of directional lights that cast shadow
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightDirectional> GetDirectionalShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             return visibleLights
                 .OfType<ISceneLightDirectional>()
-                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .Where(l => l.MarkForShadowCasting(environment, eyePosition))
                 .ToArray();
         }
         /// <summary>
         /// Gets a collection of point lights that cast shadow
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightPoint> GetPointShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             return visibleLights
                 .OfType<ISceneLightPoint>()
-                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .Where(l => l.MarkForShadowCasting(environment, eyePosition))
                 .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }
         /// <summary>
         /// Gets a collection of spot lights that cast shadow
         /// </summary>
+        /// <param name="environment">Game environment</param>
         /// <param name="eyePosition">Eye position</param>
         /// <returns>Returns a light collection</returns>
-        public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(Vector3 eyePosition)
+        public IEnumerable<ISceneLightSpot> GetSpotShadowCastingLights(GameEnvironment environment, Vector3 eyePosition)
         {
             return visibleLights
                 .OfType<ISceneLightSpot>()
-                .Where(l => l.MarkForShadowCasting(eyePosition))
+                .Where(l => l.MarkForShadowCasting(environment, eyePosition))
                 .OrderBy(l => Vector3.DistanceSquared(l.Position, eyePosition))
                 .ToArray();
         }
@@ -540,7 +552,6 @@ namespace Engine
             }
 
             float b = Math.Max(0, -(float)Math.Cos(timeOfDay.Elevation) + 0.15f) * 1.5f;
-            Albedo = Math.Min(b, 0.5f);
 
             Vector3 keyDir = timeOfDay.LightDirection;
             Vector3 backDir = -Vector3.Reflect(keyDir, Vector3.Up);
@@ -582,14 +593,14 @@ namespace Engine
                 backLight.Direction = backDir;
             }
 
-            FogColor = BaseFogColor * Albedo;
+            FogColor = BaseFogColor * b;
         }
         /// <summary>
         /// Gets the sun color based on time of day
         /// </summary>
         /// <param name="timeOfDay">Time of day class</param>
         /// <returns>Returns the color base on time of day meridian angle</returns>
-        private Color4 GetSunColor(TimeOfDay timeOfDay)
+        private Color3 GetSunColor(TimeOfDay timeOfDay)
         {
             float angle = MathUtil.Clamp(timeOfDay.MeridianAngle - MathUtil.PiOverTwo, 0, MathUtil.Pi);
 
@@ -602,7 +613,7 @@ namespace Engine
                         var from = SunColorPalette[i - 1];
                         var to = SunColorPalette[i];
                         float amount = (angle - from.Item1) / (to.Item1 - from.Item1);
-                        return Color4.Lerp(from.Item2, to.Item2, amount);
+                        return Color3.Lerp(from.Item2, to.Item2, amount);
                     }
                     else
                     {
@@ -611,7 +622,7 @@ namespace Engine
                 }
             }
 
-            return Color4.White;
+            return Color3.White;
         }
 
         /// <summary>
@@ -620,7 +631,7 @@ namespace Engine
         /// <param name="start">Starting distance</param>
         /// <param name="end">End distance</param>
         /// <param name="color">Fog color</param>
-        public void EnableFog(float start, float end, Color color)
+        public void EnableFog(float start, float end, Color4 color)
         {
             FogStart = start;
             FogRange = end - start;
@@ -634,6 +645,46 @@ namespace Engine
             FogStart = 0;
             FogRange = 0;
             BaseFogColor = FogColor = Color.Black;
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightsState
+            {
+                DirectionalLights = directionalLights.Select(l => l.GetState()).ToArray(),
+                PointLights = pointLights.Select(l => l.GetState()).ToArray(),
+                SpotLights = spotLights.Select(l => l.GetState()).ToArray(),
+                HemisphericLigth = HemisphericLigth.GetState(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightsState sceneLightsState))
+            {
+                return;
+            }
+
+            for (int i = 0; i < sceneLightsState.DirectionalLights.Count(); i++)
+            {
+                var lightState = sceneLightsState.DirectionalLights.ElementAt(i);
+                directionalLights[i].SetState(lightState);
+            }
+
+            for (int i = 0; i < sceneLightsState.PointLights.Count(); i++)
+            {
+                var lightState = sceneLightsState.PointLights.ElementAt(i);
+                PointLights[i].SetState(lightState);
+            }
+
+            for (int i = 0; i < sceneLightsState.SpotLights.Count(); i++)
+            {
+                var lightState = sceneLightsState.SpotLights.ElementAt(i);
+                spotLights[i].SetState(lightState);
+            }
+
+            HemisphericLigth.SetState(sceneLightsState.HemisphericLigth);
         }
     }
 }

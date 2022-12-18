@@ -20,6 +20,16 @@ namespace Deferred
         /// </summary>
         private readonly T controller;
 
+        /// <inheritdoc/>
+        public string Id { get; private set; }
+        /// <inheritdoc/>
+        public string Name { get; set; }
+        /// <inheritdoc/>
+        public Scene Scene { get; private set; }
+        /// <inheritdoc/>
+        public bool HasOwner { get { return Owner != null; } }
+        /// <inheritdoc/>
+        public ISceneObject Owner { get; set; }
         /// <summary>
         /// Agent type
         /// </summary>
@@ -35,11 +45,11 @@ namespace Deferred
         {
             get
             {
-                return this.model.Active;
+                return model.Active;
             }
             set
             {
-                this.model.Active = value;
+                model.Active = value;
             }
         }
         /// <summary>
@@ -49,11 +59,11 @@ namespace Deferred
         {
             get
             {
-                return this.model.Visible;
+                return model.Visible;
             }
             set
             {
-                this.model.Visible = value;
+                model.Visible = value;
             }
         }
         /// <summary>
@@ -63,7 +73,7 @@ namespace Deferred
         {
             get
             {
-                return this.controller.HasPath;
+                return controller.HasPath;
             }
         }
         /// <summary>
@@ -73,7 +83,7 @@ namespace Deferred
         {
             get
             {
-                return this.model?.Manipulator;
+                return model?.Manipulator;
             }
         }
         /// <summary>
@@ -83,11 +93,11 @@ namespace Deferred
         {
             get
             {
-                return this.controller.MaximumSpeed;
+                return controller.MaximumSpeed;
             }
             set
             {
-                this.controller.MaximumSpeed = value;
+                controller.MaximumSpeed = value;
             }
         }
         /// <summary>
@@ -97,27 +107,50 @@ namespace Deferred
         {
             get
             {
-                return this.model?.Lights ?? new ISceneLight[] { };
+                return model?.Lights ?? new ISceneLight[] { };
             }
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public GameAgent(AgentType agentType, ModelInstance model, T controller)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        /// <param name="agentType">Agent type</param>
+        /// <param name="model">Model</param>
+        /// <param name="controller">Controller</param>
+        public GameAgent(string id, string name, AgentType agentType, ModelInstance model, T controller)
         {
+            Id = id;
+            Name = name;
+            AgentType = agentType;
             this.model = model;
             this.controller = controller;
-            this.AgentType = agentType;
         }
 
         /// <summary>
         /// Updates internal state
         /// </summary>
         /// <param name="context">Upating context</param>
+        public void EarlyUpdate(UpdateContext context)
+        {
+            //Not applicable
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="context">Upating context</param>
         public void Update(UpdateContext context)
         {
-            this.controller?.UpdateManipulator(context.GameTime, this.Manipulator);
+            controller?.UpdateManipulator(context.GameTime, Manipulator);
+        }
+        /// <summary>
+        /// Updates internal state
+        /// </summary>
+        /// <param name="context">Upating context</param>
+        public void LateUpdate(UpdateContext context)
+        {
+            //Not applicable
         }
         /// <summary>
         /// Updates the specified manipulator
@@ -126,7 +159,7 @@ namespace Deferred
         /// <param name="manipulator">Manipulator</param>
         public void UpdateManipulator(GameTime gameTime, Manipulator3D manipulator)
         {
-            this.controller.UpdateManipulator(gameTime, manipulator);
+            controller.UpdateManipulator(gameTime, manipulator);
         }
         /// <summary>
         /// Follow the specified path
@@ -135,14 +168,35 @@ namespace Deferred
         /// <param name="time">Path time</param>
         public void Follow(IControllerPath newPath, float time = 0)
         {
-            this.controller.Follow(newPath, time);
+            controller.Follow(newPath, time);
         }
         /// <summary>
         /// Clears the path
         /// </summary>
         public void Clear()
         {
-            this.controller.Clear();
+            controller.Clear();
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new GameAgentState
+            {
+                Id = Id,
+                Controller = controller.GetState(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is GameAgentState gameAgentState))
+            {
+                return;
+            }
+
+            Id = gameAgentState.Id;
+            controller?.SetState(gameAgentState.Controller);
         }
     }
 }

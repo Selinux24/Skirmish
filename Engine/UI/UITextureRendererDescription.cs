@@ -16,7 +16,7 @@ namespace Engine.UI
         {
             return new UITextureRendererDescription
             {
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
                 BaseColor = Color4.White,
@@ -33,7 +33,7 @@ namespace Engine.UI
             return new UITextureRendererDescription
             {
                 Textures = new[] { fileName },
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Width = width,
                 Height = height,
                 BaseColor = Color4.White,
@@ -47,7 +47,7 @@ namespace Engine.UI
         {
             return new UITextureRendererDescription
             {
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = bounds.Left,
                 Top = bounds.Top,
                 Width = bounds.Width,
@@ -65,7 +65,7 @@ namespace Engine.UI
             return new UITextureRendererDescription
             {
                 Textures = new[] { fileName },
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = bounds.Left,
                 Top = bounds.Top,
                 Width = bounds.Width,
@@ -84,7 +84,7 @@ namespace Engine.UI
         {
             return new UITextureRendererDescription
             {
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = left,
                 Top = top,
                 Width = width,
@@ -105,7 +105,7 @@ namespace Engine.UI
             return new UITextureRendererDescription
             {
                 Textures = new[] { fileName },
-                Channel = UITextureRendererChannels.NoAlpha,
+                Channel = ColorChannels.NoAlpha,
                 Left = left,
                 Top = top,
                 Width = width,
@@ -121,11 +121,11 @@ namespace Engine.UI
         /// <summary>
         /// Initial texture index
         /// </summary>
-        public int TextureIndex { get; set; } = 0;
+        public uint TextureIndex { get; set; } = 0;
         /// <summary>
         /// Channel color
         /// </summary>
-        public UITextureRendererChannels Channel { get; set; } = UITextureRendererChannels.All;
+        public ColorChannels Channel { get; set; } = ColorChannels.Default;
 
         /// <summary>
         /// Constructor
@@ -133,7 +133,7 @@ namespace Engine.UI
         public UITextureRendererDescription()
             : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

@@ -29,6 +29,10 @@ namespace Engine
         /// </summary>
         Additive = 8,
         /// <summary>
+        /// Post processing
+        /// </summary>
+        PostProcess = 16,
+        /// <summary>
         /// Default blend mode
         /// </summary>
         Default = Opaque | Alpha,

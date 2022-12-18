@@ -9,12 +9,12 @@ namespace Engine.UI.Tween
     /// <summary>
     /// Tween collection for UIControl
     /// </summary>
-    class UIControlTweenCollection : ITweenCollection<UIControl>
+    class UIControlTweenCollection : ITweenCollection<IUIControl>
     {
         /// <summary>
         /// Task list
         /// </summary>
-        private readonly ConcurrentDictionary<UIControl, List<Func<float, bool>>> tasks = new ConcurrentDictionary<UIControl, List<Func<float, bool>>>();
+        private readonly ConcurrentDictionary<IUIControl, List<Func<float, bool>>> tasks = new ConcurrentDictionary<IUIControl, List<Func<float, bool>>>();
 
         /// <summary>
         /// Updates the task list
@@ -73,7 +73,7 @@ namespace Engine.UI.Tween
         /// </summary>
         /// <param name="item">Tween item</param>
         /// <param name="tween">Tween funcion</param>
-        public void AddTween(UIControl item, Func<float, bool> tween)
+        public void AddTween(IUIControl item, Func<float, bool> tween)
         {
             var list = tasks.GetOrAdd(item, new List<Func<float, bool>>());
 
@@ -83,7 +83,7 @@ namespace Engine.UI.Tween
         /// Clears all tweens
         /// </summary>
         /// <param name="item">Tween item</param>
-        public void ClearTween(UIControl item)
+        public void ClearTween(IUIControl item)
         {
             tasks.TryRemove(item, out _);
         }

@@ -2,7 +2,7 @@
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using RasterizerState2 = SharpDX.Direct3D11.RasterizerState2;
 
     /// <summary>
     /// Engine rasterizer state
@@ -12,16 +12,22 @@ namespace Engine.Common
         /// <summary>
         /// Internal rasterizer state
         /// </summary>
-        private RasterizerState2 rasterizerState = null;
+        private RasterizerState2 state = null;
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
 
         /// <summary>
         /// Creates a default rasterizer state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the default rasterizer state</returns>
-        public static EngineRasterizerState Default(Graphics graphics)
+        public static EngineRasterizerState Default(Graphics graphics, string name)
         {
-            var desc = new RasterizerStateDescription2()
+            var desc = new EngineRasterizerStateDescription()
             {
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Solid,
@@ -37,16 +43,17 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState($"{name}.{nameof(Default)}", desc);
         }
         /// <summary>
         /// Creates a wire frame rasterizer state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the wire frame rasterizer state</returns>
-        public static EngineRasterizerState Wireframe(Graphics graphics)
+        public static EngineRasterizerState Wireframe(Graphics graphics, string name)
         {
-            var desc = new RasterizerStateDescription2()
+            var desc = new EngineRasterizerStateDescription()
             {
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Wireframe,
@@ -62,16 +69,17 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState($"{name}.{nameof(Wireframe)}", desc);
         }
         /// <summary>
         /// Creates a no cull rasterizer state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the no cull rasterizer state</returns>
-        public static EngineRasterizerState NoCull(Graphics graphics)
+        public static EngineRasterizerState NoCull(Graphics graphics, string name)
         {
-            var desc = new RasterizerStateDescription2()
+            var desc = new EngineRasterizerStateDescription()
             {
                 CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
@@ -87,16 +95,17 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState($"{name}.{nameof(NoCull)}", desc);
         }
         /// <summary>
         /// Creates a cull front face rasterizer state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the cull front face rasterizer state</returns>
-        public static EngineRasterizerState CullFrontFace(Graphics graphics)
+        public static EngineRasterizerState CullFrontFace(Graphics graphics, string name)
         {
-            var desc = new RasterizerStateDescription2()
+            var desc = new EngineRasterizerStateDescription()
             {
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Solid,
@@ -112,16 +121,17 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState($"{name}.{nameof(CullFrontFace)}", desc);
         }
         /// <summary>
         /// Creates a stencil pass rasterizer state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the stencil pass rasterizer state</returns>
-        public static EngineRasterizerState StencilPass(Graphics graphics)
+        public static EngineRasterizerState StencilPass(Graphics graphics, string name)
         {
-            var desc = new RasterizerStateDescription2()
+            var desc = new EngineRasterizerStateDescription()
             {
                 CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
@@ -137,16 +147,17 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState($"{name}.{nameof(StencilPass)}", desc);
         }
         /// <summary>
         /// Creates a lighting pass rasterizer state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the lighting pass rasterizer state</returns>
-        public static EngineRasterizerState LightingPass(Graphics graphics)
+        public static EngineRasterizerState LightingPass(Graphics graphics, string name)
         {
-            var desc = new RasterizerStateDescription2()
+            var desc = new EngineRasterizerStateDescription()
             {
                 CullMode = CullMode.Back,
                 FillMode = FillMode.Solid,
@@ -162,16 +173,17 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState($"{name}.{nameof(LightingPass)}", desc);
         }
         /// <summary>
         /// Creates a shadow mapping rasterizer state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the shadow mapping rasterizer state</returns>
-        public static EngineRasterizerState ShadowMapping(Graphics graphics)
+        public static EngineRasterizerState ShadowMapping(Graphics graphics, string name)
         {
-            var desc = new RasterizerStateDescription2()
+            var desc = new EngineRasterizerStateDescription()
             {
                 CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
@@ -187,16 +199,30 @@ namespace Engine.Common
                 ConservativeRasterizationMode = ConservativeRasterizationMode.Off,
             };
 
-            return graphics.CreateRasterizerState(desc);
+            return graphics.CreateRasterizerState($"{name}.{nameof(ShadowMapping)}", desc);
+        }
+        /// <summary>
+        /// Creates a new rasterizer state
+        /// </summary>
+        /// <param name="graphics">Grahics</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Rasterizer state descriptio</param>
+        public static EngineRasterizerState Create(Graphics graphics, string name, EngineRasterizerStateDescription description)
+        {
+            return graphics.CreateRasterizerState(name, description);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="rasterizerState">Rasterizer state</param>
-        internal EngineRasterizerState(RasterizerState2 rasterizerState)
+        internal EngineRasterizerState(string name, RasterizerState2 rasterizerState)
         {
-            this.rasterizerState = rasterizerState;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A rasterizer state name must be specified.");
+            state = rasterizerState ?? throw new ArgumentNullException(nameof(rasterizerState), "A rasterizer state must be specified.");
+
+            state.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -222,8 +248,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                rasterizerState?.Dispose();
-                rasterizerState = null;
+                state?.Dispose();
+                state = null;
             }
         }
 
@@ -233,7 +259,7 @@ namespace Engine.Common
         /// <returns>Returns the internal rasterizer state</returns>
         internal RasterizerState2 GetRasterizerState()
         {
-            return rasterizerState;
+            return state;
         }
     }
 }

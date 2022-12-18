@@ -3,16 +3,12 @@ using Engine.Common;
 using Engine.Content;
 using Engine.UI;
 using SharpDX;
-using System;
 using System.Threading.Tasks;
 
 namespace Animation.AnimationParts
 {
     class SceneAnimationParts : Scene
     {
-        private const int layerHUD = 99;
-        private const int layerModels = 10;
-
         private UITextArea title = null;
         private UIPanel backPanel = null;
         private UIConsole console = null;
@@ -33,64 +29,68 @@ namespace Animation.AnimationParts
 
         public SceneAnimationParts(Game game) : base(game)
         {
-
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override async Task Initialize()
         {
-            await InitializeUI();
+            await base.Initialize();
 
-            UpdateLayout();
-
-            try
-            {
-                await LoadResourcesAsync(
-                    new[]
-                    {
-                        InitializeTank(),
-                        InitializeFloor(),
-                        InitializeDebug()
-                    },
-                    (res) =>
-                    {
-                        if (!res.Completed)
-                        {
-                            res.ThrowExceptions();
-                        }
-
-                        InitializeEnvironment();
-
-                        gameReady = true;
-                    });
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, ex);
-            }
+            InitializeUI();
         }
 
-        private async Task InitializeUI()
+        private void InitializeUI()
         {
-            title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            LoadResourcesAsync(
+                InitializeUITitle(),
+                InitializeUICompleted);
+        }
+        private async Task InitializeUITitle()
+        {
+            var defaultFont18 = TextDrawerDescription.FromFamily("Consolas", 18);
+
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
 
             title.Text = "Model Parts Test";
 
-            backPanel = await this.AddComponentUIPanel("Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), layerHUD - 1);
+            backPanel = await AddComponentUI<UIPanel, UIPanelDescription>("Backpanel", "Backpanel", UIPanelDescription.Default(new Color4(0, 0, 0, 0.75f)), LayerUI - 1);
 
             var consoleDesc = UIConsoleDescription.Default(new Color4(0.35f, 0.35f, 0.35f, 1f));
-            console = await this.AddComponentUIConsole("Console", consoleDesc, layerHUD + 1);
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("Console", "Console", consoleDesc, LayerUI + 1);
             console.Visible = false;
 
             uiReady = true;
         }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
+            UpdateLayout();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeTank(),
+                    InitializeFloor(),
+                    InitializeDebug()
+                },
+                InitializeComponentsCompleted);
+        }
         private async Task InitializeTank()
         {
             var tDesc = new ModelDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Optimize = false,
-                Content = ContentDescription.FromFile("AnimationParts/Resources/Leopard", "Leopard.xml"),
+                Content = ContentDescription.FromFile("AnimationParts/Resources/Leopard", "Leopard.json"),
                 TransformNames = new[]
                 {
                     "Hull-mesh",
@@ -105,7 +105,7 @@ namespace Animation.AnimationParts
                 },
             };
 
-            tank = await this.AddComponentModel("Tanks", tDesc, SceneObjectUsages.Agent, layerModels);
+            tank = await AddComponentAgent<Model, ModelDescription>("Tanks", "Tanks", tDesc);
             tank.Manipulator.SetScale(0.5f);
         }
         private async Task InitializeFloor()
@@ -127,41 +127,53 @@ namespace Animation.AnimationParts
                     1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "AnimationParts/Resources/d_road_asphalt_stripes_diffuse.dds";
             mat.NormalMapTexture = "AnimationParts/Resources/d_road_asphalt_stripes_normal.dds";
             mat.SpecularTexture = "AnimationParts/Resources/d_road_asphalt_stripes_specular.dds";
 
             var desc = new ModelDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            await this.AddComponentModel("Floor", desc);
+            await AddComponent<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeDebug()
         {
-            itemTris = await this.AddComponentPrimitiveListDrawer("DebugItemTris", new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
+            itemTris = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>(
+                "DebugItemTris",
+                "DebugItemTris",
+                new PrimitiveListDrawerDescription<Triangle>() { Count = 5000 });
             itemTris.Visible = false;
 
-            itemLines = await this.AddComponentPrimitiveListDrawer("DebugItemLines", new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
+            itemLines = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DebugItemLines",
+                "DebugItemLines",
+                new PrimitiveListDrawerDescription<Line3D>() { Count = 1000 });
             itemLines.Visible = false;
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
 
+            InitializeEnvironment();
+
+            gameReady = true;
+        }
         private void InitializeEnvironment()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
-
             Lights.KeyLight.CastShadow = true;
             Lights.KeyLight.Direction = Vector3.Normalize(new Vector3(-0.1f, -1, 1));
             Lights.KeyLight.Enabled = true;
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
-            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray, Color.White, true);
+            Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
 
             BoundingBox bbox = tank.GetBoundingBox();
             float playerHeight = bbox.Maximum.Y - bbox.Minimum.Y;
@@ -206,7 +218,7 @@ namespace Animation.AnimationParts
         private void UpdateInputCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -275,20 +287,20 @@ namespace Animation.AnimationParts
         {
             if (Game.Input.KeyPressed(Keys.J))
             {
-                tank["Turret-mesh"].Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
+                tank.GetModelPartByName("Turret-mesh").Manipulator.Rotate(-gameTime.ElapsedSeconds, 0, 0);
             }
             if (Game.Input.KeyPressed(Keys.L))
             {
-                tank["Turret-mesh"].Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
+                tank.GetModelPartByName("Turret-mesh").Manipulator.Rotate(+gameTime.ElapsedSeconds, 0, 0);
             }
 
             if (Game.Input.KeyPressed(Keys.I))
             {
-                tank["Barrel-mesh"].Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
+                tank.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, gameTime.ElapsedSeconds, 0);
             }
             if (Game.Input.KeyPressed(Keys.K))
             {
-                tank["Barrel-mesh"].Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
+                tank.GetModelPartByName("Barrel-mesh").Manipulator.Rotate(0, -gameTime.ElapsedSeconds, 0);
             }
         }
         private void UpdateInputDebug()
@@ -339,9 +351,9 @@ namespace Animation.AnimationParts
             title.SetPosition(Vector2.Zero);
 
             backPanel.Width = Game.Form.RenderWidth;
-            backPanel.Height = title.Rectangle.Bottom + 3;
+            backPanel.Height = title.AbsoluteRectangle.Bottom + 3;
 
-            console.Top = backPanel.Rectangle.Bottom;
+            console.Top = backPanel.AbsoluteRectangle.Bottom;
             console.Width = Game.Form.RenderWidth;
         }
     }

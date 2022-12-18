@@ -4,20 +4,16 @@ using System.Threading.Tasks;
 
 namespace Engine.UI
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Sprites;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// Sprite drawer
     /// </summary>
-    public class Sprite : UIControl
+    public sealed class Sprite : UIControl<SpriteDescription>
     {
-        /// <summary>
-        /// View * projection matrix
-        /// </summary>
-        private Matrix viewProjection;
-
         /// <summary>
         /// Vertex buffer descriptor
         /// </summary>
@@ -30,15 +26,65 @@ namespace Engine.UI
         /// Sprite texture
         /// </summary>
         private EngineShaderResourceView spriteTexture = null;
+        /// <summary>
+        /// Color drawer
+        /// </summary>
+        private readonly BuiltInSpriteColor spriteColorDrawer;
+        /// <summary>
+        /// Texture drawer
+        /// </summary>
+        private readonly BuiltInSpriteTexture spriteTextureDrawer;
 
+        /// <summary>
+        /// First color
+        /// </summary>
+        public Color4 Color1 { get; set; }
+        /// <summary>
+        /// Second color
+        /// </summary>
+        public Color4 Color2 { get; set; }
+        /// <summary>
+        /// Third color
+        /// </summary>
+        public Color4 Color3 { get; set; }
+        /// <summary>
+        /// Fourth color
+        /// </summary>
+        public Color4 Color4 { get; set; }
         /// <summary>
         /// Gets or sets the texture index to render
         /// </summary>
-        public int TextureIndex { get; set; }
+        public uint TextureIndex { get; set; }
         /// <summary>
         /// Use textures flag
         /// </summary>
         public bool Textured { get; private set; }
+        /// <summary>
+        /// First percentage
+        /// </summary>
+        public float Percentage1 { get; set; }
+        /// <summary>
+        /// Second percentage
+        /// </summary>
+        public float Percentage2 { get; set; }
+        /// <summary>
+        /// Third percentage
+        /// </summary>
+        public float Percentage3 { get; set; }
+        /// <summary>
+        /// Draw direction
+        /// </summary>
+        public uint DrawDirection { get; set; }
+        /// <summary>
+        /// Use percentage drawing
+        /// </summary>
+        public bool UsePercentage
+        {
+            get
+            {
+                return Percentage1 > 0f || Percentage2 > 0f || Percentage3 > 0f;
+            }
+        }
         /// <summary>
         /// Gets whether the internal buffers were ready or not
         /// </summary>
@@ -53,23 +99,14 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public Sprite(string name, Scene scene, SpriteDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public Sprite(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            Textured = description.Textures?.Any() == true;
-            TextureIndex = description.TextureIndex;
-
-            InitializeBuffers(name, Textured, description.UVMap);
-
-            if (Textured)
-            {
-                InitializeTexture(description.ContentPath, description.Textures);
-            }
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
+            spriteColorDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteColor>();
+            spriteTextureDrawer = BuiltInShaders.GetDrawer<BuiltInSpriteTexture>();
         }
         /// <inheritdoc/>
         protected override void Dispose(bool disposing)
@@ -84,6 +121,29 @@ namespace Engine.UI
             base.Dispose(disposing);
         }
 
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(SpriteDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            Color1 = Description.Color1;
+            Color2 = Description.Color2;
+            Color3 = Description.Color3;
+            Color4 = Description.Color4;
+            Percentage1 = Description.Percentage1;
+            Percentage2 = Description.Percentage2;
+            Percentage3 = Description.Percentage3;
+            DrawDirection = (uint)Description.DrawDirection;
+            Textured = Description.Textures?.Any() == true;
+            TextureIndex = Description.TextureIndex;
+
+            InitializeBuffers(Name, Textured, Description.UVMap);
+
+            if (Textured)
+            {
+                await InitializeTexture(Description.ContentPath, Description.Textures);
+            }
+        }
         /// <summary>
         /// Initialize buffers
         /// </summary>
@@ -121,10 +181,10 @@ namespace Engine.UI
         /// </summary>
         /// <param name="contentPath">Content path</param>
         /// <param name="textures">Texture names</param>
-        private void InitializeTexture(string contentPath, string[] textures)
+        private async Task InitializeTexture(string contentPath, string[] textures)
         {
-            var image = ImageContent.Array(contentPath, textures);
-            spriteTexture = Game.ResourceManager.RequestResource(image);
+            var image = new FileArrayImageContent(contentPath, textures);
+            spriteTexture = await Game.ResourceManager.RequestResource(image);
         }
 
         /// <inheritdoc/>
@@ -146,72 +206,83 @@ namespace Engine.UI
                 return;
             }
 
-            var effect = DrawerPool.EffectDefaultSprite;
-            var technique = effect.GetTechnique(
-                Textured ? VertexTypes.PositionTexture : VertexTypes.PositionColor,
-                UITextureRendererChannels.All);
+            Draw();
+
+            base.Draw(context);
+        }
+        /// <summary>
+        /// Default sprite draw
+        /// </summary>
+        private void Draw()
+        {
+            BuiltInSpriteState state;
+
+            if (UsePercentage)
+            {
+                state = new BuiltInSpriteState
+                {
+                    Local = GetTransform(),
+                    Color1 = Color1,
+                    Color2 = Color2,
+                    Color3 = Color3,
+                    Color4 = Color4,
+                    UsePercentage = true,
+                    Percentage1 = Percentage1,
+                    Percentage2 = Percentage2,
+                    Percentage3 = Percentage3,
+                    Direction = DrawDirection,
+                    Texture = spriteTexture,
+                    TextureIndex = TextureIndex,
+                    RenderArea = GetRenderArea(true),
+                };
+            }
+            else
+            {
+                var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
+                color.Alpha *= Alpha;
+
+                state = new BuiltInSpriteState
+                {
+                    Local = GetTransform(),
+                    Color1 = color,
+                    Texture = spriteTexture,
+                    TextureIndex = TextureIndex,
+                };
+            }
+
+            var drawOptions = new DrawOptions
+            {
+                IndexBuffer = indexBuffer,
+                VertexBuffer = vertexBuffer,
+                Topology = Topology.TriangleList,
+            };
+
+            if (Textured)
+            {
+                spriteTextureDrawer.UpdateSprite(state);
+                spriteTextureDrawer.Draw(BufferManager, drawOptions);
+            }
+            else
+            {
+                spriteColorDrawer.UpdateSprite(state);
+                spriteColorDrawer.Draw(BufferManager, drawOptions);
+            }
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            BufferManager.SetIndexBuffer(indexBuffer);
-            BufferManager.SetInputAssembler(technique, vertexBuffer, Topology.TriangleList);
-
-            effect.UpdatePerFrame(Manipulator.LocalTransform, viewProjection);
-
-            var color = Color4.AdjustSaturation(BaseColor * TintColor, 1f);
-            color.Alpha *= Alpha;
-
-            effect.UpdatePerObject(color, spriteTexture, TextureIndex);
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.DrawIndexed(
-                    indexBuffer.Count,
-                    indexBuffer.BufferOffset,
-                    vertexBuffer.BufferOffset);
-            }
         }
 
-        /// <inheritdoc/>
-        public override void Resize()
-        {
-            base.Resize();
-
-            viewProjection = Game.Form.GetOrthoProjectionMatrix();
-        }
-    }
-
-    /// <summary>
-    /// Sprite extensions
-    /// </summary>
-    public static class SpriteExtensions
-    {
         /// <summary>
-        /// Adds a component to the scene
+        /// Sets the percentage values
         /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<Sprite> AddComponentSprite(this Scene scene, string name, SpriteDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        /// <param name="percent1">First percentage</param>
+        /// <param name="percent2">Second percentage</param>
+        /// <param name="percent3">Third percentage</param>
+        public void SetPercentage(float percent1, float percent2 = 1.0f, float percent3 = 1.0f)
         {
-            Sprite component = null;
-
-            await Task.Run(() =>
-            {
-                component = new Sprite(name, scene, description);
-
-                scene.AddComponent(component, usage, order);
-            });
-
-            return component;
+            Percentage1 = percent1;
+            Percentage2 = percent2;
+            Percentage3 = percent3;
         }
     }
 }

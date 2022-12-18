@@ -88,7 +88,7 @@ namespace Engine
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
         public SceneLightPoint(
-            string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
+            string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled,
             SceneLightPointDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
@@ -113,9 +113,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
         {
-            CastShadowsMarked = EvaluateLight(eyePosition, CastShadow, Position, Radius);
+            CastShadowsMarked = EvaluateLight(environment, eyePosition, CastShadow, Position, Radius);
 
             return CastShadowsMarked;
         }
@@ -151,6 +151,55 @@ namespace Engine
         public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
             return Line3D.CreateWiredSphere(BoundingSphere, sliceCount, stackCount);
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightPointState
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
+
+                InitialTransform = initialTransform,
+                InitialRadius = initialRadius,
+                InitialIntensity = initialIntensity,
+                Position = Position,
+                Radius = Radius,
+                Intensity = Intensity,
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightPointState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            initialTransform = sceneLightsState.InitialTransform;
+            initialRadius = sceneLightsState.InitialRadius;
+            initialIntensity = sceneLightsState.InitialIntensity;
+            Position = sceneLightsState.Position;
+            Radius = sceneLightsState.Radius;
+            Intensity = sceneLightsState.Intensity;
         }
     }
 }

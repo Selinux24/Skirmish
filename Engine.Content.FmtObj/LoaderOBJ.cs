@@ -5,9 +5,12 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Engine.Content.FmtObj
 {
+    using Engine.Content.Persistence;
+
     /// <summary>
     /// Loader for .obj files
     /// </summary>
@@ -50,7 +53,7 @@ namespace Engine.Content.FmtObj
         /// <param name="contentFolder">Content folder</param>
         /// <param name="content">Content description</param>
         /// <returns>Returns a list of model contents</returns>
-        public IEnumerable<ContentData> Load(string contentFolder, ContentDataDescription content)
+        public async Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content)
         {
             Matrix transform = Matrix.Identity;
 
@@ -60,37 +63,42 @@ namespace Engine.Content.FmtObj
             }
 
             var meshList = Load(contentFolder, content.ModelFileName, transform, out var materials);
-            if (meshList.Any())
+            if (!meshList.Any())
             {
-                ContentData m = new ContentData();
+                return new ContentData[] { };
+            }
 
+            ContentData m = new ContentData();
+
+            await Task.Run(() =>
+            {
                 foreach (var mat in materials)
                 {
-                    if (!m.Materials.ContainsKey(mat.Name))
+                    if (m.Materials.ContainsKey(mat.Name))
                     {
-                        var matContent = mat.CreateContent();
-
-                        m.Materials.Add(mat.Name, matContent);
-
-                        m.TryAddTexture(contentFolder, mat.MapKa);
-                        m.TryAddTexture(contentFolder, mat.MapKd);
-                        m.TryAddTexture(contentFolder, mat.MapKs);
-                        m.TryAddTexture(contentFolder, mat.MapNs);
-                        m.TryAddTexture(contentFolder, mat.MapD);
-                        m.TryAddTexture(contentFolder, mat.MapBump);
+                        continue;
                     }
+
+                    var matContent = mat.CreateContent();
+
+                    m.Materials.Add(mat.Name, matContent);
+
+                    m.TryAddTexture(contentFolder, mat.MapKa);
+                    m.TryAddTexture(contentFolder, mat.MapKd);
+                    m.TryAddTexture(contentFolder, mat.MapKs);
+                    m.TryAddTexture(contentFolder, mat.MapNs);
+                    m.TryAddTexture(contentFolder, mat.MapD);
+                    m.TryAddTexture(contentFolder, mat.MapBump);
                 }
 
                 for (int i = 0; i < meshList.Count(); i++)
                 {
                     var mesh = meshList.ElementAt(i);
-                    m.Geometry.Add($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
+                    m.ImportMaterial($"Mesh{i + 1}", mesh.Material ?? ContentData.NoMaterial, mesh);
                 }
+            });
 
-                return new[] { m };
-            }
-
-            return new ContentData[] { };
+            return new[] { m };
         }
         /// <summary>
         /// Loads a model content list from resources
@@ -166,9 +174,9 @@ namespace Engine.Content.FmtObj
 
     static class ContentExtensions
     {
-        public static MaterialContent CreateContent(this Material mat)
+        public static MaterialBlinnPhongContent CreateContent(this Material mat)
         {
-            var matContent = MaterialContent.Default;
+            var matContent = MaterialBlinnPhongContent.Default;
 
             if (mat.MapNs != null)
             {
@@ -187,7 +195,7 @@ namespace Engine.Content.FmtObj
             }
             else
             {
-                matContent.DiffuseColor = new Color4(mat.Kd, 1);
+                matContent.DiffuseColor = new Color4(mat.Kd, 1f);
             }
 
             if (mat.MapKs != null)
@@ -196,13 +204,13 @@ namespace Engine.Content.FmtObj
             }
             else
             {
-                matContent.SpecularColor = new Color4(mat.Ks, 1);
+                matContent.SpecularColor = mat.Ks;
             }
 
-            matContent.EmissionColor = new Color4(mat.Ke, 1);
-            matContent.IndexOfRefraction = mat.Ni;
+            matContent.EmissiveColor = mat.Ke;
+            matContent.Shininess = mat.Ni;
 
-            matContent.Transparency = mat.D != 0 ? 1f / mat.D : 0;
+            matContent.IsTransparent = mat.D != 0;
 
             matContent.NormalMapTexture = mat.MapBump;
 
@@ -216,7 +224,7 @@ namespace Engine.Content.FmtObj
                 string path = Path.Combine(contentFolder, texture);
                 if (File.Exists(path))
                 {
-                    m.Images.Add(texture, new ImageContent() { Path = path });
+                    m.Images.Add(texture, new FileArrayImageContent(path));
                 }
             }
         }

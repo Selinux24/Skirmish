@@ -22,11 +22,11 @@ namespace Engine.Common
         /// <summary>
         /// Points cache
         /// </summary>
-        private Vector3[] positionCache = null;
+        private IEnumerable<Vector3> positionCache = Enumerable.Empty<Vector3>();
         /// <summary>
         /// Triangle list cache
         /// </summary>
-        private Triangle[] triangleCache = null;
+        private IEnumerable<Triangle> triangleCache = Enumerable.Empty<Triangle>();
 
         /// <summary>
         /// Invalidates internal state
@@ -49,41 +49,35 @@ namespace Engine.Common
         {
             bool update = refresh || updatePoints;
 
-            if (update)
+            if (!update)
             {
-                Logger.WriteTrace(this, "GeometryHelper GetPoints Forced");
+                //Copy collection
+                return positionCache.ToArray();
+            }
 
-                if (drawingData == null)
-                {
-                    return new Vector3[] { };
-                }
+            if (drawingData == null)
+            {
+                return Enumerable.Empty<Vector3>();
+            }
 
-                IEnumerable<Vector3> cache;
-
-                if (controller != null && drawingData.SkinningData != null)
-                {
-                    cache = drawingData.GetPoints(
-                        manipulator.FinalTransform,
-                        controller.GetCurrentPose(drawingData.SkinningData),
-                        update);
-                }
-                else
-                {
-                    cache = drawingData.GetPoints(
-                        manipulator.FinalTransform,
-                        update);
-                }
-
-                positionCache = cache.ToArray();
-
-                updatePoints = false;
+            if (controller != null && drawingData.SkinningData != null)
+            {
+                positionCache = drawingData.GetPoints(
+                    manipulator.FinalTransform,
+                    controller.GetCurrentPose(),
+                    update);
             }
             else
             {
-                Logger.WriteTrace(this, "GeometryHelper GetPoints Cached");
+                positionCache = drawingData.GetPoints(
+                    manipulator.FinalTransform,
+                    update);
             }
 
-            return positionCache?.ToArray() ?? new Vector3[] { };
+            updatePoints = false;
+
+            //Copy collection
+            return positionCache.ToArray();
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -97,41 +91,35 @@ namespace Engine.Common
         {
             bool update = refresh || updateTriangles;
 
-            if (update)
+            if (!update)
             {
-                Logger.WriteTrace(this, "GeometryHelper GetTriangles Forced");
+                //Copy collection
+                return triangleCache.ToArray();
+            }
 
-                if (drawingData == null)
-                {
-                    return new Triangle[] { };
-                }
+            if (drawingData == null)
+            {
+                return Enumerable.Empty<Triangle>();
+            }
 
-                IEnumerable<Triangle> cache;
-
-                if (controller != null && drawingData.SkinningData != null)
-                {
-                    cache = drawingData.GetTriangles(
-                        manipulator.LocalTransform,
-                        controller.GetCurrentPose(drawingData.SkinningData),
-                        update);
-                }
-                else
-                {
-                    cache = drawingData.GetTriangles(
-                        manipulator.LocalTransform,
-                        update);
-                }
-
-                triangleCache = cache.ToArray();
-
-                updateTriangles = false;
+            if (controller != null && drawingData.SkinningData != null)
+            {
+                triangleCache = drawingData.GetTriangles(
+                    manipulator.LocalTransform,
+                    controller.GetCurrentPose(),
+                    update);
             }
             else
             {
-                Logger.WriteTrace(this, $"GeometryHelper GetTriangles Cached");
+                triangleCache = drawingData.GetTriangles(
+                    manipulator.LocalTransform,
+                    update);
             }
 
-            return triangleCache?.ToArray() ?? new Triangle[] { };
+            updateTriangles = false;
+
+            //Copy collection
+            return triangleCache.ToArray();
         }
     }
 }

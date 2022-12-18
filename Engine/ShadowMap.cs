@@ -1,10 +1,13 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Shadows;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Shadow map
@@ -12,9 +15,9 @@ namespace Engine
     public abstract class ShadowMap : IShadowMap
     {
         /// <summary>
-        /// Game instance
+        /// Scene
         /// </summary>
-        protected Game Game { get; private set; }
+        protected Scene Scene { get; private set; }
         /// <summary>
         /// Viewport
         /// </summary>
@@ -22,41 +25,38 @@ namespace Engine
         /// <summary>
         /// Depth map
         /// </summary>
-        protected EngineDepthStencilView[] DepthMap { get; set; }
+        protected IEnumerable<EngineDepthStencilView> DepthMap { get; set; }
 
         /// <summary>
-        /// Cube deph map texture
+        /// Name
         /// </summary>
+        public string Name { get; protected set; }
+        /// <inheritdoc/>
         public EngineShaderResourceView Texture { get; protected set; }
-        /// <summary>
-        /// To shadow view*projection matrix
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix ToShadowMatrix { get; set; } = Matrix.Identity;
-        /// <summary>
-        /// Light position
-        /// </summary>
+        /// <inheritdoc/>
         public Vector3 LightPosition { get; set; } = Vector3.Zero;
-        /// <summary>
-        /// From light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix[] FromLightViewProjectionArray { get; set; }
-        /// <summary>
-        /// Gets or sets the high resolution map flag (if available)
-        /// </summary>
+        /// <inheritdoc/>
         public virtual bool HighResolutionMap { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        protected ShadowMap(Game game, int width, int height, int arraySize)
+        protected ShadowMap(Scene scene, string name, int width, int height, int arraySize)
         {
-            this.Game = game;
+            Scene = scene;
+            Name = name;
 
-            this.Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
+            Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
 
-            this.FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
+            FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
         }
         /// <summary>
         /// Destructor
@@ -66,9 +66,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -82,43 +80,112 @@ namespace Engine
         {
             if (disposing)
             {
-                for (int i = 0; i < this.DepthMap?.Length; i++)
+                if (DepthMap?.Any() == true)
                 {
-                    this.DepthMap[i]?.Dispose();
-                    this.DepthMap[i] = null;
+                    for (int i = 0; i < DepthMap.Count(); i++)
+                    {
+                        DepthMap.ElementAt(i)?.Dispose();
+                    }
                 }
-                this.DepthMap = null;
+                DepthMap = null;
 
-                this.Texture?.Dispose();
-                this.Texture = null;
+                Texture?.Dispose();
+                Texture = null;
             }
         }
 
-        /// <summary>
-        /// Updates the from light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public abstract void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
-        /// <summary>
-        /// Gets the effect to draw this shadow map
-        /// </summary>
-        /// <returns>Returns an effect</returns>
-        public abstract IShadowMapDrawer GetEffect();
-
-        /// <summary>
-        /// Binds the shadow map data to graphics
-        /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="index">Array index</param>
+        /// <inheritdoc/>
         public void Bind(Graphics graphics, int index)
         {
             //Set shadow mapper viewport
-            graphics.SetViewports(this.Viewports);
+            graphics.SetViewports(Viewports);
 
             //Set shadow map depth map without render target
             graphics.SetRenderTargets(
                 null, false, Color.Transparent,
-                this.DepthMap[index], true, false,
+                DepthMap.ElementAtOrDefault(index), true, false,
                 true);
         }
+        /// <inheritdoc/>
+        public IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
+        {
+            if (useTextureAlpha)
+            {
+                return GetTransparentDrawer(vertexType, instanced);
+            }
+            else
+            {
+                return GetOpaqueDrawer(vertexType, instanced);
+            }
+        }
+        /// <summary>
+        /// Gets the opaque drawer for the vertex type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="instanced">Instanced</param>
+        private IBuiltInDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
+        {
+            bool skinned = VertexData.IsSkinned(vertexType);
+
+            if (instanced)
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinnedInstanced>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPositionInstanced>();
+                }
+            }
+            else
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPositionSkinned>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInPosition>();
+                }
+            }
+        }
+        /// <summary>
+        /// Gets the transparent drawer for the vertex type
+        /// </summary>
+        /// <param name="vertexType">Vertex type</param>
+        /// <param name="instanced">Instanced</param>
+        private IBuiltInDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
+        {
+            bool skinned = VertexData.IsSkinned(vertexType);
+
+            if (instanced)
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPositionSkinnedInstanced>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPositionInstanced>();
+                }
+            }
+            else
+            {
+                if (skinned)
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPositionSkinned>();
+                }
+                else
+                {
+                    return BuiltInShaders.GetDrawer<BuiltInTransparentPosition>();
+                }
+            }
+        }
+
+        /// <inheritdoc/>
+        public abstract void UpdateGlobals();
     }
 }

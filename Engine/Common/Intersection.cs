@@ -38,7 +38,7 @@ namespace Engine.Common
         /// <returns>Returns true if the sphere intersects the frustum</returns>
         public static bool SphereIntersectsFrustum(BoundingSphere sphere, BoundingFrustum frustum)
         {
-            return frustum.Intersects(ref sphere);
+            return SphereContainsFrustum(sphere, frustum) != ContainmentType.Disjoint;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle
@@ -59,33 +59,64 @@ namespace Engine.Common
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="triangle">Triangle</param>
-        /// <param name="point">Returns the closest point in the triangle to the sphere center</param>
-        /// <param name="distance">Returns the distance from the closest point to the sphere center</param>
+        /// <param name="result">Returns the piking result</param>
         /// <returns>Returns true if the sphere intersects the triangle</returns>
-        public static bool SphereIntersectsTriangle(BoundingSphere sphere, Triangle triangle, out Vector3 point, out float distance)
+        public static bool SphereIntersectsTriangle(BoundingSphere sphere, Triangle triangle, out PickingResult<Triangle> result)
         {
-            ClosestPointInTriangle(sphere.Center, triangle, out point);
+            var point = ClosestPointInTriangle(sphere.Center, triangle);
 
-            distance = Vector3.Distance(sphere.Center, point);
+            float distance = Vector3.Distance(sphere.Center, point);
 
-            return distance <= sphere.Radius;
+            if (distance <= sphere.Radius)
+            {
+                result = new PickingResult<Triangle>
+                {
+                    Primitive = triangle,
+                    Distance = distance,
+                    Position = point,
+                };
+
+                return true;
+            }
+
+            result = new PickingResult<Triangle>
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle mesh
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="mesh">Triangle mesh</param>
-        /// <param name="triangle">Returns the closest triangle to the sphere center</param>
-        /// <param name="point">Returns the closest point in the triangle mesh to the sphere center</param>
-        /// <param name="distance">Returns the distance from the closest point to the sphere center</param>
+        /// <param name="result">Returns the piking result</param>
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out Triangle triangle, out Vector3 point, out float distance)
+        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out PickingResult<Triangle> result)
         {
-            ClosestPointInMesh(sphere.Center, mesh, out triangle, out point);
+            ClosestPointInMesh(sphere.Center, mesh, out var triangle, out var point);
 
-            distance = Vector3.Distance(sphere.Center, point);
+            float distance = Vector3.Distance(sphere.Center, point);
 
-            return distance <= sphere.Radius;
+            if (distance <= sphere.Radius)
+            {
+                result = new PickingResult<Triangle>
+                {
+                    Primitive = triangle,
+                    Distance = distance,
+                    Position = point,
+                };
+
+                return true;
+            }
+
+            result = new PickingResult<Triangle>
+            {
+                Distance = float.MaxValue,
+            };
+
+            return false;
         }
         /// <summary>
         /// Determines whether a sphere intersects with a triangle mesh
@@ -96,31 +127,25 @@ namespace Engine.Common
         /// <param name="points">Returns the intersection point list</param>
         /// <param name="distances">Returns the distance list from the sphere center to the intersection points</param>
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
-        public static bool SphereIntersectsMesh(BoundingSphere sphere, IEnumerable<Triangle> mesh, out Triangle[] triangles, out Vector3[] points, out float[] distances)
+        public static bool SphereIntersectsMeshAll(BoundingSphere sphere, IEnumerable<Triangle> mesh, out IEnumerable<PickingResult<Triangle>> results)
         {
-            List<Triangle> tris = new List<Triangle>();
-            List<Vector3> pts = new List<Vector3>();
-            List<float> dst = new List<float>();
+            List<PickingResult<Triangle>> picks = new List<PickingResult<Triangle>>();
 
             foreach (var t in mesh)
             {
-                ClosestPointInTriangle(sphere.Center, t.Point1, t.Point2, t.Point3, out Vector3 closestToTri);
+                var closestToTri = ClosestPointInTriangle(sphere.Center, t);
 
                 float dist = Vector3.DistanceSquared(sphere.Center, closestToTri);
                 if (dist <= sphere.Radius)
                 {
                     // Store intersection data
-                    tris.Add(t);
-                    pts.Add(closestToTri);
-                    dst.Add(dist);
+                    picks.Add(new PickingResult<Triangle> { Primitive = t, Position = closestToTri, Distance = dist });
                 }
             }
 
-            triangles = tris.ToArray();
-            points = pts.ToArray();
-            distances = dst.ToArray();
+            results = picks;
 
-            return tris.Count > 0;
+            return picks.Any();
         }
 
         /// <summary>
@@ -151,7 +176,7 @@ namespace Engine.Common
         /// <returns>Returns true if the box intersects the frustum</returns>
         public static bool BoxIntersectsFrustum(BoundingBox box, BoundingFrustum frustum)
         {
-            return frustum.Intersects(ref box);
+            return BoxContainsFrustum(box, frustum) != ContainmentType.Disjoint;
         }
         /// <summary>
         /// Determines whether a box intersects with a triangle
@@ -159,33 +184,169 @@ namespace Engine.Common
         /// <param name="box">Bounding box</param>
         /// <param name="triangle">Triangle</param>
         /// <returns>Returns true if the box intersects the triangle</returns>
+        /// <remarks>Separating axis theorem implementation adapted from "https://github.com/typicalMoves/dava.engine/blob/main/Sources/Internal/Math/AABBox3.cpp"</remarks>
         public static bool BoxIntersectsTriangle(BoundingBox box, Triangle triangle)
         {
-            // Own implementation. Not found in SharpDX
-            return BoxContainsTriangle(box, triangle) != ContainmentType.Disjoint;
+            // Translate the triangle to origin, and use only the box extents to refer to the box
+            var boxCenter = box.GetCenter();
+            var boxExtents = box.GetExtents();
+            Triangle origTri = new Triangle(triangle.Point1 - boxCenter, triangle.Point2 - boxCenter, triangle.Point3 - boxCenter);
+
+            // Test first 3 edges
+            var edge1 = triangle.GetEdge1();
+            float fex = Math.Abs(edge1.X);
+            float fey = Math.Abs(edge1.Y);
+            float fez = Math.Abs(edge1.Z);
+            if (!AxisTestX01(boxExtents, origTri, edge1.Z, edge1.Y, fez, fey)) return false;
+            if (!AxisTestY02(boxExtents, origTri, edge1.Z, edge1.X, fez, fex)) return false;
+            if (!AxisTestZ12(boxExtents, origTri, edge1.Y, edge1.X, fey, fex)) return false;
+
+            // Test second 3 edges
+            var edge2 = triangle.GetEdge2();
+            fex = Math.Abs(edge2.X);
+            fey = Math.Abs(edge2.Y);
+            fez = Math.Abs(edge2.Z);
+            if (!AxisTestX01(boxExtents, origTri, edge2.Z, edge2.Y, fez, fey)) return false;
+            if (!AxisTestY02(boxExtents, origTri, edge2.Z, edge2.X, fez, fex)) return false;
+            if (!AxisTestZ0(boxExtents, origTri, edge2.Y, edge2.X, fey, fex)) return false;
+
+            // Test third 3 edges
+            var edge3 = triangle.GetEdge3();
+            fex = Math.Abs(edge3.X);
+            fey = Math.Abs(edge3.Y);
+            fez = Math.Abs(edge3.Z);
+            if (!AxisTestX2(boxExtents, origTri, edge3.Z, edge3.Y, fez, fey)) return false;
+            if (!AxisTestY1(boxExtents, origTri, edge3.Z, edge3.X, fez, fex)) return false;
+            if (!AxisTestZ12(boxExtents, origTri, edge3.Y, edge3.X, fey, fex)) return false;
+
+            // Test X direction
+            Helper.MinMax(origTri.Point1.X, origTri.Point2.X, origTri.Point3.X, out float min, out float max);
+            if (min > boxExtents.X || max < -boxExtents.X)
+            {
+                return false;
+            }
+
+            // Test Y direction
+            Helper.MinMax(origTri.Point1.Y, origTri.Point2.Y, origTri.Point3.Y, out min, out max);
+            if (min > boxExtents.Y || max < -boxExtents.Y)
+            {
+                return false;
+            }
+
+            // Test Z direction
+            Helper.MinMax(origTri.Point1.Z, origTri.Point2.Z, origTri.Point3.Z, out min, out max);
+            if (min > boxExtents.Z || max < -boxExtents.Z)
+            {
+                return false;
+            }
+
+            // Test the box extents vs the triangle plane
+            BoundingBox aabb = new BoundingBox(-boxExtents, boxExtents);
+            return triangle.Plane.Intersects(ref aabb) == PlaneIntersectionType.Intersecting;
         }
         /// <summary>
         /// Determines whether a box intersects with a mesh
         /// </summary>
         /// <param name="box">Bounding box</param>
         /// <param name="mesh">Mesh</param>
-        /// <param name="triangles">Returns the intersected triangle list</param>
         /// <returns>Returns true if the box intersects the mesh</returns>
-        public static bool BoxIntersectsMesh(BoundingBox box, IEnumerable<Triangle> mesh, out Triangle[] triangles)
+        public static bool BoxIntersectsMesh(BoundingBox box, IEnumerable<Triangle> mesh)
         {
-            List<Triangle> tris = new List<Triangle>();
-
-            foreach (var t in mesh)
+            //Test containment 1 to 2
+            foreach (var tri in mesh)
             {
-                if (BoxIntersectsTriangle(box, t))
+                if (BoxContainsTriangle(box, tri) != ContainmentType.Disjoint)
                 {
-                    tris.Add(t);
+                    return true;
                 }
             }
 
-            triangles = tris.ToArray();
+            return false;
+        }
 
-            return tris.Count > 0;
+        private static bool AxisTestX01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
+            float p2 = a * tri.Point3.Y - b * tri.Point3.Z;
+            Helper.MinMax(p0, p2, out float min, out float max);
+
+            float rad = fa * extents.Y + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestX2(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
+            float p1 = a * tri.Point2.Y - b * tri.Point2.Z;
+            Helper.MinMax(p0, p1, out float min, out float max);
+
+            float rad = fa * extents.Y + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestY02(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
+            float p2 = -a * tri.Point3.X + b * tri.Point3.Z;
+            Helper.MinMax(p0, p2, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestY1(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
+            float p1 = -a * tri.Point2.X + b * tri.Point2.Z;
+            Helper.MinMax(p0, p1, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestZ12(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p1 = a * tri.Point2.X - b * tri.Point2.Y;
+            float p2 = a * tri.Point3.X - b * tri.Point3.Y;
+            Helper.MinMax(p1, p2, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Y;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestZ0(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = a * tri.Point1.X - b * tri.Point1.Y;
+            float p1 = a * tri.Point2.X - b * tri.Point2.Y;
+            Helper.MinMax(p0, p1, out float min, out float max);
+
+            float rad = fa * extents.X + fb * extents.Y;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -196,8 +357,13 @@ namespace Engine.Common
         /// <returns>Returns true if the frustum one intersects the frustum two</returns>
         public static bool FrustumIntersectsFrustum(BoundingFrustum frustum1, BoundingFrustum frustum2)
         {
-            // Own implementation. Has errors in SharpDX
-            return FrustumContainsFrustum(frustum1, frustum2) != ContainmentType.Disjoint;
+            var res1to2 = FrustumContainsFrustum(frustum1, frustum2);
+            if (res1to2 != ContainmentType.Disjoint)
+            {
+                return true;
+            }
+
+            return FrustumContainsFrustum(frustum2, frustum1) != ContainmentType.Disjoint;
         }
 
         /// <summary>
@@ -208,24 +374,24 @@ namespace Engine.Common
         /// <param name="triangles">Returns the intersected triangles of the mesh two</param>
         /// <param name="segments">Returns the intersection segment list</param>
         /// <returns>Returns true if the mesh one intersects the mesh two</returns>
-        public static bool MeshIntersectsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2, out Triangle[] triangles, out Line3D[] segments)
+        public static bool MeshIntersectsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
             List<Triangle> tris = new List<Triangle>();
             List<Line3D> segs = new List<Line3D>();
 
             foreach (var t in mesh1)
             {
-                if (TriangleIntersectsMesh(t, mesh2, out Triangle[] mTris, out Line3D[] mSegs))
+                if (TriangleIntersectsMesh(t, mesh2, out var mTris, out var mSegs))
                 {
                     tris.AddRange(mTris);
                     segs.AddRange(mSegs);
                 }
             }
 
-            triangles = tris.ToArray();
-            segments = segs.ToArray();
+            triangles = tris.Distinct().ToArray();
+            segments = segs.Distinct().ToArray();
 
-            return tris.Count > 0;
+            return triangles.Any();
         }
 
         /// <summary>
@@ -233,34 +399,54 @@ namespace Engine.Common
         /// </summary>
         /// <param name="ray">The ray to test</param>
         /// <param name="box">The box to test</param>
+        /// <returns>Whether the two objects intersected</returns>
+        public static bool RayIntersectsBox(PickingRay ray, BoundingBox box)
+        {
+            return RayIntersectsBox(ray, box, out _);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a Ray and a BoundingBox
+        /// </summary>
+        /// <param name="ray">The ray to test</param>
+        /// <param name="box">The box to test</param>
         /// <param name="distance">When the method completes, contains the distance of the intersection, or 0 if there was no intersection</param>
         /// <returns>Whether the two objects intersected</returns>
-        public static bool RayIntersectsBox(Ray ray, BoundingBox box, out float distance)
+        public static bool RayIntersectsBox(PickingRay ray, BoundingBox box, out float distance)
         {
-            return Collision.RayIntersectsBox(ref ray, ref box, out distance);
+            Ray rRay = ray;
+            if (Collision.RayIntersectsBox(ref rRay, ref box, out distance) && distance <= ray.MaxDistance)
+            {
+                return true;
+            }
+
+            distance = float.MaxValue;
+
+            return false;
         }
         /// <summary>
         /// Determines whether there is an intersection between a <see cref="Ray"/> and a triangle.
         /// </summary>
         /// <param name="ray">The ray to test.</param>
-        /// <param name="vertex1">The first vertex of the triangle to test.</param>
-        /// <param name="vertex2">The second vertex of the triangle to test.</param>
-        /// <param name="vertex3">The third vertex of the triangle to test.</param>
+        /// <param name="tri">Triangle</param>
         /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
         /// <param name="distance">Distance to point</param>
         /// <returns>Whether the two objects intersected.</returns>
-        public static bool RayIntersectsTriangle(ref Ray ray, ref Vector3 vertex1, ref Vector3 vertex2, ref Vector3 vertex3, out Vector3 point, out float distance)
+        public static bool RayIntersectsTriangle(PickingRay ray, Triangle tri, out Vector3 point, out float distance)
         {
-            point = Vector3.Zero;
-            distance = float.MaxValue;
-
-            if (Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out float d))
+            Ray rRay = ray;
+            Vector3 vertex1 = tri.Point1;
+            Vector3 vertex2 = tri.Point2;
+            Vector3 vertex3 = tri.Point3;
+            if (Collision.RayIntersectsTriangle(ref rRay, ref vertex1, ref vertex2, ref vertex3, out Vector3 collisionPoint))
             {
-                point = ray.Position + (ray.Direction * d);
-                distance = d;
+                point = collisionPoint;
+                distance = Vector3.Distance(collisionPoint, ray.Position);
 
                 return true;
             }
+
+            point = Vector3.Zero;
+            distance = float.MaxValue;
 
             return false;
         }
@@ -280,12 +466,11 @@ namespace Engine.Common
         /// </summary>
         /// <param name="triangle1">Triangle one</param>
         /// <param name="triangle2">Triangle two</param>
-        /// <param name="coplanar">Returns true if the triangles are coplanar</param>
         /// <param name="segment">Returns the intersection segment (if the triangles are not coplanar)</param>
         /// <returns>Returns true if the triangles intersects</returns>
-        public static bool TriangleIntersectsTriangle(Triangle triangle1, Triangle triangle2, out bool coplanar, out Line3D segment)
+        public static bool TriangleIntersectsTriangle(Triangle triangle1, Triangle triangle2, out Line3D? segment)
         {
-            return IntersectionTriangle.Intersection(triangle1, triangle2, out coplanar, out segment);
+            return IntersectionTriangle.Intersection(triangle1, triangle2, out segment);
         }
         /// <summary>
         /// Determines whether the triangle and the mesh intersects or not
@@ -294,21 +479,14 @@ namespace Engine.Common
         /// <param name="mesh">Mesh</param>
         /// <param name="triangles">Returns the intersected triangle list</param>
         /// <returns>Returns true if the triangle intersects the mesh</returns>
-        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out Triangle[] triangles)
+        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles)
         {
-            List<Triangle> tris = new List<Triangle>();
+            triangles = mesh
+                .Where(t => TriangleIntersectsTriangle(triangle, t))
+                .Distinct()
+                .ToArray();
 
-            foreach (var t in mesh)
-            {
-                if (TriangleIntersectsTriangle(triangle, t))
-                {
-                    tris.Add(t);
-                }
-            }
-
-            triangles = tris.ToArray();
-
-            return tris.Count > 0;
+            return triangles.Any();
         }
         /// <summary>
         /// Determines whether the triangle and the mesh intersects or not
@@ -318,314 +496,142 @@ namespace Engine.Common
         /// <param name="triangles">Returns the intersected triangle list</param>
         /// <param name="segments">Returns the intersection segment list</param>
         /// <returns>Returns true if the triangle intersects the mesh</returns>
-        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out Triangle[] triangles, out Line3D[] segments)
+        public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
             List<Triangle> tris = new List<Triangle>();
             List<Line3D> segs = new List<Line3D>();
 
+            bool intersected = false;
             foreach (var t in mesh)
             {
-                if (TriangleIntersectsTriangle(triangle, t, out _, out Line3D segment))
+                if (TriangleIntersectsTriangle(triangle, t, out var segment))
                 {
                     tris.Add(t);
-                    segs.Add(segment);
+                    if (segment.HasValue) segs.Add(segment.Value);
+
+                    intersected = true;
                 }
             }
 
-            triangles = tris.ToArray();
-            segments = segs.ToArray();
+            triangles = tris.Distinct().ToArray();
+            segments = segs.Where(seg => seg.Point1 != seg.Point2).Distinct().ToArray();
 
-            return tris.Count > 0;
-        }
-
-        /// <summary>
-        /// Determines whether the triangles ar coplanar
-        /// </summary>
-        /// <param name="triangle1">Triangle one</param>
-        /// <param name="triangle2">Triangle two</param>
-        /// <returns>Returns true if the triangles are coplanar</returns>
-        public static bool TriangleCoplanar(Triangle triangle1, Triangle triangle2)
-        {
-            return IntersectionTriangle.Coplanar(triangle1, triangle2);
+            return intersected;
         }
 
         /// <summary>
         /// Finds whether the point is contantained within the triangle, and the distance between the point and the triangle.
         /// </summary>
-        /// <param name="p">A point.</param>
-        /// <param name="t">A triangle</param>
-        /// <param name="distance">The distance between the point and the triangle.</param>
+        /// <param name="point">A point.</param>
+        /// <param name="triangle">A triangle</param>
         /// <returns>A value indicating whether the point is contained within the triangle.</returns>
-        public static bool PointInTriangle(Vector3 p, Triangle t, out float distance)
+        public static bool PointInTriangle(Vector3 point, Triangle triangle)
         {
-            return PointInTriangle(p, t.Point1, t.Point2, t.Point3, out distance);
-        }
-        /// <summary>
-        /// Finds whether the point is contantained within the triangle, and the distance between the point and the triangle.
-        /// </summary>
-        /// <param name="p">A point.</param>
-        /// <param name="a">The first vertex of the triangle.</param>
-        /// <param name="b">The second vertex of the triangle.</param>
-        /// <param name="c">The third vertex of the triangle.</param>
-        /// <param name="distance">The distance between the point and the triangle.</param>
-        /// <returns>A value indicating whether the point is contained within the triangle.</returns>
-        public static bool PointInTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out float distance)
-        {
-            Vector3 v0 = c - a;
-            Vector3 v1 = b - a;
-            Vector3 v2 = p - a;
+            // Assume the point is in the center of coordinates
 
-            Vector2 v20 = new Vector2(v0.X, v0.Z);
-            Vector2 v21 = new Vector2(v1.X, v1.Z);
-            Vector2 v22 = new Vector2(v2.X, v2.Z);
+            // Substract the triangle points to the test point
+            Vector3 p1 = triangle.Point1 - point;
+            Vector3 p2 = triangle.Point2 - point;
+            Vector3 p3 = triangle.Point3 - point;
 
-            Vector2.Dot(ref v20, ref v20, out float dot00);
-            Vector2.Dot(ref v20, ref v21, out float dot01);
-            Vector2.Dot(ref v20, ref v22, out float dot02);
-            Vector2.Dot(ref v21, ref v21, out float dot11);
-            Vector2.Dot(ref v21, ref v22, out float dot12);
-
-            //compute barycentric coordinates
-            float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-            float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-            float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-
-            const float EPS = 1E-4f;
-
-            //if point lies inside triangle, return interpolated y-coordinate
-            if (u >= -EPS && v >= -EPS && (u + v) <= 1 + EPS)
+            // As the point is in the center, all the triangle normals must be facing to the same direction
+            Vector3 u = Vector3.Cross(p2, p3);
+            Vector3 v = Vector3.Cross(p3, p1);
+            if (Vector3.Dot(u, v) < 0f)
             {
-                var h = a.Y + v0.Y * u + v1.Y * v;
-                distance = Math.Abs(h - p.Y);
-                return true;
+                return false;
             }
 
-            distance = float.MaxValue;
-            return false;
+            Vector3 w = Vector3.Cross(p1, p2);
+            if (Vector3.Dot(u, w) < 0f)
+            {
+                return false;
+            }
+
+            return true;
         }
         /// <summary>
         /// Finds whether the point is contantained within the triangle mesh, and the distance between the point and the closest triangle.
         /// </summary>
         /// <param name="p">A point.</param>
-        /// <param name="distance">The distance between the point and the closest triangle.</param>
-        /// <param name="distance"></param>
+        /// <param name="mesh">A mesh.</param>
         /// <returns>A value indicating whether the point is contained within the triangle mesh.</returns>
-        public static bool PointInMesh(Vector3 p, IEnumerable<Triangle> mesh, out float distance)
+        public static bool PointInMesh(Vector3 p, IEnumerable<Triangle> mesh)
         {
-            distance = float.MaxValue;
-
-            foreach (var tri in mesh)
-            {
-                if (PointInTriangle(p, tri, out float d))
-                {
-                    distance = d;
-
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Performs intersection test with ray and ray intersectable item list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="items">Ray intersectable item list</param>
-        /// <param name="facingOnly">Select only items facing to ray origin</param>
-        /// <param name="position">Result picked position</param>
-        /// <param name="item">Result picked ray intersectable item</param>
-        /// <param name="distance">Result distance to picked position</param>
-        /// <returns>Returns first intersection if exists</returns>
-        public static bool IntersectFirst<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
-        {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
-
-            foreach (var cItem in items)
-            {
-                if (cItem.Intersects(ray, facingOnly, out Vector3 pos, out float d))
-                {
-                    position = pos;
-                    item = cItem;
-                    distance = d;
-
-                    return true;
-                }
-            }
-
-            return false;
+            return mesh.Any(t => PointInTriangle(p, t));
         }
         /// <summary>
-        /// Performs intersection test with ray and ray intersectable item list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="items">Triangle list</param>
-        /// <param name="facingOnly">Select only items facing to ray origin</param>
-        /// <param name="position">Result picked position</param>
-        /// <param name="item">Result picked ray intersectable item</param>
-        /// <param name="distance">Result distance to picked position</param>
-        /// <returns>Returns nearest intersection if exists</returns>
-        public static bool IntersectNearest<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3 position, out T item, out float distance) where T : IRayIntersectable
-        {
-            position = Vector3.Zero;
-            item = default;
-            distance = float.MaxValue;
-
-            if (IntersectAll(ray, items, facingOnly, out Vector3[] pickedPositions, out T[] pickedTriangles, out float[] pickedDistances))
-            {
-                float distanceMin = float.MaxValue;
-
-                for (int i = 0; i < pickedPositions.Length; i++)
-                {
-                    float dist = pickedDistances[i];
-                    if (dist < distanceMin)
-                    {
-                        distanceMin = dist;
-                        position = pickedPositions[i];
-                        item = pickedTriangles[i];
-                        distance = pickedDistances[i];
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Performs intersection test with ray and ray intersectable item list
-        /// </summary>
-        /// <param name="ray">Ray</param>
-        /// <param name="items">Triangle list</param>
-        /// <param name="facingOnly">Select only items facing to ray origin</param>
-        /// <param name="pickedPositions">Picked position list</param>
-        /// <param name="pickedItems">Picked ray intersectable item list</param>
-        /// <param name="pickedDistances">Distances to picked positions</param>
-        /// <returns>Returns all intersections if exists</returns>
-        public static bool IntersectAll<T>(Ray ray, IEnumerable<T> items, bool facingOnly, out Vector3[] pickedPositions, out T[] pickedItems, out float[] pickedDistances) where T : IRayIntersectable
-        {
-            SortedDictionary<float, Vector3> pickedPositionList = new SortedDictionary<float, Vector3>();
-            SortedDictionary<float, T> pickedTriangleList = new SortedDictionary<float, T>();
-            SortedDictionary<float, float> pickedDistancesList = new SortedDictionary<float, float>();
-
-            foreach (T t in items)
-            {
-                //Avoid duplicate picked positions
-                var intersects = t.Intersects(ray, facingOnly, out Vector3 pos, out float d);
-                if (intersects && !pickedPositionList.ContainsValue(pos))
-                {
-                    float k = d;
-                    while (pickedPositionList.ContainsKey(k))
-                    {
-                        //Avoid duplicate distance keys
-                        k += 0.001f;
-                    }
-
-                    pickedPositionList.Add(k, pos);
-                    pickedTriangleList.Add(k, t);
-                    pickedDistancesList.Add(k, d);
-                }
-            }
-
-            if (pickedPositionList.Values.Count > 0)
-            {
-                pickedPositions = new Vector3[pickedPositionList.Values.Count];
-                pickedItems = new T[pickedTriangleList.Values.Count];
-                pickedDistances = new float[pickedDistancesList.Values.Count];
-
-                pickedPositionList.Values.CopyTo(pickedPositions, 0);
-                pickedTriangleList.Values.CopyTo(pickedItems, 0);
-                pickedDistancesList.Values.CopyTo(pickedDistances, 0);
-
-                return true;
-            }
-            else
-            {
-                pickedPositions = null;
-                pickedItems = null;
-                pickedDistances = null;
-
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Gets the nearest point in a ray from a specified point
+        /// Gets the closest point in a ray from a specified point
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="point">Point</param>
         /// <returns>Returns the resulting point along the ray</returns>
-        public static Vector3 NearestPointOnLine(Ray ray, Vector3 point)
+        public static Vector3 ClosestPointInRay(Ray ray, Vector3 point)
         {
-            Vector3 origin = ray.Position;
-            Vector3 dir = Vector3.Normalize(ray.Direction);
+            var to = point - ray.Position;
+            float rayLength = ray.Direction.Length();
+            var dir = Vector3.Normalize(ray.Direction);
 
-            //Vector from origin to point
-            var v = origin - point;
+            var dist = Vector3.Dot(to, dir);
+            if (dist < 0f)
+            {
+                return ray.Position;
+            }
+            if (dist > rayLength)
+            {
+                return ray.Position + ray.Direction;
+            }
 
-            //Project v over direction vector and get the distance magnitude over dir
-            var d = Vector3.Dot(v, dir);
-
-            //Move from origin towards the resulting distance
-            return origin + (dir * d);
+            return ray.Position + (dir * dist);
         }
         /// <summary>
-        /// Gets the distance from the nearest point in a ray from a specified point
+        /// Gets the closest point in a ray from a specified point
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <param name="point">Point</param>
+        /// <param name="distance">Distance</param>
         /// <returns>Returns the resulting minimum distance from point to ray</returns>
-        public static float DistanceFromPointToLine(Ray ray, Vector3 point)
+        public static Vector3 ClosestPointInRay(Ray ray, Vector3 point, out float distance)
         {
-            var linePoint = NearestPointOnLine(ray, point);
+            var closestPoint = ClosestPointInRay(ray, point);
 
-            return Vector3.Distance(linePoint, point);
+            distance = Vector3.Distance(closestPoint, point);
+
+            return closestPoint;
         }
 
         /// <summary>
-        /// Gets the closest triangle point from the specified point p
+        /// Gets the closest triangle point from the specified point
         /// </summary>
-        /// <param name="p">Point</param>
-        /// <param name="t">Triangle</param>
-        /// <param name="closest">Returns the closest point in the triangle from point p</param>
-        public static void ClosestPointInTriangle(Vector3 p, Triangle t, out Vector3 closest)
+        /// <param name="point">Point</param>
+        /// <param name="triangle">Triangle</param>
+        /// <returns>Returns the closest point in the triangle from point</returns>
+        public static Vector3 ClosestPointInTriangle(Vector3 point, Triangle triangle)
         {
-            ClosestPointInTriangle(p, t.Point1, t.Point2, t.Point3, out closest);
-        }
-        /// <summary>
-        /// Gets the closest triangle point from the specified point p
-        /// </summary>
-        /// <param name="p">Point</param>
-        /// <param name="a">Triangle vertex A</param>
-        /// <param name="b">Triangle vertex B</param>
-        /// <param name="c">Triangle vertex C</param>
-        /// <param name="closest">Returns the closest point in the triangle from point p</param>
-        public static void ClosestPointInTriangle(Vector3 p, Vector3 a, Vector3 b, Vector3 c, out Vector3 closest)
-        {
+            Vector3 a = triangle.Point1;
+            Vector3 b = triangle.Point2;
+            Vector3 c = triangle.Point3;
+
             // Check if P in vertex region outside A
             Vector3 ab = Vector3.Subtract(b, a);
             Vector3 ac = Vector3.Subtract(c, a);
-            Vector3 ap = Vector3.Subtract(p, a);
+            Vector3 ap = Vector3.Subtract(point, a);
             float d1 = Vector3.Dot(ab, ap);
             float d2 = Vector3.Dot(ac, ap);
             if (d1 <= 0.0f && d2 <= 0.0f)
             {
                 // barycentric coordinates (1,0,0)
-                closest = a;
-                return;
+                return a;
             }
 
             // Check if P in vertex region outside B
-            Vector3 bp = Vector3.Subtract(p, b);
+            Vector3 bp = Vector3.Subtract(point, b);
             float d3 = Vector3.Dot(ab, bp);
             float d4 = Vector3.Dot(ac, bp);
             if (d3 >= 0.0f && d4 <= d3)
             {
                 // barycentric coordinates (0,1,0)
-                closest = b;
-                return;
+                return b;
             }
 
             // Check if P in edge region of AB, if so return projection of P onto AB
@@ -634,21 +640,22 @@ namespace Engine.Common
             {
                 // barycentric coordinates (1-v,v,0)
                 float v = d1 / (d1 - d3);
-                closest.X = a.X + v * ab.X;
-                closest.Y = a.Y + v * ab.Y;
-                closest.Z = a.Z + v * ab.Z;
-                return;
+                return new Vector3
+                {
+                    X = a.X + v * ab.X,
+                    Y = a.Y + v * ab.Y,
+                    Z = a.Z + v * ab.Z,
+                };
             }
 
             // Check if P in vertex region outside C
-            Vector3 cp = Vector3.Subtract(p, c);
+            Vector3 cp = Vector3.Subtract(point, c);
             float d5 = Vector3.Dot(ab, cp);
             float d6 = Vector3.Dot(ac, cp);
             if (d6 >= 0.0f && d5 <= d6)
             {
                 // barycentric coordinates (0,0,1)
-                closest = c;
-                return;
+                return c;
             }
 
             // Check if P in edge region of AC, if so return projection of P onto AC
@@ -657,10 +664,12 @@ namespace Engine.Common
             {
                 // barycentric coordinates (1-w,0,w)
                 float w = d2 / (d2 - d6);
-                closest.X = a.X + w * ac.X;
-                closest.Y = a.Y + w * ac.Y;
-                closest.Z = a.Z + w * ac.Z;
-                return;
+                return new Vector3
+                {
+                    X = a.X + w * ac.X,
+                    Y = a.Y + w * ac.Y,
+                    Z = a.Z + w * ac.Z,
+                };
             }
 
             // Check if P in edge region of BC, if so return projection of P onto BC
@@ -669,38 +678,43 @@ namespace Engine.Common
             {
                 // barycentric coordinates (0,1-w,w)
                 float w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
-                closest.X = b.X + w * (c.X - b.X);
-                closest.Y = b.Y + w * (c.Y - b.Y);
-                closest.Z = b.Z + w * (c.Z - b.Z);
-                return;
+                return new Vector3
+                {
+                    X = b.X + w * (c.X - b.X),
+                    Y = b.Y + w * (c.Y - b.Y),
+                    Z = b.Z + w * (c.Z - b.Z),
+                };
             }
 
             // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
             float denom = 1.0f / (va + vb + vc);
             float closestV = vb * denom;
             float closestW = vc * denom;
-            closest.X = a.X + ab.X * closestV + ac.X * closestW;
-            closest.Y = a.Y + ab.Y * closestV + ac.Y * closestW;
-            closest.Z = a.Z + ab.Z * closestV + ac.Z * closestW;
+            return new Vector3
+            {
+                X = a.X + ab.X * closestV + ac.X * closestW,
+                Y = a.Y + ab.Y * closestV + ac.Y * closestW,
+                Z = a.Z + ab.Z * closestV + ac.Z * closestW,
+            };
         }
         /// <summary>
         /// Gets the closest point in a triangle mesh from the specified point p
         /// </summary>
-        /// <param name="p">Point</param>
+        /// <param name="point">Point</param>
         /// <param name="mesh">Triangle mesh</param>
         /// <param name="closest">Returns the closest triangle from point p</param>
         /// <param name="contactPoint">Returns the closest point in the triangle from point p</param>
-        public static void ClosestPointInMesh(Vector3 p, IEnumerable<Triangle> mesh, out Triangle closest, out Vector3 contactPoint)
+        public static void ClosestPointInMesh(Vector3 point, IEnumerable<Triangle> mesh, out Triangle closest, out Vector3 contactPoint)
         {
             closest = new Triangle();
-            contactPoint = p;
+            contactPoint = point;
 
             float distance = float.MaxValue;
             foreach (var t in mesh)
             {
-                ClosestPointInTriangle(p, t.Point1, t.Point2, t.Point3, out Vector3 closestToTri);
+                var closestToTri = ClosestPointInTriangle(point, t);
 
-                float sqrDist = Vector3.DistanceSquared(p, closestToTri);
+                float sqrDist = Vector3.DistanceSquared(point, closestToTri);
 
                 if (sqrDist < distance)
                 {
@@ -710,73 +724,6 @@ namespace Engine.Common
                     contactPoint = closestToTri;
                 }
             }
-        }
-
-        /// <summary>
-        /// Gets whether the specified edge overlaps with the axis
-        /// </summary>
-        /// <param name="extents">Box extents</param>
-        /// <param name="tri">Triangle</param>
-        /// <param name="edge">Edge</param>
-        /// <param name="axis">Axis</param>
-        private static bool TriangleOverlapOnBoxAxis(Vector3 extents, Triangle tri, Vector3 edge, Axis axis)
-        {
-            if (axis == Axis.X)
-            {
-                // a.X ^ b.X = (1,0,0) ^ edge
-                // axis = Vector3(0, -edge.Z, edge.Y)
-                float dPoint1 = tri.Point1.Z * edge.Y - tri.Point1.Y * edge.Z;
-                float dPoint2 = tri.Point2.Z * edge.Y - tri.Point2.Y * edge.Z;
-                float dPoint3 = tri.Point3.Z * edge.Y - tri.Point3.Y * edge.Z;
-                float dhalf = Math.Abs(extents.Y * edge.Z) + Math.Abs(extents.Z * edge.Y);
-                if (Math.Min(dPoint1, Math.Min(dPoint2, dPoint3)) >= dhalf ||
-                    Math.Max(dPoint1, Math.Max(dPoint2, dPoint3)) <= -dhalf)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (axis == Axis.Y)
-            {
-                // a.Y ^ b.X = (0,1,0) ^ edge
-                // axis = Vector3(edge.Z, 0, -edge.X)
-                float dPoint1 = tri.Point1.X * edge.Z - tri.Point1.Z * edge.X;
-                float dPoint2 = tri.Point2.X * edge.Z - tri.Point2.Z * edge.X;
-                float dPoint3 = tri.Point3.X * edge.Z - tri.Point3.Z * edge.X;
-                float dhalf = Math.Abs(extents.X * edge.Z) + Math.Abs(extents.Z * edge.X);
-                if (Math.Min(dPoint1, Math.Min(dPoint2, dPoint3)) >= dhalf ||
-                    Math.Max(dPoint1, Math.Max(dPoint2, dPoint3)) <= -dhalf)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            else if (axis == Axis.Z)
-            {
-                // a.Y ^ b.X = (0,0,1) ^ edge
-                // axis = Vector3(-edge.Y, edge.X, 0)
-                float dPoint1 = tri.Point1.Y * edge.X - tri.Point1.X * edge.Y;
-                float dPoint2 = tri.Point2.Y * edge.X - tri.Point2.X * edge.Y;
-                float dPoint3 = tri.Point3.Y * edge.X - tri.Point3.X * edge.Y;
-                float dhalf = Math.Abs(extents.Y * edge.X) + Math.Abs(extents.X * edge.Y);
-                if (Math.Min(dPoint1, Math.Min(dPoint2, dPoint3)) >= dhalf ||
-                    Math.Max(dPoint1, Math.Max(dPoint2, dPoint3)) <= -dhalf)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>
@@ -807,7 +754,24 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType SphereContainsFrustum(BoundingSphere sphere, BoundingFrustum frustum)
         {
-            return frustum.Contains(ref sphere);
+            if (!frustum.Intersects(ref sphere))
+            {
+                // Not intersection at all
+                return ContainmentType.Disjoint;
+            }
+
+            // Test if all corners are into the sphere
+            var corners = frustum.GetCorners();
+            for (int i = 0; i < corners.Length; i++)
+            {
+                var v = corners[i];
+                if (sphere.Contains(ref v) == ContainmentType.Disjoint)
+                {
+                    return ContainmentType.Intersects;
+                }
+            }
+
+            return ContainmentType.Contains;
         }
         /// <summary>
         /// Determines whether a BoundingSphere contains a Triangle.
@@ -887,7 +851,24 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType BoxContainsFrustum(BoundingBox box, BoundingFrustum frustum)
         {
-            return frustum.Contains(ref box);
+            if (!frustum.Intersects(ref box))
+            {
+                // Not intersection at all
+                return ContainmentType.Disjoint;
+            }
+
+            // Test if all corners are into the box
+            var corners = frustum.GetCorners();
+            for (int i = 0; i < corners.Length; i++)
+            {
+                var v = corners[i];
+                if (box.Contains(ref v) == ContainmentType.Disjoint)
+                {
+                    return ContainmentType.Intersects;
+                }
+            }
+
+            return ContainmentType.Contains;
         }
         /// <summary>
         /// Determines whether a BoundingBox contains a Triangle.
@@ -897,63 +878,30 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType BoxContainsTriangle(BoundingBox box, Triangle triangle)
         {
-            Vector3 boxExtents = box.GetExtents();
+            // Test containment
+            var test1 = box.Contains(triangle.Point1);
+            var test2 = box.Contains(triangle.Point2);
+            var test3 = box.Contains(triangle.Point3);
 
-            BoundingBox triBounds = BoundingBox.FromPoints(triangle.GetVertices().ToArray());
-            Vector3 triExtents = triBounds.GetExtents();
-            Vector3 triCenter = triBounds.GetCenter();
-
-            float triBoundCenterX = Math.Abs(triCenter.X);
-            float triBoundCenterY = Math.Abs(triCenter.Y);
-            float triBoundCenterZ = Math.Abs(triCenter.Z);
-
-            if (triExtents.X + boxExtents.X <= triBoundCenterX ||
-                triExtents.Y + boxExtents.Y <= triBoundCenterY ||
-                triExtents.Z + boxExtents.Z <= triBoundCenterZ)
+            if (test1 == ContainmentType.Contains && test2 == ContainmentType.Contains && test3 == ContainmentType.Contains)
             {
-                // The triangle is outside of the bounding box 
-                return ContainmentType.Disjoint;
-            }
-
-            if (triExtents.X + triBoundCenterX <= boxExtents.X &&
-                triExtents.Y + triBoundCenterY <= boxExtents.Y &&
-                triExtents.Z + triBoundCenterZ <= boxExtents.Z)
-            {
-                // The triangle is inside the bounding box
+                // All three points into the box
                 return ContainmentType.Contains;
             }
 
-            // Test the triangle normal
-
-            Vector3 edge1 = triangle.GetEdge1();
-            Vector3 edge2 = triangle.GetEdge2();
-            Vector3 crossEdge = Vector3.Cross(edge1, edge2);
-            float triDist = Vector3.Dot(triangle.Point1, crossEdge);
-
-            if (Math.Abs(crossEdge.X * boxExtents.X) +
-                Math.Abs(crossEdge.Y * boxExtents.Y) +
-                Math.Abs(crossEdge.Z * boxExtents.Z) <= Math.Abs(triDist))
+            if (test1 == ContainmentType.Contains || test2 == ContainmentType.Contains || test3 == ContainmentType.Contains)
             {
-                return ContainmentType.Disjoint;
+                // One point at least, into the box
+                return ContainmentType.Intersects;
             }
 
-            // Test the nine edge cross-products
+            // Test intersection
+            if (BoxIntersectsTriangle(box, triangle))
+            {
+                return ContainmentType.Intersects;
+            }
 
-            Vector3 edge3 = triangle.GetEdge3();
-
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge1, Axis.X)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge2, Axis.X)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge3, Axis.X)) { return ContainmentType.Disjoint; }
-
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge1, Axis.Y)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge2, Axis.Y)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge3, Axis.Y)) { return ContainmentType.Disjoint; }
-
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge1, Axis.Z)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge2, Axis.Z)) { return ContainmentType.Disjoint; }
-            if (TriangleOverlapOnBoxAxis(boxExtents, triangle, edge3, Axis.Z)) { return ContainmentType.Disjoint; }
-
-            return ContainmentType.Intersects;
+            return ContainmentType.Disjoint;
         }
         /// <summary>
         /// Determines whether a BoundingBox contains a Triangle mesh.
@@ -967,8 +915,7 @@ namespace Engine.Common
 
             foreach (var t in mesh)
             {
-                ContainmentType c = BoxContainsTriangle(box, t);
-
+                var c = BoxContainsTriangle(box, t);
                 if (c == res)
                 {
                     continue;
@@ -1024,23 +971,57 @@ namespace Engine.Common
                 return ContainmentType.Contains;
             }
 
-            var intersects = false;
-            for (var i = 0; i < 6; ++i)
+            //Test points
+            var corners = frustum2.GetCorners();
+            var f1Contains2 = FrustumContainsPoints(frustum1, corners);
+            if (f1Contains2 != ContainmentType.Disjoint)
             {
-                var plane = frustum1.GetPlane(i);
-                frustum2.Intersects(ref plane, out PlaneIntersectionType planeIntersectionType);
-                if (planeIntersectionType == PlaneIntersectionType.Back)
+                return f1Contains2;
+            }
+
+            var f2Contains1 = FrustumContainsPoints(frustum2, frustum1.GetCorners());
+            if (f2Contains1 != ContainmentType.Disjoint)
+            {
+                return ContainmentType.Intersects;
+            }
+
+            //Test near to far segments
+            for (int i = 0; i < 4; i++)
+            {
+                var p1 = corners[i + 0];
+                var p2 = corners[i + 4];
+
+                if (FrustumIntersectsSegment(frustum1, p1, p2))
                 {
-                    return ContainmentType.Disjoint;
-                }
-                else if (planeIntersectionType == PlaneIntersectionType.Intersecting)
-                {
-                    intersects = true;
-                    break;
+                    return ContainmentType.Intersects;
                 }
             }
 
-            return intersects ? ContainmentType.Intersects : ContainmentType.Contains;
+            //Test near plane segments
+            for (int i = 0; i < 4; i++)
+            {
+                var p1 = corners[i + 0];
+                var p2 = corners[(i + 1) % 4];
+
+                if (FrustumIntersectsSegment(frustum1, p1, p2))
+                {
+                    return ContainmentType.Intersects;
+                }
+            }
+
+            //Test far plane segments
+            for (int i = 0; i < 4; i++)
+            {
+                var p1 = corners[i + 4];
+                var p2 = corners[((i + 1) % 4) + 4];
+
+                if (FrustumIntersectsSegment(frustum1, p1, p2))
+                {
+                    return ContainmentType.Intersects;
+                }
+            }
+
+            return ContainmentType.Disjoint;
         }
         /// <summary>
         /// Determines whether a BoundingFrustum contains a Triangle.
@@ -1050,7 +1031,33 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType FrustumContainsTriangle(BoundingFrustum frustum, Triangle triangle)
         {
-            throw new NotImplementedException();
+            var vertices = triangle.GetVertices();
+
+            var inVerts = vertices.Where(v => frustum.Contains(ref v) != ContainmentType.Disjoint);
+
+            if (inVerts.Count() == vertices.Count())
+            {
+                // All vertices into the frustum
+                return ContainmentType.Contains;
+            }
+
+            if (inVerts.Any())
+            {
+                // At least one vertex into the frustum
+                return ContainmentType.Intersects;
+            }
+
+            // Test triangle segments
+            var edges = triangle.GetEdges();
+            foreach (var (point1, point2) in edges)
+            {
+                if (FrustumIntersectsSegment(frustum, point1, point2))
+                {
+                    return ContainmentType.Intersects;
+                }
+            }
+
+            return ContainmentType.Disjoint;
         }
         /// <summary>
         /// Determines whether a BoundingFrustum contains a Triangle mesh.
@@ -1087,7 +1094,178 @@ namespace Engine.Common
 
             return res;
         }
+        /// <summary>
+        /// Gets whether the frustum contains the point list
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="points">Point collection</param>
+        private static ContainmentType FrustumContainsPoints(BoundingFrustum frustum, IEnumerable<Vector3> points)
+        {
+            bool allCornersContained = true;
+            bool intersects = false;
+            foreach (var vertex in points)
+            {
+                var res = frustum.Contains(vertex);
+                if (res != ContainmentType.Disjoint)
+                {
+                    intersects = true;
+                }
+                else
+                {
+                    allCornersContained = false;
+                }
+            }
 
+            if (intersects)
+            {
+                return allCornersContained ? ContainmentType.Contains : ContainmentType.Intersects;
+            }
+
+            return ContainmentType.Disjoint;
+        }
+
+        /// <summary>
+        /// Gets whether a frustum is intersected with the specified segment or not
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="p1">First segment point</param>
+        /// <param name="p2">Second segment point</param>
+        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
+        public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2)
+        {
+            Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+
+            if (!frustum.Intersects(ref ray, out var inDistance, out _))
+            {
+                return false;
+            }
+
+            if (!inDistance.HasValue || Math.Abs(inDistance.Value) == float.MaxValue)
+            {
+                return false;
+            }
+
+            float rayLength = Vector3.Distance(p1, p2);
+            if (inDistance >= rayLength)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Gets whether a frustum is intersected with the specified segment or not
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="p1">First segment point</param>
+        /// <param name="p2">Second segment point</param>
+        /// <param name="distance">Returns the intersection distance</param>
+        /// <param name="point">Returns the intersection point</param>
+        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
+        public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2, out float distance, out Vector3 point)
+        {
+            distance = float.MaxValue;
+            point = Vector3.Zero;
+
+            Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+
+            if (!frustum.Intersects(ref ray, out var inDistance, out _))
+            {
+                return false;
+            }
+
+            if (!inDistance.HasValue || Math.Abs(inDistance.Value) == float.MaxValue)
+            {
+                return false;
+            }
+
+            float rayLength = Vector3.Distance(p1, p2);
+            if (inDistance >= rayLength)
+            {
+                return false;
+            }
+
+            distance = inDistance.Value;
+            point = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
+
+            return true;
+        }
+        /// <summary>
+        /// Gets whether a frustum is intersected with the specified segment or not
+        /// </summary>
+        /// <param name="frustum">Frustum</param>
+        /// <param name="p1">First segment point</param>
+        /// <param name="p2">Second segment point</param>
+        /// <param name="enteringPoint">Entering segment point</param>
+        /// <param name="exitingPoint">Exiting segment point</param>
+        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
+        public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2, out Vector3? enteringPoint, out Vector3? exitingPoint)
+        {
+            enteringPoint = null;
+            exitingPoint = null;
+
+            Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+
+            if (!frustum.Intersects(ref ray, out var inDistance, out var outDistance))
+            {
+                return false;
+            }
+
+            float rayLength = Vector3.Distance(p1, p2);
+
+            bool intoSegmentBounds = false;
+
+            if (inDistance.HasValue && Math.Abs(inDistance.Value) != float.MaxValue && inDistance <= rayLength)
+            {
+                enteringPoint = ray.Position + (Vector3.Normalize(ray.Direction) * inDistance.Value);
+                intoSegmentBounds = true;
+            }
+
+            if (outDistance.HasValue && Math.Abs(outDistance.Value) != float.MaxValue && outDistance <= rayLength)
+            {
+                exitingPoint = ray.Position + (Vector3.Normalize(ray.Direction) * outDistance.Value);
+                intoSegmentBounds = true;
+            }
+
+            return intoSegmentBounds;
+        }
+
+        /// <summary>
+        /// Determines whether a Triangle mesh contains a BoundingSphere.
+        /// </summary>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="sphere">Sphere</param>
+        /// <returns>Returns the type of containment the two objects have between them</returns>
+        public static ContainmentType MeshContainsSphere(IEnumerable<Triangle> mesh, BoundingSphere sphere)
+        {
+            BoundingBox mbox = BoundingBox.FromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+
+            return mbox.Contains(ref sphere);
+        }
+        /// <summary>
+        /// Determines whether a Triangle mesh contains a BoundingBox.
+        /// </summary>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="box">Axis aligned box</param>
+        /// <returns>Returns the type of containment the two objects have between them</returns>
+        public static ContainmentType MeshContainsBox(IEnumerable<Triangle> mesh, BoundingBox box)
+        {
+            BoundingBox mbox = BoundingBox.FromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+
+            return mbox.Contains(ref box);
+        }
+        /// <summary>
+        /// Determines whether a Triangle mesh contains a BoundingFrustum.
+        /// </summary>
+        /// <param name="mesh">Triangle mesh</param>
+        /// <param name="frustum">Frustum</param>
+        /// <returns>Returns the type of containment the two objects have between them</returns>
+        public static ContainmentType MeshContainsFrustum(IEnumerable<Triangle> mesh, BoundingFrustum frustum)
+        {
+            BoundingBox mbox = BoundingBox.FromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+
+            return BoxContainsFrustum(mbox, frustum);
+        }
         /// <summary>
         /// Determines whether a Triangle mesh contains a Triangle mesh.
         /// </summary>
@@ -1096,6 +1274,23 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2)
         {
+            // A mesh is not a volume. Calculate the bounding volumes of the tow meshes
+            var bbox1 = BoundingBox.FromPoints(mesh1.SelectMany(t => t.GetVertices()).ToArray());
+            var bbox2 = BoundingBox.FromPoints(mesh2.SelectMany(t => t.GetVertices()).ToArray());
+
+            if (bbox1.Contains(ref bbox2) == ContainmentType.Disjoint)
+            {
+                // If volumes disjoint, no intersection is possible
+                return ContainmentType.Disjoint;
+            }
+
+            if (bbox2.Contains(ref bbox1) == ContainmentType.Contains)
+            {
+                // Box2 contains box1. Then box1 intersects box2
+                return ContainmentType.Intersects;
+            }
+
+            // Test each triangle of the mesh
             foreach (var t in mesh1)
             {
                 if (TriangleIntersectsMesh(t, mesh2, out _))
@@ -1104,14 +1299,7 @@ namespace Engine.Common
                 }
             }
 
-            var bbox1 = BoundingBox.FromPoints(mesh1.SelectMany(t => t.GetVertices()).ToArray());
-            var bbox2 = BoundingBox.FromPoints(mesh2.SelectMany(t => t.GetVertices()).ToArray());
-
-            if (bbox1.Contains(ref bbox2) == ContainmentType.Disjoint)
-            {
-                return ContainmentType.Disjoint;
-            }
-
+            // If no intersection found, must be a containment result
             return ContainmentType.Contains;
         }
     }

@@ -2,9 +2,6 @@
 
 namespace Engine
 {
-    using Engine.Common;
-    using Engine.Effects;
-
     /// <summary>
     /// Cubic shadow map
     /// </summary>
@@ -47,23 +44,20 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game instance</param>
+        /// <param name="scene">Scene</param>
+        /// <param name="name">Name</param>
         /// <param name="width">With</param>
         /// <param name="height">Height</param>
         /// <param name="arraySize">Array size</param>
-        public ShadowMapPoint(Game game, int width, int height, int arraySize) : base(game, width, height, 6)
+        public ShadowMapPoint(Scene scene, string name, int width, int height, int arraySize) : base(scene, name, width, height, 6)
         {
-            game.Graphics.CreateCubicShadowMapTextureArrays(
-                width, height, arraySize,
-                out EngineDepthStencilView[] dsv, out EngineShaderResourceView srv);
+            var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateCubicShadowMapTextureArrays(name, width, height, arraySize);
 
-            DepthMap = dsv;
-            Texture = srv;
+            DepthMap = DepthStencils;
+            Texture = ShaderResource;
         }
 
-        /// <summary>
-        /// Updates the from light view projection
-        /// </summary>
+        /// <inheritdoc/>
         public override void UpdateFromLightViewProjection(Camera camera, ISceneLight light)
         {
             if (light is ISceneLightPoint lightPoint)
@@ -75,13 +69,11 @@ namespace Engine
                 FromLightViewProjectionArray = vp;
             }
         }
-        /// <summary>
-        /// Gets the effect to draw this shadow map
-        /// </summary>
-        /// <returns>Returns an effect</returns>
-        public override IShadowMapDrawer GetEffect()
+
+        /// <inheritdoc/>
+        public override void UpdateGlobals()
         {
-            return DrawerPool.EffectShadowPoint;
+
         }
 
         /// <inheritdoc/>

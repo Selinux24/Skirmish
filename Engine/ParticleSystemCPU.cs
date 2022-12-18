@@ -1,12 +1,13 @@
 ﻿using SharpDX;
-using SharpDX.Direct3D;
 using System;
+using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Particles;
     using Engine.Common;
     using Engine.Content;
-    using Engine.Effects;
 
     /// <summary>
     /// CPU particle system
@@ -21,11 +22,11 @@ namespace Engine
         /// <summary>
         /// Particle list
         /// </summary>
-        private readonly VertexCpuParticle[] particles;
+        private VertexCpuParticle[] particles;
         /// <summary>
         /// Vertex buffer
         /// </summary>
-        private EngineBuffer<VertexCpuParticle> buffer;
+        private EngineVertexBuffer<VertexCpuParticle> buffer;
         /// <summary>
         /// Current particle index to update data
         /// </summary>
@@ -38,6 +39,10 @@ namespace Engine
         /// Particle parameters
         /// </summary>
         private ParticleSystemParams parameters;
+        /// <summary>
+        /// Drawer
+        /// </summary>
+        private BuiltInParticles particleDrawer;
 
         /// <summary>
         /// Game instance
@@ -85,34 +90,59 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates a new CPU particle system
+        /// </summary>
+        /// <param name="game"></param>
+        /// <param name="name"></param>
+        /// <param name="description"></param>
+        /// <param name="emitter"></param>
+        /// <returns></returns>
+        public static async Task<ParticleSystemCpu> Create(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        {
+            var pParameters = new ParticleSystemParams(description) * emitter.Scale;
+
+            var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
+            var texture = await game.ResourceManager.RequestResource(imgContent);
+            var textureCount = (uint)imgContent.Count;
+
+            emitter.UpdateBounds(pParameters);
+            int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
+            var vParticles = new VertexCpuParticle[maxConcurrentParticles];
+            float timeToEnd = emitter.Duration + pParameters.MaxDuration;
+
+            var pBuffer = new EngineVertexBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, VertexBufferParams.Dynamic);
+
+            var drawer = BuiltInShaders.GetDrawer<BuiltInParticles>();
+            var signature = drawer.GetVertexShader().Shader.GetShaderBytecode();
+            pBuffer.CreateInputLayout(nameof(ParticlesPs), signature, BufferSlot);
+
+            return new ParticleSystemCpu
+            {
+                Game = game,
+                Name = name,
+
+                parameters = pParameters,
+                particleDrawer = drawer,
+
+                Texture = texture,
+                TextureCount = textureCount,
+
+                Emitter = emitter,
+                MaxConcurrentParticles = maxConcurrentParticles,
+                particles = vParticles,
+
+                buffer = pBuffer,
+
+                TimeToEnd = timeToEnd
+            };
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Particle system description</param>
-        /// <param name="emitter">Particle emitter</param>
-        public ParticleSystemCpu(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        protected ParticleSystemCpu()
         {
-            Game = game;
-            Name = name;
 
-            parameters = new ParticleSystemParams(description) * emitter.Scale;
-
-            var imgContent = ImageContent.Texture(description.ContentPath, description.TextureName);
-            Texture = game.ResourceManager.RequestResource(imgContent);
-            TextureCount = (uint)imgContent.Count;
-
-            Emitter = emitter;
-            Emitter.UpdateBounds(parameters);
-            MaxConcurrentParticles = Emitter.GetMaximumConcurrentParticles(description.MaxDuration);
-
-            particles = new VertexCpuParticle[MaxConcurrentParticles];
-
-            buffer = new EngineBuffer<VertexCpuParticle>(game.Graphics, description.Name, particles, true);
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.RotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
-            buffer.AddInputLayout(game.Graphics.CreateInputLayout(DrawerPool.EffectDefaultCPUParticles.NonRotationDraw.GetSignature(), VertexCpuParticle.Input(BufferSlot)));
-
-            TimeToEnd = Emitter.Duration + parameters.MaxDuration;
         }
         /// <summary>
         /// Destructor
@@ -179,11 +209,6 @@ namespace Engine
                 return;
             }
 
-            var rot = parameters.RotateSpeed != Vector2.Zero;
-
-            var effect = DrawerPool.EffectDefaultCPUParticles;
-            var technique = rot ? effect.RotationDraw : effect.NonRotationDraw;
-
             var mode = context.DrawerMode;
             if (!mode.HasFlag(DrawerModes.ShadowMap))
             {
@@ -192,15 +217,11 @@ namespace Engine
             }
 
             var graphics = Game.Graphics;
-
-            graphics.IASetVertexBuffers(BufferSlot, buffer.VertexBufferBinding);
-            graphics.IAInputLayout = rot ? buffer.InputLayouts[0] : buffer.InputLayouts[1];
-            graphics.IAPrimitiveTopology = PrimitiveTopology.PointList;
-
             graphics.SetDepthStencilRDZEnabled();
             graphics.SetBlendState(parameters.BlendMode);
 
-            var state = new EffectParticleState
+            var useRotation = parameters.RotateSpeed != Vector2.Zero;
+            var state = new BuiltInParticlesState
             {
                 TotalTime = Emitter.TotalTime,
                 MaxDuration = parameters.MaxDuration,
@@ -211,22 +232,13 @@ namespace Engine
                 EndSize = parameters.EndSize,
                 MinColor = parameters.MinColor,
                 MaxColor = parameters.MaxColor,
+                UseRotation = useRotation,
                 RotateSpeed = parameters.RotateSpeed,
             };
 
-            effect.UpdatePerFrame(
-                context.ViewProjection,
-                context.EyePosition,
-                state,
-                TextureCount,
-                Texture);
+            particleDrawer.Update(state, TextureCount, Texture);
 
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.Draw(ActiveParticles, 0);
-            }
+            particleDrawer.Draw(buffer, Topology.PointList, ActiveParticles);
         }
 
         /// <summary>
@@ -279,7 +291,7 @@ namespace Engine
             particles[currentParticleIndex].MaxAge = Emitter.TotalTime;
 
             Logger.WriteTrace(this, $"{Name} - AddParticle WriteDiscardBuffer");
-            Game.Graphics.WriteDiscardBuffer(buffer.VertexBuffer, particles);
+            buffer.Write(particles);
 
             currentParticleIndex = nextFreeParticle;
         }

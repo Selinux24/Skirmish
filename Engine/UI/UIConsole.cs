@@ -9,7 +9,7 @@ namespace Engine.UI
     /// <summary>
     /// Console
     /// </summary>
-    public class UIConsole : UITextArea
+    public sealed class UIConsole : UIControl<UIConsoleDescription>
     {
         /// <summary>
         /// Log lines
@@ -18,23 +18,27 @@ namespace Engine.UI
         /// <summary>
         /// Log lines when small sized
         /// </summary>
-        private readonly int logLinesSmall;
+        private int logLinesSmall;
         /// <summary>
         /// Log lines when big sized
         /// </summary>
-        private readonly int logLinesBig;
+        private int logLinesBig;
         /// <summary>
         /// Log formatter function
         /// </summary>
-        private readonly Func<LogEntry, string> fncFormatLog;
+        private Func<LogEntry, string> fncFormatLog;
         /// <summary>
         /// Log filter function
         /// </summary>
-        private readonly Func<LogEntry, bool> fncFilterLog;
+        private Func<LogEntry, bool> fncFilterLog;
         /// <summary>
         /// Elapsed seconds since last update
         /// </summary>
         private float elapsedSinceLastUpdate = 0;
+        /// <summary>
+        /// Text area
+        /// </summary>
+        private UITextArea textArea;
 
         /// <summary>
         /// Log lines
@@ -63,26 +67,59 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public UIConsole(string name, Scene scene, UIConsoleDescription description) : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public UIConsole(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            GrowControlWithText = false;
 
-            if (description.Background != null)
-            {
-                var background = new Sprite($"{name}.Background", scene, description.Background);
+        }
 
-                AddChild(background);
-            }
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIConsoleDescription description)
+        {
+            await base.InitializeAssets(description);
 
-            logLinesSmall = description.LogLinesSmall;
-            logLinesBig = description.LogLinesBig;
+            logLinesSmall = Description.LogLinesSmall;
+            logLinesBig = Description.LogLinesBig;
+            UpdateInterval = Description.UpdateInterval;
+
             logLines = logLinesSmall;
-            fncFormatLog = description.LogFormatterFunc ?? FormatLog;
-            fncFilterLog = description.LogFilterFunc ?? FilterLog;
-            UpdateInterval = description.UpdateInterval;
+            fncFormatLog = Description.LogFormatterFunc ?? FormatLog;
+            fncFilterLog = Description.LogFilterFunc ?? FilterLog;
+
+            if (Description.Background != null)
+            {
+                var background = await CreateBackground();
+                AddChild(background);
+
+                textArea = await CreateText();
+                background.AddChild(textArea);
+            }
+            else
+            {
+                textArea = await CreateText();
+                AddChild(textArea);
+            }
+        }
+        private async Task<Sprite> CreateBackground()
+        {
+            return await Scene.CreateComponent<Sprite, SpriteDescription>(
+                $"{Id}.Background",
+                $"{Name}.Background",
+                Description.Background);
+        }
+        private async Task<UITextArea> CreateText()
+        {
+            var text = await Scene.CreateComponent<UITextArea, UITextAreaDescription>(
+                $"{Id}.TextArea",
+                $"{Name}.TextArea",
+                Description);
+
+            text.GrowControlWithText = false;
+
+            return text;
         }
 
         /// <inheritdoc/>
@@ -98,7 +135,7 @@ namespace Engine.UI
             elapsedSinceLastUpdate += context.GameTime.ElapsedSeconds;
             if (elapsedSinceLastUpdate > UpdateInterval.TotalSeconds)
             {
-                Text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
+                textArea.Text = Logger.ReadText(fncFilterLog, fncFormatLog, LogLines);
             }
             elapsedSinceLastUpdate %= (float)UpdateInterval.TotalSeconds;
         }
@@ -108,7 +145,7 @@ namespace Engine.UI
         /// <param name="logEntry">Log entry</param>
         private string FormatLog(LogEntry logEntry)
         {
-            Color4 defColor = TextForeColor;
+            Color4 defColor = textArea.TextForeColor;
 
             Color4 logColor;
             switch (logEntry.LogLevel)
@@ -126,7 +163,7 @@ namespace Engine.UI
                     logColor = Color.Red;
                     break;
                 default:
-                    logColor = TextForeColor;
+                    logColor = textArea.TextForeColor;
                     break;
             }
 
@@ -169,36 +206,8 @@ namespace Engine.UI
                 LogLines = logLinesSmall;
             }
 
-            Height = TextLineHeight * LogLines;
+            Height = textArea.TextLineHeight * LogLines;
             Width = Game.Form.RenderWidth;
-        }
-    }
-
-    /// <summary>
-    /// UIConsole extensions
-    /// </summary>
-    public static class UIConsoleExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIConsole> AddComponentUIConsole(this Scene scene, string name, UIConsoleDescription description, int order = 0)
-        {
-            UIConsole component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIConsole(name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
-            });
-
-            return component;
         }
     }
 }

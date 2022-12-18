@@ -1,104 +1,112 @@
-﻿
-using System;
+﻿using System;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
     /// <summary>
     /// Drawable object
     /// </summary>
-    public abstract class Drawable : Updatable, IDrawable, ICullable, ISceneObject
+    public abstract class Drawable<T> : BaseSceneObject<T>, IUpdatable, IDrawable, ICullable, IDisposable where T : SceneObjectDescription
     {
-        /// <summary>
-        /// Game class
-        /// </summary>
-        protected Game Game { get { return Scene.Game; } }
         /// <summary>
         /// Buffer manager
         /// </summary>
         protected BufferManager BufferManager { get { return Game.BufferManager; } }
 
-        /// <summary>
-        /// Processing order
-        /// </summary>
-        public virtual int Order { get; set; } = 0;
-        /// <summary>
-        /// Visible
-        /// </summary>
-        public virtual bool Visible { get; set; } = true;
-        /// <summary>
-        /// Gets or sets whether the object cast shadow
-        /// </summary>
-        public virtual bool CastShadow { get; set; }
-        /// <summary>
-        /// Gets or sets whether the object is enabled to draw with the deferred renderer
-        /// </summary>
-        public virtual bool DeferredEnabled { get; set; }
-        /// <summary>
-        /// Uses depth info
-        /// </summary>
-        public virtual bool DepthEnabled { get; set; }
-        /// <summary>
-        /// Blend mode
-        /// </summary>
-        public virtual BlendModes BlendMode { get; set; }
-        /// <summary>
-        /// Object usage
-        /// </summary>
-        public virtual SceneObjectUsages Usage { get; set; } = SceneObjectUsages.None;
-        /// <summary>
-        /// Gets or sets if the current object has a parent
-        /// </summary>
-        public virtual bool HasParent { get; set; } = false;
-        /// <summary>
-        /// Maximum instance count
-        /// </summary>
-        public virtual int InstanceCount { get; protected set; } = 1;
+        /// <inheritdoc/>
+        public virtual bool Visible { get; set; }
+        /// <inheritdoc/>
+        public virtual ShadowCastingAlgorihtms CastShadow { get; protected set; }
+        /// <inheritdoc/>
+        public virtual bool DeferredEnabled { get; protected set; }
+        /// <inheritdoc/>
+        public virtual bool DepthEnabled { get; protected set; }
+        /// <inheritdoc/>
+        public virtual BlendModes BlendMode { get; protected set; }
+        /// <inheritdoc/>
+        public virtual SceneObjectUsages Usage { get; set; }
+        /// <inheritdoc/>
+        public virtual int Layer { get; set; }
+        /// <inheritdoc/>
+        public virtual int InstanceCount { get; protected set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        protected Drawable(string name, Scene scene, SceneObjectDescription description) :
-            base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        protected Drawable(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
+
+        }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~Drawable()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            Active = Visible = false;
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(T description)
+        {
+            await base.InitializeAssets(description);
+
+            Visible = description.StartsVisible;
             CastShadow = description.CastShadow;
             DeferredEnabled = description.DeferredEnabled;
             DepthEnabled = description.DepthEnabled;
             BlendMode = description.BlendMode;
+            Usage = SceneObjectUsages.None;
+            Layer = 0;
+            InstanceCount = 1;
         }
 
         /// <inheritdoc/>
-        public override void Update(UpdateContext context)
+        public virtual void EarlyUpdate(UpdateContext context)
+        {
+
+        }
+        /// <inheritdoc/>
+        public virtual void Update(UpdateContext context)
+        {
+
+        }
+        /// <inheritdoc/>
+        public virtual void LateUpdate(UpdateContext context)
         {
 
         }
 
-        /// <summary>
-        /// Draw shadows
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public virtual void DrawShadows(DrawContextShadows context)
         {
 
         }
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="context">Context</param>
+        /// <inheritdoc/>
         public virtual void Draw(DrawContext context)
         {
 
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the object is outside of the frustum</returns>
-        /// <remarks>By default, returns true and distance = float.MaxValue</remarks>
+        /// <inheritdoc/>
         public virtual bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
@@ -109,7 +117,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{GetType()}.{Name ?? "NoName"}";
+            return $"{Id}";
         }
     }
 }

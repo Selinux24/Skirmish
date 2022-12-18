@@ -6,14 +6,15 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
+    using Engine.BuiltIn.Forward;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Primitive list drawer
     /// </summary>
     /// <typeparam name="T">Primitive list type</typeparam>
-    public class PrimitiveListDrawer<T> : Drawable where T : IVertexList
+    public sealed class PrimitiveListDrawer<T> : Drawable<PrimitiveListDrawerDescription<T>> where T : IVertexList
     {
         /// <summary>
         /// Vertex buffer descriptor
@@ -34,11 +35,11 @@ namespace Engine
         /// <summary>
         /// Item stride
         /// </summary>
-        private readonly int stride = 0;
+        private int stride = 0;
         /// <summary>
         /// Item topology
         /// </summary>
-        private readonly Topology topology;
+        private Topology topology;
 
         /// <summary>
         /// Returns true if the buffers were ready
@@ -59,32 +60,13 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public PrimitiveListDrawer(string name, Scene scene, PrimitiveListDrawerDescription<T> description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public PrimitiveListDrawer(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            T tmp = default;
-            stride = tmp.GetStride();
-            topology = tmp.GetTopology();
 
-            int count;
-            if (description.Primitives?.Length > 0)
-            {
-                count = description.Primitives.Length * stride;
-
-                dictionary.TryAdd(description.Color, new List<T>(description.Primitives));
-                dictionaryChanged = true;
-            }
-            else
-            {
-                count = description.Count * stride;
-
-                dictionaryChanged = false;
-            }
-
-            InitializeBuffers(name, count);
         }
         /// <summary>
         /// Destructor
@@ -103,51 +85,32 @@ namespace Engine
                 BufferManager?.RemoveVertexData(vertexBuffer);
             }
         }
+
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override async Task InitializeAssets(PrimitiveListDrawerDescription<T> description)
         {
-            if (!Visible)
+            await base.InitializeAssets(description);
+
+            T tmp = default;
+            stride = tmp.GetStride();
+            topology = tmp.GetTopology();
+
+            int count;
+            if (Description.Primitives?.Length > 0)
             {
-                return;
+                count = Description.Primitives.Length * stride;
+
+                dictionary.TryAdd(Description.Color, new List<T>(Description.Primitives));
+                dictionaryChanged = true;
+            }
+            else
+            {
+                count = Description.Count * stride;
+
+                dictionaryChanged = false;
             }
 
-            if (!BuffersReady)
-            {
-                return;
-            }
-
-            bool draw = context.ValidateDraw(BlendMode);
-            if (!draw)
-            {
-                return;
-            }
-
-            WriteDataInBuffer();
-
-            if (drawCount <= 0)
-            {
-                return;
-            }
-
-            Counters.InstancesPerFrame += dictionary.Count;
-            Counters.PrimitivesPerFrame += drawCount / stride;
-
-            var effect = DrawerPool.EffectDefaultBasic;
-            var technique = effect.GetTechnique(VertexTypes.PositionColor, false);
-
-            BufferManager.SetInputAssembler(technique, vertexBuffer, topology);
-
-            effect.UpdatePerFrameBasic(Matrix.Identity, context);
-            effect.UpdatePerObject(0, null, 0, false);
-
-            var graphics = Game.Graphics;
-
-            for (int p = 0; p < technique.PassCount; p++)
-            {
-                graphics.EffectPassApply(technique, p, 0);
-
-                graphics.Draw(drawCount, vertexBuffer.BufferOffset);
-            }
+            InitializeBuffers(Name, count);
         }
 
         /// <summary>
@@ -269,6 +232,52 @@ namespace Engine
 
             dictionaryChanged = true;
         }
+
+        /// <inheritdoc/>
+        public override void Draw(DrawContext context)
+        {
+            if (!Visible)
+            {
+                return;
+            }
+
+            if (!BuffersReady)
+            {
+                return;
+            }
+
+            bool draw = context.ValidateDraw(BlendMode);
+            if (!draw)
+            {
+                return;
+            }
+
+            WriteDataInBuffer();
+
+            if (drawCount <= 0)
+            {
+                return;
+            }
+
+            var drawer = BuiltInShaders.GetDrawer<BuiltInPositionColor>();
+            if (drawer == null)
+            {
+                return;
+            }
+
+            drawer.UpdateMesh(BuiltInDrawerMeshState.Default());
+            drawer.UpdateMaterial(BuiltInDrawerMaterialState.Default());
+
+            drawer.Draw(BufferManager, new DrawOptions
+            {
+                VertexBuffer = vertexBuffer,
+                VertexDrawCount = drawCount,
+                Topology = topology,
+            });
+
+            Counters.InstancesPerFrame += dictionary.Count;
+            Counters.PrimitivesPerFrame += drawCount / stride;
+        }
         /// <summary>
         /// Writes dictionary data in buffer
         /// </summary>
@@ -310,36 +319,6 @@ namespace Engine
             drawCount = data.Count;
 
             dictionaryChanged = false;
-        }
-    }
-
-    /// <summary>
-    /// Primitive drawer extensions
-    /// </summary>
-    public static class PrimitiveListDrawerExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<PrimitiveListDrawer<T>> AddComponentPrimitiveListDrawer<T>(this Scene scene, string name, PrimitiveListDrawerDescription<T> description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0) where T : IVertexList
-        {
-            PrimitiveListDrawer<T> component = null;
-
-            await Task.Run(() =>
-            {
-                component = new PrimitiveListDrawer<T>(name, scene, description);
-
-                scene.AddComponent(component, usage, order);
-            });
-
-            return component;
         }
     }
 }

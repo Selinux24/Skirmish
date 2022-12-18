@@ -216,8 +216,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// </summary>
         /// <param name="data">Tile data</param>
         /// <param name="flags">Tile flags</param>
+        /// <param name="failIfExists">Fail if the tile location is not free</param>
         /// <returns>Returns the new tile</returns>
-        public CompressedTile AddTile(TileCacheData data, CompressedTileFlagTypes flags)
+        public CompressedTile AddTile(TileCacheData data, CompressedTileFlagTypes flags, bool failIfExists = true)
         {
             // Make sure the data is in right format.
             var header = data.Header;
@@ -233,7 +234,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Make sure the location is free.
             if (GetTileAt(header.TX, header.TY, header.TLayer) != null)
             {
-                throw new EngineException("DT_FAILURE");
+                return failIfExists ? throw new EngineException("DT_FAILURE") : new CompressedTile();
             }
 
             // Allocate a tile.
@@ -532,8 +533,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
         private void ProcessRequests()
         {
+            if (!m_reqs.Any())
+            {
+                return;
+            }
+
+            // Copy requests
+            var reqs = m_reqs.ToArray();
+            m_reqs.Clear();
+
             // Process requests.
-            foreach (var req in m_reqs)
+            foreach (var req in reqs)
             {
                 int idx = DecodeObstacleIdObstacle(req.NRef);
                 if (idx >= m_params.MaxObstacles)
@@ -556,8 +566,6 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     ProcessRequestRemove(ob);
                 }
             }
-
-            m_reqs.Clear();
         }
         private void ProcessRequestAdd(TileCacheObstacle ob)
         {

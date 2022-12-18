@@ -18,13 +18,18 @@ namespace Engine.Animation
         /// </summary>
         public float Time { get; set; }
         /// <summary>
+        /// Curve position
+        /// </summary>
+        /// <remarks>Only for Bezier interpolations</remarks>
+        public float Position { get; set; }
+        /// <summary>
         /// Frame transformation
         /// </summary>
         public Matrix Transform
         {
             get
             {
-                return this.transform;
+                return transform;
             }
             set
             {
@@ -32,10 +37,10 @@ namespace Engine.Animation
 
                 if (trn.Decompose(out Vector3 scale, out Quaternion rotation, out Vector3 location))
                 {
-                    this.transform = trn;
-                    this.Translation = location;
-                    this.Rotation = rotation;
-                    this.Scale = scale;
+                    transform = trn;
+                    Translation = location;
+                    Rotation = rotation;
+                    Scale = scale;
                 }
                 else
                 {
@@ -58,15 +63,19 @@ namespace Engine.Animation
         /// <summary>
         /// Interpolation type
         /// </summary>
-        public string Interpolation { get; set; }
+        public KeyframeInterpolations Interpolation { get; set; }
 
-        /// <summary>
-        /// Gets text representation
-        /// </summary>
-        /// <returns>Return text representation</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
-            return string.Format("Time: {0:0.00000}: {1}", this.Time, this.Transform.GetDescription());
+            if (Interpolation == KeyframeInterpolations.Linear)
+            {
+                return $"Time: {Time:0.00000}: {Interpolation} {Transform.GetDescription()}";
+            }
+            else
+            {
+                return $"Time: {Time:0.00000}: {Interpolation} {Position:0.00000}";
+            }
         }
         /// <summary>
         /// Gets whether the current instance is equal to the other instance
@@ -76,11 +85,12 @@ namespace Engine.Animation
         public bool Equals(Keyframe other)
         {
             return
-                this.Time == other.Time &&
-                this.Translation == other.Translation &&
-                this.Rotation == other.Rotation &&
-                this.Scale == other.Scale &&
-                this.Interpolation == other.Interpolation;
+                Time == other.Time &&
+                Position == other.Position &&
+                Translation == other.Translation &&
+                Rotation == other.Rotation &&
+                Scale == other.Scale &&
+                Interpolation == other.Interpolation;
         }
     }
 }

@@ -20,8 +20,7 @@ namespace Engine
         public ParticleManagerDescription()
             : base()
         {
-            this.DeferredEnabled = false;
-            this.BlendMode = BlendModes.Default;
+            DeferredEnabled = false;
         }
     }
 }

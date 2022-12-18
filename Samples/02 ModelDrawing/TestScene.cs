@@ -10,9 +10,6 @@ namespace ModelDrawing
 {
     public class TestScene : Scene
     {
-        private const int layerHUD = 99;
-        private const int layerEffects = 2;
-
         private UITextArea text = null;
         private UITextArea statistics = null;
         private UITextArea text1 = null;
@@ -37,6 +34,8 @@ namespace ModelDrawing
 
         public override async Task Initialize()
         {
+            await base.Initialize();
+
             GameEnvironment.Background = Color.CornflowerBlue;
 
             Camera.NearPlaneDistance = 0.1f;
@@ -44,51 +43,59 @@ namespace ModelDrawing
             Camera.Goto(Vector3.ForwardLH * -15f + Vector3.UnitY * 10f);
             Camera.LookTo(Vector3.Zero);
 
-            await LoadResourcesAsync(
-                InitializeUI(),
-                (uiRes) =>
-                {
-                    if (!uiRes.Completed)
-                    {
-                        uiRes.ThrowExceptions();
-                    }
+            InitializeUIObjects();
+        }
 
-                    UpdateLayout();
+        private void InitializeUIObjects()
+        {
+            LoadResourcesAsync(InitializeUI(), InitializeUIObjectsCompleted);
+        }
+        private async Task InitializeUI()
+        {
+            var defaultFont20 = TextDrawerDescription.FromFamily("Arial", 20);
+            var defaultFont10 = TextDrawerDescription.FromFamily("Arial", 10);
 
-                    uiReady = true;
-                });
+            var textDesc = new UITextAreaDescription { Font = defaultFont20, TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed };
+            var statisticsDesc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var text1Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
+            var text2Desc = new UITextAreaDescription { Font = defaultFont10, TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue };
 
-            await LoadResourcesAsync(
+            text = await AddComponentUI<UITextArea, UITextAreaDescription>("ui1", "Text", textDesc);
+            statistics = await AddComponentUI<UITextArea, UITextAreaDescription>("ui2", "Statistics", statisticsDesc);
+            text1 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui3", "Text1", text1Desc);
+            text2 = await AddComponentUI<UITextArea, UITextAreaDescription>("ui4", "Text2", text2Desc);
+
+            var backPanelDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            backPanel = await AddComponentUI<Sprite, SpriteDescription>("ui5", "Backpanel", backPanelDesc, LayerUI - 1);
+
+            var consoleDesc = UIConsoleDescription.Default(Color.DarkSlateBlue);
+            consoleDesc.StartsVisible = false;
+            console = await AddComponentUI<UIConsole, UIConsoleDescription>("ui6", "Console", consoleDesc, LayerUI + 1);
+        }
+        private void InitializeUIObjectsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            uiReady = true;
+
+            InitializeSceneObjects();
+        }
+
+        private void InitializeSceneObjects()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeFloor(),
                     InitializeModels(),
                     InitializeParticleVolumeDrawer()
                 },
-                (gameRes) =>
-                {
-                    if (!gameRes.Completed)
-                    {
-                        gameRes.ThrowExceptions();
-                    }
-
-                    gameReady = true;
-                });
-        }
-        private async Task InitializeUI()
-        {
-            text = await this.AddComponentUITextArea("Text", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 20), TextForeColor = Color.Yellow, TextShadowColor = Color.OrangeRed }, layerHUD);
-
-            statistics = await this.AddComponentUITextArea("Statistics", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
-
-            text1 = await this.AddComponentUITextArea("Text1", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
-
-            text2 = await this.AddComponentUITextArea("Text2", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Arial", 10), TextForeColor = Color.LightBlue, TextShadowColor = Color.DarkBlue }, layerHUD);
-
-            backPanel = await this.AddComponentSprite("Backpanel", SpriteDescription.Default(new Color4(0, 0, 0, 0.75f)), SceneObjectUsages.UI, layerHUD - 1);
-
-            console = await this.AddComponentUIConsole("Console", UIConsoleDescription.Default(Color.DarkSlateBlue), layerHUD + 1);
-            console.Visible = false;
+                InitializeSceneObjectsCompleted);
         }
         private async Task InitializeFloor()
         {
@@ -109,7 +116,7 @@ namespace ModelDrawing
                 1, 3, 2,
             };
 
-            var material = MaterialContent.Default;
+            var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = "resources/floor.png";
 
             var desc = new ModelDescription()
@@ -118,7 +125,7 @@ namespace ModelDrawing
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            await this.AddComponentModel("Floor", desc, SceneObjectUsages.Ground);
+            await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
         }
         private async Task InitializeModels()
         {
@@ -136,17 +143,30 @@ namespace ModelDrawing
             pDescriptions.Add("Explosion", pExplosion);
             pDescriptions.Add("SmokeExplosion", pSmokeExplosion);
 
-            pManager = await this.AddComponentParticleManager("ParticleManager", ParticleManagerDescription.Default());
+            pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>(
+                "ParticleManager",
+                "ParticleManager",
+                ParticleManagerDescription.Default());
         }
         private async Task InitializeParticleVolumeDrawer()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 20000,
-                DepthEnabled = true,
             };
-            pManagerLineDrawer = await this.AddComponentPrimitiveListDrawer("DebugParticleDrawer", desc, SceneObjectUsages.None, layerEffects);
-            pManagerLineDrawer.Visible = true;
+            pManagerLineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "DebugParticleDrawer",
+                "DebugParticleDrawer",
+                desc);
+        }
+        private void InitializeSceneObjectsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            gameReady = true;
         }
 
         public override void Update(GameTime gameTime)
@@ -192,7 +212,7 @@ namespace ModelDrawing
         private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
@@ -250,7 +270,7 @@ namespace ModelDrawing
             }
             if (Game.Input.KeyJustPressed(Keys.D7))
             {
-                AddSmokePlumeSystemWithWind(Vector3.Normalize(new Vector3(1, 0, 1)), 20f);
+                _ = AddSmokePlumeSystemWithWind(Vector3.Normalize(new Vector3(1, 0, 1)), 20f);
             }
 
             if (Game.Input.KeyJustPressed(Keys.P))
@@ -312,8 +332,8 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Explosion"], emitter1);
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["SmokeExplosion"], emitter2);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Explosion"], emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["SmokeExplosion"], emitter2);
         }
         private void AddProjectileTrailSystem()
         {
@@ -326,7 +346,7 @@ namespace ModelDrawing
                 MaximumDistance = 100f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Projectile"], emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Projectile"], emitter);
         }
         private void AddDustSystem()
         {
@@ -339,7 +359,7 @@ namespace ModelDrawing
                 MaximumDistance = 250f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Dust"], emitter);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Dust"], emitter);
         }
         private void AddSmokePlumeSystem()
         {
@@ -368,8 +388,8 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter1);
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter2);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter1);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter2);
         }
         private void AddSmokePlumeSystemGPU(Vector3 positionCPU, Vector3 positionGPU)
         {
@@ -416,13 +436,13 @@ namespace ModelDrawing
                 MaximumDistance = 500f,
             };
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter11);
-            pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Fire"], emitter12);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Fire"], emitter11);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Fire"], emitter12);
 
-            pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter21);
-            pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Plume"], emitter22);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter21);
+            _ = pManager.AddParticleSystem(ParticleSystemTypes.GPU, pDescriptions["Plume"], emitter22);
         }
-        private void AddSmokePlumeSystemWithWind(Vector3 wind, float force)
+        private async Task AddSmokePlumeSystemWithWind(Vector3 wind, float force)
         {
             var emitter = new ParticleEmitter()
             {
@@ -433,7 +453,7 @@ namespace ModelDrawing
                 MaximumDistance = 1000f,
             };
 
-            var pSystem = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter);
+            var pSystem = await pManager.AddParticleSystem(ParticleSystemTypes.CPU, pDescriptions["Plume"], emitter);
 
             var parameters = pSystem.GetParameters();
 
@@ -488,15 +508,15 @@ namespace ModelDrawing
         private void UpdateLayout()
         {
             text.SetPosition(Vector2.Zero);
-            statistics.SetPosition(0, text.Rectangle.Bottom + 5);
-            text1.SetPosition(0, statistics.Rectangle.Bottom + 5);
-            text2.SetPosition(0, text1.Rectangle.Bottom + 5);
+            statistics.SetPosition(0, text.AbsoluteRectangle.Bottom + 5);
+            text1.SetPosition(0, statistics.AbsoluteRectangle.Bottom + 5);
+            text2.SetPosition(0, text1.AbsoluteRectangle.Bottom + 5);
 
             backPanel.SetPosition(Vector2.Zero);
             backPanel.Height = text2.Top + text2.Height + 5;
             backPanel.Width = Game.Form.RenderWidth;
 
-            console.SetPosition(0, backPanel.Rectangle.Bottom);
+            console.SetPosition(0, backPanel.AbsoluteRectangle.Bottom);
         }
     }
 }

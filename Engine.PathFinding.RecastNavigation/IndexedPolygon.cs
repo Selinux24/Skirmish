@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -34,37 +35,83 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="ea">Resulting first merge value</param>
         /// <param name="eb">Resulting second merge value</param>
         /// <returns>Returns the best merge value</returns>
-        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, Int3[] verts, out int ea, out int eb)
+        public static int GetMergeValue(IndexedPolygon pa, IndexedPolygon pb, IEnumerable<Int3> verts, out int ea, out int eb)
         {
-            ea = RC_MESH_NULL_IDX;
-            eb = RC_MESH_NULL_IDX;
+            var (CanMerge, EdgeA, EdgeB) = PolygonsCanMerge(pa, pb);
 
+            ea = EdgeA;
+            eb = EdgeB;
+
+            if (!CanMerge)
+            {
+                return RC_MESH_NULL_IDX;
+            }
+
+            int na = pa.CountPolyVerts();
+            int nb = pb.CountPolyVerts();
+
+            // Check to see if the merged polygon would be convex.
+            int va, vb, vc;
+
+            va = pa[(ea + na - 1) % na];
+            vb = pa[ea];
+            vc = pb[(eb + 2) % nb];
+            if (!Uleft(verts.ElementAt(va), verts.ElementAt(vb), verts.ElementAt(vc)))
+            {
+                return RC_MESH_NULL_IDX;
+            }
+
+            va = pb[(eb + nb - 1) % nb];
+            vb = pb[eb];
+            vc = pa[(ea + 2) % na];
+            if (!Uleft(verts.ElementAt(va), verts.ElementAt(vb), verts.ElementAt(vc)))
+            {
+                return RC_MESH_NULL_IDX;
+            }
+
+            va = pa[ea];
+            vb = pa[(ea + 1) % na];
+
+            int dx = verts.ElementAt(va).X - verts.ElementAt(vb).X;
+            int dy = verts.ElementAt(va).Z - verts.ElementAt(vb).Z;
+
+            return dx * dx + dy * dy;
+        }
+        private static (bool CanMerge, int EdgeA, int EdgeB) PolygonsCanMerge(IndexedPolygon pa, IndexedPolygon pb)
+        {
             int na = pa.CountPolyVerts();
             int nb = pb.CountPolyVerts();
 
             // If the merged polygon would be too big, do not merge.
             if (na + nb - 2 > DetourUtils.DT_VERTS_PER_POLYGON)
             {
-                return RC_MESH_NULL_IDX;
+                return (false, RC_MESH_NULL_IDX, RC_MESH_NULL_IDX);
             }
+
+            int ea = RC_MESH_NULL_IDX;
+            int eb = RC_MESH_NULL_IDX;
 
             // Check if the polygons share an edge.
             for (int i = 0; i < na; ++i)
             {
                 int va0 = pa[i];
                 int va1 = pa[(i + 1) % na];
+
                 if (va0 > va1)
                 {
                     Helper.Swap(ref va0, ref va1);
                 }
+
                 for (int j = 0; j < nb; ++j)
                 {
                     int vb0 = pb[j];
                     int vb1 = pb[(j + 1) % nb];
+
                     if (vb0 > vb1)
                     {
                         Helper.Swap(ref vb0, ref vb1);
                     }
+
                     if (va0 == vb0 && va1 == vb1)
                     {
                         ea = i;
@@ -77,35 +124,10 @@ namespace Engine.PathFinding.RecastNavigation
             // No common edge, cannot merge.
             if (ea == RC_MESH_NULL_IDX || eb == RC_MESH_NULL_IDX)
             {
-                return RC_MESH_NULL_IDX;
+                return (false, RC_MESH_NULL_IDX, RC_MESH_NULL_IDX);
             }
 
-            // Check to see if the merged polygon would be convex.
-            int va, vb, vc;
-
-            va = pa[(ea + na - 1) % na];
-            vb = pa[ea];
-            vc = pb[(eb + 2) % nb];
-            if (!Uleft(verts[va], verts[vb], verts[vc]))
-            {
-                return RC_MESH_NULL_IDX;
-            }
-
-            va = pb[(eb + nb - 1) % nb];
-            vb = pb[eb];
-            vc = pa[(ea + 2) % na];
-            if (!Uleft(verts[va], verts[vb], verts[vc]))
-            {
-                return RC_MESH_NULL_IDX;
-            }
-
-            va = pa[ea];
-            vb = pa[(ea + 1) % na];
-
-            int dx = verts[va][0] - verts[vb][0];
-            int dy = verts[va][2] - verts[vb][2];
-
-            return dx * dx + dy * dy;
+            return (true, ea, eb);
         }
         /// <summary>
         /// Merges two polygons

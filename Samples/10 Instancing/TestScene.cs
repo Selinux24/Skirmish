@@ -1,7 +1,9 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
+using Engine.Tween;
 using Engine.UI;
 using SharpDX;
 using System;
@@ -12,68 +14,100 @@ namespace Instancing
 {
     class TestScene : Scene
     {
-        private const int layerObjects = 0;
-        private const int layerTerrain = 1;
-        private const int layerHUD = 99;
-
+        private Sprite panel = null;
+        private UITextArea title = null;
         private UITextArea runtimeText = null;
+        private UITextArea info = null;
+
+        private Sprite helpPanel = null;
+        private UITextArea help = null;
+
+        private Skydom skydom = null;
+        private uint skyboxesCount = 0;
 
         private ModelInstanced troops = null;
+
+        private readonly int instanceBlock = 10;
+        private readonly BuiltInPostProcessState postProcessState = BuiltInPostProcessState.Empty;
 
         private bool gameReady = false;
 
         public TestScene(Game game) : base(game)
         {
-
+            GameEnvironment.Background = Color.Black;
         }
 
         public override async Task Initialize()
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
+            await base.Initialize();
 
-            await LoadResourcesAsync(
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 new[]
                 {
                     InitializeTexts(),
+                    InitializeSky(),
                     InitializeFloor(),
                     InitializeTrees(),
                     InitializeTroops(),
                     InitializeWall()
                 },
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    Camera.Goto(new Vector3(-45, 17, -30));
-                    Camera.LookTo(Vector3.Zero);
-                    Camera.FarPlaneDistance = 250;
-
-                    gameReady = true;
-                });
+                InitializeComponentsCompleted);
         }
-
         private async Task InitializeTexts()
         {
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            runtimeText = await this.AddComponentUITextArea("RuntimeText", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 11), TextForeColor = Color.Yellow }, layerHUD);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Arial", 18);
+            var defaultFont11 = TextDrawerDescription.FromFamily("Arial", 11);
+
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            runtimeText = await AddComponentUI<UITextArea, UITextAreaDescription>("RuntimeText", "RuntimeText", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            info = await AddComponentUI<UITextArea, UITextAreaDescription>("Information", "Information", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
 
             title.Text = "Instancing test";
             runtimeText.Text = "";
+            info.Text = "Press F1 for Help.";
 
-            title.SetPosition(Vector2.Zero);
-            runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
 
-            var spDesc = new SpriteDescription()
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont11, TextForeColor = Color.Yellow });
+            help.Visible = false;
+            helpPanel = await AddComponentUI<Sprite, SpriteDescription>("HelpPanel", "Help panel", spDesc, LayerUI - 1);
+            helpPanel.Visible = false;
+
+            Color d = Color.Gray;
+            Color h = Color.White;
+            help.Text = $"{d}Camera: {h}W{d}-{h}A{d}-{h}S{d}-{h}D{d}.{Environment.NewLine}" +
+                $"{d}Change tone mapping using {h}Tab{d} ({h}Shift{d} reverse).{Environment.NewLine}" +
+                $"{d}Change instance count using {h}Left{d} and {h}Right{d} arrows ({h}Shift{d} moves by {instanceBlock} to {instanceBlock}).{Environment.NewLine}" +
+                $"{d}Change sky box using {h}Top{d} and {h}Down{d} arrows";
+        }
+        private async Task InitializeSky()
+        {
+            string[] paths = new[]
             {
-                Width = Game.Form.RenderWidth,
-                Height = runtimeText.Top + runtimeText.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
+                @"resources/skyboxes/Sky_horiz_1_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_3_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_4_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_5_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_7_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_9_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_10_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_14_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_15_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_18_4096.jpg",
+                @"resources/skyboxes/Sky_horiz_22_4096.jpg",
             };
 
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            skyboxesCount = (uint)paths.Length;
+
+            var desc = SkydomDescription.Hemispheric(paths, Camera.FarPlaneDistance);
+
+            skydom = await AddComponentSky<Skydom, SkydomDescription>("Sky", "Sky", desc);
         }
         private async Task InitializeFloor()
         {
@@ -95,21 +129,19 @@ namespace Instancing
                     1, 3, 2,
             };
 
-            MaterialContent mat = MaterialContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.DiffuseTexture = "resources/ground/gravel_01_diffuse.jpg";
             mat.NormalMapTexture = "resources/ground/gravel_01_normal.jpg";
 
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = true,
-                DeferredEnabled = true,
-                DepthEnabled = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
                 Instances = side * side,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
 
-            var floor = await this.AddComponentModelInstanced("Floor", desc);
+            var floor = await AddComponent<ModelInstanced, ModelInstancedDescription>("Floor", "Floor", desc);
 
             Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
             int x = 0;
@@ -134,13 +166,13 @@ namespace Instancing
 
             var treeDesc = new ModelInstancedDescription()
             {
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 Instances = instances,
                 BlendMode = BlendModes.DefaultTransparent,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"Resources/Trees",@"tree.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.json"),
             };
-            var trees = await this.AddComponentModelInstanced("Trees", treeDesc, SceneObjectUsages.None, layerTerrain);
+            var trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", treeDesc);
 
             int side = instances / 4;
             float groundSide = 55f;
@@ -177,11 +209,11 @@ namespace Instancing
             var tDesc = new ModelInstancedDescription()
             {
                 Instances = 100,
-                CastShadow = true,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile(@"Resources/Soldier",@"soldier_anim2.xml"),
+                Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
-            troops = await this.AddComponentModelInstanced("Troops", tDesc, SceneObjectUsages.Agent, layerObjects);
+            troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
             troops.MaximumCount = -1;
 
             Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
@@ -214,7 +246,7 @@ namespace Instancing
                 troops[i].TextureIndex = (uint)(i % 3);
 
                 troops[i].AnimationController.TimeDelta = 0.4f + (0.1f * (i % 2));
-                troops[i].AnimationController.AddPath(animations[anim[i % anim.Length]]);
+                troops[i].AnimationController.AppendPlan(animations[anim[i % anim.Length]]);
                 troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
 
                 x++;
@@ -227,14 +259,15 @@ namespace Instancing
         }
         private async Task InitializeWall()
         {
-            var wall = await this.AddComponentModelInstanced(
-                 "Wall",
+            var wall = await AddComponent<ModelInstanced, ModelInstancedDescription>(
+                "Wall",
+                "Wall",
                 new ModelInstancedDescription()
                 {
                     Instances = 40,
-                    CastShadow = true,
+                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                     UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile("Resources/Wall","wall.xml"),
+                    Content = ContentDescription.FromFile("Resources/Wall", "wall.json"),
                 });
 
             BoundingBox bbox = wall[0].GetBoundingBox();
@@ -264,6 +297,26 @@ namespace Instancing
                 wall[i].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
             }
         }
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            Camera.Goto(new Vector3(-48, 8, -30));
+            Camera.LookTo(Vector3.Zero);
+            Camera.FarPlaneDistance = 250;
+
+            SetPostProcessingEffects();
+
+            postProcessState.Tween((s, value) => s.SepiaIntensity = value, 1, 0, 15000, ScaleFuncs.CubicEaseOut);
+            postProcessState.Tween((s, value) => s.BlurIntensity = value, 1, 0, 30000, ScaleFuncs.CubicEaseOut);
+
+            gameReady = true;
+        }
 
         public override void Update(GameTime gameTime)
         {
@@ -277,6 +330,8 @@ namespace Instancing
                 SetRenderMode(GetRenderMode() == SceneModes.ForwardLigthning ?
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
+
+                SetPostProcessingEffects();
             }
 
             if (!gameReady)
@@ -284,8 +339,30 @@ namespace Instancing
                 return;
             }
 
+            UpdateCamera(gameTime);
+
+            UpdateInstances();
+
+            UpdateToneMapping();
+
+            UpdateSkybox();
+
+            if (Game.Input.KeyJustReleased(Keys.F1))
+            {
+                bool helpVisible = !helpPanel.Visible;
+
+                help.Visible = helpVisible;
+                helpPanel.Visible = helpVisible;
+            }
+
+            base.Update(gameTime);
+
+            runtimeText.Text = $"{Game.RuntimeText}. Instances: {troops.MaximumCount}; Tone: {postProcessState.ToneMappingTone}.";
+        }
+        private void UpdateCamera(GameTime gameTime)
+        {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -311,15 +388,21 @@ namespace Instancing
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Camera.MoveForward(gameTime, Game.Input.ShiftPressed);
+                Vector3 fwd = new Vector3(Camera.Forward.X, 0, Camera.Forward.Z);
+                fwd.Normalize();
+                Camera.Move(gameTime, fwd, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
+                Vector3 bwd = new Vector3(Camera.Backward.X, 0, Camera.Backward.Z);
+                bwd.Normalize();
+                Camera.Move(gameTime, bwd, Game.Input.ShiftPressed);
             }
-
-            int increment = Game.Input.ShiftPressed ? 10 : 1;
+        }
+        private void UpdateInstances()
+        {
+            int increment = Game.Input.ShiftPressed ? instanceBlock : 1;
 
             if (Game.Input.KeyJustReleased(Keys.Left))
             {
@@ -330,10 +413,62 @@ namespace Instancing
             {
                 troops.MaximumCount = Math.Min(troops.InstanceCount, troops.MaximumCount + increment);
             }
+        }
+        private void UpdateToneMapping()
+        {
+            if (Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                int inc = (int)postProcessState.ToneMappingTone + (Game.Input.ShiftPressed ? -1 : 1);
+                uint tone = (uint)inc;
+                tone %= 8;
 
-            base.Update(gameTime);
+                postProcessState.ToneMappingTone = (BuiltInToneMappingTones)tone;
+            }
+        }
+        private void UpdateSkybox()
+        {
+            if (Game.Input.KeyJustReleased(Keys.Up))
+            {
+                skydom.TextureIndex++;
+            }
 
-            runtimeText.Text = Game.RuntimeText;
+            if (Game.Input.KeyJustReleased(Keys.Down))
+            {
+                skydom.TextureIndex--;
+            }
+
+            skydom.TextureIndex %= skyboxesCount;
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            runtimeText.SetPosition(new Vector2(5, title.Top + title.Height + 3));
+            info.SetPosition(new Vector2(5, runtimeText.Top + runtimeText.Height + 3));
+
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = info.Top + info.Height + 3;
+
+            help.SetPosition(5, Game.Form.RenderHeight - help.Height - 10);
+            helpPanel.SetPosition(0, Game.Form.RenderHeight - help.Height - 15);
+            helpPanel.Width = Game.Form.RenderWidth;
+            helpPanel.Height = help.Height + 15;
+        }
+
+        private void SetPostProcessingEffects()
+        {
+            postProcessState.AddSepia();
+            postProcessState.AddBlurStrong();
+            postProcessState.AddBloom();
+            postProcessState.AddToneMapping(BuiltInToneMappingTones.LumaBasedReinhard);
+
+            Renderer.PostProcessingObjectsEffects = postProcessState;
         }
     }
 }

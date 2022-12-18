@@ -1,8 +1,9 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
+    using SamplerState = SharpDX.Direct3D11.SamplerState;
 
     /// <summary>
     /// Engine sampler state
@@ -10,60 +11,122 @@ namespace Engine.Common
     public class EngineSamplerState : IDisposable
     {
         /// <summary>
-        /// Internal blend state
+        /// Internal sampler state
         /// </summary>
-        private SamplerState samplerState = null;
+        private SamplerState state = null;
+
+        /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+        /// <summary>
+        /// Description
+        /// </summary>
+        public EngineSamplerStateDescription Description { get; private set; }
 
         /// <summary>
         /// Creates a point sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Returns the point sampler state</returns>
-        public static EngineSamplerState Point(Graphics graphics)
+        public static EngineSamplerState Point(Graphics graphics, string name)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.MinMagMipPoint;
 
-            return graphics.CreateSamplerState(desc);
+            return graphics.CreateSamplerState($"{name}.{nameof(Point)}", desc);
         }
         /// <summary>
         /// Creates a linear sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <returns>Creates the linear sampler state</returns>
-        public static EngineSamplerState Linear(Graphics graphics)
+        public static EngineSamplerState Linear(Graphics graphics, string name)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.MinMagMipLinear;
             desc.AddressU = TextureAddressMode.Wrap;
             desc.AddressV = TextureAddressMode.Wrap;
 
-            return graphics.CreateSamplerState(desc);
+            return graphics.CreateSamplerState($"{name}.{nameof(Linear)}", desc);
         }
         /// <summary>
         /// Creates a anisotropic sampler state
         /// </summary>
         /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
         /// <param name="maxAnisotropic">Maximum anisotropic</param>
         /// <returns>Creates the anisotropic sampler state</returns>
-        public static EngineSamplerState Anisotropic(Graphics graphics, int maxAnisotropic)
+        public static EngineSamplerState Anisotropic(Graphics graphics, string name, int maxAnisotropic)
         {
-            var desc = SamplerStateDescription.Default();
+            var desc = EngineSamplerStateDescription.Default();
             desc.Filter = Filter.Anisotropic;
             desc.MaximumAnisotropy = maxAnisotropic;
             desc.AddressU = TextureAddressMode.Wrap;
             desc.AddressV = TextureAddressMode.Wrap;
 
-            return graphics.CreateSamplerState(desc);
+            return graphics.CreateSamplerState($"{name}.{nameof(Anisotropic)}_{maxAnisotropic}", desc);
+        }
+        /// <summary>
+        /// Creates a ComparisonLessEqualBorder sampler state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
+        /// <returns>Returns the ComparisonLessEqual sampler state</returns>
+        public static EngineSamplerState ComparisonLessEqualBorder(Graphics graphics, string name)
+        {
+            var desc = EngineSamplerStateDescription.Default();
+            desc.Filter = Filter.ComparisonMinMagMipLinear;
+            desc.AddressU = TextureAddressMode.Border;
+            desc.AddressV = TextureAddressMode.Border;
+            desc.BorderColor = Color4.White;
+            desc.ComparisonFunction = Comparison.LessEqual;
+
+            return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualBorder)}", desc);
+        }
+        /// <summary>
+        /// Creates a ComparisonLessEqualClamp sampler state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
+        /// <returns>Returns the ComparisonLessEqual sampler state</returns>
+        public static EngineSamplerState ComparisonLessEqualClamp(Graphics graphics, string name)
+        {
+            var desc = EngineSamplerStateDescription.Default();
+            desc.Filter = Filter.ComparisonMinMagMipLinear;
+            desc.AddressU = TextureAddressMode.Clamp;
+            desc.AddressV = TextureAddressMode.Clamp;
+            desc.AddressW = TextureAddressMode.Clamp;
+            desc.ComparisonFunction = Comparison.LessEqual;
+
+            return graphics.CreateSamplerState($"{name}.{nameof(ComparisonLessEqualClamp)}", desc);
+        }
+        /// <summary>
+        /// Creates a sampler state
+        /// </summary>
+        /// <param name="graphics">Graphics</param>
+        /// <param name="name">Name</param>
+        /// <param name="description">Sampler description</param>
+        /// <returns></returns>
+        public static EngineSamplerState Create(Graphics graphics, string name, EngineSamplerStateDescription description)
+        {
+            return graphics.CreateSamplerState(name, description);
         }
 
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="samplerState">Sampler state</param>
-        internal EngineSamplerState(SamplerState samplerState)
+        internal EngineSamplerState(string name, SamplerState samplerState)
         {
-            this.samplerState = samplerState;
+            Name = name ?? throw new ArgumentNullException(nameof(name), "A sampler state name must be specified.");
+            state = samplerState ?? throw new ArgumentNullException(nameof(samplerState), "A sampler state must be specified.");
+            state.DebugName = name;
+
+            Description = (EngineSamplerStateDescription)state.Description;
         }
         /// <summary>
         /// Destructor
@@ -89,8 +152,8 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                samplerState?.Dispose();
-                samplerState = null;
+                state?.Dispose();
+                state = null;
             }
         }
 
@@ -100,7 +163,13 @@ namespace Engine.Common
         /// <returns>Returns the internal sampler state</returns>
         internal SamplerState GetSamplerState()
         {
-            return samplerState;
+            return state;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{nameof(EngineSamplerState)} {Name}";
         }
     }
 }

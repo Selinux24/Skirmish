@@ -16,14 +16,7 @@ namespace Engine.UI
         /// <param name="centered">Pointer positon is in the texture center</param>
         public static UICursorDescription Default(string texture, float width, float height, bool centered = false)
         {
-            return new UICursorDescription()
-            {
-                Textures = new[] { texture },
-                Width = width,
-                Height = height,
-                Centered = centered,
-                BaseColor = Color4.White,
-            };
+            return Default(texture, width, height, centered, Vector2.Zero, Color.White);
         }
         /// <summary>
         /// Gets the default cursor description
@@ -31,8 +24,34 @@ namespace Engine.UI
         /// <param name="texture">Texture file name</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
+        /// <param name="centered">Pointer positon is in the texture center</param>
         /// <param name="delta">Position delta from texture to pointer position</param>
-        public static UICursorDescription Default(string texture, float width, float height, Vector2 delta)
+        public static UICursorDescription Default(string texture, float width, float height, bool centered, Vector2 delta)
+        {
+            return Default(texture, width, height, centered, delta, Color.White);
+        }
+        /// <summary>
+        /// Gets the default cursor description
+        /// </summary>
+        /// <param name="texture">Texture file name</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="centered">Pointer positon is in the texture center</param>
+        /// <param name="baseColor">Base color</param>
+        public static UICursorDescription Default(string texture, float width, float height, bool centered, Color4 baseColor)
+        {
+            return Default(texture, width, height, centered, Vector2.Zero, baseColor);
+        }
+        /// <summary>
+        /// Gets the default cursor description
+        /// </summary>
+        /// <param name="texture">Texture file name</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="centered">Pointer positon is in the texture center</param>
+        /// <param name="delta">Position delta from texture to pointer position</param>
+        /// <param name="baseColor">Base color</param>
+        public static UICursorDescription Default(string texture, float width, float height, bool centered, Vector2 delta, Color4 baseColor)
         {
             return new UICursorDescription()
             {
@@ -40,7 +59,8 @@ namespace Engine.UI
                 Width = width,
                 Height = height,
                 Delta = delta,
-                BaseColor = Color4.White,
+                Centered = centered,
+                BaseColor = baseColor,
             };
         }
 
@@ -58,7 +78,7 @@ namespace Engine.UI
         /// </summary>
         public UICursorDescription() : base()
         {
-
+            EventsEnabled = false;
         }
     }
 }

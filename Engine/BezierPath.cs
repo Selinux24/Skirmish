@@ -382,7 +382,7 @@ namespace Engine
         /// <returns>Returns the next control point in time</returns>
         public Vector3 GetNextControlPoint(float time)
         {
-            this.FindCurve(time, out int segment, out float segmentTime);
+            this.FindCurve(time, out int segment, out _);
 
             return this.controlPoints[segment];
         }

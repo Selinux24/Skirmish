@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    class BufferManagerInstances
+    public class BufferManagerInstances
     {
         /// <summary>
         /// Instancing descriptor list
@@ -82,7 +82,7 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Adds a buffer descritor to the internal descriptos list
+        /// Adds a buffer descritor to the internal descriptors list
         /// </summary>
         /// <param name="descriptor">Descriptor</param>
         /// <param name="id">Id</param>
@@ -103,8 +103,14 @@ namespace Engine.Common
             descriptor.Count = instances;
 
             Monitor.Enter(instancingDescriptors);
-            instancingDescriptors.Add(descriptor);
-            Monitor.Exit(instancingDescriptors);
+            try
+            {
+                instancingDescriptors.Add(descriptor);
+            }
+            finally
+            {
+                Monitor.Exit(instancingDescriptors);
+            }
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
@@ -114,21 +120,27 @@ namespace Engine.Common
         public void RemoveDescriptor(BufferDescriptor descriptor, int instances)
         {
             Monitor.Enter(instancingDescriptors);
-            //Remove descriptor
-            instancingDescriptors.Remove(descriptor);
-
-            if (instancingDescriptors.Any())
+            try
             {
-                //Reallocate descriptor offsets
-                instancingDescriptors[0].BufferOffset = 0;
-                for (int i = 1; i < instancingDescriptors.Count; i++)
-                {
-                    var prev = instancingDescriptors[i - 1];
+                //Remove descriptor
+                instancingDescriptors.Remove(descriptor);
 
-                    instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
+                if (instancingDescriptors.Any())
+                {
+                    //Reallocate descriptor offsets
+                    instancingDescriptors[0].BufferOffset = 0;
+                    for (int i = 1; i < instancingDescriptors.Count; i++)
+                    {
+                        var prev = instancingDescriptors[i - 1];
+
+                        instancingDescriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
+                    }
                 }
             }
-            Monitor.Exit(instancingDescriptors);
+            finally
+            {
+                Monitor.Exit(instancingDescriptors);
+            }
 
             Instances -= instances;
         }

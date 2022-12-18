@@ -35,6 +35,32 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="AnimationParts\Resources\Leopard\Leopard.json" />
+    <None Remove="Mixamo\Resources\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="Mixamo\Resources\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="Mixamo\Resources\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="Mixamo\Resources\TestModel\TestModel.dae" />
+    <None Remove="Mixamo\Resources\TestModel\TestModel.json" />
+    <None Remove="SimpleAnimation\Resources\Doors\Dn_Doors.json" />
+    <None Remove="SimpleAnimation\Resources\Doors\Dn_Jails.json" />
+    <None Remove="SimpleAnimation\Resources\Doors\Wall1.json" />
+    <None Remove="SimpleAnimation\Resources\Doors\Wall2.json" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.json" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.json" />
+    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.json" />
+    <None Remove="SimpleAnimation\Resources\Rat\Rat.json" />
+    <None Remove="SimpleAnimation\Resources\Soldier\soldier_anim2.json" />
+    <None Remove="SmoothTransitions\Resources\d_road_asphalt_stripes_diffuse.dds" />
+    <None Remove="SmoothTransitions\Resources\d_road_asphalt_stripes_normal.dds" />
+    <None Remove="SmoothTransitions\Resources\d_road_asphalt_stripes_specular.dds" />
+    <None Remove="SmoothTransitions\Resources\Soldier\soldier0.jpg" />
+    <None Remove="SmoothTransitions\Resources\Soldier\Soldier1.jpg" />
+    <None Remove="SmoothTransitions\Resources\Soldier\soldier_anim2.dae" />
+    <None Remove="SmoothTransitions\Resources\Soldier\soldier_anim2.json" />
+    <None Remove="Start\Resources\SkyPlane.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -51,7 +77,22 @@
     <Content Include="AnimationParts\Resources\Leopard\Leopard.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="AnimationParts\Resources\Leopard\Leopard.xml">
+    <Content Include="AnimationParts\Resources\Leopard\Leopard.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Mixamo\Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Mixamo\Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Mixamo\Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Mixamo\Resources\TestModel\TestModel.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Mixamo\Resources\TestModel\TestModel.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\atlas1.jpg">
@@ -69,10 +110,10 @@
     <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.xml">
+    <Content Include="SimpleAnimation\Resources\Doors\Dn_Doors.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Dn_Jails.xml">
+    <Content Include="SimpleAnimation\Resources\Doors\Dn_Jails.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\metal_rust_d.jpg">
@@ -81,13 +122,13 @@
     <Content Include="SimpleAnimation\Resources\Doors\Wall1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall1.xml">
+    <Content Include="SimpleAnimation\Resources\Doors\Wall1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\Wall2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Doors\Wall2.xml">
+    <Content Include="SimpleAnimation\Resources\Doors\Wall2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Doors\wall_d.jpg">
@@ -111,16 +152,16 @@
     <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.xml">
+    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.xml">
+    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.xml">
+    <Content Include="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Ladder\metal_rust_d.jpg">
@@ -129,7 +170,7 @@
     <Content Include="SimpleAnimation\Resources\Rat\Rat.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Rat\Rat.xml">
+    <Content Include="SimpleAnimation\Resources\Rat\Rat.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SimpleAnimation\Resources\Rat\Rat_d.png">
@@ -144,7 +185,28 @@
     <Content Include="SimpleAnimation\Resources\Soldier\soldier_anim2.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SimpleAnimation\Resources\Soldier\soldier_anim2.xml">
+    <Content Include="SimpleAnimation\Resources\Soldier\soldier_anim2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SmoothTransitions\Resources\Soldier\soldier_anim2.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\anttisinstrumentals+keepshiningoninstrumental.mp3">
@@ -165,7 +227,7 @@
     <Content Include="Start\Resources\SkyPlane.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Start\Resources\SkyPlane.xml">
+    <Content Include="Start\Resources\SkyPlane.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Start\Resources\ui_options.png">

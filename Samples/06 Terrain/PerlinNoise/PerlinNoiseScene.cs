@@ -97,11 +97,11 @@ namespace Terrain.PerlinNoise
             }
         }
 
-        UIControl capturedCtrl = null;
+        IUIControl capturedCtrl = null;
 
         public PerlinNoiseScene(Game game) : base(game)
         {
-
+            Game.VisibleMouse = false;
         }
 
         public override async Task Initialize()
@@ -114,79 +114,92 @@ namespace Terrain.PerlinNoise
 
             ResizeTextureRenderer();
             ResizeUI();
-
-            Cursor.Show();
         }
         public async Task InitializeUI()
         {
+            Color4 pBackground = Color.RosyBrown;
             Color4 bColor1 = Color.Brown;
             Color4 bColor2 = Color4.AdjustSaturation(Color.Brown, 1.5f);
             Color4 pColor = Color.DeepSkyBlue;
 
-            var font = TextDrawerDescription.FromFamily(fontFamily, 16);
-            var butDesc = UIButtonDescription.DefaultTwoStateButton(bColor1, bColor2);
-            butDesc.Font = font;
+            var defaultFont16 = TextDrawerDescription.FromFamily(fontFamily, 16);
+            var defaultFont14 = TextDrawerDescription.FromFamily(fontFamily, 14);
+            var defaultFont12 = TextDrawerDescription.FromFamily(fontFamily, 12);
 
-            backGround = await this.AddComponentUIPanel("backGround", UIPanelDescription.Screen(this, Color.SandyBrown));
-            btnExit = await this.AddComponentUIButton("btnExit", butDesc);
+            var defaultText16 = UITextAreaDescription.Default(defaultFont16);
+            var defaultText14 = UITextAreaDescription.Default(defaultFont14);
+            var defaultText12 = UITextAreaDescription.Default(defaultFont12);
 
-            txtScale = await this.AddComponentUITextArea("txtScale", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtLacunarity = await this.AddComponentUITextArea("txtLacunarity", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtPersistance = await this.AddComponentUITextArea("txtPersistance", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtOctaves = await this.AddComponentUITextArea("txtOctaves", UITextAreaDescription.DefaultFromFamily(fontFamily, 16));
-            txtHelpOffset = await this.AddComponentUITextArea("txtHelpOffset", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
-            txtOffset = await this.AddComponentUITextArea("txtOffset", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
-            txtHelpSeed = await this.AddComponentUITextArea("txtHelpSeed", UITextAreaDescription.DefaultFromFamily(fontFamily, 12));
-            txtSeed = await this.AddComponentUITextArea("txtSeed", UITextAreaDescription.DefaultFromFamily(fontFamily, 14));
+            var defaultButton = UIButtonDescription.DefaultTwoStateButton(defaultFont16, bColor1, bColor2);
 
-            pbScale = await this.AddComponentUIProgressBar("pbScale", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbLacunarity = await this.AddComponentUIProgressBar("pbLacunarity", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbPersistance = await this.AddComponentUIProgressBar("pbPersistance", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
-            pbOctaves = await this.AddComponentUIProgressBar("pbOctaves", UIProgressBarDescription.DefaultFromFamily(fontFamily, 12));
+            backGround = await AddComponentUI<UIPanel, UIPanelDescription>("backGround", "backGround", UIPanelDescription.Screen(this, pBackground));
+            btnExit = await AddComponentUI<UIButton, UIButtonDescription>("btnExit", "Exit", defaultButton);
 
-            btnSave = await this.AddComponentUIButton("btnSave", butDesc);
+            txtScale = await AddComponentUI<UITextArea, UITextAreaDescription>("txtScale", "Scale", defaultText16);
+            txtLacunarity = await AddComponentUI<UITextArea, UITextAreaDescription>("txtLacunarity", "Lacunarity", defaultText16);
+            txtPersistance = await AddComponentUI<UITextArea, UITextAreaDescription>("txtPersistance", "Persistance", defaultText16);
+            txtOctaves = await AddComponentUI<UITextArea, UITextAreaDescription>("txtOctaves", "Octaves", defaultText16);
+            txtHelpOffset = await AddComponentUI<UITextArea, UITextAreaDescription>("txtHelpOffset", "HelpOffset", defaultText12);
+            txtOffset = await AddComponentUI<UITextArea, UITextAreaDescription>("txtOffset", "Offset", defaultText14);
+            txtHelpSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtHelpSeed", "HelpSeed", defaultText12);
+            txtSeed = await AddComponentUI<UITextArea, UITextAreaDescription>("txtSeed", "Seed", defaultText14);
 
-            btnExit.JustReleased += BtnExit_JustReleased;
+            var pbFont = TextDrawerDescription.FromFamily(fontFamily, 12);
+
+            var pbDescription = UIProgressBarDescription.Default(pbFont);
+
+            pbScale = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbScale", "Scale", pbDescription);
+            pbLacunarity = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbLacunarity", "Lacunarity", pbDescription);
+            pbPersistance = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbPersistance", "Persistance", pbDescription);
+            pbOctaves = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("pbOctaves", "Octaves", pbDescription);
+
+            btnSave = await AddComponentUI<UIButton, UIButtonDescription>("btnSave", "Save", defaultButton);
+
+            btnExit.MouseClick += BtnExitClick;
 
             txtScale.Text = "Scale";
 
             pbScale.ProgressColor = pColor;
             pbScale.ProgressValue = Scale;
-            pbScale.JustPressed += PbJustPressed;
-            pbScale.Pressed += PbPressed;
-            pbScale.JustReleased += PbJustReleased;
+            pbScale.EventsEnabled = true;
+            pbScale.MouseJustPressed += PbJustPressed;
+            pbScale.MousePressed += PbPressed;
+            pbScale.MouseJustReleased += PbJustReleased;
 
             txtLacunarity.Text = "Lacunarity";
 
             pbLacunarity.ProgressColor = pColor;
             pbLacunarity.ProgressValue = Lacunarity;
-            pbLacunarity.JustPressed += PbJustPressed;
-            pbLacunarity.Pressed += PbPressed;
-            pbLacunarity.JustReleased += PbJustReleased;
+            pbLacunarity.EventsEnabled = true;
+            pbLacunarity.MouseJustPressed += PbJustPressed;
+            pbLacunarity.MousePressed += PbPressed;
+            pbLacunarity.MouseJustReleased += PbJustReleased;
 
             txtPersistance.Text = "Persistance";
 
             pbPersistance.ProgressColor = pColor;
             pbPersistance.ProgressValue = Persistance;
-            pbPersistance.JustPressed += PbJustPressed;
-            pbPersistance.Pressed += PbPressed;
-            pbPersistance.JustReleased += PbJustReleased;
+            pbPersistance.EventsEnabled = true;
+            pbPersistance.MouseJustPressed += PbJustPressed;
+            pbPersistance.MousePressed += PbPressed;
+            pbPersistance.MouseJustReleased += PbJustReleased;
 
             txtOctaves.Text = "Octaves";
 
             pbOctaves.ProgressColor = pColor;
             pbOctaves.ProgressValue = Octaves;
-            pbOctaves.JustPressed += PbJustPressed;
-            pbOctaves.Pressed += PbPressed;
-            pbOctaves.JustReleased += PbJustReleased;
+            pbOctaves.EventsEnabled = true;
+            pbOctaves.MouseJustPressed += PbJustPressed;
+            pbOctaves.MousePressed += PbPressed;
+            pbOctaves.MouseJustReleased += PbJustReleased;
 
-            btnSave.JustReleased += BtnSave_JustReleased;
+            btnSave.MouseClick += BtnSaveClick;
         }
         public async Task InitializeTextureRenderer()
         {
-            texture = Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
+            texture = await Game.ResourceManager.RequestResource(Guid.NewGuid(), new Color4[] { }, mapSize, true);
 
-            perlinRenderer = await this.AddComponentUITextureRenderer("perlinRenderer", UITextureRendererDescription.Default());
+            perlinRenderer = await AddComponentUI<UITextureRenderer, UITextureRendererDescription>("perlinRenderer", "Renderer", UITextureRendererDescription.Default());
             perlinRenderer.Texture = texture;
         }
 
@@ -333,8 +346,8 @@ namespace Terrain.PerlinNoise
             btnExit.Width = 30;
             btnExit.Height = 30;
             btnExit.Caption.Text = "X";
-            btnExit.Caption.TextHorizontalAlign = HorizontalTextAlign.Center;
-            btnExit.Caption.TextVerticalAlign = VerticalTextAlign.Middle;
+            btnExit.Caption.TextHorizontalAlign = TextHorizontalAlign.Center;
+            btnExit.Caption.TextVerticalAlign = TextVerticalAlign.Middle;
 
             txtScale.SetPosition(marginLeft, marginTop + (separation * lineIndex++));
 
@@ -383,21 +396,21 @@ namespace Terrain.PerlinNoise
             btnSave.Width = 200;
             btnSave.Height = 50;
             btnSave.SetPosition(Game.Form.RenderCenter.X + (perlinRendererSize / 2) - btnSave.Width, Game.Form.RenderCenter.Y + (perlinRendererSize / 2));
-            btnSave.Caption.TextHorizontalAlign = HorizontalTextAlign.Center;
-            btnSave.Caption.TextVerticalAlign = VerticalTextAlign.Middle;
+            btnSave.Caption.TextHorizontalAlign = TextHorizontalAlign.Center;
+            btnSave.Caption.TextVerticalAlign = TextVerticalAlign.Middle;
             btnSave.Caption.Text = "Save to File";
         }
 
-        private void PbPressed(object sender, EventArgs e)
+        private void PbPressed(IUIControl sender, MouseEventArgs e)
         {
-            if (sender is UIProgressBar pb)
+            if (sender is UIProgressBar pb && e.Buttons.HasFlag(MouseButtons.Left))
             {
                 if (capturedCtrl != pb)
                 {
                     return;
                 }
 
-                var rect = pb.GetRenderArea();
+                var rect = pb.GetRenderArea(true);
                 var mouse = Game.Input.MouseX - rect.Left;
 
                 if (pb == pbOctaves)
@@ -410,38 +423,49 @@ namespace Terrain.PerlinNoise
                 }
             }
         }
-        private void PbJustPressed(object sender, EventArgs e)
+        private void PbJustPressed(IUIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl control)
+            if (capturedCtrl != null)
             {
-                capturedCtrl = control;
+                return;
+            }
+
+            if (e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                capturedCtrl = sender;
             }
         }
-        private void PbJustReleased(object sender, EventArgs e)
+        private void PbJustReleased(IUIControl sender, MouseEventArgs e)
         {
             capturedCtrl = null;
         }
-        private void BtnSave_JustReleased(object sender, EventArgs e)
+        private void BtnSaveClick(IUIControl sender, MouseEventArgs e)
         {
             if (noiseMap == null)
             {
                 return;
             }
 
-            using (var dlg = new SaveFileDialog())
+            if (e.Buttons.HasFlag(MouseButtons.Left))
             {
-                dlg.DefaultExt = ".png";
-                dlg.FileName = "Noisemap.png";
-
-                if (dlg.ShowDialog() == DialogResult.OK)
+                using (var dlg = new SaveFileDialog())
                 {
-                    noiseMap.SaveMapToFile(dlg.FileName);
+                    dlg.DefaultExt = ".png";
+                    dlg.FileName = "Noisemap.png";
+
+                    if (dlg.ShowDialog() == DialogResult.OK)
+                    {
+                        noiseMap.SaveMapToFile(dlg.FileName);
+                    }
                 }
             }
         }
-        private void BtnExit_JustReleased(object sender, EventArgs e)
+        private void BtnExitClick(IUIControl sender, MouseEventArgs e)
         {
-            Game.SetScene<StartScene>();
+            if (e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                Game.SetScene<StartScene>();
+            }
         }
 
         private void GenerateMap()

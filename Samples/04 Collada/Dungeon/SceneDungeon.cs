@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.BuiltIn.PostProcess;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
@@ -7,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace Collada.Dungeon
 {
-    public class SceneDungeon : Scene
+    public class SceneDungeon : WalkableScene
     {
-        private const int layerHUD = 99;
-
         private readonly string resourcesFolder = "dungeon/resources";
 
+        private Sprite panel = null;
+        private UITextArea title = null;
         private UITextArea fps = null;
+        private UITextArea picks = null;
         private Scenery dungeon = null;
 
         private Player agent = null;
@@ -21,15 +23,11 @@ namespace Collada.Dungeon
         private bool userInterfaceInitialized = false;
         private bool gameReady = false;
 
+        private readonly BuiltInPostProcessState postProcessing = BuiltInPostProcessState.Empty;
+
         public SceneDungeon(Game game)
             : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
-            await base.Initialize();
 
 #if DEBUG
             Game.VisibleMouse = false;
@@ -38,14 +36,124 @@ namespace Collada.Dungeon
             Game.VisibleMouse = false;
             Game.LockMouse = true;
 #endif
-            InitializeUI();
 
-            await Task.CompletedTask;
+            postProcessing.AddToneMapping(BuiltInToneMappingTones.RomBinDaHouse);
         }
-        public override void NavigationGraphUpdated()
+
+        public override async Task Initialize()
         {
+            await base.Initialize();
+
+            InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
+            LoadResourcesAsync(InitializeUIComponents(), InitializeUICompleted);
+        }
+        private async Task InitializeUIComponents()
+        {
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
+            title.Text = "Collada Dungeon Scene";
+
+            fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            fps.Text = null;
+
+            picks = await AddComponentUI<UITextArea, UITextAreaDescription>("Picks", "Picks", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
+            picks.Text = null;
+
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
+        }
+        private void InitializeUICompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            UpdateLayout();
+
+            userInterfaceInitialized = true;
+
+            InitializeEnvironment();
+
+            InitializePostProcessing();
+
+            LoadGameAssets();
+        }
+        private void InitializeEnvironment()
+        {
+            GameEnvironment.Background = Color.Black;
+
+            Lights.KeyLight.Enabled = false;
+            Lights.BackLight.Enabled = false;
+            Lights.FillLight.Enabled = true;
+        }
+        private void InitializePostProcessing()
+        {
+            Renderer.ClearPostProcessingEffects();
+            Renderer.PostProcessingObjectsEffects = postProcessing;
+        }
+
+        private void LoadGameAssets()
+        {
+            LoadResourcesAsync(InitializeDungeon(), LoadGameAssetsCompleted);
+        }
+        private async Task InitializeDungeon()
+        {
+            dungeon = await AddComponentGround<Scenery, GroundDescription>("Dungeon", "Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.json", 2));
+        }
+        private async Task LoadGameAssetsCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            Lights.AddRange(dungeon.Lights);
+
+            agent = new Player()
+            {
+                Name = "Player",
+                Height = 0.5f,
+                Radius = 0.15f,
+                MaxClimb = 0.225f,
+            };
+
+            InitializeCamera();
+
+            SetGround(dungeon, true);
+
+            var settings = new BuildSettings()
+            {
+                Agents = new[] { agent },
+            };
+
+            var input = new InputGeometry(GetTrianglesForNavigationGraph);
+
+            PathFinderDescription = new PathFinderDescription(settings, input);
+
+            await UpdateNavigationGraph();
+
             gameReady = true;
         }
+        private void InitializeCamera()
+        {
+            Camera.NearPlaneDistance = 0.1f;
+            Camera.FarPlaneDistance = 500;
+            Camera.MovementDelta = agent.Velocity;
+            Camera.SlowMovementDelta = agent.VelocitySlow;
+            Camera.Mode = CameraModes.Free;
+            Camera.Position = new Vector3(0, agent.Height, 0);
+            Camera.Interest = new Vector3(0, agent.Height, 1);
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
@@ -69,110 +177,6 @@ namespace Collada.Dungeon
 
             UpdateCamera();
         }
-
-        private void InitializeUI()
-        {
-            _ = LoadResourcesAsync(
-                InitializeUIComponents(),
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    userInterfaceInitialized = true;
-
-                    InitializeEnvironment();
-
-                    LoadGameAssets();
-                });
-        }
-        private void LoadGameAssets()
-        {
-            _ = LoadResourcesAsync(
-                InitializeDungeon(),
-                (res) =>
-                {
-                    if (!res.Completed)
-                    {
-                        res.ThrowExceptions();
-                    }
-
-                    Lights.AddRange(dungeon.Lights);
-
-                    agent = new Player()
-                    {
-                        Name = "Player",
-                        Height = 0.5f,
-                        Radius = 0.15f,
-                        MaxClimb = 0.225f,
-                    };
-
-                    InitializeCamera();
-
-                    SetGround(dungeon, true);
-
-                    var settings = new BuildSettings()
-                    {
-                        Agents = new[] { agent },
-                    };
-
-                    var input = new InputGeometry(GetTrianglesForNavigationGraph);
-
-                    PathFinderDescription = new PathFinderDescription(settings, input);
-
-                    Task.WhenAll(UpdateNavigationGraph());
-                });
-        }
-
-        private async Task InitializeUIComponents()
-        {
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
-            title.Text = "Collada Dungeon Scene";
-            title.SetPosition(Vector2.Zero);
-
-            fps = await this.AddComponentUITextArea("FPS", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
-            fps.Text = null;
-            fps.SetPosition(new Vector2(0, 24));
-
-            var picks = await this.AddComponentUITextArea("Picks", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
-            picks.Text = null;
-            picks.SetPosition(new Vector2(0, 48));
-
-            var spDesc = new SpriteDescription()
-            {
-                Width = Game.Form.RenderWidth,
-                Height = picks.Top + picks.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
-
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
-        }
-        private async Task InitializeDungeon()
-        {
-            dungeon = await this.AddComponentScenery("Dungeon", GroundDescription.FromFile(resourcesFolder, "Dungeon.xml", 2));
-        }
-
-        private void InitializeCamera()
-        {
-            Camera.NearPlaneDistance = 0.1f;
-            Camera.FarPlaneDistance = 500;
-            Camera.MovementDelta = agent.Velocity;
-            Camera.SlowMovementDelta = agent.VelocitySlow;
-            Camera.Mode = CameraModes.Free;
-            Camera.Position = new Vector3(0, agent.Height, 0);
-            Camera.Interest = new Vector3(0, agent.Height, 1);
-        }
-        private void InitializeEnvironment()
-        {
-            GameEnvironment.Background = Color.Black;
-
-            Lights.KeyLight.Enabled = false;
-            Lights.BackLight.Enabled = false;
-            Lights.FillLight.Enabled = true;
-        }
-
         private void UpdateCamera()
         {
             var prevPos = Camera.Position;
@@ -198,7 +202,7 @@ namespace Collada.Dungeon
             }
 
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -220,6 +224,21 @@ namespace Collada.Dungeon
             {
                 Camera.Goto(prevPos);
             }
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            fps.SetPosition(new Vector2(0, 24));
+            picks.SetPosition(new Vector2(0, 48));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = picks.Top + picks.Height + 3;
         }
     }
 }

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDataFile>
+  <model_filename>rat.dae</model_filename>
+  <animation_description>
+    <animations>
+      <animation name="walk" from="0" to="4" />
+    </animations>
+  </animation_description>
+</ContentDataFile>

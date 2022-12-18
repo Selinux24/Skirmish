@@ -6,29 +6,30 @@ namespace Engine.UI
     /// <summary>
     /// UI dialog
     /// </summary>
-    public class UIDialog : UIControl
+    public sealed class UIDialog : UIControl<UIDialogDescription>
     {
         /// <summary>
         /// Close button
         /// </summary>
-        private readonly UIButton butClose;
+        private UIButton butClose;
         /// <summary>
         /// Accept button
         /// </summary>
-        private readonly UIButton butAccept;
+        private UIButton butAccept;
         /// <summary>
         /// Dialog text
         /// </summary>
-        private readonly UITextArea dialogText;
+        private UITextArea dialogText;
         /// <summary>
         /// Button area height
         /// </summary>
-        private readonly float buttonAreaHeight = 0;
+        private float buttonAreaHeight = 0;
 
         /// <summary>
         /// Gets whether the dialog is active or not
         /// </summary>
         public bool DialogActive { get; private set; } = false;
+
         /// <summary>
         /// Fires when the accept button was just released
         /// </summary>
@@ -45,41 +46,44 @@ namespace Engine.UI
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public UIDialog(string name, Scene scene, UIDialogDescription description) : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public UIDialog(Scene scene, string id, string name) :
+            base(scene, id, name)
         {
-            var backPanel = new UIPanel($"{name}.BackPanel", scene, description.Background);
+
+        }
+
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(UIDialogDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            var backPanel = await CreateBackpanel();
             AddChild(backPanel);
 
-            dialogText = new UITextArea($"{name}.DialogText", scene, description.TextArea);
+            dialogText = await CreateDialogText();
             backPanel.AddChild(dialogText);
 
-            if (description.DialogButtons.HasFlag(UIDialogButtons.Accept))
+            if (Description.DialogButtons.HasFlag(UIDialogButtons.Accept))
             {
-                butAccept = new UIButton($"{name}.AcceptButton", scene, description.Buttons);
-                butAccept.Caption.Text = "Accept";
-                butAccept.JustReleased += DialogAcceptJustReleased;
+                butAccept = await CreateAcceptButton();
                 backPanel.AddChild(butAccept, false);
 
                 buttonAreaHeight = butAccept.Height + 10;
             }
 
-            if (description.DialogButtons.HasFlag(UIDialogButtons.Cancel) || description.DialogButtons.HasFlag(UIDialogButtons.Close))
+            if (Description.DialogButtons.HasFlag(UIDialogButtons.Cancel) || Description.DialogButtons.HasFlag(UIDialogButtons.Close))
             {
-                if (description.DialogButtons.HasFlag(UIDialogButtons.Cancel))
+                if (Description.DialogButtons.HasFlag(UIDialogButtons.Cancel))
                 {
-                    butClose = new UIButton($"{name}.CancelButton", scene, description.Buttons);
-                    butClose.Caption.Text = "Cancel";
-                    butClose.JustReleased += DialogCancelJustReleased;
+                    butClose = await CreateCancelButton();
                     backPanel.AddChild(butClose, false);
                 }
                 else
                 {
-                    butClose = new UIButton($"{name}.CloseButton", scene, description.Buttons);
-                    butClose.Caption.Text = "Close";
-                    butClose.JustReleased += DialogCloseJustReleased;
+                    butClose = await CreateCloseButton();
                     backPanel.AddChild(butClose, false);
                 }
 
@@ -87,6 +91,56 @@ namespace Engine.UI
             }
 
             UpdateLayout();
+        }
+        private async Task<UIPanel> CreateBackpanel()
+        {
+            return await Scene.CreateComponent<UIPanel, UIPanelDescription>(
+                $"{Id}.BackPanel",
+                $"{Name}.BackPanel",
+                Description.Background);
+        }
+        private async Task<UITextArea> CreateDialogText()
+        {
+            return await Scene.CreateComponent<UITextArea, UITextAreaDescription>(
+                $"{Id}.DialogText",
+                $"{Name}.DialogText",
+                Description.TextArea);
+        }
+        private async Task<UIButton> CreateAcceptButton()
+        {
+            var button = await Scene.CreateComponent<UIButton, UIButtonDescription>(
+                $"{Id}.AcceptButton",
+                $"{Name}.AcceptButton",
+                Description.Buttons);
+
+            button.Caption.Text = "Accept";
+            button.MouseClick += (sender, e) => { OnAcceptHandler?.Invoke(sender, e); };
+
+            return button;
+        }
+        private async Task<UIButton> CreateCancelButton()
+        {
+            var button = await Scene.CreateComponent<UIButton, UIButtonDescription>(
+                $"{Id}.CancelButton",
+                $"{Name}.CancelButton",
+                Description.Buttons);
+
+            button.Caption.Text = "Cancel";
+            button.MouseClick += (sender, e) => { OnCancelHandler?.Invoke(sender, e); };
+
+            return button;
+        }
+        private async Task<UIButton> CreateCloseButton()
+        {
+            var button = await Scene.CreateComponent<UIButton, UIButtonDescription>(
+                $"{Id}.CloseButton",
+                $"{Name}.CloseButton",
+                Description.Buttons);
+
+            button.Caption.Text = "Close";
+            button.MouseClick += (sender, e) => { OnCloseHandler?.Invoke(sender, e); };
+
+            return button;
         }
 
         /// <inheritdoc/>
@@ -110,29 +164,16 @@ namespace Engine.UI
 
             if (butAccept != null)
             {
-                butAccept.Top = dialogText.Rectangle.Bottom + 5;
+                butAccept.Top = dialogText.AbsoluteRectangle.Bottom + 5;
                 butAccept.Left = buttonsSpace;
-                buttonsSpace += butAccept.Rectangle.Right + 5;
+                buttonsSpace += butAccept.AbsoluteRectangle.Right + 5;
             }
 
             if (butClose != null)
             {
-                butClose.Top = dialogText.Rectangle.Bottom + 5;
+                butClose.Top = dialogText.AbsoluteRectangle.Bottom + 5;
                 butClose.Left = buttonsSpace;
             }
-        }
-
-        private void DialogAcceptJustReleased(object sender, EventArgs e)
-        {
-            OnAcceptHandler?.Invoke(this, e);
-        }
-        private void DialogCancelJustReleased(object sender, EventArgs e)
-        {
-            OnCancelHandler?.Invoke(this, e);
-        }
-        private void DialogCloseJustReleased(object sender, EventArgs e)
-        {
-            OnCloseHandler?.Invoke(this, e);
         }
 
         /// <summary>
@@ -157,34 +198,6 @@ namespace Engine.UI
             action?.Invoke();
 
             DialogActive = false;
-        }
-    }
-
-    /// <summary>
-    /// UI dialog extensions
-    /// </summary>
-    public static class UIDialogExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<UIDialog> AddComponentUIDialog(this Scene scene, string name, UIDialogDescription description, int order = 0)
-        {
-            UIDialog component = null;
-
-            await Task.Run(() =>
-            {
-                component = new UIDialog(name, scene, description);
-
-                scene.AddComponent(component, SceneObjectUsages.UI, order);
-            });
-
-            return component;
         }
     }
 }

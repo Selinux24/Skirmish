@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -31,7 +32,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets wheter the descriptor is processed into the buffer manager or not
         /// </summary>
-        public bool Processed { get; set; } = false;
+        public ProcessedStages Processed { get; set; } = ProcessedStages.Requested;
 
         /// <summary>
         /// Updates the buffer
@@ -39,6 +40,8 @@ namespace Engine.Common
         /// <param name="request">Buffer request</param>
         public void Process(BufferManager bufferManager)
         {
+            Processed = ProcessedStages.InProcess;
+
             if (Action == BufferDescriptorRequestActions.Add)
             {
                 Add(bufferManager);
@@ -48,7 +51,15 @@ namespace Engine.Common
                 Remove(bufferManager);
             }
 
-            Processed = true;
+            Processed = ProcessedStages.Processed;
+        }
+        /// <summary>
+        /// Updates the buffer descriptor
+        /// </summary>
+        /// <param name="bufferManager">Buffer manager</param>
+        public async Task ProcessAsync(BufferManager bufferManager)
+        {
+            await Task.Run(() => Process(bufferManager));
         }
         /// <summary>
         /// Assign the descriptor to the buffer manager

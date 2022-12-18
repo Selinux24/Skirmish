@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.AStar
@@ -41,47 +42,41 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns the new grid</returns>
         private Grid CreateGrid(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
-            var grid = new Grid
-            {
-                Input = this,
-                BuildSettings = settings as GridGenerationSettings
-            };
+            var grid = new Grid(settings as GridGenerationSettings, this);
 
             var bbox = GeometryUtil.CreateBoundingBox(triangles);
 
             Dictionary<Vector2, GridCollisionInfo[]> dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
 
-            float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / grid.BuildSettings.NodeSize;
-            float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / grid.BuildSettings.NodeSize;
+            float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / grid.Settings.NodeSize;
+            float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / grid.Settings.NodeSize;
 
             int xSize = fxSize > (int)fxSize ? (int)fxSize + 1 : (int)fxSize;
             int zSize = fzSize > (int)fzSize ? (int)fzSize + 1 : (int)fzSize;
 
-            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += grid.BuildSettings.NodeSize)
+            for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += grid.Settings.NodeSize)
             {
-                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += grid.BuildSettings.NodeSize)
+                for (float z = bbox.Minimum.Z; z < bbox.Maximum.Z; z += grid.Settings.NodeSize)
                 {
                     GridCollisionInfo[] info;
 
-                    Ray ray = new Ray()
-                    {
-                        Position = new Vector3(x, bbox.Maximum.Y + 0.01f, z),
-                        Direction = Vector3.Down,
-                    };
+                    PickingRay ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
 
-                    bool intersects = Intersection.IntersectAll(
-                        ray, triangles, true,
-                        out Vector3[] pickedPoints,
-                        out Triangle[] pickedTriangles,
-                        out float[] pickedDistances);
-
+                    bool intersects = RayPickingHelper.PickAll(triangles, ray, out var picks);
                     if (intersects)
                     {
-                        info = new GridCollisionInfo[pickedPoints.Length];
+                        info = new GridCollisionInfo[picks.Count()];
 
-                        for (int i = 0; i < pickedPoints.Length; i++)
+                        for (int i = 0; i < picks.Count(); i++)
                         {
-                            info[i] = new GridCollisionInfo() { Point = pickedPoints[i], Triangle = pickedTriangles[i], Distance = pickedDistances[i] };
+                            var pick = picks.ElementAt(i);
+
+                            info[i] = new GridCollisionInfo()
+                            {
+                                Point = pick.Position,
+                                Triangle = pick.Primitive,
+                                Distance = pick.Distance,
+                            };
                         }
                     }
                     else
@@ -99,12 +94,12 @@ namespace Engine.PathFinding.AStar
             dictionary.Values.CopyTo(collisionValues, 0);
 
             //Generate grid nodes
-            var result = GenerateGridNodes(gridNodeCount, xSize, zSize, grid.BuildSettings.NodeSize, collisionValues);
+            var result = GenerateGridNodes(gridNodeCount, xSize, zSize, grid.Settings.NodeSize, collisionValues);
 
             //Fill connections
             FillConnections(result);
 
-            grid.Nodes = result.ToArray();
+            grid.AddRange(result.ToArray());
             grid.Initialized = true;
 
             return grid;
@@ -118,7 +113,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="nodeSize">Node size</param>
         /// <param name="collisionValues">Collision values</param>
         /// <returns>Generates a grid node list</returns>
-        private List<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
+        private IEnumerable<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
         {
             List<GridNode> result = new List<GridNode>();
 
@@ -162,7 +157,7 @@ namespace Engine.PathFinding.AStar
 
                 //Process multiple point nodes
                 var resMultiple = MultipleCollision(max, nodeSize, coor0, coor1, coor2, coor3);
-                if (resMultiple.Count > 0)
+                if (resMultiple.Any())
                 {
                     result.AddRange(resMultiple);
                 }
@@ -205,7 +200,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="coor2">Collision info 3</param>
         /// <param name="coor3">Collision info 4</param>
         /// <returns>Returns a node list from multiple collision data</returns>
-        private List<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
+        private IEnumerable<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
         {
             List<GridNode> result = new List<GridNode>();
 
@@ -233,19 +228,25 @@ namespace Engine.PathFinding.AStar
         /// Fill node connections
         /// </summary>
         /// <param name="nodes">Grid nodes</param>
-        private void FillConnections(List<GridNode> nodes)
+        private void FillConnections(IEnumerable<GridNode> nodes)
         {
-            for (int i = 0; i < nodes.Count; i++)
+            for (int i = 0; i < nodes.Count(); i++)
             {
-                if (!nodes[i].FullConnected)
+                var nodeA = nodes.ElementAt(i);
+                if (nodeA.FullConnected)
                 {
-                    for (int n = i + 1; n < nodes.Count; n++)
+                    continue;
+                }
+
+                for (int n = i + 1; n < nodes.Count(); n++)
+                {
+                    var nodeB = nodes.ElementAt(n);
+                    if (nodeB.FullConnected)
                     {
-                        if (!nodes[n].FullConnected)
-                        {
-                            nodes[i].TryConnect(nodes[n]);
-                        }
+                        continue;
                     }
+
+                    nodeA.TryConnect(nodeB);
                 }
             }
         }

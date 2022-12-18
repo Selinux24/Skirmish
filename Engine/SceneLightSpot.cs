@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -31,21 +32,21 @@ namespace Engine
         /// </summary>
         public Vector3 Direction { get; set; }
         /// <summary>
-        /// Cone angle in degrees
+        /// Fall-off (cone) angle in degrees
         /// </summary>
-        public float Angle { get; set; }
+        public float FallOffAngle { get; set; }
         /// <summary>
-        /// Cone angle in radians
+        /// Fall-off (cone) angle in radians
         /// </summary>
-        public float AngleRadians
+        public float FallOffAngleRadians
         {
             get
             {
-                return MathUtil.DegreesToRadians(Angle);
+                return MathUtil.DegreesToRadians(FallOffAngle);
             }
             set
             {
-                Angle = MathUtil.RadiansToDegrees(value);
+                FallOffAngle = MathUtil.RadiansToDegrees(value);
             }
         }
         /// <summary>
@@ -138,13 +139,13 @@ namespace Engine
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
         public SceneLightSpot(
-            string name, bool castShadow, Color4 diffuse, Color4 specular, bool enabled,
+            string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled,
             SceneLightSpotDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             Position = description.Position;
             Direction = description.Direction;
-            Angle = description.Angle;
+            FallOffAngle = description.FallOffAngle;
             Radius = description.Radius;
             Intensity = description.Intensity;
 
@@ -176,9 +177,9 @@ namespace Engine
             FromLightVP = new Matrix[1];
         }
         /// <inheritdoc/>
-        public override bool MarkForShadowCasting(Vector3 eyePosition)
+        public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
         {
-            CastShadowsMarked = EvaluateLight(eyePosition, CastShadow, Position, Radius);
+            CastShadowsMarked = EvaluateLight(environment, eyePosition, CastShadow, Position, Radius);
 
             return CastShadowsMarked;
         }
@@ -196,7 +197,7 @@ namespace Engine
 
                 Position = Position,
                 Radius = Radius,
-                Angle = Angle,
+                FallOffAngle = FallOffAngle,
                 Direction = Direction,
                 Intensity = Intensity,
 
@@ -215,7 +216,7 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public IEnumerable<Line3D> GetVolume(int sliceCount)
         {
-            var coneLines = Line3D.CreateWiredConeAngle(AngleRadians, Radius, sliceCount);
+            var coneLines = Line3D.CreateWiredConeAngle(FallOffAngleRadians, Radius, sliceCount);
 
             //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);
@@ -225,6 +226,63 @@ namespace Engine
             Matrix trn = Helper.CreateWorld(Position, Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
+        }
+
+        /// <inheritdoc/>
+        public IGameState GetState()
+        {
+            return new SceneLightSpotState
+            {
+                Name = Name,
+                Enabled = Enabled,
+                CastShadow = CastShadow,
+                CastShadowsMarked = CastShadowsMarked,
+                DiffuseColor = DiffuseColor,
+                SpecularColor = SpecularColor,
+                ShadowMapIndex = ShadowMapIndex,
+                State = State,
+                ParentTransform = ParentTransform,
+
+                InitialTransform = initialTransform,
+                InitialRadius = initialRadius,
+                InitialIntensity = initialIntensity,
+                Position = Position,
+                Direction = Direction,
+                Angle = FallOffAngle,
+                Radius = Radius,
+                Intensity = Intensity,
+                ShadowMapCount = ShadowMapCount,
+                FromLightVP = FromLightVP.Cast<Matrix4X4>().ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is SceneLightSpotState sceneLightsState))
+            {
+                return;
+            }
+
+            Name = sceneLightsState.Name;
+            Enabled = sceneLightsState.Enabled;
+            CastShadow = sceneLightsState.CastShadow;
+            CastShadowsMarked = sceneLightsState.CastShadowsMarked;
+            DiffuseColor = sceneLightsState.DiffuseColor;
+            SpecularColor = sceneLightsState.SpecularColor;
+            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
+            State = sceneLightsState.State;
+            ParentTransform = sceneLightsState.ParentTransform;
+
+            initialTransform = sceneLightsState.InitialTransform;
+            initialRadius = sceneLightsState.InitialRadius;
+            initialIntensity = sceneLightsState.InitialIntensity;
+            Position = sceneLightsState.Position;
+            Direction = sceneLightsState.Direction;
+            FallOffAngle = sceneLightsState.Angle;
+            Radius = sceneLightsState.Radius;
+            Intensity = sceneLightsState.Intensity;
+            ShadowMapCount = sceneLightsState.ShadowMapCount;
+            FromLightVP = sceneLightsState.FromLightVP.Cast<Matrix>().ToArray();
         }
     }
 }

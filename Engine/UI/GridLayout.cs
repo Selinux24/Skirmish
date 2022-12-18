@@ -140,7 +140,7 @@ namespace Engine.UI
         /// <param name="bounds">Bounds</param>
         /// <param name="padding">Padding</param>
         /// <param name="spacing">Spacing</param>
-        public static void UpdateLayout(IEnumerable<UIControl> controls, GridLayout parameters, RectangleF bounds, Padding padding, Spacing spacing)
+        public static void UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
         {
             if (controls?.Any() != true)
             {
@@ -190,7 +190,7 @@ namespace Engine.UI
                 var yPos = cellSize.Y * rowCount + (spacing.Vertical * rowCount) + padding.Top;
 
                 var item = controls.ElementAt(i);
-                item.SetPosition(xPos + bounds.X, yPos + bounds.Y);
+                item.SetPosition(xPos, yPos);
                 item.Width = cellSize.X;
                 item.Height = cellSize.Y;
             }

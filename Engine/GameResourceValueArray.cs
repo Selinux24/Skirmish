@@ -9,10 +9,10 @@ namespace Engine
     /// </summary>
     public class GameResourceValueArray<T> : IGameResourceRequest where T : struct
     {
-        /// <summary>
-        /// Engine resource view
-        /// </summary>
-        public EngineShaderResourceView ResourceView { get; private set; } = new EngineShaderResourceView();
+        /// <inheritdoc/>
+        public string Name { get; private set; }
+        /// <inheritdoc/>
+        public EngineShaderResourceView ResourceView { get; private set; }
         /// <summary>
         /// Size
         /// </summary>
@@ -27,12 +27,18 @@ namespace Engine
         public bool Dynamic { get; set; }
 
         /// <summary>
-        /// Creates the resource
+        /// Constructor
         /// </summary>
-        /// <param name="game">Game</param>
+        public GameResourceValueArray(string name)
+        {
+            Name = name;
+            ResourceView = new EngineShaderResourceView(name);
+        }
+
+        /// <inheritdoc/>
         public void Create(Game game)
         {
-            var srv = game.Graphics.CreateTexture2D(Size, Values, Dynamic);
+            var srv = game.Graphics.CreateValueArrayTexture(Name, Size, Values, Dynamic).GetResource();
             ResourceView.SetResource(srv);
         }
     }

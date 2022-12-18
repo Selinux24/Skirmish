@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -72,10 +73,6 @@ namespace Engine
         /// Use anisotropic filtering
         /// </summary>
         public bool UseAnisotropic { get; set; } = true;
-        /// <summary>
-        /// Collision detection mode
-        /// </summary>
-        public CollisionDetectionMode CollisionDetection { get; set; } = CollisionDetectionMode.Default;
 
         /// <summary>
         /// Constructor
@@ -83,22 +80,24 @@ namespace Engine
         public GroundDescription()
             : base()
         {
-            CastShadow = true;
+            CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point;
         }
 
         /// <summary>
         /// Reads a model content from description
         /// </summary>
-        public ContentData ReadModelContent()
+        public async Task<ContentData> ReadModelContent()
         {
             // Read model content
             if (Heightmap != null)
             {
-                return Heightmap.ReadModelContent();
+                return await Heightmap.ReadModelContent();
             }
             else if (Content != null)
             {
-                return Content.ReadModelContent().FirstOrDefault();
+                var modelContent = await Content.ReadModelContent();
+
+                return modelContent.FirstOrDefault();
             }
             else
             {

@@ -3,15 +3,15 @@
     /// <summary>
     /// Sky plane modes
     /// </summary>
-    public enum SkyPlaneModes
+    public enum SkyPlaneModes : uint
     {
         /// <summary>
         /// Static sky
         /// </summary>
-        Static,
+        Static = 0,
         /// <summary>
         /// Perturbed sky
         /// </summary>
-        Perturbed,
+        Perturbed = 1,
     }
 }

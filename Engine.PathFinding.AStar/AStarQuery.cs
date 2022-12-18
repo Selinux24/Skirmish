@@ -1,6 +1,7 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.PathFinding.AStar
 {
@@ -17,7 +18,7 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Cached paths
         /// </summary>
-        private static List<PathCache> Cache = new List<PathCache>();
+        private static readonly List<PathCache> Cache = new List<PathCache>();
 
         /// <summary>
         /// Gets the path from start to end
@@ -28,44 +29,42 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static Vector3[] FindPath(Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
+        public static IEnumerable<Vector3> FindPath(Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
             GridNode start = graph.FindNode(startPosition);
             GridNode end = graph.FindNode(endPosition);
-            if (start != null && end != null)
+
+            if (start == null || end == null)
             {
-                PathCache cachedPath = Cache.Find(p => p.Start == start && p.End == end);
-                if (cachedPath != null)
-                {
-                    //Return path
-                    return cachedPath.Path;
-                }
-                else
-                {
-                    //Calculate return path
-                    Vector3[] solvedList = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
-                    if (solvedList != null && solvedList.Length > 0)
-                    {
-                        //Generate path
-                        var path = solvedList;
-
-                        //Update queue
-                        if (Cache.Count >= 10) Cache.RemoveAt(0);
-
-                        //Add path to cache
-                        Cache.Add(new PathCache()
-                        {
-                            Path = path,
-                            Start = start,
-                            End = end,
-                        });
-
-                        return path;
-                    }
-                }
+                return Enumerable.Empty<Vector3>();
             }
 
-            return new Vector3[] { };
+            var cachedPath = Cache.Find(p => p.Start == start && p.End == end);
+            if (cachedPath != null)
+            {
+                //Return path
+                return cachedPath.Path;
+            }
+
+            //Calculate return path
+            var path = CalcReturnPath(start, end, heuristicMethod, heuristicEstimateValue);
+            if (!path.Any())
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
+            //Update queue
+            if (Cache.Count >= 10) Cache.RemoveAt(0);
+
+            //Add path to cache
+            Cache.Add(new PathCache()
+            {
+                Path = path.ToArray(),
+                Start = start,
+                End = end,
+            });
+
+            return path;
         }
         /// <summary>
         /// Gets the path from start to end
@@ -75,7 +74,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicMethod">Heuristic metod</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value</param>
         /// <returns>Returns the path from start to end</returns>
-        private static Vector3[] CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
+        private static IEnumerable<Vector3> CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
             //New queue
             PriorityDictionary<GridNode, float> openPathsQueue = new PriorityDictionary<GridNode, float>();
@@ -216,7 +215,8 @@ namespace Engine.PathFinding.AStar
 
                 return h;
             }
-            else if (heuristicMethod == HeuristicMethods.Manhattan)
+
+            if (heuristicMethod == HeuristicMethods.Manhattan)
             {
                 float dx = Math.Abs(start.X - end.X);
                 float dz = Math.Abs(start.Z - end.Z);
@@ -224,7 +224,8 @@ namespace Engine.PathFinding.AStar
 
                 return h;
             }
-            else if (heuristicMethod == HeuristicMethods.DiagonalDistance1)
+
+            if (heuristicMethod == HeuristicMethods.DiagonalDistance1)
             {
                 float dx = Math.Abs(start.X - end.X);
                 float dz = Math.Abs(start.Z - end.Z);
@@ -232,7 +233,8 @@ namespace Engine.PathFinding.AStar
 
                 return h;
             }
-            else if (heuristicMethod == HeuristicMethods.DiagonalDistance2)
+
+            if (heuristicMethod == HeuristicMethods.DiagonalDistance2)
             {
                 float dx = Math.Abs(start.X - end.X);
                 float dz = Math.Abs(start.Z - end.Z);
@@ -240,7 +242,8 @@ namespace Engine.PathFinding.AStar
 
                 return h;
             }
-            else if (heuristicMethod == HeuristicMethods.HexDistance)
+
+            if (heuristicMethod == HeuristicMethods.HexDistance)
             {
                 float dx = start.X - end.X;
                 float dy = start.Y - end.Y;
@@ -249,10 +252,8 @@ namespace Engine.PathFinding.AStar
 
                 return h;
             }
-            else
-            {
-                throw new ArgumentException(string.Format("Calculation method {0} not valid.", heuristicMethod));
-            }
+
+            throw new ArgumentException($"Calculation method {heuristicMethod} not valid.");
         }
 
         /// <summary>
@@ -271,7 +272,7 @@ namespace Engine.PathFinding.AStar
             /// <summary>
             /// Path
             /// </summary>
-            public Vector3[] Path;
+            public IEnumerable<Vector3> Path;
         }
     }
 }

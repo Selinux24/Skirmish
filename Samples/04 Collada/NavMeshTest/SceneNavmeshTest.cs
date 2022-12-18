@@ -14,14 +14,14 @@ namespace Collada.NavmeshTest
     /// <summary>
     /// Navigation mesh test scene
     /// </summary>
-    class SceneNavmeshTest : Scene
+    class SceneNavmeshTest : WalkableScene
     {
-        private const int layerHUD = 99;
-
         private readonly string resourcesFolder = "navmeshtest/resources";
 
         private Player agent = null;
 
+        private Sprite panel = null;
+        private UITextArea title = null;
         private UITextArea debug = null;
         private UITextArea help = null;
 
@@ -37,89 +37,67 @@ namespace Collada.NavmeshTest
 
         public SceneNavmeshTest(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
-            await base.Initialize();
-
             GameEnvironment.Background = new Color4(0.09f, 0.09f, 0.09f, 1f);
 
             Game.VisibleMouse = true;
             Game.LockMouse = false;
 
             Camera.MovementDelta = 25f;
+        }
 
-            await LoadResourcesAsync(
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
                 InitializeText(),
-                (resUi) =>
-                {
-                    if (!resUi.Completed)
-                    {
-                        resUi.ThrowExceptions();
-                    }
-
-                    InitializeLights();
-                    InitializeAgent();
-
-                    _ = LoadResourcesAsync(
-                        new[]
-                        {
-                            InitializeNavmesh(),
-                            InitializeDebug()
-                        },
-                        (res) =>
-                        {
-                            if (!res.Completed)
-                            {
-                                res.ThrowExceptions();
-                            }
-
-                            var bbox = inputGeometry.GetBoundingBox();
-                            var center = bbox.GetCenter();
-                            float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
-
-                            Camera.Interest = center;
-                            Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
-
-                            Task.WhenAll(UpdateNavigationGraph());
-
-                            gameReady = true;
-                        });
-                });
+                InitializeComponentsCompleted);
         }
         private async Task InitializeText()
         {
-            var title = await this.AddComponentUITextArea("Title", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Tahoma", 18), TextForeColor = Color.White }, layerHUD);
+            var defaultFont18 = TextDrawerDescription.FromFamily("Tahoma", 18);
+            var defaultFont12 = TextDrawerDescription.FromFamily("Tahoma", 12);
+            defaultFont18.LineAdjust = true;
+            defaultFont12.LineAdjust = true;
+
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", new UITextAreaDescription { Font = defaultFont18, TextForeColor = Color.White });
             title.Text = "Navigation Mesh Test Scene";
-            title.SetPosition(Vector2.Zero);
 
-            debug = await this.AddComponentUITextArea("Debug", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Green }, layerHUD);
+            debug = await AddComponentUI<UITextArea, UITextAreaDescription>("Debug", "Debug", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Green });
             debug.Text = null;
-            debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
 
-            help = await this.AddComponentUITextArea("Help", new UITextAreaDescription { Font = TextDrawerDescription.FromFamily("Lucida Sans", 12), TextForeColor = Color.Yellow }, layerHUD);
+            help = await AddComponentUI<UITextArea, UITextAreaDescription>("Help", "Help", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
             help.Text = @"Camera: WASD+Mouse (Press right mouse in windowed mode to look). 
 B: Change Build Mode (SHIFT reverse).
 P: Change Partition Type (SHIFT reverse).
 T: Toggle using Tile Cache.
 F5: Saves the graph to a file.
 F6: Loads the graph from a file.
-Left Mouse: Update current tile (SHIFT remove).
+Left Mouse: Update current tile (SHIFT remove, CTRL add).
 Middle Mouse: Finds random point around circle (5 units).
 Space: Finds random over navmesh";
-            help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
             help.Visible = false;
 
-            var spDesc = new SpriteDescription()
+            var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
+            panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
+        }
+        private void InitializeComponentsCompleted(LoadResourcesResult resUi)
+        {
+            if (!resUi.Completed)
             {
-                Width = Game.Form.RenderWidth,
-                Height = debug.Top + debug.Height + 3,
-                BaseColor = new Color4(0, 0, 0, 0.75f),
-            };
+                resUi.ThrowExceptions();
+            }
 
-            await this.AddComponentSprite("Backpanel", spDesc, SceneObjectUsages.UI, layerHUD - 1);
+            UpdateLayout();
+            InitializeLights();
+            InitializeAgent();
+
+            InitializeMapData();
         }
         private void InitializeLights()
         {
@@ -143,18 +121,29 @@ Space: Finds random over navmesh";
             Camera.NearPlaneDistance = 0.01f;
             Camera.FarPlaneDistance *= 2;
         }
+
+        private void InitializeMapData()
+        {
+            LoadResourcesAsync(
+                new[]
+                {
+                    InitializeNavmesh(),
+                    InitializeDebug()
+                },
+                InitializeMapDataCompleted);
+        }
         private async Task InitializeNavmesh()
         {
-            inputGeometry = await this.AddComponentModel(
-                "NavMesh",
-                new ModelDescription()
-                {
-                    TextureIndex = 0,
-                    CastShadow = true,
-                    UseAnisotropicFiltering = true,
-                    Content = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.xml"),
-                },
-                SceneObjectUsages.Ground);
+            var contentDesc = ContentDescription.FromFile(resourcesFolder, "modular_dungeon.json");
+            var desc = new ModelDescription()
+            {
+                TextureIndex = 0,
+                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                UseAnisotropicFiltering = true,
+                Content = contentDesc,
+            };
+
+            inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
             SetGround(inputGeometry, true);
 
@@ -185,13 +174,31 @@ Space: Finds random over navmesh";
             {
                 Count = 50000,
             };
-            graphDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Graph", graphDrawerDesc);
+            graphDrawer = await AddComponent<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
 
             var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
             {
                 Count = 10000
             };
-            volumesDrawer = await this.AddComponentPrimitiveListDrawer("DEBUG++ Volumes", volumesDrawerDesc);
+            volumesDrawer = await AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
+        }
+        private async Task InitializeMapDataCompleted(LoadResourcesResult res)
+        {
+            if (!res.Completed)
+            {
+                res.ThrowExceptions();
+            }
+
+            var bbox = inputGeometry.GetBoundingBox();
+            var center = bbox.GetCenter();
+            float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
+
+            Camera.Interest = center;
+            Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
+
+            await UpdateNavigationGraph();
+
+            gameReady = true;
         }
 
         public override async Task UpdateNavigationGraph()
@@ -253,7 +260,7 @@ Space: Finds random over navmesh";
                 Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
 
-            if (Game.Input.RightMouseButtonPressed)
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     Game.GameTime,
@@ -263,24 +270,23 @@ Space: Finds random over navmesh";
         }
         private void UpdateNavmeshInput()
         {
-            if (Game.Input.MiddleMouseButtonJustReleased)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Middle))
             {
-                var pRay = GetPickingRay();
-                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+                var pRay = GetPickingRay(RayPickingParams.Perfect);
 
-                if (PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
-                    DrawPoint(r.Position, 0.25f, Color.Red);
-                    DrawTriangle(r.Item, Color.White);
+                    DrawPoint(r.PickingResult.Position, 0.25f, Color.Red);
+                    DrawTriangle(r.PickingResult.Primitive, Color.White);
 
                     float radius = 5;
 
-                    DrawCircle(r.Position, radius, Color.Orange);
+                    DrawCircle(r.PickingResult.Position, radius, Color.Orange);
 
-                    var pt = NavigationGraph.FindRandomPoint(agent, r.Position, radius);
+                    var pt = NavigationGraph.FindRandomPoint(agent, r.PickingResult.Position, radius);
                     if (pt.HasValue)
                     {
-                        float dist = Vector3.Distance(r.Position, pt.Value);
+                        float dist = Vector3.Distance(r.PickingResult.Position, pt.Value);
                         Color color = dist < radius ? Color.LightGreen : Color.Pink;
                         DrawPoint(pt.Value, 2.5f, color);
                     }
@@ -300,17 +306,15 @@ Space: Finds random over navmesh";
         {
             bool updateGraph = false;
 
-            if (Game.Input.LeftMouseButtonJustReleased)
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay();
-                var rayPParams = RayPickingParams.FacingOnly | RayPickingParams.Perfect;
+                var pRay = GetPickingRay(RayPickingParams.Perfect);
 
-                if (PickNearest(pRay, rayPParams, out PickingResult<Triangle> r))
+                if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
-                    DrawPoint(r.Position, 0.25f, Color.Red);
-                    DrawTriangle(r.Item, Color.White);
+                    DrawContact(r.PickingResult.Position, r.PickingResult.Primitive);
 
-                    ToggleTile(r.Position);
+                    ToggleTile(r.PickingResult.Position);
                 }
             }
 
@@ -357,6 +361,24 @@ Space: Finds random over navmesh";
             }
 
             debug.Text = string.Format("Build Mode: {0}; Partition Type: {1}; Build Time: {2:0.00000} seconds", nmsettings.BuildMode, nmsettings.PartitionType, lastElapsedSeconds);
+        }
+        private void DrawContact(Vector3 position, Triangle triangle)
+        {
+            volumesDrawer.Clear(Color.Red);
+            volumesDrawer.Clear(Color.Green);
+            volumesDrawer.Clear(Color.Gray);
+            volumesDrawer.Clear(Color.White);
+
+            bool walkable = IsWalkable(agent, position, 0.1f, out var nearest);
+            var pColor = walkable ? Color.Green : Color.Red;
+
+            if (nearest.HasValue)
+            {
+                DrawPoint(nearest.Value + new Vector3(0.02f), 0.45f, Color.Gray);
+            }
+
+            DrawPoint(position, 0.25f, pColor);
+            DrawTriangle(triangle, Color.White);
         }
         private void UpdateFilesInput()
         {
@@ -419,20 +441,46 @@ Space: Finds random over navmesh";
 
         private void ToggleTile(Vector3 tilePosition)
         {
-            graphDrawer.Clear();
+            bool remove = Game.Input.ShiftPressed;
+            bool create = Game.Input.ControlPressed;
 
             Stopwatch sw = new Stopwatch();
             sw.Start();
-            if (!Game.Input.ShiftPressed)
+            try
             {
-                NavigationGraph.CreateAt(tilePosition);
+                if (create)
+                {
+                    NavigationGraph.CreateAt(tilePosition);
+                    return;
+                }
+
+                if (remove)
+                {
+                    NavigationGraph.RemoveAt(tilePosition);
+                    return;
+                }
+
+                NavigationGraph.UpdateAt(tilePosition);
             }
-            else
+            finally
             {
-                NavigationGraph.RemoveAt(tilePosition);
+                sw.Stop();
+                lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
             }
-            sw.Stop();
-            lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
+        }
+
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
+            title.SetPosition(Vector2.Zero);
+            debug.SetPosition(new Vector2(0, title.Top + title.Height + 3));
+            help.SetPosition(new Vector2(0, debug.Top + debug.Height + 3));
+            panel.Width = Game.Form.RenderWidth;
+            panel.Height = debug.Top + debug.Height + 3;
         }
     }
 }

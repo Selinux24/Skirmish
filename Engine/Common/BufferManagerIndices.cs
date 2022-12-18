@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Index buffer description
     /// </summary>
-    class BufferManagerIndices
+    public class BufferManagerIndices
     {
         /// <summary>
         /// Data list
@@ -16,7 +16,7 @@ namespace Engine.Common
         /// <summary>
         /// Descriptor list
         /// </summary>
-        public readonly List<BufferDescriptor> descriptors = new List<BufferDescriptor>();
+        private readonly List<BufferDescriptor> descriptors = new List<BufferDescriptor>();
 
         /// <summary>
         /// Dynamic
@@ -73,7 +73,7 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Adds a buffer descritor to the internal descriptos list
+        /// Adds a buffer descritor to the internal descriptors list
         /// </summary>
         /// <param name="descriptor">Descriptor</param>
         /// <param name="id">Id</param>
@@ -82,12 +82,20 @@ namespace Engine.Common
         /// <returns>Returns the new registerd descriptor</returns>
         public void AddDescriptor(BufferDescriptor descriptor, string id, int bufferDescriptionIndex, IEnumerable<uint> indices)
         {
+            int offset;
+
             Monitor.Enter(data);
-            //Store current data index as descriptor offset
-            int offset = data.Count;
-            //Add items to data list
-            data.AddRange(indices);
-            Monitor.Exit(data);
+            try
+            {
+                //Store current data index as descriptor offset
+                offset = data.Count;
+                //Add items to data list
+                data.AddRange(indices);
+            }
+            finally
+            {
+                Monitor.Exit(data);
+            }
 
             //Create and add the new descriptor to main descriptor list
             descriptor.Id = id;
@@ -96,8 +104,14 @@ namespace Engine.Common
             descriptor.Count = indices.Count();
 
             Monitor.Enter(descriptors);
-            descriptors.Add(descriptor);
-            Monitor.Exit(descriptors);
+            try
+            {
+                descriptors.Add(descriptor);
+            }
+            finally
+            {
+                Monitor.Exit(descriptors);
+            }
         }
         /// <summary>
         /// Removes a buffer descriptor from the internal list
@@ -115,17 +129,28 @@ namespace Engine.Common
             if (descriptor.Count > 0)
             {
                 Monitor.Enter(data);
-                //If descriptor has items, remove from buffer descriptors
-                data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
-                Monitor.Exit(data);
+                try
+                {
+                    //If descriptor has items, remove from buffer descriptors
+                    data.RemoveRange(descriptor.BufferOffset, descriptor.Count);
+                }
+                finally
+                {
+                    Monitor.Exit(data);
+                }
             }
 
             Monitor.Enter(descriptors);
-            //Remove from descriptors list
-            descriptors.RemoveAt(index);
-
-            if (descriptors.Any())
+            try
             {
+                //Remove from descriptors list
+                descriptors.RemoveAt(index);
+
+                if (!descriptors.Any())
+                {
+                    return;
+                }
+
                 //Reallocate descriptor offsets
                 descriptors[0].BufferOffset = 0;
                 for (int i = 1; i < descriptors.Count; i++)
@@ -135,7 +160,10 @@ namespace Engine.Common
                     descriptors[i].BufferOffset = prev.BufferOffset + prev.Count;
                 }
             }
-            Monitor.Exit(descriptors);
+            finally
+            {
+                Monitor.Exit(descriptors);
+            }
         }
 
         /// <inheritdoc/>

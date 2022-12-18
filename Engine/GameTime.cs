@@ -21,7 +21,7 @@ namespace Engine
         {
             get
             {
-                return this.watch.ElapsedAdjustedTime;
+                return watch.ElapsedAdjustedTime;
             }
         }
         /// <summary>
@@ -31,7 +31,7 @@ namespace Engine
         {
             get
             {
-                return this.watch.TotalTime;
+                return watch.TotalTime;
             }
         }
         /// <summary>
@@ -41,7 +41,7 @@ namespace Engine
         {
             get
             {
-                return (float)this.ElapsedTime.TotalSeconds;
+                return (float)ElapsedTime.TotalSeconds;
             }
         }
         /// <summary>
@@ -51,7 +51,7 @@ namespace Engine
         {
             get
             {
-                return (float)this.TotalTime.TotalSeconds;
+                return (float)TotalTime.TotalSeconds;
             }
         }
         /// <summary>
@@ -61,7 +61,7 @@ namespace Engine
         {
             get
             {
-                return (float)this.ElapsedTime.TotalMilliseconds;
+                return (float)ElapsedTime.TotalMilliseconds;
             }
         }
         /// <summary>
@@ -71,7 +71,7 @@ namespace Engine
         {
             get
             {
-                return (float)this.TotalTime.TotalMilliseconds;
+                return (float)TotalTime.TotalMilliseconds;
             }
         }
         /// <summary>
@@ -81,7 +81,17 @@ namespace Engine
         {
             get
             {
-                return this.TotalTime.Ticks;
+                return TotalTime.Ticks;
+            }
+        }
+        /// <summary>
+        /// Game time paused
+        /// </summary>
+        public bool Paused
+        {
+            get
+            {
+                return watch.IsPaused;
             }
         }
 
@@ -90,7 +100,7 @@ namespace Engine
         /// </summary>
         public GameTime()
         {
-            this.watch.Reset();
+            watch.Reset();
         }
 
         /// <summary>
@@ -98,35 +108,42 @@ namespace Engine
         /// </summary>
         public void Start()
         {
-            this.watch.Reset();
+            watch.Reset();
         }
         /// <summary>
         /// Resets the stop watch
         /// </summary>
-        public void Reset()
+        /// <param name="ticks">Ticks to add</param>
+        public void Reset(long ticks = 0)
         {
-            this.watch.Reset();
+            watch.Reset(ticks);
         }
         /// <summary>
         /// Pauses the stop watch
         /// </summary>
         public void Pause()
         {
-            this.watch.Pause();
+            while (!watch.IsPaused)
+            {
+                watch.Pause();
+            }
         }
         /// <summary>
         /// Resumes the stop watch
         /// </summary>
         public void Resume()
         {
-            this.watch.Resume();
+            while (watch.IsPaused)
+            {
+                watch.Resume();
+            }
         }
         /// <summary>
         /// Updates the stop watch counters
         /// </summary>
         public void Update()
         {
-            this.watch.Tick();
+            watch.Tick();
         }
     }
 }

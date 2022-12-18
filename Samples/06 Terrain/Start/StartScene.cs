@@ -32,33 +32,31 @@ namespace Terrain.Start
 
         public StartScene(Game game) : base(game)
         {
-
-        }
-
-        public override async Task Initialize()
-        {
             Game.VisibleMouse = false;
             Game.LockMouse = false;
 
             GameEnvironment.Background = Color.Black;
+        }
 
-            await LoadResourcesAsync(InitializeAssets(), PrepareAssets);
+        public override async Task Initialize()
+        {
+            await base.Initialize();
+
+            InitializeComponents();
+        }
+
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(
+                InitializeAssets(),
+                InitializeComponentsCompleted);
         }
         private async Task InitializeAssets()
         {
             #region Cursor
 
-            var cursorDesc = new UICursorDescription()
-            {
-                ContentPath = "Start",
-                Textures = new[] { "pointer.png" },
-                Height = 48,
-                Width = 48,
-                Centered = false,
-                Delta = new Vector2(-14f, -7f),
-                BaseColor = Color.White,
-            };
-            await this.AddComponentUICursor("Cursor", cursorDesc, layerCursor);
+            var cursorDesc = UICursorDescription.Default("Start/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
+            await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc, layerCursor);
 
             #endregion
 
@@ -66,76 +64,99 @@ namespace Terrain.Start
 
             var backGroundDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile("Start", "SkyPlane.xml"),
+                Content = ContentDescription.FromFile("Start", "SkyPlane.json"),
             };
-            backGround = await this.AddComponentModel("Background", backGroundDesc, SceneObjectUsages.UI);
+            backGround = await AddComponent<Model, ModelDescription>("Background", "Background", backGroundDesc);
 
             #endregion
 
             #region Title text
 
-            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold);
+            var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            titleFont.CustomKeycodes = new[] { '✌' };
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
             titleDesc.TextForeColor = Color.Gold;
             titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
-            titleDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            titleDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            title = await this.AddComponentUITextArea("Title", titleDesc, layerHUD);
+            title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
+            title.Text = "Terrain Tests ✌";
 
             #endregion
 
             #region Scene buttons
 
-            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold);
+            var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
+            buttonsFont.CustomKeycodes = new[] { '➀', '➁' };
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
-            startButtonDesc.Font = buttonsFont;
             startButtonDesc.TextForeColor = Color.Gold;
-            startButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            startButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            scenePerlinNoiseButton = await this.AddComponentUIButton("ButtonPerlinNoise", startButtonDesc, layerHUD);
-            sceneRtsButton = await this.AddComponentUIButton("ButtonRts", startButtonDesc, layerHUD);
+            scenePerlinNoiseButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonPerlinNoise", "ButtonPerlinNoise", startButtonDesc, layerHUD);
+            scenePerlinNoiseButton.MouseClick += SceneButtonClick;
+            scenePerlinNoiseButton.MouseEnter += SceneButtonMouseEnter;
+            scenePerlinNoiseButton.MouseLeave += SceneButtonMouseLeave;
+            scenePerlinNoiseButton.Caption.Text = "➀ Perlin Noise";
+
+            sceneRtsButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonRts", "ButtonRts", startButtonDesc, layerHUD);
+            sceneRtsButton.MouseClick += SceneButtonClick;
+            sceneRtsButton.MouseEnter += SceneButtonMouseEnter;
+            sceneRtsButton.MouseLeave += SceneButtonMouseLeave;
+            sceneRtsButton.Caption.Text = "➁ Real Time Strategy Game";
 
             #endregion
 
             #region Exit button
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton("Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "Start/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
-            exitButtonDesc.Font = buttonsFont;
-            exitButtonDesc.TextHorizontalAlign = HorizontalTextAlign.Center;
-            exitButtonDesc.TextVerticalAlign = VerticalTextAlign.Middle;
+            exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
 
-            exitButton = await this.AddComponentUIButton("ButtonExit", exitButtonDesc, layerHUD);
+            exitButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
+            exitButton.MouseClick += ExitButtonClick;
+            exitButton.MouseEnter += SceneButtonMouseEnter;
+            exitButton.MouseLeave += SceneButtonMouseLeave;
+            exitButton.Caption.Text = "Exit";
 
             #endregion
         }
-        private void PrepareAssets(LoadResourcesResult res)
+        private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
             if (!res.Completed)
             {
                 res.ThrowExceptions();
             }
 
+            Renderer.PostProcessingObjectsEffects.AddToneMapping(Engine.BuiltIn.PostProcess.BuiltInToneMappingTones.Uncharted2);
+
+            UpdateLayout();
+
             backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
-            title.Text = "Terrain Tests";
-            scenePerlinNoiseButton.Caption.Text = "Perlin Noise";
-            sceneRtsButton.Caption.Text = "Real Time Strategy Game";
-            exitButton.Caption.Text = "Exit";
+            sceneReady = true;
+        }
 
+        public override void GameGraphicsResized()
+        {
+            base.GameGraphicsResized();
+            UpdateLayout();
+        }
+        private void UpdateLayout()
+        {
             var sceneButtons = new[]
             {
                 scenePerlinNoiseButton,
@@ -156,18 +177,10 @@ namespace Terrain.Start
             {
                 sceneButtons[i].Left = ((Game.Form.RenderWidth / div) * (i + 1)) - (scenePerlinNoiseButton.Width / 2);
                 sceneButtons[i].Top = (Game.Form.RenderHeight / h) * hv - (scenePerlinNoiseButton.Height / 2);
-                sceneButtons[i].JustReleased += SceneButtonClick;
-                sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
-                sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
             }
 
             exitButton.Left = (Game.Form.RenderWidth / div) * numButtons - (exitButton.Width / 2);
             exitButton.Top = (Game.Form.RenderHeight / h) * hv - (exitButton.Height / 2);
-            exitButton.JustReleased += ExitButtonClick;
-            exitButton.MouseEnter += SceneButtonMouseEnter;
-            exitButton.MouseLeave += SceneButtonMouseLeave;
-
-            sceneReady = true;
         }
 
         public override void Update(GameTime gameTime)
@@ -189,9 +202,14 @@ namespace Terrain.Start
             Camera.LookTo(position);
         }
 
-        private void SceneButtonClick(object sender, EventArgs e)
+        private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
                 return;
             }
@@ -205,25 +223,24 @@ namespace Terrain.Start
                 Game.SetScene<RtsScene>();
             }
         }
-        private void SceneButtonMouseEnter(object sender, EventArgs e)
+        private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.ScaleInScaleOut(1.0f, 1.10f, 250);
-            }
+            sender.ScaleInScaleOut(1.0f, 1.10f, 250);
         }
-        private void SceneButtonMouseLeave(object sender, EventArgs e)
+        private void SceneButtonMouseLeave(IUIControl sender, MouseEventArgs e)
         {
-            if (sender is UIControl ctrl)
-            {
-                ctrl.ClearTween();
-                ctrl.TweenScale(ctrl.Scale, 1.0f, 500, ScaleFuncs.Linear);
-            }
+            sender.ClearTween();
+            sender.TweenScale(sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
         }
 
-        private void ExitButtonClick(object sender, EventArgs e)
+        private void ExitButtonClick(IUIControl sender, MouseEventArgs e)
         {
             if (!sceneReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
             {
                 return;
             }
@@ -234,37 +251,37 @@ namespace Terrain.Start
 
     static class UIControlExtensions
     {
-        public static void Show(this UIControl ctrl, long milliseconds)
+        public static void Show(this IUIControl ctrl, long milliseconds)
         {
             ctrl.TweenShow(milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void Hide(this UIControl ctrl, long milliseconds)
+        public static void Hide(this IUIControl ctrl, long milliseconds)
         {
             ctrl.TweenHide(milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void Roll(this UIControl ctrl, long milliseconds)
+        public static void Roll(this IUIControl ctrl, long milliseconds)
         {
             ctrl.TweenRotate(MathUtil.TwoPi, milliseconds, ScaleFuncs.Linear);
             ctrl.TweenScale(1, 0.5f, milliseconds, ScaleFuncs.QuinticEaseOut);
         }
 
-        public static void ShowRoll(this UIControl ctrl, long milliseconds)
+        public static void ShowRoll(this IUIControl ctrl, long milliseconds)
         {
             ctrl.TweenScaleUp(milliseconds, ScaleFuncs.QuinticEaseOut);
             ctrl.TweenShow(milliseconds / 4, ScaleFuncs.Linear);
             ctrl.TweenRotate(MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
         }
 
-        public static void HideRoll(this UIControl ctrl, long milliseconds)
+        public static void HideRoll(this IUIControl ctrl, long milliseconds)
         {
             ctrl.TweenScaleDown(milliseconds, ScaleFuncs.QuinticEaseOut);
             ctrl.TweenHide(milliseconds / 4, ScaleFuncs.Linear);
             ctrl.TweenRotate(-MathUtil.TwoPi, milliseconds / 4, ScaleFuncs.Linear);
         }
 
-        public static void ScaleInScaleOut(this UIControl ctrl, float from, float to, long milliseconds)
+        public static void ScaleInScaleOut(this IUIControl ctrl, float from, float to, long milliseconds)
         {
             ctrl.TweenScaleBounce(from, to, milliseconds, ScaleFuncs.Linear);
         }

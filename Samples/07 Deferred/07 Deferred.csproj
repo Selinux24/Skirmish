@@ -35,8 +35,19 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Leopard.json" />
+    <None Remove="Resources\m24.json" />
+    <None Remove="Resources\terrain.json" />
+    <None Remove="Resources\Trees\birch_a.json" />
+    <None Remove="Resources\Trees\birch_b.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\flare2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Leopard.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\m24.dds">
@@ -48,16 +59,13 @@
     <Content Include="Resources\Leopard.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Leopard.xml">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Resources\m24.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\m24.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\m24.xml">
+    <Content Include="Resources\m24.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\sunset.dds">
@@ -69,10 +77,10 @@
     <Content Include="Resources\terrain.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\terrain.png">
+    <Content Include="Resources\terrain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\terrain.xml">
+    <Content Include="Resources\terrain.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\terrain_nmap.png">
@@ -93,13 +101,13 @@
     <Content Include="Resources\Trees\birch_a.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_a.xml">
+    <Content Include="Resources\Trees\birch_a.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Trees\birch_b.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Trees\birch_b.xml">
+    <Content Include="Resources\Trees\birch_b.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Vegetation\grass.png">

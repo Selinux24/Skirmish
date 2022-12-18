@@ -7,22 +7,22 @@ using System.Threading.Tasks;
 
 namespace Engine
 {
+    using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Effects;
 
     /// <summary>
     /// Instaced model
     /// </summary>
-    public class ModelInstanced : BaseModel, IComposed
+    public class ModelInstanced : BaseModel<ModelInstancedDescription>, IComposed, IHasGameState
     {
         /// <summary>
         /// Instancing data per instance
         /// </summary>
-        private readonly VertexInstancingData[] instancingData = null;
+        private VertexInstancingData[] instancingData = null;
         /// <summary>
         /// Model instance list
         /// </summary>
-        private readonly ModelInstance[] instances = null;
+        private ModelInstance[] instances = null;
         /// <summary>
         /// Temporal instance listo for rendering
         /// </summary>
@@ -34,7 +34,12 @@ namespace Engine
         /// <summary>
         /// Independant transforms flag
         /// </summary>
-        private readonly bool hasIndependantTransforms = false;
+        private bool hasIndependantTransforms = false;
+
+        /// <summary>
+        /// Instancing buffer
+        /// </summary>
+        protected BufferDescriptor InstancingBuffer { get; private set; } = null;
 
         /// <summary>
         /// Gets manipulator per instance list
@@ -61,29 +66,69 @@ namespace Engine
         /// Gets or sets the maximum number of instances to draw
         /// </summary>
         public int MaximumCount { get; set; }
+        /// <inheritdoc/>
+        /// <remarks>Always uses the highest level of detail drawing data.</remarks>
+        public override ISkinningData SkinningData
+        {
+            get
+            {
+                return GetDrawingData(LevelOfDetail.High)?.SkinningData;
+            }
+        }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="scene">Scene</param>
-        /// <param name="description">Description</param>
-        public ModelInstanced(string name, Scene scene, ModelInstancedDescription description)
-            : base(name, scene, description)
+        /// <param name="id">Id</param>
+        /// <param name="name">Name</param>
+        public ModelInstanced(Scene scene, string id, string name)
+            : base(scene, id, name)
         {
-            if (description.Instances <= 0)
+
+        }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~ModelInstanced()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <inheritdoc/>
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
             {
-                throw new ArgumentException($"Instances parameter must be more than 0: {description.Instances}");
+                BufferManager.RemoveInstancingData(InstancingBuffer);
+                InstancingBuffer = null;
             }
 
-            InstanceCount = description.Instances;
+            base.Dispose(disposing);
+        }
 
-            instances = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, description));
+        /// <inheritdoc/>
+        public override async Task InitializeAssets(ModelInstancedDescription description)
+        {
+            await base.InitializeAssets(description);
+
+            if (Description.Instances <= 0)
+            {
+                throw new ArgumentException($"Instances parameter must be more than 0: {Description.Instances}");
+            }
+
+            InstancingBuffer = BufferManager.AddInstancingData($"{Name}.Instances", true, Description.Instances);
+
+            await InitializeGeometry(description, InstancingBuffer);
+
+            InstanceCount = Description.Instances;
+
+            instances = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, Description));
             instancingData = new VertexInstancingData[InstanceCount];
 
             MaximumCount = -1;
 
-            hasIndependantTransforms = (description.TransformDependences?.Any() == true);
+            hasIndependantTransforms = Description.TransformDependences?.Any() == true;
         }
 
         /// <inheritdoc/>
@@ -91,15 +136,15 @@ namespace Engine
         {
             if (instances.Any())
             {
-                Parallel.ForEach(instances, i =>
-                {
-                    if (i.Active)
-                    {
-                        i.Update(context);
-                    }
-                });
+                instances
+                    .Where(i => i.Active)
+                    .AsParallel()
+                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                    .ForAll(i => i.Update(context));
 
-                instancesTmp = instances.Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None).ToArray();
+                instancesTmp = instances
+                    .Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)
+                    .ToArray();
             }
 
             //Process only visible instances
@@ -118,8 +163,6 @@ namespace Engine
 
             SortInstances(context.EyePosition);
 
-            LevelOfDetail lastLod = LevelOfDetail.None;
-            DrawingData drawingData = null;
             int instanceIndex = 0;
 
             for (int i = 0; i < instancesTmp.Length; i++)
@@ -130,23 +173,15 @@ namespace Engine
                     continue;
                 }
 
-                if (lastLod != current.LevelOfDetail)
-                {
-                    lastLod = current.LevelOfDetail;
-                    drawingData = GetDrawingData(lastLod);
-                }
-
-                uint animationOffset = 0;
-                if (drawingData?.SkinningData != null)
-                {
-                    current.AnimationController.Update(context.GameTime.ElapsedSeconds, drawingData.SkinningData);
-                    animationOffset = current.AnimationController.AnimationOffset;
-                }
+                current.AnimationController.Update(context.GameTime.ElapsedSeconds);
 
                 instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
+                instancingData[instanceIndex].TintColor = current.TintColor;
                 instancingData[instanceIndex].TextureIndex = current.TextureIndex;
                 instancingData[instanceIndex].MaterialIndex = current.MaterialIndex;
-                instancingData[instanceIndex].AnimationOffset = animationOffset;
+                instancingData[instanceIndex].AnimationOffset = current.AnimationController.AnimationOffset;
+                instancingData[instanceIndex].AnimationOffsetB = current.AnimationController.TransitionOffset;
+                instancingData[instanceIndex].AnimationInterpolation = current.AnimationController.TransitionInterpolationAmount;
 
                 instanceIndex++;
             }
@@ -226,6 +261,7 @@ namespace Engine
         {
             return MaximumCount >= 0 ? Math.Min(MaximumCount, InstanceCount) : InstanceCount;
         }
+
         /// <inheritdoc/>
         public override void DrawShadows(DrawContextShadows context)
         {
@@ -241,29 +277,20 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteTrace(this, $"{Name} - DrawShadows {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
-            var effect = context.ShadowMap.GetEffect();
-            if (effect == null)
-            {
-                return;
-            }
-
-            DrawShadows(context, effect);
+            DrawShadowsInstances(context);
         }
         /// <summary>
         /// Shadow drawing
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Drawer</param>
-        private void DrawShadows(DrawContextShadows context, IShadowMapDrawer effect)
+        private void DrawShadowsInstances(DrawContextShadows context)
         {
             int count = 0;
             int instanceCount = 0;
-
-            effect.UpdatePerFrame(Matrix.Identity, context);
 
             int maxCount = GetMaxCount();
 
@@ -290,21 +317,21 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(instancesTmp, lodInstances[0]) + InstancingBuffer.BufferOffset;
-                var length = Math.Min(maxCount, lodInstances.Length);
-                if (length <= 0)
+                var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances[0]) + InstancingBuffer.BufferOffset;
+                var instancesToDraw = Math.Min(maxCount, lodInstances.Length);
+                if (instancesToDraw <= 0)
                 {
                     continue;
                 }
 
-                maxCount -= length;
-                instanceCount += length;
+                maxCount -= instancesToDraw;
+                instanceCount += instancesToDraw;
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
                     UpdateIndependantTransforms(meshName);
 
-                    count += DrawShadowMesh(effect, drawingData, meshName, index, length);
+                    count += DrawShadowMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;
                 }
             }
@@ -312,17 +339,17 @@ namespace Engine
         /// <summary>
         /// Draws a mesh with a shadow map drawer
         /// </summary>
-        /// <param name="effect">Effect</param>
+        /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
         /// <param name="meshName">Mesh name</param>
-        /// <param name="index">Instance buffer index</param>
-        /// <param name="length">Instance buffer length</param>
+        /// <param name="instancesToDraw">Instance buffer length</param>
+        /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawShadowMesh(IShadowMapDrawer effect, DrawingData drawingData, string meshName, int index, int length)
+        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, string meshName, int instancesToDraw, int startInstanceLocation)
         {
-            int count = 0;
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
-            var graphics = Game.Graphics;
+            int count = 0;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -331,30 +358,39 @@ namespace Engine
                 var mesh = meshDict[materialName];
                 if (!mesh.Ready)
                 {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
                     continue;
                 }
 
                 var material = drawingData.Materials[materialName];
 
-                count += mesh.Count;
-
-                effect.UpdatePerObject(0, material, 0);
-
-                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                var technique = effect.GetTechnique(mesh.VertextType, true, material.Material.IsTransparent);
-                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                for (int p = 0; p < technique.PassCount; p++)
+                var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, true, material.Material.IsTransparent);
+                if (drawer == null)
                 {
-                    graphics.EffectPassApply(technique, p, 0);
+                    continue;
+                }
 
-                    mesh.Draw(graphics, index, length);
+                drawer.UpdateCastingLight(context);
+
+                var materialState = new BuiltInDrawerMaterialState
+                {
+                    Material = material,
+                    UseAnisotropic = false,
+                    TextureIndex = 0,
+                    TintColor = Color4.White,
+                };
+                drawer.UpdateMaterial(materialState);
+
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
+                if (drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                {
+                    count += mesh.Count;
                 }
             }
 
             return count;
         }
+
         /// <inheritdoc/>
         public override void Draw(DrawContext context)
         {
@@ -370,29 +406,20 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                Logger.WriteTrace(this, $"{Name} - Draw WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
-            var effect = GetEffect(context.DrawerMode);
-            if (effect == null)
-            {
-                return;
-            }
-
-            Draw(context, effect);
+            DrawInstances(context);
         }
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Geometry drawer</param>
-        private void Draw(DrawContext context, IGeometryDrawer effect)
+        private void DrawInstances(DrawContext context)
         {
             int count = 0;
             int instanceCount = 0;
-
-            effect.UpdatePerFrameFull(Matrix.Identity, context);
 
             int maxCount = GetMaxCount();
 
@@ -419,21 +446,21 @@ namespace Engine
                     continue;
                 }
 
-                var index = Array.IndexOf(instancesTmp, lodInstances.First()) + InstancingBuffer.BufferOffset;
-                var length = Math.Min(maxCount, lodInstances.Count());
-                if (length <= 0)
+                var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances.First()) + InstancingBuffer.BufferOffset;
+                var instancesToDraw = Math.Min(maxCount, lodInstances.Count());
+                if (instancesToDraw <= 0)
                 {
                     continue;
                 }
 
-                maxCount -= length;
-                instanceCount += length;
+                maxCount -= instancesToDraw;
+                instanceCount += instancesToDraw;
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
                     UpdateIndependantTransforms(meshName);
 
-                    count += DrawMesh(context, effect, drawingData, meshName, index, length);
+                    count += DrawMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;
                 }
             }
@@ -445,17 +472,16 @@ namespace Engine
         /// Draws a mesh with a geometry drawer
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="effect">Effect</param>
         /// <param name="drawingData">Drawing data</param>
         /// <param name="meshName">Mesh name</param>
-        /// <param name="index">Instance buffer index</param>
-        /// <param name="length">Instance buffer length</param>
+        /// <param name="instancesToDraw">Instance buffer length</param>
+        /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, IGeometryDrawer effect, DrawingData drawingData, string meshName, int index, int length)
+        private int DrawMesh(DrawContext context, DrawingData drawingData, string meshName, int instancesToDraw, int startInstanceLocation)
         {
-            int count = 0;
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
-            var graphics = Game.Graphics;
+            int count = 0;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -464,6 +490,7 @@ namespace Engine
                 var mesh = meshDict[materialName];
                 if (!mesh.Ready)
                 {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
                     continue;
                 }
 
@@ -472,23 +499,29 @@ namespace Engine
                 bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
                 {
+                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
                     continue;
                 }
 
-                count += mesh.Count;
-
-                effect.UpdatePerObject(0, material, 0, UseAnisotropicFiltering);
-
-                BufferManager.SetIndexBuffer(mesh.IndexBuffer);
-
-                var technique = effect.GetTechnique(mesh.VertextType, true);
-                BufferManager.SetInputAssembler(technique, mesh.VertexBuffer, mesh.Topology);
-
-                for (int p = 0; p < technique.PassCount; p++)
+                var drawer = GetDrawer(context.DrawerMode, mesh.VertextType, true);
+                if (drawer == null)
                 {
-                    graphics.EffectPassApply(technique, p, 0);
+                    continue;
+                }
 
-                    mesh.Draw(graphics, index, length);
+                var materialState = new BuiltInDrawerMaterialState
+                {
+                    Material = material,
+                    UseAnisotropic = UseAnisotropicFiltering,
+                    TextureIndex = 0,
+                    TintColor = Color4.White,
+                };
+                drawer.UpdateMaterial(materialState);
+
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
+                if (drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                {
+                    count += mesh.Count;
                 }
             }
 
@@ -555,21 +588,13 @@ namespace Engine
         {
             return new ReadOnlyCollection<ModelInstance>(instances);
         }
-        /// <summary>
-        /// Gets all components
-        /// </summary>
-        /// <returns>Returns a collection of components</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> GetComponents<T>()
         {
             return new ReadOnlyCollection<T>(instances.Where(i => i.Visible).OfType<T>().ToArray());
         }
 
-        /// <summary>
-        /// Performs culling test
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If any instance is inside the volume, returns zero</param>
-        /// <returns>Returns true if all of the instances were outside of the frustum</returns>
+        /// <inheritdoc/>
         public override bool Cull(IIntersectionVolume volume, out float distance)
         {
             distance = float.MaxValue;
@@ -590,34 +615,48 @@ namespace Engine
 
             return true;
         }
-    }
 
-    /// <summary>
-    /// Instanced model extensions
-    /// </summary>
-    public static class ModelInstancedExtensions
-    {
-        /// <summary>
-        /// Adds a component to the scene
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        /// <param name="name">Name</param>
-        /// <param name="description">Description</param>
-        /// <param name="usage">Component usage</param>
-        /// <param name="order">Processing order</param>
-        /// <returns>Returns the created component</returns>
-        public static async Task<ModelInstanced> AddComponentModelInstanced(this Scene scene, string name, ModelInstancedDescription description, SceneObjectUsages usage = SceneObjectUsages.None, int order = 0)
+        /// <inheritdoc/>
+        public IGameState GetState()
         {
-            ModelInstanced component = null;
-
-            await Task.Run(() =>
+            return new ModelInstancedState
             {
-                component = new ModelInstanced(name, scene, description);
+                Name = Name,
+                Active = Active,
+                Visible = Visible,
+                Usage = Usage,
+                Layer = Layer,
+                OwnerId = Owner?.Name,
 
-                scene.AddComponent(component, usage, order);
-            });
+                MaximumCount = MaximumCount,
+                Instances = instances.Select(i => i.GetState()).ToArray(),
+            };
+        }
+        /// <inheritdoc/>
+        public void SetState(IGameState state)
+        {
+            if (!(state is ModelInstancedState modelInstancedState))
+            {
+                return;
+            }
 
-            return component;
+            Name = modelInstancedState.Name;
+            Active = modelInstancedState.Active;
+            Visible = modelInstancedState.Visible;
+            Usage = modelInstancedState.Usage;
+            Layer = modelInstancedState.Layer;
+
+            if (!string.IsNullOrEmpty(modelInstancedState.OwnerId))
+            {
+                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == modelInstancedState.OwnerId);
+            }
+
+            MaximumCount = modelInstancedState.MaximumCount;
+            for (int i = 0; i < modelInstancedState.Instances.Count(); i++)
+            {
+                var instanceState = modelInstancedState.Instances.ElementAt(i);
+                instances[i].SetState(instanceState);
+            }
         }
     }
 }

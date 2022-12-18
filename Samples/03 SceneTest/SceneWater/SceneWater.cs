@@ -1,13 +1,13 @@
 ﻿using Engine;
+using Engine.Tween;
 using SharpDX;
+using System;
 using System.Threading.Tasks;
 
 namespace SceneTest.SceneWater
 {
     public class SceneWater : Scene
     {
-        private const int layerObjs = 50;
-
         private const float fogStart = 150f;
         private const float fogRange = 200f;
 
@@ -17,11 +17,6 @@ namespace SceneTest.SceneWater
 
         public SceneWater(Game game)
             : base(game)
-        {
-
-        }
-
-        public override async Task Initialize()
         {
 #if DEBUG
             Game.VisibleMouse = false;
@@ -35,18 +30,29 @@ namespace SceneTest.SceneWater
             Camera.FarPlaneDistance = 500;
             Camera.Goto(80, 10, 100f);
             Camera.LookTo(0, 0, 0);
+        }
+
+        public override async Task Initialize()
+        {
+            await base.Initialize();
 
             Lights.BaseFogColor = Color.White;
 
-            await LoadResourcesAsync(new[] {
+            Renderer.PostProcessingObjectsEffects.AddBloomLow();
+
+            GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
+
+            InitializeComponents();
+        }
+        private void InitializeComponents()
+        {
+            LoadResourcesAsync(new[]
+            {
                 InitializeLensFlare(),
                 InitializeSky(),
                 InitializeWater(),
                 InitializeSeaBottom(),
             });
-
-            GameEnvironment.TimeOfDay.BeginAnimation(5, 00, 00, 10f);
-            //Environment.TimeOfDay.SetTimeOfDay(7, 00, 00)
         }
         private async Task InitializeLensFlare()
         {
@@ -70,20 +76,23 @@ namespace SceneTest.SceneWater
                     new LensFlareDescription.Flare( 2.0f, 6.4f, new Color( 25,  50, 100), "lfFlare3.png"),
                 }
             };
-            await this.AddComponentLensFlare("Flares", lfDesc, SceneObjectUsages.None);
+
+            await AddComponentEffect<LensFlare, LensFlareDescription>("Flares", "Flares", lfDesc);
         }
         private async Task InitializeSky()
         {
-            await this.AddComponentSkyScattering("Sky", new SkyScatteringDescription()
+            var desc = new SkyScatteringDescription()
             {
                 Resolution = SkyScatteringResolutions.High
-            });
+            };
+
+            await AddComponentSky<SkyScattering, SkyScatteringDescription>("Sky", "Sky", desc);
         }
         private async Task InitializeWater()
         {
-            var wDesc = WaterDescription.CreateOcean(terrainSize, 0f);
+            var desc = WaterDescription.CreateOcean(terrainSize, 0f);
 
-            await this.AddComponentWater("Water", wDesc, SceneObjectUsages.None, layerObjs + 1);
+            await AddComponentEffect<Water, WaterDescription>("Water", "Water", desc);
         }
         private async Task InitializeSeaBottom()
         {
@@ -115,11 +124,11 @@ namespace SceneTest.SceneWater
                 NormalMaps = new[] { "Normal.jpg" },
                 Scale = 0.0333f,
             };
-            GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
+            var groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.99f, 0);
 
-            await this.AddComponentScenery("Sea Bottom", groundDesc, SceneObjectUsages.None, layerObjs);
+            await AddComponentGround<Scenery, GroundDescription>("SeaBottom", "Sea Bottom", groundDesc);
         }
 
         public override void Update(GameTime gameTime)
@@ -142,14 +151,19 @@ namespace SceneTest.SceneWater
         private void UpdateCamera(GameTime gameTime)
         {
 #if DEBUG
-            if (Game.Input.RightMouseButtonPressed)
-#endif
+            if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
                     gameTime,
                     Game.Input.MouseXDelta,
                     Game.Input.MouseYDelta);
             }
+#else
+            Camera.RotateMouse(
+                gameTime,
+                Game.Input.MouseXDelta,
+                Game.Input.MouseYDelta);
+#endif
 
             if (Game.Input.KeyPressed(Keys.A))
             {
@@ -170,6 +184,10 @@ namespace SceneTest.SceneWater
             {
                 Camera.MoveBackward(gameTime, Game.Input.ShiftPressed);
             }
+
+            float gradient = (-Vector3.Dot(Lights.KeyLight.Direction, Camera.Direction) + 1f) * 0.5f;
+            gradient = Math.Min(0.5f, gradient);
+            Renderer.PostProcessingObjectsEffects.BloomForce = ScaleFuncs.CubicEaseIn(gradient);
         }
 
         private void ToggleFog()

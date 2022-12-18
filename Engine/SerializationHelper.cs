@@ -1,4 +1,7 @@
-﻿using SharpDX;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using SharpDX;
+using System;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
@@ -86,6 +89,57 @@ namespace Engine
         }
 
         /// <summary>
+        /// Serialize into file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="fileName">File name</param>
+        /// <param name="nameSpace">Name space</param>
+        public static void SerializeToFile<T>(this T obj, string fileName, string nameSpace = null)
+        {
+            string extension = Path.GetExtension(fileName);
+            switch (extension)
+            {
+                case ".xml":
+                    SerializeXmlToFile(obj, fileName, nameSpace);
+                    break;
+                case ".json":
+                    SerializeJsonToFile(obj, fileName);
+                    break;
+                default:
+                    SerializeBinaryToFile(obj, fileName);
+                    break;
+            }
+        }
+        /// <summary>
+        /// Deserialize from a file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="fileName">File name</param>
+        /// <param name="nameSpace">Name space</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeFromFile<T>(string fileName, string nameSpace = null)
+        {
+            T result;
+
+            string extension = Path.GetExtension(fileName);
+            switch (extension)
+            {
+                case ".xml":
+                    result = DeserializeXmlFromFile<T>(fileName, nameSpace);
+                    break;
+                case ".json":
+                    result = DeserializeJsonFromFile<T>(fileName);
+                    break;
+                default:
+                    result = DeserializeBinaryFromFile<T>(fileName);
+                    break;
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Creates a new binary formatter for serialization
         /// </summary>
         /// <remarks>Includes all the Serialization Surrogates for SharpDX native structs</remarks>
@@ -163,6 +217,17 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates a new xml serializer
+        /// </summary>
+        /// <param name="objectType">Object type</param>
+        /// <param name="nameSpace">Default namespace</param>
+        /// <returns>Returns a new xml serializer</returns>
+        private static XmlSerializer CreateXmlFormatter(Type objectType, string nameSpace = null)
+        {
+            return new XmlSerializer(objectType, nameSpace);
+
+        }
+        /// <summary>
         /// Serialize into bytes
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
@@ -176,7 +241,7 @@ namespace Engine
             MemoryStream mso = new MemoryStream();
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 sr.Serialize(wr, obj);
 
@@ -198,7 +263,7 @@ namespace Engine
         {
             using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 sr.Serialize(wr, obj);
             }
@@ -215,7 +280,7 @@ namespace Engine
             using (MemoryStream mso = new MemoryStream(data))
             using (StreamReader rd = new StreamReader(mso, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 return (T)sr.Deserialize(rd);
             }
@@ -231,9 +296,94 @@ namespace Engine
         {
             using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
             {
-                XmlSerializer sr = new XmlSerializer(typeof(T), nameSpace);
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
 
                 return (T)sr.Deserialize(rd);
+            }
+        }
+
+        /// <summary>
+        /// Creates a new Json serializer
+        /// </summary>
+        /// <returns>Returns a Json serializer</returns>
+        private static JsonSerializer CreateJsonFormatter()
+        {
+            return new JsonSerializer()
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
+                TypeNameHandling = TypeNameHandling.Auto,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+        }
+        /// <summary>
+        /// Serialize into bytes
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <returns>Returns a byte array</returns>
+        public static byte[] SerializeJson<T>(this T obj)
+        {
+            byte[] data = null;
+
+            MemoryStream mso = new MemoryStream();
+            using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
+            {
+                JsonSerializer sr = CreateJsonFormatter();
+
+                sr.Serialize(wr, obj, typeof(T));
+
+                mso.Position = 0;
+
+                data = mso.ToArray();
+            }
+
+            return data;
+        }
+        /// <summary>
+        /// Serialize into file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="fileName">File name</param>
+        public static void SerializeJsonToFile<T>(this T obj, string fileName)
+        {
+            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
+            {
+                JsonSerializer sr = CreateJsonFormatter();
+
+                sr.Serialize(wr, obj, typeof(T));
+            }
+        }
+        /// <summary>
+        /// Deserialize from a byte array 
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="data">Byte array</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeJson<T>(this byte[] data)
+        {
+            using (MemoryStream mso = new MemoryStream(data))
+            using (StreamReader rd = new StreamReader(mso, Encoding.Default))
+            {
+                JsonSerializer sr = CreateJsonFormatter();
+
+                return (T)sr.Deserialize(rd, typeof(T));
+            }
+        }
+        /// <summary>
+        /// Deserialize from a file
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="fileName">File name</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeJsonFromFile<T>(string fileName)
+        {
+            using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
+            {
+                JsonSerializer sr = CreateJsonFormatter();
+
+                return (T)sr.Deserialize(rd, typeof(T));
             }
         }
 

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
@@ -116,7 +117,7 @@ namespace Engine
         /// <summary>
         /// Creating resources flag
         /// </summary>
-        private bool creatingResources = false;
+        private bool allocating = false;
 
         /// <summary>
         /// Gets wheter the resource manager has requests to process or not
@@ -180,64 +181,84 @@ namespace Engine
         /// </summary>
         /// <param name="id">Load group id</param>
         /// <param name="progress">Progress helper</param>
-        /// <param name="callback">Callback</param>
-        public void CreateResources(string id, IProgress<LoadResourceProgress> progress, Action callback = null)
+        public void CreateResources(string id, IProgress<LoadResourceProgress> progress)
         {
-            if (creatingResources)
+            if (allocating)
             {
-                callback?.Invoke();
-
-                return;
-            }
-
-            var pendingRequests = GetPendingRequests();
-            if (!pendingRequests.Any())
-            {
-                callback?.Invoke();
-
                 return;
             }
 
             try
             {
-                creatingResources = true;
+                allocating = true;
 
-                // Get pending requests
-                float total = pendingRequests.Count() + 1f;
-                float current = 0;
+                var pendingRequests = requestedResources.ToArray();
+                if (!pendingRequests.Any())
+                {
+                    return;
+                }
 
-                // Process requests
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Count()}");
+
+                ProcessPendingRequests(id, progress, pendingRequests);
+
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Count()}");
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Loading Group {id ?? "no-id"} => Error creating resources: {ex.Message}", ex);
+
+                throw;
+            }
+            finally
+            {
+                allocating = false;
+            }
+        }
+        /// <summary>
+        /// Process pending request list
+        /// </summary>
+        /// <param name="id">Load group id</param>
+        /// <param name="progress">Progress helper</param>
+        /// <param name="pendingRequests">Pending request list</param>
+        private void ProcessPendingRequests(string id, IProgress<LoadResourceProgress> progress, IEnumerable<KeyValuePair<string, IGameResourceRequest>> pendingRequests)
+        {
+            // Get pending requests
+            float total = pendingRequests.Count() + 1;
+            float current = 0;
+
+            // Process requests
+            List<string> toRemove = new List<string>();
+            try
+            {
                 foreach (var resource in pendingRequests)
                 {
                     resource.Value.Create(game);
 
-                    resources.Add(resource.Key, resource.Value.ResourceView);
+                    if (resources.ContainsKey(resource.Key))
+                    {
+                        // Updates existing request
+                        resources[resource.Key] = resource.Value.ResourceView;
+                    }
+                    else
+                    {
+                        // Adds the request
+                        resources.Add(resource.Key, resource.Value.ResourceView);
+                    }
+
+                    // Adds the key to the processed key list
+                    toRemove.Add(resource.Key);
 
                     progress?.Report(new LoadResourceProgress { Id = id, Progress = ++current / total });
                 }
-
-                // Remove requests
-                RemoveRequests(pendingRequests.Select(r => r.Key));
-
-                progress?.Report(new LoadResourceProgress { Id = id, Progress = 1f });
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Error creating new resources: {ex.Message}", ex);
             }
             finally
             {
-                creatingResources = false;
-
-                callback?.Invoke();
+                // Remove requests
+                RemoveRequests(toRemove);
             }
-        }
-        /// <summary>
-        /// Gets the pending requests
-        /// </summary>
-        private IEnumerable<KeyValuePair<string, IGameResourceRequest>> GetPendingRequests()
-        {
-            return requestedResources.ToArray();
+
+            progress?.Report(new LoadResourceProgress { Id = id, Progress = 1f });
         }
         /// <summary>
         /// Removes the specified requests keys
@@ -245,9 +266,21 @@ namespace Engine
         /// <param name="requestKeys">Request keys list</param>
         private void RemoveRequests(IEnumerable<string> requestKeys)
         {
-            foreach (string key in requestKeys)
+            var toRemove = requestKeys.ToList();
+
+            while (toRemove.Any())
             {
-                requestedResources.TryRemove(key, out _);
+                if (!requestedResources.ContainsKey(toRemove[0]))
+                {
+                    toRemove.RemoveAt(0);
+
+                    continue;
+                }
+
+                if (requestedResources.TryRemove(toRemove[0], out _))
+                {
+                    toRemove.RemoveAt(0);
+                }
             }
         }
 
@@ -259,14 +292,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the created resource view</returns>
-        public EngineShaderResourceView CreateGlobalResource(string name, ImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
+        public EngineShaderResourceView CreateGlobalResource(string name, IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
-            GameResourceImageContent resource = new GameResourceImageContent()
-            {
-                ImageContent = imageContent,
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var resource = new GameResourceImageContent(imageContent, mipAutogen, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -282,12 +310,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, string path, bool mipAutogen = true, bool dynamic = false)
         {
-            GameResourceImageContent resource = new GameResourceImageContent()
-            {
-                ImageContent = new ImageContent() { Path = path },
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var resource = new GameResourceImageContent(new FileImageContent(path), mipAutogen, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -303,12 +326,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
-            GameResourceImageContent resource = new GameResourceImageContent()
-            {
-                ImageContent = new ImageContent() { Stream = stream },
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var resource = new GameResourceImageContent(new MemoryImageContent(stream), mipAutogen, dynamic);
 
             resource.Create(game);
             SetGlobalResource(name, resource.ResourceView);
@@ -325,7 +343,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            GameResourceValueArray<T> resource = new GameResourceValueArray<T>()
+            GameResourceValueArray<T> resource = new GameResourceValueArray<T>(name)
             {
                 Values = values,
                 Size = size,
@@ -348,7 +366,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            GameResourceRandomTexture resource = new GameResourceRandomTexture()
+            GameResourceRandomTexture resource = new GameResourceRandomTexture(name)
             {
                 Size = size,
                 Min = min,
@@ -388,27 +406,22 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(ImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
+        public async Task<EngineShaderResourceView> RequestResource(IImageContent imageContent, bool mipAutogen = true, bool dynamic = false)
         {
-            var existingResource = TryGetResource(imageContent, out string resourceKey);
-            if (existingResource != null)
+            var (key, resource) = await TryGetResource(imageContent);
+            if (resource != null)
             {
-                return existingResource;
+                return resource;
             }
 
-            if (requestedResources.ContainsKey(resourceKey))
+            if (requestedResources.ContainsKey(key))
             {
-                return requestedResources[resourceKey].ResourceView;
+                return requestedResources[key].ResourceView;
             }
 
-            var request = new GameResourceImageContent
-            {
-                ImageContent = imageContent,
-                MipAutogen = mipAutogen,
-                Dynamic = dynamic,
-            };
+            var request = new GameResourceImageContent(imageContent, mipAutogen, dynamic);
 
-            if (!requestedResources.TryAdd(resourceKey, request))
+            if (!requestedResources.TryAdd(key, request))
             {
                 return null;
             }
@@ -422,9 +435,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
+        public async Task<EngineShaderResourceView> RequestResource(string path, bool mipAutogen = true, bool dynamic = false)
         {
-            return RequestResource(new ImageContent { Path = path }, mipAutogen, dynamic);
+            return await RequestResource(new FileImageContent(path), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -433,9 +446,9 @@ namespace Engine
         /// <param name="mipAutogen">Try to generate texture mips</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
+        public async Task<EngineShaderResourceView> RequestResource(MemoryStream stream, bool mipAutogen = true, bool dynamic = false)
         {
-            return RequestResource(new ImageContent { Stream = stream }, mipAutogen, dynamic);
+            return await RequestResource(new MemoryImageContent(stream), mipAutogen, dynamic);
         }
         /// <summary>
         /// Requests a new resource load
@@ -446,27 +459,27 @@ namespace Engine
         /// <param name="size">Texture size (total pixels = size * size)</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
+        public async Task<EngineShaderResourceView> RequestResource<T>(Guid identifier, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            string resourceKey = identifier.ToByteArray().GetMd5Sum();
-            if (resources.ContainsKey(resourceKey))
+            var (key, resource) = await TryGetResource(identifier);
+            if (resource != null)
             {
-                return resources[resourceKey];
+                return resource;
             }
 
-            if (requestedResources.ContainsKey(resourceKey))
+            if (requestedResources.ContainsKey(key))
             {
-                return requestedResources[resourceKey].ResourceView;
+                return requestedResources[key].ResourceView;
             }
 
-            var request = new GameResourceValueArray<T>
+            var request = new GameResourceValueArray<T>(identifier.ToString("B"))
             {
                 Values = values,
                 Size = size,
                 Dynamic = dynamic,
             };
 
-            if (!requestedResources.TryAdd(resourceKey, request))
+            if (!requestedResources.TryAdd(key, request))
             {
                 return null;
             }
@@ -483,20 +496,20 @@ namespace Engine
         /// <param name="seed">Random seed</param>
         /// <param name="dynamic">Generates a writable texture</param>
         /// <returns>Returns the engine shader resource view</returns>
-        public EngineShaderResourceView RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
+        public async Task<EngineShaderResourceView> RequestResource(Guid identifier, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            string resourceKey = identifier.ToByteArray().GetMd5Sum();
-            if (resources.ContainsKey(resourceKey))
+            var (key, resource) = await TryGetResource(identifier);
+            if (resource != null)
             {
-                return resources[resourceKey];
+                return resource;
             }
 
-            if (requestedResources.ContainsKey(resourceKey))
+            if (requestedResources.ContainsKey(key))
             {
-                return requestedResources[resourceKey].ResourceView;
+                return requestedResources[key].ResourceView;
             }
 
-            var request = new GameResourceRandomTexture
+            var request = new GameResourceRandomTexture(identifier.ToString("B"))
             {
                 Size = size,
                 Min = min,
@@ -505,7 +518,7 @@ namespace Engine
                 Dynamic = dynamic,
             };
 
-            if (!requestedResources.TryAdd(resourceKey, request))
+            if (!requestedResources.TryAdd(key, request))
             {
                 return null;
             }
@@ -519,162 +532,48 @@ namespace Engine
         /// <param name="imageContent">Image content</param>
         /// <param name="key">Resource key</param>
         /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResource(ImageContent imageContent, out string key)
+        private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(IImageContent imageContent)
         {
-            if (imageContent.IsCubic)
-            {
-                return TryGetResourceCubic(imageContent, out key);
-            }
-            else if (imageContent.IsArray)
-            {
-                return TryGetResourceArray(imageContent, out key);
-            }
-            else
-            {
-                return TryGetResourceDefault(imageContent, out key);
-            }
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResourceDefault(ImageContent imageContent, out string key)
-        {
-            key = null;
+            EngineShaderResourceView resource = null;
 
-            if (!string.IsNullOrWhiteSpace(imageContent.Path))
+            string key = imageContent?.GetResourceKey();
+            if (key == null)
             {
-                return TryGet(imageContent.Path, out key);
-            }
-            else if (imageContent.Stream != null)
-            {
-                return TryGet(imageContent.Stream, out key);
+                return await Task.FromResult((key, resource));
             }
 
-            return null;
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResourceArray(ImageContent imageContent, out string key)
-        {
-            key = null;
-
-            if (imageContent.Paths.Any())
-            {
-                return TryGet(imageContent.Paths, out key);
-            }
-            else if (imageContent.Streams.Any())
-            {
-                return TryGet(imageContent.Streams, out key);
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="imageContent">Image content</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGetResourceCubic(ImageContent imageContent, out string key)
-        {
-            key = null;
-
-            if (imageContent.IsArray)
-            {
-                if (imageContent.Paths.Any())
-                {
-                    return TryGet(imageContent.Paths, out key);
-                }
-                else if (imageContent.Streams.Any())
-                {
-                    return TryGet(imageContent.Streams, out key);
-                }
-            }
-            else
-            {
-                if (!string.IsNullOrWhiteSpace(imageContent.Path))
-                {
-                    return TryGet(imageContent.Path, out key);
-                }
-                else if (imageContent.Stream != null)
-                {
-                    return TryGet(imageContent.Stream, out key);
-                }
-            }
-
-            return null;
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="path">Path to file</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(string path, out string key)
-        {
-            key = path;
             if (!resources.ContainsKey(key))
             {
-                return null;
+                return await Task.FromResult((key, resource));
             }
 
-            return resources[key];
+            resource = resources[key];
+
+            return await Task.FromResult((key, resource));
         }
         /// <summary>
-        /// Trys to get a resource by content
+        /// Trys to get a resource by identifier
         /// </summary>
-        /// <param name="stream">Memory stream</param>
-        /// <param name="key">Resource key</param>
+        /// <param name="identifier">Identifier</param>
         /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(MemoryStream stream, out string key)
+        private async Task<(string Key, EngineShaderResourceView Resource)> TryGetResource(Guid identifier)
         {
-            key = stream.GetMd5Sum();
-            if (!resources.ContainsKey(key))
+            EngineShaderResourceView resource = null;
+
+            string key = identifier.ToByteArray().GetMd5Sum();
+            if (key == null)
             {
-                stream.Position = 0;
-                return null;
+                return await Task.FromResult((key, resource));
             }
 
-            return resources[key];
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="paths">Path list</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(IEnumerable<string> paths, out string key)
-        {
-            key = paths.GetMd5Sum();
             if (!resources.ContainsKey(key))
             {
-                return null;
+                return await Task.FromResult((key, resource));
             }
 
-            return resources[key];
-        }
-        /// <summary>
-        /// Trys to get a resource by content
-        /// </summary>
-        /// <param name="streams">Stream list</param>
-        /// <param name="key">Resource key</param>
-        /// <returns>Returns the resource if exists</returns>
-        private EngineShaderResourceView TryGet(IEnumerable<MemoryStream> streams, out string key)
-        {
-            key = streams.GetMd5Sum();
-            if (!resources.ContainsKey(key))
-            {
-                return null;
-            }
+            resource = resources[key];
 
-            return resources[key];
+            return await Task.FromResult((key, resource));
         }
     }
 }

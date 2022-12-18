@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -172,25 +173,25 @@ namespace Engine
         #region Actions & Functions
 
         /// <summary>
-        /// Executes especified action with attempts on exception
+        /// Executes the specified action a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <param name="action">Action</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
-        public static void Attempt<T>(Action<T> action, T input, int attempts)
+        /// <param name="retryCount">Retry count</param>
+        public static void Retry<T>(Action<T> action, T input, int retryCount)
         {
-            Attempt(action, input, attempts, TimeSpan.FromSeconds(0));
+            Retry(action, input, retryCount, TimeSpan.FromSeconds(0));
         }
         /// <summary>
-        /// Executes especified action with attempts on exception
+        /// Executes the specified action a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <param name="action">Action</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
+        /// <param name="retryCount">Retry count</param>
         /// <param name="delay">Delay between attempts</param>
-        public static void Attempt<T>(Action<T> action, T input, int attempts, TimeSpan delay)
+        public static void Retry<T>(Action<T> action, T input, int retryCount, TimeSpan delay)
         {
             Exception lastEx = null;
 
@@ -205,12 +206,12 @@ namespace Engine
                 catch (Exception ex)
                 {
                     lastEx = ex;
-                    attempts--;
+                    retryCount--;
                 }
 
                 Task.Delay(delay).Wait();
             }
-            while (attempts > 0);
+            while (retryCount > 0);
 
             if (lastEx != null)
             {
@@ -218,29 +219,29 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Executes especified function with attempts on exception
+        /// Executes the specified function a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <typeparam name="TResult">Result type</typeparam>
         /// <param name="func">Function</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
+        /// <param name="retryCount">Retry count</param>
         /// <returns>Returns the function execution result</returns>
-        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts)
+        public static TResult Retry<T, TResult>(Func<T, TResult> func, T input, int retryCount)
         {
-            return Attempt(func, input, attempts, TimeSpan.FromSeconds(0));
+            return Retry(func, input, retryCount, TimeSpan.FromSeconds(0));
         }
         /// <summary>
-        /// Executes especified function with attempts on exception
+        /// Executes the specified function a number of times
         /// </summary>
         /// <typeparam name="T">Input type</typeparam>
         /// <typeparam name="TResult">Result type</typeparam>
         /// <param name="func">Function</param>
         /// <param name="input">Input</param>
-        /// <param name="attempts">Number of attempts</param>
+        /// <param name="retryCount">Retry count</param>
         /// <param name="delay">Delay between attempts</param>
         /// <returns>Returns the function execution result</returns>
-        public static TResult Attempt<T, TResult>(Func<T, TResult> func, T input, int attempts, TimeSpan delay)
+        public static TResult Retry<T, TResult>(Func<T, TResult> func, T input, int retryCount, TimeSpan delay)
         {
             Exception lastEx;
 
@@ -253,14 +254,49 @@ namespace Engine
                 catch (Exception ex)
                 {
                     lastEx = ex;
-                    attempts--;
+                    retryCount--;
                 }
 
                 Task.Delay(delay).Wait();
             }
-            while (attempts > 0);
+            while (retryCount > 0);
 
             throw lastEx;
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <param name="func">Function</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <returns>Returns the result of the function</returns>
+        /// <remarks>The method exits on exceptions</remarks>
+        public static bool Retry(Func<bool> func, int retryCount)
+        {
+            return Retry(func, retryCount, TimeSpan.FromSeconds(0));
+        }
+        /// <summary>
+        /// Executes the specified function a number of times
+        /// </summary>
+        /// <param name="func">Function</param>
+        /// <param name="retryCount">Retry count</param>
+        /// <param name="delay">Delay between attempts</param>
+        /// <returns>Returns the result of the function</returns>
+        /// <remarks>The method exits on exceptions</remarks>
+        public static bool Retry(Func<bool> func, int retryCount, TimeSpan delay)
+        {
+            int retry = retryCount;
+
+            bool res;
+            do
+            {
+                res = func();
+                retry--;
+
+                Task.Delay(delay).Wait();
+            }
+            while (retry > 0 && !res);
+
+            return res;
         }
 
         #endregion
@@ -435,11 +471,9 @@ namespace Engine
         /// <param name="list">Collection</param>
         /// <param name="separator">The string to use as a separator</param>
         /// <returns>A string that consists of the members of values delimited by the separator string</returns>
-        public static string Join<T>(this ICollection<T> list, string separator = "")
+        public static string Join<T>(this IEnumerable<T> list, string separator = "")
         {
-            List<string> res = new List<string>();
-
-            list.ToList().ForEach(a => res.Add(a.ToString()));
+            var res = list.Select(a => $"{a}");
 
             return string.Join(separator, res);
         }
@@ -460,61 +494,114 @@ namespace Engine
         /// Compares two enumerable lists, element by element
         /// </summary>
         /// <typeparam name="T">Element type</typeparam>
-        /// <param name="enum1">First list</param>
-        /// <param name="enum2">Second list</param>
-        /// <returns>Returns true if both list are equal</returns>
-        public static bool ListIsEqual<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
+        /// <param name="enum1">First enumerable list</param>
+        /// <param name="enum2">Second enumerable list</param>
+        /// <returns>Returns true if both enumerables contains the same elements</returns>
+        public static bool CompareEnumerables<T>(this IEnumerable<T> enum1, IEnumerable<T> enum2)
         {
             if (enum1 == null && enum2 == null)
             {
                 return true;
             }
-            else if (enum1 != null && enum2 != null)
+
+            if (!(enum1 != null && enum2 != null))
             {
-                var list1 = enum1.ToList();
-                var list2 = enum2.ToList();
-
-                if (list1.Count == list2.Count)
-                {
-                    if (list1.Count > 0 && !IsEqual(list1, list2))
-                    {
-                        return false;
-                    }
-
-                    return true;
-                }
+                return false;
             }
 
-            return false;
-        }
-        /// <summary>
-        /// Compares two lists
-        /// </summary>
-        /// <typeparam name="T">Type of items in the list</typeparam>
-        /// <param name="list1">First list</param>
-        /// <param name="list2">Second list</param>
-        /// <returns>Returns false if the lists were not equal</returns>
-        private static bool IsEqual<T>(List<T> list1, List<T> list2)
-        {
-            bool equatable = list1[0] is IEquatable<T>;
-
-            for (int i = 0; i < list1.Count; i++)
+            if (enum1.Count() != enum2.Count())
             {
-                bool equal;
+                return false;
+            }
 
-                if (equatable)
-                {
-                    equal = ((IEquatable<T>)list1[i]).Equals(list2[i]);
-                }
-                else
-                {
-                    equal = list1[i].Equals(list2[i]);
-                }
-
-                if (!equal) return false;
+            if (!CompareEnumerableElements(enum1, enum2))
+            {
+                return false;
             }
 
             return true;
+        }
+        /// <summary>
+        /// Compares two enumerables item by item
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="enum1">First enumerable list</param>
+        /// <param name="enum2">Second enumerable list</param>
+        /// <returns></returns>
+        private static bool CompareEnumerableElements<T>(IEnumerable<T> enum1, IEnumerable<T> enum2)
+        {
+            for (int i = 0; i < enum1.Count(); i++)
+            {
+                var item1 = enum1.ElementAt(i);
+                var item2 = enum2.ElementAt(i);
+
+                if (item1 == null && item2 == null)
+                {
+                    continue;
+                }
+
+                if (item1?.Equals(item2) != true)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        /// <summary>
+        /// Gets the minimum and maximum values
+        /// </summary>
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, out float min, out float max)
+        {
+            if (value1 < value2)
+            {
+                min = value1;
+                max = value2;
+            }
+            else
+            {
+                min = value2;
+                max = value1;
+            }
+        }
+        /// <summary>
+        /// Gets the minimum and maximum values
+        /// </summary>
+        /// <param name="value1">Value 1</param>
+        /// <param name="value2">Value 2</param>
+        /// <param name="value3">Value 3</param>
+        /// <param name="min">Returns the minimum value</param>
+        /// <param name="max">Returns the maximum value</param>
+        public static void MinMax(float value1, float value2, float value3, out float min, out float max)
+        {
+            min = value1;
+            if (value2 < min) min = value2;
+            if (value3 < min) min = value3;
+
+            max = value1;
+            if (value2 > max) max = value2;
+            if (value3 > max) max = value3;
+        }
+
+        #endregion
+
+        #region Concurrent Utils
+
+        /// <summary>
+        /// Clears a concurrent bag list
+        /// </summary>
+        /// <typeparam name="T">Element type</typeparam>
+        /// <param name="source">Concurrent bag</param>
+        public static void Clear<T>(this ConcurrentBag<T> source)
+        {
+            while (!source.IsEmpty)
+            {
+                source.TryTake(out T _);
+            }
         }
 
         #endregion
@@ -572,28 +659,28 @@ namespace Engine
             return one.X * two.Y - one.Y * two.X;
         }
         /// <summary>
-        /// Gets angle between two vectors
+        /// Gets the angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value in radians</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Vector2 one, Vector2 two)
         {
             //Get the dot product
             float dot = Vector2.Dot(one, two);
 
             // Divide the dot by the product of the magnitudes of the vectors
-            dot /= (one.Length() * two.Length());
+            dot /= one.Length() * two.Length();
 
             //Get the arc cosin of the angle, you now have your angle in radians 
             return (float)Math.Acos(dot);
         }
         /// <summary>
-        /// Gets angle between two quaternions
+        /// Gets the angle between two quaternions
         /// </summary>
         /// <param name="one">First quaternions</param>
         /// <param name="two">Second quaternions</param>
-        /// <returns>Returns angle value in radians</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Quaternion one, Quaternion two)
         {
             float dot = Quaternion.Dot(one, two);
@@ -601,38 +688,53 @@ namespace Engine
             return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f)) * 2f;
         }
         /// <summary>
-        /// Gets angle between two vectors
+        /// Gets the angle between two vectors
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value</returns>
+        /// <returns>Returns the angle value in radians</returns>
         public static float Angle(Vector3 one, Vector3 two)
         {
-            //Get the dot product
             float dot = Vector3.Dot(one, two);
 
-            // Divide the dot by the product of the magnitudes of the vectors
-            dot /= one.Length() * two.Length();
-            dot = MathUtil.Clamp(dot, 0, 1);
-
-            //Get the arc cosin of the angle, you now have your angle in radians 
-            return (float)Math.Acos(dot);
+            return (float)Math.Acos(Math.Min(Math.Abs(dot), 1f));
         }
         /// <summary>
-        /// Gets angle between two vectors in the same plane
+        /// Gets the signed angle between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector2 one, Vector2 two)
+        {
+            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
+        }
+        /// <summary>
+        /// Gets the signed angle between two vectors
+        /// </summary>
+        /// <param name="one">First vector</param>
+        /// <param name="two">Second vector</param>
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector3 one, Vector3 two)
+        {
+            float dot = Vector3.Dot(one, two);
+
+            return (float)Math.Acos(Math.Min(dot, 1f));
+        }
+        /// <summary>
+        /// Gets the angle between two vectors in the same plane
         /// </summary>
         /// <param name="one">First vector</param>
         /// <param name="two">Second vector</param>
         /// <param name="planeNormal">Plane normal</param>
-        /// <returns>Returns angle value</returns>
-        /// <remarks>Result signed</remarks>
-        public static float Angle(Vector3 one, Vector3 two, Vector3 planeNormal)
+        /// <returns>Returns the angle value in radians</returns>
+        public static float AngleSigned(Vector3 one, Vector3 two, Vector3 planeNormal)
         {
             Plane p = new Plane(planeNormal, 0);
 
-            float dot = MathUtil.Clamp(Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two)), 0, 1);
+            float dot = Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two));
 
-            float angle = (float)Math.Acos(dot);
+            float angle = (float)Math.Acos(MathUtil.Clamp(dot, 0, 1));
 
             Vector3 cross = Vector3.Cross(one, two);
 
@@ -644,21 +746,11 @@ namespace Engine
             return angle;
         }
         /// <summary>
-        /// Gets angle between two vectors with sign
-        /// </summary>
-        /// <param name="one">First vector</param>
-        /// <param name="two">Second vector</param>
-        /// <returns>Returns angle value</returns>
-        public static float AngleSigned(Vector2 one, Vector2 two)
-        {
-            return (float)Math.Atan2(Cross(one, two), Vector2.Dot(one, two));
-        }
-        /// <summary>
-        /// Gets yaw and pitch values from vector
+        /// Gets the yaw and pitch values from vector
         /// </summary>
         /// <param name="vec">Vector</param>
-        /// <param name="yaw">Yaw</param>
-        /// <param name="pitch">Pitch</param>
+        /// <param name="yaw">Yaw value</param>
+        /// <param name="pitch">Pitch value</param>
         public static void GetAnglesFromVector(Vector3 vec, out float yaw, out float pitch)
         {
             yaw = (float)Math.Atan2(vec.X, vec.Y);
@@ -683,7 +775,7 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Get vector from yaw and pitch angles
+        /// Get the vector from yaw and pitch angles
         /// </summary>
         /// <param name="yaw">Yaw angle</param>
         /// <param name="pitch">Pitch angle</param>

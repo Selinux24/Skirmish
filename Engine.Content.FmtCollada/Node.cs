@@ -49,7 +49,7 @@ namespace Engine.Collada
         {
             get
             {
-                return (this.InstanceLight != null);
+                return InstanceLight != null;
             }
         }
         [XmlIgnore]
@@ -57,7 +57,7 @@ namespace Engine.Collada
         {
             get
             {
-                return (this.Nodes != null && this.Nodes[0].Type == EnumNodeType.Joint);
+                return Type == EnumNodeType.Joint;
             }
         }
         [XmlIgnore]
@@ -65,7 +65,7 @@ namespace Engine.Collada
         {
             get
             {
-                return this.InstanceController != null;
+                return InstanceController != null;
             }
         }
         [XmlIgnore]
@@ -73,7 +73,7 @@ namespace Engine.Collada
         {
             get
             {
-                return this.InstanceController?.FirstOrDefault()?.Skeleton?.FirstOrDefault();
+                return InstanceController?.FirstOrDefault()?.Skeleton?.FirstOrDefault();
             }
         }
         [XmlIgnore]
@@ -81,13 +81,13 @@ namespace Engine.Collada
         {
             get
             {
-                return this.InstanceGeometry != null;
+                return InstanceGeometry != null;
             }
         }
 
         public Node()
         {
-            this.Type = EnumNodeType.Node;
+            Type = EnumNodeType.Node;
         }
     }
 }

@@ -144,7 +144,6 @@ namespace Engine.Helpers.DDS
         private static bool ValidateTexture(DdsHeader header, out int depth, out Format format, out ResourceDimension resDim, out int arraySize, out bool isCubeMap)
         {
             depth = 0;
-            format = Format.Unknown;
             resDim = ResourceDimension.Unknown;
             arraySize = 1;
             isCubeMap = false;
@@ -195,7 +194,6 @@ namespace Engine.Helpers.DDS
             depth = 0;
             format = Format.Unknown;
             resDim = ResourceDimension.Unknown;
-            arraySize = 1;
             isCubeMap = false;
 
             arraySize = header.ArraySize;

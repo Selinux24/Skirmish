@@ -40,9 +40,9 @@ namespace Engine.Helpers.DDS
         /// <param name="outNumRows">Resulting number of rows</param>
         public static void GetSurfaceInfo(int width, int height, Format fmt, out int outNumBytes, out int outRowBytes, out int outNumRows)
         {
-            int numBytes = 0;
-            int rowBytes = 0;
-            int numRows = 0;
+            int numBytes;
+            int rowBytes;
+            int numRows;
 
             bool bc = false;
             bool packed = false;

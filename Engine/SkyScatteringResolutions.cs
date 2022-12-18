@@ -4,23 +4,23 @@ namespace Engine
     /// <summary>
     /// Sky scattering resolution
     /// </summary>
-    public enum SkyScatteringResolutions
+    public enum SkyScatteringResolutions : uint
     {
         /// <summary>
         /// None
         /// </summary>
-        None,
+        None = 0,
         /// <summary>
         /// Low
         /// </summary>
-        Low,
+        Low = 2,
         /// <summary>
         /// Medium
         /// </summary>
-        Medium,
+        Medium = 4,
         /// <summary>
         /// High
         /// </summary>
-        High,
+        High = 8,
     }
 }
