@@ -109,7 +109,7 @@ namespace Engine
         public static string GetMd5Sum(this byte[] buffer)
         {
             byte[] result = null;
-            using (MD5 md5 = new MD5CryptoServiceProvider())
+            using (MD5 md5 = MD5.Create())
             {
                 result = md5.ComputeHash(buffer);
             }

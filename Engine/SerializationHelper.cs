@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.IO.Compression;
 using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -58,15 +57,10 @@ namespace Engine
         /// <returns>Returns a compressed byte array</returns>
         public static byte[] Compress<T>(this T obj)
         {
-            using (var tmp = new MemoryStream())
+            using (var tmp = obj.SerializeJsonToStream())
+            using (var cmp = CompressStream(tmp))
             {
-                CreateBinaryFormatter().Serialize(tmp, obj);
-                tmp.Position = 0;
-
-                using (var cmp = CompressStream(tmp))
-                {
-                    return cmp.ToArray();
-                }
+                return cmp.ToArray();
             }
         }
         /// <summary>
@@ -84,7 +78,7 @@ namespace Engine
                 dec.CopyTo(tmp);
                 tmp.Position = 0;
 
-                return (T)CreateBinaryFormatter().Deserialize(tmp);
+                return DeserializeJsonFromStream<T>(tmp);
             }
         }
 
@@ -104,10 +98,8 @@ namespace Engine
                     SerializeXmlToFile(obj, fileName, nameSpace);
                     break;
                 case ".json":
-                    SerializeJsonToFile(obj, fileName);
-                    break;
                 default:
-                    SerializeBinaryToFile(obj, fileName);
+                    SerializeJsonToFile(obj, fileName);
                     break;
             }
         }
@@ -129,91 +121,12 @@ namespace Engine
                     result = DeserializeXmlFromFile<T>(fileName, nameSpace);
                     break;
                 case ".json":
-                    result = DeserializeJsonFromFile<T>(fileName);
-                    break;
                 default:
-                    result = DeserializeBinaryFromFile<T>(fileName);
+                    result = DeserializeJsonFromFile<T>(fileName);
                     break;
             }
 
             return result;
-        }
-
-        /// <summary>
-        /// Creates a new binary formatter for serialization
-        /// </summary>
-        /// <remarks>Includes all the Serialization Surrogates for SharpDX native structs</remarks>
-        private static IFormatter CreateBinaryFormatter()
-        {
-            var ss = new SurrogateSelector();
-            ss.AddSurrogate(typeof(Vector2), new StreamingContext(StreamingContextStates.All), new Vector2SerializationSurrogate());
-            ss.AddSurrogate(typeof(Vector3), new StreamingContext(StreamingContextStates.All), new Vector3SerializationSurrogate());
-            ss.AddSurrogate(typeof(Vector4), new StreamingContext(StreamingContextStates.All), new Vector4SerializationSurrogate());
-            ss.AddSurrogate(typeof(BoundingBox), new StreamingContext(StreamingContextStates.All), new BoundingBoxSerializationSurrogate());
-            ss.AddSurrogate(typeof(Int3), new StreamingContext(StreamingContextStates.All), new Int3SerializationSurrogate());
-            ss.AddSurrogate(typeof(Int4), new StreamingContext(StreamingContextStates.All), new Int4SerializationSurrogate());
-            ss.AddSurrogate(typeof(Color3), new StreamingContext(StreamingContextStates.All), new Color3SerializationSurrogate());
-            ss.AddSurrogate(typeof(Color4), new StreamingContext(StreamingContextStates.All), new Color4SerializationSurrogate());
-
-            IFormatter formatter = new BinaryFormatter
-            {
-                SurrogateSelector = ss
-            };
-
-            return formatter;
-        }
-        /// <summary>
-        /// Serialize into bytes
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="obj">Object</param>
-        /// <returns>Returns a byte array</returns>
-        public static byte[] SerializeBinary<T>(this T obj)
-        {
-            using (var tmp = new MemoryStream())
-            {
-                CreateBinaryFormatter().Serialize(tmp, obj);
-                tmp.Position = 0;
-
-                return tmp.ToArray();
-            }
-        }
-        /// <summary>
-        /// Serialize into file
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="obj">Object</param>
-        /// <param name="fileName">File name</param>
-        public static void SerializeBinaryToFile<T>(this T obj, string fileName)
-        {
-            var data = SerializeBinary(obj);
-
-            File.WriteAllBytes(fileName, data);
-        }
-        /// <summary>
-        /// Deserialize from a byte array
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="data">Byte array</param>
-        /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeBinary<T>(this byte[] data)
-        {
-            using (var buffer = new MemoryStream(data))
-            {
-                buffer.Position = 0;
-
-                return (T)CreateBinaryFormatter().Deserialize(buffer);
-            }
-        }
-        /// <summary>
-        /// Deserialize from a file
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="fileName">File name</param>
-        /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeBinaryFromFile<T>(string fileName)
-        {
-            return DeserializeBinary<T>(File.ReadAllBytes(fileName));
         }
 
         /// <summary>
@@ -236,9 +149,24 @@ namespace Engine
         /// <returns>Returns a byte array</returns>
         public static byte[] SerializeXml<T>(this T obj, string nameSpace = null)
         {
-            byte[] data = null;
+            using (var mso = SerializeXmlToStream(obj))
+            {
+                mso.Position = 0;
 
+                return mso.ToArray();
+            }
+        }
+        /// <summary>
+        /// Serialize into MemoryStream
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <param name="nameSpace">Name space</param>
+        /// <returns>Returns a MemoryStream</returns>
+        public static MemoryStream SerializeXmlToStream<T>(this T obj, string nameSpace = null)
+        {
             MemoryStream mso = new MemoryStream();
+
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
                 XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
@@ -246,11 +174,9 @@ namespace Engine
                 sr.Serialize(wr, obj);
 
                 mso.Position = 0;
-
-                data = mso.ToArray();
             }
 
-            return data;
+            return mso;
         }
         /// <summary>
         /// Serialize into file
@@ -278,6 +204,22 @@ namespace Engine
         public static T DeserializeXml<T>(this byte[] data, string nameSpace = null)
         {
             using (MemoryStream mso = new MemoryStream(data))
+            using (StreamReader rd = new StreamReader(mso, Encoding.Default))
+            {
+                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
+
+                return (T)sr.Deserialize(rd);
+            }
+        }
+        /// <summary>
+        /// Deserialize from a Stream 
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="mso">Stream</param>
+        /// <param name="nameSpace">Name space</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeXmlFromStream<T>(this Stream mso, string nameSpace = null)
+        {
             using (StreamReader rd = new StreamReader(mso, Encoding.Default))
             {
                 XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
@@ -324,9 +266,23 @@ namespace Engine
         /// <returns>Returns a byte array</returns>
         public static byte[] SerializeJson<T>(this T obj)
         {
-            byte[] data = null;
+            using (var mso = SerializeJsonToStream(obj))
+            {
+                mso.Position = 0;
 
+                return mso.ToArray();
+            }
+        }
+        /// <summary>
+        /// Serialize into MemoryStream
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="obj">Object</param>
+        /// <returns>Returns a MemoryStream</returns>
+        public static MemoryStream SerializeJsonToStream<T>(this T obj)
+        {
             MemoryStream mso = new MemoryStream();
+
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
                 JsonSerializer sr = CreateJsonFormatter();
@@ -334,11 +290,9 @@ namespace Engine
                 sr.Serialize(wr, obj, typeof(T));
 
                 mso.Position = 0;
-
-                data = mso.ToArray();
             }
 
-            return data;
+            return mso;
         }
         /// <summary>
         /// Serialize into file
@@ -363,7 +317,19 @@ namespace Engine
         /// <returns>Returns the deserialized object</returns>
         public static T DeserializeJson<T>(this byte[] data)
         {
-            using (MemoryStream mso = new MemoryStream(data))
+            using (var mso = new MemoryStream(data))
+            {
+                return DeserializeJsonFromStream<T>(mso);
+            }
+        }
+        /// <summary>
+        /// Deserialize from a Stream 
+        /// </summary>
+        /// <typeparam name="T">Object type</typeparam>
+        /// <param name="mso">Stream</param>
+        /// <returns>Returns the deserialized object</returns>
+        public static T DeserializeJsonFromStream<T>(this Stream mso)
+        {
             using (StreamReader rd = new StreamReader(mso, Encoding.Default))
             {
                 JsonSerializer sr = CreateJsonFormatter();

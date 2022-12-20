@@ -2,36 +2,12 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>Animation</RootNamespace>
     <AssemblyName>Animation</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <SonarQubeTestProject>False</SonarQubeTestProject>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>09 Animation.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
@@ -61,7 +37,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

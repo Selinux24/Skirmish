@@ -2,36 +2,12 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <UseWindowsForms>true</UseWindowsForms>
     <AssemblyName>Skybox</AssemblyName>
     <RootNamespace>Skybox</RootNamespace>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <SonarQubeTestProject>False</SonarQubeTestProject>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>05 Skybox.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <CodeAnalysisRuleSet>05 Skybox.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>05 Skybox.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>05 Skybox.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <CodeAnalysisRuleSet>05 Skybox.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>05 Skybox.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
 
   <ItemGroup>
@@ -46,7 +22,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="..\..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
     <Content Include="Resources\Audio\Effects\target_balls_single_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

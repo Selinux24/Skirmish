@@ -1,46 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net7.0-windows</TargetFramework>
     <AssemblyName>Engine.Content.FmtCollada</AssemblyName>
     <RootNamespace>Engine.Content.FmtCollada</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Engine.Content.FmtCollada.snk</AssemblyOriginatorKeyFile>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIconUrl />
-    <CodeAnalysisRuleSet>..\.sonarlint\selinux24_skirmish_devcsharp.ruleset</CodeAnalysisRuleSet>
     <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <CodeAnalysisRuleSet>..\.sonarlint\selinux24_skirmish_devcsharp.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x86'">
-    <CodeAnalysisRuleSet>..\.sonarlint\selinux24_skirmish_devcsharp.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <CodeAnalysisRuleSet>..\.sonarlint\selinux24_skirmish_devcsharp.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <CodeAnalysisRuleSet>..\.sonarlint\selinux24_skirmish_devcsharp.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x86'">
-    <CodeAnalysisRuleSet>..\.sonarlint\selinux24_skirmish_devcsharp.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <CodeAnalysisRuleSet>..\.sonarlint\selinux24_skirmish_devcsharp.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
   <ItemGroup>
-    <AdditionalFiles Include="..\.sonarlint\selinux24_skirmish_dev\CSharp\SonarLint.xml" Link="SonarLint.xml" />
-  </ItemGroup>
-
-    <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.csproj" />
   </ItemGroup>
 

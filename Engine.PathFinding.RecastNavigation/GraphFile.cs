@@ -39,8 +39,8 @@ namespace Engine.PathFinding.RecastNavigation
                 })
                 .ToArray();
 
-            buffer.AddRange(serTris.SerializeBinary());
-            buffer.AddRange(settings.SerializeBinary());
+            buffer.AddRange(serTris.SerializeJson());
+            buffer.AddRange(settings.SerializeJson());
 
             return buffer.ToArray().GetMd5Sum();
         }
