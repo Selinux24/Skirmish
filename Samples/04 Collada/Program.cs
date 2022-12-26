@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
 using Engine.Content.FmtObj;
+using Engine.Windows;
 using System;
 
 namespace Collada
@@ -20,8 +21,10 @@ namespace Collada
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
+                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+
 #if DEBUG
-                using (Game cl = new Game("4 Collada", EngineForm.ScreenSize * 0.8f, true, 0, 0))
+                using (Game cl = new Game("4 Collada", WindowsEngineForm.ScreenSize * 0.8f, true, 0, 0))
 #else
                 using (Game cl = new Game("4 Collada"))
 #endif

@@ -93,6 +93,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj" />
     <ProjectReference Include="..\..\Engine.PathFinding.RecastNavigation\Engine.PathFinding.RecastNavigation.csproj" />
+    <ProjectReference Include="..\..\Engine.Windows\Engine.Windows.csproj" />
     <ProjectReference Include="..\..\Engine\Engine.csproj" />
   </ItemGroup>
 

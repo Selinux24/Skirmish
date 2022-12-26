@@ -1,6 +1,7 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
 using Engine.Content.FmtObj;
+using Engine.Windows;
 using System;
 
 namespace Skybox
@@ -20,8 +21,10 @@ namespace Skybox
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
+                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+
 #if DEBUG
-                using (Game cl = new Game("5 Skybox", EngineForm.ScreenSize * 0.8f))
+                using (Game cl = new Game("5 Skybox", WindowsEngineForm.ScreenSize * 0.8f))
 #else
                 using (Game cl = new Game("5 Skybox"))
 #endif

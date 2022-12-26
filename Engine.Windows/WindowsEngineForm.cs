@@ -2,15 +2,16 @@
 using SharpDX.Windows;
 using System;
 using System.Windows.Forms;
+using static SharpDX.Windows.RenderLoop;
 
-namespace Engine
+namespace Engine.Windows
 {
-    using Engine.Properties;
+    using Engine.Windows.Properties;
 
     /// <summary>
     /// Engine render form
     /// </summary>
-    public class EngineForm : RenderForm
+    public class WindowsEngineForm : RenderForm, IEngineForm
     {
         /// <summary>
         /// Intialization internal flag
@@ -21,17 +22,11 @@ namespace Engine
         /// </summary>
         private FormWindowState lastWindowState = FormWindowState.Normal;
 
-        /// <summary>
-        /// Render width
-        /// </summary>
+        /// <inheritdoc/>
         public int RenderWidth { get; private set; }
-        /// <summary>
-        /// Render height
-        /// </summary>
+        /// <inheritdoc/>
         public int RenderHeight { get; private set; }
-        /// <summary>
-        /// Render rectangle
-        /// </summary>
+        /// <inheritdoc/>
         public RectangleF RenderRectangle
         {
             get
@@ -39,25 +34,15 @@ namespace Engine
                 return new RectangleF(0, 0, RenderWidth, RenderHeight);
             }
         }
-        /// <summary>
-        /// Rneder area center
-        /// </summary>
+        /// <inheritdoc/>
         public Point RenderCenter { get; private set; }
-        /// <summary>
-        /// Screen center
-        /// </summary>
+        /// <inheritdoc/>
         public Point ScreenCenter { get; private set; }
-        /// <summary>
-        /// The form is manually resizing
-        /// </summary>
+        /// <inheritdoc/>
         public bool Resizing { get; private set; }
-        /// <summary>
-        /// The form's size just changed
-        /// </summary>
+        /// <inheritdoc/>
         public bool SizeUpdated { get; private set; }
-        /// <summary>
-        /// The form's mode just changed
-        /// </summary>
+        /// <inheritdoc/>
         public bool FormModeUpdated
         {
             get
@@ -65,9 +50,7 @@ namespace Engine
                 return lastWindowState != WindowState;
             }
         }
-        /// <summary>
-        /// The form is minimized
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsMinimized
         {
             get
@@ -87,10 +70,7 @@ namespace Engine
                 base.IsFullscreen = value;
             }
         }
-
-        /// <summary>
-        /// Gets the primary screen size
-        /// </summary>
+        /// <inheritdoc/>
         public static Vector2 ScreenSize
         {
             get
@@ -104,23 +84,30 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
+        public WindowsEngineForm()
+            : base()
+        {
+            InitializeComponent();
+
+            initialized = true;
+        }
+        /// <summary>
+        /// Initializes the form
+        /// </summary>
         /// <param name="name">Form name</param>
         /// <param name="screenWidth">Width</param>
         /// <param name="screenHeight">Height</param>
         /// <param name="fullScreen">Full screen</param>
-        public EngineForm(string name, int screenWidth, int screenHeight, bool fullScreen)
-            : base(name)
+        public void Initialize(string name, int screenWidth, int screenHeight, bool fullScreen)
         {
+            Name = name;
+
             base.IsFullscreen = fullScreen;
             AllowUserResizing = !fullScreen;
 
             Size = new System.Drawing.Size(screenWidth, screenHeight);
 
             UpdateSizes(fullScreen);
-
-            InitializeComponent();
-
-            initialized = true;
         }
         /// <summary>
         /// Update form sizes
@@ -221,18 +208,12 @@ namespace Engine
             lastWindowState = WindowState;
         }
 
-        /// <summary>
-        /// Gets the render viewport
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
         public Viewport GetViewport()
         {
             return new Viewport(0, 0, RenderWidth, RenderHeight, 0, 1.0f);
         }
-        /// <summary>
-        /// Gets the current ortho projection matrix
-        /// </summary>
-        /// <returns>Returns the current ortho projection matrix</returns>
+        /// <inheritdoc/>
         public Matrix GetOrthoProjectionMatrix()
         {
             Matrix view = Matrix.LookAtLH(
@@ -247,12 +228,7 @@ namespace Engine
 
             return view * projection;
         }
-        /// <summary>
-        /// Transform to screen space using the form view ortho projection matrix
-        /// </summary>
-        /// <param name="position">Position</param>
-        /// <returns>Returns the screen space position</returns>
-        /// <remarks>Screen space: Center = (0,0) Left = -X Up = +Y</remarks>
+        /// <inheritdoc/>
         public Vector2 ToScreenSpace(Vector2 position)
         {
             var screenSpace = position - RenderRectangle.Center;
@@ -260,6 +236,28 @@ namespace Engine
             screenSpace.Y *= -1f;
 
             return screenSpace;
+        }
+        /// <inheritdoc/>
+        public Point PointToClient(Point p)
+        {
+            var drRes = PointToClient(new System.Drawing.Point(p.X, p.Y));
+
+            return new Point(drRes.X, drRes.Y);
+        }
+        /// <inheritdoc/>
+        public Point PointToScreen(Point p)
+        {
+            var drRes = PointToScreen(new System.Drawing.Point(p.X, p.Y));
+
+            return new Point(drRes.X, drRes.Y);
+        }
+
+        /// <inheritdoc/>
+        public void RenderLoop(Action renderCallback)
+        {
+            RenderCallback r = new RenderCallback(renderCallback);
+
+            Run(this, r);
         }
     }
 }

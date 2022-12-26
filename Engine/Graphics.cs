@@ -278,7 +278,7 @@ namespace Engine
         /// <param name="vsyncEnabled">Vertical sync enabled</param>
         /// <param name="refreshRate">Refresh rate</param>
         /// <param name="multiSampling">Enable multisampling</param>
-        public Graphics(EngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
+        public Graphics(IEngineForm form, bool vsyncEnabled = false, int refreshRate = 0, int multiSampling = 0)
         {
             FindModeDescription(
                 device,

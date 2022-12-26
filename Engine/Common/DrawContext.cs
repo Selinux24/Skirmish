@@ -19,7 +19,7 @@ namespace Engine.Common
         /// <summary>
         /// Engine form
         /// </summary>
-        public EngineForm Form { get; set; }
+        public IEngineForm Form { get; set; }
         /// <summary>
         /// Game time
         /// </summary>

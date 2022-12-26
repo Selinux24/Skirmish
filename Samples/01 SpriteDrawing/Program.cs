@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Windows;
 using System;
 
 namespace SpriteDrawing
@@ -18,8 +19,10 @@ namespace SpriteDrawing
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
+                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+
 #if DEBUG
-                using (Game cl = new Game("1 SpriteDrawing", EngineForm.ScreenSize * 0.8f))
+                using (Game cl = new Game("1 SpriteDrawing", WindowsEngineForm.ScreenSize * 0.8f))
 #else
                 using (Game cl = new Game("1 SpriteDrawing"))
 #endif

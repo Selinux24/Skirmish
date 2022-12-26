@@ -1,7 +1,7 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine
 {
-    using Point = System.Drawing.Point;
     using SystemCursor = System.Windows.Forms.Cursor;
 
     /// <summary>
@@ -21,11 +21,15 @@ namespace Engine
         {
             get
             {
-                return SystemCursor.Position;
+                var p = SystemCursor.Position;
+
+                return new Point(p.X, p.Y);
             }
             set
             {
-                SystemCursor.Position = value;
+                var p = new System.Drawing.Point(value.X, value.Y);
+
+                SystemCursor.Position = p;
             }
         }
 

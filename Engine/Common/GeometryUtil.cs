@@ -550,7 +550,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="form">Form</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateScreen(EngineForm form)
+        public static GeometryDescriptor CreateScreen(IEngineForm form)
         {
             return CreateScreen(form.RenderWidth, form.RenderHeight);
         }

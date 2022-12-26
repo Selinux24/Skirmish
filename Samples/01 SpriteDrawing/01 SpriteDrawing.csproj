@@ -54,6 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Windows\Engine.Windows.csproj" />
     <ProjectReference Include="..\..\Engine\Engine.csproj" />
   </ItemGroup>
 

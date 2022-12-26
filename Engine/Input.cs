@@ -25,7 +25,7 @@ namespace Engine
         /// <summary>
         /// Engine render form
         /// </summary>
-        private readonly EngineForm form;
+        private readonly IEngineForm form;
         /// <summary>
         /// First state update flag
         /// </summary>
@@ -173,7 +173,7 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public Input(EngineForm form)
+        public Input(IEngineForm form)
         {
             this.form = form;
             this.form.MouseWheel += new MouseEventHandler(OnMouseWheel);
@@ -362,7 +362,7 @@ namespace Engine
         /// <param name="location">Position</param>
         public void SetMousePosition(Point location)
         {
-            Cursor.ScreenPosition = new System.Drawing.Point(location.X, location.Y);
+            Cursor.ScreenPosition = location;
 
             var mousePos = form.PointToClient(Cursor.ScreenPosition);
             lastMousePos = new Point(mousePos.X, mousePos.Y);

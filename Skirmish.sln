@@ -3,12 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33205.214
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{E510EEF8-84D0-4A28-9E35-5B55A34893CC}"
-	ProjectSection(SolutionItems) = preProject
-		Effect Compile x64.cmd = Effect Compile x64.cmd
-		Effect Compile x86.cmd = Effect Compile x86.cmd
-	EndProjectSection
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Resources", "Resources\Resources.csproj", "{28391C85-9275-4E62-A159-3C67DFADC428}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine", "Engine\Engine.csproj", "{A4BAC380-82CB-4DB8-953F-A291F0BEF559}"
@@ -53,13 +47,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Content.OnePageDunge
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Games", "Games", "{8304C9ED-A66A-4217-8FD2-404396F077D3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tanks", "Games\Tanks\Tanks.csproj", "{87B4A2CA-F402-465D-ACA5-581A55A59969}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Tanks", "Games\Tanks\Tanks.csproj", "{87B4A2CA-F402-465D-ACA5-581A55A59969}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{EB142A8F-E8BB-4647-88CA-6A91804D5F6A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EngineTests", "Tests\EngineTests\EngineTests.csproj", "{9861580E-7A45-413A-971B-4DCAC955A9FF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "EngineTests", "Tests\EngineTests\EngineTests.csproj", "{9861580E-7A45-413A-971B-4DCAC955A9FF}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Shaders", "Engine.Shaders\Engine.Shaders.csproj", "{F366139B-499B-4557-B1E6-3E74A8F64F74}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Engine.Windows", "Engine.Windows\Engine.Windows.csproj", "{47F5E867-9953-435F-BC45-D6F0EE530ADE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -323,6 +319,18 @@ Global
 		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x64.Build.0 = Release|x64
 		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x86.ActiveCfg = Release|x86
 		{F366139B-499B-4557-B1E6-3E74A8F64F74}.Release|x86.Build.0 = Release|x86
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Debug|x64.ActiveCfg = Debug|x64
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Debug|x64.Build.0 = Debug|x64
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Debug|x86.ActiveCfg = Debug|x86
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Debug|x86.Build.0 = Debug|x86
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Release|x64.ActiveCfg = Release|x64
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Release|x64.Build.0 = Release|x64
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Release|x86.ActiveCfg = Release|x86
+		{47F5E867-9953-435F-BC45-D6F0EE530ADE}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,5 @@
 ﻿using Engine;
+using Engine.Windows;
 using System;
 
 namespace ModelDrawing
@@ -18,8 +19,10 @@ namespace ModelDrawing
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
+                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+
 #if DEBUG
-                using (Game cl = new Game("2 ModelDrawing", EngineForm.ScreenSize * 0.8f))
+                using (Game cl = new Game("2 ModelDrawing", WindowsEngineForm.ScreenSize * 0.8f))
 #else
                 using (Game cl = new Game("2 ModelDrawing"))
 #endif

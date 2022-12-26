@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
+using Engine.Windows;
 using System;
 
 namespace Animation
@@ -19,8 +20,10 @@ namespace Animation
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
+                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+
 #if DEBUG
-                using (Game cl = new Game("9 Animation", EngineForm.ScreenSize * 0.8f))
+                using (Game cl = new Game("9 Animation", WindowsEngineForm.ScreenSize * 0.8f))
 #else
                 using (Game cl = new Game("9 Animation"))
 #endif

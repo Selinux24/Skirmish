@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Content.FmtCollada;
+using Engine.Windows;
 using System;
 
 namespace GameLogic
@@ -19,8 +20,10 @@ namespace GameLogic
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
+                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+
 #if DEBUG
-                using (Game game = new Game("Game Logic", EngineForm.ScreenSize * 0.8f))
+                using (Game game = new Game("Game Logic", WindowsEngineForm.ScreenSize * 0.8f))
 #else
                 using (Game game = new Game("Game Logic"))
 #endif

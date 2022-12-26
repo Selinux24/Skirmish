@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.DXGI;
-using SharpDX.Windows;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -49,7 +48,7 @@ namespace Engine
         /// <summary>
         /// Game form
         /// </summary>
-        public EngineForm Form { get; private set; }
+        public IEngineForm Form { get; private set; }
         /// <summary>
         /// Game time
         /// </summary>
@@ -299,7 +298,9 @@ namespace Engine
                 screenHeight = mode.DesktopCoordinates.Bottom - mode.DesktopCoordinates.Top;
             }
 
-            Form = new EngineForm(name, screenWidth, screenHeight, isFullScreen);
+            Form = EngineServiceFactory.Instance<IEngineForm>();
+
+            Form.Initialize(name, screenWidth, screenHeight, isFullScreen);
 
             Form.ResizeBegin += (sender, e) =>
             {
@@ -426,7 +427,7 @@ namespace Engine
             Logger.WriteInformation(this, "** Game started                                                         **");
             Logger.WriteInformation(this, "**************************************************************************");
 
-            RenderLoop.Run(Form, Frame);
+            Form.RenderLoop(Frame);
         }
 
         /// <summary>

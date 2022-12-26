@@ -5,9 +5,9 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ApplicationIcon>engine.ico</ApplicationIcon>
     <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>Engine.snk</AssemblyOriginatorKeyFile>
-    <RootNamespace>Engine</RootNamespace>
-    <AssemblyName>Engine</AssemblyName>
+    <AssemblyOriginatorKeyFile>Engine.Windows.snk</AssemblyOriginatorKeyFile>
+    <RootNamespace>Engine.Windows</RootNamespace>
+    <AssemblyName>Engine.Windows</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>engine.ico</PackageIcon>
     <PackageIconUrl />
@@ -15,16 +15,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
-    <PackageReference Include="SharpDX" Version="4.2.0" />
-    <PackageReference Include="SharpDX.D3DCompiler" Version="4.2.0" />
-    <PackageReference Include="SharpDX.Direct2D1" Version="4.2.0" />
-    <PackageReference Include="SharpDX.Direct3D11" Version="4.2.0" />
-    <PackageReference Include="SharpDX.Direct3D11.Effects" Version="4.2.0" />
-    <PackageReference Include="SharpDX.DXGI" Version="4.2.0" />
-    <PackageReference Include="SharpDX.Mathematics" Version="4.2.0" />
-    <PackageReference Include="SharpDX.XAudio2" Version="4.2.0" />
-    <PackageReference Include="SharpDX.MediaFoundation" Version="4.2.0" />
+    <PackageReference Include="SharpDX.Desktop" Version="4.2.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -35,7 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Engine.Shaders\Engine.Shaders.csproj" />
+    <ProjectReference Include="..\Engine\Engine.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,6 +4,7 @@ using System;
 
 namespace Terrain
 {
+    using Engine.Windows;
     using Terrain.Start;
 
     static class Program
@@ -21,8 +22,10 @@ namespace Terrain
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
+                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+
 #if DEBUG
-                using (Game cl = new Game("6 Terrain", EngineForm.ScreenSize * 0.8f))
+                using (Game cl = new Game("6 Terrain", WindowsEngineForm.ScreenSize * 0.8f))
 #else
                 using (Game cl = new Game("6 Terrain"))
 #endif
