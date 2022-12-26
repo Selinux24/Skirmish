@@ -315,7 +315,7 @@ namespace SpriteDrawing
                 return;
             }
 
-            var mousePos = Cursor.ScreenPosition;
+            var mousePos = Game.Input.MousePosition;
             var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
 
             textDebug.Text = $@"GameTime paused {paused}|{gameTime.Paused}: Elapsed -> {gameTime.ElapsedTime}  Total -> {gameTime.TotalTime}

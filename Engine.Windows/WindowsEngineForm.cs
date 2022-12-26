@@ -23,6 +23,17 @@ namespace Engine.Windows
         private FormWindowState lastWindowState = FormWindowState.Normal;
 
         /// <inheritdoc/>
+        public static Vector2 ScreenSize
+        {
+            get
+            {
+                var rect = Screen.PrimaryScreen.Bounds;
+
+                return new Vector2(rect.Width, rect.Height);
+            }
+        }
+
+        /// <inheritdoc/>
         public int RenderWidth { get; private set; }
         /// <inheritdoc/>
         public int RenderHeight { get; private set; }
@@ -59,27 +70,11 @@ namespace Engine.Windows
             }
         }
         /// <inheritdoc/>
-        public new bool IsFullscreen
-        {
-            get
-            {
-                return base.IsFullscreen;
-            }
-            set
-            {
-                base.IsFullscreen = value;
-            }
-        }
+        public int MouseWheelDelta { get; private set; } = 0;
         /// <inheritdoc/>
-        public static Vector2 ScreenSize
-        {
-            get
-            {
-                var rect = Screen.PrimaryScreen.Bounds;
-
-                return new Vector2(rect.Width, rect.Height);
-            }
-        }
+        public long MouseWheelDeltaTimestamp { get; private set; }
+        /// <inheritdoc/>
+        public bool MouseIn { get; private set; } = true;
 
         /// <summary>
         /// Constructor
@@ -206,6 +201,28 @@ namespace Engine.Windows
             base.OnResize(e);
 
             lastWindowState = WindowState;
+        }
+        /// <inheritdoc/>
+        protected override void OnMouseWheel(MouseEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            MouseWheelDelta = e.Delta;
+            MouseWheelDeltaTimestamp = DateTime.Now.Ticks;
+        }
+        /// <inheritdoc/>
+        protected override void OnMouseEnter(EventArgs e)
+        {
+            base.OnMouseEnter(e);
+
+            MouseIn = true;
+        }
+        /// <inheritdoc/>
+        protected override void OnMouseLeave(EventArgs e)
+        {
+            base.OnMouseLeave(e);
+
+            MouseIn = false;
         }
 
         /// <inheritdoc/>

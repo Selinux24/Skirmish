@@ -17,6 +17,45 @@ namespace Engine
     public class Game : IDisposable
     {
         /// <summary>
+        /// Images helper static instance
+        /// </summary>
+        private static IImages images;
+        /// <summary>
+        /// Images helper
+        /// </summary>
+        public static IImages Images
+        {
+            get
+            {
+                if (images == null)
+                {
+                    images = EngineServiceFactory.Instance<IImages>();
+                }
+
+                return images;
+            }
+        }
+        /// <summary>
+        /// Fonts helper static instance
+        /// </summary>
+        private static IFonts fonts;
+        /// <summary>
+        /// Fonts helper
+        /// </summary>
+        public static IFonts Fonts
+        {
+            get
+            {
+                if (fonts == null)
+                {
+                    fonts = EngineServiceFactory.Instance<IFonts>();
+                }
+
+                return fonts;
+            }
+        }
+
+        /// <summary>
         /// Scene list
         /// </summary>
         private List<Scene> scenes = new List<Scene>();
@@ -54,13 +93,9 @@ namespace Engine
         /// </summary>
         public GameTime GameTime { get; private set; }
         /// <summary>
-        /// CPU stats
-        /// </summary>
-        public PerformanceCounter CPUStats { get; private set; }
-        /// <summary>
         /// Input helper
         /// </summary>
-        public Input Input { get; private set; }
+        public IInput Input { get; private set; }
         /// <summary>
         /// Graphics helper
         /// </summary>
@@ -284,8 +319,6 @@ namespace Engine
 
             ResourceManager = new GameResourceManager(this);
 
-            CPUStats = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-
             #region Form
 
             bool isFullScreen = fullScreen;
@@ -353,7 +386,8 @@ namespace Engine
 
             #endregion
 
-            Input = new Input(Form);
+            Input = EngineServiceFactory.Instance<IInput>();
+            Input.SetForm(Form);
 
             Graphics = new Graphics(Form, vsyncEnabled, refreshRate, multiSampling);
 
@@ -1105,7 +1139,7 @@ namespace Engine
             try
             {
                 RuntimeText = string.Format(
-                    "{0} - {1} - Frame {2} FPS: {3:000} Draw C/D: {4:00}:{5:00} Inst: {6:00} U: {7:00} S: {8}:{9}:{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs) CPU: {13:0.00}%",
+                    "{0} - {1} - Frame {2} FPS: {3:000} Draw C/D: {4:00}:{5:00} Inst: {6:00} U: {7:00} S: {8}:{9}:{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs)",
                     Graphics.DeviceDescription,
                     Name,
                     Counters.FrameCount,
@@ -1116,8 +1150,7 @@ namespace Engine
                     Counters.UpdatesPerFrame,
                     Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
                     GameTime.ElapsedSeconds,
-                    GameTime.TotalSeconds,
-                    CPUStats.NextValue());
+                    GameTime.TotalSeconds);
 #if DEBUG
                 Form.Text = RuntimeText;
 #endif

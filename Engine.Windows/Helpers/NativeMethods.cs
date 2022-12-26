@@ -2,21 +2,21 @@
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace Engine.Helpers
+namespace Engine.Windows.Helpers
 {
     /// <summary>
     /// Windows API functions
     /// </summary>
-    static class NativeMethods
+    static partial class NativeMethods
     {
         /// <summary>
         /// Gets current keyboard state
         /// </summary>
         /// <param name="lpKeyState">Key state array</param>
         /// <returns>Returns true if the state retrieved</returns>
-        [DllImport("user32.dll")]
+        [LibraryImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
-        private static extern bool GetKeyboardState(byte[] lpKeyState);
+        private static partial bool GetKeyboardState(byte[] lpKeyState);
         /// <summary>
         /// Converts key code to unicode string
         /// </summary>
@@ -35,8 +35,8 @@ namespace Engine.Helpers
         /// <param name="uVirtKey">Virtual key code</param>
         /// <param name="uMapType">Map type</param>
         /// <returns>Returns the scan code</returns>
-        [DllImport("user32.dll")]
-        private static extern uint MapVirtualKey(uint uVirtKey, uint uMapType);
+        [LibraryImport("user32.dll")]
+        private static partial uint MapVirtualKey(uint uVirtKey, uint uMapType);
 
         /// <summary>
         /// Main keyboard state buffer
@@ -166,7 +166,7 @@ namespace Engine.Helpers
             if (deadKey != 0 && lastIsDead)
             {
                 StringBuilder dsb = new StringBuilder(5);
-                ToUnicode(deadKey, deadScanCode, deadKeyState, dsb, dsb.Capacity, 0);
+                _ = ToUnicode(deadKey, deadScanCode, deadKeyState, dsb, dsb.Capacity, 0);
                 lastIsDead = false;
                 deadKey = 0;
                 deadScanCode = 0;

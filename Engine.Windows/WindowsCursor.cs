@@ -1,13 +1,13 @@
 ﻿using SharpDX;
 
-namespace Engine
+namespace Engine.Windows
 {
     using SystemCursor = System.Windows.Forms.Cursor;
 
     /// <summary>
     /// Game cursor
     /// </summary>
-    public static class Cursor
+    public static class WindowsCursor
     {
         /// <summary>
         /// Times Cursor.Hide() were called

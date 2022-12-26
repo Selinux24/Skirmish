@@ -12,6 +12,7 @@
     <PackageIcon>engine.ico</PackageIcon>
     <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
 
   <ItemGroup>

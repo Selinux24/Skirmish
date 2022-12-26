@@ -22,7 +22,7 @@ namespace Terrain
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
-                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+                WindowsExtensions.Startup();
 
 #if DEBUG
                 using (Game cl = new Game("6 Terrain", WindowsEngineForm.ScreenSize * 0.8f))

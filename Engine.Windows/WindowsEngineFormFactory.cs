@@ -1,8 +1,12 @@
 ﻿
 namespace Engine.Windows
 {
-    public class WindowsEngineFormFactory : IGameServiceFactory<IEngineForm>
+    /// <summary>
+    /// Windows form factory
+    /// </summary>
+    class WindowsEngineFormFactory : IGameServiceFactory<IEngineForm>
     {
+        /// <inheritdoc/>
         public IEngineForm Instance()
         {
             return new WindowsEngineForm();

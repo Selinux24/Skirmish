@@ -19,7 +19,7 @@ namespace SpriteDrawing
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
-                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+                WindowsExtensions.Startup();
 
 #if DEBUG
                 using (Game cl = new Game("1 SpriteDrawing", WindowsEngineForm.ScreenSize * 0.8f))

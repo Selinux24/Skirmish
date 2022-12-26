@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0-windows</TargetFramework>
-    <UseWindowsForms>true</UseWindowsForms>
+    <TargetFramework>net7.0</TargetFramework>
     <ApplicationIcon>engine.ico</ApplicationIcon>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Engine.snk</AssemblyOriginatorKeyFile>
@@ -10,7 +9,6 @@
     <AssemblyName>Engine</AssemblyName>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIcon>engine.ico</PackageIcon>
-    <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
   </PropertyGroup>
 

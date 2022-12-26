@@ -6,7 +6,7 @@ namespace Engine.UI
     /// <summary>
     /// Font map keycode generator
     /// </summary>
-    class FontMapKeycodeGenerator
+    public class FontMapKeycodeGenerator
     {
         /// <summary>
         /// Key codes

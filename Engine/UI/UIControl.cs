@@ -837,7 +837,7 @@ namespace Engine.UI
                 Buttons = clickedButtons,
             });
 
-            if ((Game.GameTime.TotalTime - lastClickedTime).TotalMilliseconds <= Input.DoubleClickTime)
+            if ((Game.GameTime.TotalTime - lastClickedTime).TotalMilliseconds <= GameEnvironment.DoubleClickTime)
             {
                 var doubleClickedButtons = lastClickedButtons & clickedButtons;
                 if (doubleClickedButtons != MouseButtons.None)

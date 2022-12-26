@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Drawing;
 using System.IO;
 
 namespace Engine
@@ -17,24 +16,20 @@ namespace Engine
         /// <returns>Returns the new generated foliage map</returns>
         public static FoliageMap FromStream(Stream data)
         {
-            Bitmap bitmap = Bitmap.FromStream(data) as Bitmap;
+            var bitmap = Game.Images.FromStream(data);
 
             var colors = new Color4[bitmap.Height + 1, bitmap.Width + 1];
 
-            using (bitmap)
+            for (int w = 0; w < bitmap.Width + 1; w++)
             {
-                for (int w = 0; w < bitmap.Width + 1; w++)
+                int ww = w < bitmap.Width ? w : w - 1;
+
+                for (int h = 0; h < bitmap.Height + 1; h++)
                 {
-                    int ww = w < bitmap.Width ? w : w - 1;
+                    int hh = h < bitmap.Height ? h : h - 1;
 
-                    for (int h = 0; h < bitmap.Height + 1; h++)
-                    {
-                        int hh = h < bitmap.Height ? h : h - 1;
-
-                        var color = bitmap.GetPixel(hh, ww);
-
-                        colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
-                    }
+                    //Flip coordinates
+                    colors[h, w] = bitmap.GetPixel(ww, hh);
                 }
             }
 

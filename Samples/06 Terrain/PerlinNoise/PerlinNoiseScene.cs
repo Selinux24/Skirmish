@@ -101,7 +101,7 @@ namespace Terrain.PerlinNoise
 
         public PerlinNoiseScene(Game game) : base(game)
         {
-            Game.VisibleMouse = false;
+            Game.VisibleMouse = true;
         }
 
         public override async Task Initialize()
@@ -222,7 +222,7 @@ namespace Terrain.PerlinNoise
                 noiseMapDirty = true;
             }
 
-            texture.Update(Game, noiseMap?.CreateColors());
+            texture.Update(Game, noiseMap?.MapImage.Flatten());
 
             if (noiseMapDirty)
             {

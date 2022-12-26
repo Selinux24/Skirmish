@@ -1,8 +1,7 @@
 ﻿using Engine;
-using Engine.Windows;
 using Engine.Content.FmtCollada;
+using Engine.Windows;
 using System;
-using Engine.Content;
 
 namespace Tanks
 {
@@ -21,7 +20,7 @@ namespace Tanks
                 Logger.LogLevel = LogLevel.Error;
 #endif
 
-                EngineServiceFactory.Register<IEngineForm, WindowsEngineFormFactory>();
+                WindowsExtensions.Startup();
 
 #if DEBUG
                 using (Game cl = new Game("Tanks!!!", WindowsEngineForm.ScreenSize * 0.8f))

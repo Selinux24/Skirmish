@@ -145,7 +145,7 @@ namespace Engine.UI
                 return;
             }
 
-            SetText(Helpers.NativeMethods.GetStrokes());
+            SetText(Game.Input.GetStrokes());
         }
         /// <summary>
         /// Evaluates the size limit

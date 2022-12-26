@@ -1,15 +1,14 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Engine
 {
     using Engine.Common;
     using Engine.Content;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Height map
@@ -54,12 +53,12 @@ namespace Engine
         /// <returns>Returns the new generated height map</returns>
         private static HeightMap FromStream(Stream heightData, Stream colorData, bool useFalloff = false, float falloffCurveA = 0f, float falloffCurveB = 0f)
         {
-            Bitmap heightBitmap = Image.FromStream(heightData) as Bitmap;
+            Image heightBitmap = Game.Images.FromStream(heightData);
 
-            Bitmap colorBitmap = null;
+            Image colorBitmap = default;
             if (colorData != null)
             {
-                colorBitmap = Image.FromStream(colorData) as Bitmap;
+                colorBitmap = Game.Images.FromStream(colorData);
 
                 if (colorBitmap.Height != heightBitmap.Height || colorBitmap.Width != heightBitmap.Width)
                 {
@@ -78,28 +77,22 @@ namespace Engine
         /// <param name="colorBitmap">Color image</param>
         /// <param name="heights">Returns the height map</param>
         /// <param name="colors">Returns the color map</param>
-        private static void ReadImages(Bitmap heightBitmap, Bitmap colorBitmap, out float[,] heights, out Color4[,] colors)
+        private static void ReadImages(Image heightBitmap, Image? colorBitmap, out float[,] heights, out Color4[,] colors)
         {
             heights = new float[heightBitmap.Height + 1, heightBitmap.Width + 1];
             colors = new Color4[heightBitmap.Height + 1, heightBitmap.Width + 1];
 
-            using (colorBitmap)
-            using (heightBitmap)
+            for (int h = 0; h < heightBitmap.Height + 1; h++)
             {
-                for (int h = 0; h < heightBitmap.Height + 1; h++)
+                int hh = h < heightBitmap.Height ? h : h - 1;
+
+                for (int w = 0; w < heightBitmap.Width + 1; w++)
                 {
-                    int hh = h < heightBitmap.Height ? h : h - 1;
+                    int ww = w < heightBitmap.Width ? w : w - 1;
 
-                    for (int w = 0; w < heightBitmap.Width + 1; w++)
-                    {
-                        int ww = w < heightBitmap.Width ? w : w - 1;
-
-                        var height = heightBitmap.GetPixel(hh, ww);
-                        var color = colorBitmap != null ? colorBitmap.GetPixel(hh, ww) : System.Drawing.Color.Gray;
-
-                        heights[w, h] = height.B / 255f;
-                        colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
-                    }
+                    //Flip coordinates
+                    heights[h, w] = heightBitmap.GetPixel(ww, hh).Blue;
+                    colors[h, w] = colorBitmap?.GetPixel(ww, hh) ?? Color.Gray;
                 }
             }
         }

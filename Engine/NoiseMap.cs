@@ -1,15 +1,8 @@
 ﻿using SharpDX;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
-    using Bitmap = System.Drawing.Bitmap;
-    using GCHandle = System.Runtime.InteropServices.GCHandle;
-    using GCHandleType = System.Runtime.InteropServices.GCHandleType;
-    using PixelFormat = System.Drawing.Imaging.PixelFormat;
-
     /// <summary>
     /// Noise map
     /// </summary>
@@ -106,49 +99,61 @@ namespace Engine
         }
 
         /// <summary>
+        /// Floating point noise map
+        /// </summary>
+        private float[,] map;
+        /// <summary>
         /// Map
         /// </summary>
-        public float[,] Map { get; private set; }
-
-        /// <summary>
-        /// Creates a color map for a texture from a noise map
-        /// </summary>
-        public IEnumerable<Color4> CreateColors()
+        public float[,] Map
         {
-            int width = Map.GetLength(0);
-            int height = Map.GetLength(1);
-
-            Color4[] colors = new Color4[width * height];
-            int index = 0;
-            for (int y = 0; y < height; y++)
+            get
             {
-                for (int x = 0; x < width; x++)
-                {
-                    colors[index++] = Color4.Lerp(Color4.White, Color4.Black, Map[x, y]);
-                }
+                return map;
             }
+            set
+            {
+                map = value;
 
-            return colors;
+                MapImage = CreateImage();
+            }
         }
+        /// <summary>
+        /// Map image
+        /// </summary>
+        public Image MapImage { get; private set; }
+
         /// <summary>
         /// Saves the noise map to a file
         /// </summary>
         /// <param name="fileName">File name</param>
         public void SaveMapToFile(string fileName)
         {
+            Game.Images.SaveToFile(fileName, MapImage);
+        }
+        /// <summary>
+        /// Creates a color map for a texture from a noise map
+        /// </summary>
+        private Image CreateImage()
+        {
+            if (Map == null)
+            {
+                return default;
+            }
+
             int width = Map.GetLength(0);
             int height = Map.GetLength(1);
 
-            var colors = CreateColors();
-
-            int stride = sizeof(int);
-            int[] bits = colors.Select(c => c.ToRgba()).ToArray();
-
-            var bitsHandle = GCHandle.Alloc(bits, GCHandleType.Pinned);
-            using (var bitmap = new Bitmap(width, height, width * stride, PixelFormat.Format32bppPArgb, bitsHandle.AddrOfPinnedObject()))
+            Color4[,] colors = new Color4[width, height];
+            for (int y = 0; y < height; y++)
             {
-                bitmap.Save(fileName);
+                for (int x = 0; x < width; x++)
+                {
+                    colors[x, y] = Color4.Lerp(Color4.White, Color4.Black, Map[x, y]);
+                }
             }
+
+            return new Image(colors);
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Windows.Forms;
 
 namespace Engine
 {
@@ -14,6 +13,45 @@ namespace Engine
         /// </summary>
         static Vector2 ScreenSize { get; }
 
+#nullable enable
+        /// <summary>
+        /// Occurs when the form is resized.
+        /// </summary>
+        event EventHandler? Resize;
+        /// <summary>
+        /// Occurs when the form starts the resize process
+        /// </summary>
+        event EventHandler? ResizeBegin;
+        /// <summary>
+        /// Occurs when the form ends the resize process
+        /// </summary>
+        event EventHandler? ResizeEnd;
+        /// <summary>
+        /// Occurs when the form is activated
+        /// </summary>
+        event EventHandler? Activated;
+        /// <summary>
+        /// Occurs when the form is deactivated
+        /// </summary>
+        event EventHandler? Deactivate;
+#nullable disable
+
+        /// <summary>
+        /// Gets or sets the form name
+        /// </summary>
+        string Name { get; set; }
+        /// <summary>
+        /// Gets or sets the form's caption text
+        /// </summary>
+        string Text { get; set; }
+        /// <summary>
+        /// Gets or sets the window handle
+        /// </summary>
+        nint Handle { get; }
+        /// <summary>
+        /// Gets or sets whether the form is in full-screen mode or not
+        /// </summary>
+        bool IsFullscreen { get; set; }
         /// <summary>
         /// Render width
         /// </summary>
@@ -56,14 +94,18 @@ namespace Engine
         /// The form is minimized
         /// </summary>
         bool IsMinimized { get; }
-
-        bool IsFullscreen { get; set; }
-
-        nint Handle { get; }
-
-        string Text { get; set; }
-
-        string Name { get; set; }
+        /// <summary>
+        /// Mouse over flag
+        /// </summary>
+        bool MouseIn { get; }
+        /// <summary>
+        /// Mouse wheel delta
+        /// </summary>
+        int MouseWheelDelta { get; }
+        /// <summary>
+        /// Mouse wheel delta timestamp
+        /// </summary>
+        long MouseWheelDeltaTimestamp { get; }
 
         /// <summary>
         /// Initializes the form
@@ -90,9 +132,14 @@ namespace Engine
         /// <returns>Returns the screen space position</returns>
         /// <remarks>Screen space: Center = (0,0) Left = -X Up = +Y</remarks>
         Vector2 ToScreenSpace(Vector2 position);
-
+        /// <summary>
+        /// Render loop callback initializer
+        /// </summary>
+        /// <param name="renderCallback">Render callback method</param>
         void RenderLoop(Action renderCallback);
-
+        /// <summary>
+        /// Closes the form
+        /// </summary>
         void Close();
         /// <summary>
         ///  Computes the location of the screen point p in client coords.
@@ -102,17 +149,5 @@ namespace Engine
         ///  Computes the location of the client point p in screen coords.
         /// </summary>
         Point PointToScreen(Point p);
-
-#nullable enable
-        event KeyEventHandler? KeyUp;
-        event EventHandler? ResizeBegin;
-        event EventHandler? ResizeEnd;
-        event EventHandler? Resize;
-        event EventHandler? Activated;
-        event EventHandler? Deactivate;
-        event MouseEventHandler? MouseWheel;
-        event EventHandler? MouseEnter;
-        event EventHandler? MouseLeave;
-#nullable disable
     }
 }

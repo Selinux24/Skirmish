@@ -4,49 +4,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 
-namespace Engine
+namespace Engine.Windows
 {
-    using Engine.Helpers;
+    using Engine.Windows.Helpers;
 
     /// <summary>
     /// Mouse and keyboard input
     /// </summary>
-    public class Input : IDisposable
+    public class WindowsInput : IDisposable, IInput
     {
-        /// <summary>
-        /// Frame time
-        /// </summary>
-        public const float InputTime = 1f / 60f;
-        /// <summary>
-        /// Double click interval
-        /// </summary>
-        public const float DoubleClickTime = 500;
-
         /// <summary>
         /// Engine render form
         /// </summary>
-        private readonly IEngineForm form;
+        private IEngineForm form;
         /// <summary>
         /// First state update flag
         /// </summary>
         private bool firstUpdate = true;
         /// <summary>
-        /// Mouse over active form flag
-        /// </summary>
-        private bool mouseIn = true;
-        /// <summary>
         /// Mouse visble flag
         /// </summary>
         private bool visibleMouse = true;
+        /// <summary>
+        /// Last mouse wheel delta timestamp
+        /// </summary>
+        private long mouseWheelDeltaTimestamp = 0;
 
         /// <summary>
         /// Mouse position of last update
         /// </summary>
         private Point lastMousePos;
-        /// <summary>
-        /// Mouse wheel delta of current update
-        /// </summary>
-        private int mouseWheel;
         /// <summary>
         /// Last mouse buttons state
         /// </summary>
@@ -60,41 +47,23 @@ namespace Engine
         /// </summary>
         private readonly List<Keys> currentKeyboardKeys = new List<Keys>();
 
-        /// <summary>
-        /// Elapsed time
-        /// </summary>
+        /// <inheritdoc/>
         public float Elapsed { get; set; } = 0f;
-        /// <summary>
-        /// Mouse X axis value
-        /// </summary>
+        /// <inheritdoc/>
         public int MouseXDelta { get; private set; }
-        /// <summary>
-        /// Mouse Y axis value
-        /// </summary>
+        /// <inheritdoc/>
         public int MouseYDelta { get; private set; }
-        /// <summary>
-        /// Mouse wheel value
-        /// </summary>
+        /// <inheritdoc/>
         public int MouseWheelDelta { get; private set; }
-        /// <summary>
-        /// Absolute Mouse X axis value
-        /// </summary>
+        /// <inheritdoc/>
         public int MouseX { get; private set; }
-        /// <summary>
-        /// Absolute Mouse Y axis value
-        /// </summary>
+        /// <inheritdoc/>
         public int MouseY { get; private set; }
-        /// <summary>
-        /// Absolute Mouse position
-        /// </summary>
+        /// <inheritdoc/>
         public Point MousePosition { get; private set; }
-        /// <summary>
-        /// Current pressed mouse buttons
-        /// </summary>
+        /// <inheritdoc/>
         public MouseButtons PressedMouseButtons { get; private set; } = MouseButtons.None;
-        /// <summary>
-        /// Current just pressed mouse buttons
-        /// </summary>
+        /// <inheritdoc/>
         public MouseButtons JustPressedMouseButtons
         {
             get
@@ -102,9 +71,7 @@ namespace Engine
                 return MouseButtonsState & ~lastMouseButtons;
             }
         }
-        /// <summary>
-        /// Current just released mouse buttons
-        /// </summary>
+        /// <inheritdoc/>
         public MouseButtons JustReleasedMouseButtons
         {
             get
@@ -112,9 +79,7 @@ namespace Engine
                 return lastMouseButtons & ~MouseButtonsState;
             }
         }
-        /// <summary>
-        /// Gets if left or right shift key were pressed now
-        /// </summary>
+        /// <inheritdoc/>
         public bool ShiftPressed
         {
             get
@@ -122,9 +87,7 @@ namespace Engine
                 return KeyPressed(Keys.LShiftKey) || KeyPressed(Keys.RShiftKey);
             }
         }
-        /// <summary>
-        /// Gets if left or right control key were pressed now
-        /// </summary>
+        /// <inheritdoc/>
         public bool ControlPressed
         {
             get
@@ -132,13 +95,9 @@ namespace Engine
                 return KeyPressed(Keys.LControlKey) || KeyPressed(Keys.RControlKey);
             }
         }
-        /// <summary>
-        /// Sets mouse on center after update
-        /// </summary>
+        /// <inheritdoc/>
         public bool LockMouse { get; set; }
-        /// <summary>
-        /// Sets cursor visible
-        /// </summary>
+        /// <inheritdoc/>
         public bool VisibleMouse
         {
             get
@@ -151,17 +110,15 @@ namespace Engine
 
                 if (visibleMouse)
                 {
-                    Cursor.Show();
+                    WindowsCursor.Show();
                 }
                 else
                 {
-                    Cursor.Hide();
+                    WindowsCursor.Hide();
                 }
             }
         }
-        /// <summary>
-        /// Mouse button state
-        /// </summary>
+        /// <inheritdoc/>
         public MouseButtons MouseButtonsState
         {
             get
@@ -171,19 +128,25 @@ namespace Engine
         }
 
         /// <summary>
+        /// Get keyboard pressed keys
+        /// </summary>
+        /// <returns>Return pressed keys collection</returns>
+        private static Keys[] GetPressedKeys()
+        {
+            return NativeMethods.GetPressedKeys();
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        public Input(IEngineForm form)
+        public WindowsInput()
         {
-            this.form = form;
-            this.form.MouseWheel += new MouseEventHandler(OnMouseWheel);
-            this.form.MouseLeave += new EventHandler(OnMouseLeave);
-            this.form.MouseEnter += new EventHandler(OnMouseEnter);
+
         }
         /// <summary>
         /// Destructor
         /// </summary>
-        ~Input()
+        ~WindowsInput()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);
@@ -205,22 +168,30 @@ namespace Engine
 
         }
 
-        /// <summary>
-        /// Updates input state
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <inheritdoc/>
+        public void SetForm(IEngineForm form)
+        {
+            this.form = form;
+        }
+
+        /// <inheritdoc/>
         public void Update(GameTime gameTime)
         {
             Elapsed += gameTime.ElapsedSeconds;
 
-            if (Elapsed < InputTime)
+            if (Elapsed < GameEnvironment.FrameTime)
             {
                 return;
             }
 
-            Elapsed -= InputTime;
+            Elapsed -= GameEnvironment.FrameTime;
 
-            if (mouseIn)
+            if (form == null)
+            {
+                return;
+            }
+
+            if (form.MouseIn)
             {
                 if (firstUpdate)
                 {
@@ -264,7 +235,7 @@ namespace Engine
         /// </summary>
         private void UpdateMousePositionState()
         {
-            var mousePos = form.PointToClient(Cursor.ScreenPosition);
+            var mousePos = form.PointToClient(WindowsCursor.ScreenPosition);
 
             MousePosition = new Point(mousePos.X, mousePos.Y);
 
@@ -289,82 +260,55 @@ namespace Engine
             lastMouseButtons = PressedMouseButtons;
             PressedMouseButtons = MouseButtonsState;
 
-            MouseWheelDelta = mouseWheel;
-            mouseWheel = 0;
+            MouseWheelDelta = 0;
+            if (mouseWheelDeltaTimestamp != form.MouseWheelDeltaTimestamp)
+            {
+                MouseWheelDelta = form.MouseWheelDelta;
+                mouseWheelDeltaTimestamp = form.MouseWheelDeltaTimestamp;
+            }
         }
 
-        /// <summary>
-        /// Gets if specified key is just released
-        /// </summary>
-        /// <param name="key">Key</param>
-        /// <returns>Returns true if the specified key is just released</returns>
+        /// <inheritdoc/>
         public bool KeyJustReleased(Keys key)
         {
             return lastKeyboardKeys.Contains(key) && !currentKeyboardKeys.Contains(key);
         }
-        /// <summary>
-        /// Gets if specified key is just pressed
-        /// </summary>
-        /// <param name="key">Key</param>
-        /// <returns>Returns true if the specified key is just pressed</returns>
+        /// <inheritdoc/>
         public bool KeyJustPressed(Keys key)
         {
             return !lastKeyboardKeys.Contains(key) && currentKeyboardKeys.Contains(key);
         }
-        /// <summary>
-        /// Gets if specified key is pressed now
-        /// </summary>
-        /// <param name="key">Key</param>
-        /// <returns>Returns true if the specified key is pressed now</returns>
+        /// <inheritdoc/>
         public bool KeyPressed(Keys key)
         {
             return currentKeyboardKeys.Contains(key);
         }
-        /// <summary>
-        /// Gets if the specified mouse button is just released
-        /// </summary>
-        /// <param name="button">Mouse button</param>
-        /// <returns>Returns true if the specified mouse button is just released</returns>
+        /// <inheritdoc/>
         public bool MouseButtonJustReleased(MouseButtons button)
         {
             return JustReleasedMouseButtons.HasFlag(button);
         }
-        /// <summary>
-        /// Gets if the specified mouse button is just pressed
-        /// </summary>
-        /// <param name="button">Mouse button</param>
-        /// <returns>Returns true if the specified mouse button is just pressed</returns>
+        /// <inheritdoc/>
         public bool MouseButtonJustPressed(MouseButtons button)
         {
             return JustPressedMouseButtons.HasFlag(button);
         }
-        /// <summary>
-        /// Gets if the specified mouse button is pressed
-        /// </summary>
-        /// <param name="button">Mouse button</param>
-        /// <returns>Returns true if the specified mouse button is pressed</returns>
+        /// <inheritdoc/>
         public bool MouseButtonPressed(MouseButtons button)
         {
             return PressedMouseButtons.HasFlag(button);
         }
-        /// <summary>
-        /// Sets mouse position
-        /// </summary>
-        /// <param name="x">X component</param>
-        /// <param name="y">Y component</param>
+        /// <inheritdoc/>
         public void SetMousePosition(int x, int y)
         {
             SetMousePosition(new Point(x, y));
         }
-        /// <summary>
-        /// Sets mouse position
-        /// </summary>
-        /// <param name="location">Position</param>
+        /// <inheritdoc/>
         public void SetMousePosition(Point location)
         {
-            Cursor.ScreenPosition = location;
+            WindowsCursor.ScreenPosition = location;
 
-            var mousePos = form.PointToClient(Cursor.ScreenPosition);
+            var mousePos = form.PointToClient(WindowsCursor.ScreenPosition);
             lastMousePos = new Point(mousePos.X, mousePos.Y);
         }
 
@@ -393,7 +337,6 @@ namespace Engine
             #region Mouse Wheel
 
             MouseWheelDelta = 0;
-            mouseWheel = 0;
 
             #endregion
 
@@ -404,57 +347,21 @@ namespace Engine
 
             #endregion
         }
-        /// <summary>
-        /// Get keyboard pressed keys
-        /// </summary>
-        /// <returns>Return pressed keys collection</returns>
-        private Keys[] GetPressedKeys()
-        {
-            return NativeMethods.GetPressedKeys();
-        }
-        /// <summary>
-        /// Gets the just pressed key list
-        /// </summary>
-        /// <returns>Returns an array of just pressed keys</returns>
+        /// <inheritdoc/>
         public Keys[] GetJustPressedKeys()
         {
             return currentKeyboardKeys.ToArray();
         }
-        /// <summary>
-        /// Gets the just released key list
-        /// </summary>
-        /// <returns>Returns an array of just released keys</returns>
+        /// <inheritdoc/>
         public Keys[] GetJustReleasedKeys()
         {
             return lastKeyboardKeys.Where(lk => !currentKeyboardKeys.Contains(lk)).ToArray();
         }
 
-        /// <summary>
-        /// When mouse enters form
-        /// </summary>
-        /// <param name="sender">Form</param>
-        /// <param name="e">Event arguments</param>
-        private void OnMouseEnter(object sender, EventArgs e)
+        /// <inheritdoc/>
+        public string GetStrokes()
         {
-            mouseIn = true;
-        }
-        /// <summary>
-        /// When mouse leaves form
-        /// </summary>
-        /// <param name="sender">Form</param>
-        /// <param name="e">Event arguments</param>
-        private void OnMouseLeave(object sender, EventArgs e)
-        {
-            mouseIn = false;
-        }
-        /// <summary>
-        /// When mouse wheel moves
-        /// </summary>
-        /// <param name="sender">Form</param>
-        /// <param name="e">Event arguments</param>
-        private void OnMouseWheel(object sender, MouseEventArgs e)
-        {
-            mouseWheel = e.Delta;
+            return NativeMethods.GetStrokes();
         }
     }
 }

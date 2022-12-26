@@ -366,14 +366,6 @@ namespace Engine
                 factory.MakeWindowAssociation(form.Handle, WindowAssociationFlags.IgnoreAltEnter);
             }
 
-            form.KeyUp += (sender, eventArgs) =>
-            {
-                if (eventArgs.Alt && (int)eventArgs.KeyCode == (int)Keys.Enter)
-                {
-                    swapChain.IsFullScreen = !swapChain.IsFullScreen;
-                }
-            };
-
             #endregion
         }
         /// <summary>

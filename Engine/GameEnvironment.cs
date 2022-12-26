@@ -14,6 +14,15 @@ namespace Engine
         public static readonly int DegreeOfParalelism = (int)Math.Ceiling(Environment.ProcessorCount * 0.75 * 2.0);
 
         /// <summary>
+        /// Frame time
+        /// </summary>
+        public static float FrameTime = 1f / 60f;
+        /// <summary>
+        /// Double click interval
+        /// </summary>
+        public static float DoubleClickTime = 500;
+
+        /// <summary>
         /// Background color
         /// </summary>
         public Color4 Background { get; set; } = Color.Black.ToColor4();
