@@ -8,6 +8,17 @@ namespace Engine
     /// </summary>
     public struct Matrix4X4 : IEquatable<Matrix4X4>
     {
+        /// <inheritdoc/>
+        public static bool operator ==(Matrix4X4 left, Matrix4X4 right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(Matrix4X4 left, Matrix4X4 right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// A <see cref="Matrix"/> with all of its components set to zero.
         /// </summary>
@@ -102,9 +113,9 @@ namespace Engine
         public Matrix4X4(float[] values)
         {
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             if (values.Length != 16)
-                throw new ArgumentOutOfRangeException("values", "There must be sixteen and only sixteen input values for Matrix.");
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be sixteen and only sixteen input values for Matrix.");
 
             M11 = values[0];
             M12 = values[1];
@@ -148,12 +159,12 @@ namespace Engine
                 M22 = value.M22,
                 M23 = value.M23,
                 M24 = value.M24,
-                
+
                 M31 = value.M31,
                 M32 = value.M32,
                 M33 = value.M33,
                 M34 = value.M34,
-                
+
                 M41 = value.M41,
                 M42 = value.M42,
                 M43 = value.M43,
@@ -169,7 +180,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is Matrix4X4))
+            if (obj is not Matrix4X4)
             {
                 return false;
             }
@@ -201,27 +212,26 @@ namespace Engine
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = M11.GetHashCode();
-                hashCode = (hashCode * 397) ^ M12.GetHashCode();
-                hashCode = (hashCode * 397) ^ M13.GetHashCode();
-                hashCode = (hashCode * 397) ^ M14.GetHashCode();
-                hashCode = (hashCode * 397) ^ M21.GetHashCode();
-                hashCode = (hashCode * 397) ^ M22.GetHashCode();
-                hashCode = (hashCode * 397) ^ M23.GetHashCode();
-                hashCode = (hashCode * 397) ^ M24.GetHashCode();
-                hashCode = (hashCode * 397) ^ M31.GetHashCode();
-                hashCode = (hashCode * 397) ^ M32.GetHashCode();
-                hashCode = (hashCode * 397) ^ M33.GetHashCode();
-                hashCode = (hashCode * 397) ^ M34.GetHashCode();
-                hashCode = (hashCode * 397) ^ M41.GetHashCode();
-                hashCode = (hashCode * 397) ^ M42.GetHashCode();
-                hashCode = (hashCode * 397) ^ M43.GetHashCode();
-                hashCode = (hashCode * 397) ^ M44.GetHashCode();
-                return hashCode;
-            }
+            HashCode hash = new HashCode();
+            hash.Add(M11);
+            hash.Add(M12);
+            hash.Add(M13);
+            hash.Add(M14);
+            hash.Add(M21);
+            hash.Add(M22);
+            hash.Add(M23);
+            hash.Add(M24);
+            hash.Add(M31);
+            hash.Add(M32);
+            hash.Add(M33);
+            hash.Add(M34);
+            hash.Add(M41);
+            hash.Add(M42);
+            hash.Add(M43);
+            hash.Add(M44);
+            return hash.ToHashCode();
         }
+
         /// <inheritdoc/>
         public override string ToString()
         {

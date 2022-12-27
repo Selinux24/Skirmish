@@ -1,4 +1,5 @@
 ﻿using Engine;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,7 +15,7 @@ namespace GameLogic.Rules
 
             teamActions = FilterTeamActions(teamActions, phase, actionType);
 
-            IEnumerable<ActionSpecification> soldierActions = new ActionSpecification[] { };
+            IEnumerable<ActionSpecification> soldierActions = Array.Empty<ActionSpecification>();
 
             if (phase == Phase.Movement)
             {
@@ -111,7 +112,7 @@ namespace GameLogic.Rules
         {
             Logger.WriteDebug(nameof(ActionsManager), $"{team?.Name}");
 
-            return new ActionSpecification[] { };
+            return Array.Empty<ActionSpecification>();
         }
 
         #endregion

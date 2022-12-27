@@ -152,7 +152,7 @@ namespace Engine.Animation
         /// </summary>
         /// <param name="skData">Skinning data</param>
         /// <param name="animationPath">Animation path to connect with current path</param>
-        public AnimationPath ConnectTo(ISkinningData skData, AnimationPath animationPath)
+        public static AnimationPath ConnectTo(ISkinningData skData, AnimationPath animationPath)
         {
             if (animationPath?.items?.Any() != true)
             {
@@ -274,7 +274,7 @@ namespace Engine.Animation
         /// <param name="interpolationValue">Path item interpolation value</param>
         /// <param name="atEnd">Returns whether the path is at end or not</param>
         /// <returns>Returns true if the time is into the path</returns>
-        private TimeInItemData TimeInItem(float targetTime, float acumDuration, AnimationPathItem item, bool isLastItem)
+        private static TimeInItemData TimeInItem(float targetTime, float acumDuration, AnimationPathItem item, bool isLastItem)
         {
             var itemTotalDuration = item.TotalDuration * item.TimeDelta;
             if (itemTotalDuration == 0)
@@ -458,7 +458,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is AnimationPathState animationPathState))
+            if (state is not AnimationPathState animationPathState)
             {
                 return;
             }

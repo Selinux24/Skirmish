@@ -55,7 +55,7 @@ namespace Collada.ModularDungeon
         private bool ratActive = false;
         private float ratTime = 5f;
         private readonly float nextRatTime = 3f;
-        private Vector3[] ratHoles = new Vector3[] { };
+        private Vector3[] ratHoles = Array.Empty<Vector3>();
 
         private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
         private ModularSceneryItem selectedItem = null;
@@ -1194,7 +1194,7 @@ namespace Collada.ModularDungeon
                 SetSelectedItem(null);
             }
         }
-        private float CalcItemPickingDistance(PickingRay ray, ModularSceneryItem item)
+        private static float CalcItemPickingDistance(PickingRay ray, ModularSceneryItem item)
         {
             if (item.Item.PickNearest(ray, out var res))
             {
@@ -1411,7 +1411,7 @@ namespace Collada.ModularDungeon
                 File.Delete(fileName);
             }
 
-            Task.WhenAll(UpdateNavigationGraph());
+            _ = UpdateNavigationGraph();
         }
         private void SaveGraphToFile()
         {
@@ -1431,7 +1431,7 @@ namespace Collada.ModularDungeon
 
                         var loader = new LoaderObj();
                         var tris = GetTrianglesForNavigationGraph();
-                        loader.Save(tris, fileName);
+                        LoaderObj.Save(tris, fileName);
                     }
                     catch (Exception ex)
                     {

@@ -282,7 +282,7 @@ namespace Engine.Common
                     .Where(r => r?.Processed == ProcessedStages.Requested)
                     .ToArray();
 
-                float requestTotal = toAssign.Count();
+                float requestTotal = toAssign.Length;
 
                 Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing descriptor requests: {requestTotal}");
 
@@ -304,11 +304,11 @@ namespace Engine.Common
 
                 float total =
                     requestTotal +
-                    instancingList.Count() +
-                    vertexList.Count() +
-                    indexList.Count();
+                    instancingList.Length +
+                    vertexList.Length +
+                    indexList.Length;
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocating {total - requestTotal} buffers: Vtx[{vertexList.Count()}], Idx[{indexList.Count()}], Ins[{instancingList.Count()}]");
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Reallocating {total - requestTotal} buffers: Vtx[{vertexList.Length}], Idx[{indexList.Length}], Ins[{instancingList.Length}]");
 
                 float current = await ReallocateInstances(id, progress, requestCurrent, total, instancingList);
 

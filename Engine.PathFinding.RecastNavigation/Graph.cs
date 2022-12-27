@@ -295,7 +295,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             if (polys.Count < 0)
             {
-                resultPath = new Vector3[] { };
+                resultPath = Array.Empty<Vector3>();
 
                 return false;
             }
@@ -624,7 +624,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         /// <param name="agentQ">Agent query</param>
         /// <param name="tiles">Tile list</param>
-        private void RemoveTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles)
+        private static void RemoveTiles(GraphAgentQuery agentQ, IEnumerable<UpdateTileData> tiles)
         {
             foreach (var tile in tiles)
             {
@@ -780,7 +780,7 @@ namespace Engine.PathFinding.RecastNavigation
             var graphQuery = GetAgentQuery(agent);
             if (graphQuery == null)
             {
-                return new IGraphNode[] { };
+                return Array.Empty<IGraphNode>();
             }
 
             nodes.AddRange(GraphNode.Build(graphQuery.NavMesh));
@@ -793,7 +793,7 @@ namespace Engine.PathFinding.RecastNavigation
             var graphQuery = GetAgentQuery(agent);
             if (graphQuery == null)
             {
-                return new Vector3[] { };
+                return Array.Empty<Vector3>();
             }
 
             var status = CalcPath(
@@ -807,13 +807,13 @@ namespace Engine.PathFinding.RecastNavigation
             }
             else
             {
-                return new Vector3[] { };
+                return Array.Empty<Vector3>();
             }
         }
         /// <inheritdoc/>
         public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
         {
-            IEnumerable<Vector3> result = new Vector3[] { };
+            IEnumerable<Vector3> result = Array.Empty<Vector3>();
 
             await Task.Run(() =>
             {
@@ -929,10 +929,7 @@ namespace Engine.PathFinding.RecastNavigation
                 foreach (var item in instance.Indices)
                 {
                     var cache = AgentQueries.Find(a => a.Agent.Equals(item.Item1))?.NavMesh.TileCache;
-                    if (cache != null)
-                    {
-                        cache.RemoveObstacle(item.Item2);
-                    }
+                    cache?.RemoveObstacle(item.Item2);
                 }
 
                 itemIndices.Remove(instance);
@@ -1036,7 +1033,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="pos">Position</param>
         /// <param name="param">Agent parameters</param>
         /// <returns>Returns the agent</returns>
-        public CrowdAgent AddCrowdAgent(Crowd crowd, Vector3 pos, CrowdAgentParameters param)
+        public static CrowdAgent AddCrowdAgent(Crowd crowd, Vector3 pos, CrowdAgentParameters param)
         {
             return crowd.AddAgent(pos, param);
         }
@@ -1060,7 +1057,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 foreach (var ag in crowd.GetAgents())
                 {
-                    crowd.RequestMoveTarget(ag, poly, nP);
+                    Crowd.RequestMoveTarget(ag, poly, nP);
                 }
             }
         }
@@ -1083,7 +1080,7 @@ namespace Engine.PathFinding.RecastNavigation
                     return;
                 }
 
-                crowd.RequestMoveTarget(crowdAgent, poly, nP);
+                Crowd.RequestMoveTarget(crowdAgent, poly, nP);
             }
         }
 

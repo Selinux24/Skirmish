@@ -526,7 +526,7 @@ namespace Engine
             toDispose.ForEach(s => s.Dispose());
             toDispose.Clear();
 
-            Task.WhenAll(StartScene(sceneToLoad));
+            _ = StartScene(sceneToLoad);
 
             scenes.Add(sceneToLoad);
             scenes.Sort(
@@ -619,10 +619,7 @@ namespace Engine
                     }
                 }
 
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-                }
+                result?.ThrowExceptions();
             });
         }
         /// <summary>
@@ -744,10 +741,7 @@ namespace Engine
                     }
                 }
 
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-                }
+                result?.ThrowExceptions();
             });
         }
         /// <summary>

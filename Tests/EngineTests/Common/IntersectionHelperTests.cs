@@ -377,7 +377,7 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void IntersectableMeshBadConstructorTest()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(new Triangle[] { }); });
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(Array.Empty<Triangle>()); });
         }
 
         [TestMethod()]

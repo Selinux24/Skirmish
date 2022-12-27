@@ -18,20 +18,20 @@ namespace Engine
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
-            if (this.Count == 0)
+            if (Count == 0)
             {
                 base.Add(item);
                 return;
             }
 
-            for (int i = 0; i < base.Count; i++)
+            for (int i = 0; i < Count; i++)
             {
                 if (item.Position < base[i].Position)
                 {
-                    base.Insert(i, item);
+                    Insert(i, item);
                     return;
                 }
             }

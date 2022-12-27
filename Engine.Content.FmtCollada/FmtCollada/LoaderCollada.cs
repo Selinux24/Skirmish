@@ -339,9 +339,9 @@ namespace Engine.Content.FmtCollada
                 foreach (var subMesh in info)
                 {
                     string materialName = FindMaterialTarget(subMesh.Material, dae.LibraryVisualScenes);
-                    if (!string.IsNullOrWhiteSpace(materialName) && modelContent.Materials.ContainsKey(materialName))
+                    if (!string.IsNullOrWhiteSpace(materialName) && modelContent.Materials.TryGetValue(materialName, out var value))
                     {
-                        var mat = modelContent.Materials[materialName];
+                        var mat = value;
 
                         subMesh.Material = materialName;
                         subMesh.SetTextured(mat.DiffuseTexture != null);

@@ -148,12 +148,12 @@ namespace Deferred
 
                     PathFinderDescription = new PathFinderDescription(nmsettings, nmInput);
 
-                    Task.WhenAll(UpdateNavigationGraph()).GetAwaiter().GetResult();
+                    UpdateNavigationGraph().GetAwaiter().GetResult();
 
                     gameReady = true;
                 });
         }
-        private async Task<double> InitializeAndTrace(Func<Task> action)
+        private static async Task<double> InitializeAndTrace(Func<Task> action)
         {
             Stopwatch sw = Stopwatch.StartNew();
             sw.Start();
@@ -1137,7 +1137,7 @@ namespace Deferred
 
             for (int i = 0; i < tankAgents.Count; i++)
             {
-                tankAgents[i].CrowdAgent = graph.AddCrowdAgent(crowd, tankAgents[i].Manipulator.Position, par);
+                tankAgents[i].CrowdAgent = Graph.AddCrowdAgent(crowd, tankAgents[i].Manipulator.Position, par);
 
                 graph.EnableDebugInfo(crowd, tankAgents[i].CrowdAgent);
             }

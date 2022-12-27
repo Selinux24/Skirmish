@@ -355,9 +355,9 @@ namespace Engine
         /// <returns>Return statistic value by key</returns>
         public static object GetStatistics(string key)
         {
-            if (gData.ContainsKey(key))
+            if (gData.TryGetValue(key, out var value))
             {
-                return gData[key];
+                return value;
             }
 
             return null;

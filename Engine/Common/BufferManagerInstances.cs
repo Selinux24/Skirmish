@@ -76,7 +76,7 @@ namespace Engine.Common
         /// Gets the buffer format stride
         /// </summary>
         /// <returns>Returns the buffer format stride in bytes</returns>
-        public int GetStride()
+        public static int GetStride()
         {
             return default(VertexInstancingData).GetStride();
         }

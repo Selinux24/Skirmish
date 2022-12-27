@@ -59,7 +59,7 @@ namespace Engine
 
             for (int i = 0; i < tris.Length; i++)
             {
-                polys[i] = Polygon.FromTriangle(tris[i], orientation);
+                polys[i] = FromTriangle(tris[i], orientation);
             }
 
             return polys;
@@ -97,7 +97,7 @@ namespace Engine
                 int i12 = i11 == 0 ? points.Length - 1 : i11 - 1;
                 int i13 = i11 == (points.Length - 1) ? 0 : i11 + 1;
 
-                if (Polygon.IsReflex(points[i12], points[i11], points[i13]))
+                if (IsReflex(points[i12], points[i11], points[i13]))
                 {
                     numreflex = 1;
                     break;
@@ -310,13 +310,13 @@ namespace Engine
         {
             get
             {
-                return this.points;
+                return points;
             }
             protected set
             {
-                this.points = value;
+                points = value;
 
-                this.Update();
+                Update();
             }
         }
         /// <summary>
@@ -339,21 +339,21 @@ namespace Engine
         {
             get
             {
-                return this.orientation;
+                return orientation;
             }
             set
             {
-                if (this.orientation != GeometricOrientation.None && (this.orientation != value))
+                if (orientation != GeometricOrientation.None && (orientation != value))
                 {
-                    Vector3[] invpoints = new Vector3[this.Count];
+                    Vector3[] invpoints = new Vector3[Count];
 
-                    for (int i = 0; i < this.Count; i++)
+                    for (int i = 0; i < Count; i++)
                     {
-                        invpoints[i] = this.points[this.Count - i - 1];
+                        invpoints[i] = points[Count - i - 1];
                     }
 
-                    this.points = invpoints;
-                    this.orientation = value;
+                    points = invpoints;
+                    orientation = value;
                 }
             }
         }
@@ -366,13 +366,13 @@ namespace Engine
         {
             get
             {
-                return this.Points[i];
+                return Points[i];
             }
             set
             {
-                this.Points[i] = value;
+                Points[i] = value;
 
-                this.Update();
+                Update();
             }
         }
         /// <summary>
@@ -389,8 +389,8 @@ namespace Engine
         /// </summary>
         public Polygon()
         {
-            this.Points = null;
-            this.Hole = false;
+            Points = null;
+            Hole = false;
         }
         /// <summary>
         /// Constructor
@@ -398,8 +398,8 @@ namespace Engine
         /// <param name="count">Number or vertices</param>
         public Polygon(int count)
         {
-            this.Points = new Vector3[count];
-            this.Hole = false;
+            Points = new Vector3[count];
+            Hole = false;
         }
         /// <summary>
         /// Constructor
@@ -407,8 +407,8 @@ namespace Engine
         /// <param name="points">Points</param>
         public Polygon(params Vector3[] points)
         {
-            this.Points = points;
-            this.Hole = false;
+            Points = points;
+            Hole = false;
         }
         /// <summary>
         /// Constructor
@@ -420,8 +420,8 @@ namespace Engine
         {
             Vector3[] tmp = new Vector3[length];
             Array.Copy(points, index, tmp, 0, length);
-            this.Points = tmp;
-            this.Hole = false;
+            Points = tmp;
+            Hole = false;
         }
         /// <summary>
         /// Constructor
@@ -429,10 +429,10 @@ namespace Engine
         /// <param name="source">Source poly</param>
         public Polygon(Polygon source)
         {
-            this.Points = new Vector3[source.Points.Length];
-            Array.Copy(source.points, this.points, source.Points.Length);
+            Points = new Vector3[source.Points.Length];
+            Array.Copy(source.points, points, source.Points.Length);
 
-            this.Hole = source.Hole;
+            Hole = source.Hole;
         }
 
         /// <summary>
@@ -440,20 +440,20 @@ namespace Engine
         /// </summary>
         private void Update()
         {
-            this.Count = 0;
-            this.Convex = false;
-            this.orientation = GeometricOrientation.None;
-            this.Center = Vector3.Zero;
+            Count = 0;
+            Convex = false;
+            orientation = GeometricOrientation.None;
+            Center = Vector3.Zero;
 
-            if (this.points != null && this.points.Length > 0)
+            if (points != null && points.Length > 0)
             {
-                this.Count = this.points.Length;
-                this.Convex = IsConvex(this.points);
-                this.orientation = GetOrientation(this.points);
+                Count = points.Length;
+                Convex = IsConvex(points);
+                orientation = GetOrientation(points);
 
                 Vector3 sum = Vector3.Zero;
-                Array.ForEach(this.points, p => sum += p);
-                this.Center = sum / (float)this.points.Length;
+                Array.ForEach(points, p => sum += p);
+                Center = sum / points.Length;
             }
         }
         /// <summary>
@@ -461,17 +461,17 @@ namespace Engine
         /// </summary>
         private bool Merge(Polygon other, SharedEdge[] sharedEdges, bool mergeConvex)
         {
-            if (this.Count == 0)
+            if (Count == 0)
             {
-                this.points = other.Points;
-                this.Hole = other.Hole;
-                this.Update();
+                points = other.Points;
+                Hole = other.Hole;
+                Update();
 
                 return true;
             }
             else
             {
-                List<Vector3> tmp1 = new List<Vector3>(this.points);
+                List<Vector3> tmp1 = new List<Vector3>(points);
                 List<Vector3> tmp2 = new List<Vector3>(other.points);
 
                 //Remove middle shared points from this poly
@@ -485,7 +485,7 @@ namespace Engine
 
                     if (i < sharedEdges.Length - 1)
                     {
-                        tmp1.Remove(this.points[sharedEdges[i].FirstPoint2]);
+                        tmp1.Remove(points[sharedEdges[i].FirstPoint2]);
                     }
 
                     tmp2.Remove(other.points[sharedEdges[i].SecondPoint2]);
@@ -494,11 +494,11 @@ namespace Engine
                 //Adds other poly to this poly at first shared index
                 tmp1.InsertRange(sharedEdges[0].FirstPoint1 + 1, tmp2);
 
-                if (!mergeConvex || tmp1.Count < 3 || Polygon.IsConvex(tmp1.ToArray()))
+                if (!mergeConvex || tmp1.Count < 3 || IsConvex(tmp1.ToArray()))
                 {
-                    this.points = tmp1.ToArray();
-                    this.Hole = false;
-                    this.Update();
+                    points = tmp1.ToArray();
+                    Hole = false;
+                    Update();
 
                     return true;
                 }
@@ -511,10 +511,10 @@ namespace Engine
         /// </summary>
         public void Clear()
         {
-            this.points = null;
-            this.orientation = GeometricOrientation.None;
-            this.Count = 0;
-            this.Hole = false;
+            points = null;
+            orientation = GeometricOrientation.None;
+            Count = 0;
+            Hole = false;
         }
         /// <summary>
         /// Get the array of edges
@@ -522,17 +522,17 @@ namespace Engine
         /// <returns>Returns the array of edges</returns>
         public Line3D[] GetEdges()
         {
-            Line3D[] edges = new Line3D[this.points.Length];
+            Line3D[] edges = new Line3D[points.Length];
 
-            for (int i = 0; i < this.points.Length; i++)
+            for (int i = 0; i < points.Length; i++)
             {
-                if (i < this.points.Length - 1)
+                if (i < points.Length - 1)
                 {
-                    edges[i] = new Line3D(this.points[i], this.points[i + 1]);
+                    edges[i] = new Line3D(points[i], points[i + 1]);
                 }
                 else
                 {
-                    edges[i] = new Line3D(this.points[i], this.points[0]);
+                    edges[i] = new Line3D(points[i], points[0]);
                 }
             }
 
@@ -545,7 +545,7 @@ namespace Engine
         /// <returns>Returns true if the polygon contains the specified point into the point list</returns>
         public bool Contains(Vector3 point)
         {
-            return Array.Exists(this.points, p => p == point);
+            return Array.Exists(points, p => p == point);
         }
         /// <summary>
         /// Remove the specified vertex list from the polygon point list
@@ -553,23 +553,23 @@ namespace Engine
         /// <param name="list">Vertex list</param>
         public void Remove(Vector3[] list)
         {
-            List<Vector3> tmp = new List<Vector3>(this.points);
+            List<Vector3> tmp = new List<Vector3>(points);
 
             foreach (var item in list)
             {
                 tmp.Remove(item);
             }
 
-            this.points = tmp.ToArray();
+            points = tmp.ToArray();
 
-            this.Update();
+            Update();
         }
         /// <summary>
         /// Remove unused vertices from the polygon point list
         /// </summary>
         public void RemoveUnused()
         {
-            RemoveUnused(new Vector3[] { });
+            RemoveUnused(Array.Empty<Vector3>());
         }
         /// <summary>
         /// Remove unused vertices from the polygon point list
@@ -579,7 +579,7 @@ namespace Engine
         {
             List<Vector3> toRemove = new List<Vector3>();
 
-            Line3D[] edges = this.GetEdges();
+            Line3D[] edges = GetEdges();
 
             for (int i = 1; i < edges.Length; i++)
             {
@@ -596,7 +596,7 @@ namespace Engine
                 }
             }
 
-            if (toRemove.Count > 0) this.Remove(toRemove.ToArray());
+            if (toRemove.Count > 0) Remove(toRemove.ToArray());
         }
         /// <summary>
         /// 
@@ -605,7 +605,7 @@ namespace Engine
         /// </returns>
         public Triangle[] Triangulate()
         {
-            Triangle[] triList = new Triangle[this.Count - 2];
+            Triangle[] triList = new Triangle[Count - 2];
 
             for (int i = 0; i < triList.Length; i++)
             {
@@ -621,12 +621,12 @@ namespace Engine
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            string text = string.Format("Vertices: {0};", this.Count);
+            string text = string.Format("Vertices: {0};", Count);
 
-            if (this.Count > 0)
+            if (Count > 0)
             {
                 string tmp = "";
-                Array.ForEach(this.points, p =>
+                Array.ForEach(points, p =>
                 {
                     if (!string.IsNullOrEmpty(tmp)) tmp += " | ";
 

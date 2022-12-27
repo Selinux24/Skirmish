@@ -38,7 +38,7 @@ namespace Engine.PathFinding.AStar
 
                 if (newCap < Count)
                 {
-                    throw new ArgumentOutOfRangeException("value", "The new capacity is not enough for the elements currently in the queue");
+                    throw new ArgumentOutOfRangeException(nameof(value), "The new capacity is not enough for the elements currently in the queue");
                 }
 
                 capacity = newCap;
@@ -226,9 +226,9 @@ namespace Engine.PathFinding.AStar
         public void CopyTo(PriorityDictionaryItem<TValue, TPriority>[] array, int arrayIndex)
         {
             if (array == null)
-                throw new ArgumentNullException("array");
+                throw new ArgumentNullException(nameof(array));
             if (arrayIndex < 0)
-                throw new ArgumentOutOfRangeException("arrayIndex", "arrayIndex is less than 0");
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), "arrayIndex is less than 0");
             if (array.Rank > 1)
                 throw new ArgumentException("the array is multidimensional");
             if (arrayIndex >= array.Length)

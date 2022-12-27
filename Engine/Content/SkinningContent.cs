@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace Engine.Content
 {
     using Engine.Animation;
@@ -11,7 +12,7 @@ namespace Engine.Content
         /// <summary>
         /// Controller names
         /// </summary>
-        public string[] Controllers { get; set; } = new string[] { };
+        public string[] Controllers { get; set; } = Array.Empty<string>();
         /// <summary>
         /// Skeleton information
         /// </summary>

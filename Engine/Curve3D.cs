@@ -159,6 +159,28 @@ namespace Engine
         }
 
         /// <summary>
+        /// Sets the curve tangents for the current key, by previous and next keys
+        /// </summary>
+        /// <param name="prev">Previous key</param>
+        /// <param name="curr">Current key</param>
+        /// <param name="next">Next key</param>
+        private static void SetCurveKeyTangent(ref CurveKey prev, ref CurveKey curr, ref CurveKey next)
+        {
+            float dt = next.Position - prev.Position;
+            float dv = next.Value - prev.Value;
+            if (Math.Abs(dv) < float.Epsilon)
+            {
+                curr.TangentIn = 0;
+                curr.TangentOut = 0;
+            }
+            else
+            {
+                curr.TangentIn = dv * (curr.Position - prev.Position) / dt;
+                curr.TangentOut = dv * (next.Position - curr.Position) / dt;
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public Curve3D()
@@ -271,27 +293,6 @@ namespace Engine
                 this.cZ.Keys[i] = curr;
             }
 
-        }
-        /// <summary>
-        /// Sets the curve tangents for the current key, by previous and next keys
-        /// </summary>
-        /// <param name="prev">Previous key</param>
-        /// <param name="curr">Current key</param>
-        /// <param name="next">Next key</param>
-        private void SetCurveKeyTangent(ref CurveKey prev, ref CurveKey curr, ref CurveKey next)
-        {
-            float dt = next.Position - prev.Position;
-            float dv = next.Value - prev.Value;
-            if (Math.Abs(dv) < float.Epsilon)
-            {
-                curr.TangentIn = 0;
-                curr.TangentOut = 0;
-            }
-            else
-            {
-                curr.TangentIn = dv * (curr.Position - prev.Position) / dt;
-                curr.TangentOut = dv * (next.Position - curr.Position) / dt;
-            }
         }
         /// <summary>
         /// Samples current path in a vector array

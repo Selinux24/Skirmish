@@ -153,7 +153,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns a tile list</returns>
         public IEnumerable<CompressedTile> GetTiles()
         {
-            return m_tiles?.ToArray() ?? new CompressedTile[] { };
+            return m_tiles?.ToArray() ?? Array.Empty<CompressedTile>();
         }
         /// <summary>
         /// Gets the tiles at the specified coordinates
@@ -648,7 +648,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return status;
         }
-        private bool ProcessObstacleUpdate(TileCacheObstacle ob, CompressedTile r)
+        private static bool ProcessObstacleUpdate(TileCacheObstacle ob, CompressedTile r)
         {
             // Remove handled tile from pending list.
             ob.Pending.Remove(r);
@@ -820,10 +820,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                 TileLayer = tile.Header.TLayer,
             };
 
-            if (m_tmproc != null)
-            {
-                m_tmproc.Process(ref param, bc);
-            }
+            m_tmproc?.Process(ref param, bc);
 
             // Remove existing tile.
             m_navMesh.RemoveTile(tile.Header.TX, tile.Header.TY, tile.Header.TLayer);
@@ -866,14 +863,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Encodes an obstacle id.
         /// </summary>
-        private int EncodeObstacleId(int salt, int it)
+        private static int EncodeObstacleId(int salt, int it)
         {
             return (salt << 16) | it;
         }
         /// <summary>
         /// Decodes an obstacle salt.
         /// </summary>
-        private int DecodeObstacleIdSalt(int r)
+        private static int DecodeObstacleIdSalt(int r)
         {
             int saltMask = (1 << 16) - 1;
             return ((r >> 16) & saltMask);
@@ -881,7 +878,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <summary>
         /// Decodes an obstacle id.
         /// </summary>
-        private int DecodeObstacleIdObstacle(int r)
+        private static int DecodeObstacleIdObstacle(int r)
         {
             int tileMask = (1 << 16) - 1;
             return (r & tileMask);

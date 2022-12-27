@@ -238,7 +238,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the triangle list</returns>
         public IEnumerable<Triangle> GetTriangles()
         {
-            return triangles?.ToArray() ?? new Triangle[] { };
+            return triangles?.ToArray() ?? Array.Empty<Triangle>();
         }
         /// <summary>
         /// Gets the triangles in the specified node

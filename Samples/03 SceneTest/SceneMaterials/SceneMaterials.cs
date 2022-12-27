@@ -285,7 +285,7 @@ namespace SceneTest.SceneMaterials
                 }
             }
         }
-        private IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, MaterialParams matParams, bool nmap)
+        private static IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, MaterialParams matParams, bool nmap)
         {
             List<IMaterialContent> materials = new List<IMaterialContent>();
 
@@ -306,7 +306,7 @@ namespace SceneTest.SceneMaterials
 
             return materials;
         }
-        private IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, MaterialParams matParams, bool nmap)
+        private static IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, MaterialParams matParams, bool nmap)
         {
             if (matParams.Algorithm == SpecularAlgorithms.Phong)
             {
@@ -365,7 +365,7 @@ namespace SceneTest.SceneMaterials
 
             return model;
         }
-        private void SetSpheresPosition(int colorCount, int n, ModelInstanced spheres, Vector3 position, float distance)
+        private static void SetSpheresPosition(int colorCount, int n, ModelInstanced spheres, Vector3 position, float distance)
         {
             int instanceIndex = 0;
             for (int r = 0; r < colorCount; r += n)

@@ -142,7 +142,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 throw new EngineException("Bad header Version value");
             }
 
-            NavMeshParams nvParams = settings.GetSoloNavMeshParams(header.Bounds, header.PolyCount);
+            NavMeshParams nvParams = BuildSettings.GetSoloNavMeshParams(header.Bounds, header.PolyCount);
 
             var nm = new NavMesh(nvParams);
             nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
@@ -680,10 +680,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             RemoveTiles(x, y);
 
-            if (TileCache != null)
-            {
-                TileCache.RemoveTiles(x, y);
-            }
+            TileCache?.RemoveTiles(x, y);
         }
 
         /// <summary>
@@ -1623,7 +1620,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="dir">Direction</param>
         /// <param name="neiarea">Neighbour area</param>
         /// <returns>Returns the limit bounds</returns>
-        private Vector2Int? CompressPortalLimits(Vector3 va, Vector3 vb, int dir, Vector2 neiarea)
+        private static Vector2Int? CompressPortalLimits(Vector3 va, Vector3 vb, int dir, Vector2 neiarea)
         {
             // Compress portal limits to an integer value.
             if (dir == 0 || dir == 4)
@@ -1978,7 +1975,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="pos">Position</param>
         /// <param name="onlyBoundary">Use only boundaries or not</param>
         /// <param name="closest">Resulting closest point</param>
-        private void ClosestPointOnDetailEdges(MeshTile tile, Poly poly, Vector3 pos, bool onlyBoundary, out Vector3 closest)
+        private static void ClosestPointOnDetailEdges(MeshTile tile, Poly poly, Vector3 pos, bool onlyBoundary, out Vector3 closest)
         {
             var pd = tile.GetDetailMesh(poly);
 
@@ -2037,7 +2034,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="pos">Position</param>
         /// <param name="height">Resulting height</param>
         /// <returns>Returns true if the height were found</returns>
-        public bool GetPolyHeight(MeshTile tile, Poly poly, Vector3 pos, out float height)
+        public static bool GetPolyHeight(MeshTile tile, Poly poly, Vector3 pos, out float height)
         {
             height = 0;
 

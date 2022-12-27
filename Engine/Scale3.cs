@@ -62,11 +62,11 @@ namespace Engine
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
             if (values.Length != 3)
             {
-                throw new ArgumentOutOfRangeException("values", "There must be three and only three input values for Scale3.");
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Scale3.");
             }
 
             X = values[0];
@@ -121,7 +121,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is Scale3))
+            if (obj is not Scale3)
                 return false;
 
             var strongValue = (Scale3)obj;
@@ -135,14 +135,9 @@ namespace Engine
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = X.GetHashCode();
-                hashCode = (hashCode * 397) ^ Y.GetHashCode();
-                hashCode = (hashCode * 397) ^ Z.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(X, Y, Z);
         }
+
         /// <inheritdoc/>
         public override string ToString()
         {

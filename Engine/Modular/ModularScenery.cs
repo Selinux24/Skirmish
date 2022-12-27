@@ -1422,7 +1422,7 @@ namespace Engine.Modular
         {
             if (!triggers.ContainsKey(item.Item))
             {
-                return new ModularSceneryTrigger[] { };
+                return Array.Empty<ModularSceneryTrigger>();
             }
 
             return triggers[item.Item]
@@ -1470,10 +1470,8 @@ namespace Engine.Modular
             item.CurrentState = trigger.StateTo;
 
             //Execute the action in the item first
-            if (animations.ContainsKey(item.Item) && animations[item.Item].ContainsKey(trigger.AnimationPlan))
+            if (animations.TryGetValue(item.Item, out var anim) && anim.TryGetValue(trigger.AnimationPlan, out var plan))
             {
-                var plan = animations[item.Item]?[trigger.AnimationPlan];
-
                 item.Item.AnimationController.ReplacePlan(plan);
                 item.Item.AnimationController.Start();
                 item.Item.InvalidateCache();
@@ -1658,7 +1656,7 @@ namespace Engine.Modular
             /// <param name="target">Target item</param>
             /// <param name="s">Source index</param>
             /// <param name="t">Target index</param>
-            private void FindPortals(Persistence.AssetMap assetConfiguration, AssetMapItem source, AssetMapItem target, int s, int t)
+            private static void FindPortals(AssetMap assetConfiguration, AssetMapItem source, AssetMapItem target, int s, int t)
             {
                 var sourceConf = assetConfiguration.Assets.FirstOrDefault(a => a.Name == source.Name);
                 if (sourceConf?.Connections?.Any() == true)
@@ -1690,7 +1688,7 @@ namespace Engine.Modular
             /// <param name="connection">Connection</param>
             /// <param name="transform">Transform to apply</param>
             /// <returns>Returns the connector information</returns>
-            private ConnectorInfo ReadConnection(AssetConnection connection, Matrix transform)
+            private static ConnectorInfo ReadConnection(AssetConnection connection, Matrix transform)
             {
                 return new ConnectorInfo
                 {

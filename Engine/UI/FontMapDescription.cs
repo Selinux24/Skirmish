@@ -37,7 +37,7 @@ namespace Engine.UI
         /// <summary>
         /// Generated texture stream
         /// </summary>
-        public MemoryStream ImageStream;
+        public MemoryStream ImageStream { get; set; }
 
         /// <summary>
         /// Gets the font's white space size

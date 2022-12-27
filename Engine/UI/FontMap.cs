@@ -223,12 +223,11 @@ namespace Engine.UI
                 return fMap;
             }
 
-            fMap = new FontMap()
+            fMap = new FontMap
             {
                 FontName = fontName,
+                Texture = await game.ResourceManager.RequestResource(fontName, false)
             };
-
-            fMap.Texture = await game.ResourceManager.RequestResource(fontName, false);
 
             string fontMapName = Path.Combine(contentPath, fontMapping.MapFile);
 
@@ -242,7 +241,7 @@ namespace Engine.UI
 
                 if (charMap.StartsWith("size:", StringComparison.OrdinalIgnoreCase))
                 {
-                    Vector2 textureSize = FromMap(charMap.Substring(6));
+                    Vector2 textureSize = FromMap(charMap[6..]);
 
                     fMap.TextureWidth = (int)textureSize.X;
                     fMap.TextureHeight = (int)textureSize.Y;
@@ -254,8 +253,8 @@ namespace Engine.UI
                 int rightBottomIndex = charMap.IndexOf(";", leftTopIndex) + 1;
 
                 char c = charMap[0];
-                Vector2 topLeft = FromMap(charMap.Substring(leftTopIndex, rightBottomIndex - leftTopIndex));
-                Vector2 bottomRight = FromMap(charMap.Substring(rightBottomIndex));
+                Vector2 topLeft = FromMap(charMap[leftTopIndex..rightBottomIndex]);
+                Vector2 bottomRight = FromMap(charMap[rightBottomIndex..]);
 
                 var chr = new FontMapChar()
                 {
@@ -460,8 +459,8 @@ namespace Engine.UI
             {
                 return new FontMapSentenceDescriptor
                 {
-                    Vertices = new VertexFont[] { },
-                    Indices = new uint[] { },
+                    Vertices = Array.Empty<VertexFont>(),
+                    Indices = Array.Empty<uint>(),
                     Size = Vector2.Zero,
                 };
             }

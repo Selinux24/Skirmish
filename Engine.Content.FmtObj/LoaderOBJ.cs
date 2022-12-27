@@ -22,6 +22,76 @@ namespace Engine.Content.FmtObj
         public static CultureInfo Locale { get; set; } = CultureInfo.InvariantCulture;
 
         /// <summary>
+        /// Loads a model content list from resources
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="fileName">File name</param>
+        /// <param name="transform">Transform</param>
+        /// <param name="materials">Resulting material list</param>
+        /// <returns>Returns a list of model contents</returns>
+        private static IEnumerable<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform, out IEnumerable<Material> materials)
+        {
+            List<Material> matList = new List<Material>();
+
+            var modelList = ContentManager.FindContent(contentFolder, fileName);
+            if (modelList.Any())
+            {
+                List<SubMeshContent> res = new List<SubMeshContent>();
+
+                foreach (var model in modelList)
+                {
+                    Reader.LoadObj(model, contentFolder, transform, out var contentList, out var mats);
+
+                    matList.AddRange(mats);
+                    res.AddRange(contentList);
+                }
+
+                materials = matList.ToArray();
+
+                return res.ToArray();
+            }
+            else
+            {
+                throw new EngineException(string.Format("Model not found: {0}", fileName));
+            }
+        }
+        /// <summary>
+        /// Saves a triangle list in a file
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="fileName">File name</param>
+        public static void Save(IEnumerable<Triangle> triangles, string fileName)
+        {
+            // Write the file
+            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
+            {
+                Writer.WriteObj(wr, triangles);
+            }
+        }
+        /// <summary>
+        /// Saves a model list into a file
+        /// </summary>
+        /// <param name="models"></param>
+        /// <param name="fileName"></param>
+        public static void Save(IEnumerable<ContentData> models, string fileName)
+        {
+            // Write the file
+            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
+            {
+                foreach (var geo in models)
+                {
+                    foreach (var g in geo.Geometry.Values)
+                    {
+                        foreach (var s in g.Values)
+                        {
+                            Writer.WriteObj(wr, s);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public LoaderObj()
@@ -65,7 +135,7 @@ namespace Engine.Content.FmtObj
             var meshList = Load(contentFolder, content.ModelFileName, transform, out var materials);
             if (!meshList.Any())
             {
-                return new ContentData[] { };
+                return Array.Empty<ContentData>();
             }
 
             ContentData m = new ContentData();
@@ -99,76 +169,6 @@ namespace Engine.Content.FmtObj
             });
 
             return new[] { m };
-        }
-        /// <summary>
-        /// Loads a model content list from resources
-        /// </summary>
-        /// <param name="contentFolder">Content folder</param>
-        /// <param name="fileName">File name</param>
-        /// <param name="transform">Transform</param>
-        /// <param name="materials">Resulting material list</param>
-        /// <returns>Returns a list of model contents</returns>
-        private IEnumerable<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform, out IEnumerable<Material> materials)
-        {
-            List<Material> matList = new List<Material>();
-
-            var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList.Any())
-            {
-                List<SubMeshContent> res = new List<SubMeshContent>();
-
-                foreach (var model in modelList)
-                {
-                    Reader.LoadObj(model, contentFolder, transform, out var contentList, out var mats);
-
-                    matList.AddRange(mats);
-                    res.AddRange(contentList);
-                }
-
-                materials = matList.ToArray();
-
-                return res.ToArray();
-            }
-            else
-            {
-                throw new EngineException(string.Format("Model not found: {0}", fileName));
-            }
-        }
-
-        /// <summary>
-        /// Saves a triangle list in a file
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <param name="fileName">File name</param>
-        public void Save(IEnumerable<Triangle> triangles, string fileName)
-        {
-            // Write the file
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                Writer.WriteObj(wr, triangles);
-            }
-        }
-        /// <summary>
-        /// Saves a model list into a file
-        /// </summary>
-        /// <param name="models"></param>
-        /// <param name="fileName"></param>
-        public void Save(IEnumerable<ContentData> models, string fileName)
-        {
-            // Write the file
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                foreach (var geo in models)
-                {
-                    foreach (var g in geo.Geometry.Values)
-                    {
-                        foreach (var s in g.Values)
-                        {
-                            Writer.WriteObj(wr, s);
-                        }
-                    }
-                }
-            }
         }
     }
 

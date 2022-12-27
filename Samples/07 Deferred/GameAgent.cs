@@ -2,6 +2,7 @@
 using Engine.Common;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation.Detour.Crowds;
+using System;
 using System.Collections.Generic;
 
 namespace Deferred
@@ -107,7 +108,7 @@ namespace Deferred
         {
             get
             {
-                return model?.Lights ?? new ISceneLight[] { };
+                return model?.Lights ?? Array.Empty<ISceneLight>();
             }
         }
 
@@ -190,7 +191,7 @@ namespace Deferred
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is GameAgentState gameAgentState))
+            if (state is not GameAgentState gameAgentState)
             {
                 return;
             }

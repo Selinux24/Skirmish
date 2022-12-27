@@ -1,4 +1,5 @@
 ﻿using SharpDX.D3DCompiler;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -301,7 +302,7 @@ namespace Engine
         /// <summary>
         /// Gets the shader compilation flags
         /// </summary>
-        private ShaderFlags GetShaderCompilationFlags()
+        private static ShaderFlags GetShaderCompilationFlags()
         {
 #if DEBUG
             return ShaderFlags.Debug | ShaderFlags.SkipOptimization | ShaderFlags.DebugNameForSource;
@@ -1132,7 +1133,7 @@ namespace Engine
 
                 var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
 
-                return new EngineGeometryShader(name, new GeometryShader(device, cmpResult.Bytecode, so, new int[] { }, 0), cmpResult.Bytecode);
+                return new EngineGeometryShader(name, new GeometryShader(device, cmpResult.Bytecode, so, Array.Empty<int>(), 0), cmpResult.Bytecode);
             }
         }
         /// <summary>
@@ -1152,7 +1153,7 @@ namespace Engine
                 {
                     var so = soElements.Select(s => (StreamOutputElement)s).ToArray();
 
-                    return new EngineGeometryShader(name, new GeometryShader(device, code.Data, so, new int[] { }, 0), code);
+                    return new EngineGeometryShader(name, new GeometryShader(device, code.Data, so, Array.Empty<int>(), 0), code);
                 }
             }
         }

@@ -63,7 +63,7 @@ namespace Engine.Audio
         {
             get
             {
-                return this.Speakers.HasFlag(Speakers.LowFrequency);
+                return Speakers.HasFlag(Speakers.LowFrequency);
             }
         }
 
@@ -75,13 +75,13 @@ namespace Engine.Audio
         {
             get
             {
-                this.MasteringVoice.GetVolume(out float masterVolume);
+                MasteringVoice.GetVolume(out float masterVolume);
                 return masterVolume;
             }
             set
             {
                 float masterVolume = MathUtil.Clamp(value, 0.0f, 1.0f);
-                this.MasteringVoice.SetVolume(masterVolume);
+                MasteringVoice.SetVolume(masterVolume);
             }
         }
         /// <summary>
@@ -99,11 +99,11 @@ namespace Engine.Audio
 
                 if (useMasteringLimiter)
                 {
-                    this.EnableMasteringLimiter();
+                    EnableMasteringLimiter();
                 }
                 else
                 {
-                    this.DisableMasteringLimiter();
+                    DisableMasteringLimiter();
                 }
             }
         }
@@ -119,42 +119,42 @@ namespace Engine.Audio
 #else
             audio2Flags = XAudio2Flags.None;
 #endif
-            this.device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
-            this.device.StopEngine();
+            device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
+            device.StopEngine();
 #if DEBUG
             DebugConfiguration debugConfiguration = new DebugConfiguration()
             {
                 TraceMask = (int)(LogType.Errors | LogType.Warnings),
                 BreakMask = (int)LogType.Errors,
             };
-            this.device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
+            device.SetDebugConfiguration(debugConfiguration, IntPtr.Zero);
 #endif
 
-            this.MasteringVoice = new MasteringVoice(this.device, 2, sampleRate);
+            MasteringVoice = new MasteringVoice(device, 2, sampleRate);
 
-            if (this.device.Version == XAudio2Version.Version27)
+            if (device.Version == XAudio2Version.Version27)
             {
-                var details = this.MasteringVoice.VoiceDetails;
-                this.InputSampleRate = details.InputSampleRate;
-                this.InputChannelCount = details.InputChannelCount;
-                int channelMask = this.MasteringVoice.ChannelMask;
-                this.Speakers = (Speakers)channelMask;
+                var details = MasteringVoice.VoiceDetails;
+                InputSampleRate = details.InputSampleRate;
+                InputChannelCount = details.InputChannelCount;
+                int channelMask = MasteringVoice.ChannelMask;
+                Speakers = (Speakers)channelMask;
             }
             else
             {
-                this.MasteringVoice.GetVoiceDetails(out var details);
-                this.InputSampleRate = details.InputSampleRate;
-                this.InputChannelCount = details.InputChannelCount;
-                this.MasteringVoice.GetChannelMask(out int channelMask);
-                this.Speakers = (Speakers)channelMask;
+                MasteringVoice.GetVoiceDetails(out var details);
+                InputSampleRate = details.InputSampleRate;
+                InputChannelCount = details.InputChannelCount;
+                MasteringVoice.GetChannelMask(out int channelMask);
+                Speakers = (Speakers)channelMask;
             }
 
-            if (this.Speakers == Speakers.None)
+            if (Speakers == Speakers.None)
             {
-                this.Speakers = Speakers.FrontLeft | Speakers.FrontRight;
+                Speakers = Speakers.FrontLeft | Speakers.FrontRight;
             }
 
-            this.MasteringVoice.SetVolume(1f);
+            MasteringVoice.SetVolume(1f);
         }
         /// <summary>
         /// Destructor
@@ -291,12 +291,12 @@ namespace Engine.Audio
         {
             if (release < MasteringLimiter.MinimumRelease || release > MasteringLimiter.MaximumRelease)
             {
-                throw new ArgumentOutOfRangeException("release", $"Must be a value between {MasteringLimiter.MinimumRelease} and {MasteringLimiter.MaximumRelease}");
+                throw new ArgumentOutOfRangeException(nameof(release), $"Must be a value between {MasteringLimiter.MinimumRelease} and {MasteringLimiter.MaximumRelease}");
             }
 
             if (loudness < MasteringLimiter.MinimumLoudness || loudness > MasteringLimiter.MaximumLoudness)
             {
-                throw new ArgumentOutOfRangeException("loudness", $"Must be a value between {MasteringLimiter.MinimumLoudness} and {MasteringLimiter.MaximumLoudness}");
+                throw new ArgumentOutOfRangeException(nameof(loudness), $"Must be a value between {MasteringLimiter.MinimumLoudness} and {MasteringLimiter.MaximumLoudness}");
             }
 
             if (useMasteringLimiter)
@@ -307,7 +307,7 @@ namespace Engine.Audio
                     Release = release
                 };
 
-                this.MasteringVoice?.SetEffectParameters(0, parameters);
+                MasteringVoice?.SetEffectParameters(0, parameters);
             }
         }
         /// <summary>
@@ -315,20 +315,20 @@ namespace Engine.Audio
         /// </summary>
         private void EnableMasteringLimiter()
         {
-            if (this.masteringLimiter == null)
+            if (masteringLimiter == null)
             {
-                this.masteringLimiter = new MasteringLimiter(this.device);
-                this.MasteringVoice.SetEffectChain(new EffectDescriptor(this.masteringLimiter));
+                masteringLimiter = new MasteringLimiter(device);
+                MasteringVoice.SetEffectChain(new EffectDescriptor(masteringLimiter));
             }
 
-            this.MasteringVoice?.EnableEffect(0);
+            MasteringVoice?.EnableEffect(0);
         }
         /// <summary>
         /// Disables the mastering limiter
         /// </summary>
         private void DisableMasteringLimiter()
         {
-            this.MasteringVoice?.DisableEffect(0);
+            MasteringVoice?.DisableEffect(0);
         }
 
         /// <summary>
@@ -340,12 +340,12 @@ namespace Engine.Audio
         /// <param name="dspSettings">DSP settings</param>
         internal void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
         {
-            if (this.x3DInstance == null)
+            if (x3DInstance == null)
             {
-                this.x3DInstance = new X3DAudio(this.Speakers, X3DAudio.SpeedOfSound);
+                x3DInstance = new X3DAudio(this.Speakers, X3DAudio.SpeedOfSound);
             }
 
-            this.x3DInstance.Calculate(listener, emitter, flags, dspSettings);
+            x3DInstance.Calculate(listener, emitter, flags, dspSettings);
         }
     }
 }

@@ -1252,7 +1252,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     if (ni == -1)
                     {
                         // Should not happen.
-                        return new int[] { };
+                        return Array.Empty<int>();
                     }
                     x = nx;
                     y = ny;
@@ -1348,7 +1348,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     if (ni == -1)
                     {
                         // Should not happen.
-                        return new Int4[] { };
+                        return Array.Empty<Int4>();
                     }
                     x = nx;
                     y = ny;

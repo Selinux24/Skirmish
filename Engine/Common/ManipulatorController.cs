@@ -116,7 +116,7 @@ namespace Engine.Common
         /// <returns>Returns the current controller path</returns>
         public IEnumerable<Vector3> SamplePath(float sampleTime = 0.1f)
         {
-            return path?.SamplePath(sampleTime) ?? new Vector3[] { };
+            return path?.SamplePath(sampleTime) ?? Array.Empty<Vector3>();
         }
 
         /// <inheritdoc/>

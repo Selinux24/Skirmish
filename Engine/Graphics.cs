@@ -373,7 +373,7 @@ namespace Engine
         /// </summary>
         /// <param name="factory">Factory</param>
         /// <returns>Returns the best adapter index</returns>
-        private int SelectBestAdapter(Factory5 factory)
+        private static int SelectBestAdapter(Factory5 factory)
         {
             int bestIndex = 0;
 
@@ -710,7 +710,7 @@ namespace Engine
             var rtv = renderTargets?.GetRenderTargets() ?? Enumerable.Empty<RenderTargetView1>();
             var rtvCount = rtv.Count();
 
-            deviceContext.OutputMerger.SetTargets(dsv, 0, new UnorderedAccessView[] { }, new int[] { }, rtv.ToArray());
+            deviceContext.OutputMerger.SetTargets(dsv, 0, Array.Empty<UnorderedAccessView>(), Array.Empty<int>(), rtv.ToArray());
 
             if (clearRT && rtvCount > 0)
             {

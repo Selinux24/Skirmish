@@ -109,7 +109,7 @@ namespace Engine.Collada
             }
             else
             {
-                return new T[] { };
+                return Array.Empty<T>();
             }
         }
         internal static string ConvertToString<T>(T value)
@@ -124,7 +124,7 @@ namespace Engine.Collada
 
                 for (int i = 0; i < values.Length; i++)
                 {
-                    if (i > 0) res.Append(" ");
+                    if (i > 0) res.Append(' ');
 
                     res.Append(string.Format(CultureInfo.InvariantCulture, "{0}", values[i]));
                 }

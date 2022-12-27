@@ -45,11 +45,11 @@ namespace Engine.Content
         /// <summary>
         /// Vertices
         /// </summary>
-        public VertexData[] Vertices { get; private set; } = new VertexData[] { };
+        public VertexData[] Vertices { get; private set; } = Array.Empty<VertexData>();
         /// <summary>
         /// Indices
         /// </summary>
-        public uint[] Indices { get; private set; } = new uint[] { };
+        public uint[] Indices { get; private set; } = Array.Empty<uint>();
         /// <summary>
         /// Material
         /// </summary>
@@ -147,7 +147,7 @@ namespace Engine.Content
         /// <param name="vertices">Vertex list</param>
         public void SetVertices(IEnumerable<VertexData> vertices)
         {
-            Vertices = new VertexData[] { };
+            Vertices = Array.Empty<VertexData>();
             VertexType = VertexTypes.Unknown;
 
             if (vertices?.Any() == true)
@@ -162,7 +162,7 @@ namespace Engine.Content
         /// <param name="indices">Index list</param>
         public void SetIndices(IEnumerable<uint> indices)
         {
-            Indices = new uint[] { };
+            Indices = Array.Empty<uint>();
 
             if (indices?.Any() == true)
             {
@@ -320,7 +320,7 @@ namespace Engine.Content
             else
             {
                 var vertices = await GeometryUtil.ConstraintVerticesAsync(constraint.Value, Vertices);
-                var indices = new uint[] { };
+                var indices = Array.Empty<uint>();
 
                 return (vertices, indices);
             }

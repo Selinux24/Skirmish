@@ -73,11 +73,11 @@ namespace Engine
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
             if (values.Length != 4)
             {
-                throw new ArgumentOutOfRangeException("values", "There must be four and only four input values for RotationQ.");
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for RotationQ.");
             }
 
             X = values[0];
@@ -133,7 +133,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is RotationQ))
+            if (obj is not RotationQ)
                 return false;
 
             var strongValue = (RotationQ)obj;
@@ -147,15 +147,9 @@ namespace Engine
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = X.GetHashCode();
-                hashCode = (hashCode * 397) ^ Y.GetHashCode();
-                hashCode = (hashCode * 397) ^ Z.GetHashCode();
-                hashCode = (hashCode * 397) ^ W.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(X, Y, Z, W);
         }
+
         /// <inheritdoc/>
         public override string ToString()
         {

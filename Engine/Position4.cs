@@ -65,11 +65,11 @@ namespace Engine
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
             if (values.Length != 4)
             {
-                throw new ArgumentOutOfRangeException("values", "There must be three and only four input values for Position4.");
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only four input values for Position4.");
             }
 
             X = values[0];
@@ -125,7 +125,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is Position4))
+            if (obj is not Position4)
                 return false;
 
             var strongValue = (Position4)obj;
@@ -139,14 +139,9 @@ namespace Engine
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = X.GetHashCode();
-                hashCode = (hashCode * 397) ^ Y.GetHashCode();
-                hashCode = (hashCode * 397) ^ Z.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(X, Y, Z);
         }
+
         /// <inheritdoc/>
         public override string ToString()
         {

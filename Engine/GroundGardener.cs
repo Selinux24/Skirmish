@@ -32,7 +32,7 @@ namespace Engine
             /// <summary>
             /// Foliage generated data
             /// </summary>
-            private IEnumerable<VertexBillboard> foliageData = new VertexBillboard[] { };
+            private IEnumerable<VertexBillboard> foliageData = Array.Empty<VertexBillboard>();
 
             /// <summary>
             /// Foliage populating flag
@@ -560,7 +560,7 @@ namespace Engine
         /// <summary>
         /// Last visible node collection
         /// </summary>
-        private IEnumerable<QuadTreeNode> visibleNodes = new QuadTreeNode[] { };
+        private IEnumerable<QuadTreeNode> visibleNodes = Array.Empty<QuadTreeNode>();
         /// <summary>
         /// Counter of the elapsed seconds between the last node sorting
         /// </summary>
@@ -1017,9 +1017,9 @@ namespace Engine
         /// <param name="channelCount">Channel count</param>
         private IEnumerable<FoliagePatch> GetNodePatches(QuadTreeNode node, int channelCount)
         {
-            if (foliagePatches.ContainsKey(node))
+            if (foliagePatches.TryGetValue(node, out var value))
             {
-                return foliagePatches[node];
+                return value;
             }
 
             foliagePatches.Add(node, new List<FoliagePatch>());

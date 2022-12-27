@@ -97,7 +97,7 @@ namespace Engine
         /// <summary>
         /// Gets the current model lights collection
         /// </summary>
-        public IEnumerable<ISceneLight> Lights { get; private set; } = new ISceneLight[] { };
+        public IEnumerable<ISceneLight> Lights { get; private set; } = Array.Empty<ISceneLight>();
         /// <inheritdoc/>
         public int ModelPartCount
         {
@@ -164,7 +164,7 @@ namespace Engine
                 throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
             }
 
-            if (dependences.Any(i => i < -1 || i > dependences.Count() - 1))
+            if (dependences.Any(i => i < -1 || i > dependences.Length - 1))
             {
                 throw new EngineException("Bad transform dependences indices.");
             }
@@ -629,7 +629,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is ModelState modelState))
+            if (state is not ModelState modelState)
             {
                 return;
             }

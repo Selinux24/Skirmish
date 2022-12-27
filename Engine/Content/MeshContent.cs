@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Linq;
 
 namespace Engine.Content
@@ -15,7 +16,7 @@ namespace Engine.Content
         /// <summary>
         /// Sub mesh names
         /// </summary>
-        public string[] SubMeshes { get; set; } = new string[] { };
+        public string[] SubMeshes { get; set; } = Array.Empty<string>();
 
         /// <inheritdoc/>
         public override string ToString()

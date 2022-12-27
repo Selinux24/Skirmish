@@ -8,7 +8,7 @@ namespace Engine
 
     }
 
-    public interface IGameServiceFactory<T> : IGameServiceFactory
+    public interface IGameServiceFactory<out T> : IGameServiceFactory
     {
         T Instance();
     }

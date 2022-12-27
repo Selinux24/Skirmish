@@ -372,7 +372,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="generationBounds">Generation bounds</param>
         /// <param name="polyCount">Maximum polygon count</param>
         /// <returns>Returns the navigation mesh parameters</returns>
-        internal NavMeshParams GetSoloNavMeshParams(BoundingBox generationBounds, int polyCount)
+        internal static NavMeshParams GetSoloNavMeshParams(BoundingBox generationBounds, int polyCount)
         {
             return new NavMeshParams
             {

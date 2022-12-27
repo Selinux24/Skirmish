@@ -97,7 +97,6 @@ namespace Engine
                 case ".xml":
                     SerializeXmlToFile(obj, fileName, nameSpace);
                     break;
-                case ".json":
                 default:
                     SerializeJsonToFile(obj, fileName);
                     break;
@@ -112,20 +111,12 @@ namespace Engine
         /// <returns>Returns the deserialized object</returns>
         public static T DeserializeFromFile<T>(string fileName, string nameSpace = null)
         {
-            T result;
-
             string extension = Path.GetExtension(fileName);
-            switch (extension)
+            var result = extension switch
             {
-                case ".xml":
-                    result = DeserializeXmlFromFile<T>(fileName, nameSpace);
-                    break;
-                case ".json":
-                default:
-                    result = DeserializeJsonFromFile<T>(fileName);
-                    break;
-            }
-
+                ".xml" => DeserializeXmlFromFile<T>(fileName, nameSpace),
+                _ => DeserializeJsonFromFile<T>(fileName),
+            };
             return result;
         }
 
@@ -145,9 +136,8 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
-        /// <param name="nameSpace">Name space</param>
         /// <returns>Returns a byte array</returns>
-        public static byte[] SerializeXml<T>(this T obj, string nameSpace = null)
+        public static byte[] SerializeXml<T>(this T obj)
         {
             using (var mso = SerializeXmlToStream(obj))
             {

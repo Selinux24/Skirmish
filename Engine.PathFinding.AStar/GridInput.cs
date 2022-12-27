@@ -81,7 +81,7 @@ namespace Engine.PathFinding.AStar
                     }
                     else
                     {
-                        info = new GridCollisionInfo[] { };
+                        info = Array.Empty<GridCollisionInfo>();
                     }
 
                     dictionary.Add(new Vector2(x, z), info);
@@ -113,7 +113,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="nodeSize">Node size</param>
         /// <param name="collisionValues">Collision values</param>
         /// <returns>Generates a grid node list</returns>
-        private IEnumerable<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
+        private static IEnumerable<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
         {
             List<GridNode> result = new List<GridNode>();
 
@@ -173,7 +173,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="c2">Collision info 3</param>
         /// <param name="c3">Collision info 4</param>
         /// <returns>Returns a node list from unique collision data</returns>
-        private GridNode UniqueCollision(GridCollisionInfo c0, GridCollisionInfo c1, GridCollisionInfo c2, GridCollisionInfo c3)
+        private static GridNode UniqueCollision(GridCollisionInfo c0, GridCollisionInfo c1, GridCollisionInfo c2, GridCollisionInfo c3)
         {
             Vector3 va = (
                 c0.Triangle.Normal +
@@ -200,16 +200,16 @@ namespace Engine.PathFinding.AStar
         /// <param name="coor2">Collision info 3</param>
         /// <param name="coor3">Collision info 4</param>
         /// <returns>Returns a node list from multiple collision data</returns>
-        private IEnumerable<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
+        private static IEnumerable<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
         {
             List<GridNode> result = new List<GridNode>();
 
             for (int i = 0; i < max; i++)
             {
-                var c0 = i < coor0.Length ? coor0[i] : coor0[coor0.Length - 1];
-                var c1 = i < coor1.Length ? coor1[i] : coor1[coor1.Length - 1];
-                var c2 = i < coor2.Length ? coor2[i] : coor2[coor2.Length - 1];
-                var c3 = i < coor3.Length ? coor3[i] : coor3[coor3.Length - 1];
+                var c0 = i < coor0.Length ? coor0[i] : coor0[^1];
+                var c1 = i < coor1.Length ? coor1[i] : coor1[^1];
+                var c2 = i < coor2.Length ? coor2[i] : coor2[^1];
+                var c3 = i < coor3.Length ? coor3[i] : coor3[^1];
 
                 float fmin = Helper.Min(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
                 float fmax = Helper.Max(c0.Point.Y, c1.Point.Y, c2.Point.Y, c3.Point.Y);
@@ -228,7 +228,7 @@ namespace Engine.PathFinding.AStar
         /// Fill node connections
         /// </summary>
         /// <param name="nodes">Grid nodes</param>
-        private void FillConnections(IEnumerable<GridNode> nodes)
+        private static void FillConnections(IEnumerable<GridNode> nodes)
         {
             for (int i = 0; i < nodes.Count(); i++)
             {

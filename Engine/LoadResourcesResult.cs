@@ -50,7 +50,7 @@ namespace Engine
                 .Select(r => r.Exception)
                 .ToArray();
 
-            return exList ?? new Exception[] { };
+            return exList ?? Array.Empty<Exception>();
         }
     }
 

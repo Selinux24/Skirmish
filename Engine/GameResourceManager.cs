@@ -198,11 +198,11 @@ namespace Engine
                     return;
                 }
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Count()}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Processing resource requests: {pendingRequests.Length}");
 
                 ProcessPendingRequests(id, progress, pendingRequests);
 
-                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Count()}");
+                Logger.WriteTrace(this, $"Loading Group {id ?? "no-id"} => Resource requests processed: {pendingRequests.Length}");
             }
             catch (Exception ex)
             {
@@ -386,9 +386,9 @@ namespace Engine
         /// <param name="resource">Resource content</param>
         private void SetGlobalResource(string name, EngineShaderResourceView resource)
         {
-            if (globalResources.ContainsKey(name))
+            if (globalResources.TryGetValue(name, out var value))
             {
-                var cRes = globalResources[name];
+                var cRes = value;
                 var srv = cRes.GetResource();
                 srv?.Dispose();
                 cRes.SetResource(resource.GetResource());
@@ -414,9 +414,9 @@ namespace Engine
                 return resource;
             }
 
-            if (requestedResources.ContainsKey(key))
+            if (requestedResources.TryGetValue(key, out var value))
             {
-                return requestedResources[key].ResourceView;
+                return value.ResourceView;
             }
 
             var request = new GameResourceImageContent(imageContent, mipAutogen, dynamic);
@@ -467,9 +467,9 @@ namespace Engine
                 return resource;
             }
 
-            if (requestedResources.ContainsKey(key))
+            if (requestedResources.TryGetValue(key, out var value))
             {
-                return requestedResources[key].ResourceView;
+                return value.ResourceView;
             }
 
             var request = new GameResourceValueArray<T>(identifier.ToString("B"))
@@ -504,9 +504,9 @@ namespace Engine
                 return resource;
             }
 
-            if (requestedResources.ContainsKey(key))
+            if (requestedResources.TryGetValue(key, out var value))
             {
-                return requestedResources[key].ResourceView;
+                return value.ResourceView;
             }
 
             var request = new GameResourceRandomTexture(identifier.ToString("B"))

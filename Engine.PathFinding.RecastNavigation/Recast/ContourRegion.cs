@@ -129,7 +129,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return (bestVertex, index);
         }
-        private IEnumerable<PotentialDiagonal> FindPotentialDiagonals(Int4 corner, Contour outline)
+        private static IEnumerable<PotentialDiagonal> FindPotentialDiagonals(Int4 corner, Contour outline)
         {
             List<PotentialDiagonal> diags = new List<PotentialDiagonal>();
 

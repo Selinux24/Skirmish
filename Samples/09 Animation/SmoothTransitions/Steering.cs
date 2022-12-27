@@ -77,7 +77,7 @@ namespace Animation.SmoothTransitions
                 return Vector3.Zero;
             }
         }
-        private Vector3 FindProjection(Vector3 pos, Vector3 a, Vector3 b)
+        private static Vector3 FindProjection(Vector3 pos, Vector3 a, Vector3 b)
         {
             var v1 = a - pos;
             var v2 = b - pos;

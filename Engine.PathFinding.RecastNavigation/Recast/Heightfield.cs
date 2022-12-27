@@ -323,7 +323,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 span.area = AreaTypes.RC_NULL_AREA;
             }
         }
-        private (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
+        private static (int MinHeight, int AsMin, int AsMax) FindMinimumHeight(Span nSpan, Span span, int walkableHeight, int walkableClimb, int minHeight, int minimumAccessibleNeigbor, int maximumAccessibleNeigbor)
         {
             int minh = minHeight;
             int asmin = minimumAccessibleNeigbor;

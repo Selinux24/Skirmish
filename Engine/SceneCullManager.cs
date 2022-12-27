@@ -62,7 +62,7 @@ namespace Engine
                     Distance = distance,
                 };
 
-                this.SetCullValue(cullData, index, item, false);
+                SetCullValue(cullData, index, item, false);
 
                 if (!cullData.Culled) res = true;
             }
@@ -77,12 +77,12 @@ namespace Engine
         /// <param name="item">Object</param>
         private void SetCullValue(CullData value, int index, ICullable item, bool force)
         {
-            if (!this.Objects.ContainsKey(item))
+            if (!Objects.ContainsKey(item))
             {
-                this.Objects.Add(item, new List<CullData>(index + 1));
+                Objects.Add(item, new List<CullData>(index + 1));
             }
 
-            var values = this.Objects[item];
+            var values = Objects[item];
 
             if (values.Count <= index)
             {
@@ -112,10 +112,8 @@ namespace Engine
         /// <returns>Returns the cull data item for the specified object and index. If not exists, returns the Empty cull data object</returns>
         public CullData GetCullValue(int index, ICullable item)
         {
-            if (this.Objects.ContainsKey(item))
+            if (Objects.TryGetValue(item, out var values))
             {
-                var values = this.Objects[item];
-
                 if (index < values.Count)
                 {
                     return values[index];

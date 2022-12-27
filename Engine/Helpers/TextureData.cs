@@ -75,7 +75,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(string filename)
         {
-            return ReadTextureArray(filename, new Rectangle[] { }).FirstOrDefault();
+            return ReadTextureArray(filename, Array.Empty<Rectangle>()).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data from a file
@@ -94,7 +94,7 @@ namespace Engine.Helpers
         /// <returns>Returns the texture data</returns>
         public static TextureData ReadTexture(MemoryStream stream)
         {
-            return ReadTextureArray(stream, new Rectangle[] { }).FirstOrDefault();
+            return ReadTextureArray(stream, Array.Empty<Rectangle>()).FirstOrDefault();
         }
         /// <summary>
         /// Reads a texture data from a stream
@@ -387,7 +387,7 @@ namespace Engine.Helpers
                 {
                     if (!formatConverter.CanConvert(frame.PixelFormat, format))
                     {
-                        return new BitmapData[] { };
+                        return Array.Empty<BitmapData>();
                     }
 
                     formatConverter.Initialize(

@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Default compact cell
         /// </summary>
-        public CompactCell Default
+        public static CompactCell Default
         {
             get
             {

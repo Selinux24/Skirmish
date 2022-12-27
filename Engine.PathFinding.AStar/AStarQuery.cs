@@ -137,7 +137,7 @@ namespace Engine.PathFinding.AStar
             else
             {
                 //If no result...
-                return new Vector3[] { };
+                return Array.Empty<Vector3>();
             }
         }
         /// <summary>

@@ -125,7 +125,7 @@ namespace Engine
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="instanced">Instanced</param>
-        private IBuiltInDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
+        private static IBuiltInDrawer GetOpaqueDrawer(VertexTypes vertexType, bool instanced)
         {
             bool skinned = VertexData.IsSkinned(vertexType);
 
@@ -157,7 +157,7 @@ namespace Engine
         /// </summary>
         /// <param name="vertexType">Vertex type</param>
         /// <param name="instanced">Instanced</param>
-        private IBuiltInDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
+        private static IBuiltInDrawer GetTransparentDrawer(VertexTypes vertexType, bool instanced)
         {
             bool skinned = VertexData.IsSkinned(vertexType);
 

@@ -207,7 +207,7 @@ namespace Engine.Content.FmtCollada
                 return animationLibrary[input.Source].ReadFloat();
             }
 
-            return new float[] { };
+            return Array.Empty<float>();
         }
         /// <summary>
         /// Reads the curve position output
@@ -223,7 +223,7 @@ namespace Engine.Content.FmtCollada
                 return animationLibrary[input.Source].ReadFloat();
             }
 
-            return new float[] { };
+            return Array.Empty<float>();
         }
         /// <summary>
         /// Reads the linear transformation output
@@ -261,7 +261,7 @@ namespace Engine.Content.FmtCollada
                 return ParseInterpolations(animationLibrary[input.Source].ReadNames());
             }
 
-            return new KeyframeInterpolations[] { };
+            return Array.Empty<KeyframeInterpolations>();
         }
         /// <summary>
         /// Parses a interpolation list from string to enumeration

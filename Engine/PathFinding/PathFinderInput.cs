@@ -65,11 +65,11 @@ namespace Engine.PathFinding
 
                 BoundingBox = GeometryUtil.CreateBoundingBox(tris);
 
-                return tris ?? new Triangle[] { };
+                return tris ?? Array.Empty<Triangle>();
             }
             else
             {
-                return new Triangle[] { };
+                return Array.Empty<Triangle>();
             }
         }
 

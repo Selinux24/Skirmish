@@ -150,7 +150,7 @@ namespace Engine.Content
                 throw new FileNotFoundException("File not found", path);
             }
 
-            return new MemoryStream[] { };
+            return Array.Empty<MemoryStream>();
         }
         /// <summary>
         /// Finds content int zippped file
@@ -181,7 +181,7 @@ namespace Engine.Content
                 throw new FileNotFoundException("File not found", resourcePath);
             }
 
-            return new MemoryStream[] { };
+            return Array.Empty<MemoryStream>();
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Engine.Content
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
-                return new MemoryStream[] { };
+                return Array.Empty<MemoryStream>();
             }
 
             if (File.Exists(resourcePath))
@@ -224,7 +224,7 @@ namespace Engine.Content
                 throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
             }
 
-            return new MemoryStream[] { };
+            return Array.Empty<MemoryStream>();
         }
         /// <summary>
         /// Finds content
@@ -271,7 +271,7 @@ namespace Engine.Content
         {
             if (string.IsNullOrEmpty(resourcePath))
             {
-                return new string[] { };
+                return Array.Empty<string>();
             }
 
             if (File.Exists(resourcePath))
@@ -313,7 +313,7 @@ namespace Engine.Content
                 throw new DirectoryNotFoundException(string.Format("Content source [{0}] not exists", resourcePath));
             }
 
-            return new string[] { };
+            return Array.Empty<string>();
         }
         /// <summary>
         /// Finds paths

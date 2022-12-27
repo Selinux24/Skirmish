@@ -225,7 +225,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector2)}");
 
-                return new Vector2[] { };
+                return Array.Empty<Vector2>();
             }
 
             int length = source.TechniqueCommon.Accessor.Count;
@@ -258,7 +258,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector3)}");
 
-                return new Vector3[] { };
+                return Array.Empty<Vector3>();
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -294,7 +294,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Vector4)}");
 
-                return new Vector4[] { };
+                return Array.Empty<Vector4>();
             }
 
             int x = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "X");
@@ -332,7 +332,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color3)}");
 
-                return new Color3[] { };
+                return Array.Empty<Color3>();
             }
 
             int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
@@ -368,7 +368,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Color4)}");
 
-                return new Color4[] { };
+                return Array.Empty<Color4>();
             }
 
             int r = Array.FindIndex(source.TechniqueCommon.Accessor.Params, p => p.Name == "R");
@@ -418,7 +418,7 @@ namespace Engine.Content.FmtCollada
             {
                 Logger.WriteWarning(nameof(LoaderCollada), $"Stride not supported for {stride}: {typeof(Matrix)}");
 
-                return new Matrix[] { };
+                return Array.Empty<Matrix>();
             }
 
             int length = source.TechniqueCommon.Accessor.Count;

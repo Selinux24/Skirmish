@@ -117,7 +117,7 @@ namespace Engine.Content
         /// <param name="quadraticAtt">Quadratic attenuation value</param>
         /// <param name="minLight">Minimum light value</param>
         /// <returns>Returns the light radius</returns>
-        private float GetRadius(float quadraticAtt, float minLight)
+        private static float GetRadius(float quadraticAtt, float minLight)
         {
             return (float)Math.Sqrt(1.0f / (quadraticAtt * minLight));
         }

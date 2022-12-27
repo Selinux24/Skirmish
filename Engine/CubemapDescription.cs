@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -153,7 +154,7 @@ namespace Engine
         /// Index 4: Front face
         /// Index 5: Back face
         /// </remarks>
-        public Rectangle[] Faces { get; set; } = new Rectangle[] { };
+        public Rectangle[] Faces { get; set; } = Array.Empty<Rectangle>();
 
         /// <summary>
         /// Plain texture list

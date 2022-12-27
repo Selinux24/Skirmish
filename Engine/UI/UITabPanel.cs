@@ -73,7 +73,7 @@ namespace Engine.UI
         {
             get
             {
-                return tabButtons?.Count() ?? 0;
+                return tabButtons?.Count ?? 0;
             }
         }
         /// <summary>

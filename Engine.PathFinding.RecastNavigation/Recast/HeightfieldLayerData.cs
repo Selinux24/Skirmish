@@ -194,7 +194,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Create unique ID.
         /// </summary>
-        private int CreateUniqueId(IEnumerable<int> prevCount, int regId, ref LayerSweepSpan[] sweeps, int nsweeps)
+        private static int CreateUniqueId(IEnumerable<int> prevCount, int regId, ref LayerSweepSpan[] sweeps, int nsweeps)
         {
             int id = regId;
 

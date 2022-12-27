@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Default compact span
         /// </summary>
-        public CompactSpan Default
+        public static CompactSpan Default
         {
             get
             {

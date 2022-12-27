@@ -1202,7 +1202,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // raycast ends on poly boundary and the path might include the next poly boundary.
-                if (pathList.Count > 0 && pathList[pathList.Count - 1] == next.Id)
+                if (pathList.Count > 0 && pathList[^1] == next.Id)
                 {
                     pathList.RemoveAt(pathList.Count - 1); // remove to avoid duplicates
                 }
@@ -2520,7 +2520,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>The status flags for the query.</returns>
         public Status GetPolyWallSegments(int r, QueryFilter filter, int maxSegments, out Segment[] segmentsRes)
         {
-            segmentsRes = new Segment[] { };
+            segmentsRes = Array.Empty<Segment>();
 
             List<Segment> segments = new List<Segment>();
 
@@ -2875,7 +2875,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="tile">Candidate tile</param>
         /// <param name="areaSum">Area sumatory</param>
         /// <returns>Returns the selected tile</returns>
-        private TileRef SelectBestTile(TileRef best, TileRef tile, ref float areaSum)
+        private static TileRef SelectBestTile(TileRef best, TileRef tile, ref float areaSum)
         {
             // Place random locations on on ground.
             if (best.Poly.Type == PolyTypes.Ground)
@@ -3071,7 +3071,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="edged">Distance to edges array</param>
         /// <param name="edget">Distance from first edge point to closest point list</param>
         /// <returns>Returns the closest position</returns>
-        private Vector3 GetClosestPointOutsidePoly(IEnumerable<Vector3> verts, float[] edged, float[] edget)
+        private static Vector3 GetClosestPointOutsidePoly(IEnumerable<Vector3> verts, float[] edged, float[] edget)
         {
             float dmin = edged[0];
             int imin = 0;
@@ -3120,7 +3120,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_SUCCESS;
             }
 
-            return m_nav.GetPolyHeight(cur.Tile, cur.Poly, pos, out height) ?
+            return NavMesh.GetPolyHeight(cur.Tile, cur.Poly, pos, out height) ?
                 Status.DT_SUCCESS :
                 Status.DT_FAILURE | Status.DT_INVALID_PARAM;
         }
@@ -3343,7 +3343,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Returns portal points between two polygons.
         /// </summary>
-        private Status GetPortalPoints(TileRef from, TileRef to, out Vector3 left, out Vector3 right)
+        private static Status GetPortalPoints(TileRef from, TileRef to, out Vector3 left, out Vector3 right)
         {
             left = new Vector3();
             right = new Vector3();
@@ -3398,7 +3398,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Returns edge mid point between two polygons.
         /// </summary>
-        private Status GetEdgeMidPoint(TileRef from, TileRef to, out Vector3 mid)
+        private static Status GetEdgeMidPoint(TileRef from, TileRef to, out Vector3 mid)
         {
             mid = new Vector3();
 
@@ -3414,7 +3414,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Appends vertex to a straight path
         /// </summary>
-        private Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath, ref StraightPath straightPath)
+        private static Status AppendVertex(Vector3 pos, StraightPathFlagTypes flags, int r, int maxStraightPath, ref StraightPath straightPath)
         {
             if (straightPath.Count > 0 && DetourUtils.Vequal(straightPath.EndPath, pos))
             {

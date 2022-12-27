@@ -73,11 +73,11 @@ namespace Engine
         {
             if (values == null)
             {
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             }
             if (values.Length != 4)
             {
-                throw new ArgumentOutOfRangeException("values", "There must be four and only four input values for ColorRGBA.");
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be four and only four input values for ColorRGBA.");
             }
 
             R = values[0];
@@ -155,7 +155,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is ColorRgba))
+            if (obj is not ColorRgba)
                 return false;
 
             var strongValue = (ColorRgba)obj;
@@ -169,15 +169,9 @@ namespace Engine
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = R.GetHashCode();
-                hashCode = (hashCode * 397) ^ G.GetHashCode();
-                hashCode = (hashCode * 397) ^ B.GetHashCode();
-                hashCode = (hashCode * 397) ^ A.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(R, G, B, A);
         }
+
         /// <inheritdoc/>
         public override string ToString()
         {

@@ -89,9 +89,9 @@ namespace Engine
         public Direction3(float[] values)
         {
             if (values == null)
-                throw new ArgumentNullException("values");
+                throw new ArgumentNullException(nameof(values));
             if (values.Length != 3)
-                throw new ArgumentOutOfRangeException("values", "There must be three and only three input values for Direction3.");
+                throw new ArgumentOutOfRangeException(nameof(values), "There must be three and only three input values for Direction3.");
 
             X = values[0];
             Y = values[1];
@@ -141,7 +141,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is Direction3))
+            if (obj is not Direction3)
                 return false;
 
             var strongValue = (Direction3)obj;
@@ -155,14 +155,9 @@ namespace Engine
         /// <inheritdoc/>
         public override int GetHashCode()
         {
-            unchecked
-            {
-                var hashCode = X.GetHashCode();
-                hashCode = (hashCode * 397) ^ Y.GetHashCode();
-                hashCode = (hashCode * 397) ^ Z.GetHashCode();
-                return hashCode;
-            }
+            return HashCode.Combine(X, Y, Z);
         }
+
         /// <inheritdoc/>
         public override string ToString()
         {

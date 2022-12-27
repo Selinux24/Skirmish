@@ -190,7 +190,7 @@ namespace Engine
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private void DrawWithDrawer(BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static void DrawWithDrawer(BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
                 sceneryDrawer.UpdateMesh(BuiltInDrawerMeshState.Default());
 
@@ -212,7 +212,7 @@ namespace Engine
             /// <param name="mode">Drawing mode</param>
             /// <param name="vertexType">Vertex type</param>
             /// <returns>Returns the drawing effect</returns>
-            private IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType)
+            private static IBuiltInDrawer GetDrawer(DrawerModes mode, VertexTypes vertexType)
             {
                 if (mode.HasFlag(DrawerModes.Forward))
                 {
@@ -317,7 +317,7 @@ namespace Engine
         /// <summary>
         /// Visible Nodes
         /// </summary>
-        private PickingQuadTreeNode<Triangle>[] visibleNodes = new PickingQuadTreeNode<Triangle>[] { };
+        private PickingQuadTreeNode<Triangle>[] visibleNodes = Array.Empty<PickingQuadTreeNode<Triangle>>();
 
         /// <summary>
         /// Gets the visible node count

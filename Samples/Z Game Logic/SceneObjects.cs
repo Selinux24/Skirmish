@@ -1134,7 +1134,7 @@ namespace GameLogic
 
             return res;
         }
-        private Vector3 GetRandomPoint()
+        private static Vector3 GetRandomPoint()
         {
             return Vector3.Zero;
         }

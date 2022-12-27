@@ -92,15 +92,12 @@ namespace Engine.Common
             get
             {
                 int count = IndexBuffer?.Count > 0 ? IndexBuffer.Count : VertexBuffer?.Count ?? 0;
-                switch (Topology)
+                return Topology switch
                 {
-                    case Topology.LineList:
-                        return count / 2;
-                    case Topology.TriangleList:
-                        return count / 3;
-                    default:
-                        return count;
-                }
+                    Topology.LineList => count / 2,
+                    Topology.TriangleList => count / 3,
+                    _ => count,
+                };
             }
         }
 
@@ -118,9 +115,9 @@ namespace Engine.Common
             Name = name;
             Topology = topology;
             Transform = transform;
-            Vertices = vertices ?? new IVertexData[] { };
+            Vertices = vertices ?? Array.Empty<IVertexData>();
             VertextType = vertices?.FirstOrDefault()?.VertexType ?? VertexTypes.Unknown;
-            Indices = indices ?? new uint[] { };
+            Indices = indices ?? Array.Empty<uint>();
             Indexed = indices?.Any() == true;
         }
         /// <summary>
@@ -233,7 +230,7 @@ namespace Engine.Common
                 positionCache = positionList.ToArray();
             }
 
-            return positionCache?.ToArray() ?? new Vector3[] { };
+            return positionCache?.ToArray() ?? Array.Empty<Vector3>();
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -264,7 +261,7 @@ namespace Engine.Common
                 positionCache = positionList.ToArray();
             }
 
-            return positionCache?.ToArray() ?? new Vector3[] { };
+            return positionCache?.ToArray() ?? Array.Empty<Vector3>();
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -289,11 +286,11 @@ namespace Engine.Common
                 }
                 else
                 {
-                    triangleCache = new Triangle[] { };
+                    triangleCache = Array.Empty<Triangle>();
                 }
             }
 
-            return triangleCache?.ToArray() ?? new Triangle[] { };
+            return triangleCache?.ToArray() ?? Array.Empty<Triangle>();
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -319,11 +316,11 @@ namespace Engine.Common
                 }
                 else
                 {
-                    triangleCache = new Triangle[] { };
+                    triangleCache = Array.Empty<Triangle>();
                 }
             }
 
-            return triangleCache?.ToArray() ?? new Triangle[] { };
+            return triangleCache?.ToArray() ?? Array.Empty<Triangle>();
         }
 
         /// <inheritdoc/>

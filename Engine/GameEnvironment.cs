@@ -16,11 +16,11 @@ namespace Engine
         /// <summary>
         /// Frame time
         /// </summary>
-        public static float FrameTime = 1f / 60f;
+        public static float FrameTime { get; set; } = 1f / 60f;
         /// <summary>
         /// Double click interval
         /// </summary>
-        public static float DoubleClickTime = 500;
+        public static float DoubleClickTime { get; set; } = 500;
 
         /// <summary>
         /// Background color
@@ -325,7 +325,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is GameEnvironmentState environmentState))
+            if (state is not GameEnvironmentState environmentState)
             {
                 return;
             }

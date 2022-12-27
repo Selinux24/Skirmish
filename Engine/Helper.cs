@@ -49,9 +49,7 @@ namespace Engine
         /// <param name="right">Right value</param>
         public static void Swap<T>(ref T left, ref T right)
         {
-            T temp = left;
-            left = right;
-            right = temp;
+            (right, left) = (left, right);
         }
         /// <summary>
         /// Converts the byte array to a structure
@@ -109,10 +107,7 @@ namespace Engine
         public static string GetMd5Sum(this byte[] buffer)
         {
             byte[] result = null;
-            using (MD5 md5 = MD5.Create())
-            {
-                result = md5.ComputeHash(buffer);
-            }
+            result = MD5.HashData(buffer);
 
             StringBuilder sb = new StringBuilder();
             Array.ForEach(result, r => sb.Append(r.ToString("X2")));
@@ -641,7 +636,7 @@ namespace Engine
                 }
             }
 
-            return new float[] { };
+            return Array.Empty<float>();
         }
 
         #endregion

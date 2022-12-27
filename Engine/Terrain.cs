@@ -400,7 +400,7 @@ namespace Engine
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="drawer">Drawer</param>
             /// <param name="nodeList">Node list</param>
-            private void DrawNodeList(BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
+            private static void DrawNodeList(BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
             {
                 for (int i = 0; i < nodeList.Length; i++)
                 {

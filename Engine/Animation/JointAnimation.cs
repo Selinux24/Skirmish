@@ -8,8 +8,19 @@ namespace Engine.Animation
     /// <summary>
     /// Bone animation
     /// </summary>
-    public struct JointAnimation : IEquatable<JointAnimation>
+    public readonly struct JointAnimation : IEquatable<JointAnimation>
     {
+        /// <inheritdoc/>
+        public static bool operator ==(JointAnimation left, JointAnimation right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(JointAnimation left, JointAnimation right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Joint name
         /// </summary>
@@ -46,7 +57,7 @@ namespace Engine.Animation
 
             if (keyframes?.Any() != true)
             {
-                Keyframes = new Keyframe[] { };
+                Keyframes = Array.Empty<Keyframe>();
                 StartTime = 0;
                 EndTime = 0;
 
@@ -186,7 +197,7 @@ namespace Engine.Animation
         {
             if (Keyframes?.Any() != true)
             {
-                return new JointAnimation(Joint, new Keyframe[] { });
+                return new JointAnimation(Joint, Array.Empty<Keyframe>());
             }
 
             Keyframe[] kfs = new Keyframe[Keyframes.Count];
@@ -204,7 +215,7 @@ namespace Engine.Animation
         {
             if (Keyframes?.Any() != true)
             {
-                return new JointAnimation(Joint, new Keyframe[] { });
+                return new JointAnimation(Joint, Array.Empty<Keyframe>());
             }
 
             Keyframe[] kfs = new Keyframe[indexTo - indexFrom + 1];
@@ -218,6 +229,17 @@ namespace Engine.Animation
             }
 
             return new JointAnimation(Joint, kfs);
+        }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is JointAnimation animation && Equals(animation);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return Joint.GetHashCode() ^ Keyframes.GetHashCode() ^ StartTime.GetHashCode() ^ EndTime.GetHashCode();
         }
     }
 }

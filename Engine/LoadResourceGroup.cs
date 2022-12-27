@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -79,7 +80,7 @@ namespace Engine
         /// <summary>
         /// Task list
         /// </summary>
-        public IEnumerable<Task> Tasks { get; set; } = new Task[] { };
+        public IEnumerable<Task> Tasks { get; set; } = Array.Empty<Task>();
     }
 
     /// <summary>
@@ -159,6 +160,6 @@ namespace Engine
         /// <summary>
         /// Task list
         /// </summary>
-        public IEnumerable<Task<T>> Tasks { get; set; } = new Task<T>[] { };
+        public IEnumerable<Task<T>> Tasks { get; set; } = Array.Empty<Task<T>>();
     }
 }

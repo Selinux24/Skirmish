@@ -241,9 +241,9 @@ namespace Engine.Common
                 return null;
             }
 
-            if (meshesByLOD.ContainsKey(lod))
+            if (meshesByLOD.TryGetValue(lod, out var value))
             {
-                return meshesByLOD[lod];
+                return value;
             }
 
             return GetFirstDrawingData(LevelOfDetail.Minimum);
@@ -262,9 +262,9 @@ namespace Engine.Common
 
             while (lod > LevelOfDetail.None)
             {
-                if (meshesByLOD.ContainsKey(lod))
+                if (meshesByLOD.TryGetValue(lod, out var value))
                 {
-                    return meshesByLOD[lod];
+                    return value;
                 }
 
                 lod = (LevelOfDetail)((int)lod / 2);

@@ -177,7 +177,7 @@ namespace Engine.Content.FmtObj
                 return new[] { v };
             }
 
-            return new Vector2[] { };
+            return Array.Empty<Vector2>();
         }
         private static IEnumerable<Vector3> ReadVector3(string strLine, string dataType)
         {
@@ -197,7 +197,7 @@ namespace Engine.Content.FmtObj
                 return new[] { vr };
             }
 
-            return new Vector3[] { };
+            return Array.Empty<Vector3>();
         }
         private static IEnumerable<Face[]> ReadFaces(string strLine)
         {
@@ -228,7 +228,7 @@ namespace Engine.Content.FmtObj
                 return new[] { face };
             }
 
-            return new Face[][] { };
+            return Array.Empty<Face[]>();
         }
 
         private static string ReadUseMaterial(string strLine)
@@ -247,7 +247,7 @@ namespace Engine.Content.FmtObj
                 string materialFile = strLine.Split(" ".ToArray(), StringSplitOptions.None).ElementAtOrDefault(1);
                 if (string.IsNullOrWhiteSpace(materialFile))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 string path = Path.Combine(folder, materialFile);
@@ -257,7 +257,7 @@ namespace Engine.Content.FmtObj
                 }
             }
 
-            return new string[] { };
+            return Array.Empty<string>();
         }
         private static IEnumerable<Material> ReadMaterialsFromFile(IEnumerable<string> fileNames)
         {

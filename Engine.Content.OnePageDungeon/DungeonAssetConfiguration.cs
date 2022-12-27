@@ -4,7 +4,6 @@ using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
-    using Engine.Modular;
     using Engine.Modular.Persistence;
 
     public class DungeonAssetConfiguration
@@ -16,10 +15,10 @@ namespace Engine.Content.OnePageDungeon
 
         public IEnumerable<string> Hulls { get; set; } = new[] { "volume", "_volume", "_volume", "_volumes" };
 
-        public IEnumerable<string> Floors { get; set; } = new string[] { };
-        public IEnumerable<string> Walls { get; set; } = new string[] { };
-        public IEnumerable<string> Ceilings { get; set; } = new string[] { };
-        public IEnumerable<string> Columns { get; set; } = new string[] { };
+        public IEnumerable<string> Floors { get; set; } = Array.Empty<string>();
+        public IEnumerable<string> Walls { get; set; } = Array.Empty<string>();
+        public IEnumerable<string> Ceilings { get; set; } = Array.Empty<string>();
+        public IEnumerable<string> Columns { get; set; } = Array.Empty<string>();
 
         public IDictionary<DoorTypes, string[]> Doors { get; set; } = new Dictionary<DoorTypes, string[]> { };
         public IEnumerable<ObjectAnimationPlan> DoorAnimationPlans { get; set; }
@@ -68,7 +67,7 @@ namespace Engine.Content.OnePageDungeon
                 return res;
             }
 
-            return new string[] { };
+            return Array.Empty<string>();
         }
 
         public T GetRandon<T>(IEnumerable<T> list)

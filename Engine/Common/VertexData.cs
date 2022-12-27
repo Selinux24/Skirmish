@@ -652,8 +652,8 @@ namespace Engine.Common
                 return position;
             }
 
-            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : new byte[] { };
-            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : new float[] { };
+            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : Array.Empty<byte>();
+            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : Array.Empty<float>();
             Matrix[] transforms = boneTransforms.ToArray();
 
             Vector3 t = Vector3.Zero;
@@ -685,7 +685,7 @@ namespace Engine.Common
         {
             if (vertices?.Any() != true)
             {
-                return new VertexData[] { };
+                return Array.Empty<VertexData>();
             }
 
             if (transform.IsIdentity)
@@ -747,11 +747,11 @@ namespace Engine.Common
         /// <returns>Returns a vertex array</returns>
         public static IEnumerable<VertexData> FromDescriptor(GeometryDescriptor descriptor)
         {
-            var vertices = descriptor.Vertices?.ToArray() ?? new Vector3[] { };
-            var normals = descriptor.Normals?.ToArray() ?? new Vector3[] { };
-            var uvs = descriptor.Uvs?.ToArray() ?? new Vector2[] { };
-            var tangents = descriptor.Tangents?.ToArray() ?? new Vector3[] { };
-            var binormals = descriptor.Binormals?.ToArray() ?? new Vector3[] { };
+            var vertices = descriptor.Vertices?.ToArray() ?? Array.Empty<Vector3>();
+            var normals = descriptor.Normals?.ToArray() ?? Array.Empty<Vector3>();
+            var uvs = descriptor.Uvs?.ToArray() ?? Array.Empty<Vector2>();
+            var tangents = descriptor.Tangents?.ToArray() ?? Array.Empty<Vector3>();
+            var binormals = descriptor.Binormals?.ToArray() ?? Array.Empty<Vector3>();
 
             VertexData[] res = new VertexData[vertices.Length];
 

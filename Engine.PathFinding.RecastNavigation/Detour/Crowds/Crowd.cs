@@ -378,7 +378,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="r">The position's polygon reference.</param>
         /// <param name="pos">The position within the polygon.</param>
         /// <returns>True if the request was successfully submitted.</returns>
-        public bool RequestMoveTarget(CrowdAgent ag, int r, Vector3 pos)
+        public static bool RequestMoveTarget(CrowdAgent ag, int r, Vector3 pos)
         {
             if (ag == null)
             {
@@ -412,7 +412,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="ag">The agent.</param>
         /// <param name="vel">The movement velocity. [(x, y, z)]</param>
         /// <returns>True if the request was successfully submitted.</returns>
-        public bool RequestMoveVelocity(CrowdAgent ag, Vector3 vel)
+        public static bool RequestMoveVelocity(CrowdAgent ag, Vector3 vel)
         {
             if (ag == null)
             {
@@ -433,7 +433,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// </summary>
         /// <param name="ag">The agent.</param>
         /// <returns>True if the request was successfully reseted.</returns>
-        public bool ResetMoveTarget(CrowdAgent ag)
+        public static bool ResetMoveTarget(CrowdAgent ag)
         {
             if (ag == null)
             {
@@ -638,7 +638,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             return replan;
         }
-        private bool RequestMoveTargetReplan(CrowdAgent ag, int r, Vector3 pos)
+        private static bool RequestMoveTargetReplan(CrowdAgent ag, int r, Vector3 pos)
         {
             if (ag == null)
             {
@@ -1087,7 +1087,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
         }
 
-        private void CalculateSteering(IEnumerable<CrowdAgent> agents)
+        private static void CalculateSteering(IEnumerable<CrowdAgent> agents)
         {
             foreach (var ag in agents)
             {
@@ -1103,7 +1103,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 CalculateSteering(ag);
             }
         }
-        private void CalculateSteering(CrowdAgent ag)
+        private static void CalculateSteering(CrowdAgent ag)
         {
             Vector3 dvel;
             if (ag.TargetState == MoveRequestState.DT_CROWDAGENT_TARGET_VELOCITY)
@@ -1264,7 +1264,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_velocitySampleCount += ns;
         }
 
-        private void IntegrateAgents(IEnumerable<CrowdAgent> agents, float dt)
+        private static void IntegrateAgents(IEnumerable<CrowdAgent> agents, float dt)
         {
             foreach (var ag in agents)
             {

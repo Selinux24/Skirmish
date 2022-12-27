@@ -32,28 +32,6 @@ namespace Engine.Windows
                 .Where(f => !string.IsNullOrEmpty(f))
                 .ToArray();
         }
-
-        /// <inheritdoc/>
-        public FontMapDescription FromFile(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string fileName, float size, FontMapStyles style)
-        {
-            using (PrivateFontCollection collection = new PrivateFontCollection())
-            {
-                collection.AddFontFile(fileName);
-
-                using (FontFamily family = new FontFamily(collection.Families[0].Name, collection))
-                {
-                    return FromFamily(generator, mapParams, family, size, style);
-                }
-            }
-        }
-        /// <inheritdoc/>
-        public FontMapDescription FromFamilyName(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string familyName, float size, FontMapStyles style)
-        {
-            using (var fontFamily = new FontFamily(familyName))
-            {
-                return FromFamily(generator, mapParams, fontFamily, size, style);
-            }
-        }
         /// <summary>
         /// Creates a font map
         /// </summary>
@@ -63,7 +41,7 @@ namespace Engine.Windows
         /// <param name="size">Font size</param>
         /// <param name="style">Font style</param>
         /// <returns>Returns the font map description</returns>
-        private FontMapDescription FromFamily(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, FontFamily family, float size, FontMapStyles style)
+        private static FontMapDescription FromFamily(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, FontFamily family, float size, FontMapStyles style)
         {
             //Calc the destination texture width and height
             var mapSize = MeasureMap(generator, mapParams, family, size, style);
@@ -158,7 +136,7 @@ namespace Engine.Windows
         /// <param name="size">Font size</param>
         /// <param name="style">Font style</param>
         /// <returns>Returns the font map size</returns>
-        private Size MeasureMap(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, FontFamily family, float size, FontMapStyles style)
+        private static Size MeasureMap(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, FontFamily family, float size, FontMapStyles style)
         {
             int width = 0;
             int height = 0;
@@ -201,6 +179,28 @@ namespace Engine.Windows
             height = Helper.NextPowerOfTwo(height);
 
             return new Size(width, height);
+        }
+
+        /// <inheritdoc/>
+        public FontMapDescription FromFile(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string fileName, float size, FontMapStyles style)
+        {
+            using (PrivateFontCollection collection = new PrivateFontCollection())
+            {
+                collection.AddFontFile(fileName);
+
+                using (FontFamily family = new FontFamily(collection.Families[0].Name, collection))
+                {
+                    return FromFamily(generator, mapParams, family, size, style);
+                }
+            }
+        }
+        /// <inheritdoc/>
+        public FontMapDescription FromFamilyName(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string familyName, float size, FontMapStyles style)
+        {
+            using (var fontFamily = new FontFamily(familyName))
+            {
+                return FromFamily(generator, mapParams, fontFamily, size, style);
+            }
         }
 
         /// <inheritdoc/>

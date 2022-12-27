@@ -434,7 +434,7 @@ namespace Animation.SmoothTransitions
         /// <param name="from">Position from</param>
         /// <param name="to">Position to</param>
         /// <returns>Returns the path</returns>
-        private IControllerPath CalcPath(Vector3 from, Vector3 to)
+        private static IControllerPath CalcPath(Vector3 from, Vector3 to)
         {
             return new SegmentPath(from, to);
         }
@@ -456,7 +456,7 @@ namespace Animation.SmoothTransitions
         /// Gets a gradient color
         /// </summary>
         /// <param name="value">Value</param>
-        private Color4 GetColor(float value)
+        private static Color4 GetColor(float value)
         {
             var colorFrom = new Color4(0f, 1f, 0f, 0.25f);
             var colorMiddle = new Color4(Color.Orange.ToColor3(), 0.25f);

@@ -105,7 +105,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-        private BoundingBoxInt? ComputeBounds(BoundingBox bbox, Vector3 orig, int w, int h, float ics, float ich)
+        private static BoundingBoxInt? ComputeBounds(BoundingBox bbox, Vector3 orig, int w, int h, float ics, float ich)
         {
             int minx = (int)Math.Floor((bbox.Minimum.X - orig.X) * ics);
             int miny = (int)Math.Floor((bbox.Minimum.Y - orig.Y) * ich);
