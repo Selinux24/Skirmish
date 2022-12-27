@@ -11,32 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="AnimationParts\Resources\Leopard\Leopard.json" />
-    <None Remove="Mixamo\Resources\d_road_asphalt_stripes_diffuse.dds" />
-    <None Remove="Mixamo\Resources\d_road_asphalt_stripes_normal.dds" />
-    <None Remove="Mixamo\Resources\d_road_asphalt_stripes_specular.dds" />
-    <None Remove="Mixamo\Resources\TestModel\TestModel.dae" />
-    <None Remove="Mixamo\Resources\TestModel\TestModel.json" />
-    <None Remove="SimpleAnimation\Resources\Doors\Dn_Doors.json" />
-    <None Remove="SimpleAnimation\Resources\Doors\Dn_Jails.json" />
-    <None Remove="SimpleAnimation\Resources\Doors\Wall1.json" />
-    <None Remove="SimpleAnimation\Resources\Doors\Wall2.json" />
-    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.json" />
-    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.json" />
-    <None Remove="SimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.json" />
-    <None Remove="SimpleAnimation\Resources\Rat\Rat.json" />
-    <None Remove="SimpleAnimation\Resources\Soldier\soldier_anim2.json" />
-    <None Remove="SmoothTransitions\Resources\d_road_asphalt_stripes_diffuse.dds" />
-    <None Remove="SmoothTransitions\Resources\d_road_asphalt_stripes_normal.dds" />
-    <None Remove="SmoothTransitions\Resources\d_road_asphalt_stripes_specular.dds" />
-    <None Remove="SmoothTransitions\Resources\Soldier\soldier0.jpg" />
-    <None Remove="SmoothTransitions\Resources\Soldier\Soldier1.jpg" />
-    <None Remove="SmoothTransitions\Resources\Soldier\soldier_anim2.dae" />
-    <None Remove="SmoothTransitions\Resources\Soldier\soldier_anim2.json" />
-    <None Remove="Start\Resources\SkyPlane.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="AnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

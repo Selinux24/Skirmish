@@ -11,21 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Rts\Resources\Buildings\Building_1.json" />
-    <None Remove="Rts\Resources\Cursor\cursor.json" />
-    <None Remove="Rts\Resources\Garage\garage.json" />
-    <None Remove="Rts\Resources\Helicopter\m24.json" />
-    <None Remove="Rts\Resources\Heliport\heliport.json" />
-    <None Remove="Rts\Resources\Leopard\Leopard.json" />
-    <None Remove="Rts\Resources\Obelisk\obelisk.json" />
-    <None Remove="Rts\Resources\Rocks\boulder.json" />
-    <None Remove="Rts\Resources\Terrain\two_levels.json" />
-    <None Remove="Rts\Resources\Trees\birch_a.json" />
-    <None Remove="Rts\Resources\Trees\birch_b.json" />
-    <None Remove="Start\SkyPlane.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Rts\Resources\Buildings\Building_1.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

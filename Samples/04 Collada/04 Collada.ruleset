@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<RuleSet Name="SonarQube - Skirmish-dev Sonar way" ToolsVersion="16.0">
-  <Include Path="..\..\.sonarlint\selinux24_skirmish_devcsharp.ruleset" Action="Default" />
-  <Include Path="04 collada.ruleset" Action="Default" />
-</RuleSet>

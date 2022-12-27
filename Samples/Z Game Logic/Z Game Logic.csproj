@@ -11,12 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources3D\cursor.json" />
-    <None Remove="Resources3D\soldier_anim2.json" />
-    <None Remove="Resources3D\terrain.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources3D\cursor.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

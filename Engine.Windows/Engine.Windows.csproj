@@ -16,13 +16,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SharpDX.Desktop" Version="4.2.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="engine.ico">
       <Pack>True</Pack>
-      <PackagePath></PackagePath>
     </None>
   </ItemGroup>
 

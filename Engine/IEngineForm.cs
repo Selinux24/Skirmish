@@ -136,7 +136,7 @@ namespace Engine
         /// Render loop callback initializer
         /// </summary>
         /// <param name="renderCallback">Render callback method</param>
-        void RenderLoop(Action renderCallback);
+        void Render(Action renderCallback);
         /// <summary>
         /// Closes the form
         /// </summary>

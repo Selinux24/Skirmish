@@ -11,14 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Leopard.json" />
-    <None Remove="Resources\m24.json" />
-    <None Remove="Resources\terrain.json" />
-    <None Remove="Resources\Trees\birch_a.json" />
-    <None Remove="Resources\Trees\birch_b.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\flare2.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

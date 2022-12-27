@@ -11,20 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="DungeonWall\Resources\Wall.json" />
-    <None Remove="Dungeon\Resources\Dungeon.json" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Assets.json" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\AssetsMap.json" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Levels.json" />
-    <None Remove="ModularDungeon\Resources\BasicDungeon\Levels2.json" />
-    <None Remove="ModularDungeon\Resources\Characters\Human2\Human2.json" />
-    <None Remove="ModularDungeon\Resources\Characters\Rat\Rat.json" />
-    <None Remove="NavMeshTest\Resources\dungeon.json" />
-    <None Remove="NavMeshTest\Resources\modular_dungeon.json" />
-    <None Remove="Start\Resources\SkyPlane.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="DungeonWall\Resources\diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

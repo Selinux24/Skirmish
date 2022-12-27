@@ -461,7 +461,7 @@ namespace Engine
             Logger.WriteInformation(this, "** Game started                                                         **");
             Logger.WriteInformation(this, "**************************************************************************");
 
-            Form.RenderLoop(Frame);
+            Form.Render(Frame);
         }
 
         /// <summary>

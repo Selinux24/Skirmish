@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using SharpDX.Mathematics.Interop;
+using SharpDX.Win32;
+using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -209,5 +212,16 @@ namespace Engine.Windows.Helpers
                 rc = ToUnicode(key, scanCode, keyStateNull, sb, sb.Capacity, 0);
             } while (rc < 0);
         }
+
+        [DllImport("user32.dll", EntryPoint = "GetClientRect")]
+        public static extern bool GetClientRect(IntPtr hWnd, out RawRectangle lpRect);
+        [DllImport("user32.dll", EntryPoint = "PeekMessage")]
+        public static extern int PeekMessage(out NativeMessage lpMsg, IntPtr hWnd, int wMsgFilterMin, int wMsgFilterMax, int wRemoveMsg);
+        [DllImport("user32.dll", EntryPoint = "GetMessage")]
+        public static extern int GetMessage(out NativeMessage lpMsg, IntPtr hWnd, int wMsgFilterMin, int wMsgFilterMax);
+        [DllImport("user32.dll", EntryPoint = "TranslateMessage")]
+        public static extern int TranslateMessage(ref NativeMessage lpMsg);
+        [DllImport("user32.dll", EntryPoint = "DispatchMessage")]
+        public static extern int DispatchMessage(ref NativeMessage lpMsg);
     }
 }

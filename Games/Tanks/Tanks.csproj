@@ -12,51 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Arrow.png" />
-    <None Remove="Resources\Audio\cannon-shooting.wav" />
-    <None Remove="Resources\Audio\explosion_vehicle_small_close_01.wav" />
-    <None Remove="Resources\Audio\explosion_vehicle_small_distant_01.wav" />
-    <None Remove="Resources\Audio\metal_grate_large_01.wav" />
-    <None Remove="Resources\Audio\metal_grate_large_02.wav" />
-    <None Remove="Resources\Audio\metal_grate_large_03.wav" />
-    <None Remove="Resources\Audio\metal_grate_large_04.wav" />
-    <None Remove="Resources\Audio\metal_pipe_large_01.wav" />
-    <None Remove="Resources\Audio\metal_pipe_large_02.wav" />
-    <None Remove="Resources\Audio\metal_pipe_large_03.wav" />
-    <None Remove="Resources\Audio\metal_pipe_large_04.wav" />
-    <None Remove="Resources\Audio\tank_engine.wav" />
-    <None Remove="Resources\Compass.png" />
-    <None Remove="Resources\Crater.png" />
-    <None Remove="Resources\Dot.png" />
-    <None Remove="Resources\Dot_w.png" />
-    <None Remove="Resources\Environment\Tree\Tree1.dae" />
-    <None Remove="Resources\Environment\Tree\tree1.json" />
-    <None Remove="Resources\Environment\Tree\Tree2.dae" />
-    <None Remove="Resources\Environment\Tree\tree2.json" />
-    <None Remove="Resources\Environment\Tree\Tree3.dae" />
-    <None Remove="Resources\Environment\Tree\tree3.json" />
-    <None Remove="Resources\GameIcon.png" />
-    <None Remove="Resources\LeagueSpartan-Bold.otf" />
-    <None Remove="Resources\Leopard\Leopard.dae" />
-    <None Remove="Resources\Leopard\Leopard.json" />
-    <None Remove="Resources\Leopard\Leopard_0.bmp" />
-    <None Remove="Resources\Leopard\Leopard_1.bmp" />
-    <None Remove="Resources\Leopard\Leopard_2.bmp" />
-    <None Remove="Resources\Move.png" />
-    <None Remove="Resources\Particles\explosion.png" />
-    <None Remove="Resources\Particles\fire.dds" />
-    <None Remove="Resources\Particles\fire.png" />
-    <None Remove="Resources\Particles\floor.png" />
-    <None Remove="Resources\Particles\smoke.png" />
-    <None Remove="Resources\Pitch.png" />
-    <None Remove="Resources\Tank.png" />
-    <None Remove="Resources\Terrain\Diffuse.jpg" />
-    <None Remove="Resources\Terrain\Normal.jpg" />
-    <None Remove="Resources\Turn.png" />
-    <None Remove="Resources\Wind.png" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\Arrow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -165,9 +120,6 @@
     <Content Include="Resources\Wind.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\Environment\Tree\Tree1.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

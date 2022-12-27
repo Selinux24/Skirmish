@@ -11,25 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="SceneLights\Buildings\Obelisk\obelisk.json" />
-    <None Remove="SceneLights\Trees\tree.json" />
-    <None Remove="SceneMaterials\corrugated_d.jpg" />
-    <None Remove="SceneMaterials\corrugated_n.jpg" />
-    <None Remove="SceneStart\SkyPlane.json" />
-    <None Remove="SceneStencilPass\Buildings\Obelisk\obelisk.json" />
-    <None Remove="SceneTest\Buildings\Obelisk\obelisk.json" />
-    <None Remove="SceneTest\Character\Soldier\soldier_anim2.json" />
-    <None Remove="SceneTest\Container\container.json" />
-    <None Remove="SceneTest\Lamps\Lamp.json" />
-    <None Remove="SceneTest\Lamps\StreetLamp.json" />
-    <None Remove="SceneTest\Scenery\clif.json" />
-    <None Remove="SceneTest\Trees\Tree.json" />
-    <None Remove="SceneTest\Vehicles\Challenger\challenger.json" />
-    <None Remove="SceneTest\Vehicles\Leopard\Leopard.json" />
-    <None Remove="SceneWater\Specular.jpg" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Common\buttons.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

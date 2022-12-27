@@ -11,19 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Bradley\Bradley.json" />
-    <None Remove="Resources\Buildings\Affgan1.json" />
-    <None Remove="Resources\Container\container.json" />
-    <None Remove="Resources\M24\m24.json" />
-    <None Remove="Resources\Rocks\boulder.json" />
-    <None Remove="Resources\Scenery\Objects\torch.json" />
-    <None Remove="Resources\Soldier\soldier_anim2.json" />
-    <None Remove="Resources\Trees2\Tree.json" />
-    <None Remove="Resources\Trees\Tree.json" />
-    <None Remove="Resources\Watch Tower\Watch Tower.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\Bradley\Bradley.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

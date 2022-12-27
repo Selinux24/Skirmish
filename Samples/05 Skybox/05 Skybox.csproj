@@ -11,17 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Bullets\bullet-hole_1.png" />
-    <None Remove="Resources\Bullets\bullet-hole_2.png" />
-    <None Remove="Resources\Bullets\bullet-hole_3.png" />
-    <None Remove="Resources\Daylight Box UV.png" />
-    <None Remove="Resources\Fountain\Fountain.json" />
-    <None Remove="Resources\Obelisk\obelisk.json" />
-    <None Remove="Resources\ruins.json" />
-    <None Remove="Resources\torch.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\Audio\Effects\target_balls_single_loop.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

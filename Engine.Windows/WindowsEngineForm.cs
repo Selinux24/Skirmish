@@ -1,17 +1,22 @@
-﻿using SharpDX;
-using SharpDX.Windows;
-using System;
+﻿using System;
+using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
-using static SharpDX.Windows.RenderLoop;
 
 namespace Engine.Windows
 {
+    using Engine.Windows.Helpers;
     using Engine.Windows.Properties;
+    using SharpDX;
+    using SharpDX.Mathematics.Interop;
 
     /// <summary>
     /// Engine render form
     /// </summary>
-    public class WindowsEngineForm : RenderForm, IEngineForm
+    /// <remarks>
+    /// An adapted copy of https://github.com/sharpdx/SharpDX/blob/master/Source/SharpDX.Desktop/RenderForm.cs
+    /// </remarks>
+    public class WindowsEngineForm : Form, IEngineForm
     {
         /// <summary>
         /// Intialization internal flag
@@ -21,6 +26,26 @@ namespace Engine.Windows
         /// Previous window state
         /// </summary>
         private FormWindowState lastWindowState = FormWindowState.Normal;
+
+        private const int WM_SIZE = 0x0005;
+        private const int SIZE_RESTORED = 0;
+        private const int SIZE_MINIMIZED = 1;
+        private const int SIZE_MAXIMIZED = 2;
+        private const int WM_ACTIVATEAPP = 0x001C;
+        private const int WM_POWERBROADCAST = 0x0218;
+        private const int WM_MENUCHAR = 0x0120;
+        private const int WM_SYSCOMMAND = 0x0112;
+        private const uint PBT_APMRESUMESUSPEND = 7;
+        private const uint PBT_APMQUERYSUSPEND = 0;
+        private const int SC_MONITORPOWER = 0xF170;
+        private const int SC_SCREENSAVE = 0xF140;
+        private const int WM_DISPLAYCHANGE = 0x007E;
+        private const int MNC_CLOSE = 1;
+        private Size cachedSize;
+        private FormWindowState previousWindowState;
+        private bool allowUserResizing;
+        private bool isBackgroundFirstDraw;
+        private bool isSizeChangedWithoutResizeBegin;
 
         /// <inheritdoc/>
         public static Vector2 ScreenSize
@@ -75,17 +100,73 @@ namespace Engine.Windows
         public long MouseWheelDeltaTimestamp { get; private set; }
         /// <inheritdoc/>
         public bool MouseIn { get; private set; } = true;
+        /// <summary>
+        /// Gets or sets a value indicating whether this form can be resized by the user. See remarks.
+        /// </summary>
+        /// <remarks>
+        /// This property alters <see cref="Form.FormBorderStyle"/>, 
+        /// for <c>true</c> value it is <see cref="FormBorderStyle.Sizable"/>, 
+        /// for <c>false</c> - <see cref="FormBorderStyle.FixedSingle"/>.
+        /// </remarks>
+        /// <value><c>true</c> if this form can be resized by the user (by default); otherwise, <c>false</c>.</value>
+        public bool AllowUserResizing
+        {
+            get
+            {
+                return allowUserResizing;
+            }
+            set
+            {
+                if (allowUserResizing != value)
+                {
+                    allowUserResizing = value;
+                    MaximizeBox = allowUserResizing;
+                    FormBorderStyle = IsFullscreen
+                        ? FormBorderStyle.None
+                        : allowUserResizing ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+                }
+            }
+        }
+        /// <summary>
+        /// Gets or sets a value indicationg whether the current render form is in fullscreen mode. See remarks.
+        /// </summary>
+        /// <remarks>
+        /// If Toolkit is used, this property is set automatically,
+        /// otherwise user should maintain it himself as it affects the behavior of <see cref="AllowUserResizing"/> property.
+        /// </remarks>
+        public bool IsFullscreen { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public WindowsEngineForm()
-            : base()
+        public WindowsEngineForm() : this("Engine")
         {
-            InitializeComponent();
+
+        }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public WindowsEngineForm(string text) : base()
+        {
+            SuspendLayout();
+
+            Icon = Resources.engine;
+            Name = text;
+            Text = text;
+            KeyPreview = true;
+            ClientSize = new Size(800, 600);
+
+            ResizeRedraw = true;
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint, true);
+
+            previousWindowState = FormWindowState.Normal;
+            AllowUserResizing = true;
+
+            ResumeLayout(false);
 
             initialized = true;
         }
+
         /// <summary>
         /// Initializes the form
         /// </summary>
@@ -97,7 +178,7 @@ namespace Engine.Windows
         {
             Name = name;
 
-            base.IsFullscreen = fullScreen;
+            IsFullscreen = fullScreen;
             AllowUserResizing = !fullScreen;
 
             Size = new System.Drawing.Size(screenWidth, screenHeight);
@@ -145,21 +226,128 @@ namespace Engine.Windows
                 ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
             }
         }
+
         /// <summary>
-        /// Initialize component
+        /// Occurs when [app activated].
         /// </summary>
-        private void InitializeComponent()
+        public event EventHandler<EventArgs> AppActivated;
+        /// <summary>
+        /// Occurs when [app deactivated].
+        /// </summary>
+        public event EventHandler<EventArgs> AppDeactivated;
+        /// <summary>
+        /// Occurs when [monitor changed].
+        /// </summary>
+        public event EventHandler<EventArgs> MonitorChanged;
+        /// <summary>
+        /// Occurs when [pause rendering].
+        /// </summary>
+        public event EventHandler<EventArgs> PauseRendering;
+        /// <summary>
+        /// Occurs when [resume rendering].
+        /// </summary>
+        public event EventHandler<EventArgs> ResumeRendering;
+        /// <summary>
+        /// Occurs when [screensaver].
+        /// </summary>
+        public event EventHandler<CancelEventArgs> Screensaver;
+        /// <summary>
+        /// Occurs when [system resume].
+        /// </summary>
+        public event EventHandler<EventArgs> SystemResume;
+        /// <summary>
+        /// Occurs when [system suspend].
+        /// </summary>
+        public event EventHandler<EventArgs> SystemSuspend;
+        /// <summary>
+        /// Occurs when [user resized].
+        /// </summary>
+        public event EventHandler<EventArgs> UserResized;
+
+        /// <summary>
+        /// Raises the Pause Rendering event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnPauseRendering(EventArgs e)
         {
-            SuspendLayout();
-
-            Icon = Resources.engine;
-            Name = "EngineForm";
-            Text = "Engine Form";
-            KeyPreview = true;
-
-            ResumeLayout(false);
+            PauseRendering?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the Resume Rendering event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnResumeRendering(EventArgs e)
+        {
+            ResumeRendering?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the User resized event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnUserResized(EventArgs e)
+        {
+            UserResized?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the Monitor changed event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnMonitorChanged(EventArgs e)
+        {
+            MonitorChanged?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the On App Activated event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnAppActivated(EventArgs e)
+        {
+            AppActivated?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the App Deactivated event
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnAppDeactivated(EventArgs e)
+        {
+            AppDeactivated?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the System Suspend event
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnSystemSuspend(EventArgs e)
+        {
+            SystemSuspend?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the System Resume event
+        /// </summary>
+        /// <param name="e">The <see cref="System.EventArgs"/> instance containing the event data.</param>
+        private void OnSystemResume(EventArgs e)
+        {
+            SystemResume?.Invoke(this, e);
+        }
+        /// <summary>
+        /// Raises the <see cref="E:Screensaver"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="System.ComponentModel.CancelEventArgs"/> instance containing the event data.</param>
+        private void OnScreensaver(CancelEventArgs e)
+        {
+            Screensaver?.Invoke(this, e);
         }
 
+        /// <inheritdoc/>
+        protected override void OnClientSizeChanged(EventArgs e)
+        {
+            base.OnClientSizeChanged(e);
+            if (!Resizing && (isSizeChangedWithoutResizeBegin || cachedSize != Size))
+            {
+                isSizeChangedWithoutResizeBegin = false;
+                cachedSize = Size;
+                OnUserResized(EventArgs.Empty);
+            }
+        }
         /// <inheritdoc/>
         protected override void OnKeyDown(KeyEventArgs e)
         {
@@ -180,20 +368,6 @@ namespace Engine.Windows
             {
                 UpdateSizes(IsFullscreen);
             }
-        }
-        /// <inheritdoc/>
-        protected override void OnResizeBegin(EventArgs e)
-        {
-            base.OnResizeBegin(e);
-
-            Resizing = true;
-        }
-        /// <inheritdoc/>
-        protected override void OnResizeEnd(EventArgs e)
-        {
-            base.OnResizeEnd(e);
-
-            Resizing = false;
         }
         /// <inheritdoc/>
         protected override void OnResize(EventArgs e)
@@ -223,6 +397,37 @@ namespace Engine.Windows
             base.OnMouseLeave(e);
 
             MouseIn = false;
+        }
+        /// <inheritdoc/>
+        protected override void OnResizeBegin(EventArgs e)
+        {
+            Resizing = true;
+
+            base.OnResizeBegin(e);
+            cachedSize = Size;
+            OnPauseRendering(e);
+        }
+        /// <inheritdoc/>
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+
+            if (Resizing && cachedSize != Size)
+            {
+                OnUserResized(e);
+            }
+
+            Resizing = false;
+            OnResumeRendering(e);
+        }
+        /// <inheritdoc/>
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            if (!isBackgroundFirstDraw)
+            {
+                base.OnPaintBackground(e);
+                isBackgroundFirstDraw = true;
+            }
         }
 
         /// <inheritdoc/>
@@ -270,11 +475,114 @@ namespace Engine.Windows
         }
 
         /// <inheritdoc/>
-        public void RenderLoop(Action renderCallback)
+        protected override void WndProc(ref Message m)
         {
-            RenderCallback r = new RenderCallback(renderCallback);
+            long wparam = m.WParam.ToInt64();
 
-            Run(this, r);
+            switch (m.Msg)
+            {
+                case WM_SIZE:
+                    if (wparam == SIZE_MINIMIZED)
+                    {
+                        previousWindowState = FormWindowState.Minimized;
+                        OnPauseRendering(EventArgs.Empty);
+                    }
+                    else
+                    {
+                        NativeMethods.GetClientRect(m.HWnd, out RawRectangle rect);
+                        if (rect.Bottom - rect.Top == 0)
+                        {
+                            // Rapidly clicking the task bar to minimize and restore a window
+                            // can cause a WM_SIZE message with SIZE_RESTORED when 
+                            // the window has actually become minimized due to rapid change
+                            // so just ignore this message
+                        }
+                        else if (wparam == SIZE_MAXIMIZED)
+                        {
+                            if (previousWindowState == FormWindowState.Minimized)
+                                OnResumeRendering(EventArgs.Empty);
+
+                            previousWindowState = FormWindowState.Maximized;
+
+                            OnUserResized(EventArgs.Empty);
+                            cachedSize = Size;
+                        }
+                        else if (wparam == SIZE_RESTORED)
+                        {
+                            if (previousWindowState == FormWindowState.Minimized)
+                                OnResumeRendering(EventArgs.Empty);
+
+                            if (!Resizing && (Size != cachedSize || previousWindowState == FormWindowState.Maximized))
+                            {
+                                previousWindowState = FormWindowState.Normal;
+
+                                // Only update when cachedSize is != 0
+                                if (cachedSize != Size.Empty)
+                                {
+                                    isSizeChangedWithoutResizeBegin = true;
+                                }
+                            }
+                            else
+                                previousWindowState = FormWindowState.Normal;
+                        }
+                    }
+                    break;
+                case WM_ACTIVATEAPP:
+                    if (wparam != 0)
+                        OnAppActivated(EventArgs.Empty);
+                    else
+                        OnAppDeactivated(EventArgs.Empty);
+                    break;
+                case WM_POWERBROADCAST:
+                    if (wparam == PBT_APMQUERYSUSPEND)
+                    {
+                        OnSystemSuspend(EventArgs.Empty);
+                        m.Result = new IntPtr(1);
+                        return;
+                    }
+                    else if (wparam == PBT_APMRESUMESUSPEND)
+                    {
+                        OnSystemResume(EventArgs.Empty);
+                        m.Result = new IntPtr(1);
+                        return;
+                    }
+                    break;
+                case WM_MENUCHAR:
+                    m.Result = new IntPtr(MNC_CLOSE << 16);
+                    return;
+                case WM_SYSCOMMAND:
+                    wparam &= 0xFFF0;
+                    if (wparam == SC_MONITORPOWER || wparam == SC_SCREENSAVE)
+                    {
+                        var e = new CancelEventArgs();
+                        OnScreensaver(e);
+                        if (e.Cancel)
+                        {
+                            m.Result = IntPtr.Zero;
+                            return;
+                        }
+                    }
+                    break;
+                case WM_DISPLAYCHANGE:
+                    OnMonitorChanged(EventArgs.Empty);
+                    break;
+            }
+
+            base.WndProc(ref m);
+        }
+        /// <inheritdoc/>
+        protected override bool ProcessDialogKey(System.Windows.Forms.Keys keyData)
+        {
+            if (keyData == (System.Windows.Forms.Keys.Menu | System.Windows.Forms.Keys.Alt) || keyData == System.Windows.Forms.Keys.F10)
+                return true;
+
+            return base.ProcessDialogKey(keyData);
+        }
+
+        /// <inheritdoc/>
+        public void Render(Action renderCallback)
+        {
+            RenderLoop.Run(this, renderCallback);
         }
     }
 }

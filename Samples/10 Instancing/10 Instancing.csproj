@@ -11,23 +11,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\Skyboxes\Sky_horiz_10_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_14_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_15_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_18_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_1_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_22_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_3_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_4_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_5_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_7_4096.jpg" />
-    <None Remove="Resources\Skyboxes\Sky_horiz_9_4096.jpg" />
-    <None Remove="Resources\Soldier\soldier_anim2.json" />
-    <None Remove="Resources\Trees\tree.json" />
-    <None Remove="Resources\Wall\Wall.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Content Include="Resources\Ground\gravel_01_diffuse.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
