@@ -65,8 +65,21 @@ namespace Engine.Animation
             return
                 Name == other.Name &&
                 Bone == other.Bone &&
+                Parent == other.Parent &&
                 Helper.CompareEnumerables(Childs, other.Childs) &&
-                Offset == other.Offset;
+                Offset == other.Offset &&
+                LocalTransform == other.LocalTransform &&
+                GlobalTransform == other.GlobalTransform;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Joint);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Bone, Parent, Childs, Offset, LocalTransform, GlobalTransform);
         }
     }
 }

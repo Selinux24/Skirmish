@@ -260,11 +260,7 @@ namespace Engine.Animation
             return values.ToArray();
         }
 
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(SkinningData other)
         {
             return
@@ -272,6 +268,16 @@ namespace Engine.Animation
                 clips.CompareEnumerables(other.clips) &&
                 offsets.CompareEnumerables(other.offsets) &&
                 skeleton.Equals(other.skeleton);
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as SkinningData);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(animations, clips, offsets, skeleton);
         }
     }
 }

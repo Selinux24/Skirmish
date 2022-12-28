@@ -11,7 +11,7 @@ namespace Engine.Windows
     /// <summary>
     /// Mouse and keyboard input
     /// </summary>
-    public class WindowsInput : IDisposable, IInput
+    public class WindowsInput : IInput
     {
         /// <summary>
         /// Engine render form

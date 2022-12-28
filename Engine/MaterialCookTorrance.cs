@@ -11,6 +11,17 @@ namespace Engine
     /// </summary>
     public struct MaterialCookTorrance : IEquatable<MaterialCookTorrance>, IMaterial
     {
+        /// <inheritdoc/>
+        public static bool operator ==(MaterialCookTorrance left, MaterialCookTorrance right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(MaterialCookTorrance left, MaterialCookTorrance right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Default material
         /// </summary>
@@ -109,6 +120,16 @@ namespace Engine
                 IsTransparent == other.IsTransparent &&
                 Metallic == other.Metallic &&
                 Roughness == other.Roughness;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is MaterialCookTorrance torrance && Equals(torrance);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(EmissiveColor, AmbientColor, DiffuseColor, SpecularColor, IsTransparent, Metallic, Roughness);
         }
         /// <inheritdoc/>
         public override string ToString()

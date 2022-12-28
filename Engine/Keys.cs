@@ -5,7 +5,6 @@ namespace Engine
     /// <summary>
     ///  Specifies key codes and modifiers.
     /// </summary>
-    [Flags]
     public enum Keys
     {
         /// <summary>

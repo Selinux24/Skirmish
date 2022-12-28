@@ -294,7 +294,19 @@ namespace Engine.Animation
         {
             return
                 Helper.CompareEnumerables(jointNames, other.jointNames) &&
-                Root.Equals(other.Root);
+                Helper.CompareEnumerables(boneNames, other.boneNames) &&
+                Name == other.Name &&
+                Root == other.Root;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Skeleton);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(jointNames, boneNames, Name, Root);
         }
     }
 }

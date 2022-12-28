@@ -38,17 +38,23 @@ namespace Engine.Animation
             }
         }
 
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(AnimationClip other)
         {
             return
                 Name == other.Name &&
                 Duration == other.Duration &&
                 Helper.CompareEnumerables(Animations, other.Animations);
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as AnimationClip);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Name, Duration, Animations);
         }
     }
 }

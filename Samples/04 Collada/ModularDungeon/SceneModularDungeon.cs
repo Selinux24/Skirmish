@@ -1429,7 +1429,6 @@ namespace Collada.ModularDungeon
                             File.Delete(fileName);
                         }
 
-                        var loader = new LoaderObj();
                         var tris = GetTrianglesForNavigationGraph();
                         LoaderObj.Save(tris, fileName);
                     }

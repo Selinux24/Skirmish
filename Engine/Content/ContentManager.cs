@@ -96,7 +96,7 @@ namespace Engine.Content
                     {
                         var entry = archive.Entries[i];
 
-                        var match = Regex.Match(entry.Name, regexMask);
+                        var match = Regex.Match(entry.Name, regexMask, RegexOptions.NonBacktracking, TimeSpan.FromMilliseconds(100));
                         if (match.Success)
                         {
                             using (var stream = entry.Open())

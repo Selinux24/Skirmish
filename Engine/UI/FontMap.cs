@@ -629,7 +629,7 @@ namespace Engine.UI
         /// </summary>
         /// <param name="width">White space width</param>
         /// <param name="height">White space height</param>
-        private void GetSpaceSize(out float width, out float height)
+        public void GetSpaceSize(out float width, out float height)
         {
             char defChar = GetSampleCharacter();
 
@@ -665,4 +665,3 @@ namespace Engine.UI
         }
     }
 }
-

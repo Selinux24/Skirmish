@@ -243,7 +243,7 @@ namespace Collada.Start
             tabButtons.AddRange(mapFiles.Select(m =>
             {
                 string name = Path.GetFileNameWithoutExtension(m).Replace("_", " ");
-                return name.First().ToString().ToUpper() + name.Substring(1);
+                return string.Concat(name.First().ToString().ToUpper(), name.AsSpan(1));
             }));
             basicIndex = tabButtons.Count;
             tabButtons.Add("Basic Dungeon");

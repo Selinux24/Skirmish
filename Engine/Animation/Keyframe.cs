@@ -8,6 +8,17 @@ namespace Engine.Animation
     /// </summary>
     public struct Keyframe : IEquatable<Keyframe>
     {
+        /// <inheritdoc/>
+        public static bool operator ==(Keyframe left, Keyframe right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(Keyframe left, Keyframe right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Frame transformation
         /// </summary>
@@ -77,11 +88,7 @@ namespace Engine.Animation
                 return $"Time: {Time:0.00000}: {Interpolation} {Position:0.00000}";
             }
         }
-        /// <summary>
-        /// Gets whether the current instance is equal to the other instance
-        /// </summary>
-        /// <param name="other">The other instance</param>
-        /// <returns>Returns true if both instances are equal</returns>
+        /// <inheritdoc/>
         public bool Equals(Keyframe other)
         {
             return
@@ -91,6 +98,16 @@ namespace Engine.Animation
                 Rotation == other.Rotation &&
                 Scale == other.Scale &&
                 Interpolation == other.Interpolation;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is Keyframe keyframe && Equals(keyframe);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Time, Position, Translation, Rotation, Scale, Interpolation);
         }
     }
 }

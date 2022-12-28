@@ -11,6 +11,17 @@ namespace Engine
     /// </summary>
     public struct MaterialBlinnPhong : IEquatable<MaterialBlinnPhong>, IMaterial
     {
+        /// <inheritdoc/>
+        public static bool operator ==(MaterialBlinnPhong left, MaterialBlinnPhong right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(MaterialBlinnPhong left, MaterialBlinnPhong right)
+        {
+            return !(left == right);
+        }
+
         /// <summary>
         /// Default material
         /// </summary>
@@ -102,6 +113,16 @@ namespace Engine
                 SpecularColor == other.SpecularColor &&
                 IsTransparent == other.IsTransparent &&
                 Shininess == other.Shininess;
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is MaterialBlinnPhong phong && Equals(phong);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(EmissiveColor, AmbientColor, DiffuseColor, SpecularColor, IsTransparent, Shininess);
         }
         /// <inheritdoc/>
         public override string ToString()

@@ -143,6 +143,16 @@ namespace Engine.Common
                 NormalMap == other.NormalMap;
         }
         /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as MeshMaterial);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Material, EmissionTexture, AmbientTexture, DiffuseTexture, NormalMap);
+        }
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"{Material} EmissionTexture: {EmissionTexture != null}; AmbientTexture: {AmbientTexture != null}; DiffuseTexture: {DiffuseTexture != null}; NormalMapTexture: {NormalMap != null};";

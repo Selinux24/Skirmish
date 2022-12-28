@@ -188,6 +188,16 @@ namespace Engine.Animation
                 StartTime == other.StartTime &&
                 EndTime == other.EndTime;
         }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return obj is JointAnimation animation && Equals(animation);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return Joint.GetHashCode() ^ Keyframes.GetHashCode() ^ StartTime.GetHashCode() ^ EndTime.GetHashCode();
+        }
 
         /// <summary>
         /// Makes a copy of the instance keyframes
@@ -229,17 +239,6 @@ namespace Engine.Animation
             }
 
             return new JointAnimation(Joint, kfs);
-        }
-
-        /// <inheritdoc/>
-        public override bool Equals(object obj)
-        {
-            return obj is JointAnimation animation && Equals(animation);
-        }
-        /// <inheritdoc/>
-        public override int GetHashCode()
-        {
-            return Joint.GetHashCode() ^ Keyframes.GetHashCode() ^ StartTime.GetHashCode() ^ EndTime.GetHashCode();
         }
     }
 }

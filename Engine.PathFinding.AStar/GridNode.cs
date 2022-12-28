@@ -26,7 +26,7 @@ namespace Engine.PathFinding.AStar
         {
             get
             {
-                return this.ConnectedNodes.ToArray();
+                return ConnectedNodes.ToArray();
             }
         }
         /// <summary>
@@ -38,7 +38,7 @@ namespace Engine.PathFinding.AStar
         {
             get
             {
-                return this.ConnectedNodes[index];
+                return ConnectedNodes[index];
             }
         }
         /// <summary>
@@ -78,11 +78,9 @@ namespace Engine.PathFinding.AStar
         {
             get
             {
-                if (this.nodesDictionary.ContainsKey(heading))
+                if (nodesDictionary.TryGetValue(heading, out int index))
                 {
-                    int index = this.nodesDictionary[heading];
-
-                    return this.ConnectedNodes[index];
+                    return ConnectedNodes[index];
                 }
 
                 return null;
@@ -95,7 +93,7 @@ namespace Engine.PathFinding.AStar
         {
             get
             {
-                return this.ConnectedNodes.Count == 8;
+                return ConnectedNodes.Count == 8;
             }
         }
 
@@ -156,20 +154,20 @@ namespace Engine.PathFinding.AStar
             minZ = Math.Min(minZ, p3.Z);
 
             var ne = GetNorthEast(maxX, maxZ, p0, p1, p2, p3);
-            if (ne.HasValue) this.NorthEast = ne.Value;
+            if (ne.HasValue) NorthEast = ne.Value;
 
             var nw = GetNorthWest(minX, maxZ, p0, p1, p2, p3);
-            if (nw.HasValue) this.NorthWest = nw.Value;
+            if (nw.HasValue) NorthWest = nw.Value;
 
             var sw = GetSouthWest(minX, minZ, p0, p1, p2, p3);
-            if (sw.HasValue) this.SouthWest = sw.Value;
+            if (sw.HasValue) SouthWest = sw.Value;
 
             var se = GetSouthEast(maxX, minZ, p0, p1, p2, p3);
-            if (se.HasValue) this.SouthEast = se.Value;
+            if (se.HasValue) SouthEast = se.Value;
 
-            this.TotalCost = cost;
-            this.State = GridNodeStates.Clear;
-            this.Center = (p0 + p1 + p2 + p3) / 4f;
+            TotalCost = cost;
+            State = GridNodeStates.Clear;
+            Center = (p0 + p1 + p2 + p3) / 4f;
         }
         /// <summary>
         /// Gets the north east position in the specified points
@@ -181,7 +179,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the north east position</returns>
-        private Vector3? GetNorthEast(float maxX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetNorthEast(float maxX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
             if (p0.X == maxX && p0.Z == maxZ) return p0;
             else if (p1.X == maxX && p1.Z == maxZ) return p1;
@@ -200,7 +198,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the north west position</returns>
-        private Vector3? GetNorthWest(float minX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetNorthWest(float minX, float maxZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
             if (p0.X == minX && p0.Z == maxZ) return p0;
             else if (p1.X == minX && p1.Z == maxZ) return p1;
@@ -219,7 +217,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the south west position</returns>
-        private Vector3? GetSouthWest(float minX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetSouthWest(float minX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
             if (p0.X == minX && p0.Z == minZ) return p0;
             else if (p1.X == minX && p1.Z == minZ) return p1;
@@ -238,7 +236,7 @@ namespace Engine.PathFinding.AStar
         /// <param name="p2">Point 3</param>
         /// <param name="p3">Point 4</param>
         /// <returns>Returns the south east position</returns>
-        private Vector3? GetSouthEast(float maxX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+        private static Vector3? GetSouthEast(float maxX, float minZ, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
         {
             if (p0.X == maxX && p0.Z == minZ) return p0;
             else if (p1.X == maxX && p1.Z == minZ) return p1;
@@ -256,10 +254,10 @@ namespace Engine.PathFinding.AStar
         public bool IsConnected(Vector3 position)
         {
             return (
-                this.NorthWest == position ||
-                this.NorthEast == position ||
-                this.SouthWest == position ||
-                this.SouthEast == position);
+                NorthWest == position ||
+                NorthEast == position ||
+                SouthWest == position ||
+                SouthEast == position);
         }
         /// <summary>
         /// Gets specified node direction from current node
@@ -268,10 +266,10 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns specified node direction from current node</returns>
         public Headings GetHeadingTo(GridNode node)
         {
-            bool connectedWithNorthWest = this.IsConnected(node.NorthWest);
-            bool connectedWithNorthEast = this.IsConnected(node.NorthEast);
-            bool connectedWithSouthWest = this.IsConnected(node.SouthWest);
-            bool connectedWithSouthEast = this.IsConnected(node.SouthEast);
+            bool connectedWithNorthWest = IsConnected(node.NorthWest);
+            bool connectedWithNorthEast = IsConnected(node.NorthEast);
+            bool connectedWithSouthWest = IsConnected(node.SouthWest);
+            bool connectedWithSouthEast = IsConnected(node.SouthEast);
 
             if (!connectedWithNorthWest &&
                 !connectedWithNorthEast &&
@@ -322,16 +320,16 @@ namespace Engine.PathFinding.AStar
         /// <param name="gridNode">Grid node to connect</param>
         public void TryConnect(GridNode gridNode)
         {
-            Headings headingThis = this.GetHeadingTo(gridNode);
+            Headings headingThis = GetHeadingTo(gridNode);
 
             if (headingThis != Headings.None)
             {
                 Headings headingOther = GetOpposite(headingThis);
 
-                if (!this.nodesDictionary.ContainsKey(headingThis))
+                if (!nodesDictionary.ContainsKey(headingThis))
                 {
-                    this.ConnectedNodes.Add(gridNode);
-                    this.nodesDictionary.Add(headingThis, this.ConnectedNodes.Count - 1);
+                    ConnectedNodes.Add(gridNode);
+                    nodesDictionary.Add(headingThis, ConnectedNodes.Count - 1);
                 }
 
                 if (!gridNode.nodesDictionary.ContainsKey(headingOther))
@@ -348,8 +346,8 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns whether this node contains specified point</returns>
         public bool Contains(Vector3 point)
         {
-            if (point.X >= this.SouthWest.X && point.Z >= this.SouthWest.Z &&
-                point.X <= this.NorthEast.X && point.Z <= this.NorthEast.Z)
+            if (point.X >= SouthWest.X && point.Z >= SouthWest.Z &&
+                point.X <= NorthEast.X && point.Z <= NorthEast.Z)
             {
                 return true;
             }
@@ -365,10 +363,10 @@ namespace Engine.PathFinding.AStar
         {
             distance = float.MaxValue;
 
-            if (point.X >= this.SouthWest.X && point.Z >= this.SouthWest.Z &&
-                point.X <= this.NorthEast.X && point.Z <= this.NorthEast.Z)
+            if (point.X >= SouthWest.X && point.Z >= SouthWest.Z &&
+                point.X <= NorthEast.X && point.Z <= NorthEast.Z)
             {
-                distance = Vector3.DistanceSquared(point, this.Center);
+                distance = Vector3.DistanceSquared(point, Center);
 
                 return true;
             }
@@ -383,10 +381,10 @@ namespace Engine.PathFinding.AStar
         {
             return new[]
             {
-                this.NorthEast,
-                this.NorthWest,
-                this.SouthWest,
-                this.SouthEast,
+                NorthEast,
+                NorthWest,
+                SouthWest,
+                SouthEast,
             };
         }
         /// <summary>
@@ -395,7 +393,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns text representation</returns>
         public override string ToString()
         {
-            return string.Format("State {0}; Cost {1:0.00}; Connections {2}; Center: {3}", this.State, this.TotalCost, this.ConnectedNodes.Count, this.Center);
+            return $"State {State}; Cost {TotalCost:0.00}; Connections {ConnectedNodes.Count}; Center: {Center}";
         }
     }
 }

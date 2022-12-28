@@ -112,12 +112,9 @@ namespace Engine
         /// <returns>Returns the cull data item for the specified object and index. If not exists, returns the Empty cull data object</returns>
         public CullData GetCullValue(int index, ICullable item)
         {
-            if (Objects.TryGetValue(item, out var values))
+            if (Objects.TryGetValue(item, out var values) && index < values.Count)
             {
-                if (index < values.Count)
-                {
-                    return values[index];
-                }
+                return values[index];
             }
 
             return CullData.Empty;

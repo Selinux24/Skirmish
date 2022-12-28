@@ -362,7 +362,7 @@ namespace Engine
         /// </summary>
         public static void Clear()
         {
-            while (log.Count > 0)
+            while (!log.IsEmpty)
             {
                 log.TryDequeue(out _);
             }

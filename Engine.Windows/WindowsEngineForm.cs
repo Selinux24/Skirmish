@@ -121,9 +121,7 @@ namespace Engine.Windows
                 {
                     allowUserResizing = value;
                     MaximizeBox = allowUserResizing;
-                    FormBorderStyle = IsFullscreen
-                        ? FormBorderStyle.None
-                        : allowUserResizing ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
+                    FormBorderStyle = GetFormBorderStyle();
                 }
             }
         }
@@ -225,6 +223,19 @@ namespace Engine.Windows
                 RenderCenter = new Point(RenderWidth / 2, RenderHeight / 2);
                 ScreenCenter = new Point(Location.X + RenderCenter.X, Location.Y + RenderCenter.Y);
             }
+        }
+
+        /// <summary>
+        /// Gets the Form Border Style
+        /// </summary>
+        private FormBorderStyle GetFormBorderStyle()
+        {
+            if (IsFullscreen)
+            {
+                return FormBorderStyle.None;
+            }
+
+            return allowUserResizing ? FormBorderStyle.Sizable : FormBorderStyle.FixedSingle;
         }
 
         /// <summary>
