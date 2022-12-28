@@ -1,6 +1,4 @@
-﻿using SharpDX.Win32;
-using System;
-using System.Globalization;
+﻿using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -197,13 +195,11 @@ namespace Engine.Windows
             }
 
             // Previous code not compatible with Application.AddMessageFilter but faster then DoEvents
-            while (NativeMethods.PeekMessage(out NativeMessage msg, IntPtr.Zero, 0, 0, 0) != 0)
+            while (NativeMethods.PeekMessage(out var msg, IntPtr.Zero, 0, 0, 0) != 0)
             {
                 if (NativeMethods.GetMessage(out msg, IntPtr.Zero, 0, 0) == -1)
                 {
-                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture,
-                        "An error happened in rendering loop while processing windows messages. Error: {0}",
-                        Marshal.GetLastWin32Error()));
+                    throw new InvalidOperationException($"An error happened in rendering loop while processing windows messages. Error: {Marshal.GetLastWin32Error()}");
                 }
 
                 // NCDESTROY event?
