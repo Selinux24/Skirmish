@@ -68,10 +68,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
-            {
-                throw new EngineException("buildNavigation: Could not erode.");
-            }
+            chf.ErodeWalkableArea(cfg.WalkableRadius);
 
             // Mark areas.
             chf.MarkAreas(geometry);
@@ -253,10 +250,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
-            {
-                return null;
-            }
+            chf.ErodeWalkableArea(cfg.WalkableRadius);
 
             // Mark areas.
             chf.MarkAreas(geometry);
@@ -386,10 +380,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
 
             // Erode the walkable area by agent radius.
-            if (!chf.ErodeWalkableArea(cfg.WalkableRadius))
-            {
-                throw new EngineException("buildNavigation: Could not erode.");
-            }
+            chf.ErodeWalkableArea(cfg.WalkableRadius);
 
             // Mark areas.
             chf.MarkAreas(geometry);

@@ -7,6 +7,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 {
     static class RecastUtils
     {
+        private static readonly int[] OffsetsX = new[] { -1, 0, 1, 0, };
+        private static readonly int[] OffsetsY = new[] { 0, 1, 0, -1 };
+        private static readonly int[] OffsetsDir = new[] { 3, 0, -1, 2, 1 };
+
         /// <summary>
         /// Gets the next index value in a fixed length array
         /// </summary>
@@ -58,18 +62,15 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         public static int GetDirOffsetX(int dir)
         {
-            int[] offset = new[] { -1, 0, 1, 0, };
-            return offset[dir & 0x03];
+            return OffsetsX[dir & 0x03];
         }
         public static int GetDirOffsetY(int dir)
         {
-            int[] offset = new[] { 0, 1, 0, -1 };
-            return offset[dir & 0x03];
+            return OffsetsY[dir & 0x03];
         }
         public static int GetDirForOffset(int x, int y)
         {
-            int[] dirs = { 3, 0, -1, 2, 1 };
-            return dirs[((y + 1) << 1) + x];
+            return OffsetsDir[((y + 1) << 1) + x];
         }
 
         public static int CalcAreaOfPolygon2D(IEnumerable<Int4> verts, int nverts)

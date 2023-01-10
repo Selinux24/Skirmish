@@ -42,113 +42,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 BoundingBox = bbox,
                 CellSize = hf.CellSize,
                 CellHeight = hf.CellHeight,
-                Cells = new CompactCell[w * h],
-                Spans = new CompactSpan[spanCount],
-                Areas = new AreaTypes[spanCount]
             };
 
             // Fill in cells and spans.
-            int idx = 0;
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-                    var s = hf.Spans[x + y * w];
-
-                    // If there are no spans at this cell, just leave the data to index=0, count=0.
-                    if (s == null)
-                    {
-                        continue;
-                    }
-
-                    var c = new CompactCell
-                    {
-                        Index = idx,
-                        Count = 0
-                    };
-
-                    while (s != null)
-                    {
-                        if (s.area != AreaTypes.RC_NULL_AREA)
-                        {
-                            int bot = s.smax;
-                            int top = s.next != null ? s.next.smin : int.MaxValue;
-                            chf.Spans[idx].Y = MathUtil.Clamp(bot, 0, 0xffff);
-                            chf.Spans[idx].H = MathUtil.Clamp(top - bot, 0, 0xff);
-                            chf.Areas[idx] = s.area;
-                            idx++;
-                            c.Count++;
-                        }
-
-                        s = s.next;
-                    }
-
-                    chf.Cells[x + y * w] = c;
-                }
-            }
+            chf.FillCellsAndSpans(hf.Spans, spanCount);
 
             // Find neighbour connections.
-            int maxLayers = ContourSet.RC_NOT_CONNECTED - 1;
-            int tooHighNeighbour = 0;
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-                    var c = chf.Cells[x + y * w];
-
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; i++)
-                    {
-                        var s = chf.Spans[i];
-
-                        for (int dir = 0; dir < 4; dir++)
-                        {
-                            s.SetCon(dir, ContourSet.RC_NOT_CONNECTED);
-                            int nx = x + RecastUtils.GetDirOffsetX(dir);
-                            int ny = y + RecastUtils.GetDirOffsetY(dir);
-                            // First check that the neighbour cell is in bounds.
-                            if (nx < 0 || ny < 0 || nx >= w || ny >= h)
-                            {
-                                continue;
-                            }
-
-                            // Iterate over all neighbour spans and check if any of the is
-                            // accessible from current cell.
-                            var nc = chf.Cells[nx + ny * w];
-
-                            for (int k = nc.Index, nk = (nc.Index + nc.Count); k < nk; ++k)
-                            {
-                                var ns = chf.Spans[k];
-
-                                int bot = Math.Max(s.Y, ns.Y);
-                                int top = Math.Min(s.Y + s.H, ns.Y + ns.H);
-
-                                // Check that the gap between the spans is walkable,
-                                // and that the climb height between the gaps is not too high.
-                                if ((top - bot) >= walkableHeight && Math.Abs(ns.Y - s.Y) <= walkableClimb)
-                                {
-                                    // Mark direction as walkable.
-                                    int lidx = k - nc.Index;
-                                    if (lidx < 0 || lidx > maxLayers)
-                                    {
-                                        tooHighNeighbour = Math.Max(tooHighNeighbour, lidx);
-                                        continue;
-                                    }
-
-                                    s.SetCon(dir, lidx);
-                                    break;
-                                }
-                            }
-                        }
-
-                        chf.Spans[i] = s;
-                    }
-                }
-            }
-
-            if (tooHighNeighbour > maxLayers)
-            {
-                throw new EngineException(string.Format("Heightfield has too many layers {0} (max: {1})", tooHighNeighbour, maxLayers));
-            }
+            chf.FindNeighbourConnections();
 
             return chf;
         }
@@ -255,6 +155,140 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public AreaTypes[] Areas { get; set; }
 
         /// <summary>
+        /// Fill in cells and spans.
+        /// </summary>
+        /// <param name="spans">Heightfield span list</param>
+        /// <param name="spanCount">Heightfield span count</param>
+        private void FillCellsAndSpans(Span[] spans, int spanCount)
+        {
+            Cells = new CompactCell[Width * Height];
+            Spans = new CompactSpan[spanCount];
+            Areas = new AreaTypes[spanCount];
+
+            // Fill in cells and spans.
+            int idx = 0;
+            for (int y = 0; y < Height; ++y)
+            {
+                for (int x = 0; x < Width; ++x)
+                {
+                    var s = spans[x + y * Width];
+
+                    // If there are no spans at this cell, just leave the data to index=0, count=0.
+                    if (s == null)
+                    {
+                        continue;
+                    }
+
+                    var c = new CompactCell
+                    {
+                        Index = idx,
+                        Count = 0
+                    };
+
+                    while (s != null)
+                    {
+                        if (s.area != AreaTypes.RC_NULL_AREA)
+                        {
+                            int bot = s.smax;
+                            int top = s.next != null ? s.next.smin : int.MaxValue;
+                            Spans[idx].Y = MathUtil.Clamp(bot, 0, 0xffff);
+                            Spans[idx].H = MathUtil.Clamp(top - bot, 0, 0xff);
+                            Areas[idx] = s.area;
+                            idx++;
+                            c.Count++;
+                        }
+
+                        s = s.next;
+                    }
+
+                    Cells[x + y * Width] = c;
+                }
+            }
+        }
+        /// <summary>
+        /// Find neighbour connections.
+        /// </summary>
+        private void FindNeighbourConnections()
+        {
+            // Find neighbour connections.
+            int maxLayers = ContourSet.RC_NOT_CONNECTED - 1;
+            int tooHighNeighbour = 0;
+            for (int y = 0; y < Height; ++y)
+            {
+                for (int x = 0; x < Width; ++x)
+                {
+                    var c = Cells[x + y * Width];
+
+                    for (int i = c.Index, ni = c.Index + c.Count; i < ni; i++)
+                    {
+                        Spans[i] = FindConnections(x, y, Spans[i], maxLayers, ref tooHighNeighbour);
+                    }
+                }
+            }
+
+            if (tooHighNeighbour > maxLayers)
+            {
+                throw new EngineException(string.Format("Heightfield has too many layers {0} (max: {1})", tooHighNeighbour, maxLayers));
+            }
+        }
+        /// <summary>
+        /// Iterate over all neighbour spans and check if any of the is accessible from current cell.
+        /// </summary>
+        /// <param name="x">X cell coordinate</param>
+        /// <param name="y">Y cell coordinate</param>
+        /// <param name="span">Compact span</param>
+        /// <param name="maxLayers">Maximum layers</param>
+        /// <param name="tooHighNeighbour">Returns the too high neighbour index, if any</param>
+        /// <returns>Returns the updated compact span</returns>
+        private CompactSpan FindConnections(int x, int y, CompactSpan span, int maxLayers, ref int tooHighNeighbour)
+        {
+            var s = span;
+
+            for (int dir = 0; dir < 4; dir++)
+            {
+                s.SetCon(dir, ContourSet.RC_NOT_CONNECTED);
+                int nx = x + RecastUtils.GetDirOffsetX(dir);
+                int ny = y + RecastUtils.GetDirOffsetY(dir);
+
+                // First check that the neighbour cell is in bounds.
+                if (nx < 0 || ny < 0 || nx >= Width || ny >= Height)
+                {
+                    continue;
+                }
+
+                // Iterate over all neighbour spans and check if any of the is
+                // accessible from current cell.
+                var nc = Cells[nx + ny * Width];
+
+                for (int k = nc.Index, nk = (nc.Index + nc.Count); k < nk; ++k)
+                {
+                    var ns = Spans[k];
+
+                    int bot = Math.Max(s.Y, ns.Y);
+                    int top = Math.Min(s.Y + s.H, ns.Y + ns.H);
+
+                    // Check that the gap between the spans is walkable,
+                    // and that the climb height between the gaps is not too high.
+                    if ((top - bot) >= WalkableHeight && Math.Abs(ns.Y - s.Y) <= WalkableClimb)
+                    {
+                        // Mark direction as walkable.
+                        int lidx = k - nc.Index;
+                        if (lidx < 0 || lidx > maxLayers)
+                        {
+                            tooHighNeighbour = Math.Max(tooHighNeighbour, lidx);
+                            continue;
+                        }
+
+                        s.SetCon(dir, lidx);
+                        break;
+                    }
+                }
+            }
+
+            return s;
+        }
+
+        /// <summary>
         /// Marks the geometry areas into the heightfield
         /// </summary>
         /// <param name="geometry">Geometry input</param>
@@ -276,121 +310,30 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Basically, any spans that are closer to a boundary or obstruction than the specified radius are marked as unwalkable.
         /// </summary>
         /// <param name="radius">Radius</param>
-        /// <param name="chf">Compact height field</param>
-        /// <returns>Returns always true</returns>
         /// <remarks>
         /// This method is usually called immediately after the heightfield has been built.
         /// </remarks>
-        public bool ErodeWalkableArea(int radius)
+        public void ErodeWalkableArea(int radius)
         {
             int w = Width;
             int h = Height;
 
             // Init distance.
-            int[] dist = Helper.CreateArray(SpanCount, 0xff);
-
-            // Mark boundary cells.
-            for (int y = 0; y < h; ++y)
-            {
-                for (int x = 0; x < w; ++x)
-                {
-                    CompactCell c = Cells[x + y * w];
-                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
-                    {
-                        if (Areas[i] == AreaTypes.RC_NULL_AREA)
-                        {
-                            dist[i] = 0;
-                        }
-                        else
-                        {
-                            CompactSpan s = Spans[i];
-                            int nc = 0;
-                            for (int dir = 0; dir < 4; ++dir)
-                            {
-                                if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
-                                {
-                                    int nx = x + RecastUtils.GetDirOffsetX(dir);
-                                    int ny = y + RecastUtils.GetDirOffsetY(dir);
-                                    int nidx = Cells[nx + ny * w].Index + s.GetCon(dir);
-                                    if (Areas[nidx] != AreaTypes.RC_NULL_AREA)
-                                    {
-                                        nc++;
-                                    }
-                                }
-                            }
-                            // At least one missing neighbour.
-                            if (nc != 4)
-                            {
-                                dist[i] = 0;
-                            }
-                        }
-                    }
-                }
-            }
-
-            int nd;
+            int[] dist = MarkBoundaryCells();
 
             // Pass 1
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    CompactCell c = Cells[x + y * w];
+                    var c = Cells[x + y * w];
                     for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        CompactSpan s = Spans[i];
-                        if (s.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            // (-1,0)
-                            int ax = x + RecastUtils.GetDirOffsetX(0);
-                            int ay = y + RecastUtils.GetDirOffsetY(0);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(0);
-                            CompactSpan asp = Spans[ai];
-                            nd = Math.Min(dist[ai] + 2, 255);
-                            if (nd < dist[i])
-                            {
-                                dist[i] = nd;
-                            }
+                        // (0,-1) & (1,-1)
+                        dist[i] = CalculateDistance(x, y, i, dist, 0, 3);
 
-                            // (-1,-1)
-                            if (asp.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
-                            {
-                                int aax = ax + RecastUtils.GetDirOffsetX(3);
-                                int aay = ay + RecastUtils.GetDirOffsetY(3);
-                                int aai = Cells[aax + aay * w].Index + asp.GetCon(3);
-                                nd = Math.Min(dist[aai] + 3, 255);
-                                if (nd < dist[i])
-                                {
-                                    dist[i] = nd;
-                                }
-                            }
-                        }
-                        if (s.GetCon(3) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            // (0,-1)
-                            int ax = x + RecastUtils.GetDirOffsetX(3);
-                            int ay = y + RecastUtils.GetDirOffsetY(3);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(3);
-                            CompactSpan asp = Spans[ai];
-                            nd = Math.Min(dist[ai] + 2, 255);
-                            if (nd < dist[i])
-                            {
-                                dist[i] = nd;
-                            }
-
-                            // (1,-1)
-                            if (asp.GetCon(2) != ContourSet.RC_NOT_CONNECTED)
-                            {
-                                int aax = ax + RecastUtils.GetDirOffsetX(2);
-                                int aay = ay + RecastUtils.GetDirOffsetY(2);
-                                int aai = Cells[aax + aay * w].Index + asp.GetCon(2);
-                                nd = Math.Min(dist[aai] + 3, 255);
-                                if (nd < dist[i])
-                                {
-                                    dist[i] = nd;
-                                }
-                            }
-                        }
+                        // (0,-1) & (1,-1)
+                        dist[i] = CalculateDistance(x, y, i, dist, 3, 2);
                     }
                 }
             }
@@ -403,59 +346,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     var c = Cells[x + y * w];
                     for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
                     {
-                        var s = Spans[i];
-                        if (s.GetCon(2) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            // (1,0)
-                            int ax = x + RecastUtils.GetDirOffsetX(2);
-                            int ay = y + RecastUtils.GetDirOffsetY(2);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(2);
-                            var asp = Spans[ai];
-                            nd = Math.Min(dist[ai] + 2, 255);
-                            if (nd < dist[i])
-                            {
-                                dist[i] = nd;
-                            }
+                        // (1,0) & (1,1)
+                        dist[i] = CalculateDistance(x, y, i, dist, 2, 1);
 
-                            // (1,1)
-                            if (asp.GetCon(1) != ContourSet.RC_NOT_CONNECTED)
-                            {
-                                int aax = ax + RecastUtils.GetDirOffsetX(1);
-                                int aay = ay + RecastUtils.GetDirOffsetY(1);
-                                int aai = Cells[aax + aay * w].Index + asp.GetCon(1);
-                                nd = Math.Min(dist[aai] + 3, 255);
-                                if (nd < dist[i])
-                                {
-                                    dist[i] = nd;
-                                }
-                            }
-                        }
-                        if (s.GetCon(1) != ContourSet.RC_NOT_CONNECTED)
-                        {
-                            // (0,1)
-                            int ax = x + RecastUtils.GetDirOffsetX(1);
-                            int ay = y + RecastUtils.GetDirOffsetY(1);
-                            int ai = Cells[ax + ay * w].Index + s.GetCon(1);
-                            var asp = Spans[ai];
-                            nd = Math.Min(dist[ai] + 2, 255);
-                            if (nd < dist[i])
-                            {
-                                dist[i] = nd;
-                            }
-
-                            // (-1,1)
-                            if (asp.GetCon(0) != ContourSet.RC_NOT_CONNECTED)
-                            {
-                                int aax = ax + RecastUtils.GetDirOffsetX(0);
-                                int aay = ay + RecastUtils.GetDirOffsetY(0);
-                                int aai = Cells[aax + aay * w].Index + asp.GetCon(0);
-                                nd = Math.Min(dist[aai] + 3, 255);
-                                if (nd < dist[i])
-                                {
-                                    dist[i] = nd;
-                                }
-                            }
-                        }
+                        // (0,1) & (-1,1)
+                        dist[i] = CalculateDistance(x, y, i, dist, 1, 0);
                     }
                 }
             }
@@ -468,8 +363,104 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     Areas[i] = AreaTypes.RC_NULL_AREA;
                 }
             }
+        }
+        /// <summary>
+        /// Calculates the distance map
+        /// </summary>
+        /// <param name="x">X cell coordinate</param>
+        /// <param name="y">Y cell coordinate</param>
+        /// <param name="i">Span index</param>
+        /// <param name="dist">Distance map</param>
+        /// <param name="dir1">Direction 1</param>
+        /// <param name="dir2">Direction 2</param>
+        /// <returns>Returns the new distance value</returns>
+        private int CalculateDistance(int x, int y, int i, int[] dist, int dir1, int dir2)
+        {
+            var s = Spans[i];
+            int d = dist[i];
 
-            return true;
+            if (s.GetCon(dir1) == ContourSet.RC_NOT_CONNECTED)
+            {
+                return d;
+            }
+
+            int nd;
+
+            int ax = x + RecastUtils.GetDirOffsetX(dir1);
+            int ay = y + RecastUtils.GetDirOffsetY(dir1);
+            int ai = Cells[ax + ay * Width].Index + s.GetCon(dir1);
+            var asp = Spans[ai];
+            nd = Math.Min(dist[ai] + 2, 255);
+            if (nd < d)
+            {
+                d = nd;
+            }
+
+            if (asp.GetCon(dir2) == ContourSet.RC_NOT_CONNECTED)
+            {
+                return d;
+            }
+
+            int aax = ax + RecastUtils.GetDirOffsetX(dir2);
+            int aay = ay + RecastUtils.GetDirOffsetY(dir2);
+            int aai = Cells[aax + aay * Width].Index + asp.GetCon(dir2);
+            nd = Math.Min(dist[aai] + 3, 255);
+            if (nd < d)
+            {
+                d = nd;
+            }
+
+            return d;
+        }
+        /// <summary>
+        /// Mark boundary cells.
+        /// </summary>
+        /// <returns>Returns the distance map</returns>
+        private int[] MarkBoundaryCells()
+        {
+            // Init distance.
+            int[] dist = Helper.CreateArray(SpanCount, 0xff);
+
+            // Mark boundary cells.
+            for (int y = 0; y < Height; ++y)
+            {
+                for (int x = 0; x < Width; ++x)
+                {
+                    var c = Cells[x + y * Width];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    {
+                        if (Areas[i] == AreaTypes.RC_NULL_AREA)
+                        {
+                            dist[i] = 0;
+                            continue;
+                        }
+
+                        var s = Spans[i];
+                        int nc = 0;
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
+                            {
+                                int nx = x + RecastUtils.GetDirOffsetX(dir);
+                                int ny = y + RecastUtils.GetDirOffsetY(dir);
+                                int nidx = Cells[nx + ny * Width].Index + s.GetCon(dir);
+                                if (Areas[nidx] != AreaTypes.RC_NULL_AREA)
+                                {
+                                    nc++;
+                                }
+                            }
+                        }
+
+                        // At least one missing neighbour.
+                        if (nc != 4)
+                        {
+                            dist[i] = 0;
+                        }
+                    }
+                }
+            }
+
+            return dist;
         }
         /// <summary>
         /// Returns whether the specified edge is solid
@@ -591,7 +582,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <remarks>
         /// Reads to the compact heightfield are offset by border size, since border size offset is already removed from the polymesh vertices.
         /// </remarks>
-        public void GetHeightData(IndexedPolygon poly, Int3[] verts, int borderSize, HeightPatch hp, int region)
+        public void GetHeightData(IndexedPolygon poly, Int3[] verts, HeightPatch hp, int borderSize, int region)
         {
             List<HeightDataItem> queue = new List<HeightDataItem>(512);
 
@@ -605,56 +596,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // with polys of that region and the heights sampled here could be wrong.
             if (!IndexedPolygon.HasMultipleRegions(region))
             {
-                // Copy the height from the same region, and mark region borders
-                // as seed points to fill the rest.
-                for (int hy = 0; hy < hp.Bounds.Height; hy++)
-                {
-                    int y = hp.Bounds.Y + hy + borderSize;
-                    for (int hx = 0; hx < hp.Bounds.Width; hx++)
-                    {
-                        int x = hp.Bounds.X + hx + borderSize;
-                        var c = Cells[x + y * Width];
-                        for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
-                        {
-                            var s = Spans[i];
-                            if (s.Reg == region)
-                            {
-                                // Store height
-                                hp.Data[hx + hy * hp.Bounds.Width] = s.Y;
-                                empty = false;
+                empty = GetHeightDataFromMultipleRegions(hp, borderSize, region, out var qItems);
 
-                                // If any of the neighbours is not in same region,
-                                // add the current location as flood fill start
-                                bool border = false;
-                                for (int dir = 0; dir < 4; ++dir)
-                                {
-                                    if (s.GetCon(dir) != ContourSet.RC_NOT_CONNECTED)
-                                    {
-                                        int ax = x + RecastUtils.GetDirOffsetX(dir);
-                                        int ay = y + RecastUtils.GetDirOffsetY(dir);
-                                        int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
-                                        var a = Spans[ai];
-                                        if (a.Reg != region)
-                                        {
-                                            border = true;
-                                            break;
-                                        }
-                                    }
-                                }
-                                if (border)
-                                {
-                                    queue.Add(new HeightDataItem
-                                    {
-                                        X = x,
-                                        Y = y,
-                                        I = i
-                                    });
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
+                queue.AddRange(qItems);
             }
 
             // if the polygon does not contain any points from the current region (rare, but happens)
@@ -665,6 +609,77 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 queue.AddRange(SeedArrayWithPolyCenter(poly, verts, borderSize, hp));
             }
 
+            ProcessHeightDataQueue(hp, borderSize, queue);
+        }
+
+        private bool GetHeightDataFromMultipleRegions(HeightPatch hp, int borderSize, int region, out List<HeightDataItem> queue)
+        {
+            bool empty = true;
+
+            queue = new List<HeightDataItem>();
+
+            // Copy the height from the same region, and mark region borders
+            // as seed points to fill the rest.
+            for (int hy = 0; hy < hp.Bounds.Height; hy++)
+            {
+                int y = hp.Bounds.Y + hy + borderSize;
+                for (int hx = 0; hx < hp.Bounds.Width; hx++)
+                {
+                    int x = hp.Bounds.X + hx + borderSize;
+                    var c = Cells[x + y * Width];
+                    for (int i = c.Index, ni = (c.Index + c.Count); i < ni; ++i)
+                    {
+                        var s = Spans[i];
+                        if (s.Reg != region)
+                        {
+                            continue;
+                        }
+
+                        // Store height
+                        hp.Data[hx + hy * hp.Bounds.Width] = s.Y;
+                        empty = false;
+
+                        // If any of the neighbours is not in same region,
+                        // add the current location as flood fill start
+                        bool border = false;
+                        for (int dir = 0; dir < 4; ++dir)
+                        {
+                            if (s.GetCon(dir) == ContourSet.RC_NOT_CONNECTED)
+                            {
+                                continue;
+                            }
+
+                            int ai = GetSpanIndexAtDir(x, y, s, dir);
+                            var a = Spans[ai];
+                            if (a.Reg != region)
+                            {
+                                border = true;
+                                break;
+                            }
+                        }
+
+                        if (border)
+                        {
+                            queue.Add(new HeightDataItem { X = x, Y = y, I = i });
+                        }
+
+                        break;
+                    }
+                }
+            }
+
+            return empty;
+        }
+
+        private int GetSpanIndexAtDir(int x, int y, CompactSpan from, int dir)
+        {
+            int ax = x + RecastUtils.GetDirOffsetX(dir);
+            int ay = y + RecastUtils.GetDirOffsetY(dir);
+            return Cells[ax + ay * Width].Index + from.GetCon(dir);
+        }
+
+        private void ProcessHeightDataQueue(HeightPatch hp, int borderSize, List<HeightDataItem> queue)
+        {
             int RETRACT_SIZE = 256;
             int head = 0;
 
@@ -1231,6 +1246,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         int ai = Cells[ax + ay * Width].Index + s.GetCon(dir);
                         r = srcReg[ai];
                     }
+
                     if (r != curReg)
                     {
                         curReg = r;
@@ -1249,11 +1265,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                         var nc = Cells[nx + ny * Width];
                         ni = nc.Index + s.GetCon(dir);
                     }
+
                     if (ni == -1)
                     {
                         // Should not happen.
                         return Array.Empty<int>();
                     }
+
                     x = nx;
                     y = ny;
                     i = ni;
@@ -1457,10 +1475,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (maxz < 0) return;
             if (minz >= Height) return;
 
-            if (minx < 0) minx = 0;
-            if (maxx >= Width) maxx = Width - 1;
-            if (minz < 0) minz = 0;
-            if (maxz >= Height) maxz = Height - 1;
+            minx = Math.Max(0, minx);
+            maxx = Math.Min(Width - 1, maxx);
+            minz = Math.Max(0, minz);
+            maxz = Math.Min(Height - 1, maxz);
 
             for (int z = minz; z <= maxz; ++z)
             {
@@ -1515,10 +1533,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (maxz < 0) return;
             if (minz >= Height) return;
 
-            if (minx < 0) minx = 0;
-            if (maxx >= Width) maxx = Width - 1;
-            if (minz < 0) minz = 0;
-            if (maxz >= Height) maxz = Height - 1;
+            minx = Math.Max(0, minx);
+            maxx = Math.Min(Width - 1, maxx);
+            minz = Math.Max(0, minz);
+            maxz = Math.Min(Height - 1, maxz);
 
             for (int z = minz; z <= maxz; ++z)
             {
@@ -1586,10 +1604,10 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (maxz < 0) return;
             if (minz >= Height) return;
 
-            if (minx < 0) minx = 0;
-            if (maxx >= Width) maxx = Width - 1;
-            if (minz < 0) minz = 0;
-            if (maxz >= Height) maxz = Height - 1;
+            minx = Math.Max(0, minx);
+            maxx = Math.Min(Width - 1, maxx);
+            minz = Math.Max(0, minz);
+            maxz = Math.Min(Height - 1, maxz);
 
             for (int z = minz; z <= maxz; ++z)
             {
@@ -1723,7 +1741,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                                 d += cd * 2;
                             }
                         }
-                        dst[i] = ((d + 5) / 9);
+                        dst[i] = (d + 5) / 9;
                     }
                 }
             }
