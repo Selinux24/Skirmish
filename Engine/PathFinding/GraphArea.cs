@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.PathFinding
 {
@@ -32,7 +33,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Vertices (convex polygon)
         /// </summary>
-        public Vector3[] Vertices { get; set; }
+        public IEnumerable<Vector3> Vertices { get; set; }
         /// <summary>
         /// Minimum height
         /// </summary>
@@ -41,10 +42,6 @@ namespace Engine.PathFinding
         /// Maximum height
         /// </summary>
         public float MaxHeight { get; set; }
-        /// <summary>
-        /// Vertex count
-        /// </summary>
-        public int VertexCount { get; set; }
         /// <summary>
         /// Area type
         /// </summary>
@@ -64,9 +61,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("AreaType {0}; MinHeight {1} MaxHeight {2} VertexCount {3} -> {4}",
-                AreaType, MinHeight, MaxHeight, VertexCount,
-                Vertices != null ? string.Join(" ", Vertices) : "");
+            return $"AreaType {AreaType}; MinHeight {MinHeight} MaxHeight {MaxHeight} -> {(Vertices != null ? string.Join(" ", Vertices) : "")}";
         }
     }
 }

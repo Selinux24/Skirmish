@@ -118,5 +118,24 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return h;
         }
+        /// <summary>
+        /// Gets whether the specified magnitudes were into the heightpatch or not
+        /// </summary>
+        /// <param name="hx">X height</param>
+        /// <param name="hy">Y height</param>
+        public bool CompareBounds(int hx, int hy)
+        {
+            if (hx < 0 || hy < 0 || hx >= Bounds.Width || hy >= Bounds.Height)
+            {
+                return false;
+            }
+
+            if (Data[hx + hy * Bounds.Width] != RC_UNSET_HEIGHT)
+            {
+                return false;
+            }
+
+            return true;
+        }
     }
 }

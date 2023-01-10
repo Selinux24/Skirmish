@@ -77,19 +77,17 @@ namespace Engine.PathFinding
         /// Adds a new area to input
         /// </summary>
         /// <param name="verts">Area polygon vertices</param>
-        /// <param name="nverts">Vertex count</param>
         /// <param name="minh">Minimum height</param>
         /// <param name="maxh">Maximum height</param>
         /// <param name="area">Area type</param>
         /// <returns>Returns the area id</returns>
-        public int AddArea(IEnumerable<Vector3> verts, int nverts, float minh, float maxh, GraphAreaTypes area)
+        public int AddArea(IEnumerable<Vector3> verts, float minh, float maxh, GraphAreaTypes area)
         {
             if (areas.Count >= MaxAreas) return -1;
 
             var graphArea = new GraphArea
             {
                 Vertices = verts?.ToArray(),
-                VertexCount = nverts,
                 MinHeight = minh,
                 MaxHeight = maxh,
                 AreaType = area,

@@ -539,8 +539,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             return (float)Math.Sqrt(minDist);
         }
-        public static void TriangulateHull(IEnumerable<Vector3> verts, int nhull, IEnumerable<int> hull, int nin, List<Int3> tris)
+        public static IEnumerable<Int3> TriangulateHull(IEnumerable<Vector3> verts, IEnumerable<int> hull)
         {
+            List<Int3> tris = new List<Int3>();
+
+            int nhull = hull.Count();
+            int nin = verts.Count();
+
             int start = 0, left = 1, right = nhull - 1;
 
             // Start from an ear with shortest perimeter.
@@ -625,6 +630,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     right = nright;
                 }
             }
+
+            return tris.ToArray();
         }
         /// <summary>
         /// Returns true iff segments ab and cd intersect, properly or improperly.
