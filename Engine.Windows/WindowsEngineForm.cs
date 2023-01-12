@@ -554,28 +554,30 @@ namespace Engine.Windows
                 return;
             }
 
-            if (wparam == SIZE_RESTORED)
+            if (wparam != SIZE_RESTORED)
             {
-                if (previousWindowState == FormWindowState.Minimized)
-                {
-                    OnResumeRendering(EventArgs.Empty);
-                }
-
-                if (!Resizing && (Size != cachedSize || previousWindowState == FormWindowState.Maximized))
-                {
-                    previousWindowState = FormWindowState.Normal;
-
-                    // Only update when cachedSize is != 0
-                    if (cachedSize != Size.Empty)
-                    {
-                        isSizeChangedWithoutResizeBegin = true;
-                    }
-                }
-                else
-                {
-                    previousWindowState = FormWindowState.Normal;
-                }
+                return;
             }
+
+            if (previousWindowState == FormWindowState.Minimized)
+            {
+                OnResumeRendering(EventArgs.Empty);
+            }
+
+            if (!Resizing && (Size != cachedSize || previousWindowState == FormWindowState.Maximized))
+            {
+                previousWindowState = FormWindowState.Normal;
+
+                // Only update when cachedSize is != 0
+                if (cachedSize != Size.Empty)
+                {
+                    isSizeChangedWithoutResizeBegin = true;
+                }
+
+                return;
+            }
+
+            previousWindowState = FormWindowState.Normal;
         }
         private void OnMessageActivateApp(long wparam)
         {
@@ -616,7 +618,7 @@ namespace Engine.Windows
 
             return false;
         }
-        
+
         /// <inheritdoc/>
         protected override bool ProcessDialogKey(System.Windows.Forms.Keys keyData)
         {

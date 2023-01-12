@@ -947,7 +947,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return verts;
         }
 
-        private bool GetPolyVerts(IEnumerable<Vector3> polygon, int i, int j, out Vector3 vi, out Vector3 vj)
+        private static bool GetPolyVerts(IEnumerable<Vector3> polygon, int i, int j, out Vector3 vi, out Vector3 vj)
         {
             vj = polygon.ElementAt(j);
             vi = polygon.ElementAt(i);
@@ -1010,7 +1010,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             return nn;
         }
 
-        private IEnumerable<int> SimplifySamples(Vector3[] edge, int nn, BuildPolyDetailParams param)
+        private static IEnumerable<int> SimplifySamples(Vector3[] edge, int nn, BuildPolyDetailParams param)
         {
             float sampleMaxError = param.SampleMaxError;
 
