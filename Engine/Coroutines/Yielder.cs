@@ -20,10 +20,23 @@ namespace Engine.Coroutines
         /// <param name="routine"></param>
         internal Coroutine StartCoroutine(IEnumerator routine)
         {
+            if (routine != null)
+            {
+                return Coroutine.Empty();
+            }
+
             var coroutine = new Coroutine(routine);
             coroutine.Start();
             coroutines.Add(coroutine);
             return coroutine;
+        }
+        /// <summary>
+        /// Starts a new coroutine
+        /// </summary>
+        /// <param name="yieldInstruction"></param>
+        internal Coroutine StartCoroutine(YieldInstruction yieldInstruction)
+        {
+            return StartCoroutine(yieldInstruction?.Routine);
         }
         /// <summary>
         /// Process coroutines
