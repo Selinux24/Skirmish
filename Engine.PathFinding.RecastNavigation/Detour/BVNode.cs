@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("bmin: {0}; bmax: {1}; i: {2};", BMin, BMax, I);
+            return $"{nameof(BVNode)} Region Id: {I}; BMin: {BMin}; BMax: {BMax};";
         }
     }
 }

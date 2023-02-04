@@ -1,17 +1,48 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine.PathFinding.RecastNavigation.Detour
 {
+    /// <summary>
+    /// Bounding volume item.
+    /// </summary>
+    [Serializable]
     public struct BVItem
     {
+        /// <summary>
+        /// X axis comparer
+        /// </summary>
         public static readonly CompareX XComparer = new CompareX();
+        /// <summary>
+        /// Y axis comparer
+        /// </summary>
         public static readonly CompareY YComparer = new CompareY();
+        /// <summary>
+        /// Z axis comparer
+        /// </summary>
         public static readonly CompareZ ZComparer = new CompareZ();
 
+        /// <summary>
+        /// Minimum bounds of the item's AABB. [(x, y, z)]
+        /// </summary>
         public Int3 BMin { get; set; }
+        /// <summary>
+        /// Maximum bounds of the item's AABB. [(x, y, z)]
+        /// </summary>
         public Int3 BMax { get; set; }
+        /// <summary>
+        /// The item's index. (Negative for escape sequence.)
+        /// </summary>
         public int I { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public BVItem()
+        {
+
+        }
 
         /// <summary>
         /// Gets the text representation of the instance
@@ -19,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Region Id: {0}; BMin: {1}; BMax: {2};", this.I, this.BMin, this.BMax);
+            return $"{nameof(BVItem)} Region Id: {I}; BMin: {BMin}; BMax: {BMax};";
         }
 
         /// <summary>

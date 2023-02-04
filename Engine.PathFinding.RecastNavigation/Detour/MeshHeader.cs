@@ -96,11 +96,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("{0}.{1}.{2}; Id: {3}; Bbox: {4}; Polys: {5}; Vertices: {6}; DMeshes: {7}; DTriangles: {8}; DVertices: {9}",
-                X, Y, Layer, UserId,
-                Bounds,
-                PolyCount, VertCount,
-                DetailMeshCount, DetailTriCount, DetailVertCount);
+            return $"{X}.{Y}.{Layer}; Id: {UserId}; Bbox: {Bounds}; Polys: {PolyCount}; Vertices: {VertCount}; DMeshes: {DetailMeshCount}; DTriangles: {DetailTriCount}; DVertices: {DetailVertCount}";
         }
     };
 }

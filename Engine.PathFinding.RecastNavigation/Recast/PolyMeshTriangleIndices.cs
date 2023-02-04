@@ -56,9 +56,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns></returns>
         public DetailTriEdgeFlagTypes GetDetailTriEdgeFlags(int edgeIndex)
         {
-            DetailTriEdgeFlagTypes dFlags = (DetailTriEdgeFlagTypes)((Flags >> (edgeIndex * 2)) & 0x3);
-
-            return dFlags;
+            return (DetailTriEdgeFlagTypes)((Flags >> (edgeIndex * 2)) & 0x3);
         }
     }
 }

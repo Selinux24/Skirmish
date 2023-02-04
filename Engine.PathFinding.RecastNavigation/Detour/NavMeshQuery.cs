@@ -3022,7 +3022,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            this.m_nav.ClosestPointOnPoly(r, pos, out closest, out posOverPoly);
+            m_nav.ClosestPointOnPoly(r, pos, out closest, out posOverPoly);
 
             return Status.DT_SUCCESS;
         }
@@ -3194,38 +3194,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         ///  Queries polygons within a tile using a BVtree.
         /// </summary>
-        private void QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query)
+        private void QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query, int batchSize = 32)
         {
-            int batchSize = 32;
             List<int> polyRefs = new List<int>(batchSize);
 
-            int nodeIndex = 0;
-            int endIndex = tile.Header.BvNodeCount;
-            var tb = tile.Header.Bounds;
-            float qfac = tile.Header.BvQuantFactor;
-
             // Calculate quantized box
-
-            // Clamp query box to world box.
-            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
-            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
-            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
-            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
-
-            // Quantize
-            Int3 bmin = new Int3();
-            Int3 bmax = new Int3();
-            bmin.X = (int)(qfac * minx) & 0xfffe;
-            bmin.Y = (int)(qfac * miny) & 0xfffe;
-            bmin.Z = (int)(qfac * minz) & 0xfffe;
-            bmax.X = (int)(qfac * maxx + 1) | 1;
-            bmax.Y = (int)(qfac * maxy + 1) | 1;
-            bmax.Z = (int)(qfac * maxz + 1) | 1;
+            CalculateQuantizedBox(tile, bounds, out var bmin, out var bmax);
 
             // Traverse tree
             int bse = m_nav.GetTileRef(tile);
+            int nodeIndex = 0;
+            int endIndex = tile.Header.BvNodeCount;
 
             while (nodeIndex < endIndex)
             {
@@ -3265,6 +3244,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Process the last polygons that didn't make a full batch.
             query.Process(tile, polyRefs);
+        }
+        /// <summary>
+        /// Calculate quantized box
+        /// </summary>
+        private void CalculateQuantizedBox(MeshTile tile, BoundingBox bounds, out Int3 bmin, out Int3 bmax)
+        {
+            var tb = tile.Header.Bounds;
+            float qfac = tile.Header.BvQuantFactor;
+
+            // Clamp query box to world box.
+            float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float minz = MathUtil.Clamp(bounds.Minimum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+            float maxx = MathUtil.Clamp(bounds.Maximum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
+            float maxy = MathUtil.Clamp(bounds.Maximum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
+            float maxz = MathUtil.Clamp(bounds.Maximum.Z, tb.Minimum.Z, tb.Maximum.Z) - tb.Minimum.Z;
+
+            // Quantize
+            bmin = new Int3();
+            bmax = new Int3();
+            bmin.X = (int)(qfac * minx) & 0xfffe;
+            bmin.Y = (int)(qfac * miny) & 0xfffe;
+            bmin.Z = (int)(qfac * minz) & 0xfffe;
+            bmax.X = (int)(qfac * maxx + 1) | 1;
+            bmax.Y = (int)(qfac * maxy + 1) | 1;
+            bmax.Z = (int)(qfac * maxz + 1) | 1;
         }
         /// <summary>
         ///  Queries polygons within a tile reference by reference.

@@ -52,7 +52,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("header: {0};", Header);
+            return $"Header: {Header};";
         }
 
         /// <summary>
@@ -79,13 +79,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         /// <param name="param">Creation parameters</param>
         /// <param name="offMeshConClass">Off-mesh connection classification</param>
-        public void StoreOffMeshLinksVertices(NavMeshCreateParams param, Vector2Int[] offMeshConClass)
+        public void StoreOffMeshLinksVertices(NavMeshCreateParams param, IEnumerable<Vector2Int> offMeshConClass)
         {
             int n = 0;
             for (int i = 0; i < param.OffMeshConCount; ++i)
             {
                 // Only store connections which start from this tile.
-                if (offMeshConClass[i].X == 0xff)
+                if (offMeshConClass.ElementAt(i).X == 0xff)
                 {
                     var linkv = param.OffMeshCon[i];
                     NavVerts.Add(linkv.Start);
@@ -117,13 +117,13 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="param">Creation parameters</param>
         /// <param name="offMeshConClass">Off-mesh connection classification</param>
         /// <param name="offMeshVertsBase">Off-mesh vertices base index</param>
-        public void StoreOffMeshConnectionVertices(NavMeshCreateParams param, Vector2Int[] offMeshConClass, int offMeshVertsBase)
+        public void StoreOffMeshConnectionVertices(NavMeshCreateParams param, IEnumerable<Vector2Int> offMeshConClass, int offMeshVertsBase)
         {
             int n = 0;
             for (int i = 0; i < param.OffMeshConCount; i++)
             {
                 // Only store connections which start from this tile.
-                if (offMeshConClass[i].X == 0xff)
+                if (offMeshConClass.ElementAt(i).X == 0xff)
                 {
                     int start = offMeshVertsBase + (n * 2) + 0;
                     int end = offMeshVertsBase + (n * 2) + 1;
@@ -221,14 +221,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="param">Creation parameters</param>
         /// <param name="offMeshConClass">Off-mesh connection classification</param>
         /// <param name="offMeshPolyBase">Off-mesh polygon base index</param>
-        public void StoreOffMeshConnections(NavMeshCreateParams param, Vector2Int[] offMeshConClass, int offMeshPolyBase)
+        public void StoreOffMeshConnections(NavMeshCreateParams param, IEnumerable<Vector2Int> offMeshConClass, int offMeshPolyBase)
         {
             int n = 0;
 
             for (int i = 0; i < param.OffMeshConCount; ++i)
             {
                 // Only store connections which start from this tile.
-                if (offMeshConClass[i].X == 0xff)
+                if (offMeshConClass.ElementAt(i).X == 0xff)
                 {
                     // Copy connection end-points.
                     var con = new OffMeshConnection
@@ -236,7 +236,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         Poly = offMeshPolyBase + n,
                         Rad = param.OffMeshCon[i].Radius,
                         Flags = param.OffMeshCon[i].Direction != 0 ? DetourUtils.DT_OFFMESH_CON_BIDIR : 0,
-                        Side = offMeshConClass[i].Y,
+                        Side = offMeshConClass.ElementAt(i).Y,
                         Start = param.OffMeshCon[i].Start,
                         End = param.OffMeshCon[i].End,
                         UserId = param.OffMeshCon[i].Id,
