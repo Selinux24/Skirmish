@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <AssemblyName>Engine.Physics</AssemblyName>
+    <RootNamespace>Engine.Physics</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Engine.Physics.snk</AssemblyOriginatorKeyFile>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <PackageIconUrl />
+    <SonarQubeTestProject>False</SonarQubeTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="CollisionDetector.cs~RF7341a000.TMP" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -147,6 +147,16 @@ namespace Engine.Common
 
             return picks.Any();
         }
+        /// <summary>
+        /// Determines whether a sphere intersects with a plane
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="plane">Plane</param>
+        /// <returns>Returns true if the sphere intersects the plane</returns>
+        public static bool SphereIntersectsPlane(BoundingSphere sphere, Plane plane)
+        {
+            return plane.Intersects(ref sphere) == PlaneIntersectionType.Intersecting;
+        }
 
         /// <summary>
         /// Determines whether a box intersects with a sphere
@@ -262,6 +272,16 @@ namespace Engine.Common
             }
 
             return false;
+        }
+        /// <summary>
+        /// Determines whether a box intersects with a plane
+        /// </summary>
+        /// <param name="box">Axis aligned box</param>
+        /// <param name="plane">Plane</param>
+        /// <returns>Returns true if the box intersects the plane</returns>
+        public static bool BoxIntersectsPlane(BoundingBox box, Plane plane)
+        {
+            return plane.Intersects(ref box) == PlaneIntersectionType.Intersecting;
         }
 
         private static bool AxisTestX01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
@@ -600,6 +620,57 @@ namespace Engine.Common
             return closestPoint;
         }
 
+        /// <summary>
+        /// Gets the point of the box closest to the specified point
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="point">point</param>
+        /// <returns>Returns the point of the box closest to the specified point</returns>
+        public static Vector3 ClosestPointInBox(Vector3 point, OrientedBoundingBox box)
+        {
+            Vector3 diff = point - box.Center;
+
+            float closestX = Vector3.Dot(diff, box.Transformation.Right);
+            float closestY = Vector3.Dot(diff, box.Transformation.Up);
+            float closestZ = Vector3.Dot(diff, box.Transformation.Backward);
+
+            //Eje X
+            if (closestX < -box.Extents.X)
+            {
+                closestX = -box.Extents.X;
+            }
+            else if (closestX > box.Extents.X)
+            {
+                closestX = box.Extents.X;
+            }
+
+            //Eje Y
+            if (closestY < -box.Extents.Y)
+            {
+                closestY = -box.Extents.Y;
+            }
+            else if (closestY > box.Extents.Y)
+            {
+                closestY = box.Extents.Y;
+            }
+
+            //Eje Z
+            if (closestZ < -box.Extents.Z)
+            {
+                closestZ = -box.Extents.Z;
+            }
+            else if (closestZ > box.Extents.Z)
+            {
+                closestZ = box.Extents.Z;
+            }
+
+            Vector3 closestPoint = box.Center;
+            closestPoint += closestX * box.Transformation.Right;
+            closestPoint += closestY * box.Transformation.Up;
+            closestPoint += closestZ * box.Transformation.Backward;
+
+            return closestPoint;
+        }
         /// <summary>
         /// Gets the closest triangle point from the specified point
         /// </summary>
