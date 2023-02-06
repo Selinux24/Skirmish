@@ -27,11 +27,11 @@ namespace Engine.Physics
         /// <summary>
         /// Friction.
         /// </summary>
-        private float Friction;
+        private float friction;
         /// <summary>
         /// Restitution.
         /// </summary>
-        private float Restitution;
+        private float restitution;
 
         /// <summary>
         /// Contacting bodies
@@ -60,15 +60,15 @@ namespace Engine.Physics
         /// <summary>
         /// Penetration depth. Usually just between both contacts.
         /// </summary>
-        public float Penetration { get; set; }
+        public float Penetration { get; private set; }
         /// <summary>
         /// Contact point in world coordinates.
         /// </summary>
-        public Vector3 ContactPositionWorld { get; set; }
+        public Vector3 ContactPositionWorld { get; private set; }
         /// <summary>
         /// Contact normal in world coordinates.
         /// </summary>
-        public Vector3 ContactNormalWorld { get; set; }
+        public Vector3 ContactNormalWorld { get; private set; }
         /// <summary>
         /// Orthonormal matrix for local-to-world transforms.
         /// </summary>
@@ -79,19 +79,27 @@ namespace Engine.Physics
         public float DesiredDeltaVelocity { get; private set; }
 
         /// <summary>
-        /// Sets the data that is normally independent of the contact
+        /// Sets the contact data
         /// </summary>
-        /// <param name="one">First body</param>
-        /// <param name="two">Second body</param>
+        /// <param name="body1">First body</param>
+        /// <param name="body2">Second body</param>
         /// <param name="friction">Friction</param>
         /// <param name="restitution">Restitution</param>
-        public void SetBodyData(IRigidBody one, IRigidBody two, float friction, float restitution)
+        /// <param name="position">Position in world coordinates</param>
+        /// <param name="normal">Normal in world coordinates</param>
+        /// <param name="penetration">Penetration</param>
+        public void SetContactData(IRigidBody body1, IRigidBody body2, float friction, float restitution, Vector3 position, Vector3 normal, float penetration)
         {
-            body1 = one;
-            body2 = two;
-            Friction = friction;
-            Restitution = restitution;
+            this.body1 = body1;
+            this.body2 = body2;
+            this.friction = friction;
+            this.restitution = restitution;
+
+            ContactPositionWorld = position;
+            ContactNormalWorld = normal;
+            Penetration = penetration;
         }
+
         /// <summary>
         /// Calculate internal contact status data. This function is called before the resolution of the contact resolution algorithm..
         /// </summary>
@@ -181,7 +189,7 @@ namespace Engine.Physics
             }
 
             // If the speed is very slow, it is necessary to limit the restitution
-            float thisRestitution = Restitution;
+            float thisRestitution = restitution;
             if (Math.Abs(ContactVelocity.X) < velocityLimit)
             {
                 thisRestitution = 0.0f;
@@ -295,7 +303,7 @@ namespace Engine.Physics
 
             // Calculate the impulse on each contact axis
             Vector3 impulseContact;
-            if (Friction == 0f)
+            if (friction == 0f)
             {
                 // Frictionless impulse
                 impulseContact = CalculateFrictionlessImpulse(inverseInertiaTensor);
@@ -344,30 +352,7 @@ namespace Engine.Physics
             angularChange = new Vector3[2];
 
             // We have to work with the inertia of each body in the direction of the contact normal, and the angular inertia.
-            float totalInertia = 0f;
-            float[] linearInertia = new float[2];
-            float[] angularInertia = new float[2];
-            for (uint i = 0; i < 2; i++)
-            {
-                if (body2 == null)
-                {
-                    continue;
-                }
-
-                var inverseInertiaTensor = body2.InverseInertiaTensorWorld;
-
-                // Get the angular inertia.
-                var angularInertiaWorld = Vector3.Cross(relativeContactPositionsWorld[i], ContactNormalWorld);
-                angularInertiaWorld = Core.Transform(inverseInertiaTensor, angularInertiaWorld);
-                angularInertiaWorld = Vector3.Cross(angularInertiaWorld, relativeContactPositionsWorld[i]);
-                angularInertia[i] = Vector3.Dot(angularInertiaWorld, ContactNormalWorld);
-
-                // The linear component is the inverse of the mass
-                linearInertia[i] = body2.InverseMass;
-
-                // Get the total inertia of all components
-                totalInertia += linearInertia[i] + angularInertia[i];
-            }
+            ApplyInertia(out var totalInertia, out var linearInertia, out var angularInertia);
 
             // Iterate again calculating the changes and applying them
             float angularLimit = 0.2f;
@@ -437,6 +422,40 @@ namespace Engine.Physics
                 {
                     body2.CalculateDerivedData();
                 }
+            }
+        }
+        /// <summary>
+        /// Calculates the inertia of the position change
+        /// </summary>
+        /// <param name="totalInertia">Total inertia value</param>
+        /// <param name="linearInertia">Linear inertia of each body</param>
+        /// <param name="angularInertia">Angular inertia of each body</param>
+        private void ApplyInertia(out float totalInertia, out float[] linearInertia, out float[] angularInertia)
+        {
+            totalInertia = 0f;
+            linearInertia = new float[2];
+            angularInertia = new float[2];
+
+            for (uint i = 0; i < 2; i++)
+            {
+                if (body2 == null)
+                {
+                    continue;
+                }
+
+                var inverseInertiaTensor = body2.InverseInertiaTensorWorld;
+
+                // Get the angular inertia.
+                var angularInertiaWorld = Vector3.Cross(relativeContactPositionsWorld[i], ContactNormalWorld);
+                angularInertiaWorld = Core.Transform(inverseInertiaTensor, angularInertiaWorld);
+                angularInertiaWorld = Vector3.Cross(angularInertiaWorld, relativeContactPositionsWorld[i]);
+                angularInertia[i] = Vector3.Dot(angularInertiaWorld, ContactNormalWorld);
+
+                // The linear component is the inverse of the mass
+                linearInertia[i] = body2.InverseMass;
+
+                // Get the total inertia of all components
+                totalInertia += linearInertia[i] + angularInertia[i];
             }
         }
         /// <summary>
@@ -543,18 +562,18 @@ namespace Engine.Physics
 
             // Check for excessive friction
             float planarImpulse = (float)Math.Sqrt(impulseContact.Y * impulseContact.Y + impulseContact.Z * impulseContact.Z);
-            if (planarImpulse > impulseContact.X * Friction)
+            if (planarImpulse > impulseContact.X * friction)
             {
                 // Need to use dynamic friction
                 impulseContact.Y /= planarImpulse;
                 impulseContact.Z /= planarImpulse;
                 impulseContact.X =
                     deltaVelocity.M11 +
-                    deltaVelocity.M12 * Friction * impulseContact.Y +
-                    deltaVelocity.M13 * Friction * impulseContact.Z;
+                    deltaVelocity.M12 * friction * impulseContact.Y +
+                    deltaVelocity.M13 * friction * impulseContact.Z;
                 impulseContact.X = DesiredDeltaVelocity / impulseContact.X;
-                impulseContact.Y *= Friction * impulseContact.X;
-                impulseContact.Z *= Friction * impulseContact.X;
+                impulseContact.Y *= friction * impulseContact.X;
+                impulseContact.Z *= friction * impulseContact.X;
             }
 
             return impulseContact;

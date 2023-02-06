@@ -12,7 +12,7 @@ namespace Engine.Physics
         /// <summary>
         /// Triangle list
         /// </summary>
-        private List<Triangle> triangleList = new List<Triangle>();
+        private readonly List<Triangle> triangleList = new List<Triangle>();
 
         /// <summary>
         /// Gets the triangle list

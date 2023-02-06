@@ -18,7 +18,7 @@ namespace Engine.Coroutines
         /// <summary>
         /// Routine
         /// </summary>
-        IEnumerator Run()
+        static IEnumerator Run()
         {
             yield return true;
         }

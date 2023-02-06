@@ -26,15 +26,15 @@ namespace Engine.Physics
         /// <summary> 
         /// Friction factor to add in all collisions
         /// </summary>
-        public float Friction = 0f;
+        public float Friction { get; set; } = 0f;
         /// <summary> 
         /// Restitution factor to add on all collisions
         /// </summary>
-        public float Restitution = 0f;
+        public float Restitution { get; set; } = 0f;
         /// <summary>
         /// Tolerance
         /// </summary>
-        public float Tolerance = 0f;
+        public float Tolerance { get; set; } = 0f;
 
         /// <summary>
         /// Gets the contact list
@@ -123,8 +123,15 @@ namespace Engine.Physics
         /// <summary>
         /// Notifies the instance that a contact has been added.
         /// </summary>
-        public void AddContact()
+        public void AddContact(IRigidBody one, IRigidBody two, Vector3 position, Vector3 normal, float penetration)
         {
+            if (!HasFreeContacts())
+            {
+                return;
+            }
+
+            CurrentContact?.SetContactData(one, two, Friction, Restitution, position, normal, penetration);
+
             currentContactIndex++;
         }
 
@@ -222,11 +229,11 @@ namespace Engine.Physics
 
                 foreach (var c in EnumerateContactsWithContact(contact, linearChange, angularChange))
                 {
-                    c.Contact.AdjustPosition(
-                        c.LinearChange,
-                        c.AngularChange,
-                        c.RelativeContactPositionsWorld,
-                        c.PenetrationDirection);
+                    c.contact.AdjustPosition(
+                        c.linearChange,
+                        c.angularChange,
+                        c.relativeContactPositionsWorld,
+                        c.penetrationDirection);
                 }
 
                 positionIterationsUsed++;
@@ -270,11 +277,11 @@ namespace Engine.Physics
 
                 foreach (var c in EnumerateContactsWithContact(contact, linearChange, angularChange))
                 {
-                    c.Contact.AdjustVelocities(
-                        c.LinearChange,
-                        c.AngularChange,
-                        c.RelativeContactPositionsWorld,
-                        c.PenetrationDirection,
+                    c.contact.AdjustVelocities(
+                        c.linearChange,
+                        c.angularChange,
+                        c.relativeContactPositionsWorld,
+                        c.penetrationDirection,
                         duration);
                 }
 
@@ -287,25 +294,37 @@ namespace Engine.Physics
         /// <param name="contact">Contact</param>
         /// <param name="linearChange">Linear velocity change</param>
         /// <param name="angularChange">Angular velocity change</param>
-        private IEnumerable<(Contact Contact, Vector3 LinearChange, Vector3 AngularChange, Vector3 RelativeContactPositionsWorld, int PenetrationDirection)> EnumerateContactsWithContact(Contact contact, IEnumerable<Vector3> linearChange, IEnumerable<Vector3> angularChange)
+        private IEnumerable<(Contact contact, Vector3 relativeContactPositionsWorld, int penetrationDirection, Vector3 linearChange, Vector3 angularChange)> EnumerateContactsWithContact(Contact contact, IEnumerable<Vector3> linearChanges, IEnumerable<Vector3> angularChanges)
         {
             foreach (var other in contactArray)
             {
-                for (int i = 0; i < other.Bodies.Count(); i++)
+                // Get all non-null bodies
+                var otherDataList = other.Bodies
+                    .Where(ob => ob != null)
+                    .Select((ob, index) => new
+                    {
+                        OtherBody = ob,
+                        RelativeContactPosition = other.RelativeContactPositionsWorld.ElementAtOrDefault(index),
+                        PenetrationDirection = index != 0 ? 1 : -1
+                    })
+                    .ToArray();
+
+                foreach (var otherData in otherDataList)
                 {
-                    if (other.Bodies.ElementAt(i) == null)
-                    {
-                        continue;
-                    }
-
-                    for (int o = 0; o < contact.Bodies.Count(); o++)
-                    {
-                        if (other.Bodies.ElementAt(i) != contact.Bodies.ElementAt(o))
+                    // Get coincident body if any
+                    var contactBody = contact.Bodies
+                        .Where(cb => cb == otherData.OtherBody)
+                        .Select((cb, index) => new
                         {
-                            continue;
-                        }
+                            LinearChange = linearChanges.ElementAtOrDefault(index),
+                            AngularChange = angularChanges.ElementAtOrDefault(index)
+                        })
+                        .FirstOrDefault();
 
-                        yield return (other, linearChange.ElementAtOrDefault(o), angularChange.ElementAtOrDefault(o), other.RelativeContactPositionsWorld.ElementAtOrDefault(i), i != 0 ? 1 : -1);
+                    if (contactBody != null)
+                    {
+                        // Return contact data
+                        yield return (other, otherData.RelativeContactPosition, otherData.PenetrationDirection, contactBody.LinearChange, contactBody.AngularChange);
                     }
                 }
             }

@@ -216,12 +216,8 @@ namespace Engine.Physics
             }
         }
 
-        /// <summary>
-        /// Sets the damping coefficients
-        /// </summary>
-        /// <param name="linearDamping">Linear damping</param>
-        /// <param name="angularDamping">Angular damping</param>
-        private void SetDamping(float linearDamping, float angularDamping)
+        /// <inheritdoc/>
+        public void SetDamping(float linearDamping, float angularDamping)
         {
             this.linearDamping = linearDamping;
             this.angularDamping = angularDamping;

@@ -117,6 +117,13 @@ namespace Engine.Physics
         void Integrate(float duration);
 
         /// <summary>
+        /// Sets the damping coefficients
+        /// </summary>
+        /// <param name="linearDamping">Linear damping</param>
+        /// <param name="angularDamping">Angular damping</param>
+        void SetDamping(float linearDamping, float angularDamping);
+
+        /// <summary>
         /// Adds the specified force to the linear force accumulator
         /// </summary>
         /// <param name="force">Linear force vector</param>

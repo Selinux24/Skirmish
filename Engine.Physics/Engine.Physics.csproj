@@ -12,10 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="CollisionDetector.cs~RF7341a000.TMP" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Engine\Engine.csproj" />
   </ItemGroup>
 

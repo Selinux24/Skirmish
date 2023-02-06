@@ -48,7 +48,7 @@ namespace Engine.Physics
         public void Update(GameTime gameTime)
         {
             // Encontrar la duración de este intervalo para las físicas
-            float time = (float)gameTime.ElapsedMilliseconds * 0.001f;
+            float time = gameTime.ElapsedMilliseconds * 0.001f;
             if (time <= 0.0f)
             {
                 return;

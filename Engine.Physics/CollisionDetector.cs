@@ -104,13 +104,7 @@ namespace Engine.Physics
 
                 // The point of contact is halfway between the vertex and the plane.
                 // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
-                Contact contact = data.CurrentContact;
-                contact.ContactPositionWorld = vertexPos;
-                contact.ContactNormalWorld = plane.Normal;
-                contact.Penetration = -vertexDistance;
-                contact.SetBodyData(box.RigidBody, null, data.Friction, data.Restitution);
-
-                data.AddContact();
+                data.AddContact(box.RigidBody, null, vertexPos, plane.Normal, -vertexDistance);
 
                 if (data.ContactsLeft <= 0)
                 {
@@ -158,13 +152,7 @@ namespace Engine.Physics
 
                 // The point of contact is halfway between the vertex and the plane.
                 // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
-                Contact contact = data.CurrentContact;
-                contact.ContactPositionWorld = contactPoint;
-                contact.ContactNormalWorld = tri.Plane.Normal;
-                contact.Penetration = -vertexDistance;
-                contact.SetBodyData(box.RigidBody, null, data.Friction, data.Restitution);
-
-                data.AddContact();
+                data.AddContact(box.RigidBody, null, contactPoint, tri.Normal, -vertexDistance);
 
                 if (data.ContactsLeft <= 0)
                 {
@@ -188,37 +176,7 @@ namespace Engine.Physics
                 return false;
             }
 
-            Vector3 toCentre = two.RigidBody.Position - one.RigidBody.Position;
-
-            float pen = float.MaxValue;
-            uint best = uint.MaxValue;
-            var oneTrn = one.RigidBody.TransformMatrix;
-            var twoTrn = two.RigidBody.TransformMatrix;
-
-            // Check each axis, storing penetration and the best axis
-            if (!TryAxis(one, two, oneTrn.Left, toCentre, 0, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, oneTrn.Up, toCentre, 1, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, oneTrn.Backward, toCentre, 2, ref pen, ref best)) return false;
-
-            if (!TryAxis(one, two, twoTrn.Left, toCentre, 3, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, twoTrn.Up, toCentre, 4, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, twoTrn.Backward, toCentre, 5, ref pen, ref best)) return false;
-
-            // Store the best axis so far, in case of being in a parallel axis collision later.
-            uint bestSingleAxis = best;
-
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Left), toCentre, 6, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Up), toCentre, 7, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Backward), toCentre, 8, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Left), toCentre, 9, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Up), toCentre, 10, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Backward), toCentre, 11, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Left), toCentre, 12, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Up), toCentre, 13, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Backward), toCentre, 14, ref pen, ref best)) return false;
-
-            // Making sure we have a result.
-            if (best == uint.MaxValue)
+            if (!DetectBestAxis(one, two, out var toCentre, out var pen, out var best, out var bestSingleAxis))
             {
                 return false;
             }
@@ -235,144 +193,16 @@ namespace Engine.Physics
             if (best < 6)
             {
                 // There is a vertex of box one on a face of box two.
-                FillPointFaceBoxBox(two, one, toCentre * -1.0f, best - 3, pen, ref data);
+
+                // Swap bodies
+                (one, two) = (two, one);
+                FillPointFaceBoxBox(one, two, toCentre * -1f, best - 3, pen, ref data);
 
                 return true;
             }
 
-            // Edge-to-edge contact. Get the common axis.
-            best -= 6;
-            uint oneAxisIndex = best / 3;
-            uint twoAxisIndex = best % 3;
-            Vector3 oneAxis = GetAxis(one.RigidBody.TransformMatrix, oneAxisIndex);
-            Vector3 twoAxis = GetAxis(two.RigidBody.TransformMatrix, twoAxisIndex);
-            Vector3 axis = Vector3.Cross(oneAxis, twoAxis);
-            axis.Normalize();
-
-            // The axis should point from box one to box two.
-            if (Vector3.Dot(axis, toCentre) > 0f)
-            {
-                axis *= -1.0f;
-            }
-
-            // We have the axes, but not the edges.
-
-            // Each axis has 4 edges parallel to it, we have to find the 4 of each box.
-            // We will look for the point in the center of the edge.
-            // We know that its component on the collision axis is 0 and we determine which endpoint on each of the other axes is closest.
-            Vector3 vOne = one.HalfSize;
-            Vector3 vTwo = two.HalfSize;
-            float[] ptOnOneEdge = new float[] { vOne.X, vOne.Y, vOne.Z };
-            float[] ptOnTwoEdge = new float[] { vTwo.X, vTwo.Y, vTwo.Z };
-            for (uint i = 0; i < 3; i++)
-            {
-                if (i == oneAxisIndex)
-                {
-                    ptOnOneEdge[i] = 0;
-                }
-                else if (Vector3.Dot(GetAxis(one.RigidBody.TransformMatrix, i), axis) > 0f)
-                {
-                    ptOnOneEdge[i] = -ptOnOneEdge[i];
-                }
-
-                if (i == twoAxisIndex)
-                {
-                    ptOnTwoEdge[i] = 0;
-                }
-                else if (Vector3.Dot(GetAxis(two.RigidBody.TransformMatrix, i), axis) < 0f)
-                {
-                    ptOnTwoEdge[i] = -ptOnTwoEdge[i];
-                }
-            }
-
-            vOne.X = ptOnOneEdge[0];
-            vOne.Y = ptOnOneEdge[1];
-            vOne.Z = ptOnOneEdge[2];
-
-            vTwo.X = ptOnTwoEdge[0];
-            vTwo.Y = ptOnTwoEdge[1];
-            vTwo.Z = ptOnTwoEdge[2];
-
-            // Go to world coordinates
-            vOne = Vector3.TransformCoordinate(vOne, one.RigidBody.TransformMatrix);
-            vTwo = Vector3.TransformCoordinate(vTwo, two.RigidBody.TransformMatrix);
-
-            // We have a point and a direction for the colliding edges.
-            // We need to find the closest point of the two segments.
-            float[] vOneAxis = new float[] { one.HalfSize.X, one.HalfSize.Y, one.HalfSize.Z };
-            float[] vTwoAxis = new float[] { two.HalfSize.X, two.HalfSize.Y, two.HalfSize.Z };
-            Vector3 vertex = ContactPoint(
-                vOne, oneAxis, vOneAxis[oneAxisIndex],
-                vTwo, twoAxis, vTwoAxis[twoAxisIndex],
-                bestSingleAxis > 2);
-
-            // Fill in the contact.
-            Contact contact = data.CurrentContact;
-            contact.Penetration = pen;
-            contact.ContactNormalWorld = axis;
-            contact.ContactPositionWorld = vertex;
-            contact.SetBodyData(one.RigidBody, two.RigidBody, data.Friction, data.Restitution);
-
-            data.AddContact();
-
-            return true;
-        }
-        /// <summary>
-        /// Detect the collision between a box and a point
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="point">Point</param>
-        /// <param name="data">Collision data</param>
-        /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndPoint(CollisionBox box, Vector3 point, ref CollisionData data)
-        {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
-
-            Vector3 relPt = Vector3.TransformCoordinate(point, Matrix.Invert(box.RigidBody.TransformMatrix));
-
-            // Check each axis looking for the axis in which the penetration is less deep.
-            float min_depth = box.HalfSize.X - Math.Abs(relPt.X);
-            if (min_depth < 0)
-            {
-                return false;
-            }
-
-
-            float depth = box.HalfSize.Y - Math.Abs(relPt.Y);
-            if (depth < 0)
-            {
-                return false;
-            }
-
-            Vector3 normal = box.RigidBody.TransformMatrix.Left * ((relPt.X < 0) ? -1 : 1);
-            if (depth < min_depth)
-            {
-                min_depth = depth;
-                normal = box.RigidBody.TransformMatrix.Up * ((relPt.Y < 0) ? -1 : 1);
-            }
-
-            depth = box.HalfSize.Z - Math.Abs(relPt.Z);
-            if (depth < 0)
-            {
-                return false;
-            }
-
-            if (depth < min_depth)
-            {
-                min_depth = depth;
-                normal = box.RigidBody.TransformMatrix.Backward * ((relPt.Z < 0) ? -1 : 1);
-            }
-
-            Contact contact = data.CurrentContact;
-            contact.ContactNormalWorld = normal;
-            contact.ContactPositionWorld = point;
-            contact.Penetration = min_depth;
-            contact.SetBodyData(box.RigidBody, null, data.Friction, data.Restitution);
-
-            data.AddContact();
+            // Edge-to-edge contact.
+            FillEdgeEdgeBoxBox(one, two, toCentre, best - 6, bestSingleAxis, pen, ref data);
 
             return true;
         }
@@ -399,13 +229,9 @@ namespace Engine.Physics
                 return false;
             }
 
-            Contact contact = data.CurrentContact;
-            contact.ContactNormalWorld = Vector3.Normalize(box.RigidBody.Position - closestPoint);
-            contact.ContactPositionWorld = closestPoint;
-            contact.Penetration = sphere.Radius - distance;
-            contact.SetBodyData(box.RigidBody, sphere.RigidBody, data.Friction, data.Restitution);
-
-            data.AddContact();
+            var normal = Vector3.Normalize(box.RigidBody.Position - closestPoint);
+            var penetration = sphere.Radius - distance;
+            data.AddContact(box.RigidBody, sphere.RigidBody, closestPoint, normal, penetration);
 
             return true;
         }
@@ -508,13 +334,8 @@ namespace Engine.Physics
             }
 
             // Create the contact. It has a normal in the direction of the plane.
-            Contact contact = data.CurrentContact;
-            contact.ContactNormalWorld = plane.Normal;
-            contact.Penetration = -penetration;
-            contact.ContactPositionWorld = sphere.RigidBody.Position - plane.Normal * centerToPlane;
-            contact.SetBodyData(sphere.RigidBody, null, data.Friction, data.Restitution);
-
-            data.AddContact();
+            var position = sphere.RigidBody.Position - plane.Normal * centerToPlane;
+            data.AddContact(sphere.RigidBody, null, position, plane.Normal, -penetration);
 
             return true;
         }
@@ -543,13 +364,7 @@ namespace Engine.Physics
             }
 
             // Create the contact.
-            Contact contact = data.CurrentContact;
-            contact.ContactNormalWorld = tri.Normal;
-            contact.Penetration = sphere.Radius - distance;
-            contact.ContactPositionWorld = closestPoint;
-            contact.SetBodyData(sphere.RigidBody, null, data.Friction, data.Restitution);
-
-            data.AddContact();
+            data.AddContact(sphere.RigidBody, null, closestPoint, tri.Normal, sphere.Radius - distance);
 
             return true;
         }
@@ -578,13 +393,10 @@ namespace Engine.Physics
                 return false;
             }
 
-            Contact contact = data.CurrentContact;
-            contact.ContactNormalWorld = Vector3.Normalize(midline);
-            contact.ContactPositionWorld = positionOne + midline * 0.5f;
-            contact.Penetration = one.Radius + two.Radius - size;
-            contact.SetBodyData(one.RigidBody, two.RigidBody, data.Friction, data.Restitution);
-
-            data.AddContact();
+            var normal = Vector3.Normalize(midline);
+            var position = positionOne + midline * 0.5f;
+            var penetration = one.Radius + two.Radius - size;
+            data.AddContact(one.RigidBody, two.RigidBody, position, normal, penetration);
 
             return true;
         }
@@ -636,6 +448,56 @@ namespace Engine.Physics
             return contact;
         }
 
+        /// <summary>
+        /// Detects the best collision axis in a box to box collision
+        /// </summary>
+        /// <param name="one">First box</param>
+        /// <param name="two">Second box</param>
+        /// <param name="toCentre">To centre position</param>
+        /// <param name="pen">Penetration value</param>
+        /// <param name="best">Best axis</param>
+        /// <param name="bestSingleAxis">Best single axis</param>
+        /// <returns>Returns true if best axis detected</returns>
+        private static bool DetectBestAxis(CollisionBox one, CollisionBox two, out Vector3 toCentre, out float pen, out uint best, out uint bestSingleAxis)
+        {
+            toCentre = two.RigidBody.Position - one.RigidBody.Position;
+            pen = float.MaxValue;
+            best = uint.MaxValue;
+            bestSingleAxis = uint.MaxValue;
+
+            var oneTrn = one.RigidBody.TransformMatrix;
+            var twoTrn = two.RigidBody.TransformMatrix;
+
+            // Check each axis, storing penetration and the best axis
+            if (!TryAxis(one, two, oneTrn.Left, toCentre, 0, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, oneTrn.Up, toCentre, 1, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, oneTrn.Backward, toCentre, 2, ref pen, ref best)) return false;
+
+            if (!TryAxis(one, two, twoTrn.Left, toCentre, 3, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, twoTrn.Up, toCentre, 4, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, twoTrn.Backward, toCentre, 5, ref pen, ref best)) return false;
+
+            // Store the best axis so far, in case of being in a parallel axis collision later.
+            bestSingleAxis = best;
+
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Left), toCentre, 6, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Up), toCentre, 7, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Backward), toCentre, 8, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Left), toCentre, 9, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Up), toCentre, 10, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Backward), toCentre, 11, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Left), toCentre, 12, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Up), toCentre, 13, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Backward), toCentre, 14, ref pen, ref best)) return false;
+
+            // Making sure we have a result.
+            if (best == uint.MaxValue)
+            {
+                return false;
+            }
+
+            return true;
+        }
         /// <summary>
         /// Gets whether there is penetration between the projections of the boxes in the specified axis
         /// </summary>
@@ -713,13 +575,89 @@ namespace Engine.Physics
             if (Vector3.Dot(two.RigidBody.TransformMatrix.Up, normal) < 0f) vertex.Y = -vertex.Y;
             if (Vector3.Dot(two.RigidBody.TransformMatrix.Backward, normal) < 0f) vertex.Z = -vertex.Z;
 
-            Contact contact = data.CurrentContact;
-            contact.ContactNormalWorld = normal;
-            contact.Penetration = pen;
-            contact.ContactPositionWorld = Vector3.TransformCoordinate(vertex, two.RigidBody.TransformMatrix);
-            contact.SetBodyData(one.RigidBody, two.RigidBody, data.Friction, data.Restitution);
+            var position = Vector3.TransformCoordinate(vertex, two.RigidBody.TransformMatrix);
 
-            data.AddContact();
+            data.AddContact(one.RigidBody, two.RigidBody, position, normal, pen);
+        }
+        /// <summary>
+        /// Fills the collision information between two boxes, once it is known that there is edge-edge contact
+        /// </summary>
+        /// <param name="one">First box</param>
+        /// <param name="two">Second box</param>
+        /// <param name="toCentre">Distance to center</param>
+        /// <param name="best">Best penetration axis</param>
+        /// <param name="bestSingleAxis">Best single axis</param>
+        /// <param name="pen">Minor penetration axis</param>
+        /// <param name="data">Collision data</param>
+        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, uint bestSingleAxis, float pen, ref CollisionData data)
+        {
+            // Get the common axis.
+            uint oneAxisIndex = best / 3;
+            uint twoAxisIndex = best % 3;
+            Vector3 oneAxis = GetAxis(one.RigidBody.TransformMatrix, oneAxisIndex);
+            Vector3 twoAxis = GetAxis(two.RigidBody.TransformMatrix, twoAxisIndex);
+            Vector3 axis = Vector3.Cross(oneAxis, twoAxis);
+            axis.Normalize();
+
+            // The axis should point from box one to box two.
+            if (Vector3.Dot(axis, toCentre) > 0f)
+            {
+                axis *= -1.0f;
+            }
+
+            // We have the axes, but not the edges.
+
+            // Each axis has 4 edges parallel to it, we have to find the 4 of each box.
+            // We will look for the point in the center of the edge.
+            // We know that its component on the collision axis is 0 and we determine which endpoint on each of the other axes is closest.
+            Vector3 vOne = one.HalfSize;
+            Vector3 vTwo = two.HalfSize;
+            float[] ptOnOneEdge = new float[] { vOne.X, vOne.Y, vOne.Z };
+            float[] ptOnTwoEdge = new float[] { vTwo.X, vTwo.Y, vTwo.Z };
+            for (uint i = 0; i < 3; i++)
+            {
+                if (i == oneAxisIndex)
+                {
+                    ptOnOneEdge[i] = 0;
+                }
+                else if (Vector3.Dot(GetAxis(one.RigidBody.TransformMatrix, i), axis) > 0f)
+                {
+                    ptOnOneEdge[i] = -ptOnOneEdge[i];
+                }
+
+                if (i == twoAxisIndex)
+                {
+                    ptOnTwoEdge[i] = 0;
+                }
+                else if (Vector3.Dot(GetAxis(two.RigidBody.TransformMatrix, i), axis) < 0f)
+                {
+                    ptOnTwoEdge[i] = -ptOnTwoEdge[i];
+                }
+            }
+
+            vOne.X = ptOnOneEdge[0];
+            vOne.Y = ptOnOneEdge[1];
+            vOne.Z = ptOnOneEdge[2];
+
+            vTwo.X = ptOnTwoEdge[0];
+            vTwo.Y = ptOnTwoEdge[1];
+            vTwo.Z = ptOnTwoEdge[2];
+
+            // Go to world coordinates
+            vOne = Vector3.TransformCoordinate(vOne, one.RigidBody.TransformMatrix);
+            vTwo = Vector3.TransformCoordinate(vTwo, two.RigidBody.TransformMatrix);
+
+            // We have a point and a direction for the colliding edges.
+            // We need to find the closest point of the two segments.
+            float[] vOneAxis = new float[] { one.HalfSize.X, one.HalfSize.Y, one.HalfSize.Z };
+            float[] vTwoAxis = new float[] { two.HalfSize.X, two.HalfSize.Y, two.HalfSize.Z };
+            Vector3 vertex = ContactPoint(
+                vOne, oneAxis, vOneAxis[oneAxisIndex],
+                vTwo, twoAxis, vTwoAxis[twoAxisIndex],
+                bestSingleAxis > 2);
+
+            // Fill in the contact.
+            data.AddContact(one.RigidBody, two.RigidBody, vertex, axis, pen);
         }
         /// <summary>
         /// Gets the closest point to the segments involved in an edge-to-edge or face-to-edge, or face-to-face collision
@@ -773,27 +711,6 @@ namespace Engine.Physics
 
                 return cOne * 0.5f + cTwo * 0.5f;
             }
-        }
-
-        /// <summary>
-        /// Gets the penetration of the projections of the boxes in the specified axis
-        /// </summary>
-        /// <param name="one">First box</param>
-        /// <param name="two">Second box</param>
-        /// <param name="axis">Axis</param>
-        /// <param name="toCentre">Distance to center</param>
-        /// <returns>Returns the penetration of the projections of the boxes on the axis.</returns>
-        private static float PenetrationOnAxis(CollisionBox box, Triangle tri, Vector3 edge, Vector3 toCentre)
-        {
-            // Project the extensions of each box onto the axis
-            float oneProject = Core.ProjectToVector(box.OBB, edge);
-            float twoProject = Core.ProjectToVector(tri, edge);
-
-            // Obtain the distance between centers of the boxes on the axis
-            float distance = Convert.ToSingle(Math.Abs(Vector3.Dot(toCentre, edge)));
-
-            // Positive indicates overlap, negative separation
-            return oneProject + twoProject - distance;
         }
 
         /// <summary>

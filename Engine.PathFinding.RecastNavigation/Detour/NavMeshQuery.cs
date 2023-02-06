@@ -3248,7 +3248,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// Calculate quantized box
         /// </summary>
-        private void CalculateQuantizedBox(MeshTile tile, BoundingBox bounds, out Int3 bmin, out Int3 bmax)
+        private static void CalculateQuantizedBox(MeshTile tile, BoundingBox bounds, out Int3 bmin, out Int3 bmax)
         {
             var tb = tile.Header.Bounds;
             float qfac = tile.Header.BvQuantFactor;

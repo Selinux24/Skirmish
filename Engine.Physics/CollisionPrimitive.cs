@@ -19,7 +19,7 @@ namespace Engine.Physics
         /// Constructor
         /// </summary>
         /// <param name="rigidBody">Rigid body</param>
-        public CollisionPrimitive(IRigidBody rigidBody)
+        protected CollisionPrimitive(IRigidBody rigidBody)
         {
             RigidBody = rigidBody ?? throw new ArgumentNullException(nameof(rigidBody), $"Collision primitive mast have a rigid body.");
         }
