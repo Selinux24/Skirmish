@@ -15,11 +15,11 @@ namespace Engine.Physics
         /// <summary>
         /// Linear damping
         /// </summary>
-        private float linearDamping = 0f;
+        private float linearDamping = Constants.LinearDamping;
         /// <summary>
         /// Angular damping
         /// </summary>
-        private float angularDamping = 0f;
+        private float angularDamping = Constants.AngularDamping;
         /// <summary>
         /// Motion
         /// </summary>
@@ -67,6 +67,17 @@ namespace Engine.Physics
         public bool IsAwake { get; private set; } = false;
         /// <inheritdoc/>
         public bool CanSleep { get; private set; } = false;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public RigidBody(float mass, Matrix initialTransform)
+        {
+            SetMass(mass);
+
+            initialTransform.Decompose(out _, out var rotation, out var translation);
+            SetInitialState(translation, rotation);
+        }
 
         /// <inheritdoc/>
         public void SetInitialState(Vector3 position, Quaternion orientation)

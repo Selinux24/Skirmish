@@ -187,9 +187,9 @@ namespace Engine.Physics
         /// </remarks>
         private void Prepare(float duration)
         {
-            foreach (var contact in contactArray)
+            for (int i = 0; i < ContactCount; i++)
             {
-                contact.CalculateInternals(duration);
+                contactArray[i].CalculateInternals(duration);
             }
         }
         /// <summary>
@@ -299,7 +299,7 @@ namespace Engine.Physics
             foreach (var other in contactArray)
             {
                 // Get all non-null bodies
-                var otherDataList = other.Bodies
+                var otherDataList = other.GetBodies()
                     .Where(ob => ob != null)
                     .Select((ob, index) => new
                     {
@@ -312,7 +312,7 @@ namespace Engine.Physics
                 foreach (var otherData in otherDataList)
                 {
                     // Get coincident body if any
-                    var contactBody = contact.Bodies
+                    var contactBody = contact.GetBodies()
                         .Where(cb => cb == otherData.OtherBody)
                         .Select((cb, index) => new
                         {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -176,25 +177,45 @@ namespace Engine.Common
                 return true;
             }
 
+            int currCount = Resources.Count();
+            int newCount = resourceList.Count();
+
             //Get the range to update
-            int currentCount = StartSlot + Resources.Count();
-            int newCount = startSlot + resourceList.Count();
-            int newLength = Math.Max(currentCount, newCount);
-            T[] list = new T[newLength];
-
-            for (int i = 0; i < Resources.Count(); i++)
+            if (startSlot == StartSlot)
             {
-                list[i + StartSlot] = Resources.ElementAt(i);
-            }
+                if (currCount == newCount)
+                {
+                    //Same size. Replace resouce list
+                    Resources = resourceList.ToArray();
 
-            for (int i = 0; i < resourceList.Count(); i++)
+                    return true;
+                }
+
+                //Resize the resource list (always bigger), copy current resources, then copy new resources
+                T[] tmp = new T[Math.Max(currCount, newCount)];
+                Array.Copy(Resources.ToArray(), 0, tmp, 0, currCount);
+                Array.Copy(resourceList.ToArray(), 0, tmp, 0, newCount);
+                Resources = tmp;
+
+                return true;
+            }
+            else
             {
-                list[i + startSlot] = resourceList.ElementAt(i);
+                //Resize the resource list (always bigger) relative to the minimum start slot value
+                int minSlot = Math.Min(startSlot, StartSlot);
+                int newSize = Math.Max(startSlot + newCount, StartSlot + currCount) - minSlot;
+                T[] tmp = new T[newSize];
+
+                //Copy current resources at current start slot
+                Array.Copy(Resources.ToArray(), 0, tmp, StartSlot - minSlot, currCount);
+                //Then copy new resources at new start slot
+                Array.Copy(resourceList.ToArray(), 0, tmp, startSlot - minSlot, newCount);
+                Resources = tmp;
+                //Update start slot to the minimum value
+                StartSlot = minSlot;
+
+                return true;
             }
-
-            Resources = list;
-
-            return true;
         }
 
         /// <summary>

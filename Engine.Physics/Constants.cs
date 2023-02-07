@@ -39,5 +39,13 @@ namespace Engine.Physics
         /// Contact orientation factor
         /// </summary>
         public static float OrientationContactFactor { get; set; } = 0.0f;
+        /// <summary>
+        /// Linear damping
+        /// </summary>
+        public static float LinearDamping { get; set; } = 0.99f;
+        /// <summary>
+        /// Angular damping
+        /// </summary>
+        public static float AngularDamping { get; set; } = 0.8f;
     }
 }

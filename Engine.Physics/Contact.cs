@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine.Physics
 {
@@ -33,16 +32,6 @@ namespace Engine.Physics
         /// </summary>
         private float restitution;
 
-        /// <summary>
-        /// Contacting bodies
-        /// </summary>
-        public IEnumerable<IRigidBody> Bodies
-        {
-            get
-            {
-                return new[] { body1, body2 };
-            }
-        }
         /// <summary>
         /// Relative contact positions in world coordinates.
         /// </summary>
@@ -127,14 +116,31 @@ namespace Engine.Physics
             }
 
             // Find the relative speed of each body at the moment of collision.
-            ContactVelocity = CalculateLocalVelocity(0, duration);
+            ContactVelocity = CalculateLocalVelocity(body1, relativeContactPositionsWorld[0], duration);
             if (body2 != null)
             {
-                ContactVelocity -= CalculateLocalVelocity(1, duration);
+                ContactVelocity -= CalculateLocalVelocity(body2, relativeContactPositionsWorld[1], duration);
             }
 
             // Calculate the velocity needed to resolve the contact
             CalculateDesiredDeltaVelocity(duration);
+        }
+        /// <summary>
+        /// Get contacting bodies
+        /// </summary>
+        public IEnumerable<IRigidBody> GetBodies()
+        {
+            return new[] { body1, body2 };
+        }
+        /// <summary>
+        /// Get contacting body
+        /// </summary>
+        /// <param name="index">Body index</param>
+        public IRigidBody GetBody(int index)
+        {
+            int i = index % 2;
+
+            return i == 0 ? body1 : body2;
         }
         /// <summary>
         /// Swap body references.
@@ -201,18 +207,13 @@ namespace Engine.Physics
         /// <summary>
         /// Gets the velocity of the specified body contact point.
         /// </summary>
-        /// <param name="bodyIndex">Body index</param>
+        /// <param name="body">Rigid body</param>
+        /// <param name="relativeContactPositionWorld">Relative contact position world</param>
         /// <param name="duration">Duration</param>
-        private Vector3 CalculateLocalVelocity(int bodyIndex, float duration)
+        private Vector3 CalculateLocalVelocity(IRigidBody body, Vector3 relativeContactPositionWorld, float duration)
         {
-            var body = Bodies.ElementAt(bodyIndex);
-            if (body == null)
-            {
-                return Vector3.Zero;
-            }
-
             // Extract the velocity at the point of contact.
-            Vector3 velocity = Vector3.Cross(body.AngularVelocity, relativeContactPositionsWorld[bodyIndex]);
+            Vector3 velocity = Vector3.Cross(body.AngularVelocity, relativeContactPositionWorld);
             velocity += body.LinearVelocity;
 
             // Convert velocity to contact coordinates.
@@ -356,19 +357,18 @@ namespace Engine.Physics
 
             // Iterate again calculating the changes and applying them
             float angularLimit = 0.2f;
-            float[] angularMove = new float[2];
-            float[] linearMove = new float[2];
-            for (uint i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
-                if (body2 == null)
+                var body = GetBody(i);
+                if (body == null)
                 {
                     continue;
                 }
 
                 // The angular and linear movements are proportional to the two inverse inertias.
                 float sign = (i == 0) ? 1 : -1;
-                angularMove[i] = sign * penetration * (angularInertia[i] / totalInertia);
-                linearMove[i] = sign * penetration * (linearInertia[i] / totalInertia);
+                float angularMove = sign * penetration * (angularInertia[i] / totalInertia);
+                float linearMove = sign * penetration * (linearInertia[i] / totalInertia);
 
                 // To avoid too large angular projections, the angular movement is limited.
                 var projection = relativeContactPositionsWorld[i];
@@ -376,22 +376,22 @@ namespace Engine.Physics
 
                 float maxMagnitude = angularLimit * projection.Length();
 
-                if (angularMove[i] < -maxMagnitude)
+                if (angularMove < -maxMagnitude)
                 {
-                    float totalMove = angularMove[i] + linearMove[i];
-                    angularMove[i] = -maxMagnitude;
-                    linearMove[i] = totalMove - angularMove[i];
+                    float totalMove = angularMove + linearMove;
+                    angularMove = -maxMagnitude;
+                    linearMove = totalMove - angularMove;
                 }
-                else if (angularMove[i] > maxMagnitude)
+                else if (angularMove > maxMagnitude)
                 {
-                    float totalMove = angularMove[i] + linearMove[i];
-                    angularMove[i] = maxMagnitude;
-                    linearMove[i] = totalMove - angularMove[i];
+                    float totalMove = angularMove + linearMove;
+                    angularMove = maxMagnitude;
+                    linearMove = totalMove - angularMove;
                 }
 
                 // We have the linear amount of motion required to rotate the body.
                 // Now you have to calculate the desired rotation to make it rotate.
-                if (angularMove[i] == 0f)
+                if (angularMove == 0f)
                 {
                     // There is no angular movement. No rotation.
                     angularChange[i] = Vector3.Zero;
@@ -401,26 +401,27 @@ namespace Engine.Physics
                     // Get direction of rotation.
                     var targetAngularDirection = Vector3.Cross(relativeContactPositionsWorld[i], ContactNormalWorld);
 
-                    var inverseInertiaTensor = body2.InverseInertiaTensorWorld;
+                    var inverseInertiaTensor = body.InverseInertiaTensorWorld;
 
-                    angularChange[i] = Core.Transform(inverseInertiaTensor, targetAngularDirection) * (angularMove[i] / angularInertia[i]);
+                    angularChange[i] = Core.Transform(inverseInertiaTensor, targetAngularDirection) * (angularMove / angularInertia[i]);
                 }
 
                 // Velocity variation: linear movement on the normal of contact.
-                linearChange[i] = ContactNormalWorld * linearMove[i];
+                linearChange[i] = ContactNormalWorld * linearMove;
 
                 // Apply linear motion
-                body2.AddPosition(Vector3.Multiply(ContactNormalWorld, linearMove[i]));
+                var positionChange = Vector3.Multiply(ContactNormalWorld, linearMove);
+                body.AddPosition(positionChange);
 
                 // Apply the change in orientation
-                var orientationDelta = new Quaternion(angularChange[i], 0f) * body2.Orientation;
-                body2.AddOrientation(orientationDelta * Constants.OrientationContactFactor);
+                var orientationChange = new Quaternion(angularChange[i], 0f) * body.Orientation * Constants.OrientationContactFactor;
+                body.AddOrientation(orientationChange);
 
                 // You have to update each body that is active, so that the changes are reflected in the body.
                 // Otherwise, the resolution will not change the position for the object, and the next round of collision detection will result in the same penetration.
-                if (!body2.IsAwake)
+                if (!body.IsAwake)
                 {
-                    body2.CalculateDerivedData();
+                    body.CalculateDerivedData();
                 }
             }
         }
@@ -436,14 +437,15 @@ namespace Engine.Physics
             linearInertia = new float[2];
             angularInertia = new float[2];
 
-            for (uint i = 0; i < 2; i++)
+            for (int i = 0; i < 2; i++)
             {
-                if (body2 == null)
+                var body = GetBody(i);
+                if (body == null)
                 {
                     continue;
                 }
 
-                var inverseInertiaTensor = body2.InverseInertiaTensorWorld;
+                var inverseInertiaTensor = body.InverseInertiaTensorWorld;
 
                 // Get the angular inertia.
                 var angularInertiaWorld = Vector3.Cross(relativeContactPositionsWorld[i], ContactNormalWorld);
@@ -452,7 +454,7 @@ namespace Engine.Physics
                 angularInertia[i] = Vector3.Dot(angularInertiaWorld, ContactNormalWorld);
 
                 // The linear component is the inverse of the mass
-                linearInertia[i] = body2.InverseMass;
+                linearInertia[i] = body.InverseMass;
 
                 // Get the total inertia of all components
                 totalInertia += linearInertia[i] + angularInertia[i];

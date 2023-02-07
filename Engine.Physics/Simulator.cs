@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Physics
 {
@@ -21,9 +22,9 @@ namespace Engine.Physics
         /// </summary>
         private readonly CollisionData contactData = new CollisionData(MaxContacts);
         /// <summary>
-        /// Rigid body list
+        /// Physics object list
         /// </summary>
-        private readonly List<IRigidBody> rigidBodies = new List<IRigidBody>();
+        private readonly List<IPhysicsObject> physicsObjects = new List<IPhysicsObject>();
         /// <summary>
         /// Force generator list
         /// </summary>
@@ -48,7 +49,7 @@ namespace Engine.Physics
         public void Update(GameTime gameTime)
         {
             // Encontrar la duración de este intervalo para las físicas
-            float time = gameTime.ElapsedMilliseconds * 0.001f;
+            float time = gameTime.ElapsedSeconds;
             if (time <= 0.0f)
             {
                 return;
@@ -75,22 +76,22 @@ namespace Engine.Physics
         /// <param name="time">Time</param>
         private void UpdateObjects(float time)
         {
-            for (int i = 0; i < rigidBodies.Count; i++)
+            foreach (var obj in physicsObjects)
             {
-                for (int f = 0; f < forceGenerators.Count; f++)
+                foreach (var forceGenerator in forceGenerators)
                 {
-                    forceGenerators[f].UpdateForce(rigidBodies[i], time);
+                    forceGenerator.UpdateForce(obj.Body, time);
                 }
             }
 
-            for (int i = 0; i < rigidBodies.Count; i++)
+            foreach (var obj in physicsObjects)
             {
-                if (!rigidBodies[i].IsAwake)
+                if (!obj.Body.IsAwake)
                 {
                     continue;
                 }
 
-                rigidBodies[i].Integrate(time);
+                obj.Body.Integrate(time);
             }
         }
         /// <summary>
@@ -114,6 +115,27 @@ namespace Engine.Physics
 
                 contactGenerator.AddContact(contactData, 0);
             }
+
+            for (int i = 0; i < physicsObjects.Count; i++)
+            {
+                if (!contactData.HasFreeContacts())
+                {
+                    break;
+                }
+
+                for (int j = i + 1; j < physicsObjects.Count; j++)
+                {
+                    if (!contactData.HasFreeContacts())
+                    {
+                        break;
+                    }
+
+                    var collider1 = physicsObjects[i].Collider;
+                    var collider2 = physicsObjects[j].Collider;
+
+                    CollisionDetector.BetweenObjects(collider1, collider2, contactData);
+                }
+            }
         }
         /// <summary>
         /// Contact resolution
@@ -130,22 +152,31 @@ namespace Engine.Physics
         }
 
         /// <summary>
-        /// Adds a new rigid body to the simulation
+        /// Adds a new physics object to the simulation
         /// </summary>
-        /// <param name="rigidBody">Rigid body</param>
-        public void AddRigidBody(IRigidBody rigidBody)
+        /// <param name="physicsObject">Physics object</param>
+        public void AddPhysicsObject(IPhysicsObject physicsObject)
         {
-            if (rigidBody == null)
+            if (physicsObject == null)
             {
                 return;
             }
 
-            if (rigidBodies.Contains(rigidBody))
+            if (physicsObjects.Contains(physicsObject))
             {
                 return;
             }
 
-            rigidBodies.Add(rigidBody);
+            physicsObjects.Add(physicsObject);
+
+            //Order by mass
+            physicsObjects.Sort((p, b) =>
+            {
+                float pMass = p.Body?.Mass ?? float.PositiveInfinity;
+                float bMass = b.Body?.Mass ?? float.PositiveInfinity;
+
+                return pMass.CompareTo(bMass);
+            });
         }
         /// <summary>
         /// Adds a new force generator to the simulation
