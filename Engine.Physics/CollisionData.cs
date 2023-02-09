@@ -12,16 +12,16 @@ namespace Engine.Physics
         /// <summary>
         /// Maximum contacts
         /// </summary>
-        protected const int MaxContacts = 256;
+        private const int MaxContacts = 256;
 
+        /// <summary>
+        /// Contact list
+        /// </summary>
+        private readonly Contact[] contacts = new Contact[MaxContacts];
         /// <summary>
         /// Current contact index
         /// </summary>
         private int currentContactIndex = 0;
-        /// <summary>
-        /// Contact list
-        /// </summary>
-        private Contact[] contactArray;
 
         /// <summary> 
         /// Friction factor to add in all collisions
@@ -36,16 +36,6 @@ namespace Engine.Physics
         /// </summary>
         public float Tolerance { get; set; } = 0f;
 
-        /// <summary>
-        /// Gets the contact list
-        /// </summary>
-        public IEnumerable<Contact> ContactArray
-        {
-            get
-            {
-                return contactArray;
-            }
-        }
         /// <summary> 
         /// Gets the current contact
         /// </summary>
@@ -53,7 +43,7 @@ namespace Engine.Physics
         {
             get
             {
-                return contactArray[currentContactIndex];
+                return contacts[currentContactIndex];
             }
         }
         /// <summary> 
@@ -73,7 +63,7 @@ namespace Engine.Physics
         {
             get
             {
-                return contactArray.Length - currentContactIndex;
+                return contacts.Length - currentContactIndex;
             }
         }
 
@@ -81,16 +71,11 @@ namespace Engine.Physics
         /// Constructor
         /// </summary>
         public CollisionData()
-            : this(MaxContacts)
         {
-
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public CollisionData(int maxContacts)
-        {
-            InitializeContactArray(maxContacts);
+            for (int i = 0; i < contacts.Length; i++)
+            {
+                contacts[i] = new Contact();
+            }
         }
 
         /// <summary>
@@ -98,7 +83,7 @@ namespace Engine.Physics
         /// </summary>
         public bool HasFreeContacts()
         {
-            return currentContactIndex < contactArray.Length;
+            return ContactsLeft > 0;
         }
         /// <summary>
         /// Reset contact list
@@ -106,19 +91,6 @@ namespace Engine.Physics
         public void Reset()
         {
             currentContactIndex = 0;
-        }
-        /// <summary>
-        /// Resets the contact list to the specified size
-        /// </summary>
-        /// <param name="maxContacts">Number of contacts in the contact list</param>
-        public void Reset(int maxContacts)
-        {
-            if (contactArray.Length != maxContacts)
-            {
-                InitializeContactArray(maxContacts);
-            }
-
-            Reset();
         }
         /// <summary>
         /// Notifies the instance that a contact has been added.
@@ -133,20 +105,6 @@ namespace Engine.Physics
             CurrentContact?.SetContactData(one, two, Friction, Restitution, position, normal, penetration);
 
             currentContactIndex++;
-        }
-
-        /// <summary>
-        /// Initializes the contact list to the specified number
-        /// </summary>
-        /// <param name="maxContacts">Number of contacts in the contact list</param>
-        private void InitializeContactArray(int maxContacts)
-        {
-            contactArray = new Contact[maxContacts];
-
-            for (int i = 0; i < contactArray.Length; i++)
-            {
-                contactArray[i] = new Contact();
-            }
         }
 
         /// <summary>
@@ -189,7 +147,9 @@ namespace Engine.Physics
         {
             for (int i = 0; i < ContactCount; i++)
             {
-                contactArray[i].CalculateInternals(duration);
+                var contact = contacts[i];
+
+                contact.CalculateInternals(duration);
             }
         }
         /// <summary>
@@ -203,23 +163,10 @@ namespace Engine.Physics
             while (positionIterationsUsed < positionIterations)
             {
                 // Find the greatest penetration
-                float max = positionEpsilon;
-                int index = ContactCount;
-                for (int i = 0; i < ContactCount; i++)
-                {
-                    if (contactArray[i].Penetration > max)
-                    {
-                        max = contactArray[i].Penetration;
-                        index = i;
-                    }
-                }
-
-                if (index == ContactCount)
+                if (!FindMaxPositionChangeContact(positionEpsilon, out var contact, out var max))
                 {
                     break;
                 }
-
-                var contact = contactArray[index];
 
                 // Update contact status
                 contact.MatchAwakeState();
@@ -240,6 +187,37 @@ namespace Engine.Physics
             }
         }
         /// <summary>
+        /// Finds the contact with greatest penetration
+        /// </summary>
+        /// <param name="positionEpsilon">Position change</param>
+        /// <param name="contact">Contact</param>
+        /// <param name="max">Returns the maximum penetration value</param>
+        /// <returns>Returns true if a contact was found</returns>
+        private bool FindMaxPositionChangeContact(float positionEpsilon, out Contact contact, out float max)
+        {
+            contact = null;
+
+            max = positionEpsilon;
+            int index = ContactCount;
+            for (int i = 0; i < ContactCount; i++)
+            {
+                if (contacts[i].Penetration > max)
+                {
+                    max = contacts[i].Penetration;
+                    index = i;
+                }
+            }
+
+            if (index == ContactCount)
+            {
+                return false;
+            }
+
+            contact = contacts[index];
+
+            return true;
+        }
+        /// <summary>
         /// Solve speed problems with the contact list
         /// </summary>
         /// <param name="duration">Duration of the previous frame</param>
@@ -251,23 +229,10 @@ namespace Engine.Physics
             while (velocityIterationsUsed < velocityIterations)
             {
                 // Find contacts with maximum magnitude of probable velocity change
-                float max = velocityEpsilon;
-                int index = ContactCount;
-                for (int i = 0; i < ContactCount; i++)
+                if (!FindMaxVelocityChangeContact(velocityEpsilon, out var contact))
                 {
-                    if (contactArray[i].DesiredDeltaVelocity > max)
-                    {
-                        max = contactArray[i].DesiredDeltaVelocity;
-                        index = i;
-                    }
+                    return;
                 }
-
-                if (index == ContactCount)
-                {
-                    break;
-                }
-
-                var contact = contactArray[index];
 
                 // Update contact status
                 contact.MatchAwakeState();
@@ -289,6 +254,36 @@ namespace Engine.Physics
             }
         }
         /// <summary>
+        /// Finds the contact with maximum magnitude of probable velocity change
+        /// </summary>
+        /// <param name="velocityEpsilon">Velocity change</param>
+        /// <param name="contact">Returns the maximum velocity change contact</param>
+        /// <returns>Returns true if a contact was found</returns>
+        private bool FindMaxVelocityChangeContact(float velocityEpsilon, out Contact contact)
+        {
+            contact = null;
+
+            float max = velocityEpsilon;
+            int index = ContactCount;
+            for (int i = 0; i < ContactCount; i++)
+            {
+                if (contacts[i].DesiredDeltaVelocity > max)
+                {
+                    max = contacts[i].DesiredDeltaVelocity;
+                    index = i;
+                }
+            }
+
+            if (index == ContactCount)
+            {
+                return false;
+            }
+
+            contact = contacts[index];
+
+            return true;
+        }
+        /// <summary>
         /// Enumerate multi-collision contacts
         /// </summary>
         /// <param name="contact">Contact</param>
@@ -296,8 +291,10 @@ namespace Engine.Physics
         /// <param name="angularChange">Angular velocity change</param>
         private IEnumerable<(Contact contact, Vector3 relativeContactPositionsWorld, int penetrationDirection, Vector3 linearChange, Vector3 angularChange)> EnumerateContactsWithContact(Contact contact, IEnumerable<Vector3> linearChanges, IEnumerable<Vector3> angularChanges)
         {
-            foreach (var other in contactArray)
+            for (int i = 0; i < ContactCount; i++)
             {
+                var other = contacts[i];
+
                 // Get all non-null bodies
                 var otherDataList = other.GetBodies()
                     .Where(ob => ob != null)

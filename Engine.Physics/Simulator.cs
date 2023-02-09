@@ -9,18 +9,13 @@ namespace Engine.Physics
     public sealed class Simulator
     {
         /// <summary>
-        /// Maximum number of contacts to generate in the simulation
-        /// </summary>
-        private const int MaxContacts = 1024;
-
-        /// <summary>
         /// Contact resolver
         /// </summary>
         private ContactResolver contactResolver = new ContactResolver();
         /// <summary>
         /// Collision data structure
         /// </summary>
-        private readonly CollisionData contactData = new CollisionData(MaxContacts);
+        private readonly CollisionData contactData = new CollisionData();
         /// <summary>
         /// Physics object list
         /// </summary>
