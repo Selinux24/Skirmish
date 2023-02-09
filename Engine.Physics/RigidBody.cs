@@ -165,6 +165,11 @@ namespace Engine.Physics
                 return;
             }
 
+            if (Mass == float.PositiveInfinity)
+            {
+                return;
+            }
+
             // Get the bounce coefficients for this time interval
             float linearDampingOnTime = (float)Math.Pow(linearDamping, duration);
             float angularDampingOnTime = (float)Math.Pow(angularDamping, duration);

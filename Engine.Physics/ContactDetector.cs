@@ -6,9 +6,9 @@ using System.Linq;
 namespace Engine.Physics
 {
     /// <summary>
-    /// Collision detector
+    /// Contact detector
     /// </summary>
-    static class CollisionDetector
+    static class ContactDetector
     {
         /// <summary>
         /// Detect collision between two primitives
@@ -17,7 +17,7 @@ namespace Engine.Physics
         /// <param name="primitive2">Second primitive</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        public static bool BetweenObjects(ICollisionPrimitive primitive1, ICollisionPrimitive primitive2, CollisionData data)
+        public static bool BetweenObjects(ICollisionPrimitive primitive1, ICollisionPrimitive primitive2, ContactResolver data)
         {
             if (primitive1 == null || primitive2 == null)
             {
@@ -44,7 +44,7 @@ namespace Engine.Physics
         /// <param name="primitive2">Primitive</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndPrimitive(CollisionBox box1, ICollisionPrimitive primitive2, CollisionData data)
+        private static bool BoxAndPrimitive(CollisionBox box1, ICollisionPrimitive primitive2, ContactResolver data)
         {
             if (primitive2 is CollisionBox box2)
             {
@@ -75,7 +75,7 @@ namespace Engine.Physics
         /// <param name="plane">Plane</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, CollisionData data)
+        private static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -120,7 +120,7 @@ namespace Engine.Physics
         /// <param name="two">Second box</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndBox(CollisionBox one, CollisionBox two, CollisionData data)
+        private static bool BoxAndBox(CollisionBox one, CollisionBox two, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -164,7 +164,7 @@ namespace Engine.Physics
         /// <param name="sphere">Sphere</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndSphere(CollisionBox box, CollisionSphere sphere, CollisionData data)
+        private static bool BoxAndSphere(CollisionBox box, CollisionSphere sphere, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -193,7 +193,7 @@ namespace Engine.Physics
         /// <param name="triangleSoup">Triangle soup</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndTriangleSoup(CollisionBox box, CollisionTriangleSoup triangleSoup, CollisionData data)
+        private static bool BoxAndTriangleSoup(CollisionBox box, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -230,7 +230,7 @@ namespace Engine.Physics
         /// <param name="rigidBody">Rigid body</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndTriangle(CollisionBox box, Triangle tri, IRigidBody rigidBody, CollisionData data)
+        private static bool BoxAndTriangle(CollisionBox box, Triangle tri, IRigidBody rigidBody, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -279,7 +279,7 @@ namespace Engine.Physics
         /// <param name="primitive2">Primitive</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndPrimitive(CollisionSphere sphere1, ICollisionPrimitive primitive2, CollisionData data)
+        private static bool SphereAndPrimitive(CollisionSphere sphere1, ICollisionPrimitive primitive2, ContactResolver data)
         {
             if (primitive2 is CollisionBox box2)
             {
@@ -310,7 +310,7 @@ namespace Engine.Physics
         /// <param name="plane">Plane</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, CollisionData data)
+        private static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -340,7 +340,7 @@ namespace Engine.Physics
         /// <param name="two">Second sphere</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndSphere(CollisionSphere one, CollisionSphere two, CollisionData data)
+        private static bool SphereAndSphere(CollisionSphere one, CollisionSphere two, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -372,7 +372,7 @@ namespace Engine.Physics
         /// <param name="triangleSoup">Triangle soup</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndTriangleSoup(CollisionSphere sphere, CollisionTriangleSoup triangleSoup, CollisionData data)
+        private static bool SphereAndTriangleSoup(CollisionSphere sphere, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
             if (data.ContactsLeft <= 0)
             {
@@ -544,7 +544,7 @@ namespace Engine.Physics
         /// <param name="best">Best penetration axis</param>
         /// <param name="pen">Minor penetration axis</param>
         /// <param name="data">Collision data</param>
-        private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, float pen, ref CollisionData data)
+        private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, float pen, ref ContactResolver data)
         {
             // We know which is the axis of the collision, but we have to know which face we have to work with
             var normal = GetAxis(one.RigidBody.TransformMatrix, best);
@@ -572,7 +572,7 @@ namespace Engine.Physics
         /// <param name="bestSingleAxis">Best single axis</param>
         /// <param name="pen">Minor penetration axis</param>
         /// <param name="data">Collision data</param>
-        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, uint bestSingleAxis, float pen, ref CollisionData data)
+        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, uint bestSingleAxis, float pen, ref ContactResolver data)
         {
             // Get the common axis.
             uint oneAxisIndex = best / 3;

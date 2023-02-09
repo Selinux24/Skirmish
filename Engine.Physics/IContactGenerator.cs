@@ -12,6 +12,6 @@ namespace Engine.Physics
         /// <param name="contactData">Contact data</param>
         /// <param name="limit">Limit of contacts to generate</param>
         /// <returns>Returns the number of contacts generated</returns>
-        int AddContact(CollisionData contactData, int limit);
+        int AddContact(ContactResolver contactData, int limit);
     }
 }

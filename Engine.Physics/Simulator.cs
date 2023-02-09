@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics
@@ -9,13 +10,9 @@ namespace Engine.Physics
     public sealed class Simulator
     {
         /// <summary>
-        /// Contact resolver
-        /// </summary>
-        private ContactResolver contactResolver = new ContactResolver();
-        /// <summary>
         /// Collision data structure
         /// </summary>
-        private readonly CollisionData contactData = new CollisionData();
+        private readonly ContactResolver contactResolver = new ContactResolver();
         /// <summary>
         /// Physics object list
         /// </summary>
@@ -30,63 +27,56 @@ namespace Engine.Physics
         private readonly List<IContactGenerator> contactGenerators = new List<IContactGenerator>();
 
         /// <summary>
-        /// Constructor
-        /// </summary>
-        public Simulator()
-        {
-
-        }
-
-        /// <summary>
         /// Update physics
         /// </summary>
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
-            // Encontrar la duración de este intervalo para las físicas
-            float time = gameTime.ElapsedSeconds;
+            // Get time simulation
+            float time = Math.Min(gameTime.ElapsedSeconds, 0.05f);
             if (time <= 0.0f)
             {
                 return;
             }
 
-            if (time > 0.05f)
-            {
-                time = 0.05f;
-            }
-
-            // Actualizar los objetos
+            // Update simulation objects
             UpdateObjects(time);
 
-            // Generar los contactos
+            // Generate contacts
             GenerateContacts();
 
-            // Resolver los contactos
-            ResolveContacts(time);
+            // Resolve the contacs
+            contactResolver.Resolve(time);
         }
 
         /// <summary>
-        /// Update the state of objects
+        /// Updates the simulation objects
         /// </summary>
         /// <param name="time">Time</param>
         private void UpdateObjects(float time)
         {
-            foreach (var obj in physicsObjects)
+            //Apply force generators
+            var bodies = physicsObjects
+                .Select(o => o.Body)
+                .ToArray();
+
+            foreach (var body in bodies)
             {
                 foreach (var forceGenerator in forceGenerators)
                 {
-                    forceGenerator.UpdateForce(obj.Body, time);
+                    forceGenerator.UpdateForce(body, time);
                 }
             }
 
-            foreach (var obj in physicsObjects)
-            {
-                if (!obj.Body.IsAwake)
-                {
-                    continue;
-                }
+            //Integrate forces
+            var activeBodies = physicsObjects
+                .Where(o => o?.Body?.IsAwake == true)
+                .Select(o => o.Body)
+                .ToArray();
 
-                obj.Body.Integrate(time);
+            foreach (var body in activeBodies)
+            {
+                body.Integrate(time);
             }
         }
         /// <summary>
@@ -94,33 +84,31 @@ namespace Engine.Physics
         /// </summary>
         private void GenerateContacts()
         {
-            // Prepare collision data
-            contactData.Reset();
-            contactData.Friction = 0.75f;
-            contactData.Restitution = 0.1f;
-            contactData.Tolerance = 0.1f;
+            // Reset contact data
+            contactResolver.Reset();
 
-            // Generate contacs
+            // Process contact generators
             foreach (var contactGenerator in contactGenerators)
             {
-                if (!contactData.HasFreeContacts())
+                if (!contactResolver.HasFreeContacts())
                 {
                     break;
                 }
 
-                contactGenerator.AddContact(contactData, 0);
+                contactGenerator.AddContact(contactResolver, 0);
             }
 
+            // Test physics bodies contacts
             for (int i = 0; i < physicsObjects.Count; i++)
             {
-                if (!contactData.HasFreeContacts())
+                if (!contactResolver.HasFreeContacts())
                 {
                     break;
                 }
 
                 for (int j = i + 1; j < physicsObjects.Count; j++)
                 {
-                    if (!contactData.HasFreeContacts())
+                    if (!contactResolver.HasFreeContacts())
                     {
                         break;
                     }
@@ -128,22 +116,9 @@ namespace Engine.Physics
                     var collider1 = physicsObjects[i].Collider;
                     var collider2 = physicsObjects[j].Collider;
 
-                    CollisionDetector.BetweenObjects(collider1, collider2, contactData);
+                    ContactDetector.BetweenObjects(collider1, collider2, contactResolver);
                 }
             }
-        }
-        /// <summary>
-        /// Contact resolution
-        /// </summary>
-        /// <param name="time">Time</param>
-        private void ResolveContacts(float time)
-        {
-            if (contactData.ContactCount <= 0)
-            {
-                return;
-            }
-
-            contactData.Resolve(contactResolver, time);
         }
 
         /// <summary>

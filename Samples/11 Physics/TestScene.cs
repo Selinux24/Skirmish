@@ -18,7 +18,6 @@ namespace Physics
         private Model sphere1 = null;
         private Model sphere2 = null;
 
-        private PhysicsFloor floorBody = null;
         private PhysicsObject sphere1Body = null;
         private PhysicsObject sphere2Body = null;
 
@@ -124,9 +123,9 @@ namespace Physics
             Camera.FarPlaneDistance = 250;
 
             sphere1.Manipulator.SetPosition(Vector3.One * 5f, true);
-            sphere2.Manipulator.SetPosition(Vector3.Up * 5f, true);
+            sphere2.Manipulator.SetPosition(Vector3.Up * 15f, true);
 
-            floorBody = new PhysicsFloor(new RigidBody(float.PositiveInfinity, Matrix.Identity));
+            var floorBody = new PhysicsFloor(new RigidBody(float.PositiveInfinity, Matrix.Identity));
             sphere1Body = new PhysicsObject(new RigidBody(10, sphere1.Manipulator.FinalTransform), sphere1);
             sphere2Body = new PhysicsObject(new RigidBody(10, sphere2.Manipulator.FinalTransform), sphere2);
 
