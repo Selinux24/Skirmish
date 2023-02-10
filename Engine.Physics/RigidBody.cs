@@ -41,7 +41,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public Vector3 Position { get; private set; } = Vector3.Zero;
         /// <inheritdoc/>
-        public Quaternion Orientation { get; private set; } = Quaternion.Identity;
+        public Quaternion Rotation { get; private set; } = Quaternion.Identity;
         /// <inheritdoc/>
         public Vector3 LinearVelocity { get; private set; } = Vector3.Zero;
         /// <inheritdoc/>
@@ -61,7 +61,7 @@ namespace Engine.Physics
         public Matrix3x3 InverseInertiaTensorWorld { get; private set; } = Matrix3x3.Identity;
 
         /// <inheritdoc/>
-        public Matrix TransformMatrix { get; private set; } = Matrix.Identity;
+        public Matrix Transform { get; private set; } = Matrix.Identity;
 
         /// <inheritdoc/>
         public bool IsAwake { get; private set; } = false;
@@ -83,7 +83,7 @@ namespace Engine.Physics
         public void SetInitialState(Vector3 position, Quaternion orientation)
         {
             Position = position;
-            Orientation = orientation;
+            Rotation = orientation;
 
             LinearVelocity = Vector3.Zero;
             AngularVelocity = Vector3.Zero;
@@ -105,19 +105,19 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public bool HasFiniteMass()
         {
-            return InverseMass >= 0f;
-        }
-
-        /// <inheritdoc/>
-        public void SetInertiaTensor(Matrix3x3 inertiaTensor)
-        {
-            InertiaTensor = inertiaTensor;
-            InverseInertiaTensor = Matrix3x3.Invert(inertiaTensor);
+            return InverseMass >= 0f && !float.IsPositiveInfinity(Mass);
         }
 
         /// <inheritdoc/>
         public void SetAwakeState(bool isAwake)
         {
+            if (!HasFiniteMass())
+            {
+                IsAwake = false;
+
+                return;
+            }
+
             IsAwake = isAwake;
 
             if (isAwake)
@@ -134,6 +134,13 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void SetCanSleepState(bool canSleep)
         {
+            if (!HasFiniteMass())
+            {
+                CanSleep = false;
+
+                return;
+            }
+
             CanSleep = canSleep;
 
             if (!canSleep && !IsAwake)
@@ -145,34 +152,39 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void CalculateDerivedData()
         {
-            if (!Orientation.IsNormalized)
+            if (!HasFiniteMass())
             {
-                Orientation.Normalize();
+                return;
+            }
+
+            if (!Rotation.IsNormalized)
+            {
+                Rotation.Normalize();
             }
 
             // Calculate transformation matrix with orientation and position
-            TransformMatrix = Matrix.RotationQuaternion(Orientation) * Matrix.Translation(Position);
+            Transform = Matrix.RotationQuaternion(Rotation) * Matrix.Translation(Position);
 
             // Calculate the inertia tensor in world coordinates
-            InverseInertiaTensorWorld = Core.Transform(InverseInertiaTensor, TransformMatrix);
+            InverseInertiaTensorWorld = Core.Transform(InverseInertiaTensor, Transform);
             InertiaTensorWorld = Matrix3x3.Invert(InverseInertiaTensorWorld);
         }
         /// <inheritdoc/>
-        public void Integrate(float duration)
+        public void Integrate(float time)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             if (!IsAwake)
             {
                 return;
             }
 
-            if (Mass == float.PositiveInfinity)
-            {
-                return;
-            }
-
             // Get the bounce coefficients for this time interval
-            float linearDampingOnTime = (float)Math.Pow(linearDamping, duration);
-            float angularDampingOnTime = (float)Math.Pow(angularDamping, duration);
+            float linearDampingOnTime = (float)Math.Pow(linearDamping, time);
+            float angularDampingOnTime = (float)Math.Pow(angularDamping, time);
 
             // Calculate the linear acceleration from the forces
             LastFrameAcceleration = Acceleration;
@@ -182,20 +194,20 @@ namespace Engine.Physics
             Vector3 angularAcceleration = Core.Transform(InverseInertiaTensorWorld, torqueAccum);
 
             // Update linear velocity using linear acceleration
-            LinearVelocity += Vector3.Multiply(LastFrameAcceleration, duration);
+            LinearVelocity += Vector3.Multiply(LastFrameAcceleration, time);
 
             // Update angular velocity using angular acceleration
-            AngularVelocity += Vector3.Multiply(angularAcceleration, duration);
+            AngularVelocity += Vector3.Multiply(angularAcceleration, time);
 
             // Apply damping coefficients
             LinearVelocity *= linearDampingOnTime;
             AngularVelocity *= angularDampingOnTime;
 
             // Update linear position
-            Position += Vector3.Multiply(LinearVelocity, duration);
+            Position += Vector3.Multiply(LinearVelocity, time);
 
             // Update orientation (angular position)
-            Orientation += Core.AddScaledVector(Orientation, AngularVelocity, duration);
+            Rotation *= Core.AddScaledVector(Rotation, AngularVelocity, time);
 
             // Apply damping coefficients
             LinearVelocity *= linearDampingOnTime;
@@ -216,7 +228,7 @@ namespace Engine.Physics
 
             // Calculate current kinetic energy
             float currentMotion = Vector3.Dot(LinearVelocity, LinearVelocity) + Vector3.Dot(AngularVelocity, AngularVelocity);
-            float bias = (float)Math.Pow(0.5f, duration);
+            float bias = (float)Math.Pow(0.5f, time);
 
             motionAcum = bias * motionAcum + (1f - bias) * currentMotion;
 
@@ -235,6 +247,11 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void SetDamping(float linearDamping, float angularDamping)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             this.linearDamping = linearDamping;
             this.angularDamping = angularDamping;
         }
@@ -242,6 +259,11 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void AddForce(Vector3 force)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             if (Vector3.Zero == force)
             {
                 return;
@@ -254,6 +276,11 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void AddTorque(Vector3 torque)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             if (Vector3.Zero == torque)
             {
                 return;
@@ -266,6 +293,11 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void AddForceAtPoint(Vector3 force, Vector3 point)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             if (Vector3.Zero == force)
             {
                 return;
@@ -282,6 +314,11 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void AddForceAtBodyPoint(Vector3 force, Vector3 point)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             if (Vector3.Zero == force)
             {
                 return;
@@ -305,43 +342,63 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void AddLinearVelocity(Vector3 linearVelocityChange)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             LinearVelocity += linearVelocityChange;
         }
         /// <inheritdoc/>
         public void AddAngularVelocity(Vector3 angularVelocityChange)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             AngularVelocity += angularVelocityChange;
         }
         /// <inheritdoc/>
         public void AddPosition(Vector3 positionChange)
         {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
             Position += positionChange;
         }
         /// <inheritdoc/>
         public void AddOrientation(Quaternion orientationChange)
         {
-            Orientation += orientationChange;
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
+            Rotation *= orientationChange;
         }
 
         /// <inheritdoc/>
         public Vector3 GetPointInLocalSpace(Vector3 point)
         {
-            return Vector3.TransformCoordinate(point, Matrix.Invert(TransformMatrix));
+            return Vector3.TransformCoordinate(point, Matrix.Invert(Transform));
         }
         /// <inheritdoc/>
         public Vector3 GetPointInWorldSpace(Vector3 point)
         {
-            return Vector3.TransformCoordinate(point, TransformMatrix);
+            return Vector3.TransformCoordinate(point, Transform);
         }
         /// <inheritdoc/>
         public Vector3 GetDirectionInLocalSpace(Vector3 direction)
         {
-            return Vector3.TransformNormal(direction, Matrix.Invert(TransformMatrix));
+            return Vector3.TransformNormal(direction, Matrix.Invert(Transform));
         }
         /// <inheritdoc/>
         public Vector3 GetDirectionInWorldSpace(Vector3 direction)
         {
-            return Vector3.TransformNormal(direction, TransformMatrix);
+            return Vector3.TransformNormal(direction, Transform);
         }
     }
 }

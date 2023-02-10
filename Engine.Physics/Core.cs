@@ -134,7 +134,7 @@ namespace Engine.Physics
             res.Y += q.Y * 0.5f;
             res.Z += q.Z * 0.5f;
 
-            return res;
+            return Quaternion.Normalize(res);
         }
 
 

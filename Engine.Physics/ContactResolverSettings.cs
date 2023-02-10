@@ -42,15 +42,15 @@ namespace Engine.Physics
         /// <summary> 
         /// Friction factor to add in all collisions
         /// </summary>
-        public float Friction { get; set; } = 0f;
+        public float Friction { get; set; } = 0.9f;
         /// <summary> 
         /// Restitution factor to add on all collisions
         /// </summary>
-        public float Restitution { get; set; } = 0f;
+        public float Restitution { get; set; } = 0.2f;
         /// <summary>
         /// Tolerance
         /// </summary>
-        public float Tolerance { get; set; } = 0f;
+        public float Tolerance { get; set; } = 0.1f;
 
         /// <summary>
         /// Constructor

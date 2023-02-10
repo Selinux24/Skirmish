@@ -15,11 +15,18 @@ namespace Physics
         private UITextArea runtimeText = null;
         private UITextArea info = null;
 
-        private Model sphere1 = null;
-        private Model sphere2 = null;
+        private Model floor = null;
+        private PhysicsFloor floorBody = null;
 
+        private readonly Vector3 sphere1Position = Vector3.One * 10f;
+        private Model sphere1 = null;
         private PhysicsObject sphere1Body = null;
+        private SceneLightPoint sphere1Light;
+
+        private readonly Vector3 sphere2Position = Vector3.Up * 10f;
+        private Model sphere2 = null;
         private PhysicsObject sphere2Body = null;
+        private SceneLightPoint sphere2Light;
 
         private readonly Simulator simulator = new Simulator();
 
@@ -44,7 +51,7 @@ namespace Physics
                 {
                     InitializeTexts(),
                     InitializeFloor(),
-                    InitializeSphere(),
+                    InitializeSpheres(),
                 },
                 InitializeComponentsCompleted);
         }
@@ -66,7 +73,7 @@ namespace Physics
         }
         private async Task InitializeFloor()
         {
-            float l = 25f;
+            float l = 50f;
             float h = 0f;
 
             VertexData[] vertices = new VertexData[]
@@ -92,9 +99,9 @@ namespace Physics
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
+            floor = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
         }
-        private async Task InitializeSphere()
+        private async Task InitializeSpheres()
         {
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
@@ -108,6 +115,9 @@ namespace Physics
 
             sphere1 = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
             sphere2 = await AddComponent<Model, ModelDescription>("sphere2", "sphere2", desc);
+
+            sphere1.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
+            sphere2.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -122,16 +132,24 @@ namespace Physics
             Camera.LookTo(Vector3.Zero);
             Camera.FarPlaneDistance = 250;
 
-            sphere1.Manipulator.SetPosition(Vector3.One * 5f, true);
-            sphere2.Manipulator.SetPosition(Vector3.Up * 15f, true);
-
-            var floorBody = new PhysicsFloor(new RigidBody(float.PositiveInfinity, Matrix.Identity));
-            sphere1Body = new PhysicsObject(new RigidBody(10, sphere1.Manipulator.FinalTransform), sphere1);
-            sphere2Body = new PhysicsObject(new RigidBody(10, sphere2.Manipulator.FinalTransform), sphere2);
-
+            floor.Manipulator.SetRotation(0f, -0.2f, 0f);
+            floorBody = new PhysicsFloor(new RigidBody(float.PositiveInfinity, floor.Manipulator.FinalTransform), floor);
             simulator.AddPhysicsObject(floorBody);
+
+            sphere1.Manipulator.SetPosition(sphere1Position);
+            sphere1Body = new PhysicsObject(new RigidBody(10, sphere1.Manipulator.FinalTransform), sphere1);
             simulator.AddPhysicsObject(sphere1Body);
+
+            sphere2.Manipulator.SetScale(0.5f);
+            sphere2.Manipulator.SetPosition(sphere2Position);
+            sphere2Body = new PhysicsObject(new RigidBody(5, sphere2.Manipulator.FinalTransform), sphere2);
             simulator.AddPhysicsObject(sphere2Body);
+
+            sphere1Light = new SceneLightPoint(nameof(sphere1), true, sphere1.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 5f, 2f));
+            Lights.Add(sphere1Light);
+
+            sphere2Light = new SceneLightPoint(nameof(sphere2), true, sphere2.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
+            Lights.Add(sphere2Light);
 
             gameReady = true;
         }
@@ -150,6 +168,11 @@ namespace Physics
                     SceneModes.ForwardLigthning);
             }
 
+            if (Game.Input.KeyJustReleased(Keys.Tab))
+            {
+                Reset();
+            }
+
             if (!gameReady)
             {
                 return;
@@ -161,6 +184,9 @@ namespace Physics
 
             sphere1Body.Update();
             sphere2Body.Update();
+
+            sphere1Light.Position = sphere1Body.Body.Position;
+            sphere2Light.Position = sphere2Body.Body.Position;
 
             base.Update(gameTime);
         }
@@ -204,6 +230,16 @@ namespace Physics
                 bwd.Normalize();
                 Camera.Move(gameTime, bwd, Game.Input.ShiftPressed);
             }
+
+            if (Game.Input.KeyPressed(Keys.C))
+            {
+                Camera.MoveDown(gameTime, Game.Input.ShiftPressed);
+            }
+
+            if (Game.Input.KeyPressed(Keys.Space))
+            {
+                Camera.MoveUp(gameTime, Game.Input.ShiftPressed);
+            }
         }
 
         public override void GameGraphicsResized()
@@ -221,17 +257,41 @@ namespace Physics
             panel.Width = Game.Form.RenderWidth;
             panel.Height = info.Top + info.Height + 3;
         }
+
+        private void Reset()
+        {
+            sphere1Body.Body.SetInitialState(sphere1Position, Quaternion.Identity);
+            sphere2Body.Body.SetInitialState(sphere2Position, Quaternion.Identity);
+        }
     }
 
     public class PhysicsFloor : IPhysicsObject
     {
         public IRigidBody Body { get; private set; }
         public ICollisionPrimitive Collider { get; private set; }
+        public Model Model { get; private set; }
 
-        public PhysicsFloor(IRigidBody body)
+        public PhysicsFloor(IRigidBody body, Model model)
         {
             Body = body;
-            Collider = new CollisionPlane(Body, new Plane(Vector3.Up, 0));
+            Model = model;
+            Collider = new CollisionPlane(Body, new Plane(model.Manipulator.Up, 0));
+        }
+
+        public void Update()
+        {
+            if (Body == null)
+            {
+                return;
+            }
+
+            if (Model == null)
+            {
+                return;
+            }
+
+            Model.Manipulator.SetRotation(Body.Rotation);
+            Model.Manipulator.SetPosition(Body.Position);
         }
     }
 
@@ -260,7 +320,8 @@ namespace Physics
                 return;
             }
 
-            Model.Manipulator.SetTransform(Body.TransformMatrix);
+            Model.Manipulator.SetRotation(Body.Rotation);
+            Model.Manipulator.SetPosition(Body.Position);
         }
     }
 }

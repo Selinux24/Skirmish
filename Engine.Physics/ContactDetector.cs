@@ -448,8 +448,8 @@ namespace Engine.Physics
             best = uint.MaxValue;
             bestSingleAxis = uint.MaxValue;
 
-            var oneTrn = one.RigidBody.TransformMatrix;
-            var twoTrn = two.RigidBody.TransformMatrix;
+            var oneTrn = one.RigidBody.Transform;
+            var twoTrn = two.RigidBody.Transform;
 
             // Check each axis, storing penetration and the best axis
             if (!TryAxis(one, two, oneTrn.Left, toCentre, 0, ref pen, ref best)) return false;
@@ -547,18 +547,18 @@ namespace Engine.Physics
         private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, float pen, ref ContactResolver data)
         {
             // We know which is the axis of the collision, but we have to know which face we have to work with
-            var normal = GetAxis(one.RigidBody.TransformMatrix, best);
+            var normal = GetAxis(one.RigidBody.Transform, best);
             if (Vector3.Dot(normal, toCentre) > 0f)
             {
                 normal *= -1f;
             }
 
             Vector3 vertex = two.HalfSize;
-            if (Vector3.Dot(two.RigidBody.TransformMatrix.Left, normal) < 0f) vertex.X = -vertex.X;
-            if (Vector3.Dot(two.RigidBody.TransformMatrix.Up, normal) < 0f) vertex.Y = -vertex.Y;
-            if (Vector3.Dot(two.RigidBody.TransformMatrix.Backward, normal) < 0f) vertex.Z = -vertex.Z;
+            if (Vector3.Dot(two.RigidBody.Transform.Left, normal) < 0f) vertex.X = -vertex.X;
+            if (Vector3.Dot(two.RigidBody.Transform.Up, normal) < 0f) vertex.Y = -vertex.Y;
+            if (Vector3.Dot(two.RigidBody.Transform.Backward, normal) < 0f) vertex.Z = -vertex.Z;
 
-            var position = Vector3.TransformCoordinate(vertex, two.RigidBody.TransformMatrix);
+            var position = Vector3.TransformCoordinate(vertex, two.RigidBody.Transform);
 
             data.AddContact(one.RigidBody, two.RigidBody, position, normal, pen);
         }
@@ -577,8 +577,8 @@ namespace Engine.Physics
             // Get the common axis.
             uint oneAxisIndex = best / 3;
             uint twoAxisIndex = best % 3;
-            Vector3 oneAxis = GetAxis(one.RigidBody.TransformMatrix, oneAxisIndex);
-            Vector3 twoAxis = GetAxis(two.RigidBody.TransformMatrix, twoAxisIndex);
+            Vector3 oneAxis = GetAxis(one.RigidBody.Transform, oneAxisIndex);
+            Vector3 twoAxis = GetAxis(two.RigidBody.Transform, twoAxisIndex);
             Vector3 axis = Vector3.Cross(oneAxis, twoAxis);
             axis.Normalize();
 
@@ -603,7 +603,7 @@ namespace Engine.Physics
                 {
                     ptOnOneEdge[i] = 0;
                 }
-                else if (Vector3.Dot(GetAxis(one.RigidBody.TransformMatrix, i), axis) > 0f)
+                else if (Vector3.Dot(GetAxis(one.RigidBody.Transform, i), axis) > 0f)
                 {
                     ptOnOneEdge[i] = -ptOnOneEdge[i];
                 }
@@ -612,7 +612,7 @@ namespace Engine.Physics
                 {
                     ptOnTwoEdge[i] = 0;
                 }
-                else if (Vector3.Dot(GetAxis(two.RigidBody.TransformMatrix, i), axis) < 0f)
+                else if (Vector3.Dot(GetAxis(two.RigidBody.Transform, i), axis) < 0f)
                 {
                     ptOnTwoEdge[i] = -ptOnTwoEdge[i];
                 }
@@ -627,8 +627,8 @@ namespace Engine.Physics
             vTwo.Z = ptOnTwoEdge[2];
 
             // Go to world coordinates
-            vOne = Vector3.TransformCoordinate(vOne, one.RigidBody.TransformMatrix);
-            vTwo = Vector3.TransformCoordinate(vTwo, two.RigidBody.TransformMatrix);
+            vOne = Vector3.TransformCoordinate(vOne, one.RigidBody.Transform);
+            vTwo = Vector3.TransformCoordinate(vTwo, two.RigidBody.Transform);
 
             // We have a point and a direction for the colliding edges.
             // We need to find the closest point of the two segments.

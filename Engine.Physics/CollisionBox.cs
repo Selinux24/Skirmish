@@ -42,7 +42,7 @@ namespace Engine.Physics
             {
                 return new OrientedBoundingBox(AABB)
                 {
-                    Transformation = RigidBody.TransformMatrix
+                    Transformation = RigidBody.Transform
                 };
             }
         }
@@ -84,7 +84,7 @@ namespace Engine.Physics
         {
             Vector3 result = new Vector3(mults[index, 0], mults[index, 1], mults[index, 2]);
             result = Vector3.Multiply(result, HalfSize);
-            result = Vector3.TransformCoordinate(result, RigidBody.TransformMatrix);
+            result = Vector3.TransformCoordinate(result, RigidBody.Transform);
 
             return result;
         }
@@ -101,20 +101,6 @@ namespace Engine.Physics
             }
 
             return corners;
-        }
-
-        /// <inheritdoc/>
-        public override void SetInitialState(Vector3 position, Quaternion orientation)
-        {
-            base.SetInitialState(position, orientation);
-
-            float mass = RigidBody.Mass;
-            Vector3 squares = Vector3.Multiply(HalfSize, HalfSize);
-            var inertiaTensor = Core.CreateFromInertiaTensorCoeffs(
-                0.3f * mass * (squares.Y + squares.Z),
-                0.3f * mass * (squares.X + squares.Z),
-                0.3f * mass * (squares.X + squares.Y));
-            RigidBody.SetInertiaTensor(inertiaTensor);
         }
     }
 }

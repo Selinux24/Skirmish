@@ -25,7 +25,7 @@ namespace Engine.Physics
         }
 
         /// <inheritdoc/>
-        public virtual void SetInitialState(Vector3 position, Quaternion orientation)
+        public void SetInitialState(Vector3 position, Quaternion orientation)
         {
             RigidBody.SetInitialState(position, orientation);
         }

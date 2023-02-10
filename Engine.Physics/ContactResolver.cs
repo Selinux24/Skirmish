@@ -123,9 +123,10 @@ namespace Engine.Physics
                 return;
             }
 
-            CurrentContact?.SetContactData(one, two, Friction, Restitution, position, normal, penetration);
-
-            currentContactIndex++;
+            if (CurrentContact?.SetContactData(one, two, Friction, Restitution, position, normal, penetration) == true)
+            {
+                currentContactIndex++;
+            }
         }
 
         /// <summary>
@@ -137,7 +138,7 @@ namespace Engine.Physics
         /// </remarks>
         public void Resolve(float time)
         {
-            if (!HasFreeContacts())
+            if (ContactCount <= 0)
             {
                 return;
             }
@@ -165,6 +166,7 @@ namespace Engine.Physics
                 contacts[i].CalculateInternals(time);
             }
         }
+
         /// <summary>
         /// Solve contact list positional problems
         /// </summary>
@@ -205,27 +207,25 @@ namespace Engine.Physics
         private bool FindMaxPositionChangeContact(out Contact contact, out float maxPenetration)
         {
             contact = null;
-
             maxPenetration = settings.PositionEpsilon;
-            int index = ContactCount;
+
+            bool found = false;
             for (int i = 0; i < ContactCount; i++)
             {
-                if (contacts[i].Penetration > maxPenetration)
+                float penetration = contacts[i].Penetration;
+
+                if (penetration > maxPenetration)
                 {
-                    maxPenetration = contacts[i].Penetration;
-                    index = i;
+                    maxPenetration = penetration;
+                    contact = contacts[i];
+
+                    found = true;
                 }
             }
 
-            if (index == ContactCount)
-            {
-                return false;
-            }
-
-            contact = contacts[index];
-
-            return true;
+            return found;
         }
+
         /// <summary>
         /// Solve speed problems with the contact list
         /// </summary>
@@ -267,27 +267,25 @@ namespace Engine.Physics
         private bool FindMaxVelocityChangeContact(out Contact contact)
         {
             contact = null;
-
             float max = settings.VelocityEpsilon;
-            int index = ContactCount;
+
+            bool found = false;
             for (int i = 0; i < ContactCount; i++)
             {
-                if (contacts[i].DesiredDeltaVelocity > max)
+                float desiredDeltaVelocity = contacts[i].DesiredDeltaVelocity;
+
+                if (desiredDeltaVelocity > max)
                 {
-                    max = contacts[i].DesiredDeltaVelocity;
-                    index = i;
+                    max = desiredDeltaVelocity;
+                    contact = contacts[i];
+
+                    found = true;
                 }
             }
 
-            if (index == ContactCount)
-            {
-                return false;
-            }
-
-            contact = contacts[index];
-
-            return true;
+            return found;
         }
+
         /// <summary>
         /// Enumerate multi-collision contacts
         /// </summary>

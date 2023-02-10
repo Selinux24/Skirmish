@@ -106,8 +106,8 @@ namespace Engine.PhysicsTests
             resolver.AddContact(body1.Object, body2.Object, pos, norm, pen);
             Assert.AreEqual(curr.GetBody(0), body1.Object);
             Assert.AreEqual(curr.GetBody(1), body2.Object);
-            Assert.AreEqual(curr.ContactPositionWorld, pos);
-            Assert.AreEqual(curr.ContactNormalWorld, norm);
+            Assert.AreEqual(curr.Position, pos);
+            Assert.AreEqual(curr.Normal, norm);
             Assert.AreEqual(curr.Penetration, pen);
 
             Assert.AreNotSame(resolver.CurrentContact, curr);

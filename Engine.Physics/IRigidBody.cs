@@ -21,9 +21,9 @@ namespace Engine.Physics
         /// </summary>
         Vector3 Position { get; }
         /// <summary>
-        /// Gets the body orientation
+        /// Gets the body rotation
         /// </summary>
-        Quaternion Orientation { get; }
+        Quaternion Rotation { get; }
         /// <summary>
         /// Gets the body linear velocity
         /// </summary>
@@ -61,7 +61,7 @@ namespace Engine.Physics
         /// <summary>
         /// Gets the rigid body transform matrix
         /// </summary>
-        Matrix TransformMatrix { get; }
+        Matrix Transform { get; }
 
         /// <summary>
         /// Gets whether the body is awake or not
@@ -90,12 +90,6 @@ namespace Engine.Physics
         bool HasFiniteMass();
 
         /// <summary>
-        /// Sets the inertia tensor
-        /// </summary>
-        /// <param name="inertiaTensor">Inertia tensor</param>
-        void SetInertiaTensor(Matrix3x3 inertiaTensor);
-
-        /// <summary>
         /// Sets the awake state
         /// </summary>
         /// <param name="isAwake">Is awake</param>
@@ -113,8 +107,8 @@ namespace Engine.Physics
         /// <summary>
         /// Integrates state over time
         /// </summary>
-        /// <param name="duration">Duration</param>
-        void Integrate(float duration);
+        /// <param name="time">Time</param>
+        void Integrate(float time);
 
         /// <summary>
         /// Sets the damping coefficients

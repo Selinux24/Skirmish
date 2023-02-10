@@ -75,6 +75,11 @@ namespace Engine
         {
             get
             {
+                if (transformUpdateNeeded)
+                {
+                    UpdateLocalTransform();
+                }
+
                 return localTransform;
             }
         }
@@ -85,6 +90,11 @@ namespace Engine
         {
             get
             {
+                if (transformUpdateNeeded)
+                {
+                    UpdateLocalTransform();
+                }
+
                 if (Parent != null)
                 {
                     return localTransform * Parent.FinalTransform;
