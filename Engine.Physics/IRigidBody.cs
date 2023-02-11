@@ -73,11 +73,11 @@ namespace Engine.Physics
         bool CanSleep { get; }
 
         /// <summary>
-        /// Sets the initial state of the body to the indicated position and orientation
+        /// Sets the initial state of the body to the indicated position and rotation
         /// </summary>
         /// <param name="position">Initial position</param>
-        /// <param name="orientation">Initial orientation</param>
-        void SetInitialState(Vector3 position, Quaternion orientation);
+        /// <param name="rotation">Initial rotation</param>
+        void SetInitialState(Vector3 position, Quaternion rotation);
 
         /// <summary>
         /// Sets the body mass
@@ -88,6 +88,14 @@ namespace Engine.Physics
         /// Gets whether the body has a finite mass
         /// </summary>
         bool HasFiniteMass();
+
+        /// <summary>
+        /// Sets the intertia tensor coefficient
+        /// </summary>
+        /// <param name="ix">Interntia magnitude on X coordinate</param>
+        /// <param name="iy">Interntia magnitude on Y coordinate</param>
+        /// <param name="iz">Interntia magnitude on Z coordinate</param>
+        void SetIntertiaCoefficients(float ix, float iy, float iz);
 
         /// <summary>
         /// Sets the awake state

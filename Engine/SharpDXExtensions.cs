@@ -237,7 +237,7 @@ namespace Engine
         {
             var center = bbox.GetCenter();
 
-            return (bbox.Maximum - center);
+            return bbox.Maximum - center;
         }
         /// <summary>
         /// Gets the XY rectangle of the box

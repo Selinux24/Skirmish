@@ -13,19 +13,22 @@ namespace Engine.Physics
         IRigidBody RigidBody { get; }
 
         /// <summary>
-        /// Axis aligned bounding box
-        /// </summary>
-        BoundingBox AABB { get; }
-        /// <summary>
         /// Bounding sphere
         /// </summary>
-        BoundingSphere SPH { get; }
+        BoundingSphere BoundingSphere { get; }
+        /// <summary>
+        /// Axis aligned bounding box
+        /// </summary>
+        BoundingBox BoundingBox { get; }
+        /// <summary>
+        /// Oriented bounding box
+        /// </summary>
+        OrientedBoundingBox OrientedBoundingBox { get; }
 
         /// <summary>
-        /// Sets the initial state of the primitive to the indicated position and orientation
+        /// Attachs a body to the collision primitive
         /// </summary>
-        /// <param name="position">Initial position</param>
-        /// <param name="orientation">Initial orientation</param>
-        void SetInitialState(Vector3 position, Quaternion orientation);
+        /// <param name="body">Rigid body</param>
+        void Attach(IRigidBody body);
     }
 }

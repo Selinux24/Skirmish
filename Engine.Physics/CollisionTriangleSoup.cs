@@ -1,4 +1,5 @@
 using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -28,42 +29,21 @@ namespace Engine.Physics
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="rigidBody">Rigid body</param>
         /// <param name="triangles">Triangle list</param>
-        public CollisionTriangleSoup(IRigidBody rigidBody, IEnumerable<Triangle> triangles) : base(rigidBody)
-        {
-            AddTriangles(triangles);
-        }
-
-        /// <summary>
-        /// Adds the specified list of triangles to the triangle soup
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        public void AddTriangles(IEnumerable<Triangle> triangles)
+        public CollisionTriangleSoup(IEnumerable<Triangle> triangles) : base()
         {
             if (triangles?.Any() != true)
             {
-                return;
+                throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(CollisionTriangleSoup)} must have one triangle at least.");
             }
 
             triangleList.AddRange(triangles);
 
-            Update();
-        }
-        /// <summary>
-        /// Updates the container bodies of the primitives
-        /// </summary>
-        private void Update()
-        {
-            List<Vector3> vertexList = new List<Vector3>();
+            var vertexList = triangleList.SelectMany(t => t.GetVertices()).ToArray();
 
-            foreach (var tri in triangleList)
-            {
-                vertexList.AddRange(tri.GetVertices());
-            }
-
-            AABB = BoundingBox.FromPoints(vertexList.ToArray());
-            SPH = BoundingSphere.FromPoints(vertexList.ToArray());
+            boundingBox = BoundingBox.FromPoints(vertexList);
+            boundingSphere = BoundingSphere.FromPoints(vertexList);
+            orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
     }
 }

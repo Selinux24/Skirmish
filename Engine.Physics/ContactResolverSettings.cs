@@ -33,12 +33,12 @@ namespace Engine.Physics
         /// To avoid instability, speeds less than this value are considered 0
         /// </summary>
         /// <remarks>The higher this number, the more the interpenetration will be visually noticeable.</remarks>
-        public float VelocityEpsilon { get; set; } = 0.01f;
+        public float VelocityEpsilon { get; set; } = 0.001f;
         /// <summary>
         /// To avoid instability, penetrations less than this value are considered as no interpenetrations.
         /// </summary>
         /// <remarks>The higher this number, the more the interpenetration will be visually noticeable.</remarks>
-        public float PositionEpsilon { get; set; } = 0.01f;
+        public float PositionEpsilon { get; set; } = 0.001f;
         /// <summary> 
         /// Friction factor to add in all collisions
         /// </summary>
@@ -46,11 +46,7 @@ namespace Engine.Physics
         /// <summary> 
         /// Restitution factor to add on all collisions
         /// </summary>
-        public float Restitution { get; set; } = 0.2f;
-        /// <summary>
-        /// Tolerance
-        /// </summary>
-        public float Tolerance { get; set; } = 0.1f;
+        public float Restitution { get; set; } = 0.001f;
 
         /// <summary>
         /// Constructor

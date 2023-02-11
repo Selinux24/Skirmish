@@ -1,4 +1,5 @@
-﻿
+﻿using SharpDX;
+
 namespace Engine.Physics
 {
     /// <summary>
@@ -14,5 +15,16 @@ namespace Engine.Physics
         /// Primiteve collider
         /// </summary>
         ICollisionPrimitive Collider { get; }
+
+        /// <summary>
+        /// Updates the object state
+        /// </summary>
+        void Update();
+        /// <summary>
+        /// Resets the object state
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="rotation">Rotation</param>
+        void Reset(Vector3 position, Quaternion rotation);
     }
 }

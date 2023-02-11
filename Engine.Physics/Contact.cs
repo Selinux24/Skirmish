@@ -37,7 +37,7 @@ namespace Engine.Physics
         /// <summary>
         /// Contact velocity.
         /// </summary>
-        private Vector3 contactVelocity;
+        private Vector3 velocity;
         /// <summary>
         /// Orthonormal matrix for local-to-world transforms.
         /// </summary>
@@ -133,6 +133,26 @@ namespace Engine.Physics
                 Column3 = contactTangent2,
             };
         }
+        /// <summary>
+        /// Gets the symmetric matrix based on the specified vector
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <returns>Returns the symmetric matrix based on the specified vector</returns>
+        /// <remarks>
+        /// The symmetric matrix is the equivalent to the cross product of the specified vector, such that a x b = A_s b, where a and b are vectors and A_s is the symmetric form of a
+        /// </remarks>
+        private static Matrix3x3 SkewSymmetric(Vector3 vector)
+        {
+            Matrix3x3 result;
+            result.M11 = result.M22 = result.M33 = 0f;
+            result.M12 = -vector.Z;
+            result.M13 = vector.Y;
+            result.M21 = vector.Z;
+            result.M23 = -vector.X;
+            result.M31 = -vector.Y;
+            result.M32 = vector.X;
+            return result;
+        }
 
         /// <summary>
         /// Sets the contact data
@@ -189,11 +209,11 @@ namespace Engine.Physics
             // Store the relative position of the contact, with respect to each body
             // & find the relative speed of each body at the moment of collision.
             relativeContactPositionsWorld1 = Position - body1.Position;
-            contactVelocity = CalculateLocalVelocity(body1, relativeContactPositionsWorld1, time);
+            velocity = CalculateLocalVelocity(body1, relativeContactPositionsWorld1, time);
             if (body2.HasFiniteMass())
             {
                 relativeContactPositionsWorld2 = Position - body2.Position;
-                contactVelocity -= CalculateLocalVelocity(body2, relativeContactPositionsWorld2, time);
+                velocity -= CalculateLocalVelocity(body2, relativeContactPositionsWorld2, time);
             }
 
             // Calculate the velocity needed to resolve the contact
@@ -208,17 +228,17 @@ namespace Engine.Physics
         private Vector3 CalculateLocalVelocity(IRigidBody body, Vector3 relativeContactPositionWorld, float time)
         {
             // Extract the velocity at the point of contact.
-            var velocity = Vector3.Cross(body.AngularVelocity, relativeContactPositionWorld);
-            velocity += body.LinearVelocity;
+            var bodyVelocity = Vector3.Cross(body.AngularVelocity, relativeContactPositionWorld);
+            bodyVelocity += body.LinearVelocity;
 
             // Convert velocity to contact coordinates.
-            var contactVelocity = Core.TransformTranspose(contactToWorld, velocity);
+            var contactVelocity = MathExtensions.TransformTranspose(contactToWorld, bodyVelocity);
 
             // Calculate the amount of velocity available for forces without taking reactions into account.
             var accVelocity = body.LastFrameAcceleration * time;
 
             // Calculate amount of velocity in contact coordinates.
-            accVelocity = Core.TransformTranspose(contactToWorld, accVelocity);
+            accVelocity = MathExtensions.TransformTranspose(contactToWorld, accVelocity);
 
             // Acceleration components in the direction of the contact normal are ignored..
             // Only accelerations in the plane are taken into account.
@@ -246,13 +266,13 @@ namespace Engine.Physics
 
             // If the speed is very slow, it is necessary to limit the restitution
             float thisRestitution = restitution;
-            if (Math.Abs(contactVelocity.X) < velocityLimit)
+            if (Math.Abs(velocity.X) < velocityLimit)
             {
                 thisRestitution = 0.0f;
             }
 
             // Combine dumping speed with speed taken from acceleration
-            DesiredDeltaVelocity = -contactVelocity.X - thisRestitution * (contactVelocity.X - velocityFromAcc);
+            DesiredDeltaVelocity = -velocity.X - thisRestitution * (velocity.X - velocityFromAcc);
         }
 
         /// <summary>
@@ -348,7 +368,7 @@ namespace Engine.Physics
 
                     var inverseInertiaTensor = body.InverseInertiaTensorWorld;
 
-                    angularChange[i] = Core.Transform(inverseInertiaTensor, targetAngularDirection) * (angularMove / angularInertia[i]);
+                    angularChange[i] = inverseInertiaTensor.Transform(targetAngularDirection) * (angularMove / angularInertia[i]);
                 }
 
                 // Velocity variation: linear movement on the normal of contact.
@@ -395,7 +415,7 @@ namespace Engine.Physics
                 // Get the angular inertia.
                 var relativeContactPosition = GetRelativeContactPosition(i);
                 var angularInertiaWorld = Vector3.Cross(relativeContactPosition, Normal);
-                angularInertiaWorld = Core.Transform(inverseInertiaTensor, angularInertiaWorld);
+                angularInertiaWorld = inverseInertiaTensor.Transform(angularInertiaWorld);
                 angularInertiaWorld = Vector3.Cross(angularInertiaWorld, relativeContactPosition);
                 angularInertia[i] = Vector3.Dot(angularInertiaWorld, Normal);
 
@@ -448,11 +468,11 @@ namespace Engine.Physics
             }
 
             // Convert momentum to world coordinates
-            Vector3 impulse = Core.Transform(contactToWorld, impulseContact);
+            Vector3 impulse = contactToWorld.Transform(impulseContact);
 
             // Divide the impulse into linear components and rotations
             Vector3 impulsiveTorque = Vector3.Cross(relativeContactPositionsWorld1, impulse);
-            rotationChange[0] = Core.Transform(inverseInertiaTensor[0], impulsiveTorque);
+            rotationChange[0] = inverseInertiaTensor[0].Transform(impulsiveTorque);
             velocityChange[0] = Vector3.Zero;
             velocityChange[0] += Vector3.Multiply(impulse, body1.InverseMass);
 
@@ -464,7 +484,7 @@ namespace Engine.Physics
             {
                 // Obtain linear and rotational impulses for the second body
                 impulsiveTorque = Vector3.Cross(impulse, relativeContactPositionsWorld2);
-                rotationChange[1] = Core.Transform(inverseInertiaTensor[1], impulsiveTorque);
+                rotationChange[1] = inverseInertiaTensor[1].Transform(impulsiveTorque);
                 velocityChange[1] = Vector3.Zero;
                 velocityChange[1] += Vector3.Multiply(impulse, -body2.InverseMass);
 
@@ -486,7 +506,7 @@ namespace Engine.Physics
 
             // Calculate a vector showing the change in velocity in world coordinates, for a unit impulse in the direction of the contact normal.
             Vector3 deltaVelWorld = Vector3.Cross(relativeContactPositionsWorld1, Normal);
-            deltaVelWorld = Core.Transform(inverseInertiaTensor[0], deltaVelWorld);
+            deltaVelWorld = inverseInertiaTensor[0].Transform(deltaVelWorld);
             deltaVelWorld = Vector3.Cross(deltaVelWorld, relativeContactPositionsWorld1);
 
             // Obtain the variation of the velocity in contact coordinates.
@@ -498,7 +518,7 @@ namespace Engine.Physics
             if (body2.HasFiniteMass())
             {
                 deltaVelWorld = Vector3.Cross(relativeContactPositionsWorld2, Normal);
-                deltaVelWorld = Core.Transform(inverseInertiaTensor[1], deltaVelWorld);
+                deltaVelWorld = inverseInertiaTensor[1].Transform(deltaVelWorld);
                 deltaVelWorld = Vector3.Cross(deltaVelWorld, relativeContactPositionsWorld2);
 
                 deltaVelocity += Vector3.Dot(deltaVelWorld, Normal);
@@ -528,7 +548,7 @@ namespace Engine.Physics
             // The equivalent of the cross product in matrices is multiplication by the skew symmetric matrix.
             // The matrix will be used to convert linear quantities to angular ones.
             Matrix3x3 impulseToTorque;
-            impulseToTorque = Core.SkewSymmetric(relativeContactPositionsWorld1);
+            impulseToTorque = SkewSymmetric(relativeContactPositionsWorld1);
 
             // Get the matrix to convert contact impulse to velocity variation in world coordinates.
             Matrix3x3 deltaVelWorld = impulseToTorque;
@@ -538,7 +558,7 @@ namespace Engine.Physics
 
             if (body2.HasFiniteMass())
             {
-                impulseToTorque = Core.SkewSymmetric(relativeContactPositionsWorld2);
+                impulseToTorque = SkewSymmetric(relativeContactPositionsWorld2);
 
                 // Calculate the velocity modification matrix
                 Matrix3x3 deltaVelWorld2 = impulseToTorque;
@@ -569,11 +589,11 @@ namespace Engine.Physics
             // Find the velocities to kill.
             Vector3 velKill = new Vector3(
                 DesiredDeltaVelocity,
-                -contactVelocity.Y,
-                -contactVelocity.Z);
+                -velocity.Y,
+                -velocity.Z);
 
             // Find the momentum to nullify the velocities
-            impulseContact = Core.Transform(impulseMatrix, velKill);
+            impulseContact = impulseMatrix.Transform(velKill);
 
             // Check for excessive friction
             float planarImpulse = (float)Math.Sqrt(impulseContact.Y * impulseContact.Y + impulseContact.Z * impulseContact.Z);
@@ -600,7 +620,13 @@ namespace Engine.Physics
         /// <param name="penetrationDirection">Penetration direction</param>
         public void AdjustVelocities(Vector3 deltaVelocity, int penetrationDirection)
         {
-            contactVelocity += Core.TransformTranspose(contactToWorld, deltaVelocity) * -penetrationDirection;
+            velocity += MathExtensions.TransformTranspose(contactToWorld, deltaVelocity) * -penetrationDirection;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Position: {Position}; Normal: {Normal}; Penetration: {Penetration}; From {body1.Mass} mass body1 to {body2.Mass} mass body2.";
         }
     }
 }

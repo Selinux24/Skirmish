@@ -69,14 +69,14 @@ namespace Engine.Physics
             }
 
             //Integrate forces
-            var activeBodies = physicsObjects
-                .Where(o => o?.Body?.IsAwake == true)
-                .Select(o => o.Body)
-                .ToArray();
-
-            foreach (var body in activeBodies)
+            foreach (var obj in physicsObjects)
             {
-                body.Integrate(time);
+                if(obj.Body?.IsAwake == true)
+                {
+                    obj.Body.Integrate(time);
+                }
+
+                obj.Update();
             }
         }
         /// <summary>

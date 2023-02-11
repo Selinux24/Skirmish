@@ -31,10 +31,6 @@ namespace Engine.Physics
         /// Restitution factor to add on all collisions
         /// </summary>
         public float Restitution { get; set; } = 0f;
-        /// <summary>
-        /// Tolerance
-        /// </summary>
-        public float Tolerance { get; set; } = 0f;
 
         /// <summary> 
         /// Gets the current contact
@@ -96,7 +92,6 @@ namespace Engine.Physics
 
             Friction = settings.Friction;
             Restitution = settings.Restitution;
-            Tolerance = settings.Tolerance;
         }
 
         /// <summary>
@@ -298,26 +293,23 @@ namespace Engine.Physics
             {
                 var other = contacts[i];
 
-                for (int b = 0; b < 2; b++)
+                for (int o = 0; o < 2; o++)
                 {
-                    var otherBody = other.GetBody(b);
-                    if (otherBody == null)
-                    {
-                        continue;
-                    }
+                    var otherBody = other.GetBody(o);
 
-                    for (int d = 0; d < 2; d++)
+                    for (int c = 0; c < 2; c++)
                     {
-                        var contactBody = contact.GetBody(d);
+                        var contactBody = contact.GetBody(c);
                         if (contactBody != otherBody)
                         {
                             continue;
                         }
 
-                        var relativeContactPosition = other.GetRelativeContactPosition(b);
-                        int direction = b != 0 ? 1 : -1;
-                        var linearChange = linearChanges.ElementAt(d);
-                        var angularChange = angularChanges.ElementAt(d);
+                        var relativeContactPosition = other.GetRelativeContactPosition(o);
+                        int direction = o != 0 ? 1 : -1;
+
+                        var linearChange = linearChanges.ElementAt(c);
+                        var angularChange = angularChanges.ElementAt(c);
                         var delta = linearChange + Vector3.Cross(angularChange, relativeContactPosition);
 
                         yield return (other, direction, delta);

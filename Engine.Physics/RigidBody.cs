@@ -80,10 +80,10 @@ namespace Engine.Physics
         }
 
         /// <inheritdoc/>
-        public void SetInitialState(Vector3 position, Quaternion orientation)
+        public void SetInitialState(Vector3 position, Quaternion rotation)
         {
             Position = position;
-            Rotation = orientation;
+            Rotation = Quaternion.Normalize(rotation);
 
             LinearVelocity = Vector3.Zero;
             AngularVelocity = Vector3.Zero;
@@ -106,6 +106,32 @@ namespace Engine.Physics
         public bool HasFiniteMass()
         {
             return InverseMass >= 0f && !float.IsPositiveInfinity(Mass);
+        }
+
+        /// <inheritdoc/>
+        public void SetIntertiaCoefficients(float ix, float iy, float iz)
+        {
+            if (!HasFiniteMass())
+            {
+                return;
+            }
+
+            InertiaTensor = new Matrix3x3()
+            {
+                M11 = ix * Mass,
+                M12 = 0,
+                M13 = 0,
+
+                M21 = 0,
+                M22 = iy * Mass,
+                M23 = 0,
+
+                M31 = 0,
+                M32 = 0,
+                M33 = iz * Mass,
+            };
+
+            InverseInertiaTensor = Matrix3x3.Invert(InertiaTensor);
         }
 
         /// <inheritdoc/>
@@ -157,16 +183,12 @@ namespace Engine.Physics
                 return;
             }
 
-            if (!Rotation.IsNormalized)
-            {
-                Rotation.Normalize();
-            }
-
             // Calculate transformation matrix with orientation and position
+            Rotation = Quaternion.Normalize(Rotation);
             Transform = Matrix.RotationQuaternion(Rotation) * Matrix.Translation(Position);
 
             // Calculate the inertia tensor in world coordinates
-            InverseInertiaTensorWorld = Core.Transform(InverseInertiaTensor, Transform);
+            InverseInertiaTensorWorld = InverseInertiaTensor.Transform(Transform);
             InertiaTensorWorld = Matrix3x3.Invert(InverseInertiaTensorWorld);
         }
         /// <inheritdoc/>
@@ -188,10 +210,13 @@ namespace Engine.Physics
 
             // Calculate the linear acceleration from the forces
             LastFrameAcceleration = Acceleration;
-            LastFrameAcceleration += Vector3.Multiply(forceAccum, InverseMass);
+            if (forceAccum != Vector3.Zero && InverseMass != 0f)
+            {
+                LastFrameAcceleration += Vector3.Multiply(forceAccum, InverseMass);
+            }
 
             // Calculate the angular acceleration from the torques
-            Vector3 angularAcceleration = Core.Transform(InverseInertiaTensorWorld, torqueAccum);
+            Vector3 angularAcceleration = InverseInertiaTensorWorld.Transform(torqueAccum);
 
             // Update linear velocity using linear acceleration
             LinearVelocity += Vector3.Multiply(LastFrameAcceleration, time);
@@ -204,10 +229,17 @@ namespace Engine.Physics
             AngularVelocity *= angularDampingOnTime;
 
             // Update linear position
-            Position += Vector3.Multiply(LinearVelocity, time);
+            if (LinearVelocity != Vector3.Zero)
+            {
+                Position += Vector3.Multiply(LinearVelocity, time);
+            }
 
             // Update orientation (angular position)
-            Rotation *= Core.AddScaledVector(Rotation, AngularVelocity, time);
+            if (AngularVelocity != Vector3.Zero)
+            {
+                var newRotation = new Quaternion(AngularVelocity * time, 0f) * Rotation;
+                Rotation = Quaternion.Normalize(Rotation + newRotation);
+            }
 
             // Apply damping coefficients
             LinearVelocity *= linearDampingOnTime;
@@ -347,12 +379,22 @@ namespace Engine.Physics
                 return;
             }
 
+            if (linearVelocityChange == Vector3.Zero)
+            {
+                return;
+            }
+
             LinearVelocity += linearVelocityChange;
         }
         /// <inheritdoc/>
         public void AddAngularVelocity(Vector3 angularVelocityChange)
         {
             if (!HasFiniteMass())
+            {
+                return;
+            }
+
+            if (angularVelocityChange == Vector3.Zero)
             {
                 return;
             }
@@ -367,6 +409,11 @@ namespace Engine.Physics
                 return;
             }
 
+            if (positionChange == Vector3.Zero)
+            {
+                return;
+            }
+
             Position += positionChange;
         }
         /// <inheritdoc/>
@@ -377,7 +424,12 @@ namespace Engine.Physics
                 return;
             }
 
-            Rotation *= orientationChange;
+            if (orientationChange == Quaternion.Zero)
+            {
+                return;
+            }
+
+            Rotation = Quaternion.Normalize(Rotation + orientationChange);
         }
 
         /// <inheritdoc/>

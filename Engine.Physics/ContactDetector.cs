@@ -1,10 +1,11 @@
-using Engine.Common;
 using SharpDX;
 using System;
 using System.Linq;
 
 namespace Engine.Physics
 {
+    using Engine.Common;
+
     /// <summary>
     /// Contact detector
     /// </summary>
@@ -19,6 +20,11 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool BetweenObjects(ICollisionPrimitive primitive1, ICollisionPrimitive primitive2, ContactResolver data)
         {
+            if (!data.HasFreeContacts())
+            {
+                return false;
+            }
+
             if (primitive1 == null || primitive2 == null)
             {
                 return false;
@@ -77,20 +83,17 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
+            if (!Intersection.BoxIntersectsPlane(box.BoundingBox, plane.Plane))
             {
                 return false;
             }
 
-            if (!Intersection.BoxIntersectsPlane(box.AABB, plane.Plane))
-            {
-                return false;
-            }
+            var corners = box.OrientedBoundingBox.GetCorners();
 
             bool intersectionExists = false;
             for (int i = 0; i < 8; i++)
             {
-                Vector3 vertexPos = box.GetCorner(i);
+                Vector3 vertexPos = corners[i];
 
                 // Distance to plane
                 float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
@@ -105,7 +108,7 @@ namespace Engine.Physics
                 // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
                 data.AddContact(box.RigidBody, plane.RigidBody, vertexPos, plane.Normal, -vertexDistance);
 
-                if (data.ContactsLeft <= 0)
+                if (!data.HasFreeContacts())
                 {
                     break;
                 }
@@ -122,11 +125,6 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool BoxAndBox(CollisionBox one, CollisionBox two, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
-
             if (!DetectBestAxis(one, two, out var toCentre, out var pen, out var best, out var bestSingleAxis))
             {
                 return false;
@@ -166,13 +164,8 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool BoxAndSphere(CollisionBox box, CollisionSphere sphere, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
-
             // Get the point of the box closest to the center of the sphere
-            Vector3 closestPoint = Intersection.ClosestPointInBox(sphere.RigidBody.Position, box.OBB);
+            Vector3 closestPoint = Intersection.ClosestPointInBox(sphere.RigidBody.Position, box.OrientedBoundingBox);
 
             float distance = Vector3.Distance(sphere.RigidBody.Position, closestPoint);
             if (distance > sphere.Radius)
@@ -195,11 +188,6 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool BoxAndTriangleSoup(CollisionBox box, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
-
             if (triangleSoup?.Triangles?.Any() != true)
             {
                 return false;
@@ -214,7 +202,7 @@ namespace Engine.Physics
                     intersection = true;
                 }
 
-                if (data.ContactsLeft <= 0)
+                if (!data.HasFreeContacts())
                 {
                     break;
                 }
@@ -232,15 +220,12 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool BoxAndTriangle(CollisionBox box, Triangle tri, IRigidBody rigidBody, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
+            var corners = box.OrientedBoundingBox.GetCorners();
 
             bool intersectionExists = false;
             for (int i = 0; i < 8; i++)
             {
-                var vertexPos = box.GetCorner(i);
+                var vertexPos = corners[i];
 
                 // Distance to plane
                 float vertexDistance = tri.Plane.D + Vector3.Dot(vertexPos, tri.Plane.Normal);
@@ -263,7 +248,7 @@ namespace Engine.Physics
                 // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
                 data.AddContact(box.RigidBody, rigidBody, contactPoint, tri.Normal, -vertexDistance);
 
-                if (data.ContactsLeft <= 0)
+                if (!data.HasFreeContacts())
                 {
                     break;
                 }
@@ -312,11 +297,6 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
-
             // Distance from center to plane
             float centerToPlane = Math.Abs(Vector3.Dot(plane.Normal, sphere.RigidBody.Position) + plane.D);
 
@@ -342,11 +322,6 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool SphereAndSphere(CollisionSphere one, CollisionSphere two, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
-
             // Find the vector between the objects
             Vector3 positionOne = one.RigidBody.Position;
             Vector3 positionTwo = two.RigidBody.Position;
@@ -374,11 +349,6 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool SphereAndTriangleSoup(CollisionSphere sphere, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
-            if (data.ContactsLeft <= 0)
-            {
-                return false;
-            }
-
             if (triangleSoup?.Triangles?.Any() != true)
             {
                 return false;
@@ -388,17 +358,17 @@ namespace Engine.Physics
 
             foreach (var triangle in triangleSoup.Triangles)
             {
-                if (data.ContactsLeft <= 0)
-                {
-                    break;
-                }
-
                 if (SphereAndTriangle(sphere, triangle, out var closestPoint, out var penetration))
                 {
                     // Create the contact.
                     data.AddContact(sphere.RigidBody, triangleSoup.RigidBody, closestPoint, triangle.Normal, penetration);
 
                     contact = true;
+                }
+
+                if (!data.HasFreeContacts())
+                {
+                    break;
                 }
             }
 
@@ -526,8 +496,8 @@ namespace Engine.Physics
         private static float PenetrationOnAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCentre)
         {
             // Project the extensions of each box onto the axis
-            float oneProject = Core.ProjectToVector(one.OBB, axis);
-            float twoProject = Core.ProjectToVector(two.OBB, axis);
+            float oneProject = one.OrientedBoundingBox.ProjectToVector(axis);
+            float twoProject = two.OrientedBoundingBox.ProjectToVector(axis);
 
             // Obtain the distance between centers of the boxes on the axis
             float distance = Convert.ToSingle(Math.Abs(Vector3.Dot(toCentre, axis)));
