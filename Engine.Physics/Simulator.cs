@@ -33,7 +33,7 @@ namespace Engine.Physics
         public void Update(GameTime gameTime)
         {
             // Get time simulation
-            float time = Math.Min(gameTime.ElapsedSeconds, 0.05f);
+            float time = Math.Min(gameTime.ElapsedSeconds, 0.05f)*0.333f;
             if (time <= 0.0f)
             {
                 return;

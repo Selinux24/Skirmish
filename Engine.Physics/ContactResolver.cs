@@ -123,6 +123,19 @@ namespace Engine.Physics
                 currentContactIndex++;
             }
         }
+        /// <summary>
+        /// Gets the contact by index
+        /// </summary>
+        /// <param name="contactIndex">Contact index</param>
+        public Contact GetContact(int contactIndex)
+        {
+            if (contactIndex >= ContactCount)
+            {
+                return null;
+            }
+
+            return contacts[contactIndex];
+        }
 
         /// <summary>
         /// Solve a list of contacts by penetration and speed

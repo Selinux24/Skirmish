@@ -13,7 +13,11 @@ namespace Engine.Physics
         /// <summary>
         /// Triangle list
         /// </summary>
-        private readonly List<Triangle> triangleList = new List<Triangle>();
+        private readonly Triangle[] triangles;
+        /// <summary>
+        /// Vertex list
+        /// </summary>
+        private readonly Vector3[] vertices;
 
         /// <summary>
         /// Gets the triangle list
@@ -22,7 +26,30 @@ namespace Engine.Physics
         {
             get
             {
-                return triangleList.ToArray();
+                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                {
+                    return triangles;
+                }
+
+                return Triangle.Transform(triangles, RigidBody.Transform);
+            }
+        }
+        /// <summary>
+        /// Gets the vertex list
+        /// </summary>
+        public IEnumerable<Vector3> Vertices
+        {
+            get
+            {
+                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                {
+                    return vertices;
+                }
+
+                var trn = RigidBody.Transform;
+                var verts = vertices.ToArray();
+                Vector3.TransformCoordinate(verts, ref trn, verts);
+                return verts;
             }
         }
 
@@ -37,12 +64,12 @@ namespace Engine.Physics
                 throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(CollisionTriangleSoup)} must have one triangle at least.");
             }
 
-            triangleList.AddRange(triangles);
+            this.triangles = triangles.ToArray();
 
-            var vertexList = triangleList.SelectMany(t => t.GetVertices()).ToArray();
+            vertices = triangles.SelectMany(t => t.GetVertices()).Distinct().ToArray();
 
-            boundingBox = BoundingBox.FromPoints(vertexList);
-            boundingSphere = BoundingSphere.FromPoints(vertexList);
+            boundingBox = BoundingBox.FromPoints(vertices);
+            boundingSphere = BoundingSphere.FromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
     }

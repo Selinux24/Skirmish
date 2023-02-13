@@ -743,6 +743,15 @@ namespace Engine
         {
             return Vector3.Subtract(Point1, Point3);
         }
+        /// <summary>
+        /// Gets the triangle radius
+        /// </summary>
+        public float GetRadius()
+        {
+            Vector3 center = Center;
+
+            return Math.Max(Vector3.Distance(center, Point1), Math.Max(Vector3.Distance(center, Point2), Vector3.Distance(center, Point3)));
+        }
 
         /// <summary>
         /// Gets a new triangle with reversed normal vector

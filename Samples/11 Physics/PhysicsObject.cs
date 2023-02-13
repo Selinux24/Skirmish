@@ -11,6 +11,24 @@ namespace Physics
         public ICollisionPrimitive Collider { get; private set; }
         public Model Model { get; private set; }
 
+        private static CollisionTriangleSoup CollisionTriangleSoupFromModel(Model model)
+        {
+            var tris = model.GetTriangles(true);
+            tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.FinalTransform));
+
+            return new CollisionTriangleSoup(tris);
+        }
+
+        private static CollisionBox CollisionBoxFromModel(Model model)
+        {
+            return new CollisionBox(model.GetBoundingBox(true).GetExtents());
+        }
+
+        private static CollisionSphere CollisionSphereFromModel(Model model)
+        {
+            return new CollisionSphere(model.GetBoundingSphere(true).Radius);
+        }
+
         public PhysicsObject(IRigidBody body, Model model)
         {
             Body = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
@@ -18,9 +36,9 @@ namespace Physics
 
             Collider = model.CullingVolumeType switch
             {
-                CullingVolumeTypes.None => new CollisionTriangleSoup(model.GetTriangles(true)),
-                CullingVolumeTypes.BoxVolume => new CollisionBox(model.GetBoundingBox(true).GetExtents()),
-                _ => new CollisionSphere(model.GetBoundingSphere(true).Radius),
+                CullingVolumeTypes.None => CollisionTriangleSoupFromModel(model),
+                CullingVolumeTypes.BoxVolume => CollisionBoxFromModel(model),
+                _ => CollisionSphereFromModel(model),
             };
             Collider.Attach(body);
         }

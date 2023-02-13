@@ -9,7 +9,7 @@ namespace Engine.Physics
     /// <summary>
     /// Contact detector
     /// </summary>
-    static class ContactDetector
+    public static class ContactDetector
     {
         /// <summary>
         /// Detect collision between two primitives
@@ -30,6 +30,16 @@ namespace Engine.Physics
                 return false;
             }
 
+            // The first primitive can never be a plane
+            if (primitive1 is CollisionPlane)
+            {
+                (primitive1, primitive2) = (primitive2, primitive1);
+            }
+            if (primitive1 is CollisionPlane)
+            {
+                return false;
+            }
+
             if (primitive1 is CollisionBox box1)
             {
                 return BoxAndPrimitive(box1, primitive2, data);
@@ -38,6 +48,11 @@ namespace Engine.Physics
             if (primitive1 is CollisionSphere sphere1)
             {
                 return SphereAndPrimitive(sphere1, primitive2, data);
+            }
+
+            if (primitive1 is CollisionTriangleSoup triangleSoup)
+            {
+                return TriangleSoupAndPrimitive(triangleSoup, primitive2, data);
             }
 
             return false;
@@ -83,11 +98,6 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
         {
-            if (!Intersection.BoxIntersectsPlane(box.BoundingBox, plane.Plane))
-            {
-                return false;
-            }
-
             var corners = box.OrientedBoundingBox.GetCorners();
 
             bool intersectionExists = false;
@@ -246,7 +256,7 @@ namespace Engine.Physics
 
                 // The point of contact is halfway between the vertex and the plane.
                 // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
-                data.AddContact(box.RigidBody, rigidBody, contactPoint, tri.Normal, -vertexDistance);
+                data.AddContact(box.RigidBody, rigidBody, contactPoint, tri.Normal, vertexDistance);
 
                 if (!data.HasFreeContacts())
                 {
@@ -328,7 +338,8 @@ namespace Engine.Physics
             Vector3 midline = positionOne - positionTwo;
             float size = midline.Length();
 
-            if (size <= 0.0f || size >= one.Radius + two.Radius)
+            // Check for errors
+            if (size <= float.Epsilon || size >= one.Radius + two.Radius)
             {
                 return false;
             }
@@ -384,7 +395,25 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         private static bool SphereAndTriangle(CollisionSphere sphere, Triangle tri, out Vector3 closestPoint, out float penetration)
         {
+            closestPoint = Vector3.Zero;
             penetration = 0f;
+
+            // Check if the sphere and triangle are separated in the X, Y and Z axis
+            var triCenter = tri.Center;
+            float triRadius = tri.GetRadius();
+            float radius = sphere.Radius + triRadius;
+            if (Math.Abs(sphere.RigidBody.Position.X - triCenter.X) > radius)
+            {
+                return false;
+            }
+            if (Math.Abs(sphere.RigidBody.Position.Y - triCenter.Y) > radius)
+            {
+                return false;
+            }
+            if (Math.Abs(sphere.RigidBody.Position.Z - triCenter.Z) > radius)
+            {
+                return false;
+            }
 
             // Get the point of the triangle closest to the center of the sphere
             closestPoint = Intersection.ClosestPointInTriangle(sphere.RigidBody.Position, tri);
@@ -399,6 +428,70 @@ namespace Engine.Physics
             penetration = sphere.Radius - distance;
 
             return true;
+        }
+
+        /// <summary>
+        /// Detect collision between a triangle soup and a primitive
+        /// </summary>
+        /// <param name="triangleSoup1">Triangle soup</param>
+        /// <param name="primitive2">Primitive</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        private static bool TriangleSoupAndPrimitive(CollisionTriangleSoup triangleSoup1, ICollisionPrimitive primitive2, ContactResolver data)
+        {
+            if (primitive2 is CollisionBox box2)
+            {
+                return BoxAndTriangleSoup(box2, triangleSoup1, data);
+            }
+
+            if (primitive2 is CollisionSphere sphere2)
+            {
+                return SphereAndTriangleSoup(sphere2, triangleSoup1, data);
+            }
+
+            if (primitive2 is CollisionPlane plane2)
+            {
+                return TriangleSoupAndHalfSpace(triangleSoup1, plane2, data);
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Detect the collision between a triangle soup and a plane
+        /// </summary>
+        /// <param name="triangleSoup">Triangle soup</param>
+        /// <param name="plane">Plane</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        private static bool TriangleSoupAndHalfSpace(CollisionTriangleSoup triangleSoup, CollisionPlane plane, ContactResolver data)
+        {
+            var tris = triangleSoup.Vertices.ToArray();
+
+            bool intersectionExists = false;
+            for (int i = 0; i < tris.Length; i++)
+            {
+                Vector3 vertexPos = tris[i];
+
+                // Distance to plane
+                float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
+                if (vertexDistance > 0f)
+                {
+                    continue;
+                }
+
+                intersectionExists = true;
+
+                // The point of contact is halfway between the vertex and the plane.
+                // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
+                data.AddContact(triangleSoup.RigidBody, plane.RigidBody, vertexPos, plane.Normal, -vertexDistance);
+
+                if (!data.HasFreeContacts())
+                {
+                    break;
+                }
+            }
+
+            return intersectionExists;
         }
 
         /// <summary>

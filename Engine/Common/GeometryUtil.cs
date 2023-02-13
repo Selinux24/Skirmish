@@ -722,6 +722,42 @@ namespace Engine.Common
             };
         }
         /// <summary>
+        /// Creates a pyramid
+        /// </summary>
+        /// <param name="center">Center</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreatePyramid(Vector3 center, float width, float height, float depth)
+        {
+            Vector3[] vertices = new Vector3[5];
+            uint[][] indices = new uint[6][];
+
+            vertices[0] = new Vector3(0.0f, 1.0f, 0.0f);
+            vertices[1] = new Vector3(-1.0f, -1.0f, 1.0f);
+            vertices[2] = new Vector3(1.0f, -1.0f, 1.0f);
+            vertices[3] = new Vector3(1.0f, -1.0f, -1.0f);
+            vertices[4] = new Vector3(-1.0f, -1.0f, -1.0f);
+
+            indices[0] = new uint[] { 0, 1, 2 };
+            indices[1] = new uint[] { 0, 2, 3 };
+            indices[2] = new uint[] { 0, 3, 4 };
+            indices[3] = new uint[] { 0, 4, 1 };
+            indices[4] = new uint[] { 1, 3, 2 };
+            indices[5] = new uint[] { 3, 1, 4 };
+
+            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices.SelectMany(i => i.ToArray()),
+            };
+        }
+        /// <summary>
         /// Creates a cone
         /// </summary>
         /// <param name="radius">The base radius</param>
