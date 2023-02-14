@@ -27,13 +27,18 @@ namespace Engine.Physics
         private readonly List<IContactGenerator> contactGenerators = new List<IContactGenerator>();
 
         /// <summary>
+        /// Simulation velocity
+        /// </summary>
+        public float Velocity { get; set; } = 1f;
+
+        /// <summary>
         /// Update physics
         /// </summary>
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
             // Get time simulation
-            float time = Math.Min(gameTime.ElapsedSeconds, 0.05f)*0.333f;
+            float time = Math.Min(gameTime.ElapsedSeconds, 0.05f) * Velocity;
             if (time <= 0.0f)
             {
                 return;
@@ -71,7 +76,7 @@ namespace Engine.Physics
             //Integrate forces
             foreach (var obj in physicsObjects)
             {
-                if(obj.Body?.IsAwake == true)
+                if (obj.Body?.IsAwake == true)
                 {
                     obj.Body.Integrate(time);
                 }

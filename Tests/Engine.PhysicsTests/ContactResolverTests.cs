@@ -1,6 +1,5 @@
 ﻿using Engine.Physics;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -41,10 +40,12 @@ namespace Engine.PhysicsTests
         {
             ContactResolverSettings settings = new ContactResolverSettings();
             ContactResolver resolver = new ContactResolver(settings);
+            IRigidBody r1 = new RigidBody(1, Matrix.Identity);
+            IRigidBody r2 = new RigidBody(1, Matrix.Identity);
 
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
-            resolver.AddContact(null, null, Vector3.Zero, Vector3.Zero, 0);
+            resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
             Assert.IsTrue(resolver.ContactCount == count + 1);
             Assert.IsTrue(resolver.ContactsLeft == left - 1);
             Assert.IsTrue(resolver.HasFreeContacts());
@@ -55,10 +56,12 @@ namespace Engine.PhysicsTests
         {
             ContactResolverSettings settings = new ContactResolverSettings();
             ContactResolver resolver = new ContactResolver(settings);
+            IRigidBody r1 = new RigidBody(1, Matrix.Identity);
+            IRigidBody r2 = new RigidBody(1, Matrix.Identity);
 
             int count = resolver.ContactCount;
             int left = resolver.ContactsLeft;
-            resolver.AddContact(null, null, Vector3.Zero, Vector3.Zero, 0);
+            resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
             Assert.IsTrue(resolver.ContactCount == count + 1);
             Assert.IsTrue(resolver.ContactsLeft == left - 1);
             Assert.IsTrue(resolver.HasFreeContacts());
@@ -74,11 +77,13 @@ namespace Engine.PhysicsTests
         {
             ContactResolverSettings settings = new ContactResolverSettings();
             ContactResolver resolver = new ContactResolver(settings);
+            IRigidBody r1 = new RigidBody(1, Matrix.Identity);
+            IRigidBody r2 = new RigidBody(1, Matrix.Identity);
 
             int left = resolver.ContactsLeft;
             for (int i = 0; i < left; i++)
             {
-                resolver.AddContact(null, null, Vector3.Zero, Vector3.Zero, 0);
+                resolver.AddContact(r1, r2, Vector3.Zero, Vector3.Zero, 0);
             }
             Assert.IsTrue(resolver.ContactCount == left);
             Assert.IsTrue(resolver.ContactsLeft == 0);
@@ -97,15 +102,15 @@ namespace Engine.PhysicsTests
             ContactResolver resolver = new ContactResolver(settings);
 
             var curr = resolver.CurrentContact;
-            Mock<IRigidBody> body1 = new Mock<IRigidBody>();
-            Mock<IRigidBody> body2 = new Mock<IRigidBody>();
+            IRigidBody r1 = new RigidBody(1, Matrix.Identity);
+            IRigidBody r2 = new RigidBody(1, Matrix.Identity);
             Vector3 pos = new Vector3(1, 2, 3);
             Vector3 norm = new Vector3(4, 5, 6);
             float pen = 7;
 
-            resolver.AddContact(body1.Object, body2.Object, pos, norm, pen);
-            Assert.AreEqual(curr.GetBody(0), body1.Object);
-            Assert.AreEqual(curr.GetBody(1), body2.Object);
+            resolver.AddContact(r1, r2, pos, norm, pen);
+            Assert.AreEqual(curr.GetBody(0), r1);
+            Assert.AreEqual(curr.GetBody(1), r2);
             Assert.AreEqual(curr.Position, pos);
             Assert.AreEqual(curr.Normal, norm);
             Assert.AreEqual(curr.Penetration, pen);
@@ -120,20 +125,20 @@ namespace Engine.PhysicsTests
             ContactResolver resolver = new ContactResolver(settings);
             float time = 1f / 60f;
 
-            RigidBody body1 = new RigidBody(1, Matrix.Identity);
+            IRigidBody r1 = new RigidBody(1, Matrix.Identity);
 
-            RigidBody body2 = new RigidBody(1, Matrix.Translation(0, 1, 0));
-            body2.AddLinearVelocity(new Vector3(0, -1, 0));
+            IRigidBody r2 = new RigidBody(1, Matrix.Translation(0, 1, 0));
+            r2.AddLinearVelocity(new Vector3(0, -1, 0));
 
             Vector3 pos = new Vector3(0, 0, 0);
             Vector3 norm = new Vector3(0, -1, 0);
             float pen = 0.5f;
 
-            resolver.AddContact(body1, body2, pos, norm, pen);
+            resolver.AddContact(r1, r2, pos, norm, pen);
             resolver.Resolve(time);
 
-            Assert.IsTrue(body1.Position.Y < 0);
-            Assert.IsTrue(body2.Position.Y > 1);
+            Assert.IsTrue(r1.Position.Y < 0);
+            Assert.IsTrue(r2.Position.Y > 1);
         }
     }
 }

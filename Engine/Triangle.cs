@@ -680,6 +680,28 @@ namespace Engine
         }
 
         /// <summary>
+        /// Projects the triangle into the given vector
+        /// </summary>
+        /// <param name="vector">Direction vector</param>
+        public float ProjectToVector(Vector3 vector)
+        {
+            var p1 = Point1;
+            var p2 = Point2;
+            var p3 = Point3;
+            var d = Vector3.Normalize(vector);
+
+            var p1_proj = p1 - Vector3.Dot(p1 - Vector3.Zero, d) * d;
+            var p2_proj = p2 - Vector3.Dot(p2 - Vector3.Zero, d) * d;
+            var p3_proj = p3 - Vector3.Dot(p3 - Vector3.Zero, d) * d;
+
+            var v1 = p2_proj - p1_proj;
+            var v2 = p3_proj - p1_proj;
+            var area = Vector3.Cross(v1, v2).Length() * 0.5f;
+
+            return area * Math.Abs(Vector3.Dot(d, Vector3.Normalize(v1 + v2)));
+        }
+
+        /// <summary>
         /// Retrieves the three vertices of the triangle.
         /// </summary>
         /// <returns>An array of points representing the three vertices of the triangle.</returns>
@@ -713,31 +735,31 @@ namespace Engine
         /// Retrieves the three edges of the triangle.
         /// </summary>
         /// <returns>An array of vectors representing the three edges of the triangle.</returns>
-        public IEnumerable<(Vector3 P1, Vector3 P2)> GetEdges()
+        public IEnumerable<Segment> GetEdges()
         {
             return new[]
             {
-                (Point2, Point1),
-                (Point3, Point2),
-                (Point1, Point2),
+                new Segment(Point2, Point1),
+                new Segment(Point3, Point2),
+                new Segment(Point1, Point2),
             };
         }
         /// <summary>
-        /// Gets the edge vector between points 2 and 1
+        /// Gets the edge direction vector between points 2 and 1
         /// </summary>
         public Vector3 GetEdge1()
         {
             return Vector3.Subtract(Point2, Point1);
         }
         /// <summary>
-        /// Gets the edge vector between points 3 and 2
+        /// Gets the edge direction vector between points 3 and 2
         /// </summary>
         public Vector3 GetEdge2()
         {
             return Vector3.Subtract(Point3, Point2);
         }
         /// <summary>
-        /// Gets the edge vector between points 1 and 3
+        /// Gets the edge direction vector between points 1 and 3
         /// </summary>
         public Vector3 GetEdge3()
         {

@@ -136,6 +136,18 @@ namespace Engine.Physics
 
             return contacts[contactIndex];
         }
+        /// <summary>
+        /// Gets the contact list
+        /// </summary>
+        public IEnumerable<Contact> GetContacts()
+        {
+            if (ContactCount <= 0)
+            {
+                return Enumerable.Empty<Contact>();
+            }
+
+            return contacts.Take(ContactCount).ToArray();
+        }
 
         /// <summary>
         /// Solve a list of contacts by penetration and speed

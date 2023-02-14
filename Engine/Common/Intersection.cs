@@ -8,6 +8,9 @@ namespace Engine.Common
     /// <summary>
     /// Intersections
     /// </summary>
+    /// <remarks>
+    /// Many of this code was extracted from Christer Ericson's book Real-Time Collision Detection, and refactored in several iterations.
+    /// </remarks>
     public static class Intersection
     {
         /// <summary>
@@ -461,6 +464,90 @@ namespace Engine.Common
             {
                 point = collisionPoint;
                 distance = Vector3.Distance(collisionPoint, ray.Position);
+                if (distance > ray.MaxDistance)
+                {
+                    return false;
+                }
+
+                return true;
+            }
+
+            point = Vector3.Zero;
+            distance = float.MaxValue;
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="BoundingBox"/>
+        /// </summary>
+        /// <param name="segment">The segment to test</param>
+        /// <param name="box">The box to test</param>
+        /// <returns>Whether the two objects intersected</returns>
+        public static bool SegmentIntersectsBox(Segment segment, BoundingBox box)
+        {
+            return SegmentIntersectsBox(segment, box, out _);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="BoundingBox"/>
+        /// </summary>
+        /// <param name="segment">The segment to test</param>
+        /// <param name="box">The box to test</param>
+        /// <param name="distance">When the method completes, contains the distance of the intersection, or 0 if there was no intersection</param>
+        /// <returns>Whether the two objects intersected</returns>
+        public static bool SegmentIntersectsBox(Segment segment, BoundingBox box, out float distance)
+        {
+            Ray ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
+            if (Collision.RayIntersectsBox(ref ray, ref box, out distance) && distance <= segment.Length)
+            {
+                return true;
+            }
+
+            distance = float.MaxValue;
+
+            return false;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="BoundingBox"/>
+        /// </summary>
+        /// <param name="segment">The segment to test</param>
+        /// <param name="box">The box to test</param>
+        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <param name="distance">Distance to point</param>
+        /// <returns>Whether the two objects intersected</returns>
+        public static bool SegmentIntersectsBox(Segment segment, BoundingBox box, out Vector3 point, out float distance)
+        {
+            point = Vector3.Zero;
+            distance = float.MaxValue;
+
+            if (!SegmentIntersectsBox(segment, box, out float d))
+            {
+                return false;
+            }
+
+            point = segment.Point1 + Vector3.Normalize(segment.Point2 - segment.Point1) * d;
+            distance = d;
+
+            return true;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="Triangle"/>.
+        /// </summary>
+        /// <param name="segment">The segment to test.</param>
+        /// <param name="tri">Triangle</param>
+        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <param name="distance">Distance to point</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool SegmentIntersectsTriangle(Segment segment, Triangle tri, out Vector3 point, out float distance)
+        {
+            Ray ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
+            Vector3 vertex1 = tri.Point1;
+            Vector3 vertex2 = tri.Point2;
+            Vector3 vertex3 = tri.Point3;
+            if (Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out Vector3 collisionPoint))
+            {
+                point = collisionPoint;
+                distance = Vector3.Distance(collisionPoint, segment.Point1);
 
                 return true;
             }
@@ -1120,9 +1207,9 @@ namespace Engine.Common
 
             // Test triangle segments
             var edges = triangle.GetEdges();
-            foreach (var (point1, point2) in edges)
+            foreach (var edge in edges)
             {
-                if (FrustumIntersectsSegment(frustum, point1, point2))
+                if (FrustumIntersectsSegment(frustum, edge.Point1, edge.Point2))
                 {
                     return ContainmentType.Intersects;
                 }

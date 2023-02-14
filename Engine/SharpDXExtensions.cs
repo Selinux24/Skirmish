@@ -1,4 +1,6 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -268,6 +270,47 @@ namespace Engine
                 Right = bbox.Maximum.X,
                 Bottom = bbox.Maximum.Z,
             };
+        }
+        /// <summary>
+        /// Gets the bounding box edge list
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the edge list of the current bounding box</returns>
+        public static IEnumerable<Segment> GetEdges(this BoundingBox bbox)
+        {
+            List<Segment> segments = new List<Segment>(12);
+
+            var corners = bbox.GetCorners();
+
+            //Top edges
+            segments.Add(new Segment(corners[0], corners[1]));
+            segments.Add(new Segment(corners[1], corners[2]));
+            segments.Add(new Segment(corners[2], corners[3]));
+            segments.Add(new Segment(corners[3], corners[0]));
+
+            //Bottom edges
+            segments.Add(new Segment(corners[4], corners[5]));
+            segments.Add(new Segment(corners[5], corners[6]));
+            segments.Add(new Segment(corners[6], corners[7]));
+            segments.Add(new Segment(corners[7], corners[4]));
+
+            //Vertical edges
+            segments.Add(new Segment(corners[0], corners[4]));
+            segments.Add(new Segment(corners[1], corners[5]));
+            segments.Add(new Segment(corners[2], corners[6]));
+            segments.Add(new Segment(corners[3], corners[7]));
+
+            return segments;
+        }
+
+        /// <summary>
+        /// Gets the specified corner
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="index">Corner index</param>
+        public static Vector3 GetCorner(this OrientedBoundingBox obb, int index)
+        {
+            return obb.GetCorners().ElementAtOrDefault(index);
         }
 
         /// <summary>

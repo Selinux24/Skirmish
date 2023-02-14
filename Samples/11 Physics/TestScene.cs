@@ -416,6 +416,12 @@ namespace Physics
             box1Body.Reset(box1Position, Quaternion.Identity);
             box2Body.Reset(box2Position, Quaternion.Identity);
             pyramid1Body.Reset(pyramid1Position, Quaternion.Identity);
+
+            sphere1Time = 0f;
+            sphere2Time = 0f;
+            box1Time = 0f;
+            box2Time = 0f;
+            pyramid1Time = 0f;
         }
     }
 }

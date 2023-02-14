@@ -1,5 +1,6 @@
 using SharpDX;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics
@@ -65,7 +66,7 @@ namespace Engine.Physics
         /// <param name="primitive2">Primitive</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndPrimitive(CollisionBox box1, ICollisionPrimitive primitive2, ContactResolver data)
+        public static bool BoxAndPrimitive(CollisionBox box1, ICollisionPrimitive primitive2, ContactResolver data)
         {
             if (primitive2 is CollisionBox box2)
             {
@@ -96,7 +97,7 @@ namespace Engine.Physics
         /// <param name="plane">Plane</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
+        public static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
         {
             var corners = box.OrientedBoundingBox.GetCorners();
 
@@ -133,7 +134,7 @@ namespace Engine.Physics
         /// <param name="two">Second box</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndBox(CollisionBox one, CollisionBox two, ContactResolver data)
+        public static bool BoxAndBox(CollisionBox one, CollisionBox two, ContactResolver data)
         {
             if (!DetectBestAxis(one, two, out var toCentre, out var pen, out var best, out var bestSingleAxis))
             {
@@ -172,7 +173,7 @@ namespace Engine.Physics
         /// <param name="sphere">Sphere</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndSphere(CollisionBox box, CollisionSphere sphere, ContactResolver data)
+        public static bool BoxAndSphere(CollisionBox box, CollisionSphere sphere, ContactResolver data)
         {
             // Get the point of the box closest to the center of the sphere
             Vector3 closestPoint = Intersection.ClosestPointInBox(sphere.RigidBody.Position, box.OrientedBoundingBox);
@@ -196,29 +197,59 @@ namespace Engine.Physics
         /// <param name="triangleSoup">Triangle soup</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndTriangleSoup(CollisionBox box, CollisionTriangleSoup triangleSoup, ContactResolver data)
+        public static bool BoxAndTriangleSoup(CollisionBox box, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
             if (triangleSoup?.Triangles?.Any() != true)
             {
                 return false;
             }
 
-            bool intersection = false;
+            //Convert obb to aabb
+            var obb = box.OrientedBoundingBox;
+            var trn = obb.Transformation;
+            var invTrn = Matrix.Invert(trn);
+            var origBox = new BoundingBox(-obb.Extents, obb.Extents);
 
-            foreach (Triangle triangle in triangleSoup.Triangles)
+            List<(Vector3 position, Vector3 normal)> contacts = new List<(Vector3 position, Vector3 normal)>();
+
+            foreach (var triangle in triangleSoup.Triangles)
             {
-                if (BoxAndTriangle(box, triangle, triangleSoup.RigidBody, data))
+                var origTri = Triangle.Transform(triangle, invTrn);
+
+                if (!Intersection.BoxIntersectsTriangle(origBox, origTri))
                 {
-                    intersection = true;
+                    continue;
                 }
 
+                var contactList = GenerateBoxAndTriangleContacts(origBox, origTri);
+                foreach (var position in contactList)
+                {
+                    contacts.Add((position, triangle.Normal));
+                }
+            }
+
+            if (!contacts.Any())
+            {
+                return false;
+            }
+
+            foreach (var contact in contacts.Distinct())
+            {
+                var contactPosition = Vector3.TransformCoordinate(contact.position, trn);
+
+                var axis = contact.normal;
+                float oneProject = obb.ProjectToVector(axis);
+                float twoProject = Math.Abs(Vector3.Dot(contact.position, axis));
+                float pen = oneProject - twoProject;
+
+                data.AddContact(box.RigidBody, triangleSoup.RigidBody, contactPosition, contact.normal, -pen);
                 if (!data.HasFreeContacts())
                 {
                     break;
                 }
             }
 
-            return intersection;
+            return true;
         }
         /// <summary>
         /// Detect collision between box and triangle
@@ -228,43 +259,34 @@ namespace Engine.Physics
         /// <param name="rigidBody">Rigid body</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool BoxAndTriangle(CollisionBox box, Triangle tri, IRigidBody rigidBody, ContactResolver data)
+        public static bool BoxAndTriangle(CollisionBox box, Triangle triangle, IRigidBody rigidBody, ContactResolver data)
         {
-            var corners = box.OrientedBoundingBox.GetCorners();
+            //Convert obb to aabb
+            var obb = box.OrientedBoundingBox;
+            var trn = obb.Transformation;
+            var invTrn = Matrix.Invert(trn);
+            var origBox = new BoundingBox(-obb.Extents, obb.Extents);
+            var origTri = Triangle.Transform(triangle, invTrn);
 
-            bool intersectionExists = false;
-            for (int i = 0; i < 8; i++)
+            //Detect contacts
+            var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
+            foreach (var contact in contacts)
             {
-                var vertexPos = corners[i];
+                var contactPosition = Vector3.TransformCoordinate(contact, trn);
 
-                // Distance to plane
-                float vertexDistance = tri.Plane.D + Vector3.Dot(vertexPos, tri.Plane.Normal);
-                if (vertexDistance > 0f)
-                {
-                    continue;
-                }
+                var axis = triangle.Normal;
+                float oneProject = obb.ProjectToVector(axis);
+                float twoProject = Math.Abs(Vector3.Dot(contact, axis));
+                float pen = oneProject - twoProject;
 
-                // Intersection between line and triangle
-                Vector3 direction = Vector3.Normalize(box.RigidBody.Position - vertexPos);
-                Ray r = new Ray(vertexPos, direction);
-                if (!Intersection.RayIntersectsTriangle(r, tri, out var contactPoint, out _))
-                {
-                    continue;
-                }
-
-                intersectionExists = true;
-
-                // The point of contact is halfway between the vertex and the plane.
-                // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
-                data.AddContact(box.RigidBody, rigidBody, contactPoint, tri.Normal, vertexDistance);
-
+                data.AddContact(box.RigidBody, rigidBody, contactPosition, triangle.Normal, pen);
                 if (!data.HasFreeContacts())
                 {
-                    break;
+                    return true;
                 }
             }
 
-            return intersectionExists;
+            return true;
         }
 
         /// <summary>
@@ -274,7 +296,7 @@ namespace Engine.Physics
         /// <param name="primitive2">Primitive</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndPrimitive(CollisionSphere sphere1, ICollisionPrimitive primitive2, ContactResolver data)
+        public static bool SphereAndPrimitive(CollisionSphere sphere1, ICollisionPrimitive primitive2, ContactResolver data)
         {
             if (primitive2 is CollisionBox box2)
             {
@@ -305,7 +327,7 @@ namespace Engine.Physics
         /// <param name="plane">Plane</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, ContactResolver data)
+        public static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, ContactResolver data)
         {
             // Distance from center to plane
             float centerToPlane = Math.Abs(Vector3.Dot(plane.Normal, sphere.RigidBody.Position) + plane.D);
@@ -330,7 +352,7 @@ namespace Engine.Physics
         /// <param name="two">Second sphere</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndSphere(CollisionSphere one, CollisionSphere two, ContactResolver data)
+        public static bool SphereAndSphere(CollisionSphere one, CollisionSphere two, ContactResolver data)
         {
             // Find the vector between the objects
             Vector3 positionOne = one.RigidBody.Position;
@@ -358,7 +380,7 @@ namespace Engine.Physics
         /// <param name="triangleSoup">Triangle soup</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndTriangleSoup(CollisionSphere sphere, CollisionTriangleSoup triangleSoup, ContactResolver data)
+        public static bool SphereAndTriangleSoup(CollisionSphere sphere, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
             if (triangleSoup?.Triangles?.Any() != true)
             {
@@ -393,7 +415,7 @@ namespace Engine.Physics
         /// <param name="closestPoint">Closest point</param>
         /// <param name="penetration">Penetration</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool SphereAndTriangle(CollisionSphere sphere, Triangle tri, out Vector3 closestPoint, out float penetration)
+        public static bool SphereAndTriangle(CollisionSphere sphere, Triangle tri, out Vector3 closestPoint, out float penetration)
         {
             closestPoint = Vector3.Zero;
             penetration = 0f;
@@ -437,7 +459,7 @@ namespace Engine.Physics
         /// <param name="primitive2">Primitive</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool TriangleSoupAndPrimitive(CollisionTriangleSoup triangleSoup1, ICollisionPrimitive primitive2, ContactResolver data)
+        public static bool TriangleSoupAndPrimitive(CollisionTriangleSoup triangleSoup1, ICollisionPrimitive primitive2, ContactResolver data)
         {
             if (primitive2 is CollisionBox box2)
             {
@@ -463,7 +485,7 @@ namespace Engine.Physics
         /// <param name="plane">Plane</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        private static bool TriangleSoupAndHalfSpace(CollisionTriangleSoup triangleSoup, CollisionPlane plane, ContactResolver data)
+        public static bool TriangleSoupAndHalfSpace(CollisionTriangleSoup triangleSoup, CollisionPlane plane, ContactResolver data)
         {
             var tris = triangleSoup.Vertices.ToArray();
 
@@ -593,7 +615,7 @@ namespace Engine.Physics
             float twoProject = two.OrientedBoundingBox.ProjectToVector(axis);
 
             // Obtain the distance between centers of the boxes on the axis
-            float distance = Convert.ToSingle(Math.Abs(Vector3.Dot(toCentre, axis)));
+            float distance = Math.Abs(Vector3.Dot(toCentre, axis));
 
             // Positive indicates overlap, negative separation
             return oneProject + twoProject - distance;
@@ -758,7 +780,6 @@ namespace Engine.Physics
                 return cOne * 0.5f + cTwo * 0.5f;
             }
         }
-
         /// <summary>
         /// Gets the axis vector value from the specified trasnform
         /// </summary>
@@ -774,6 +795,35 @@ namespace Engine.Physics
             if (axis == 2) return transform.Backward;
 
             throw new ArgumentOutOfRangeException(nameof(axis), axis, $"Axis value must be between 0 and 2");
+        }
+        /// <summary>
+        /// Generates box-triangle contacts
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="tri">Triangle</param>
+        private static IEnumerable<Vector3> GenerateBoxAndTriangleContacts(BoundingBox box, Triangle tri)
+        {
+            List<Vector3> res = new List<Vector3>();
+
+            var triEdges = tri.GetEdges();
+            foreach (var edge in triEdges)
+            {
+                if (Intersection.SegmentIntersectsBox(edge, box, out var contactPosition, out _))
+                {
+                    res.Add(contactPosition);
+                }
+            }
+
+            var boxEdges = box.GetEdges();
+            foreach (var edge in boxEdges)
+            {
+                if (Intersection.SegmentIntersectsTriangle(edge, tri, out var contactPosition, out _))
+                {
+                    res.Add(contactPosition);
+                }
+            }
+
+            return res.Distinct().ToArray();
         }
     }
 }
