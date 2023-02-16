@@ -46,7 +46,6 @@ namespace Engine.PhysicsTests
         public static void ClassInitialize(TestContext context)
         {
             _testContext = context;
-
         }
 
         [TestInitialize]
@@ -56,102 +55,134 @@ namespace Engine.PhysicsTests
         }
 
         [TestMethod()]
-        public void ContactDetectorBoxAndHalfSpacePlaneTest()
+        public void ContactDetectorBoxAndHalfSpaceOverNoIntersectionTest()
+        {
+            ContactResolver data = new ContactResolver();
+
+            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
+
+            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Up * 5f));
+            Assert.IsFalse(ContactDetector.BoxAndHalfSpace(box, plane, data), "No intersection expected");
+            Assert.IsTrue(data.ContactCount == 0, "Zero contacts expected");
+        }
+        [TestMethod()]
+        public void ContactDetectorBoxAndHalfSpaceBottomFaceIntersectionTest()
+        {
+            ContactResolver data = new ContactResolver();
+
+            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
+
+            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Up));
+            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
+            Assert.IsTrue(data.ContactCount == 4, "Four contacts expected");
+            Assert.IsTrue(data.GetContact(0).Penetration == 0, "Penetration 0 expected");
+            Assert.IsTrue(data.GetContact(1).Penetration == 0, "Penetration 0 expected");
+            Assert.IsTrue(data.GetContact(2).Penetration == 0, "Penetration 0 expected");
+            Assert.IsTrue(data.GetContact(3).Penetration == 0, "Penetration 0 expected");
+            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            data.Reset();
+        }
+        [TestMethod()]
+        public void ContactDetectorBoxAndHalfSpaceMiddleIntersectionTest()
         {
             ContactResolver data = new ContactResolver();
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
             var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Identity);
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, plane, data), "Plane intersects in the middle of the box. Intersection expected");
-            Assert.IsTrue(data.ContactCount == 4, "Plane intersects in the middle of the box. Four contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 1, "Plane intersects in the middle of the box. Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 1, "Plane intersects in the middle of the box. Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 1, "Plane intersects in the middle of the box. Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 1, "Plane intersects in the middle of the box. Penetration 1 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[4], "Plane intersects in the middle of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[5], "Plane intersects in the middle of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[6], "Plane intersects in the middle of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[7], "Plane intersects in the middle of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Plane intersects in the middle of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Plane intersects in the middle of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Plane intersects in the middle of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Plane intersects in the middle of the box. Contact normal equals to plane normal vertex expected");
+            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
+            Assert.IsTrue(data.ContactCount == 4, "Four contacts expected");
+            Assert.IsTrue(data.GetContact(0).Penetration == 1, "Penetration 1 expected");
+            Assert.IsTrue(data.GetContact(1).Penetration == 1, "Penetration 1 expected");
+            Assert.IsTrue(data.GetContact(2).Penetration == 1, "Penetration 1 expected");
+            Assert.IsTrue(data.GetContact(3).Penetration == 1, "Penetration 1 expected");
+            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
             data.Reset();
+        }
+        [TestMethod()]
+        public void ContactDetectorBoxAndHalfSpaceUpperFaceIntersectionTest()
+        {
+            ContactResolver data = new ContactResolver();
 
-            box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Up));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, plane, data), "Plane intersects in the bottom face of the box. Intersection expected");
-            Assert.IsTrue(data.ContactCount == 4, "Plane intersects in the bottom face of the box. Four contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 0, "Plane intersects in the bottom face of the box. Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 0, "Plane intersects in the bottom face of the box. Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 0, "Plane intersects in the bottom face of the box. Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 0, "Plane intersects in the bottom face of the box. Penetration 0 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[4], "Plane intersects in the bottom face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[5], "Plane intersects in the bottom face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[6], "Plane intersects in the bottom face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[7], "Plane intersects in the bottom face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Plane intersects in the bottom face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Plane intersects in the bottom face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Plane intersects in the bottom face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Plane intersects in the bottom face of the box. Contact normal equals to plane normal vertex expected");
+            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
+
+            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Down));
+            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
+            Assert.IsTrue(data.ContactCount == 8, "Eight contacts expected");
+            Assert.IsTrue(data.GetContact(0).Penetration == 0, "Penetration 0 expected");
+            Assert.IsTrue(data.GetContact(1).Penetration == 0, "Penetration 0 expected");
+            Assert.IsTrue(data.GetContact(2).Penetration == 0, "Penetration 0 expected");
+            Assert.IsTrue(data.GetContact(3).Penetration == 0, "Penetration 0 expected");
+            Assert.IsTrue(data.GetContact(4).Penetration == 2, "Penetration 2 expected");
+            Assert.IsTrue(data.GetContact(5).Penetration == 2, "Penetration 2 expected");
+            Assert.IsTrue(data.GetContact(6).Penetration == 2, "Penetration 2 expected");
+            Assert.IsTrue(data.GetContact(7).Penetration == 2, "Penetration 2 expected");
+            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[0], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[1], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[2], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[3], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(4).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(5).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(6).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(7).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(4).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(5).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(6).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(7).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
             data.Reset();
+        }
+        [TestMethod()]
+        public void ContactDetectorBoxAndHalfSpaceBellowIntersectionTest()
+        {
+            ContactResolver data = new ContactResolver();
 
-            box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Down));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, plane, data), "Plane intersects in the upper face of the box. Intersection expected");
-            Assert.IsTrue(data.ContactCount == 8, "Plane intersects in the upper face of the box. Four contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 0, "Plane intersects in the upper face of the box. Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 0, "Plane intersects in the upper face of the box. Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 0, "Plane intersects in the upper face of the box. Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 0, "Plane intersects in the upper face of the box. Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(4).Penetration == 2, "Plane intersects in the upper face of the box. Penetration 2 expected");
-            Assert.IsTrue(data.GetContact(5).Penetration == 2, "Plane intersects in the upper face of the box. Penetration 2 expected");
-            Assert.IsTrue(data.GetContact(6).Penetration == 2, "Plane intersects in the upper face of the box. Penetration 2 expected");
-            Assert.IsTrue(data.GetContact(7).Penetration == 2, "Plane intersects in the upper face of the box. Penetration 2 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[0], "Plane intersects in the upper face of the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[1], "Plane intersects in the upper face of the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[2], "Plane intersects in the upper face of the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[3], "Plane intersects in the upper face of the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(4).Position, box.OrientedBoundingBox.GetCorners()[4], "Plane intersects in the upper face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(5).Position, box.OrientedBoundingBox.GetCorners()[5], "Plane intersects in the upper face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(6).Position, box.OrientedBoundingBox.GetCorners()[6], "Plane intersects in the upper face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(7).Position, box.OrientedBoundingBox.GetCorners()[7], "Plane intersects in the upper face of the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(4).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(5).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(6).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(7).Normal, plane.Normal, "Plane intersects in the upper face of the box. Contact normal equals to plane normal vertex expected");
-            data.Reset();
+            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
-            box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Down * 2f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, plane, data), "Plane over the box. Intersection expected");
-            Assert.IsTrue(data.ContactCount == 8, "Plane over the box. Four contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 1, "Plane over the box. Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 1, "Plane over the box. Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 1, "Plane over the box. Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 1, "Plane over the box. Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(4).Penetration == 3, "Plane over the box. Penetration 3 expected");
-            Assert.IsTrue(data.GetContact(5).Penetration == 3, "Plane over the box. Penetration 3 expected");
-            Assert.IsTrue(data.GetContact(6).Penetration == 3, "Plane over the box. Penetration 3 expected");
-            Assert.IsTrue(data.GetContact(7).Penetration == 3, "Plane over the box. Penetration 3 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[0], "Plane over the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[1], "Plane over the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[2], "Plane over the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[3], "Plane over the box. Upper vertex expected");
-            Assert.AreEqual(data.GetContact(4).Position, box.OrientedBoundingBox.GetCorners()[4], "Plane over the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(5).Position, box.OrientedBoundingBox.GetCorners()[5], "Plane over the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(6).Position, box.OrientedBoundingBox.GetCorners()[6], "Plane over the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(7).Position, box.OrientedBoundingBox.GetCorners()[7], "Plane over the box. Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(4).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(5).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(6).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(7).Normal, plane.Normal, "Plane over the box. Contact normal equals to plane normal vertex expected");
+            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Down * 2f));
+            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
+            Assert.IsTrue(data.ContactCount == 8, "Eight contacts expected");
+            Assert.IsTrue(data.GetContact(0).Penetration == 1, "Penetration 1 expected");
+            Assert.IsTrue(data.GetContact(1).Penetration == 1, "Penetration 1 expected");
+            Assert.IsTrue(data.GetContact(2).Penetration == 1, "Penetration 1 expected");
+            Assert.IsTrue(data.GetContact(3).Penetration == 1, "Penetration 1 expected");
+            Assert.IsTrue(data.GetContact(4).Penetration == 3, "Penetration 3 expected");
+            Assert.IsTrue(data.GetContact(5).Penetration == 3, "Penetration 3 expected");
+            Assert.IsTrue(data.GetContact(6).Penetration == 3, "Penetration 3 expected");
+            Assert.IsTrue(data.GetContact(7).Penetration == 3, "Penetration 3 expected");
+            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[0], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[1], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[2], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[3], "Upper vertex expected");
+            Assert.AreEqual(data.GetContact(4).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(5).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(6).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(7).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
+            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(4).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(5).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(6).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
+            Assert.AreEqual(data.GetContact(7).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
             data.Reset();
         }
 
@@ -172,12 +203,12 @@ namespace Engine.PhysicsTests
 
 
             var tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle over the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle over the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle bellow the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle bellow the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -185,7 +216,7 @@ namespace Engine.PhysicsTests
             float p = 0f;
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the top plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the top plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -199,7 +230,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -217,7 +248,7 @@ namespace Engine.PhysicsTests
             p = -1f + 0.99f;
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -231,7 +262,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -250,12 +281,12 @@ namespace Engine.PhysicsTests
 
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle in front of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in front of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle behind the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle behind the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -265,7 +296,7 @@ namespace Engine.PhysicsTests
             p = 0f;
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the forward plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the forward plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -279,7 +310,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the backward plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the backward plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -297,7 +328,7 @@ namespace Engine.PhysicsTests
             p = -1f + 0.99f;
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -311,7 +342,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -329,12 +360,12 @@ namespace Engine.PhysicsTests
 
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle at left of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle at left of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle at right of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle at right of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -344,7 +375,7 @@ namespace Engine.PhysicsTests
             p = 0f;
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the left plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the left plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -358,7 +389,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the right plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the right plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -377,7 +408,7 @@ namespace Engine.PhysicsTests
             p = -1f + 0.99f;
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -391,7 +422,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -404,7 +435,6 @@ namespace Engine.PhysicsTests
                 tri.Triangles.ElementAt(0).GetVertices().ToArray());
             data.Reset();
         }
-
         [TestMethod()]
         public void ContactDetectorBoxAndTriangleSoup2Test()
         {
@@ -422,12 +452,12 @@ namespace Engine.PhysicsTests
 
 
             var tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle over the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle over the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle bellow the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle bellow the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -435,7 +465,7 @@ namespace Engine.PhysicsTests
             float p = 0f;
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the top plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the top plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -449,7 +479,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -467,7 +497,7 @@ namespace Engine.PhysicsTests
             p = -boxSize + (boxSize * 0.99f);
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -481,7 +511,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -500,12 +530,12 @@ namespace Engine.PhysicsTests
 
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle in front of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in front of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle behind the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle behind the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -515,7 +545,7 @@ namespace Engine.PhysicsTests
             p = 0f;
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the forward plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the forward plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -529,7 +559,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the backward plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the backward plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -547,7 +577,7 @@ namespace Engine.PhysicsTests
             p = -boxSize + (boxSize * 0.99f);
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -561,7 +591,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -579,12 +609,12 @@ namespace Engine.PhysicsTests
 
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle at left of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle at left of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle at right of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle at right of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -594,7 +624,7 @@ namespace Engine.PhysicsTests
             p = 0f;
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the left plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the left plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -608,7 +638,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the right plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the right plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -627,7 +657,7 @@ namespace Engine.PhysicsTests
             p = -boxSize + (boxSize * 0.99f);
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -641,7 +671,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 3);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -654,7 +684,6 @@ namespace Engine.PhysicsTests
                 tri.Triangles.ElementAt(0).GetVertices().ToArray());
             data.Reset();
         }
-
         [TestMethod()]
         public void ContactDetectorBoxAndTriangleSoup3Test()
         {
@@ -671,12 +700,12 @@ namespace Engine.PhysicsTests
 
 
             var tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle over the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle over the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle bellow the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle bellow the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -685,7 +714,7 @@ namespace Engine.PhysicsTests
             float p = 0f;
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the top plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the top plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -699,7 +728,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -718,7 +747,7 @@ namespace Engine.PhysicsTests
             var v = Vector3.Up * p;
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Up * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the top plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the top plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -732,7 +761,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(xTri, Matrix.Translation(Vector3.Down * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the bottom plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -748,12 +777,12 @@ namespace Engine.PhysicsTests
 
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle in front of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in front of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle behind the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle behind the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -762,7 +791,7 @@ namespace Engine.PhysicsTests
             p = 0f;
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the forward plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the forward plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -776,7 +805,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the backward plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the backward plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -794,7 +823,7 @@ namespace Engine.PhysicsTests
             v = Vector3.ForwardLH * p;
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.ForwardLH * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -808,7 +837,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(yTri, Matrix.Translation(Vector3.BackwardLH * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -825,12 +854,12 @@ namespace Engine.PhysicsTests
 
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle at left of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle at left of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize * 2f));
-            Assert.IsFalse(ContactDetector.BetweenObjects(box, tri, data), "Triangle at right of the box. Not intersection expected");
+            Assert.IsFalse(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle at right of the box. Not intersection expected");
             Assert.IsTrue(data.ContactCount == 0);
             data.Reset();
 
@@ -839,7 +868,7 @@ namespace Engine.PhysicsTests
             p = 0f;
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the left plane of the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the left plane of the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -853,7 +882,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle in the right plane the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle in the right plane the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -872,7 +901,7 @@ namespace Engine.PhysicsTests
             v = Vector3.Left * p;
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Left * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
@@ -886,7 +915,7 @@ namespace Engine.PhysicsTests
             data.Reset();
 
             tri = FromTriangle(zTri, Matrix.Translation(Vector3.Right * boxSize * 0.99f));
-            Assert.IsTrue(ContactDetector.BetweenObjects(box, tri, data), "Triangle into the box. Intersection expected");
+            Assert.IsTrue(ContactDetector.BoxAndTriangleSoup(box, tri, data), "Triangle into the box. Intersection expected");
             Assert.IsTrue(data.ContactCount == 4);
             CollectionAssert.AreEquivalent(
                 data.GetContacts().Select(p => p.Penetration).ToArray(),
