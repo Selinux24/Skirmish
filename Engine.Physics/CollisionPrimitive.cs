@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 
 namespace Engine.Physics
@@ -8,6 +9,10 @@ namespace Engine.Physics
     /// </summary>
     public abstract class CollisionPrimitive : ICollisionPrimitive
     {
+        private static readonly BoundingSphere EmptyBoundingSphere = new BoundingSphere();
+        private static readonly BoundingBox EmptyBoundingBox = new BoundingBox();
+        private static readonly OrientedBoundingBox EmptyOrientedBoundingBox = new OrientedBoundingBox();
+
         /// <summary>
         /// Untransformed bounding box
         /// </summary>
@@ -28,13 +33,17 @@ namespace Engine.Physics
         {
             get
             {
-                if ((RigidBody?.Position ?? Vector3.Zero) == Vector3.Zero)
+                if (boundingBox == EmptyBoundingBox)
                 {
                     return boundingBox;
                 }
 
-                var position = RigidBody.Position;
-                return new BoundingBox(boundingBox.Minimum + position, boundingBox.Maximum + position);
+                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                {
+                    return boundingBox;
+                }
+
+                return boundingBox.SetTransform(RigidBody.Transform);
             }
         }
         /// <inheritdoc/>
@@ -42,12 +51,17 @@ namespace Engine.Physics
         {
             get
             {
-                if ((RigidBody?.Position ?? Vector3.Zero) == Vector3.Zero)
+                if (boundingSphere == EmptyBoundingSphere)
                 {
                     return boundingSphere;
                 }
 
-                return new BoundingSphere(RigidBody.Position, boundingSphere.Radius);
+                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                {
+                    return boundingSphere;
+                }
+
+                return boundingSphere.SetTransform(RigidBody.Transform);
             }
         }
         /// <inheritdoc/>
@@ -55,14 +69,17 @@ namespace Engine.Physics
         {
             get
             {
+                if (orientedBoundingBox == EmptyOrientedBoundingBox)
+                {
+                    return orientedBoundingBox;
+                }
+
                 if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
                 {
                     return orientedBoundingBox;
                 }
 
-                var trnObb = orientedBoundingBox;
-                trnObb.Transformation = RigidBody.Transform;
-                return trnObb;
+                return orientedBoundingBox.SetTransform(RigidBody.Transform);
             }
         }
 

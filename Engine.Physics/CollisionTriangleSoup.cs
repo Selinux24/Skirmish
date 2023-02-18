@@ -64,7 +64,7 @@ namespace Engine.Physics
                 throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(CollisionTriangleSoup)} must have one triangle at least.");
             }
 
-            this.triangles = triangles.ToArray();
+            this.triangles = triangles.Distinct().ToArray();
 
             vertices = triangles.SelectMany(t => t.GetVertices()).Distinct().ToArray();
 

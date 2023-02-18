@@ -37,5 +37,22 @@ namespace Engine.Common
 
             return obb;
         }
+
+        /// <summary>
+        /// Gets a oriented bounding box transformed by the given matrix
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="transform">Transform</param>
+        public static OrientedBoundingBox SetTransform(this OrientedBoundingBox obb, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return obb;
+            }
+
+            var trnObb = obb;
+            trnObb.Transformation = transform;
+            return trnObb;
+        }
     }
 }

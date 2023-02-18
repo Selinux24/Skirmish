@@ -638,7 +638,7 @@ namespace Engine.Physics
                 normal *= -1f;
             }
 
-            Vector3 vertex = two.HalfSize;
+            Vector3 vertex = two.Extents;
             if (Vector3.Dot(two.RigidBody.Transform.Left, normal) < 0f) vertex.X = -vertex.X;
             if (Vector3.Dot(two.RigidBody.Transform.Up, normal) < 0f) vertex.Y = -vertex.Y;
             if (Vector3.Dot(two.RigidBody.Transform.Backward, normal) < 0f) vertex.Z = -vertex.Z;
@@ -678,8 +678,8 @@ namespace Engine.Physics
             // Each axis has 4 edges parallel to it, we have to find the 4 of each box.
             // We will look for the point in the center of the edge.
             // We know that its component on the collision axis is 0 and we determine which endpoint on each of the other axes is closest.
-            Vector3 vOne = one.HalfSize;
-            Vector3 vTwo = two.HalfSize;
+            Vector3 vOne = one.Extents;
+            Vector3 vTwo = two.Extents;
             float[] ptOnOneEdge = new float[] { vOne.X, vOne.Y, vOne.Z };
             float[] ptOnTwoEdge = new float[] { vTwo.X, vTwo.Y, vTwo.Z };
             for (uint i = 0; i < 3; i++)
@@ -717,8 +717,8 @@ namespace Engine.Physics
 
             // We have a point and a direction for the colliding edges.
             // We need to find the closest point of the two segments.
-            float[] vOneAxis = new float[] { one.HalfSize.X, one.HalfSize.Y, one.HalfSize.Z };
-            float[] vTwoAxis = new float[] { two.HalfSize.X, two.HalfSize.Y, two.HalfSize.Z };
+            float[] vOneAxis = new float[] { one.Extents.X, one.Extents.Y, one.Extents.Z };
+            float[] vTwoAxis = new float[] { two.Extents.X, two.Extents.Y, two.Extents.Z };
             Vector3 vertex = ContactPoint(
                 vOne, oneAxis, vOneAxis[oneAxisIndex],
                 vTwo, twoAxis, vTwoAxis[twoAxisIndex],

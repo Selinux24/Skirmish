@@ -10,26 +10,17 @@ namespace Engine.Physics
         /// <summary>
         /// Box half size extents
         /// </summary>
-        public Vector3 HalfSize { get; private set; }
+        public Vector3 Extents { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="aabb">Axis aligned bounding box</param>
-        public CollisionBox(BoundingBox aabb)
-            : this(aabb.GetExtents())
+        /// <param name="extents">Bounding box extents</param>
+        public CollisionBox(Vector3 extents) : base()
         {
+            Extents = extents;
 
-        }
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        /// <param name="halfSize">Bounding box half sizes</param>
-        public CollisionBox(Vector3 halfSize) : base()
-        {
-            HalfSize = halfSize;
-
-            boundingBox = new BoundingBox(-halfSize, halfSize);
+            boundingBox = new BoundingBox(-extents, extents);
             boundingSphere = BoundingSphere.FromBox(boundingBox);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }

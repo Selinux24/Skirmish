@@ -23,10 +23,9 @@ namespace Engine.PhysicsTests
             return plane;
         }
 
-        static CollisionBox FromAABB(Vector3 min, Vector3 max, Matrix transform)
+        static CollisionBox FromAABB(Vector3 extents, Matrix transform)
         {
-            BoundingBox aabb = new BoundingBox(min, max);
-            CollisionBox box = new CollisionBox(aabb);
+            CollisionBox box = new CollisionBox(extents);
             RigidBody boxBody = new RigidBody(1, transform);
             box.Attach(boxBody);
 
@@ -61,7 +60,7 @@ namespace Engine.PhysicsTests
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
-            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Up * 5f));
+            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up * 5f));
             Assert.IsFalse(ContactDetector.BoxAndHalfSpace(box, plane, data), "No intersection expected");
             Assert.IsTrue(data.ContactCount == 0, "Zero contacts expected");
         }
@@ -72,7 +71,7 @@ namespace Engine.PhysicsTests
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
-            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Up));
+            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up));
             Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
             Assert.IsTrue(data.ContactCount == 4, "Four contacts expected");
             Assert.IsTrue(data.GetContact(0).Penetration == 0, "Penetration 0 expected");
@@ -96,7 +95,7 @@ namespace Engine.PhysicsTests
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
-            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Identity);
+            var box = FromAABB(Vector3.One, Matrix.Identity);
             Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
             Assert.IsTrue(data.ContactCount == 4, "Four contacts expected");
             Assert.IsTrue(data.GetContact(0).Penetration == 1, "Penetration 1 expected");
@@ -120,7 +119,7 @@ namespace Engine.PhysicsTests
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
-            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Down));
+            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Down));
             Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
             Assert.IsTrue(data.ContactCount == 8, "Eight contacts expected");
             Assert.IsTrue(data.GetContact(0).Penetration == 0, "Penetration 0 expected");
@@ -156,7 +155,7 @@ namespace Engine.PhysicsTests
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
-            var box = FromAABB(-Vector3.One, Vector3.One, Matrix.Translation(Vector3.Down * 2f));
+            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Down * 2f));
             Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
             Assert.IsTrue(data.ContactCount == 8, "Eight contacts expected");
             Assert.IsTrue(data.GetContact(0).Penetration == 1, "Penetration 1 expected");
@@ -192,7 +191,7 @@ namespace Engine.PhysicsTests
             ContactResolver data = new ContactResolver();
 
             float boxSize = 1f;
-            var box = FromAABB(-Vector3.One * boxSize, Vector3.One * boxSize, Matrix.Identity);
+            var box = FromAABB(Vector3.One * boxSize, Matrix.Identity);
 
             float triSize = 1f;
             var xTri = new Triangle(new Vector3(1, 0, -1) * triSize, new Vector3(-1, 0, -1) * triSize, new Vector3(0, 0, 1) * triSize);
@@ -441,7 +440,7 @@ namespace Engine.PhysicsTests
             ContactResolver data = new ContactResolver();
 
             float boxSize = 10f;
-            var box = FromAABB(-Vector3.One * boxSize, Vector3.One * boxSize, Matrix.Identity);
+            var box = FromAABB(Vector3.One * boxSize, Matrix.Identity);
 
             float triSize = 1f;
             var xTri = new Triangle(new Vector3(1, 0, -1) * triSize, new Vector3(-1, 0, -1) * triSize, new Vector3(0, 0, 1) * triSize);
@@ -690,7 +689,7 @@ namespace Engine.PhysicsTests
             ContactResolver data = new ContactResolver();
 
             float boxSize = 1f;
-            var box = FromAABB(-Vector3.One * boxSize, Vector3.One * boxSize, Matrix.Identity);
+            var box = FromAABB(Vector3.One * boxSize, Matrix.Identity);
 
             float triSize = 10f;
             var xTri = new Triangle(new Vector3(1, 0, -1) * triSize, new Vector3(-1, 0, -1) * triSize, new Vector3(0, 0, 1) * triSize);
