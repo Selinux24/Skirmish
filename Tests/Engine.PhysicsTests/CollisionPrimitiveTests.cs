@@ -185,5 +185,17 @@ namespace Engine.PhysicsTests
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollisionTriangleSoup(null));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollisionTriangleSoup(Enumerable.Empty<Triangle>()));
         }
+
+        [TestMethod()]
+        public void CollisionPrimitiveAttachTest()
+        {
+            CollisionBox box = new CollisionBox(Vector3.One);
+
+            RigidBody body = new RigidBody(1, Matrix.Identity);
+            box.Attach(body);
+            Assert.AreEqual(box.RigidBody, body);
+
+            Assert.ThrowsException<ArgumentNullException>(() => box.Attach(null));
+        }
     }
 }
