@@ -330,7 +330,7 @@ namespace Engine.Physics
         public static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, ContactResolver data)
         {
             // Distance from center to plane
-            float centerToPlane = Math.Abs(Vector3.Dot(plane.Normal, sphere.RigidBody.Position) + plane.D);
+            float centerToPlane = Vector3.Dot(plane.Normal, sphere.RigidBody.Position) + plane.D;
 
             // Obtain the penetration of the sphere in the plane.
             float penetration = centerToPlane - sphere.Radius;

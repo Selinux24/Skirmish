@@ -157,6 +157,17 @@ namespace Engine.Common.Tests
         }
 
         [TestMethod()]
+        public void IntersectsIntersectableTest()
+        {
+            Assert.IsFalse(IntersectionHelper.Intersects(null, null));
+
+            Assert.IsFalse(IntersectionHelper.Intersects(i1.Object, IntersectDetectionMode.Sphere, null));
+            Assert.IsFalse(IntersectionHelper.Intersects(i1.Object, IntersectDetectionMode.Sphere, null, IntersectDetectionMode.Sphere));
+
+            Assert.IsFalse(IntersectionHelper.Intersects(null, IntersectDetectionMode.Sphere, i1.Object, IntersectDetectionMode.Sphere));
+        }
+
+        [TestMethod()]
         public void IntersectsIntersectableSphereTest()
         {
             bool res1 = IntersectionHelper.Intersects(i1.Object, IntersectDetectionMode.Sphere, i2.Object, IntersectDetectionMode.Sphere);
