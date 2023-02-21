@@ -108,7 +108,7 @@ namespace Engine.Physics
 
                 // Distance to plane
                 float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
-                if (vertexDistance > 0f)
+                if (vertexDistance > 0f && !MathUtil.IsZero(vertexDistance))
                 {
                     continue;
                 }
@@ -334,7 +334,7 @@ namespace Engine.Physics
 
             // Obtain the penetration of the sphere in the plane.
             float penetration = centerToPlane - sphere.Radius;
-            if (penetration >= 0)
+            if (penetration > 0f && !MathUtil.IsZero(penetration))
             {
                 return false;
             }

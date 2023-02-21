@@ -9,19 +9,9 @@ namespace Engine.PhysicsTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
-    public class ContactDetectorTests
+    public class ContactDetectorBoxAndTriangleSoupTests
     {
         static TestContext _testContext;
-
-        static CollisionPlane FromPlane(Vector3 normal, float d, Matrix transform)
-        {
-            Plane p = new Plane(normal, d);
-            CollisionPlane plane = new CollisionPlane(p);
-            RigidBody planeBody = new RigidBody(float.PositiveInfinity, transform);
-            plane.Attach(planeBody);
-
-            return plane;
-        }
 
         static CollisionBox FromAABB(Vector3 extents, Matrix transform)
         {
@@ -51,138 +41,6 @@ namespace Engine.PhysicsTests
         public void SetupTest()
         {
             Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
-        }
-
-        [TestMethod()]
-        public void ContactDetectorBoxAndHalfSpaceOverNoIntersectionTest()
-        {
-            ContactResolver data = new ContactResolver();
-
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
-
-            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up * 5f));
-            Assert.IsFalse(ContactDetector.BoxAndHalfSpace(box, plane, data), "No intersection expected");
-            Assert.IsTrue(data.ContactCount == 0, "Zero contacts expected");
-        }
-        [TestMethod()]
-        public void ContactDetectorBoxAndHalfSpaceBottomFaceIntersectionTest()
-        {
-            ContactResolver data = new ContactResolver();
-
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
-
-            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up));
-            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
-            Assert.IsTrue(data.ContactCount == 4, "Four contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 0, "Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 0, "Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 0, "Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 0, "Penetration 0 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            data.Reset();
-        }
-        [TestMethod()]
-        public void ContactDetectorBoxAndHalfSpaceMiddleIntersectionTest()
-        {
-            ContactResolver data = new ContactResolver();
-
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
-
-            var box = FromAABB(Vector3.One, Matrix.Identity);
-            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
-            Assert.IsTrue(data.ContactCount == 4, "Four contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 1, "Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 1, "Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 1, "Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 1, "Penetration 1 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            data.Reset();
-        }
-        [TestMethod()]
-        public void ContactDetectorBoxAndHalfSpaceUpperFaceIntersectionTest()
-        {
-            ContactResolver data = new ContactResolver();
-
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
-
-            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Down));
-            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
-            Assert.IsTrue(data.ContactCount == 8, "Eight contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 0, "Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 0, "Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 0, "Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 0, "Penetration 0 expected");
-            Assert.IsTrue(data.GetContact(4).Penetration == 2, "Penetration 2 expected");
-            Assert.IsTrue(data.GetContact(5).Penetration == 2, "Penetration 2 expected");
-            Assert.IsTrue(data.GetContact(6).Penetration == 2, "Penetration 2 expected");
-            Assert.IsTrue(data.GetContact(7).Penetration == 2, "Penetration 2 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[0], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[1], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[2], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[3], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(4).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(5).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(6).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(7).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(4).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(5).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(6).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(7).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            data.Reset();
-        }
-        [TestMethod()]
-        public void ContactDetectorBoxAndHalfSpaceBellowIntersectionTest()
-        {
-            ContactResolver data = new ContactResolver();
-
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
-
-            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Down * 2f));
-            Assert.IsTrue(ContactDetector.BoxAndHalfSpace(box, plane, data), "Intersection expected");
-            Assert.IsTrue(data.ContactCount == 8, "Eight contacts expected");
-            Assert.IsTrue(data.GetContact(0).Penetration == 1, "Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(1).Penetration == 1, "Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(2).Penetration == 1, "Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(3).Penetration == 1, "Penetration 1 expected");
-            Assert.IsTrue(data.GetContact(4).Penetration == 3, "Penetration 3 expected");
-            Assert.IsTrue(data.GetContact(5).Penetration == 3, "Penetration 3 expected");
-            Assert.IsTrue(data.GetContact(6).Penetration == 3, "Penetration 3 expected");
-            Assert.IsTrue(data.GetContact(7).Penetration == 3, "Penetration 3 expected");
-            Assert.AreEqual(data.GetContact(0).Position, box.OrientedBoundingBox.GetCorners()[0], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(1).Position, box.OrientedBoundingBox.GetCorners()[1], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(2).Position, box.OrientedBoundingBox.GetCorners()[2], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(3).Position, box.OrientedBoundingBox.GetCorners()[3], "Upper vertex expected");
-            Assert.AreEqual(data.GetContact(4).Position, box.OrientedBoundingBox.GetCorners()[4], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(5).Position, box.OrientedBoundingBox.GetCorners()[5], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(6).Position, box.OrientedBoundingBox.GetCorners()[6], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(7).Position, box.OrientedBoundingBox.GetCorners()[7], "Bottom vertex expected");
-            Assert.AreEqual(data.GetContact(0).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(1).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(2).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(3).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(4).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(5).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(6).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            Assert.AreEqual(data.GetContact(7).Normal, plane.Normal, "Contact normal equals to plane normal vertex expected");
-            data.Reset();
         }
 
         [TestMethod()]
