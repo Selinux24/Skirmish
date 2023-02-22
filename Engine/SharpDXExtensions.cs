@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -222,6 +223,33 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets a sphere transformed by the given matrix
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="transform">Transform</param>
+        public static BoundingSphere SetTransform(this BoundingSphere sphere, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return sphere;
+            }
+
+            // Gets the new position
+            var center = Vector3.TransformCoordinate(sphere.Center, transform);
+
+            // Calculates the scale vector
+            var scale = new Vector3(
+                transform.Column1.Length(),
+                transform.Column2.Length(),
+                transform.Column3.Length());
+
+            // Gets the new sphere radius, based on the maximum scale axis value
+            float radius = sphere.Radius * Math.Max(Math.Max(scale.X, scale.Y), scale.Z);
+
+            return new BoundingSphere(center, radius);
+        }
+
+        /// <summary>
         /// Gets the bounding box center
         /// </summary>
         /// <param name="bbox">Bounding box</param>
@@ -302,7 +330,52 @@ namespace Engine
 
             return segments;
         }
+        /// <summary>
+        /// Gets the specified corner
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="corner">Box corner</param>
+        public static Vector3 GetCorner(this BoundingBox box, BoxCorners corner)
+        {
+            return GetCorner(box, (int)corner);
+        }
+        /// <summary>
+        /// Gets the specified corner
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="index">Corner index</param>
+        public static Vector3 GetCorner(this BoundingBox box, int index)
+        {
+            return box.GetCorners().ElementAtOrDefault(index);
+        }
+        /// <summary>
+        /// Gets a box transformed by the given matrix
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="transform">Transform</param>
+        public static BoundingBox SetTransform(this BoundingBox box, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return box;
+            }
 
+            // Gets the new position
+            var min = Vector3.TransformCoordinate(box.Minimum, transform);
+            var max = Vector3.TransformCoordinate(box.Maximum, transform);
+
+            return new BoundingBox(min, max);
+        }
+
+        /// <summary>
+        /// Gets the specified corner
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="corner">Box corner</param>
+        public static Vector3 GetCorner(this OrientedBoundingBox obb, BoxCorners corner)
+        {
+            return GetCorner(obb, (int)corner);
+        }
         /// <summary>
         /// Gets the specified corner
         /// </summary>
@@ -311,6 +384,50 @@ namespace Engine
         public static Vector3 GetCorner(this OrientedBoundingBox obb, int index)
         {
             return obb.GetCorners().ElementAtOrDefault(index);
+        }
+        /// <summary>
+        /// Creates an oriented bounding box from a transformed point list and it's transform matrix
+        /// </summary>
+        /// <param name="points">Point list</param>
+        /// <param name="transform">Transform matrix</param>
+        /// <returns>Returns the new oriented bounding box</returns>
+        public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return new OrientedBoundingBox(points.ToArray());
+            }
+
+            //First, get item points
+            Vector3[] ptArray = points.ToArray();
+
+            //Next, remove any point transform and set points to origin
+            Matrix inv = Matrix.Invert(transform);
+            Vector3.TransformCoordinate(ptArray, ref inv, ptArray);
+
+            //Create the obb from origin points
+            var obb = new OrientedBoundingBox(ptArray);
+
+            //Apply the original transform to obb
+            obb.Transformation *= transform;
+
+            return obb;
+        }
+        /// <summary>
+        /// Gets a oriented bounding box transformed by the given matrix
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="transform">Transform</param>
+        public static OrientedBoundingBox SetTransform(this OrientedBoundingBox obb, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return obb;
+            }
+
+            var trnObb = obb;
+            trnObb.Transformation = transform;
+            return trnObb;
         }
 
         /// <summary>

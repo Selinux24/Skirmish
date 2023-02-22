@@ -13,6 +13,15 @@ namespace Engine.Physics
     public static class ContactDetector
     {
         /// <summary>
+        /// The value for which all absolute numbers smaller than are considered equal to zero
+        /// </summary>
+        public static readonly float ZeroTolerance = MathUtil.ZeroTolerance;
+        /// <summary>
+        /// The value for which all vectors smaller than are considered equal to Vector3.Zero
+        /// </summary>
+        public static readonly Vector3 ZeroToleranceVector = new Vector3(MathUtil.ZeroTolerance);
+
+        /// <summary>
         /// Detect collision between two primitives
         /// </summary>
         /// <param name="primitive1">First primitive</param>
@@ -210,7 +219,7 @@ namespace Engine.Physics
             var invTrn = Matrix.Invert(trn);
             var origBox = new BoundingBox(-obb.Extents, obb.Extents);
 
-            List<(Vector3 position, Vector3 normal)> contacts = new List<(Vector3 position, Vector3 normal)>();
+            ContactAcummulator contacts = new ContactAcummulator();
 
             foreach (var triangle in triangleSoup.Triangles)
             {
@@ -224,16 +233,16 @@ namespace Engine.Physics
                 var contactList = GenerateBoxAndTriangleContacts(origBox, origTri);
                 foreach (var position in contactList)
                 {
-                    contacts.Add((position, triangle.Normal));
+                    contacts.Add(position, triangle.Normal);
                 }
             }
 
-            if (!contacts.Any())
+            if (contacts.Count <= 0)
             {
                 return false;
             }
 
-            foreach (var contact in contacts.Distinct())
+            foreach (var contact in contacts.GetContacts())
             {
                 var contactPosition = Vector3.TransformCoordinate(contact.position, trn);
 
@@ -824,6 +833,50 @@ namespace Engine.Physics
             }
 
             return res.Distinct().ToArray();
+        }
+
+        /// <summary>
+        /// Contact acummulator
+        /// </summary>
+        class ContactAcummulator
+        {
+            /// <summary>
+            /// Contact collection
+            /// </summary>
+            private readonly List<(Vector3 position, Vector3 normal)> contacts = new List<(Vector3 position, Vector3 normal)>();
+
+            /// <summary>
+            /// Adds new contacts to the collection
+            /// </summary>
+            /// <param name="position">Position</param>
+            /// <param name="normal">Normal</param>
+            public void Add(Vector3 position, Vector3 normal)
+            {
+                if (contacts.Any(c => Vector3.NearEqual(c.position, position, ZeroToleranceVector)))
+                {
+                    return;
+                }
+
+                contacts.Add((position, normal));
+            }
+
+            /// <summary>
+            /// Contact count
+            /// </summary>
+            public int Count
+            {
+                get
+                {
+                    return contacts.Count;
+                }
+            }
+            /// <summary>
+            /// Gets the contact list
+            /// </summary>
+            public IEnumerable<(Vector3 position, Vector3 normal)> GetContacts()
+            {
+                return contacts.ToArray();
+            }
         }
     }
 }

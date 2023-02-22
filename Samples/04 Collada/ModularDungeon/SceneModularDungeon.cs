@@ -853,7 +853,7 @@ namespace Collada.ModularDungeon
             //Refresh affected obstacles (if any)
             obs.ForEach(o =>
             {
-                var obb = OrientedBoundingBoxExtensions.FromPoints(
+                var obb = SharpDXExtensions.FromPoints(
                     o.Item.GetPoints(true),
                     o.Item.Manipulator.FinalTransform);
 
@@ -1659,7 +1659,9 @@ namespace Collada.ModularDungeon
 
             foreach (var item in sceneryObjects)
             {
-                var obb = OrientedBoundingBoxExtensions.FromPoints(item.GetPoints(), item.Manipulator.FinalTransform);
+                var obb = SharpDXExtensions.FromPoints(
+                    item.GetPoints(),
+                    item.Manipulator.FinalTransform);
 
                 int index = AddObstacle(obb);
                 if (index >= 0)

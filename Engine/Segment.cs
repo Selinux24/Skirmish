@@ -35,6 +35,16 @@ namespace Engine
                 return Vector3.DistanceSquared(Point1, Point2);
             }
         }
+        /// <summary>
+        /// Gets the normalized direction vector
+        /// </summary>
+        public Vector3 Direction
+        {
+            get
+            {
+                return Vector3.Normalize(Point2 - Point1);
+            }
+        }
 
         /// <summary>
         /// Constructor

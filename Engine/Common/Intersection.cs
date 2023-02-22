@@ -497,7 +497,7 @@ namespace Engine.Common
         /// <returns>Whether the two objects intersected</returns>
         public static bool SegmentIntersectsBox(Segment segment, BoundingBox box, out float distance)
         {
-            Ray ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
+            Ray ray = new Ray(segment.Point1, segment.Direction);
             if (Collision.RayIntersectsBox(ref ray, ref box, out distance) && distance <= segment.Length)
             {
                 return true;
@@ -520,12 +520,19 @@ namespace Engine.Common
             point = Vector3.Zero;
             distance = float.MaxValue;
 
-            if (!SegmentIntersectsBox(segment, box, out float d))
+            Ray ray = new Ray(segment.Point1, segment.Direction);
+            if (!Collision.RayIntersectsBox(ref ray, ref box, out Vector3 pos))
             {
                 return false;
             }
 
-            point = segment.Point1 + Vector3.Normalize(segment.Point2 - segment.Point1) * d;
+            float d = Vector3.Distance(segment.Point1, pos);
+            if (d > segment.Length)
+            {
+                return false;
+            }
+
+            point = pos;
             distance = d;
 
             return true;

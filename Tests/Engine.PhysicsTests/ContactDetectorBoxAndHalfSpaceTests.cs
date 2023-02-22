@@ -59,21 +59,8 @@ namespace Engine.PhysicsTests
 
         public struct BoxAndHalfSpaceContactData
         {
-            public int Corner { get; set; }
+            public BoxCorners Corner { get; set; }
             public float Penetration { get; set; }
-        }
-
-        public enum BoxCorners : int
-        {
-            FrontRightTop = 0,
-            BackRightTop = 1,
-            BackLeftTop = 2,
-            FrontLeftTop = 3,
-
-            FrontRightBottom = 4,
-            BackRightBottom = 5,
-            BackLeftBottom = 6,
-            FrontLeftBottom = 7,
         }
 
         public static IEnumerable<object[]> BoxAndHalfSpaceTestData
@@ -99,10 +86,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -114,10 +101,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -129,14 +116,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 2 },
                             }
                         }
                     },
@@ -148,14 +135,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 3 },
                             }
                         }
                     },
@@ -167,14 +154,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 6 },
                             }
                         }
                     },
@@ -196,10 +183,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -211,10 +198,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -226,14 +213,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 2 },
                             }
                         }
                     },
@@ -245,14 +232,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 3 },
                             }
                         }
                     },
@@ -264,14 +251,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 6 },
                             }
                         }
                     },
@@ -293,10 +280,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop  , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop  , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop , Penetration = 0 },
                             }
                         }
                     },
@@ -308,10 +295,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop  , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop  , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop , Penetration = 1 },
                             }
                         }
                     },
@@ -323,14 +310,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -342,14 +329,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -361,14 +348,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 4 },
                             }
                         }
                     },
@@ -390,10 +377,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop   , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop   , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -405,10 +392,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop   , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop   , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -420,14 +407,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -439,14 +426,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -458,14 +445,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 4 },
                             }
                         }
                     },
@@ -487,10 +474,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop   , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop   , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom, Penetration = 0 },
                             }
                         }
                     },
@@ -502,10 +489,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop   , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop   , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom, Penetration = 1 },
                             }
                         }
                     },
@@ -517,14 +504,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 2 },
                             }
                         }
                     },
@@ -536,14 +523,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 3 },
                             }
                         }
                     },
@@ -555,14 +542,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 6 },
                             }
                         }
                     },
@@ -584,10 +571,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -599,10 +586,10 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -614,14 +601,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 2 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 0 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 2 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 0 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -633,14 +620,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 3 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 1 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 3 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 1 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -652,14 +639,14 @@ namespace Engine.PhysicsTests
                             IntersectioExpected = true,
                             Contacts = new BoxAndHalfSpaceContactData[]
                             {
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightTop   , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightTop    , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftTop     , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftTop    , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontRightBottom, Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackRightBottom , Penetration = 6 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.BackLeftBottom  , Penetration = 4 },
-                                new BoxAndHalfSpaceContactData{ Corner = (int)BoxCorners.FrontLeftBottom , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 6 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 4 },
+                                new BoxAndHalfSpaceContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 4 },
                             }
                         }
                     },
