@@ -543,6 +543,30 @@ namespace Engine.Common
         /// <param name="segment">The segment to test.</param>
         /// <param name="tri">Triangle</param>
         /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool SegmentIntersectsTriangle(Segment segment, Triangle tri, out float distance)
+        {
+            Ray ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
+            Vector3 vertex1 = tri.Point1;
+            Vector3 vertex2 = tri.Point2;
+            Vector3 vertex3 = tri.Point3;
+            if (Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out Vector3 collisionPoint))
+            {
+                distance = Vector3.Distance(collisionPoint, segment.Point1);
+
+                return true;
+            }
+
+            distance = float.MaxValue;
+
+            return false;
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="Triangle"/>.
+        /// </summary>
+        /// <param name="segment">The segment to test.</param>
+        /// <param name="tri">Triangle</param>
+        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
         /// <param name="distance">Distance to point</param>
         /// <returns>Whether the two objects intersected.</returns>
         public static bool SegmentIntersectsTriangle(Segment segment, Triangle tri, out Vector3 point, out float distance)

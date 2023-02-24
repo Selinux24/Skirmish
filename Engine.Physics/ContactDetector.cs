@@ -219,7 +219,7 @@ namespace Engine.Physics
             var invTrn = Matrix.Invert(trn);
             var origBox = new BoundingBox(-obb.Extents, obb.Extents);
 
-            ContactAcummulator contacts = new ContactAcummulator();
+            ContactAcummulator contactsAccum = new ContactAcummulator();
 
             foreach (var triangle in triangleSoup.Triangles)
             {
@@ -230,28 +230,26 @@ namespace Engine.Physics
                     continue;
                 }
 
-                var contactList = GenerateBoxAndTriangleContacts(origBox, origTri);
-                foreach (var position in contactList)
+                var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
+                foreach (var contact in contacts)
                 {
-                    contacts.Add(position, triangle.Normal);
+                    contactsAccum.Add(contact);
                 }
             }
 
-            if (contacts.Count <= 0)
+            if (contactsAccum.Count <= 0)
             {
                 return false;
             }
 
-            foreach (var contact in contacts.GetContacts())
+            foreach (var contact in contactsAccum.GetContacts())
             {
-                var contactPosition = Vector3.TransformCoordinate(contact.position, trn);
+                var contactPosition = Vector3.TransformCoordinate(contact.Point, trn);
+                var contactNormal = Vector3.TransformNormal(contact.Normal, trn);
+                IRigidBody body1 = contact.Direction == 1 ? box.RigidBody : triangleSoup.RigidBody;
+                IRigidBody body2 = contact.Direction == 1 ? triangleSoup.RigidBody : box.RigidBody;
 
-                var axis = contact.normal;
-                float oneProject = obb.ProjectToVector(axis);
-                float twoProject = Math.Abs(Vector3.Dot(contact.position, axis));
-                float pen = oneProject - twoProject;
-
-                data.AddContact(box.RigidBody, triangleSoup.RigidBody, contactPosition, contact.normal, -pen);
+                data.AddContact(body1, body2, contactPosition, contactNormal, contact.Penetration);
                 if (!data.HasFreeContacts())
                 {
                     break;
@@ -281,14 +279,12 @@ namespace Engine.Physics
             var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
             foreach (var contact in contacts)
             {
-                var contactPosition = Vector3.TransformCoordinate(contact, trn);
+                var contactPosition = Vector3.TransformCoordinate(contact.Point, trn);
+                var contactNormal = Vector3.TransformNormal(contact.Normal, trn);
+                IRigidBody body1 = contact.Direction == 1 ? box.RigidBody : rigidBody;
+                IRigidBody body2 = contact.Direction == 1 ? rigidBody : box.RigidBody;
 
-                var axis = triangle.Normal;
-                float oneProject = obb.ProjectToVector(axis);
-                float twoProject = Math.Abs(Vector3.Dot(contact, axis));
-                float pen = oneProject - twoProject;
-
-                data.AddContact(box.RigidBody, rigidBody, contactPosition, triangle.Normal, pen);
+                data.AddContact(body1, body2, contactPosition, contactNormal, contact.Penetration);
                 if (!data.HasFreeContacts())
                 {
                     return true;
@@ -810,26 +806,41 @@ namespace Engine.Physics
         /// </summary>
         /// <param name="box">Box</param>
         /// <param name="tri">Triangle</param>
-        private static IEnumerable<Vector3> GenerateBoxAndTriangleContacts(BoundingBox box, Triangle tri)
+        private static IEnumerable<ContactAcummulatorData> GenerateBoxAndTriangleContacts(BoundingBox box, Triangle tri)
         {
-            List<Vector3> res = new List<Vector3>();
+            List<ContactAcummulatorData> res = new List<ContactAcummulatorData>();
 
-            var triEdges = tri.GetEdges();
-            foreach (var edge in triEdges)
-            {
-                if (Intersection.SegmentIntersectsBox(edge, box, out var contactPosition, out _))
-                {
-                    res.Add(contactPosition);
-                }
-            }
-
+            // Box to triangle contacts
             var boxEdges = box.GetEdges();
             foreach (var edge in boxEdges)
             {
-                if (Intersection.SegmentIntersectsTriangle(edge, tri, out var contactPosition, out _))
+                if (!Intersection.SegmentIntersectsTriangle(edge, tri, out _))
                 {
-                    res.Add(contactPosition);
+                    continue;
                 }
+
+                float sign = Vector3.Dot(edge.Direction, tri.Plane.Normal);
+                var penetrationPoint = sign >= 0 ? edge.Point1 : edge.Point2;
+                float penetration = tri.Plane.D + Vector3.Dot(penetrationPoint, tri.Plane.Normal);
+
+                res.Add(new ContactAcummulatorData { Edge = edge, Point = penetrationPoint, Penetration = -penetration, Normal = tri.Normal, Direction = 1 });
+            }
+
+            // Triangle to box contacts
+            var triToBoxNormal = Vector3.Normalize(tri.Center - box.Center);
+            var triEdges = tri.GetEdges();
+            foreach (var edge in triEdges)
+            {
+                if (!Intersection.SegmentIntersectsBox(edge, box, out _))
+                {
+                    continue;
+                }
+
+                float sign = Vector3.Dot(edge.Direction, triToBoxNormal);
+                var penetrationPoint = sign >= 0 ? edge.Point1 : edge.Point2;
+                float penetration = tri.Plane.D + Vector3.Dot(penetrationPoint, triToBoxNormal);
+
+                res.Add(new ContactAcummulatorData { Edge = edge, Point = penetrationPoint, Penetration = -penetration, Normal = edge.Direction, Direction = -1 });
             }
 
             return res.Distinct().ToArray();
@@ -843,21 +854,33 @@ namespace Engine.Physics
             /// <summary>
             /// Contact collection
             /// </summary>
-            private readonly List<(Vector3 position, Vector3 normal)> contacts = new List<(Vector3 position, Vector3 normal)>();
+            private readonly List<ContactAcummulatorData> contacts = new List<ContactAcummulatorData>();
 
             /// <summary>
             /// Adds new contacts to the collection
             /// </summary>
-            /// <param name="position">Position</param>
-            /// <param name="normal">Normal</param>
-            public void Add(Vector3 position, Vector3 normal)
+            /// <param name="contact">Contact</param>
+            public void Add(ContactAcummulatorData contact)
             {
-                if (contacts.Any(c => Vector3.NearEqual(c.position, position, ZeroToleranceVector)))
+                // Find edge contact
+                var index = contacts.FindIndex(c => c.Edge == contact.Edge);
+                if (index < 0)
                 {
+                    // Add edge contact to the collection
+                    contacts.Add(contact);
+
                     return;
                 }
 
-                contacts.Add((position, normal));
+                // Test contact penetration
+                if (contacts[index].Penetration >= contact.Penetration)
+                {
+                    // Minor penetrations ignored
+                    return;
+                }
+
+                // Store contact
+                contacts[index] = contact;
             }
 
             /// <summary>
@@ -873,10 +896,19 @@ namespace Engine.Physics
             /// <summary>
             /// Gets the contact list
             /// </summary>
-            public IEnumerable<(Vector3 position, Vector3 normal)> GetContacts()
+            public IEnumerable<ContactAcummulatorData> GetContacts()
             {
                 return contacts.ToArray();
             }
+        }
+
+        class ContactAcummulatorData
+        {
+            public Segment Edge { get; set; }
+            public Vector3 Point { get; set; }
+            public float Penetration { get; set; }
+            public Vector3 Normal { get; set; }
+            public int Direction { get; set; }
         }
     }
 }

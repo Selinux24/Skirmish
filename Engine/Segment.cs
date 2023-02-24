@@ -1,11 +1,12 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
     /// <summary>
     /// Segment
     /// </summary>
-    public struct Segment
+    public struct Segment : IEquatable<Segment>
     {
         /// <summary>
         /// First point
@@ -60,6 +61,51 @@ namespace Engine
         {
             Point1 = point1;
             Point2 = point2;
+        }
+
+        /// <inheritdoc/>
+        public static bool operator ==(Segment left, Segment right)
+        {
+            return left.Equals(ref right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(Segment left, Segment right)
+        {
+            return !left.Equals(ref right);
+        }
+        /// <inheritdoc/>
+        public bool Equals(Segment other)
+        {
+            return Equals(ref other);
+        }
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is Segment))
+            {
+                return false;
+            }
+
+            var strongValue = (Segment)obj;
+            return Equals(ref strongValue);
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(ref Segment other)
+        {
+            return
+                other.Point1.Equals(Point1) &&
+                other.Point2.Equals(Point2);
+        }
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Point1, Point2);
+        }
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Point 1 {Point1}; Point 2 {Point2};";
         }
     }
 }
