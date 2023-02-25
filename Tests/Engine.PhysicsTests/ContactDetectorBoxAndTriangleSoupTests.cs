@@ -25,15 +25,6 @@ namespace Engine.PhysicsTests
             return box;
         }
 
-        static CollisionTriangleSoup FromTriangle(Triangle tri, Matrix transform)
-        {
-            CollisionTriangleSoup ctri = new CollisionTriangleSoup(new[] { tri });
-            RigidBody triBody = new RigidBody(2, transform);
-            ctri.Attach(triBody);
-
-            return ctri;
-        }
-
         static CollisionTriangleSoup FromRectangle(RectangleF rect, float d, Matrix transform)
         {
             Vector3 p1 = new Vector3(rect.BottomLeft.X, d, rect.BottomLeft.Y);
@@ -258,7 +249,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 90º - Front face to plane. Back face perfect contact. Front face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
@@ -304,7 +295,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 180º - Top face to plane. Top face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 5,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop, Penetration = 0 },
@@ -355,7 +346,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 180º - Top face to plane. Bottom face perfect contact. Top face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
@@ -401,7 +392,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 270º - Back face to plane. Back face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop   , Penetration = 0 },
@@ -646,7 +637,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis -90º - Right face to plane. Left face perfect contact. Right face below the plane",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
@@ -708,14 +699,14 @@ namespace Engine.PhysicsTests
             {
                 var contact = contacts.ElementAt(i);
 
-                var expectedContact = testData.Contacts.FirstOrDefault(c => box.OrientedBoundingBox.GetCorner(c.Corner) == contact.Position);
+                var expectedContact = testData.Contacts.FirstOrDefault(c => box.OrientedBoundingBox.GetVertex(c.Corner) == contact.Position);
                 if (expectedContact == null)
                 {
                     continue;
                 }
 
                 var expectedPenetration = expectedContact.Penetration;
-                var expectedPosition = box.OrientedBoundingBox.GetCorner(expectedContact.Corner);
+                var expectedPosition = box.OrientedBoundingBox.GetVertex(expectedContact.Corner);
                 var expectedNormal = Vector3.Up;
 
                 Assert.IsTrue(MathUtil.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");

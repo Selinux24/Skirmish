@@ -280,7 +280,7 @@ namespace Engine
 
             if (topology == Topology.TriangleList)
             {
-                Vector3[] v = obb.GetCorners();
+                Vector3[] v = obb.GetVertices().ToArray();
 
                 // Fill in the front face index data
                 triangleList.Add(new Triangle(v[0], v[1], v[2]));

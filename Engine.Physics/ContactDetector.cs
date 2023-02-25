@@ -108,12 +108,12 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
         {
-            var corners = box.OrientedBoundingBox.GetCorners();
+            var corners = box.OrientedBoundingBox.GetVertices();
 
             bool intersectionExists = false;
             for (int i = 0; i < 8; i++)
             {
-                Vector3 vertexPos = corners[i];
+                Vector3 vertexPos = corners.ElementAt(i);
 
                 // Distance to plane
                 float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
@@ -901,13 +901,30 @@ namespace Engine.Physics
                 return contacts.ToArray();
             }
         }
-
+        /// <summary>
+        /// Contact acummulator data
+        /// </summary>
         class ContactAcummulatorData
         {
+            /// <summary>
+            /// Contact edge
+            /// </summary>
             public Segment Edge { get; set; }
+            /// <summary>
+            /// Contact point
+            /// </summary>
             public Vector3 Point { get; set; }
+            /// <summary>
+            /// Penetration
+            /// </summary>
             public float Penetration { get; set; }
+            /// <summary>
+            /// Contact normal
+            /// </summary>
             public Vector3 Normal { get; set; }
+            /// <summary>
+            /// Contact direction
+            /// </summary>
             public int Direction { get; set; }
         }
     }

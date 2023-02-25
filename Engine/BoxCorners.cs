@@ -4,7 +4,7 @@ namespace Engine
     /// <summary>
     /// Box corner enumerable
     /// </summary>
-    public enum BoxCorners : int
+    public enum BoxCorners
     {
         /// <summary>
         /// Front right top

@@ -488,7 +488,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a list of tiles</returns>
         private IEnumerable<UpdateTileData> LookupTiles(BoundingBox bbox)
         {
-            var points = bbox.GetCorners();
+            var points = bbox.GetVertices();
 
             var cornerTiles = LookupTiles(points).ToList();
 

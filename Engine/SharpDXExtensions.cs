@@ -248,6 +248,40 @@ namespace Engine
 
             return new BoundingSphere(center, radius);
         }
+        /// <summary>
+        /// Gets a box transformed by the given matrix
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="transform">Transform</param>
+        public static BoundingBox SetTransform(this BoundingBox box, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return box;
+            }
+
+            // Gets the new position
+            var min = Vector3.TransformCoordinate(box.Minimum, transform);
+            var max = Vector3.TransformCoordinate(box.Maximum, transform);
+
+            return new BoundingBox(min, max);
+        }
+        /// <summary>
+        /// Gets a oriented bounding box transformed by the given matrix
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="transform">Transform</param>
+        public static OrientedBoundingBox SetTransform(this OrientedBoundingBox obb, Matrix transform)
+        {
+            if (transform.IsIdentity)
+            {
+                return obb;
+            }
+
+            var trnObb = obb;
+            trnObb.Transformation = transform;
+            return trnObb;
+        }
 
         /// <summary>
         /// Gets the bounding box center
@@ -299,6 +333,7 @@ namespace Engine
                 Bottom = bbox.Maximum.Z,
             };
         }
+
         /// <summary>
         /// Gets the bounding box edge list
         /// </summary>
@@ -306,85 +341,222 @@ namespace Engine
         /// <returns>Returns the edge list of the current bounding box</returns>
         public static IEnumerable<Segment> GetEdges(this BoundingBox bbox)
         {
-            List<Segment> segments = new List<Segment>(12);
-
-            var corners = bbox.GetCorners();
-
-            //Top edges
-            segments.Add(new Segment(corners[0], corners[1]));
-            segments.Add(new Segment(corners[1], corners[2]));
-            segments.Add(new Segment(corners[2], corners[3]));
-            segments.Add(new Segment(corners[3], corners[0]));
-
-            //Bottom edges
-            segments.Add(new Segment(corners[4], corners[5]));
-            segments.Add(new Segment(corners[5], corners[6]));
-            segments.Add(new Segment(corners[6], corners[7]));
-            segments.Add(new Segment(corners[7], corners[4]));
-
-            //Vertical edges
-            segments.Add(new Segment(corners[0], corners[4]));
-            segments.Add(new Segment(corners[1], corners[5]));
-            segments.Add(new Segment(corners[2], corners[6]));
-            segments.Add(new Segment(corners[3], corners[7]));
-
-            return segments;
+            return GetEdges(bbox.GetVertices());
         }
         /// <summary>
-        /// Gets the specified corner
+        /// Gets the oriented bounding box edge list
         /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="corner">Box corner</param>
-        public static Vector3 GetCorner(this BoundingBox box, BoxCorners corner)
+        /// <param name="obb">Oriented bounding box</param>
+        /// <returns>Returns the edge list of the current oriented bounding box</returns>
+        public static IEnumerable<Segment> GetEdges(this OrientedBoundingBox obb)
         {
-            return GetCorner(box, (int)corner);
+            return GetEdges(obb.GetVertices());
         }
         /// <summary>
-        /// Gets the specified corner
+        /// Gets the edge list
         /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="index">Corner index</param>
-        public static Vector3 GetCorner(this BoundingBox box, int index)
+        /// <param name="vertices">Box vertices</param>
+        /// <returns>Returns the edge list of the current box vertices</returns>
+        public static IEnumerable<Segment> GetEdges(IEnumerable<Vector3> vertices)
         {
-            return box.GetCorners().ElementAtOrDefault(index);
-        }
-        /// <summary>
-        /// Gets a box transformed by the given matrix
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="transform">Transform</param>
-        public static BoundingBox SetTransform(this BoundingBox box, Matrix transform)
-        {
-            if (transform.IsIdentity)
+            return new[]
             {
-                return box;
-            }
+                //Top edges
+                new Segment(vertices.ElementAt((int)BoxCorners.FrontRightTop),    vertices.ElementAt((int)BoxCorners.BackRightTop)),
+                new Segment(vertices.ElementAt((int)BoxCorners.BackRightTop),     vertices.ElementAt((int)BoxCorners.BackLeftTop)),
+                new Segment(vertices.ElementAt((int)BoxCorners.BackLeftTop),      vertices.ElementAt((int)BoxCorners.FrontLeftTop)),
+                new Segment(vertices.ElementAt((int)BoxCorners.FrontLeftTop),     vertices.ElementAt((int)BoxCorners.FrontRightTop)),
 
-            // Gets the new position
-            var min = Vector3.TransformCoordinate(box.Minimum, transform);
-            var max = Vector3.TransformCoordinate(box.Maximum, transform);
+                //Bottom edges
+                new Segment(vertices.ElementAt((int)BoxCorners.FrontRightBottom), vertices.ElementAt((int)BoxCorners.BackRightBottom)),
+                new Segment(vertices.ElementAt((int)BoxCorners.BackRightBottom),  vertices.ElementAt((int)BoxCorners.BackLeftBottom)),
+                new Segment(vertices.ElementAt((int)BoxCorners.BackLeftBottom),   vertices.ElementAt((int)BoxCorners.FrontLeftBottom)),
+                new Segment(vertices.ElementAt((int)BoxCorners.FrontLeftBottom),  vertices.ElementAt((int)BoxCorners.FrontRightBottom)),
 
-            return new BoundingBox(min, max);
+                //Vertical edges
+                new Segment(vertices.ElementAt((int)BoxCorners.FrontRightTop),    vertices.ElementAt((int)BoxCorners.FrontRightBottom)),
+                new Segment(vertices.ElementAt((int)BoxCorners.BackRightTop),     vertices.ElementAt((int)BoxCorners.BackRightBottom)),
+                new Segment(vertices.ElementAt((int)BoxCorners.BackLeftTop),      vertices.ElementAt((int)BoxCorners.BackLeftBottom)),
+                new Segment(vertices.ElementAt((int)BoxCorners.FrontLeftTop),     vertices.ElementAt((int)BoxCorners.FrontLeftBottom))
+            };
         }
 
         /// <summary>
-        /// Gets the specified corner
+        /// Gets the bounding box face planes list
         /// </summary>
-        /// <param name="obb">Oriented bounding box</param>
-        /// <param name="corner">Box corner</param>
-        public static Vector3 GetCorner(this OrientedBoundingBox obb, BoxCorners corner)
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static IEnumerable<Plane> GetFaces(this BoundingBox bbox)
         {
-            return GetCorner(obb, (int)corner);
+            var vertices = bbox.GetVertices();
+
+            Plane top = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), Vector3.Up);
+            Plane bottom = new Plane(GetVertex(vertices, BoxCorners.FrontLeftBottom), Vector3.Down);
+            Plane front = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), Vector3.ForwardLH);
+            Plane back = new Plane(GetVertex(vertices, BoxCorners.BackLeftTop), Vector3.BackwardLH);
+            Plane left = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), Vector3.Left);
+            Plane right = new Plane(GetVertex(vertices, BoxCorners.FrontRightBottom), Vector3.Right);
+
+            return new[] { top, bottom, front, back, left, right };
         }
         /// <summary>
-        /// Gets the specified corner
+        /// Gets the oriented bounding box face planes list
         /// </summary>
         /// <param name="obb">Oriented bounding box</param>
-        /// <param name="index">Corner index</param>
-        public static Vector3 GetCorner(this OrientedBoundingBox obb, int index)
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static IEnumerable<Plane> GetFaces(this OrientedBoundingBox obb)
         {
-            return obb.GetCorners().ElementAtOrDefault(index);
+            var vertices = obb.GetVertices();
+
+            var edges = GetEdges(vertices);
+
+            Vector3 topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
+            Plane top = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), topNormal);
+
+            Vector3 bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
+            Plane bottom = new Plane(GetVertex(vertices, BoxCorners.FrontLeftBottom), bottomNormal);
+
+            Vector3 frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
+            Plane front = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), frontNormal);
+
+            Vector3 backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
+            Plane back = new Plane(GetVertex(vertices, BoxCorners.BackLeftTop), backNormal);
+
+            Vector3 leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
+            Plane left = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), leftNormal);
+
+            Vector3 rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
+            Plane right = new Plane(GetVertex(vertices, BoxCorners.FrontRightBottom), rightNormal);
+
+            return new[] { top, bottom, front, back, left, right };
         }
+
+        /// <summary>
+        /// Gets the bounding box face plane
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="face">Face</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this BoundingBox bbox, BoxFaces face)
+        {
+            return GetFace(bbox, (int)face);
+        }
+        /// <summary>
+        /// Gets the bounding box face plane
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <param name="faceIndex">Face index</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this BoundingBox bbox, int faceIndex)
+        {
+            return GetFaces(bbox).ElementAtOrDefault(faceIndex);
+        }
+        /// <summary>
+        /// Gets the oriented bounding box face plane
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="face">Face</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this OrientedBoundingBox obb, BoxFaces face)
+        {
+            return GetFace(obb, (int)face);
+        }
+        /// <summary>
+        /// Gets the oriented bounding box face plane
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="faceIndex">Face index</param>
+        /// <returns>Returns the face list of the current bounding box</returns>
+        public static Plane GetFace(this OrientedBoundingBox obb, int faceIndex)
+        {
+            return GetFaces(obb).ElementAtOrDefault(faceIndex);
+        }
+
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="vertex">Box vertex</param>
+        public static Vector3 GetVertex(this BoundingBox box, BoxCorners vertex)
+        {
+            return GetVertex(box.GetVertices(), (int)vertex);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="index">Vertex index</param>
+        public static Vector3 GetVertex(this BoundingBox box, int index)
+        {
+            return GetVertex(box.GetVertices(), index);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="vertex">Box vertex</param>
+        public static Vector3 GetVertex(this OrientedBoundingBox obb, BoxCorners vertex)
+        {
+            return GetVertex(obb.GetVertices(), (int)vertex);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <param name="index">Vertex index</param>
+        public static Vector3 GetVertex(this OrientedBoundingBox obb, int index)
+        {
+            return GetVertex(obb.GetVertices(), index);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="vertex">Box vertex</param>
+        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, BoxCorners vertex)
+        {
+            return vertices.ElementAtOrDefault((int)vertex);
+        }
+        /// <summary>
+        /// Gets the specified vertex
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="index">Vertex index</param>
+        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, int index)
+        {
+            return vertices.ElementAtOrDefault(index);
+        }
+
+        /// <summary>
+        /// Gets the bounding box vertices
+        /// </summary>
+        /// <param name="box">Bounding box</param>
+        public static IEnumerable<Vector3> GetVertices(this BoundingBox box)
+        {
+            var corners = box.GetCorners();
+
+            // Hack sharpDX BoundingBox vertex order, to compatibilice with OrientedBoundingBox
+            return new[]
+            {
+                corners[1],
+                corners[5],
+                corners[4],
+                corners[0],
+                corners[2],
+                corners[6],
+                corners[7],
+                corners[3],
+            };
+        }
+        /// <summary>
+        /// Gets the oriented bounding box vertices
+        /// </summary>
+        /// <param name="obb">Oriented bounding box</param>
+        public static IEnumerable<Vector3> GetVertices(this OrientedBoundingBox obb)
+        {
+            return obb.GetCorners();
+        }
+
         /// <summary>
         /// Creates an oriented bounding box from a transformed point list and it's transform matrix
         /// </summary>
@@ -412,22 +584,6 @@ namespace Engine
             obb.Transformation *= transform;
 
             return obb;
-        }
-        /// <summary>
-        /// Gets a oriented bounding box transformed by the given matrix
-        /// </summary>
-        /// <param name="obb">Oriented bounding box</param>
-        /// <param name="transform">Transform</param>
-        public static OrientedBoundingBox SetTransform(this OrientedBoundingBox obb, Matrix transform)
-        {
-            if (transform.IsIdentity)
-            {
-                return obb;
-            }
-
-            var trnObb = obb;
-            trnObb.Transformation = transform;
-            return trnObb;
         }
 
         /// <summary>

@@ -679,7 +679,7 @@ namespace Engine.PhysicsTests
 
                 var expectedContact = testData.Contacts[i];
                 var expectedPenetration = expectedContact.Penetration;
-                var expectedPosition = box.OrientedBoundingBox.GetCorner(expectedContact.Corner);
+                var expectedPosition = box.OrientedBoundingBox.GetVertex(expectedContact.Corner);
                 var expectedNormal = plane.Normal;
 
                 Assert.IsTrue(MathUtil.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");

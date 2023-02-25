@@ -149,7 +149,7 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateWiredBox(BoundingBox bbox)
         {
-            return CreateWiredBox(bbox.GetCorners());
+            return CreateWiredBox(bbox.GetVertices());
         }
         public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<OrientedBoundingBox> obboxList)
         {
@@ -164,7 +164,7 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateWiredBox(OrientedBoundingBox obbox)
         {
-            return CreateWiredBox(obbox.GetCorners());
+            return CreateWiredBox(obbox.GetVertices());
         }
         public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<Vector3> corners)
         {
