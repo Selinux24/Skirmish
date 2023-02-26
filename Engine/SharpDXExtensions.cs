@@ -362,22 +362,22 @@ namespace Engine
             return new[]
             {
                 //Top edges
-                new Segment(vertices.ElementAt((int)BoxCorners.FrontRightTop),    vertices.ElementAt((int)BoxCorners.BackRightTop)),
-                new Segment(vertices.ElementAt((int)BoxCorners.BackRightTop),     vertices.ElementAt((int)BoxCorners.BackLeftTop)),
-                new Segment(vertices.ElementAt((int)BoxCorners.BackLeftTop),      vertices.ElementAt((int)BoxCorners.FrontLeftTop)),
-                new Segment(vertices.ElementAt((int)BoxCorners.FrontLeftTop),     vertices.ElementAt((int)BoxCorners.FrontRightTop)),
+                new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop),    vertices.ElementAt((int)BoxVertices.BackRightTop)),
+                new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop),     vertices.ElementAt((int)BoxVertices.BackLeftTop)),
+                new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop),      vertices.ElementAt((int)BoxVertices.FrontLeftTop)),
+                new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop),     vertices.ElementAt((int)BoxVertices.FrontRightTop)),
 
                 //Bottom edges
-                new Segment(vertices.ElementAt((int)BoxCorners.FrontRightBottom), vertices.ElementAt((int)BoxCorners.BackRightBottom)),
-                new Segment(vertices.ElementAt((int)BoxCorners.BackRightBottom),  vertices.ElementAt((int)BoxCorners.BackLeftBottom)),
-                new Segment(vertices.ElementAt((int)BoxCorners.BackLeftBottom),   vertices.ElementAt((int)BoxCorners.FrontLeftBottom)),
-                new Segment(vertices.ElementAt((int)BoxCorners.FrontLeftBottom),  vertices.ElementAt((int)BoxCorners.FrontRightBottom)),
+                new Segment(vertices.ElementAt((int)BoxVertices.FrontRightBottom), vertices.ElementAt((int)BoxVertices.BackRightBottom)),
+                new Segment(vertices.ElementAt((int)BoxVertices.BackRightBottom),  vertices.ElementAt((int)BoxVertices.BackLeftBottom)),
+                new Segment(vertices.ElementAt((int)BoxVertices.BackLeftBottom),   vertices.ElementAt((int)BoxVertices.FrontLeftBottom)),
+                new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftBottom),  vertices.ElementAt((int)BoxVertices.FrontRightBottom)),
 
                 //Vertical edges
-                new Segment(vertices.ElementAt((int)BoxCorners.FrontRightTop),    vertices.ElementAt((int)BoxCorners.FrontRightBottom)),
-                new Segment(vertices.ElementAt((int)BoxCorners.BackRightTop),     vertices.ElementAt((int)BoxCorners.BackRightBottom)),
-                new Segment(vertices.ElementAt((int)BoxCorners.BackLeftTop),      vertices.ElementAt((int)BoxCorners.BackLeftBottom)),
-                new Segment(vertices.ElementAt((int)BoxCorners.FrontLeftTop),     vertices.ElementAt((int)BoxCorners.FrontLeftBottom))
+                new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop),    vertices.ElementAt((int)BoxVertices.FrontRightBottom)),
+                new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop),     vertices.ElementAt((int)BoxVertices.BackRightBottom)),
+                new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop),      vertices.ElementAt((int)BoxVertices.BackLeftBottom)),
+                new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop),     vertices.ElementAt((int)BoxVertices.FrontLeftBottom))
             };
         }
 
@@ -390,12 +390,12 @@ namespace Engine
         {
             var vertices = bbox.GetVertices();
 
-            Plane top = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), Vector3.Up);
-            Plane bottom = new Plane(GetVertex(vertices, BoxCorners.FrontLeftBottom), Vector3.Down);
-            Plane front = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), Vector3.ForwardLH);
-            Plane back = new Plane(GetVertex(vertices, BoxCorners.BackLeftTop), Vector3.BackwardLH);
-            Plane left = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), Vector3.Left);
-            Plane right = new Plane(GetVertex(vertices, BoxCorners.FrontRightBottom), Vector3.Right);
+            Plane top = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Up);
+            Plane bottom = new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3.Down);
+            Plane front = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.ForwardLH);
+            Plane back = new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3.BackwardLH);
+            Plane left = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Left);
+            Plane right = new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3.Right);
 
             return new[] { top, bottom, front, back, left, right };
         }
@@ -411,22 +411,22 @@ namespace Engine
             var edges = GetEdges(vertices);
 
             Vector3 topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
-            Plane top = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), topNormal);
+            Plane top = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
 
             Vector3 bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
-            Plane bottom = new Plane(GetVertex(vertices, BoxCorners.FrontLeftBottom), bottomNormal);
+            Plane bottom = new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
 
             Vector3 frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
-            Plane front = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), frontNormal);
+            Plane front = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
 
             Vector3 backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
-            Plane back = new Plane(GetVertex(vertices, BoxCorners.BackLeftTop), backNormal);
+            Plane back = new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
 
             Vector3 leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
-            Plane left = new Plane(GetVertex(vertices, BoxCorners.FrontLeftTop), leftNormal);
+            Plane left = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
 
             Vector3 rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
-            Plane right = new Plane(GetVertex(vertices, BoxCorners.FrontRightBottom), rightNormal);
+            Plane right = new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
 
             return new[] { top, bottom, front, back, left, right };
         }
@@ -439,7 +439,7 @@ namespace Engine
         /// <returns>Returns the face list of the current bounding box</returns>
         public static Plane GetFace(this BoundingBox bbox, BoxFaces face)
         {
-            return GetFace(bbox, (int)face);
+            return GetFace(bbox.GetFaces(), face);
         }
         /// <summary>
         /// Gets the bounding box face plane
@@ -449,7 +449,7 @@ namespace Engine
         /// <returns>Returns the face list of the current bounding box</returns>
         public static Plane GetFace(this BoundingBox bbox, int faceIndex)
         {
-            return GetFaces(bbox).ElementAtOrDefault(faceIndex);
+            return GetFace(bbox.GetFaces(), faceIndex);
         }
         /// <summary>
         /// Gets the oriented bounding box face plane
@@ -459,7 +459,7 @@ namespace Engine
         /// <returns>Returns the face list of the current bounding box</returns>
         public static Plane GetFace(this OrientedBoundingBox obb, BoxFaces face)
         {
-            return GetFace(obb, (int)face);
+            return GetFace(obb.GetFaces(), face);
         }
         /// <summary>
         /// Gets the oriented bounding box face plane
@@ -469,7 +469,25 @@ namespace Engine
         /// <returns>Returns the face list of the current bounding box</returns>
         public static Plane GetFace(this OrientedBoundingBox obb, int faceIndex)
         {
-            return GetFaces(obb).ElementAtOrDefault(faceIndex);
+            return GetFace(obb.GetFaces(), faceIndex);
+        }
+        /// <summary>
+        /// Gets the specified box face
+        /// </summary>
+        /// <param name="faces">Box faces collection</param>
+        /// <param name="face">Face</param>
+        public static Plane GetFace(IEnumerable<Plane> faces, BoxFaces face)
+        {
+            return faces.ElementAtOrDefault((int)face);
+        }
+        /// <summary>
+        /// Gets the specified box face
+        /// </summary>
+        /// <param name="faces">Box faces collection</param>
+        /// <param name="faceIndex">Face index</param>
+        public static Plane GetFace(IEnumerable<Plane> faces, int faceIndex)
+        {
+            return faces.ElementAtOrDefault(faceIndex);
         }
 
         /// <summary>
@@ -477,7 +495,7 @@ namespace Engine
         /// </summary>
         /// <param name="box">Box</param>
         /// <param name="vertex">Box vertex</param>
-        public static Vector3 GetVertex(this BoundingBox box, BoxCorners vertex)
+        public static Vector3 GetVertex(this BoundingBox box, BoxVertices vertex)
         {
             return GetVertex(box.GetVertices(), (int)vertex);
         }
@@ -495,7 +513,7 @@ namespace Engine
         /// </summary>
         /// <param name="obb">Oriented bounding box</param>
         /// <param name="vertex">Box vertex</param>
-        public static Vector3 GetVertex(this OrientedBoundingBox obb, BoxCorners vertex)
+        public static Vector3 GetVertex(this OrientedBoundingBox obb, BoxVertices vertex)
         {
             return GetVertex(obb.GetVertices(), (int)vertex);
         }
@@ -513,7 +531,7 @@ namespace Engine
         /// </summary>
         /// <param name="vertices">Vertices</param>
         /// <param name="vertex">Box vertex</param>
-        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, BoxCorners vertex)
+        public static Vector3 GetVertex(IEnumerable<Vector3> vertices, BoxVertices vertex)
         {
             return vertices.ElementAtOrDefault((int)vertex);
         }

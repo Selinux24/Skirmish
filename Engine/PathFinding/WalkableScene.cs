@@ -64,6 +64,33 @@ namespace Engine.PathFinding
 
             return pickables.ToArray();
         }
+        /// <summary>
+        /// Gets the new agent position when target position is walkable
+        /// </summary>
+        /// <param name="agent">Agent</param>
+        /// <param name="prevPosition">Previous position</param>
+        /// <param name="newPosition">New position</param>
+        /// <param name="position">Test position</param>
+        /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
+        /// <returns>Returns the new agent position</returns>
+        private static Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
+        {
+            var finalPosition = position;
+
+            if (adjustHeight)
+            {
+                finalPosition.Y += agent.Height;
+            }
+
+            var moveP = newPosition - prevPosition;
+            var moveV = finalPosition - prevPosition;
+            if (moveV.LengthSquared() > moveP.LengthSquared())
+            {
+                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
+            }
+
+            return finalPosition;
+        }
 
         /// <summary>
         /// Path finder
@@ -542,33 +569,6 @@ namespace Engine.PathFinding
             }
 
             return false;
-        }
-        /// <summary>
-        /// Gets the new agent position when target position is walkable
-        /// </summary>
-        /// <param name="agent">Agent</param>
-        /// <param name="prevPosition">Previous position</param>
-        /// <param name="newPosition">New position</param>
-        /// <param name="position">Test position</param>
-        /// <param name="adjustHeight">Set whether use the agent height or not when resolving the final position. Usually true when the camera sets the agent's position</param>
-        /// <returns>Returns the new agent position</returns>
-        private Vector3 GetPositionWalkable(AgentType agent, Vector3 prevPosition, Vector3 newPosition, Vector3 position, bool adjustHeight)
-        {
-            var finalPosition = position;
-
-            if (adjustHeight)
-            {
-                finalPosition.Y += agent.Height;
-            }
-
-            var moveP = newPosition - prevPosition;
-            var moveV = finalPosition - prevPosition;
-            if (moveV.LengthSquared() > moveP.LengthSquared())
-            {
-                finalPosition = prevPosition + (Vector3.Normalize(moveV) * moveP.Length());
-            }
-
-            return finalPosition;
         }
         /// <summary>
         /// Gets the new agent position when target position is not walkable

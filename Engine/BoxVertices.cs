@@ -2,9 +2,9 @@
 namespace Engine
 {
     /// <summary>
-    /// Box corner enumerable
+    /// Box vertices enumerable
     /// </summary>
-    public enum BoxCorners
+    public enum BoxVertices
     {
         /// <summary>
         /// Front right top

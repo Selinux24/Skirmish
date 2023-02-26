@@ -484,7 +484,7 @@ namespace Engine
             {
                 Logger.WriteInformation(this, "Game: Setting scene with the default constructor");
 
-                scene = (T)Activator.CreateInstance(typeof(T), new object[] { this });
+                scene = (T)Activator.CreateInstance(typeof(T), this);
             }
             catch (Exception ex)
             {

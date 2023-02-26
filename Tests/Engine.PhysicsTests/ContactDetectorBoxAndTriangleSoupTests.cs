@@ -41,15 +41,6 @@ namespace Engine.PhysicsTests
 
             return ctri;
         }
-        static CollisionPlane FromPlane(Vector3 normal, float d, Matrix transform)
-        {
-            Plane p = new Plane(normal, d);
-            CollisionPlane plane = new CollisionPlane(p);
-            RigidBody planeBody = new RigidBody(float.PositiveInfinity, transform);
-            plane.Attach(planeBody);
-
-            return plane;
-        }
 
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
@@ -74,7 +65,7 @@ namespace Engine.PhysicsTests
 
         public class BoxAndTriangleSoupContactData
         {
-            public BoxCorners Corner { get; set; }
+            public BoxVertices Corner { get; set; }
             public float Penetration { get; set; }
         }
 
@@ -104,10 +95,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -121,10 +112,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0.1f },
                             }
                         }
                     },
@@ -138,10 +129,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -155,10 +146,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
                             }
                         }
                     },
@@ -201,10 +192,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -218,10 +209,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -235,10 +226,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -252,10 +243,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
                             }
                         }
                     },
@@ -298,10 +289,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 5,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop  , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 0 },
                             }
                         }
                     },
@@ -315,10 +306,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop  , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 0.1f },
                             }
                         }
                     },
@@ -332,10 +323,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop  , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop  , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop , Penetration = 1 },
                             }
                         }
                     },
@@ -349,10 +340,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
                             }
                         }
                     },
@@ -395,10 +386,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -412,10 +403,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop   , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0.1f },
                             }
                         }
                     },
@@ -429,10 +420,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom, Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -446,10 +437,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
                             }
                         }
                     },
@@ -492,10 +483,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom, Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 0 },
                             }
                         }
                     },
@@ -509,10 +500,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop   , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom, Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 0.1f },
                             }
                         }
                     },
@@ -526,10 +517,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom, Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop   , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom, Penetration = 1 },
                             }
                         }
                     },
@@ -543,10 +534,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftTop     , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackLeftBottom  , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontLeftBottom , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftTop    , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftBottom  , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontLeftBottom , Penetration = 2 },
                             }
                         }
                     },
@@ -589,10 +580,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0 },
                             }
                         }
                     },
@@ -606,10 +597,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 0.1f },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0.1f },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 0.1f },
                             }
                         }
                     },
@@ -623,10 +614,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 6,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 1 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 1 },
                             }
                         }
                     },
@@ -640,10 +631,10 @@ namespace Engine.PhysicsTests
                             ContactCount = 7,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightTop   , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightTop    , Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.FrontRightBottom, Penetration = 2 },
-                                new BoxAndTriangleSoupContactData{ Corner = BoxCorners.BackRightBottom , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
+                                new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightBottom , Penetration = 2 },
                             }
                         }
                     },
@@ -676,15 +667,12 @@ namespace Engine.PhysicsTests
             Console.WriteLine(testData.CaseName);
 
             ContactResolver data = new ContactResolver();
-            ContactResolver data1 = new ContactResolver();
 
             var soup = FromRectangle(new RectangleF(-100f, -100f, 200f, 200f), 0, Matrix.Identity);
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
             var box = FromAABB(Vector3.One, testData.BoxTransform);
 
             bool intersection = ContactDetector.BoxAndTriangleSoup(box, soup, data);
-            bool intersection2 = ContactDetector.BoxAndHalfSpace(box, plane, data1);
 
             Assert.AreEqual(testData.IntersectioExpected, intersection, testData.IntersectioExpected ? "Intersection expected" : "No intersection expected");
             Assert.AreEqual(testData.ContactCount, data.ContactCount, $"{testData.ContactCount} contacts expected");

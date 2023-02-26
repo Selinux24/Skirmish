@@ -210,7 +210,7 @@ namespace Engine.Common
             float fex = Math.Abs(edge1.X);
             float fey = Math.Abs(edge1.Y);
             float fez = Math.Abs(edge1.Z);
-            if (!AxisTestX01(boxExtents, origTri, edge1.Z, edge1.Y, fez, fey)) return false;
+            if (!AxisTestX02(boxExtents, origTri, edge1.Z, edge1.Y, fez, fey)) return false;
             if (!AxisTestY02(boxExtents, origTri, edge1.Z, edge1.X, fez, fex)) return false;
             if (!AxisTestZ12(boxExtents, origTri, edge1.Y, edge1.X, fey, fex)) return false;
 
@@ -219,17 +219,17 @@ namespace Engine.Common
             fex = Math.Abs(edge2.X);
             fey = Math.Abs(edge2.Y);
             fez = Math.Abs(edge2.Z);
-            if (!AxisTestX01(boxExtents, origTri, edge2.Z, edge2.Y, fez, fey)) return false;
+            if (!AxisTestX02(boxExtents, origTri, edge2.Z, edge2.Y, fez, fey)) return false;
             if (!AxisTestY02(boxExtents, origTri, edge2.Z, edge2.X, fez, fex)) return false;
-            if (!AxisTestZ0(boxExtents, origTri, edge2.Y, edge2.X, fey, fex)) return false;
+            if (!AxisTestZ01(boxExtents, origTri, edge2.Y, edge2.X, fey, fex)) return false;
 
             // Test third 3 edges
             var edge3 = triangle.GetEdge3();
             fex = Math.Abs(edge3.X);
             fey = Math.Abs(edge3.Y);
             fez = Math.Abs(edge3.Z);
-            if (!AxisTestX2(boxExtents, origTri, edge3.Z, edge3.Y, fez, fey)) return false;
-            if (!AxisTestY1(boxExtents, origTri, edge3.Z, edge3.X, fez, fex)) return false;
+            if (!AxisTestX01(boxExtents, origTri, edge3.Z, edge3.Y, fez, fey)) return false;
+            if (!AxisTestY01(boxExtents, origTri, edge3.Z, edge3.X, fez, fex)) return false;
             if (!AxisTestZ12(boxExtents, origTri, edge3.Y, edge3.X, fey, fex)) return false;
 
             // Test X direction
@@ -290,6 +290,20 @@ namespace Engine.Common
         private static bool AxisTestX01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
         {
             float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
+            float p1 = a * tri.Point2.Y - b * tri.Point2.Z;
+            Helper.MinMax(p0, p1, out float min, out float max);
+
+            float rad = fa * extents.Y + fb * extents.Z;
+            if (min > rad || max < -rad)
+            {
+                return false;
+            }
+
+            return true;
+        }
+        private static bool AxisTestX02(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        {
+            float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
             float p2 = a * tri.Point3.Y - b * tri.Point3.Z;
             Helper.MinMax(p0, p2, out float min, out float max);
 
@@ -301,13 +315,13 @@ namespace Engine.Common
 
             return true;
         }
-        private static bool AxisTestX2(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestY01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
         {
-            float p0 = a * tri.Point1.Y - b * tri.Point1.Z;
-            float p1 = a * tri.Point2.Y - b * tri.Point2.Z;
+            float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
+            float p1 = -a * tri.Point2.X + b * tri.Point2.Z;
             Helper.MinMax(p0, p1, out float min, out float max);
 
-            float rad = fa * extents.Y + fb * extents.Z;
+            float rad = fa * extents.X + fb * extents.Z;
             if (min > rad || max < -rad)
             {
                 return false;
@@ -329,13 +343,13 @@ namespace Engine.Common
 
             return true;
         }
-        private static bool AxisTestY1(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
+        private static bool AxisTestZ01(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
         {
-            float p0 = -a * tri.Point1.X + b * tri.Point1.Z;
-            float p1 = -a * tri.Point2.X + b * tri.Point2.Z;
+            float p0 = a * tri.Point1.X - b * tri.Point1.Y;
+            float p1 = a * tri.Point2.X - b * tri.Point2.Y;
             Helper.MinMax(p0, p1, out float min, out float max);
 
-            float rad = fa * extents.X + fb * extents.Z;
+            float rad = fa * extents.X + fb * extents.Y;
             if (min > rad || max < -rad)
             {
                 return false;
@@ -348,20 +362,6 @@ namespace Engine.Common
             float p1 = a * tri.Point2.X - b * tri.Point2.Y;
             float p2 = a * tri.Point3.X - b * tri.Point3.Y;
             Helper.MinMax(p1, p2, out float min, out float max);
-
-            float rad = fa * extents.X + fb * extents.Y;
-            if (min > rad || max < -rad)
-            {
-                return false;
-            }
-
-            return true;
-        }
-        private static bool AxisTestZ0(Vector3 extents, Triangle tri, float a, float b, float fa, float fb)
-        {
-            float p0 = a * tri.Point1.X - b * tri.Point1.Y;
-            float p1 = a * tri.Point2.X - b * tri.Point2.Y;
-            Helper.MinMax(p0, p1, out float min, out float max);
 
             float rad = fa * extents.X + fb * extents.Y;
             if (min > rad || max < -rad)
@@ -542,7 +542,17 @@ namespace Engine.Common
         /// </summary>
         /// <param name="segment">The segment to test.</param>
         /// <param name="tri">Triangle</param>
-        /// <param name="point">When the method completes, contains the point of intersection, or <see cref="Vector3.Zero"/> if there was no intersection.</param>
+        /// <returns>Whether the two objects intersected.</returns>
+        public static bool SegmentIntersectsTriangle(Segment segment, Triangle tri)
+        {
+            return SegmentIntersectsTriangle(segment, tri, out _);
+        }
+        /// <summary>
+        /// Determines whether there is an intersection between a <see cref="Segment"/> and a <see cref="Triangle"/>.
+        /// </summary>
+        /// <param name="segment">The segment to test.</param>
+        /// <param name="tri">Triangle</param>
+        /// <param name="distance">Distance to point</param>
         /// <returns>Whether the two objects intersected.</returns>
         public static bool SegmentIntersectsTriangle(Segment segment, Triangle tri, out float distance)
         {

@@ -814,7 +814,7 @@ namespace Engine.Physics
             var boxEdges = box.GetEdges();
             foreach (var edge in boxEdges)
             {
-                if (!Intersection.SegmentIntersectsTriangle(edge, tri, out _))
+                if (!Intersection.SegmentIntersectsTriangle(edge, tri))
                 {
                     continue;
                 }
@@ -831,7 +831,7 @@ namespace Engine.Physics
             var triEdges = tri.GetEdges();
             foreach (var edge in triEdges)
             {
-                if (!Intersection.SegmentIntersectsBox(edge, box, out _))
+                if (!Intersection.SegmentIntersectsBox(edge, box))
                 {
                     continue;
                 }
@@ -840,7 +840,7 @@ namespace Engine.Physics
                 var penetrationPoint = sign >= 0 ? edge.Point1 : edge.Point2;
                 float penetration = tri.Plane.D + Vector3.Dot(penetrationPoint, triToBoxNormal);
 
-                res.Add(new ContactAcummulatorData { Edge = edge, Point = penetrationPoint, Penetration = -penetration, Normal = edge.Direction, Direction = -1 });
+                res.Add(new ContactAcummulatorData { Edge = edge, Point = penetrationPoint, Penetration = -penetration, Normal = -edge.Direction, Direction = -1 });
             }
 
             return res.Distinct().ToArray();

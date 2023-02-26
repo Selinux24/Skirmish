@@ -599,7 +599,7 @@ namespace Engine
             where TObj : BaseSceneObject<TDescription>
             where TDescription : SceneObjectDescription
         {
-            var component = (TObj)Activator.CreateInstance(typeof(TObj), new object[] { this, id, name });
+            var component = (TObj)Activator.CreateInstance(typeof(TObj), this, id, name);
 
             await component.InitializeAssets(description);
 

@@ -27,7 +27,7 @@ namespace Engine.Helpers.DDS
             byte ch2 = (byte)text[2];
             byte ch3 = (byte)text[3];
 
-            return (ch0 | (ch1 << 8) | (ch2 << 16) | (ch3 << 24));
+            return ch0 | (ch1 << 8) | (ch2 << 16) | (ch3 << 24);
         }
         /// <summary>
         /// Gets the surface info
@@ -288,8 +288,8 @@ namespace Engine.Helpers.DDS
         public bool IsDX10()
         {
             return
-                (this.Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC)) &&
-                (MakeFourCC("DX10") == this.FourCC);
+                Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC) &&
+                (MakeFourCC("DX10") == FourCC);
         }
         /// <summary>
         /// Gets the equivalent DXGI format
@@ -297,19 +297,19 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the equivalent DXGI format</returns>
         public Format GetDXGIFormat()
         {
-            if (this.Flags.HasFlag(DdsPixelFormats.DDPF_RGB))
+            if (Flags.HasFlag(DdsPixelFormats.DDPF_RGB))
             {
                 return GetFormatDDPFRGB();
             }
-            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_LUMINANCE))
+            else if (Flags.HasFlag(DdsPixelFormats.DDPF_LUMINANCE))
             {
                 return GetFormatDDPFLuminance();
             }
-            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_ALPHA))
+            else if (Flags.HasFlag(DdsPixelFormats.DDPF_ALPHA))
             {
                 return GetFormatDDPFAlpha();
             }
-            else if (this.Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC))
+            else if (Flags.HasFlag(DdsPixelFormats.DDPF_FOURCC))
             {
                 return GetFormatDDPFFOURCC();
             }
@@ -323,7 +323,7 @@ namespace Engine.Helpers.DDS
         private Format GetFormatDDPFRGB()
         {
             // Note that sRGB formats are written using the "DX10" extended header
-            switch (this.RGBBitCount)
+            switch (RGBBitCount)
             {
                 case 32:
                     return GetFormatDDPFRGB32();
@@ -341,17 +341,17 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the DDPF RGB Format</returns>
         private Format GetFormatDDPFRGB32()
         {
-            if (this.IsBitMask(0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000))
+            if (IsBitMask(0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000))
             {
                 return Format.R8G8B8A8_UNorm;
             }
 
-            if (this.IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000))
+            if (IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0xff000000))
             {
                 return Format.B8G8R8A8_UNorm;
             }
 
-            if (this.IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000))
+            if (IsBitMask(0x00ff0000, 0x0000ff00, 0x000000ff, 0x00000000))
             {
                 return Format.B8G8R8X8_UNorm;
             }
@@ -365,19 +365,19 @@ namespace Engine.Helpers.DDS
             // header extension and specify the DXGI_FORMAT_R10G10B10A2_UNORM format directly
 
             // For 'correct' writers, this should be 0x000003ff, 0x000ffc00, 0x3ff00000 for RGB data
-            if (this.IsBitMask(0x3ff00000, 0x000ffc00, 0x000003ff, 0xc0000000))
+            if (IsBitMask(0x3ff00000, 0x000ffc00, 0x000003ff, 0xc0000000))
             {
                 return Format.R10G10B10A2_UNorm;
             }
 
             // No DXGI format maps to ISBITMASK(0x000003ff, 0x000ffc00, 0x3ff00000, 0xc0000000) aka D3DFMT_A2R10G10B10
 
-            if (this.IsBitMask(0x0000ffff, 0xffff0000, 0x00000000, 0x00000000))
+            if (IsBitMask(0x0000ffff, 0xffff0000, 0x00000000, 0x00000000))
             {
                 return Format.R16G16_UNorm;
             }
 
-            if (this.IsBitMask(0xffffffff, 0x00000000, 0x00000000, 0x00000000))
+            if (IsBitMask(0xffffffff, 0x00000000, 0x00000000, 0x00000000))
             {
                 // Only 32-bit color channel format in D3D9 was R32F
                 return Format.R32_Float; // D3DX writes this out as a FourCC of 114
@@ -400,17 +400,17 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the DDPF RGB Format</returns>
         private Format GetFormatDDPFRGB16()
         {
-            if (this.IsBitMask(0x7c00, 0x03e0, 0x001f, 0x8000))
+            if (IsBitMask(0x7c00, 0x03e0, 0x001f, 0x8000))
             {
                 return Format.B5G5R5A1_UNorm;
             }
-            if (this.IsBitMask(0xf800, 0x07e0, 0x001f, 0x0000))
+            if (IsBitMask(0xf800, 0x07e0, 0x001f, 0x0000))
             {
                 return Format.B5G6R5_UNorm;
             }
 
             // No DXGI format maps to ISBITMASK(0x7c00, 0x03e0, 0x001f, 0x0000) aka D3DFMT_X1R5G5B5
-            if (this.IsBitMask(0x0f00, 0x00f0, 0x000f, 0xf000))
+            if (IsBitMask(0x0f00, 0x00f0, 0x000f, 0xf000))
             {
                 return Format.B4G4R4A4_UNorm;
             }
@@ -426,19 +426,19 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the DDPF Luminance Format</returns>
         private Format GetFormatDDPFLuminance()
         {
-            if (8 == this.RGBBitCount && this.IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x00000000))
+            if (8 == RGBBitCount && IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x00000000))
             {
                 return Format.R8_UNorm; // D3DX10/11 writes this out as DX10 extension
             }
             // No DXGI format maps to ISBITMASK(0x0f, 0x00, 0x00, 0xf0) aka D3DFMT_A4L4
 
-            if (16 == this.RGBBitCount)
+            if (16 == RGBBitCount)
             {
-                if (this.IsBitMask(0x0000ffff, 0x00000000, 0x00000000, 0x00000000))
+                if (IsBitMask(0x0000ffff, 0x00000000, 0x00000000, 0x00000000))
                 {
                     return Format.R16_UNorm; // D3DX10/11 writes this out as DX10 extension
                 }
-                if (this.IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x0000ff00))
+                if (IsBitMask(0x000000ff, 0x00000000, 0x00000000, 0x0000ff00))
                 {
                     return Format.R8G8_UNorm; // D3DX10/11 writes this out as DX10 extension
                 }
@@ -452,7 +452,7 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the DDPF Alpha Format</returns>
         private Format GetFormatDDPFAlpha()
         {
-            if (8 == this.RGBBitCount)
+            if (8 == RGBBitCount)
             {
                 return Format.A8_UNorm;
             }
@@ -465,69 +465,69 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns the DDPF Four CC Format</returns>
         private Format GetFormatDDPFFOURCC()
         {
-            if (MakeFourCC("DXT1") == this.FourCC)
+            if (MakeFourCC("DXT1") == FourCC)
             {
                 return Format.BC1_UNorm;
             }
-            if (MakeFourCC("DXT3") == this.FourCC)
+            if (MakeFourCC("DXT3") == FourCC)
             {
                 return Format.BC2_UNorm;
             }
-            if (MakeFourCC("DXT5") == this.FourCC)
+            if (MakeFourCC("DXT5") == FourCC)
             {
                 return Format.BC3_UNorm;
             }
 
             // While pre-mulitplied alpha isn't directly supported by the DXGI formats,
             // they are basically the same as these BC formats so they can be mapped
-            if (MakeFourCC("DXT2") == this.FourCC)
+            if (MakeFourCC("DXT2") == FourCC)
             {
                 return Format.BC2_UNorm;
             }
-            if (MakeFourCC("DXT4") == this.FourCC)
+            if (MakeFourCC("DXT4") == FourCC)
             {
                 return Format.BC3_UNorm;
             }
 
-            if (MakeFourCC("ATI1") == this.FourCC)
+            if (MakeFourCC("ATI1") == FourCC)
             {
                 return Format.BC4_UNorm;
             }
-            if (MakeFourCC("BC4U") == this.FourCC)
+            if (MakeFourCC("BC4U") == FourCC)
             {
                 return Format.BC4_UNorm;
             }
-            if (MakeFourCC("BC4S") == this.FourCC)
+            if (MakeFourCC("BC4S") == FourCC)
             {
                 return Format.BC4_SNorm;
             }
 
-            if (MakeFourCC("ATI2") == this.FourCC)
+            if (MakeFourCC("ATI2") == FourCC)
             {
                 return Format.BC5_UNorm;
             }
-            if (MakeFourCC("BC5U") == this.FourCC)
+            if (MakeFourCC("BC5U") == FourCC)
             {
                 return Format.BC5_UNorm;
             }
-            if (MakeFourCC("BC5S") == this.FourCC)
+            if (MakeFourCC("BC5S") == FourCC)
             {
                 return Format.BC5_SNorm;
             }
 
             // BC6H and BC7 are written using the "DX10" extended header
 
-            if (MakeFourCC("RGBG") == this.FourCC)
+            if (MakeFourCC("RGBG") == FourCC)
             {
                 return Format.R8G8_B8G8_UNorm;
             }
-            if (MakeFourCC("GRGB") == this.FourCC)
+            if (MakeFourCC("GRGB") == FourCC)
             {
                 return Format.G8R8_G8B8_UNorm;
             }
 
             // Check for D3DFORMAT enums being set here
-            switch (this.FourCC)
+            switch (FourCC)
             {
                 case 36: // D3DFMT_A16B16G16R16
                     return Format.R16G16B16A16_UNorm;
@@ -566,7 +566,11 @@ namespace Engine.Helpers.DDS
         /// <returns>Returns true if the specified color components were the bit mask</returns>
         private bool IsBitMask(uint r, uint g, uint b, uint a)
         {
-            return (this.RBitMask == r && this.GBitMask == g && this.BBitMask == b && this.ABitMask == a);
+            return
+                RBitMask == r &&
+                GBitMask == g &&
+                BBitMask == b &&
+                ABitMask == a;
         }
     };
 }
