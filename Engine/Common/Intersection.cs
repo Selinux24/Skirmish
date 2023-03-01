@@ -751,51 +751,73 @@ namespace Engine.Common
         /// <summary>
         /// Gets the point of the box closest to the specified point
         /// </summary>
+        /// <param name="point">Point</param>
         /// <param name="box">Box</param>
-        /// <param name="point">point</param>
         /// <returns>Returns the point of the box closest to the specified point</returns>
-        public static Vector3 ClosestPointInBox(Vector3 point, OrientedBoundingBox box)
+        public static Vector3 ClosestPointInBox(Vector3 point, BoundingBox box)
         {
-            Vector3 diff = point - box.Center;
+            return ClosestPointInBox(point, box.Center, box.GetExtents(), Matrix.Identity);
+        }
+        /// <summary>
+        /// Gets the point of the box closest to the specified point
+        /// </summary>
+        /// <param name="point">Point</param>
+        /// <param name="obb">Oriented bounding box</param>
+        /// <returns>Returns the point of the box closest to the specified point</returns>
+        public static Vector3 ClosestPointInBox(Vector3 point, OrientedBoundingBox obb)
+        {
+            return ClosestPointInBox(point, obb.Center, obb.Extents, obb.Transformation);
+        }
+        /// <summary>
+        /// Gets the point of the box closest to the specified point
+        /// </summary>
+        /// <param name="point">Point</param>
+        /// <param name="center">Box center</param>
+        /// <param name="extents">Box extents</param>
+        /// <param name="transform">Box transform</param>
+        /// <returns>Returns the point of the box closest to the specified point</returns>
+        public static Vector3 ClosestPointInBox(Vector3 point, Vector3 center, Vector3 extents, Matrix transform)
+        {
+            Vector3 diff = point - center;
 
-            float closestX = Vector3.Dot(diff, box.Transformation.Right);
-            float closestY = Vector3.Dot(diff, box.Transformation.Up);
-            float closestZ = Vector3.Dot(diff, box.Transformation.Backward);
+            float closestX = Vector3.Dot(diff, transform.Right);
+            float closestY = Vector3.Dot(diff, transform.Up);
+            float closestZ = Vector3.Dot(diff, transform.Backward);
 
             //Eje X
-            if (closestX < -box.Extents.X)
+            if (closestX < -extents.X)
             {
-                closestX = -box.Extents.X;
+                closestX = -extents.X;
             }
-            else if (closestX > box.Extents.X)
+            else if (closestX > extents.X)
             {
-                closestX = box.Extents.X;
+                closestX = extents.X;
             }
 
             //Eje Y
-            if (closestY < -box.Extents.Y)
+            if (closestY < -extents.Y)
             {
-                closestY = -box.Extents.Y;
+                closestY = -extents.Y;
             }
-            else if (closestY > box.Extents.Y)
+            else if (closestY > extents.Y)
             {
-                closestY = box.Extents.Y;
+                closestY = extents.Y;
             }
 
             //Eje Z
-            if (closestZ < -box.Extents.Z)
+            if (closestZ < -extents.Z)
             {
-                closestZ = -box.Extents.Z;
+                closestZ = -extents.Z;
             }
-            else if (closestZ > box.Extents.Z)
+            else if (closestZ > extents.Z)
             {
-                closestZ = box.Extents.Z;
+                closestZ = extents.Z;
             }
 
-            Vector3 closestPoint = box.Center;
-            closestPoint += closestX * box.Transformation.Right;
-            closestPoint += closestY * box.Transformation.Up;
-            closestPoint += closestZ * box.Transformation.Backward;
+            Vector3 closestPoint = center;
+            closestPoint += closestX * transform.Right;
+            closestPoint += closestY * transform.Up;
+            closestPoint += closestZ * transform.Backward;
 
             return closestPoint;
         }

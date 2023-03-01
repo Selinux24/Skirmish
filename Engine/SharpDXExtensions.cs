@@ -390,14 +390,12 @@ namespace Engine
         {
             var vertices = bbox.GetVertices();
 
-            Plane top = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Up);
-            Plane bottom = new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3.Down);
-            Plane front = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.ForwardLH);
-            Plane back = new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3.BackwardLH);
-            Plane left = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Left);
-            Plane right = new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3.Right);
-
-            return new[] { top, bottom, front, back, left, right };
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Up);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), Vector3.Down);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.ForwardLH);
+            yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), Vector3.BackwardLH);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), Vector3.Left);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), Vector3.Right);
         }
         /// <summary>
         /// Gets the oriented bounding box face planes list
@@ -411,24 +409,22 @@ namespace Engine
             var edges = GetEdges(vertices);
 
             Vector3 topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
-            Plane top = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
 
             Vector3 bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
-            Plane bottom = new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
 
             Vector3 frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
-            Plane front = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
 
             Vector3 backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
-            Plane back = new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
+            yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
 
             Vector3 leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
-            Plane left = new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
 
             Vector3 rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
-            Plane right = new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
-
-            return new[] { top, bottom, front, back, left, right };
+            yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
         }
 
         /// <summary>

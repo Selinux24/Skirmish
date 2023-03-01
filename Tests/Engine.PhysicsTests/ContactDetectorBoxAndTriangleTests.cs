@@ -1,0 +1,127 @@
+﻿using Engine.Physics;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using SharpDX;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+
+namespace Engine.PhysicsTests
+{
+    [ExcludeFromCodeCoverage]
+    [TestClass()]
+    public class ContactDetectorBoxAndTriangleTests
+    {
+        static TestContext _testContext;
+
+        static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
+
+        static CollisionBox FromAABB(Vector3 extents, Matrix transform)
+        {
+            CollisionBox box = new CollisionBox(extents);
+            RigidBody boxBody = new RigidBody(1, transform);
+            box.Attach(boxBody);
+
+            return box;
+        }
+        static CollisionPlane FromPlane(Plane plane, Matrix transform)
+        {
+            CollisionPlane p = new CollisionPlane(plane);
+            RigidBody triBody = new RigidBody(2, transform);
+            p.Attach(triBody);
+
+            return p;
+        }
+        static CollisionTriangleSoup FromTriangle(Triangle tri, Matrix transform)
+        {
+            CollisionTriangleSoup ctri = new CollisionTriangleSoup(new[] { tri });
+            RigidBody triBody = new RigidBody(2, transform);
+            ctri.Attach(triBody);
+
+            return ctri;
+        }
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context)
+        {
+            _testContext = context;
+        }
+
+        [TestInitialize]
+        public void SetupTest()
+        {
+            Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
+        }
+
+        [TestMethod()]
+        public void ContactDetectorBoxAndTriangleTest()
+        {
+            ContactResolver dataPln = new ContactResolver();
+            ContactResolver dataTri = new ContactResolver();
+
+            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up * 0.99f));
+
+            var p1 = new Vector3(0f, 0f, 100f);
+            var p2 = new Vector3(100f, 0f, -100f);
+            var p3 = new Vector3(-100f, 0f, -100f);
+            var tri = new Triangle(p1, p2, p3);
+
+            var plane = FromPlane(tri.Plane, Matrix.Identity);
+            var triSoup = FromTriangle(tri, Matrix.Identity);
+
+            bool intersectionPln = ContactDetector.BoxAndHalfSpace(box, plane, dataPln);
+            Assert.AreEqual(true, intersectionPln);
+
+            bool intersectionTri = ContactDetector.BoxAndTriangleSoup(box, triSoup, dataTri);
+            Assert.AreEqual(true, intersectionTri);
+
+            var contactsPln = dataPln.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
+            var contactsTri = dataTri.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
+            CollectionAssert.AreEquivalent(contactsPln, contactsTri);
+        }
+
+        [TestMethod()]
+        public void ContactDetectorBoxAndTriangleTest2()
+        {
+            ContactResolver dataPln = new ContactResolver();
+            ContactResolver dataTri = new ContactResolver();
+
+            var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Down));
+            var plane = FromPlane(new Plane(Vector3.Up, 0), Matrix.Identity);
+
+            var p1 = new Vector3(0f, -0.1f, 0f);
+            var p2 = new Vector3(5f, 5f, 0f);
+            var p3 = new Vector3(-5f, 5f, 0f);
+            var tri = new Triangle(p1, p2, p3);
+            var triSoup = FromTriangle(tri, Matrix.Identity);
+
+            bool intersectionPln = ContactDetector.TriangleSoupAndHalfSpace(triSoup, plane, dataPln);
+            Assert.AreEqual(true, intersectionPln);
+
+            bool intersectionTri = ContactDetector.BoxAndTriangleSoup(box, triSoup, dataTri);
+            Assert.AreEqual(true, intersectionTri);
+
+            var contactsPln = dataPln.GetContacts();
+            var contactsTri = dataTri.GetContacts();
+
+            for (int i = 0; i < contactsPln.Count(); i++)
+            {
+                var contact = contactsPln.ElementAt(i);
+
+                var expectedContact = contactsTri.FirstOrDefault(c => c.Position == contact.Position);
+                if (expectedContact == null)
+                {
+                    continue;
+                }
+
+                var expectedPenetration = expectedContact.Penetration;
+                var expectedPosition = expectedContact.Position;
+                var expectedNormal = Vector3.Up;
+
+                Assert.IsTrue(MathUtil.NearEqual(expectedPenetration, contact.Penetration), $"Contact {i}. Expected penetration {expectedPenetration} != {contact.Penetration}");
+                Assert.IsTrue(Vector3.NearEqual(expectedPosition, contact.Position, Epsilon), $"Contact {i}. Expected position {expectedPosition} != {contact.Position}");
+                Assert.IsTrue(Vector3.NearEqual(expectedNormal, contact.Normal, Epsilon), $"Contact {i}. Expected normal {expectedNormal} != {contact.Normal}");
+            }
+        }
+    }
+}

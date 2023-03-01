@@ -154,7 +154,7 @@ namespace Engine.Physics
             if (best < 3)
             {
                 // There is a vertex of box two on a face of box one.
-                FillPointFaceBoxBox(one, two, toCentre, best, pen, ref data);
+                FillPointFaceBoxBox(one, two, toCentre, best, pen, data);
 
                 return true;
             }
@@ -165,13 +165,13 @@ namespace Engine.Physics
 
                 // Swap bodies
                 (one, two) = (two, one);
-                FillPointFaceBoxBox(one, two, toCentre * -1f, best - 3, pen, ref data);
+                FillPointFaceBoxBox(one, two, toCentre * -1f, best - 3, pen, data);
 
                 return true;
             }
 
             // Edge-to-edge contact.
-            FillEdgeEdgeBoxBox(one, two, toCentre, best - 6, bestSingleAxis, pen, ref data);
+            FillEdgeEdgeBoxBox(one, two, toCentre, best - 6, bestSingleAxis, pen, data);
 
             return true;
         }
@@ -223,13 +223,20 @@ namespace Engine.Physics
 
             foreach (var triangle in triangleSoup.Triangles)
             {
-                var origTri = Triangle.Transform(triangle, invTrn);
+                var origTri = triangle;
+                if (!invTrn.IsIdentity)
+                {
+                    // Move to "aabb as origin" space
+                    origTri = Triangle.Transform(triangle, invTrn);
+                }
 
+                // Intersection test
                 if (!Intersection.BoxIntersectsTriangle(origBox, origTri))
                 {
                     continue;
                 }
 
+                // Generate body contacts
                 var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
                 foreach (var contact in contacts)
                 {
@@ -242,19 +249,7 @@ namespace Engine.Physics
                 return false;
             }
 
-            foreach (var contact in contactsAccum.GetContacts())
-            {
-                var contactPosition = Vector3.TransformCoordinate(contact.Point, trn);
-                var contactNormal = Vector3.TransformNormal(contact.Normal, trn);
-                IRigidBody body1 = contact.Direction == 1 ? box.RigidBody : triangleSoup.RigidBody;
-                IRigidBody body2 = contact.Direction == 1 ? triangleSoup.RigidBody : box.RigidBody;
-
-                data.AddContact(body1, body2, contactPosition, contactNormal, contact.Penetration);
-                if (!data.HasFreeContacts())
-                {
-                    break;
-                }
-            }
+            ContactAcummulator.AddToResolver(contactsAccum.GetContacts(), box.RigidBody, triangleSoup.RigidBody, trn, data);
 
             return true;
         }
@@ -268,28 +263,27 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool BoxAndTriangle(CollisionBox box, Triangle triangle, IRigidBody rigidBody, ContactResolver data)
         {
-            //Convert obb to aabb
+            // Convert obb to aabb
             var obb = box.OrientedBoundingBox;
             var trn = obb.Transformation;
             var invTrn = Matrix.Invert(trn);
             var origBox = new BoundingBox(-obb.Extents, obb.Extents);
             var origTri = Triangle.Transform(triangle, invTrn);
 
-            //Detect contacts
-            var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
-            foreach (var contact in contacts)
+            // Intersection test
+            if (!Intersection.BoxIntersectsTriangle(origBox, origTri))
             {
-                var contactPosition = Vector3.TransformCoordinate(contact.Point, trn);
-                var contactNormal = Vector3.TransformNormal(contact.Normal, trn);
-                IRigidBody body1 = contact.Direction == 1 ? box.RigidBody : rigidBody;
-                IRigidBody body2 = contact.Direction == 1 ? rigidBody : box.RigidBody;
-
-                data.AddContact(body1, body2, contactPosition, contactNormal, contact.Penetration);
-                if (!data.HasFreeContacts())
-                {
-                    return true;
-                }
+                return false;
             }
+
+            // Generate body contacts
+            var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
+            if (!contacts.Any())
+            {
+                return false;
+            }
+
+            ContactAcummulator.AddToResolver(contacts, box.RigidBody, rigidBody, trn, data);
 
             return true;
         }
@@ -634,7 +628,7 @@ namespace Engine.Physics
         /// <param name="best">Best penetration axis</param>
         /// <param name="pen">Minor penetration axis</param>
         /// <param name="data">Collision data</param>
-        private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, float pen, ref ContactResolver data)
+        private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, float pen, ContactResolver data)
         {
             // We know which is the axis of the collision, but we have to know which face we have to work with
             var normal = GetAxis(one.RigidBody.Transform, best);
@@ -662,7 +656,7 @@ namespace Engine.Physics
         /// <param name="bestSingleAxis">Best single axis</param>
         /// <param name="pen">Minor penetration axis</param>
         /// <param name="data">Collision data</param>
-        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, uint bestSingleAxis, float pen, ref ContactResolver data)
+        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, uint bestSingleAxis, float pen, ContactResolver data)
         {
             // Get the common axis.
             uint oneAxisIndex = best / 3;
@@ -820,112 +814,60 @@ namespace Engine.Physics
                 }
 
                 float sign = Vector3.Dot(edge.Direction, tri.Plane.Normal);
-                var penetrationPoint = sign >= 0 ? edge.Point1 : edge.Point2;
-                float penetration = tri.Plane.D + Vector3.Dot(penetrationPoint, tri.Plane.Normal);
+                var contactPoint = sign >= 0 ? edge.Point1 : edge.Point2;
+                float penetration = tri.Plane.D + Vector3.Dot(contactPoint, tri.Plane.Normal);
 
-                res.Add(new ContactAcummulatorData { Edge = edge, Point = penetrationPoint, Penetration = -penetration, Normal = tri.Normal, Direction = 1 });
+                res.Add(new ContactAcummulatorData { Edge = edge, Point = contactPoint, Penetration = -penetration, Normal = tri.Normal, Direction = 1 });
             }
 
             // Triangle to box contacts
-            var triToBoxNormal = Vector3.Normalize(tri.Center - box.Center);
             var triEdges = tri.GetEdges();
             foreach (var edge in triEdges)
             {
-                if (!Intersection.SegmentIntersectsBox(edge, box))
+                if (!Intersection.SegmentIntersectsBox(edge, box, out Vector3 point, out _))
                 {
                     continue;
                 }
 
-                float sign = Vector3.Dot(edge.Direction, triToBoxNormal);
-                var penetrationPoint = sign >= 0 ? edge.Point1 : edge.Point2;
-                float penetration = tri.Plane.D + Vector3.Dot(penetrationPoint, triToBoxNormal);
+                var bestFace = GetAABBFaceFromPoint(box, point);
+                var contactNormal = bestFace.Normal;
+                float sign = Vector3.Dot(edge.Direction, contactNormal);
+                var contactPoint = sign >= 0 ? edge.Point1 : edge.Point2;
+                float penetration = bestFace.D + Vector3.Dot(contactPoint, contactNormal);
 
-                res.Add(new ContactAcummulatorData { Edge = edge, Point = penetrationPoint, Penetration = -penetration, Normal = -edge.Direction, Direction = -1 });
+                res.Add(new ContactAcummulatorData { Edge = edge, Point = contactPoint, Penetration = -penetration, Normal = contactNormal, Direction = -1 });
             }
 
             return res.Distinct().ToArray();
         }
 
-        /// <summary>
-        /// Contact acummulator
-        /// </summary>
-        class ContactAcummulator
+        private static Plane GetAABBFaceFromPoint(BoundingBox box, Vector3 point)
         {
-            /// <summary>
-            /// Contact collection
-            /// </summary>
-            private readonly List<ContactAcummulatorData> contacts = new List<ContactAcummulatorData>();
-
-            /// <summary>
-            /// Adds new contacts to the collection
-            /// </summary>
-            /// <param name="contact">Contact</param>
-            public void Add(ContactAcummulatorData contact)
+            float bestD = float.MaxValue;
+            Plane bestP = new Plane();
+            foreach (var face in box.GetFaces())
             {
-                // Find edge contact
-                var index = contacts.FindIndex(c => c.Edge == contact.Edge);
-                if (index < 0)
-                {
-                    // Add edge contact to the collection
-                    contacts.Add(contact);
+                var intersection = face.Intersects(ref point);
 
-                    return;
+                if (intersection == PlaneIntersectionType.Intersecting)
+                {
+                    return face;
                 }
 
-                // Test contact penetration
-                if (contacts[index].Penetration >= contact.Penetration)
+                if (intersection == PlaneIntersectionType.Front)
                 {
-                    // Minor penetrations ignored
-                    return;
+                    continue;
                 }
 
-                // Store contact
-                contacts[index] = contact;
-            }
-
-            /// <summary>
-            /// Contact count
-            /// </summary>
-            public int Count
-            {
-                get
+                float d = -(Vector3.Dot(point, face.Normal) + face.D);
+                if (d < bestD)
                 {
-                    return contacts.Count;
+                    bestD = d;
+                    bestP = face;
                 }
             }
-            /// <summary>
-            /// Gets the contact list
-            /// </summary>
-            public IEnumerable<ContactAcummulatorData> GetContacts()
-            {
-                return contacts.ToArray();
-            }
-        }
-        /// <summary>
-        /// Contact acummulator data
-        /// </summary>
-        class ContactAcummulatorData
-        {
-            /// <summary>
-            /// Contact edge
-            /// </summary>
-            public Segment Edge { get; set; }
-            /// <summary>
-            /// Contact point
-            /// </summary>
-            public Vector3 Point { get; set; }
-            /// <summary>
-            /// Penetration
-            /// </summary>
-            public float Penetration { get; set; }
-            /// <summary>
-            /// Contact normal
-            /// </summary>
-            public Vector3 Normal { get; set; }
-            /// <summary>
-            /// Contact direction
-            /// </summary>
-            public int Direction { get; set; }
+
+            return bestP;
         }
     }
 }
