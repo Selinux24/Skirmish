@@ -4,6 +4,7 @@ using Engine.Content;
 using Engine.Physics;
 using Engine.UI;
 using SharpDX;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Physics
@@ -14,8 +15,9 @@ namespace Physics
         private UITextArea title = null;
         private UITextArea runtimeText = null;
         private UITextArea info = null;
+        private PrimitiveListDrawer<Line3D> lineDrawer = null;
 
-        private readonly Simulator simulator = new Simulator();
+        private readonly Simulator simulator = new Simulator() { Velocity = 1f };
         private readonly float bodyTime = 20f;
         private readonly float bodyDistance = 50f * 50f;
 
@@ -26,30 +28,35 @@ namespace Physics
         private PhysicsObject sphere1Body = null;
         private SceneLightPoint sphere1Light;
         private float sphere1Time = 0f;
+        private IEnumerable<Line3D> sphere1Lines;
 
         private readonly Vector3 sphere2Position = Vector3.Up * 15f;
         private Model sphere2 = null;
         private PhysicsObject sphere2Body = null;
         private SceneLightPoint sphere2Light;
         private float sphere2Time = 0f;
+        private IEnumerable<Line3D> sphere2Lines;
 
         private readonly Vector3 box1Position = Vector3.Up * 20f;
         private Model box1 = null;
         private PhysicsObject box1Body = null;
         private SceneLightPoint box1Light;
         private float box1Time = 0f;
+        private IEnumerable<Line3D> box1Lines;
 
         private readonly Vector3 box2Position = Vector3.Up * 25f;
         private Model box2 = null;
         private PhysicsObject box2Body = null;
         private SceneLightPoint box2Light;
         private float box2Time = 0f;
+        private IEnumerable<Line3D> box2Lines;
 
         private readonly Vector3 pyramid1Position = Vector3.Up * 30f;
         private Model pyramid1 = null;
         private PhysicsObject pyramid1Body = null;
         private SceneLightPoint pyramid1Light;
         private float pyramid1Time = 0f;
+        private IEnumerable<Line3D> pyramid1Lines;
 
         private bool gameReady = false;
 
@@ -71,6 +78,7 @@ namespace Physics
                 new[]
                 {
                     InitializeTexts(),
+                    InitializeLineDrawer(),
                     InitializeFloor(),
                     InitializeSpheres(),
                     InitializeBoxes(),
@@ -93,6 +101,18 @@ namespace Physics
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.66f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Panel", "Panel", spDesc, LayerUI - 1);
+        }
+        private async Task InitializeLineDrawer()
+        {
+            var desc = new PrimitiveListDrawerDescription<Line3D>()
+            {
+                Count = 20000,
+                DepthEnabled = true,
+            };
+            lineDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+                "EdgeDrawer",
+                "EdgeDrawer",
+                desc);
         }
         private async Task InitializeFloor()
         {
@@ -142,6 +162,9 @@ namespace Physics
 
             sphere1.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
             sphere2.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
+
+            sphere1Lines = Line3D.CreateWiredSphere(sphere1.GetBoundingSphere(), 32, 6);
+            sphere2Lines = Line3D.CreateWiredSphere(sphere2.GetBoundingSphere(), 32, 6);
         }
         private async Task InitializeBoxes()
         {
@@ -161,6 +184,9 @@ namespace Physics
 
             box1.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
             box2.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
+
+            box1Lines = Line3D.CreateWiredBox(box1.GetOrientedBoundingBox());
+            box2Lines = Line3D.CreateWiredBox(box2.GetOrientedBoundingBox());
         }
         private async Task InitializePyramids()
         {
@@ -178,6 +204,8 @@ namespace Physics
             pyramid1 = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
 
             pyramid1.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
+
+            pyramid1Lines = Line3D.CreateWiredPyramid(pyramid1.GetPoints());
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -202,11 +230,17 @@ namespace Physics
             sphere2.Manipulator.SetPosition(sphere2Position);
             sphere2Body = new PhysicsObject(new RigidBody(5, sphere2.Manipulator.FinalTransform), sphere2);
 
-            box1.Manipulator.SetPosition(box1Position);
+            Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
+            Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
+            Matrix r = r2 * r1 * Matrix.Translation(new Vector3(0, 10, 1.5f));
+            box1.Manipulator.SetTransform(r);
+
+            //box1.Manipulator.SetPosition(box1Position);
             box1Body = new PhysicsObject(new RigidBody(15, box1.Manipulator.FinalTransform), box1);
 
-            box2.Manipulator.SetScale(2f);
-            box2.Manipulator.SetPosition(box2Position);
+            //box2.Manipulator.SetScale(2f);
+            //box2.Manipulator.SetPosition(box2Position);
+            box2.Manipulator.SetPosition(new Vector3(0, 8, 0));
             box2Body = new PhysicsObject(new RigidBody(20, box2.Manipulator.FinalTransform), box2);
 
             pyramid1.Manipulator.SetPosition(pyramid1Position);
@@ -391,6 +425,16 @@ namespace Physics
                 pyramid1Body.Reset(pyramid1Position, Quaternion.Identity);
                 pyramid1Time = 0;
             }
+
+            lineDrawer.Clear();
+
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(sphere1.TintColor, 0.1f), Line3D.Transform(sphere1Lines, sphere1.Manipulator.FinalTransform));
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(sphere2.TintColor, 0.1f), Line3D.Transform(sphere2Lines, sphere2.Manipulator.FinalTransform));
+
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(box1.TintColor, 0.1f), Line3D.Transform(box1Lines, box1.Manipulator.FinalTransform));
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(box2.TintColor, 0.1f), Line3D.Transform(box2Lines, box2.Manipulator.FinalTransform));
+
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(pyramid1.TintColor, 0.1f), Line3D.Transform(pyramid1Lines, pyramid1.Manipulator.FinalTransform));
         }
 
         public override void GameGraphicsResized()

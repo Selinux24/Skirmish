@@ -21,7 +21,7 @@ namespace Physics
 
         private static CollisionBox CollisionBoxFromModel(Model model)
         {
-            return new CollisionBox(model.GetBoundingBox(true).GetExtents());
+            return new CollisionBox(model.GetOrientedBoundingBox(true).Extents);
         }
 
         private static CollisionSphere CollisionSphereFromModel(Model model)

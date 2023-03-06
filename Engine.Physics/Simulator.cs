@@ -50,7 +50,7 @@ namespace Engine.Physics
             // Generate contacts
             GenerateContacts();
 
-            // Resolve the contacs
+            // Resolve the contacts
             contactResolver.Resolve(time);
         }
 

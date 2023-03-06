@@ -326,19 +326,8 @@ namespace Engine
         {
             return CreateWiredBox(frustum.GetCorners());
         }
-        public static IEnumerable<Line3D> CreateWiredPyramid(BoundingFrustum frustum)
+        public static IEnumerable<Line3D> CreateWiredPyramid(IEnumerable<Vector3> vertices)
         {
-            FrustumCameraParams prms = frustum.GetCameraParams();
-            Vector3[] corners = frustum.GetCorners();
-
-            Vector3[] vertices = new Vector3[5];
-
-            vertices[0] = prms.Position;
-            vertices[1] = corners[4];
-            vertices[2] = corners[5];
-            vertices[3] = corners[6];
-            vertices[4] = corners[7];
-
             List<int> indexes = new List<int>(16)
             {
                 0,
@@ -361,6 +350,20 @@ namespace Engine
             };
 
             return CreateFromVertices(vertices, indexes);
+        }
+        public static IEnumerable<Line3D> CreateWiredPyramid(BoundingFrustum frustum)
+        {
+            FrustumCameraParams prms = frustum.GetCameraParams();
+            Vector3[] corners = frustum.GetCorners();
+
+            Vector3[] vertices = new Vector3[5];
+            vertices[0] = prms.Position;
+            vertices[1] = corners[4];
+            vertices[2] = corners[5];
+            vertices[3] = corners[6];
+            vertices[4] = corners[7];
+
+            return CreateWiredPyramid(vertices);
         }
         public static IEnumerable<Line3D> CreatePath(IEnumerable<Vector3> path)
         {
