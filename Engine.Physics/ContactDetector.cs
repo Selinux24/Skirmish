@@ -520,14 +520,14 @@ namespace Engine.Physics
         /// </summary>
         /// <param name="one">First box</param>
         /// <param name="two">Second box</param>
-        /// <param name="toCentre">To centre position</param>
+        /// <param name="toCenter">To center position</param>
         /// <param name="pen">Penetration value</param>
         /// <param name="best">Best axis</param>
         /// <param name="bestSingleAxis">Best single axis</param>
         /// <returns>Returns true if best axis detected</returns>
-        private static bool DetectBestAxis(CollisionBox one, CollisionBox two, out Vector3 toCentre, out float pen, out uint best, out uint bestSingleAxis)
+        private static bool DetectBestAxis(CollisionBox one, CollisionBox two, out Vector3 toCenter, out float pen, out uint best, out uint bestSingleAxis)
         {
-            toCentre = two.RigidBody.Position - one.RigidBody.Position;
+            toCenter = two.RigidBody.Position - one.RigidBody.Position;
             pen = float.MaxValue;
             best = uint.MaxValue;
             bestSingleAxis = uint.MaxValue;
@@ -536,26 +536,26 @@ namespace Engine.Physics
             var twoTrn = two.RigidBody.Transform;
 
             // Check each axis, storing penetration and the best axis
-            if (!TryAxis(one, two, oneTrn.Left, toCentre, 0, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, oneTrn.Up, toCentre, 1, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, oneTrn.Backward, toCentre, 2, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, oneTrn.Left, toCenter, 0, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, oneTrn.Up, toCenter, 1, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, oneTrn.Backward, toCenter, 2, ref pen, ref best)) return false;
 
-            if (!TryAxis(one, two, twoTrn.Left, toCentre, 3, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, twoTrn.Up, toCentre, 4, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, twoTrn.Backward, toCentre, 5, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, twoTrn.Left, toCenter, 3, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, twoTrn.Up, toCenter, 4, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, twoTrn.Backward, toCenter, 5, ref pen, ref best)) return false;
 
             // Store the best axis so far, in case of being in a parallel axis collision later.
             bestSingleAxis = best;
 
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Left), toCentre, 6, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Up), toCentre, 7, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Backward), toCentre, 8, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Left), toCentre, 9, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Up), toCentre, 10, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Backward), toCentre, 11, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Left), toCentre, 12, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Up), toCentre, 13, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Backward), toCentre, 14, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Left), toCenter, 6, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Up), toCenter, 7, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Backward), toCenter, 8, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Left), toCenter, 9, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Up), toCenter, 10, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Backward), toCenter, 11, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Left), toCenter, 12, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Up), toCenter, 13, ref pen, ref best)) return false;
+            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Backward), toCenter, 14, ref pen, ref best)) return false;
 
             // Making sure we have a result.
             if (best == uint.MaxValue)
@@ -571,12 +571,12 @@ namespace Engine.Physics
         /// <param name="one">First box</param>
         /// <param name="two">Second box</param>
         /// <param name="axis">Axis</param>
-        /// <param name="toCentre">Distance to center</param>
+        /// <param name="toCenter">Distance to center</param>
         /// <param name="index">Index</param>
         /// <param name="smallestPenetration">Smallest penetration</param>
         /// <param name="smallestCase">Smallest test case</param>
         /// <returns>Returns true if there has been a penetration</returns>
-        private static bool TryAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCentre, uint index, ref float smallestPenetration, ref uint smallestCase)
+        private static bool TryAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCenter, uint index, ref float smallestPenetration, ref uint smallestCase)
         {
             if (axis.LengthSquared() < 0.0001)
             {
@@ -585,7 +585,7 @@ namespace Engine.Physics
 
             axis.Normalize();
 
-            float penetration = PenetrationOnAxis(one, two, axis, toCentre);
+            float penetration = PenetrationOnAxis(one, two, axis, toCenter);
             if (penetration < 0)
             {
                 return false;
@@ -605,16 +605,16 @@ namespace Engine.Physics
         /// <param name="one">First box</param>
         /// <param name="two">Second box</param>
         /// <param name="axis">Axis</param>
-        /// <param name="toCentre">Distance to center</param>
+        /// <param name="toCenter">Distance to center</param>
         /// <returns>Returns true if there has been a penetration</returns>
-        private static float PenetrationOnAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCentre)
+        private static float PenetrationOnAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCenter)
         {
             // Project the extensions of each box onto the axis
             float oneProject = one.OrientedBoundingBox.ProjectToVector(axis);
             float twoProject = two.OrientedBoundingBox.ProjectToVector(axis);
 
             // Obtain the distance between centers of the boxes on the axis
-            float distance = Math.Abs(Vector3.Dot(toCentre, axis));
+            float distance = Math.Abs(Vector3.Dot(toCenter, axis));
 
             // Positive indicates overlap, negative separation
             return oneProject + twoProject - distance;
@@ -624,15 +624,15 @@ namespace Engine.Physics
         /// </summary>
         /// <param name="one">First box</param>
         /// <param name="two">Second box</param>
-        /// <param name="toCentre">Distance to center</param>
+        /// <param name="toCenter">Distance to center</param>
         /// <param name="best">Best penetration axis</param>
         /// <param name="pen">Minor penetration axis</param>
         /// <param name="data">Collision data</param>
-        private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, float pen, ContactResolver data)
+        private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCenter, uint best, float pen, ContactResolver data)
         {
             // We know which is the axis of the collision, but we have to know which face we have to work with
             var normal = GetAxis(one.RigidBody.Transform, best);
-            if (Vector3.Dot(normal, toCentre) > 0f)
+            if (Vector3.Dot(normal, toCenter) > 0f)
             {
                 normal *= -1f;
             }
@@ -651,12 +651,12 @@ namespace Engine.Physics
         /// </summary>
         /// <param name="one">First box</param>
         /// <param name="two">Second box</param>
-        /// <param name="toCentre">Distance to center</param>
+        /// <param name="toCenter">Distance to center</param>
         /// <param name="best">Best penetration axis</param>
         /// <param name="bestSingleAxis">Best single axis</param>
         /// <param name="pen">Minor penetration axis</param>
         /// <param name="data">Collision data</param>
-        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCentre, uint best, uint bestSingleAxis, float pen, ContactResolver data)
+        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCenter, uint best, uint bestSingleAxis, float pen, ContactResolver data)
         {
             // Get the common axis.
             uint oneAxisIndex = best / 3;
@@ -667,7 +667,7 @@ namespace Engine.Physics
             axis.Normalize();
 
             // The axis should point from box one to box two.
-            if (Vector3.Dot(axis, toCentre) > 0f)
+            if (Vector3.Dot(axis, toCenter) > 0f)
             {
                 axis *= -1.0f;
             }
@@ -780,7 +780,7 @@ namespace Engine.Physics
             }
         }
         /// <summary>
-        /// Gets the axis vector value from the specified trasnform
+        /// Gets the axis vector value from the specified transform
         /// </summary>
         /// <param name="transform">Transform matrix</param>
         /// <param name="axis">Axis value</param>

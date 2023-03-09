@@ -668,7 +668,7 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Finds whether the point is contantained within the triangle, and the distance between the point and the triangle.
+        /// Finds whether the point is contained within the triangle, and the distance between the point and the triangle.
         /// </summary>
         /// <param name="point">A point.</param>
         /// <param name="triangle">A triangle</param>
@@ -677,7 +677,7 @@ namespace Engine.Common
         {
             // Assume the point is in the center of coordinates
 
-            // Substract the triangle points to the test point
+            // Subtract the triangle points to the test point
             Vector3 p1 = triangle.Point1 - point;
             Vector3 p2 = triangle.Point2 - point;
             Vector3 p3 = triangle.Point3 - point;
@@ -699,7 +699,7 @@ namespace Engine.Common
             return true;
         }
         /// <summary>
-        /// Finds whether the point is contantained within the triangle mesh, and the distance between the point and the closest triangle.
+        /// Finds whether the point is contained within the triangle mesh, and the distance between the point and the closest triangle.
         /// </summary>
         /// <param name="p">A point.</param>
         /// <param name="mesh">A mesh.</param>
@@ -784,7 +784,7 @@ namespace Engine.Common
             float closestY = Vector3.Dot(diff, transform.Up);
             float closestZ = Vector3.Dot(diff, transform.Backward);
 
-            //Eje X
+            //X axis
             if (closestX < -extents.X)
             {
                 closestX = -extents.X;
@@ -794,7 +794,7 @@ namespace Engine.Common
                 closestX = extents.X;
             }
 
-            //Eje Y
+            //Y axis
             if (closestY < -extents.Y)
             {
                 closestY = -extents.Y;
@@ -804,7 +804,7 @@ namespace Engine.Common
                 closestY = extents.Y;
             }
 
-            //Eje Z
+            //Z axis
             if (closestZ < -extents.Z)
             {
                 closestZ = -extents.Z;
@@ -1183,7 +1183,7 @@ namespace Engine.Common
         /// Determines whether a BoundingFrustum contains a BoundingFrustum.
         /// </summary>
         /// <param name="frustum1">Frustum one</param>
-        /// <param name="frustum2">Frustum trwo</param>
+        /// <param name="frustum2">Frustum two</param>
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType FrustumContainsFrustum(BoundingFrustum frustum1, BoundingFrustum frustum2)
         {
@@ -1258,7 +1258,7 @@ namespace Engine.Common
 
             if (inVerts.Count() == vertices.Count())
             {
-                // All vertices into the frustum
+                // All vertices were inside the trunk
                 return ContainmentType.Contains;
             }
 
@@ -1348,7 +1348,7 @@ namespace Engine.Common
         /// <param name="frustum">Frustum</param>
         /// <param name="p1">First segment point</param>
         /// <param name="p2">Second segment point</param>
-        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
+        /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2)
         {
             Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
@@ -1379,7 +1379,7 @@ namespace Engine.Common
         /// <param name="p2">Second segment point</param>
         /// <param name="distance">Returns the intersection distance</param>
         /// <param name="point">Returns the intersection point</param>
-        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
+        /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2, out float distance, out Vector3 point)
         {
             distance = float.MaxValue;
@@ -1416,7 +1416,7 @@ namespace Engine.Common
         /// <param name="p2">Second segment point</param>
         /// <param name="enteringPoint">Entering segment point</param>
         /// <param name="exitingPoint">Exiting segment point</param>
-        /// <returns>Returs true if the frustum is intersected with the specified segment</returns>
+        /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2, out Vector3? enteringPoint, out Vector3? exitingPoint)
         {
             enteringPoint = null;
