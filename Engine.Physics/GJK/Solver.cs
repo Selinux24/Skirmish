@@ -24,7 +24,7 @@
 using SharpDX;
 using System;
 
-namespace Engine.Physics.GJK2
+namespace Engine.Physics.GJK
 {
     /// <summary>
     /// GJK-EPA solver class
@@ -282,10 +282,11 @@ namespace Engine.Physics.GJK2
                 Vector3 search_dir = faces[closest_face, 3];
                 Vector3 p = coll2.Support(search_dir) - coll1.Support(-search_dir);
 
-                if (Vector3.Dot(p, search_dir) - min_dist < EPA_TOLERANCE)
+                float sdist = Vector3.Dot(p, search_dir);
+                if (sdist - min_dist < EPA_TOLERANCE)
                 {
                     //Convergence (new point is not significantly further from origin)
-                    return faces[closest_face, 3] * Vector3.Dot(p, search_dir); //dot vertex with normal to resolve collision along normal!
+                    return faces[closest_face, 3] * sdist; //dot vertex with normal to resolve collision along normal!
                 }
 
                 Vector3[,] loose_edges = new Vector3[EPA_MAX_NUM_LOOSE_EDGES, 2]; //keep track of edges we need to fix after removing faces
@@ -294,302 +295,81 @@ namespace Engine.Physics.GJK2
                 //Find all triangles that are facing p
                 for (int i = 0; i < num_faces; i++)
                 {
-                    if (Vector3.Dot(faces[i, 3], p - faces[i, 0]) > 0) //triangle i faces p, remove it
+                    if (Vector3.Dot(faces[i, 3], p - faces[i, 0]) <= 0) //triangle i faces p, remove it
                     {
-                        //Add removed triangle's edges to loose edge list.
-                        //If it's already there, remove it (both triangles it belonged to are gone)
-                        for (int j = 0; j < 3; j++) //Three edges per face
-                        {
-                            Vector3[] current_edge = new Vector3[] { faces[i, j], faces[i, (j + 1) % 3] };
-                            bool found_edge = false;
-                            for (int k = 0; k < num_loose_edges; k++) //Check if current edge is already in list
-                            {
-                                if (loose_edges[k, 1] == current_edge[0] && loose_edges[k, 0] == current_edge[1])
-                                {
-                                    //Edge is already in the list, remove it
-                                    //THIS ASSUMES EDGE CAN ONLY BE SHARED BY 2 TRIANGLES (which should be true)
-                                    //THIS ALSO ASSUMES SHARED EDGE WILL BE REVERSED IN THE TRIANGLES (which 
-                                    //should be true provided every triangle is wound CCW)
-                                    loose_edges[k, 0] = loose_edges[num_loose_edges - 1, 0]; //Overwrite current edge
-                                    loose_edges[k, 1] = loose_edges[num_loose_edges - 1, 1]; //with last edge in list
-                                    num_loose_edges--;
-                                    found_edge = true;
-                                    k = num_loose_edges; //exit loop because edge can only be shared once
-                                }
-                            }
+                        continue;
+                    }
 
-                            if (!found_edge)
+                    //Add removed triangle's edges to loose edge list.
+                    //If it's already there, remove it (both triangles it belonged to are gone)
+                    for (int j = 0; j < 3; j++) //Three edges per face
+                    {
+                        Vector3[] current_edge = new Vector3[] { faces[i, j], faces[i, (j + 1) % 3] };
+                        bool found_edge = false;
+                        for (int k = 0; k < num_loose_edges; k++) //Check if current edge is already in list
+                        {
+                            if (loose_edges[k, 1] == current_edge[0] && loose_edges[k, 0] == current_edge[1])
                             {
-                                //add current edge to list
-                                // assert(num_loose_edges<EPA_MAX_NUM_LOOSE_EDGES);
-                                if (num_loose_edges >= EPA_MAX_NUM_LOOSE_EDGES) break;
-                                loose_edges[num_loose_edges, 0] = current_edge[0];
-                                loose_edges[num_loose_edges, 1] = current_edge[1];
-                                num_loose_edges++;
+                                //Edge is already in the list, remove it
+                                //THIS ASSUMES EDGE CAN ONLY BE SHARED BY 2 TRIANGLES (which should be true)
+                                //THIS ALSO ASSUMES SHARED EDGE WILL BE REVERSED IN THE TRIANGLES (which 
+                                //should be true provided every triangle is wound CCW)
+                                loose_edges[k, 0] = loose_edges[num_loose_edges - 1, 0]; //Overwrite current edge
+                                loose_edges[k, 1] = loose_edges[num_loose_edges - 1, 1]; //with last edge in list
+                                num_loose_edges--;
+                                found_edge = true;
+                                k = num_loose_edges; //exit loop because edge can only be shared once
                             }
                         }
 
-                        //Remove triangle i from list
-                        faces[i, 0] = faces[num_faces - 1, 0];
-                        faces[i, 1] = faces[num_faces - 1, 1];
-                        faces[i, 2] = faces[num_faces - 1, 2];
-                        faces[i, 3] = faces[num_faces - 1, 3];
-                        num_faces--;
-                        i--;
+                        if (!found_edge)
+                        {
+                            //add current edge to list
+                            if (num_loose_edges >= EPA_MAX_NUM_LOOSE_EDGES) break;
+                            loose_edges[num_loose_edges, 0] = current_edge[0];
+                            loose_edges[num_loose_edges, 1] = current_edge[1];
+                            num_loose_edges++;
+                        }
                     }
+
+                    //Remove triangle i from list
+                    faces[i, 0] = faces[num_faces - 1, 0];
+                    faces[i, 1] = faces[num_faces - 1, 1];
+                    faces[i, 2] = faces[num_faces - 1, 2];
+                    faces[i, 3] = faces[num_faces - 1, 3];
+                    num_faces--;
+                    i--;
                 }
 
                 //Reconstruct polytope with p added
                 for (int i = 0; i < num_loose_edges; i++)
                 {
-                    // assert(num_faces<EPA_MAX_NUM_FACES);
-                    if (num_faces >= EPA_MAX_NUM_FACES) break;
+                    if (num_faces >= EPA_MAX_NUM_FACES)
+                    {
+                        break;
+                    }
+
                     faces[num_faces, 0] = loose_edges[i, 0];
                     faces[num_faces, 1] = loose_edges[i, 1];
                     faces[num_faces, 2] = p;
                     faces[num_faces, 3] = Vector3.Normalize(Vector3.Cross(loose_edges[i, 0] - loose_edges[i, 1], loose_edges[i, 0] - p));
 
-                    //Check for wrong normal to maintain CCW winding
-                    float bias = 0.000001f; //in case dot result is only slightly < 0 (because origin is on face)
-                    if (Vector3.Dot(faces[num_faces, 0], faces[num_faces, 3]) + bias < 0)
+                    //Check for wrong normal to maintain CCW winding in case dot result is only slightly < 0 (because origin is on face)
+                    float bias = 0.000001f;
+                    float dd = Vector3.Dot(faces[num_faces, 0], faces[num_faces, 3]) + bias;
+                    if (dd < 0)
                     {
-                        Vector3 temp = faces[num_faces, 0];
-                        faces[num_faces, 0] = faces[num_faces, 1];
-                        faces[num_faces, 1] = temp;
+                        (faces[num_faces, 1], faces[num_faces, 0]) = (faces[num_faces, 0], faces[num_faces, 1]);
                         faces[num_faces, 3] = -faces[num_faces, 3];
                     }
                     num_faces++;
                 }
             }
 
-            Console.WriteLine("EPA did not converge\n");
+            Console.WriteLine("EPA did not converge");
 
             //Return most recent closest point
             return faces[closest_face, 3] * Vector3.Dot(faces[closest_face, 0], faces[closest_face, 3]);
         }
     }
-
-    /// <summary>
-    /// Base interface for all collision shapes
-    /// </summary>
-    public interface ICollider
-    {
-        /// <summary>
-        /// Origin in world space
-        /// </summary>
-        Vector3 Position { get; set; }
-        /// <summary>
-        /// Rotation/scale component of model matrix
-        /// </summary>
-        Matrix RotationScale { get; set; }
-        /// <summary>
-        /// Inverse rotation/scale component of model matrix
-        /// </summary>
-        Matrix RotationScaleInverse { get; }
-
-        Vector3 Support(Vector3 dir);
-    }
-
-    /// <summary>
-    /// Box
-    /// </summary>
-    /// <remarks>
-    /// Assume these are axis aligned!
-    /// </remarks>
-    public struct BBox : ICollider
-    {
-        public Vector3 Min { get; set; } = Vector3.Zero;
-        public Vector3 Max { get; set; } = Vector3.Zero;
-        public Vector3 Position { get; set; } = Vector3.Zero;
-        public Matrix RotationScale { get; set; } = Matrix.Identity;
-        public Matrix RotationScaleInverse => Matrix.Invert(RotationScale);
-
-        public BBox()
-        {
-
-        }
-
-        public Vector3 Support(Vector3 dir)
-        {
-            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
-
-            Vector3 result;
-            result.X = (dir.X > 0) ? Max.X : Min.X;
-            result.Y = (dir.Y > 0) ? Max.Y : Min.Y;
-            result.Z = (dir.Z > 0) ? Max.Z : Min.Z;
-
-            return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space
-        }
-    }
-
-    /// <summary>
-    /// Sphere
-    /// </summary>
-    public struct Sphere : ICollider
-    {
-        public float R { get; set; } = 0;
-        public Vector3 Position { get; set; } = Vector3.Zero;
-        public Matrix RotationScale { get; set; } = Matrix.Identity;
-        public Matrix RotationScaleInverse => Matrix.Invert(RotationScale);
-
-        public Sphere()
-        {
-
-        }
-
-        public Vector3 Support(Vector3 dir)
-        {
-            return Vector3.Normalize(dir) * R + Position;
-        }
-    }
-
-    /// <summary>
-    /// Cylinder: Height-aligned with y-axis (rotate using matRS)
-    /// </summary>
-    public struct Cylinder : ICollider
-    {
-        public float R { get; set; } = 0;
-        public float YBase { get; set; } = 0;
-        public float YCap { get; set; } = 0;
-        public Vector3 Position { get; set; } = Vector3.Zero;
-        public Matrix RotationScale { get; set; } = Matrix.Identity;
-        public Matrix RotationScaleInverse => Matrix.Invert(RotationScale);
-
-        public Cylinder()
-        {
-
-        }
-
-        public Vector3 Support(Vector3 dir)
-        {
-            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
-
-            Vector3 dir_xz = new Vector3(dir.X, 0, dir.Z);
-            Vector3 result = Vector3.Normalize(dir_xz) * R;
-            result.Y = (dir.Y > 0) ? YCap : YBase;
-
-            return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space
-        }
-    }
-
-    /// <summary>
-    /// Capsule: Height-aligned with y-axis
-    /// </summary>
-    public struct Capsule : ICollider
-    {
-        public float R { get; set; } = 0;
-        public float YBase { get; set; } = 0;
-        public float YCap { get; set; } = 0;
-        public Vector3 Position { get; set; } = Vector3.Zero;
-        public Matrix RotationScale { get; set; } = Matrix.Identity;
-        public Matrix RotationScaleInverse => Matrix.Invert(RotationScale);
-
-        public Capsule()
-        {
-
-        }
-
-        public Vector3 Support(Vector3 dir)
-        {
-            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
-
-            Vector3 result = Vector3.Normalize(dir) * R;
-            result.Y += (dir.Y > 0) ? YCap : YBase;
-
-            return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space
-        }
-    }
-
-    /// <summary>
-    /// Triangle
-    /// </summary>
-    /// <remarks>
-    /// Triangle: Kind of a hack 
-    ///  "All physics code is an awful hack" - Will, #HandmadeDev
-    /// Need to fake a prism for GJK to converge
-    /// NB: Currently using world-space points, ignore matRS and pos from base class
-    /// Don't use EPA with this! Might resolve collision along any one of prism's faces
-    /// Only resolve around triangle normal
-    /// </remarks>
-    public struct TriangleCollider : ICollider
-    {
-        public Vector3[] Points { get; set; } = new Vector3[] { };
-        public Vector3 Normal { get; set; } = Vector3.Zero;
-        public Vector3 Position { get; set; } = Vector3.Zero;
-        public Matrix RotationScale { get; set; } = Matrix.Identity;
-        public Matrix RotationScaleInverse => Matrix.Invert(RotationScale);
-
-        public TriangleCollider()
-        {
-
-        }
-
-        public Vector3 Support(Vector3 dir)
-        {
-            //Find which triangle vertex is furthest along dir
-            float dot0 = Vector3.Dot(Points[0], dir);
-            float dot1 = Vector3.Dot(Points[1], dir);
-            float dot2 = Vector3.Dot(Points[2], dir);
-            Vector3 furthest_point = Points[0];
-            if (dot1 > dot0)
-            {
-                furthest_point = Points[1];
-                if (dot2 > dot1)
-                    furthest_point = Points[2];
-            }
-            else if (dot2 > dot0)
-            {
-                furthest_point = Points[2];
-            }
-
-            //fake some depth behind triangle so we have volume
-            if (Vector3.Dot(dir, Normal) < 0)
-            {
-                furthest_point -= Normal;
-            }
-
-            return furthest_point;
-        }
-    }
-
-    /// <summary>
-    /// Polytope: Just a set of points
-    /// </summary>
-    public struct Polytope : ICollider
-    {
-        /// <summary>
-        /// (x0 y0 z0 x1 y1 z1 etc)
-        /// </summary>
-        public Vector3[] Points { get; set; } = new Vector3[] { };
-        public Vector3 Position { get; set; } = Vector3.Zero;
-        public Matrix RotationScale { get; set; } = Matrix.Identity;
-        public Matrix RotationScaleInverse => Matrix.Invert(RotationScale);
-
-        public Polytope()
-        {
-
-        }
-
-        public Vector3 Support(Vector3 dir)
-        {
-            // Dumb O(n) support function, just brute force check all points
-            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
-
-            Vector3 furthest_point = Points[0];
-            float max_dot = Vector3.Dot(furthest_point, dir);
-
-            for (int i = 1; i < Points.Length; i++)
-            {
-                Vector3 v = Points[i];
-                float d = Vector3.Dot(v, dir);
-                if (d > max_dot)
-                {
-                    max_dot = d;
-                    furthest_point = v;
-                }
-            }
-
-            return Vector3.TransformNormal(furthest_point, RotationScale) + Position; //convert support to world space
-        }
-    };
 }
