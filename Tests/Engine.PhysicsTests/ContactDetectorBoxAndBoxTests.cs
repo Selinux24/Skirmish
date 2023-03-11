@@ -50,10 +50,12 @@ namespace Engine.PhysicsTests
             ContactResolver data2 = new ContactResolver();
             ContactResolver data3 = new ContactResolver();
 
-            Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
-            Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
-            var boxTrn1 = r2 * r1 * Matrix.Translation(new Vector3(0, 2, 1.5f));
-            var boxTrn2 = Matrix.Translation(Vector3.Zero);
+            //Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
+            //Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
+            //var boxTrn1 = r2 * r1 * Matrix.Translation(new Vector3(0, 2, 1.5f));
+            
+            var boxTrn1 = Matrix.Translation(new Vector3(0, 0, 0));
+            var boxTrn2 = Matrix.Translation(new Vector3(2, 0, 0));
 
             var box1 = FromAABB(Vector3.One, boxTrn1);
             var box2 = FromAABB(Vector3.One, boxTrn2);

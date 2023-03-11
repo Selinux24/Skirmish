@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using SharpDX;
+﻿using SharpDX;
 using System;
 
 namespace Engine.Physics

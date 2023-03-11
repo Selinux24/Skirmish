@@ -278,8 +278,15 @@ namespace Engine
                 return obb;
             }
 
+
+            if (!transform.Decompose(out var scale, out var rotation, out var translation))
+            {
+                return obb;
+            }
+
             var trnObb = obb;
-            trnObb.Transformation = transform;
+            trnObb.Scale(scale);
+            trnObb.Transformation = Matrix.RotationQuaternion(rotation) * Matrix.Translation(translation);
             return trnObb;
         }
 

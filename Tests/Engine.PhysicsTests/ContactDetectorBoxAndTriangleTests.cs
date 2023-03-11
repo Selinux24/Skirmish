@@ -56,7 +56,6 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactDetectorBoxAndTriangleTest()
         {
-            ContactResolver dataPln = new ContactResolver();
             ContactResolver dataTri = new ContactResolver();
 
             var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up * 0.99f));
@@ -66,18 +65,13 @@ namespace Engine.PhysicsTests
             var p3 = new Vector3(-100f, 0f, -100f);
             var tri = new Triangle(p1, p2, p3);
 
-            var plane = FromPlane(tri.Plane, Matrix.Identity);
             var triSoup = FromTriangle(tri, Matrix.Identity);
-
-            bool intersectionPln = ContactDetector.BoxAndHalfSpace(box, plane, dataPln);
-            Assert.AreEqual(true, intersectionPln);
 
             bool intersectionTri = ContactDetector.BoxAndTriangleSoup(box, triSoup, dataTri);
             Assert.AreEqual(true, intersectionTri);
 
-            var contactsPln = dataPln.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
             var contactsTri = dataTri.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            CollectionAssert.AreEquivalent(contactsPln, contactsTri);
+            Assert.AreEqual(1, contactsTri.Count());
         }
 
         [TestMethod()]

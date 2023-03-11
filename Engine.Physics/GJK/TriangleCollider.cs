@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Physics.GJK
 {
@@ -16,7 +15,9 @@ namespace Engine.Physics.GJK
     /// </remarks>
     public struct TriangleCollider : ICollider
     {
-        public Vector3[] Points { get; set; } = Array.Empty<Vector3>();
+        public Vector3 Point1 { get; set; } = Vector3.Zero;
+        public Vector3 Point2 { get; set; } = Vector3.Zero;
+        public Vector3 Point3 { get; set; } = Vector3.Zero;
         public Vector3 Normal { get; set; } = Vector3.Zero;
         public Vector3 Position { get; set; } = Vector3.Zero;
         public Matrix RotationScale { get; set; } = Matrix.Identity;
@@ -27,22 +28,38 @@ namespace Engine.Physics.GJK
 
         }
 
+        public TriangleCollider(Vector3 point1, Vector3 point2, Vector3 point3, Vector3 normal)
+        {
+            Point1 = point1;
+            Point1 = point2;
+            Point1 = point3;
+            Normal = normal;
+        }
+
+        public TriangleCollider(Triangle tri)
+        {
+            Point1 = tri.Point1;
+            Point1 = tri.Point2;
+            Point1 = tri.Point3;
+            Normal = tri.Normal;
+        }
+
         public Vector3 Support(Vector3 dir)
         {
             //Find which triangle vertex is furthest along dir
-            float dot0 = Vector3.Dot(Points[0], dir);
-            float dot1 = Vector3.Dot(Points[1], dir);
-            float dot2 = Vector3.Dot(Points[2], dir);
-            Vector3 furthest_point = Points[0];
+            float dot0 = Vector3.Dot(Point1, dir);
+            float dot1 = Vector3.Dot(Point2, dir);
+            float dot2 = Vector3.Dot(Point3, dir);
+            Vector3 furthest_point = Point1;
             if (dot1 > dot0)
             {
-                furthest_point = Points[1];
+                furthest_point = Point2;
                 if (dot2 > dot1)
-                    furthest_point = Points[2];
+                    furthest_point = Point3;
             }
             else if (dot2 > dot0)
             {
-                furthest_point = Points[2];
+                furthest_point = Point3;
             }
 
             //fake some depth behind triangle so we have volume

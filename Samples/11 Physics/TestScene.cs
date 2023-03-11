@@ -58,6 +58,13 @@ namespace Physics
         private float pyramid1Time = 0f;
         private IEnumerable<Line3D> pyramid1Lines;
 
+        private readonly Vector3 pyramid2Position = Vector3.Up * 50f;
+        private Model pyramid2 = null;
+        private PhysicsObject pyramid2Body = null;
+        private SceneLightPoint pyramid2Light;
+        private float pyramid2Time = 0f;
+        private IEnumerable<Line3D> pyramid2Lines;
+
         private bool gameReady = false;
 
         public TestScene(Game game) : base(game)
@@ -202,10 +209,13 @@ namespace Physics
             };
 
             pyramid1 = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
+            pyramid2 = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);
 
             pyramid1.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
+            pyramid2.TintColor = Color4.AdjustSaturation(Color.Beige, 20f);
 
             pyramid1Lines = Line3D.CreateWiredPyramid(pyramid1.GetPoints());
+            pyramid2Lines = Line3D.CreateWiredPyramid(pyramid2.GetPoints());
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -230,21 +240,18 @@ namespace Physics
             sphere2.Manipulator.SetPosition(sphere2Position);
             sphere2Body = new PhysicsObject(new RigidBody(5, sphere2.Manipulator.FinalTransform), sphere2);
 
-            Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
-            Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
-            Matrix r = r2 * r1 * Matrix.Translation(new Vector3(0, 10, 1.5f));
-            box1.Manipulator.SetTransform(r);
-
-            //box1.Manipulator.SetPosition(box1Position);
+            box1.Manipulator.SetPosition(box1Position);
             box1Body = new PhysicsObject(new RigidBody(15, box1.Manipulator.FinalTransform), box1);
 
-            //box2.Manipulator.SetScale(2f);
-            //box2.Manipulator.SetPosition(box2Position);
-            box2.Manipulator.SetPosition(new Vector3(0, 8, 0));
+            box2.Manipulator.SetPosition(box2Position);
             box2Body = new PhysicsObject(new RigidBody(20, box2.Manipulator.FinalTransform), box2);
 
             pyramid1.Manipulator.SetPosition(pyramid1Position);
             pyramid1Body = new PhysicsObject(new RigidBody(15, pyramid1.Manipulator.FinalTransform), pyramid1);
+
+            pyramid2.Manipulator.SetScale(0.5f);
+            pyramid2.Manipulator.SetPosition(pyramid2Position);
+            pyramid2Body = new PhysicsObject(new RigidBody(20, pyramid2.Manipulator.FinalTransform), pyramid2);
 
             simulator.AddPhysicsObject(floorBody);
             simulator.AddPhysicsObject(sphere1Body);
@@ -252,18 +259,21 @@ namespace Physics
             simulator.AddPhysicsObject(box1Body);
             simulator.AddPhysicsObject(box2Body);
             simulator.AddPhysicsObject(pyramid1Body);
+            simulator.AddPhysicsObject(pyramid2Body);
 
             sphere1Light = new SceneLightPoint(nameof(sphere1), true, sphere1.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 5f, 2f));
             sphere2Light = new SceneLightPoint(nameof(sphere2), true, sphere2.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
             box1Light = new SceneLightPoint(nameof(box1), true, box1.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
             box2Light = new SceneLightPoint(nameof(box2), true, box2.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 7.5f, 2f));
             pyramid1Light = new SceneLightPoint(nameof(pyramid1), true, pyramid1.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
+            pyramid2Light = new SceneLightPoint(nameof(pyramid2), true, pyramid2.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
 
             Lights.Add(sphere1Light);
             Lights.Add(sphere2Light);
             Lights.Add(box1Light);
             Lights.Add(box2Light);
             Lights.Add(pyramid1Light);
+            Lights.Add(pyramid2Light);
 
             gameReady = true;
         }
@@ -291,12 +301,6 @@ namespace Physics
             UpdateInputBodies();
 
             simulator.Update(gameTime);
-
-            sphere1Light.Position = sphere1Body.Body.Position;
-            sphere2Light.Position = sphere2Body.Body.Position;
-            box1Light.Position = box1Body.Body.Position;
-            box2Light.Position = box2Body.Body.Position;
-            pyramid1Light.Position = pyramid1Body.Body.Position;
 
             UpdateStateBodies(gameTime);
 
@@ -395,6 +399,7 @@ namespace Physics
             box1Time += elapsed;
             box2Time += elapsed;
             pyramid1Time += elapsed;
+            pyramid2Time += elapsed;
 
             if (sphere1Time > bodyTime || sphere1.Manipulator.Position.LengthSquared() > bodyDistance)
             {
@@ -426,15 +431,34 @@ namespace Physics
                 pyramid1Time = 0;
             }
 
+            if (pyramid2Time > bodyTime || pyramid2.Manipulator.Position.LengthSquared() > bodyDistance)
+            {
+                pyramid2Body.Reset(pyramid2Position, Quaternion.Identity);
+                pyramid2Time = 0;
+            }
+
             lineDrawer.Clear();
 
+            sphere1.Manipulator.UpdateInternals(false);
+            sphere2.Manipulator.UpdateInternals(false);
+            sphere1Light.Position = sphere1Body.Body.Position;
+            sphere2Light.Position = sphere2Body.Body.Position;
             lineDrawer.SetPrimitives(Color4.AdjustContrast(sphere1.TintColor, 0.1f), Line3D.Transform(sphere1Lines, sphere1.Manipulator.FinalTransform));
             lineDrawer.SetPrimitives(Color4.AdjustContrast(sphere2.TintColor, 0.1f), Line3D.Transform(sphere2Lines, sphere2.Manipulator.FinalTransform));
 
+            box1.Manipulator.UpdateInternals(false);
+            box2.Manipulator.UpdateInternals(false);
+            box1Light.Position = box1Body.Body.Position;
+            box2Light.Position = box2Body.Body.Position;
             lineDrawer.SetPrimitives(Color4.AdjustContrast(box1.TintColor, 0.1f), Line3D.Transform(box1Lines, box1.Manipulator.FinalTransform));
             lineDrawer.SetPrimitives(Color4.AdjustContrast(box2.TintColor, 0.1f), Line3D.Transform(box2Lines, box2.Manipulator.FinalTransform));
 
+            pyramid1.Manipulator.UpdateInternals(false);
+            pyramid2.Manipulator.UpdateInternals(false);
+            pyramid1Light.Position = pyramid1Body.Body.Position;
+            pyramid2Light.Position = pyramid1Body.Body.Position;
             lineDrawer.SetPrimitives(Color4.AdjustContrast(pyramid1.TintColor, 0.1f), Line3D.Transform(pyramid1Lines, pyramid1.Manipulator.FinalTransform));
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(pyramid2.TintColor, 0.1f), Line3D.Transform(pyramid2Lines, pyramid2.Manipulator.FinalTransform));
         }
 
         public override void GameGraphicsResized()
@@ -460,12 +484,14 @@ namespace Physics
             box1Body.Reset(box1Position, Quaternion.Identity);
             box2Body.Reset(box2Position, Quaternion.Identity);
             pyramid1Body.Reset(pyramid1Position, Quaternion.Identity);
+            pyramid2Body.Reset(pyramid2Position, Quaternion.Identity);
 
             sphere1Time = 0f;
             sphere2Time = 0f;
             box1Time = 0f;
             box2Time = 0f;
             pyramid1Time = 0f;
+            pyramid2Time = 0f;
         }
     }
 }

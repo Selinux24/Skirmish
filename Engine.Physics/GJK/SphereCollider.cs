@@ -16,10 +16,18 @@ namespace Engine.Physics.GJK
         {
 
         }
+        public SphereCollider(float r)
+        {
+            R = r;
+        }
 
         public Vector3 Support(Vector3 dir)
         {
-            return Vector3.Normalize(dir) * R + Position;
+            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
+
+            Vector3 result = Vector3.Normalize(dir) * R;
+
+            return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space
         }
     }
 }

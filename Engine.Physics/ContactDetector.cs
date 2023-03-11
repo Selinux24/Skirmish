@@ -1,11 +1,10 @@
 using SharpDX;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Physics
 {
     using Engine.Common;
+    using Engine.Physics.GJK;
 
     /// <summary>
     /// Contact detector
@@ -87,14 +86,14 @@ namespace Engine.Physics
                 return BoxAndSphere(box1, sphere2, data);
             }
 
-            if (primitive2 is CollisionPlane plane2)
-            {
-                return BoxAndHalfSpace(box1, plane2, data);
-            }
-
             if (primitive2 is CollisionTriangleSoup soup2)
             {
                 return BoxAndTriangleSoup(box1, soup2, data);
+            }
+
+            if (primitive2 is CollisionPlane plane2)
+            {
+                return BoxAndHalfSpace(box1, plane2, data);
             }
 
             return false;
@@ -145,33 +144,20 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool BoxAndBox(CollisionBox one, CollisionBox two, ContactResolver data)
         {
-            if (!DetectBestAxis(one, two, out var toCentre, out var pen, out var best, out var bestSingleAxis))
+            var collider1 = new BoxCollider(one.Extents);
+            collider1.Position = one.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(one.RigidBody.Rotation);
+
+            var collider2 = new BoxCollider(two.Extents);
+            collider2.Position = two.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(two.RigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
             {
                 return false;
             }
 
-            // We have collision, and we have the axis of collision with less penetration
-            if (best < 3)
-            {
-                // There is a vertex of box two on a face of box one.
-                FillPointFaceBoxBox(one, two, toCentre, best, pen, data);
-
-                return true;
-            }
-
-            if (best < 6)
-            {
-                // There is a vertex of box one on a face of box two.
-
-                // Swap bodies
-                (one, two) = (two, one);
-                FillPointFaceBoxBox(one, two, toCentre * -1f, best - 3, pen, data);
-
-                return true;
-            }
-
-            // Edge-to-edge contact.
-            FillEdgeEdgeBoxBox(one, two, toCentre, best - 6, bestSingleAxis, pen, data);
+            data.AddContact(one.RigidBody, two.RigidBody, position, normal, penetration);
 
             return true;
         }
@@ -208,48 +194,20 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool BoxAndTriangleSoup(CollisionBox box, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
-            if (triangleSoup?.Triangles?.Any() != true)
+            var collider1 = new BoxCollider(box.Extents);
+            collider1.Position = box.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(box.RigidBody.Rotation);
+
+            var collider2 = new PolytopeCollider(triangleSoup.GetVertices());
+            collider2.Position = triangleSoup.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(triangleSoup.RigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
             {
                 return false;
             }
 
-            //Convert obb to aabb
-            var obb = box.OrientedBoundingBox;
-            var trn = obb.Transformation;
-            var invTrn = Matrix.Invert(trn);
-            var origBox = new BoundingBox(-obb.Extents, obb.Extents);
-
-            ContactAcummulator contactsAccum = new ContactAcummulator();
-
-            foreach (var triangle in triangleSoup.Triangles)
-            {
-                var origTri = triangle;
-                if (!invTrn.IsIdentity)
-                {
-                    // Move to "aabb as origin" space
-                    origTri = Triangle.Transform(triangle, invTrn);
-                }
-
-                // Intersection test
-                if (!Intersection.BoxIntersectsTriangle(origBox, origTri))
-                {
-                    continue;
-                }
-
-                // Generate body contacts
-                var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
-                foreach (var contact in contacts)
-                {
-                    contactsAccum.Add(contact);
-                }
-            }
-
-            if (contactsAccum.Count <= 0)
-            {
-                return false;
-            }
-
-            ContactAcummulator.AddToResolver(contactsAccum.GetContacts(), box.RigidBody, triangleSoup.RigidBody, trn, data);
+            data.AddContact(box.RigidBody, triangleSoup.RigidBody, position, normal, penetration);
 
             return true;
         }
@@ -257,33 +215,26 @@ namespace Engine.Physics
         /// Detect collision between box and triangle
         /// </summary>
         /// <param name="box">box</param>
-        /// <param name="tri">Triangle</param>
+        /// <param name="triangle">Triangle</param>
         /// <param name="rigidBody">Rigid body</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
         public static bool BoxAndTriangle(CollisionBox box, Triangle triangle, IRigidBody rigidBody, ContactResolver data)
         {
-            // Convert obb to aabb
-            var obb = box.OrientedBoundingBox;
-            var trn = obb.Transformation;
-            var invTrn = Matrix.Invert(trn);
-            var origBox = new BoundingBox(-obb.Extents, obb.Extents);
-            var origTri = Triangle.Transform(triangle, invTrn);
+            var collider1 = new BoxCollider(box.Extents);
+            collider1.Position = box.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(box.RigidBody.Rotation);
 
-            // Intersection test
-            if (!Intersection.BoxIntersectsTriangle(origBox, origTri))
+            var collider2 = new TriangleCollider(triangle);
+            collider2.Position = rigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(rigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
             {
                 return false;
             }
 
-            // Generate body contacts
-            var contacts = GenerateBoxAndTriangleContacts(origBox, origTri);
-            if (!contacts.Any())
-            {
-                return false;
-            }
-
-            ContactAcummulator.AddToResolver(contacts, box.RigidBody, rigidBody, trn, data);
+            data.AddContact(box.RigidBody, rigidBody, position, normal, penetration);
 
             return true;
         }
@@ -307,14 +258,14 @@ namespace Engine.Physics
                 return SphereAndSphere(sphere1, sphere2, data);
             }
 
-            if (primitive2 is CollisionPlane plane2)
-            {
-                return SphereAndHalfSpace(sphere1, plane2, data);
-            }
-
             if (primitive2 is CollisionTriangleSoup soup2)
             {
                 return SphereAndTriangleSoup(sphere1, soup2, data);
+            }
+
+            if (primitive2 is CollisionPlane plane2)
+            {
+                return SphereAndHalfSpace(sphere1, plane2, data);
             }
 
             return false;
@@ -381,72 +332,47 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool SphereAndTriangleSoup(CollisionSphere sphere, CollisionTriangleSoup triangleSoup, ContactResolver data)
         {
-            if (triangleSoup?.Triangles?.Any() != true)
+            var collider1 = new SphereCollider(sphere.Radius);
+            collider1.Position = sphere.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(sphere.RigidBody.Rotation);
+
+            var collider2 = new PolytopeCollider(triangleSoup.GetVertices());
+            collider2.Position = triangleSoup.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(triangleSoup.RigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
             {
                 return false;
             }
 
-            bool contact = false;
+            data.AddContact(sphere.RigidBody, triangleSoup.RigidBody, position, normal, penetration);
 
-            foreach (var triangle in triangleSoup.Triangles)
-            {
-                if (SphereAndTriangle(sphere, triangle, out var closestPoint, out var penetration))
-                {
-                    // Create the contact.
-                    data.AddContact(sphere.RigidBody, triangleSoup.RigidBody, closestPoint, triangle.Normal, penetration);
-
-                    contact = true;
-                }
-
-                if (!data.HasFreeContacts())
-                {
-                    break;
-                }
-            }
-
-            return contact;
+            return true;
         }
         /// <summary>
         /// Detect the collision between a sphere and a triangle
         /// </summary>
         /// <param name="sphere">Sphere</param>
-        /// <param name="tri">Triangle</param>
-        /// <param name="closestPoint">Closest point</param>
-        /// <param name="penetration">Penetration</param>
+        /// <param name="triangle">Triangle</param>
+        /// <param name="rigidBody">Rigid body</param>
+        /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        public static bool SphereAndTriangle(CollisionSphere sphere, Triangle tri, out Vector3 closestPoint, out float penetration)
+        public static bool SphereAndTriangle(CollisionSphere sphere, Triangle triangle, IRigidBody rigidBody, ContactResolver data)
         {
-            closestPoint = Vector3.Zero;
-            penetration = 0f;
+            var collider1 = new SphereCollider(sphere.Radius);
+            collider1.Position = sphere.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(sphere.RigidBody.Rotation);
 
-            // Check if the sphere and triangle are separated in the X, Y and Z axis
-            var triCenter = tri.Center;
-            float triRadius = tri.GetRadius();
-            float radius = sphere.Radius + triRadius;
-            if (Math.Abs(sphere.RigidBody.Position.X - triCenter.X) > radius)
-            {
-                return false;
-            }
-            if (Math.Abs(sphere.RigidBody.Position.Y - triCenter.Y) > radius)
-            {
-                return false;
-            }
-            if (Math.Abs(sphere.RigidBody.Position.Z - triCenter.Z) > radius)
+            var collider2 = new TriangleCollider(triangle);
+            collider2.Position = rigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(rigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
             {
                 return false;
             }
 
-            // Get the point of the triangle closest to the center of the sphere
-            closestPoint = Intersection.ClosestPointInTriangle(sphere.RigidBody.Position, tri);
-
-            // Obtain the distance of the obtained point to the center of the sphere
-            float distance = Vector3.Distance(closestPoint, sphere.RigidBody.Position);
-            if (distance > sphere.Radius)
-            {
-                return false;
-            }
-
-            penetration = sphere.Radius - distance;
+            data.AddContact(sphere.RigidBody, rigidBody, position, normal, penetration);
 
             return true;
         }
@@ -470,12 +396,43 @@ namespace Engine.Physics
                 return SphereAndTriangleSoup(sphere2, triangleSoup1, data);
             }
 
+            if (primitive2 is CollisionTriangleSoup soup2)
+            {
+                return TriangleSoupAndTriangleSoup(triangleSoup1, soup2, data);
+            }
+
             if (primitive2 is CollisionPlane plane2)
             {
                 return TriangleSoupAndHalfSpace(triangleSoup1, plane2, data);
             }
 
             return false;
+        }
+        /// <summary>
+        /// Detect collision between triangle soups
+        /// </summary>
+        /// <param name="triangleSoup1">Triangle soup 1</param>
+        /// <param name="triangleSoup2">Triangle soup 2</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool TriangleSoupAndTriangleSoup(CollisionTriangleSoup triangleSoup1, CollisionTriangleSoup triangleSoup2, ContactResolver data)
+        {
+            var collider1 = new PolytopeCollider(triangleSoup1.GetVertices());
+            collider1.Position = triangleSoup1.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(triangleSoup1.RigidBody.Rotation);
+
+            var collider2 = new PolytopeCollider(triangleSoup2.GetVertices());
+            collider2.Position = triangleSoup2.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(triangleSoup2.RigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
+            {
+                return false;
+            }
+
+            data.AddContact(triangleSoup1.RigidBody, triangleSoup2.RigidBody, position, normal, penetration);
+
+            return true;
         }
         /// <summary>
         /// Detect the collision between a triangle soup and a plane
@@ -486,12 +443,12 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool TriangleSoupAndHalfSpace(CollisionTriangleSoup triangleSoup, CollisionPlane plane, ContactResolver data)
         {
-            var tris = triangleSoup.Vertices.ToArray();
+            var tris = triangleSoup.GetVertices(true);
 
             bool intersectionExists = false;
-            for (int i = 0; i < tris.Length; i++)
+            for (int i = 0; i < tris.Count(); i++)
             {
-                Vector3 vertexPos = tris[i];
+                Vector3 vertexPos = tris.ElementAt(i);
 
                 // Distance to plane
                 float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
@@ -513,361 +470,6 @@ namespace Engine.Physics
             }
 
             return intersectionExists;
-        }
-
-        /// <summary>
-        /// Detects the best collision axis in a box to box collision
-        /// </summary>
-        /// <param name="one">First box</param>
-        /// <param name="two">Second box</param>
-        /// <param name="toCenter">To center position</param>
-        /// <param name="pen">Penetration value</param>
-        /// <param name="best">Best axis</param>
-        /// <param name="bestSingleAxis">Best single axis</param>
-        /// <returns>Returns true if best axis detected</returns>
-        private static bool DetectBestAxis(CollisionBox one, CollisionBox two, out Vector3 toCenter, out float pen, out uint best, out uint bestSingleAxis)
-        {
-            toCenter = two.RigidBody.Position - one.RigidBody.Position;
-            pen = float.MaxValue;
-            best = uint.MaxValue;
-            bestSingleAxis = uint.MaxValue;
-
-            var oneTrn = one.RigidBody.Transform;
-            var twoTrn = two.RigidBody.Transform;
-
-            // Check each axis, storing penetration and the best axis
-            if (!TryAxis(one, two, oneTrn.Left, toCenter, 0, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, oneTrn.Up, toCenter, 1, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, oneTrn.Backward, toCenter, 2, ref pen, ref best)) return false;
-
-            if (!TryAxis(one, two, twoTrn.Left, toCenter, 3, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, twoTrn.Up, toCenter, 4, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, twoTrn.Backward, toCenter, 5, ref pen, ref best)) return false;
-
-            // Store the best axis so far, in case of being in a parallel axis collision later.
-            bestSingleAxis = best;
-
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Left), toCenter, 6, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Up), toCenter, 7, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Left, twoTrn.Backward), toCenter, 8, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Left), toCenter, 9, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Up), toCenter, 10, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Up, twoTrn.Backward), toCenter, 11, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Left), toCenter, 12, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Up), toCenter, 13, ref pen, ref best)) return false;
-            if (!TryAxis(one, two, Vector3.Cross(oneTrn.Backward, twoTrn.Backward), toCenter, 14, ref pen, ref best)) return false;
-
-            // Making sure we have a result.
-            if (best == uint.MaxValue)
-            {
-                return false;
-            }
-
-            return true;
-        }
-        /// <summary>
-        /// Gets whether there is penetration between the projections of the boxes in the specified axis
-        /// </summary>
-        /// <param name="one">First box</param>
-        /// <param name="two">Second box</param>
-        /// <param name="axis">Axis</param>
-        /// <param name="toCenter">Distance to center</param>
-        /// <param name="index">Index</param>
-        /// <param name="smallestPenetration">Smallest penetration</param>
-        /// <param name="smallestCase">Smallest test case</param>
-        /// <returns>Returns true if there has been a penetration</returns>
-        private static bool TryAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCenter, uint index, ref float smallestPenetration, ref uint smallestCase)
-        {
-            if (axis.LengthSquared() < 0.0001)
-            {
-                return true;
-            }
-
-            axis.Normalize();
-
-            float penetration = PenetrationOnAxis(one, two, axis, toCenter);
-            if (penetration < 0)
-            {
-                return false;
-            }
-
-            if (penetration < smallestPenetration)
-            {
-                smallestPenetration = penetration;
-                smallestCase = index;
-            }
-
-            return true;
-        }
-        /// <summary>
-        /// Gets the penetration of the projections of the boxes in the specified axis
-        /// </summary>
-        /// <param name="one">First box</param>
-        /// <param name="two">Second box</param>
-        /// <param name="axis">Axis</param>
-        /// <param name="toCenter">Distance to center</param>
-        /// <returns>Returns true if there has been a penetration</returns>
-        private static float PenetrationOnAxis(CollisionBox one, CollisionBox two, Vector3 axis, Vector3 toCenter)
-        {
-            // Project the extensions of each box onto the axis
-            float oneProject = one.OrientedBoundingBox.ProjectToVector(axis);
-            float twoProject = two.OrientedBoundingBox.ProjectToVector(axis);
-
-            // Obtain the distance between centers of the boxes on the axis
-            float distance = Math.Abs(Vector3.Dot(toCenter, axis));
-
-            // Positive indicates overlap, negative separation
-            return oneProject + twoProject - distance;
-        }
-        /// <summary>
-        /// Fills the collision information between two boxes, once it is known that there is vertex-face contact
-        /// </summary>
-        /// <param name="one">First box</param>
-        /// <param name="two">Second box</param>
-        /// <param name="toCenter">Distance to center</param>
-        /// <param name="best">Best penetration axis</param>
-        /// <param name="pen">Minor penetration axis</param>
-        /// <param name="data">Collision data</param>
-        private static void FillPointFaceBoxBox(CollisionBox one, CollisionBox two, Vector3 toCenter, uint best, float pen, ContactResolver data)
-        {
-            // We know which is the axis of the collision, but we have to know which face we have to work with
-            var normal = GetAxis(one.RigidBody.Transform, best);
-            if (Vector3.Dot(normal, toCenter) > 0f)
-            {
-                normal *= -1f;
-            }
-
-            Vector3 vertex = two.Extents;
-            if (Vector3.Dot(two.RigidBody.Transform.Left, normal) < 0f) vertex.X = -vertex.X;
-            if (Vector3.Dot(two.RigidBody.Transform.Up, normal) < 0f) vertex.Y = -vertex.Y;
-            if (Vector3.Dot(two.RigidBody.Transform.Backward, normal) < 0f) vertex.Z = -vertex.Z;
-
-            var position = Vector3.TransformCoordinate(vertex, two.RigidBody.Transform);
-
-            data.AddContact(one.RigidBody, two.RigidBody, position, normal, pen);
-        }
-        /// <summary>
-        /// Fills the collision information between two boxes, once it is known that there is edge-edge contact
-        /// </summary>
-        /// <param name="one">First box</param>
-        /// <param name="two">Second box</param>
-        /// <param name="toCenter">Distance to center</param>
-        /// <param name="best">Best penetration axis</param>
-        /// <param name="bestSingleAxis">Best single axis</param>
-        /// <param name="pen">Minor penetration axis</param>
-        /// <param name="data">Collision data</param>
-        private static void FillEdgeEdgeBoxBox(CollisionBox one, CollisionBox two, Vector3 toCenter, uint best, uint bestSingleAxis, float pen, ContactResolver data)
-        {
-            // Get the common axis.
-            uint oneAxisIndex = best / 3;
-            uint twoAxisIndex = best % 3;
-            Vector3 oneAxis = GetAxis(one.RigidBody.Transform, oneAxisIndex);
-            Vector3 twoAxis = GetAxis(two.RigidBody.Transform, twoAxisIndex);
-            Vector3 axis = Vector3.Cross(oneAxis, twoAxis);
-            axis.Normalize();
-
-            // The axis should point from box one to box two.
-            if (Vector3.Dot(axis, toCenter) > 0f)
-            {
-                axis *= -1.0f;
-            }
-
-            // We have the axes, but not the edges.
-
-            // Each axis has 4 edges parallel to it, we have to find the 4 of each box.
-            // We will look for the point in the center of the edge.
-            // We know that its component on the collision axis is 0 and we determine which endpoint on each of the other axes is closest.
-            Vector3 vOne = one.Extents;
-            Vector3 vTwo = two.Extents;
-            float[] ptOnOneEdge = new float[] { vOne.X, vOne.Y, vOne.Z };
-            float[] ptOnTwoEdge = new float[] { vTwo.X, vTwo.Y, vTwo.Z };
-            for (uint i = 0; i < 3; i++)
-            {
-                if (i == oneAxisIndex)
-                {
-                    ptOnOneEdge[i] = 0;
-                }
-                else if (Vector3.Dot(GetAxis(one.RigidBody.Transform, i), axis) > 0f)
-                {
-                    ptOnOneEdge[i] = -ptOnOneEdge[i];
-                }
-
-                if (i == twoAxisIndex)
-                {
-                    ptOnTwoEdge[i] = 0;
-                }
-                else if (Vector3.Dot(GetAxis(two.RigidBody.Transform, i), axis) < 0f)
-                {
-                    ptOnTwoEdge[i] = -ptOnTwoEdge[i];
-                }
-            }
-
-            vOne.X = ptOnOneEdge[0];
-            vOne.Y = ptOnOneEdge[1];
-            vOne.Z = ptOnOneEdge[2];
-
-            vTwo.X = ptOnTwoEdge[0];
-            vTwo.Y = ptOnTwoEdge[1];
-            vTwo.Z = ptOnTwoEdge[2];
-
-            // Go to world coordinates
-            vOne = Vector3.TransformCoordinate(vOne, one.RigidBody.Transform);
-            vTwo = Vector3.TransformCoordinate(vTwo, two.RigidBody.Transform);
-
-            // We have a point and a direction for the colliding edges.
-            // We need to find the closest point of the two segments.
-            float[] vOneAxis = new float[] { one.Extents.X, one.Extents.Y, one.Extents.Z };
-            float[] vTwoAxis = new float[] { two.Extents.X, two.Extents.Y, two.Extents.Z };
-            Vector3 vertex = ContactPoint(
-                vOne, oneAxis, vOneAxis[oneAxisIndex],
-                vTwo, twoAxis, vTwoAxis[twoAxisIndex],
-                bestSingleAxis > 2);
-
-            // Fill in the contact.
-            data.AddContact(one.RigidBody, two.RigidBody, vertex, axis, pen);
-        }
-        /// <summary>
-        /// Gets the closest point to the segments involved in an edge-to-edge or face-to-edge, or face-to-face collision
-        /// </summary>
-        /// <param name="pOne"></param>
-        /// <param name="dOne"></param>
-        /// <param name="oneSize"></param>
-        /// <param name="pTwo"></param>
-        /// <param name="dTwo"></param>
-        /// <param name="twoSize"></param>
-        /// <param name="useOne">If true, and the contact point is off edge (face-to-edge collision), only box one will be used, otherwise box two.</param>
-        /// <returns>Returns the closest point to the two segments involved in an edge-to-edge collision</returns>
-        private static Vector3 ContactPoint(Vector3 pOne, Vector3 dOne, float oneSize, Vector3 pTwo, Vector3 dTwo, float twoSize, bool useOne)
-        {
-            Vector3 toSt, cOne, cTwo;
-            float dpStaOne, dpStaTwo, dpOneTwo, smOne, smTwo;
-            float denom, mua, mub;
-
-            smOne = dOne.LengthSquared();
-            smTwo = dTwo.LengthSquared();
-            dpOneTwo = Vector3.Dot(dTwo, dOne);
-
-            toSt = pOne - pTwo;
-            dpStaOne = Vector3.Dot(dOne, toSt);
-            dpStaTwo = Vector3.Dot(dTwo, toSt);
-
-            denom = smOne * smTwo - dpOneTwo * dpOneTwo;
-
-            // Zero denominator indicates parallel lines
-            if (Math.Abs(denom) < 0.0001f)
-            {
-                return useOne ? pOne : pTwo;
-            }
-
-            mua = (dpOneTwo * dpStaTwo - smTwo * dpStaOne) / denom;
-            mub = (smOne * dpStaTwo - dpOneTwo * dpStaOne) / denom;
-
-            // If any of the edges has the closest point out of bounds, the edges are not closed, and we have an edge-to-face collision..
-            // The point is in the edge, which we know from the useOne parameter.
-            if (mua > oneSize ||
-                mua < -oneSize ||
-                mub > twoSize ||
-                mub < -twoSize)
-            {
-                return useOne ? pOne : pTwo;
-            }
-            else
-            {
-                cOne = pOne + dOne * mua;
-                cTwo = pTwo + dTwo * mub;
-
-                return cOne * 0.5f + cTwo * 0.5f;
-            }
-        }
-        /// <summary>
-        /// Gets the axis vector value from the specified transform
-        /// </summary>
-        /// <param name="transform">Transform matrix</param>
-        /// <param name="axis">Axis value</param>
-        /// <exception cref="ArgumentOutOfRangeException"></exception>
-        private static Vector3 GetAxis(Matrix transform, uint axis)
-        {
-            if (axis == 0) return transform.Left;
-
-            if (axis == 1) return transform.Up;
-
-            if (axis == 2) return transform.Backward;
-
-            throw new ArgumentOutOfRangeException(nameof(axis), axis, $"Axis value must be between 0 and 2");
-        }
-        /// <summary>
-        /// Generates box-triangle contacts
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="tri">Triangle</param>
-        private static IEnumerable<ContactAcummulatorData> GenerateBoxAndTriangleContacts(BoundingBox box, Triangle tri)
-        {
-            List<ContactAcummulatorData> res = new List<ContactAcummulatorData>();
-
-            // Box to triangle contacts
-            var boxEdges = box.GetEdges();
-            foreach (var edge in boxEdges)
-            {
-                if (!Intersection.SegmentIntersectsTriangle(edge, tri))
-                {
-                    continue;
-                }
-
-                float sign = Vector3.Dot(edge.Direction, tri.Plane.Normal);
-                var contactPoint = sign >= 0 ? edge.Point1 : edge.Point2;
-                float penetration = tri.Plane.D + Vector3.Dot(contactPoint, tri.Plane.Normal);
-
-                res.Add(new ContactAcummulatorData { Edge = edge, Point = contactPoint, Penetration = -penetration, Normal = tri.Normal, Direction = 1 });
-            }
-
-            // Triangle to box contacts
-            var triEdges = tri.GetEdges();
-            foreach (var edge in triEdges)
-            {
-                if (!Intersection.SegmentIntersectsBox(edge, box, out Vector3 point, out _))
-                {
-                    continue;
-                }
-
-                var bestFace = GetAABBFaceFromPoint(box, point);
-                var contactNormal = bestFace.Normal;
-                float sign = Vector3.Dot(edge.Direction, contactNormal);
-                var contactPoint = sign >= 0 ? edge.Point1 : edge.Point2;
-                float penetration = bestFace.D + Vector3.Dot(contactPoint, contactNormal);
-
-                res.Add(new ContactAcummulatorData { Edge = edge, Point = contactPoint, Penetration = -penetration, Normal = contactNormal, Direction = -1 });
-            }
-
-            return res.Distinct().ToArray();
-        }
-
-        private static Plane GetAABBFaceFromPoint(BoundingBox box, Vector3 point)
-        {
-            float bestD = float.MaxValue;
-            Plane bestP = new Plane();
-            foreach (var face in box.GetFaces())
-            {
-                var intersection = face.Intersects(ref point);
-
-                if (intersection == PlaneIntersectionType.Intersecting)
-                {
-                    return face;
-                }
-
-                if (intersection == PlaneIntersectionType.Front)
-                {
-                    continue;
-                }
-
-                float d = -(Vector3.Dot(point, face.Normal) + face.D);
-                if (d < bestD)
-                {
-                    bestD = d;
-                    bestP = face;
-                }
-            }
-
-            return bestP;
         }
     }
 }

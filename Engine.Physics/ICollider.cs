@@ -1,6 +1,6 @@
 ﻿using SharpDX;
 
-namespace Engine.Physics.GJK
+namespace Engine.Physics
 {
     /// <summary>
     /// Base interface for all collision shapes
@@ -20,7 +20,10 @@ namespace Engine.Physics.GJK
         /// </summary>
         Matrix RotationScaleInverse { get; }
 
-
+        /// <summary>
+        /// Gets the support vector of the specified direction
+        /// </summary>
+        /// <param name="dir">Direction</param>
         Vector3 Support(Vector3 dir);
     }
 }

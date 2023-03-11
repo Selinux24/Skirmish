@@ -20,6 +20,16 @@ namespace Engine.Physics.GJK
         {
 
         }
+        public BoxCollider(Vector3 extents)
+        {
+            Min = -extents;
+            Max = extents;
+        }
+        public BoxCollider(Vector3 min, Vector3 max)
+        {
+            Min = min;
+            Max = max;
+        }
 
         public Vector3 Support(Vector3 dir)
         {

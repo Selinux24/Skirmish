@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine.Physics.GJK
 {
@@ -19,6 +21,11 @@ namespace Engine.Physics.GJK
         public PolytopeCollider()
         {
 
+        }
+
+        public PolytopeCollider(IEnumerable<Vector3> points)
+        {
+            Points = points?.ToArray() ?? Array.Empty<Vector3>();
         }
 
         public Vector3 Support(Vector3 dir)

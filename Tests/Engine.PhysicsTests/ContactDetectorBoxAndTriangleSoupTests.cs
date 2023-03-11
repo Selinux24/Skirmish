@@ -92,7 +92,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Un-rotated box - Bottom face to plane. Bottom face perfect contact",
                             BoxTransform = Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0 },
@@ -109,7 +109,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Un-rotated box - Bottom face to plane. Bottom face 0.1 penetration",
                             BoxTransform = Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 0.1f },
@@ -126,7 +126,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Un-rotated box - Bottom face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.Identity,
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 1 },
@@ -143,7 +143,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Un-rotated box - Bottom face to plane. Top face perfect contact. Bottom face below the plane",
                             BoxTransform = Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightBottom, Penetration = 2 },
@@ -189,7 +189,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 90º - Front face to plane. Front face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
@@ -206,7 +206,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 90º - Front face to plane. Front face 0.1 penetration",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
@@ -223,7 +223,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 90º - Front face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
@@ -240,7 +240,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 90º - Front face to plane. Back face perfect contact. Front face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
@@ -286,7 +286,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 180º - Top face to plane. Top face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 5,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 0 },
@@ -303,7 +303,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 90º - Top face to plane. Top face 0.1 penetration",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 0.1f },
@@ -320,7 +320,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 180º - Top face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop, Penetration = 1 },
@@ -337,7 +337,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 180º - Top face to plane. Bottom face perfect contact. Top face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },
@@ -383,7 +383,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 270º - Back face to plane. Back face perfect contact",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 0 },
@@ -400,7 +400,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 270º - Back face to plane. Back face 0.1 penetration",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 0.1f },
@@ -417,7 +417,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 270º - Back face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop   , Penetration = 1 },
@@ -434,7 +434,7 @@ namespace Engine.PhysicsTests
                             CaseName = "X-axis 270º - Back face to plane. Front face perfect contact. Back face below the plane",
                             BoxTransform = Matrix.RotationX(MathUtil.Pi + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackRightTop    , Penetration = 2 },
@@ -480,7 +480,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis 90º - Left face to plane. Left face perfect contact",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0 },
@@ -497,7 +497,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis 90º - Left face to plane. Left face 0.1 penetration",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 0.1f },
@@ -514,7 +514,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis 90º - Left face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop    , Penetration = 1 },
@@ -531,7 +531,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis 90º - Left face to plane. Right face perfect contact. Left face below the plane",
                             BoxTransform = Matrix.RotationZ(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.BackLeftTop     , Penetration = 2 },
@@ -577,7 +577,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis -90º - Right face to plane. Right face perfect contact",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0 },
@@ -594,7 +594,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis -90º - Right face to plane. Right face 0.1 penetration",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 0.9f),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 0.1f },
@@ -611,7 +611,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis -90º - Right face to plane. Plane cuts in the middle",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo),
                             IntersectioExpected = true,
-                            ContactCount = 6,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 1 },
@@ -628,7 +628,7 @@ namespace Engine.PhysicsTests
                             CaseName = "Z-axis -90º - Right face to plane. Left face perfect contact. Right face below the plane",
                             BoxTransform = Matrix.RotationZ(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down),
                             IntersectioExpected = true,
-                            ContactCount = 7,
+                            ContactCount = 1,
                             Contacts = new BoxAndTriangleSoupContactData[]
                             {
                                 new BoxAndTriangleSoupContactData{ Corner = BoxVertices.FrontRightTop   , Penetration = 2 },

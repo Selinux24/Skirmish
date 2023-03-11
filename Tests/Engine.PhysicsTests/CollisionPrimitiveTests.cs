@@ -152,16 +152,16 @@ namespace Engine.PhysicsTests
             OrientedBoundingBox obb = new OrientedBoundingBox(distinctPoints);
 
             CollisionTriangleSoup soup = new CollisionTriangleSoup(allTris);
-            CollectionAssert.AreEquivalent(soup.Triangles.ToArray(), distinctTris);
-            CollectionAssert.AreEquivalent(soup.Vertices.ToArray(), distinctPoints);
+            CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
+            CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
             Assert.AreEqual(soup.BoundingSphere, sphere);
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
             RigidBody rbody = new RigidBody(1f, Matrix.Identity);
             soup.Attach(rbody);
-            CollectionAssert.AreEquivalent(soup.Triangles.ToArray(), distinctTris);
-            CollectionAssert.AreEquivalent(soup.Vertices.ToArray(), distinctPoints);
+            CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
+            CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
             Assert.AreEqual(soup.BoundingSphere, sphere);
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
@@ -176,8 +176,8 @@ namespace Engine.PhysicsTests
             box = box.SetTransform(trn);
             obb = obb.SetTransform(trn);
             soup.Attach(rbody);
-            CollectionAssert.AreEquivalent(soup.Triangles.ToArray(), distinctTris);
-            CollectionAssert.AreEquivalent(soup.Vertices.ToArray(), distinctPoints);
+            CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
+            CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
             Assert.AreEqual(soup.BoundingSphere, sphere);
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
