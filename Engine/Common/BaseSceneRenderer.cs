@@ -1117,7 +1117,7 @@ namespace Engine.Common
         {
             var graphics = Scene.Game.Graphics;
 
-            //Restore backbuffer as render target and clear it
+            //Restore back buffer as render target and clear it
             graphics.SetDefaultRenderTarget(clearRT, clearRTColor);
             graphics.SetDefaultViewport();
         }
@@ -1224,7 +1224,7 @@ namespace Engine.Common
         /// <summary>
         /// Does the post-processing draw
         /// </summary>
-        /// <param name="target">Target to set restul</param>
+        /// <param name="target">Target to set result</param>
         /// <param name="renderPass">Render pass</param>
         /// <param name="gameTime">Game time</param>
         protected virtual bool DoPostProcessing(Targets target, RenderPass renderPass, GameTime gameTime)

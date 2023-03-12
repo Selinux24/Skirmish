@@ -76,7 +76,7 @@ namespace Engine
         /// Gets the transform list of the pose at specified time
         /// </summary>
         /// <param name="time">Time</param>
-        /// <param name="clipName">Clip mame</param>
+        /// <param name="clipName">Clip name</param>
         /// <returns>Returns the resulting transform list</returns>
         IEnumerable<Matrix> GetPoseAtTime(float time, string clipName);
         /// <summary>

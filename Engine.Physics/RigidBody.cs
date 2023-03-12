@@ -81,7 +81,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void SetInitialState(Matrix transform)
         {
-            if (!transform.Decompose(out var scale, out var rotation, out var translation))
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
             {
                 throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
             }
@@ -102,6 +102,25 @@ namespace Engine.Physics
             SetAwakeState(true);
 
             ClearAccumulators();
+            CalculateDerivedData();
+        }
+     
+        /// <inheritdoc/>
+        public void SetState(Matrix transform)
+        {
+            if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
+            {
+                throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
+            }
+
+            SetState(translation, rotation);
+        }
+        /// <inheritdoc/>
+        public void SetState(Vector3 position, Quaternion rotation)
+        {
+            Position = position;
+            Rotation = Quaternion.Normalize(rotation);
+
             CalculateDerivedData();
         }
 

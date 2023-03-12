@@ -12,7 +12,7 @@ namespace Engine
     public interface IShadowMap : IDisposable
     {
         /// <summary>
-        /// Deph map texture
+        /// Depth map texture
         /// </summary>
         EngineShaderResourceView Texture { get; }
         /// <summary>

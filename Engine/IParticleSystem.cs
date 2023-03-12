@@ -18,7 +18,7 @@ namespace Engine
         /// </summary>
         bool Active { get; }
         /// <summary>
-        /// Gest the maximum number of concurrent particles at the same time
+        /// Gets the maximum number of concurrent particles at the same time
         /// </summary>
         int MaxConcurrentParticles { get; }
         /// <summary>

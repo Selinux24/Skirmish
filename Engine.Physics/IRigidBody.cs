@@ -83,6 +83,18 @@ namespace Engine.Physics
         /// <param name="position">Initial position</param>
         /// <param name="rotation">Initial rotation</param>
         void SetInitialState(Vector3 position, Quaternion rotation);
+   
+        /// <summary>
+        /// Sets the state of the body
+        /// </summary>
+        /// <param name="transform">Transform matrix</param>
+        void SetState(Matrix transform);
+        /// <summary>
+        /// Sets the state of the body
+        /// </summary>
+        /// <param name="position">Initial position</param>
+        /// <param name="rotation">Initial rotation</param>
+        void SetState(Vector3 position, Quaternion rotation);
 
         /// <summary>
         /// Sets the body mass
@@ -95,11 +107,11 @@ namespace Engine.Physics
         bool HasFiniteMass();
 
         /// <summary>
-        /// Sets the intertia tensor coefficient
+        /// Sets the inertia tensor coefficient
         /// </summary>
-        /// <param name="ix">Interntia magnitude on X coordinate</param>
-        /// <param name="iy">Interntia magnitude on Y coordinate</param>
-        /// <param name="iz">Interntia magnitude on Z coordinate</param>
+        /// <param name="ix">Inertia magnitude on X coordinate</param>
+        /// <param name="iy">Inertia magnitude on Y coordinate</param>
+        /// <param name="iz">Inertia magnitude on Z coordinate</param>
         void SetIntertiaCoefficients(float ix, float iy, float iz);
 
         /// <summary>

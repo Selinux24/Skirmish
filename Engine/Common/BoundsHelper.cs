@@ -86,7 +86,7 @@ namespace Engine.Common
         /// Gets bounding sphere
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
         public BoundingSphere GetBoundingSphere(Manipulator3D manipulator, bool refresh = false)
         {
@@ -106,7 +106,7 @@ namespace Engine.Common
         /// Gets bounding box
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
         public BoundingBox GetBoundingBox(Manipulator3D manipulator, bool refresh = false)
         {
@@ -125,7 +125,7 @@ namespace Engine.Common
         /// Gets oriented bounding box
         /// </summary>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
         public OrientedBoundingBox GetOrientedBoundingBox(Manipulator3D manipulator, bool refresh = false)
         {

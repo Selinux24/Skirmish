@@ -166,7 +166,7 @@ namespace Engine.Physics
             // Prepare contacts for processing
             Prepare(time);
 
-            // Solve interpenetration problems with contacts
+            // Solve inter-penetration problems with contacts
             AdjustPositions();
 
             // Resolve speed issues with contacts
@@ -195,7 +195,7 @@ namespace Engine.Physics
             int positionIterations = settings.PositionIterations;
             int positionIterationsUsed = 0;
 
-            // Resolve interpenetrations in order of severity
+            // Resolve inter-penetrations in order of severity
             while (positionIterationsUsed < positionIterations)
             {
                 // Find the greatest penetration

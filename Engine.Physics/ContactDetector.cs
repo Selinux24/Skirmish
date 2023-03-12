@@ -106,7 +106,8 @@ namespace Engine.Physics
         public static bool HalfSpaceAndSphere(HalfSpaceCollider halfSpace, SphereCollider sphere, ContactResolver data)
         {
             // Distance from center to plane
-            float centerToPlane = Vector3.Dot(halfSpace.Normal, sphere.RigidBody.Position) + halfSpace.D;
+            Vector3 normal = Vector3.TransformNormal(halfSpace.Normal, halfSpace.RigidBody.Transform);
+            float centerToPlane = Vector3.Dot(normal, sphere.RigidBody.Position) + halfSpace.D;
 
             // Obtain the penetration of the sphere in the plane.
             float penetration = centerToPlane - sphere.Radius;
@@ -116,8 +117,8 @@ namespace Engine.Physics
             }
 
             // Create the contact. It has a normal in the direction of the plane.
-            var position = sphere.RigidBody.Position - halfSpace.Normal * centerToPlane;
-            data.AddContact(sphere.RigidBody, halfSpace.RigidBody, position, halfSpace.Normal, -penetration);
+            var position = sphere.RigidBody.Position - normal * centerToPlane;
+            data.AddContact(sphere.RigidBody, halfSpace.RigidBody, position, normal, -penetration);
 
             return true;
         }
@@ -135,12 +136,14 @@ namespace Engine.Physics
                 return false;
             }
 
+            Vector3 normal = Vector3.TransformNormal(halfSpace.Normal, halfSpace.RigidBody.Transform);
+
             bool intersectionExists = false;
 
             foreach (var point in points)
             {
                 // Distance to plane
-                float penetration = halfSpace.D + Vector3.Dot(point, halfSpace.Normal);
+                float penetration = halfSpace.D + Vector3.Dot(point, normal);
                 if (penetration > 0f && !MathUtil.IsZero(penetration))
                 {
                     continue;
@@ -148,7 +151,7 @@ namespace Engine.Physics
 
                 intersectionExists = true;
 
-                data.AddContact(rigidBody, halfSpace.RigidBody, point, halfSpace.Normal, -penetration);
+                data.AddContact(rigidBody, halfSpace.RigidBody, point, normal, -penetration);
                 if (!data.HasFreeContacts())
                 {
                     break;

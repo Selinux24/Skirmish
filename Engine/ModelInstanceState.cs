@@ -15,7 +15,7 @@ namespace Engine
         /// </summary>
         public int InstanceId { get; set; }
         /// <summary>
-        /// Activo
+        /// Active
         /// </summary>
         public bool Active { get; set; }
         /// <summary>

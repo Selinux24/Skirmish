@@ -556,7 +556,7 @@ namespace Engine
         {
             var corners = box.GetCorners();
 
-            // Hack sharpDX BoundingBox vertex order, to compatibilice with OrientedBoundingBox
+            // Hack sharpDX BoundingBox vertex order, to make compatible with OrientedBoundingBox
             return new[]
             {
                 corners[1],

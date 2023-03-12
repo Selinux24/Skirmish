@@ -36,7 +36,7 @@ namespace Engine
         /// </summary>
         Vector4 ToCascadeOffsetY { get; set; }
         /// <summary>
-        /// Cascasde scale
+        /// Cascade scale
         /// </summary>
         Vector4 ToCascadeScale { get; set; }
 

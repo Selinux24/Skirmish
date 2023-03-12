@@ -2,7 +2,7 @@
 namespace Engine
 {
     /// <summary>
-    /// Isometrix axis
+    /// Isometric axis
     /// </summary>
     public enum IsometricAxis
     {

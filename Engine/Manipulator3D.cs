@@ -133,7 +133,7 @@ namespace Engine
         public Vector3 Velocity { get; private set; }
 
         /// <summary>
-        /// Contructor
+        /// Constructor
         /// </summary>
         public Manipulator3D()
         {

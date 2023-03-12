@@ -24,7 +24,7 @@ namespace Engine
         /// </summary>
         private ModelInstance[] instances = null;
         /// <summary>
-        /// Temporal instance listo for rendering
+        /// Temporal instance list for rendering
         /// </summary>
         private ModelInstance[] instancesTmp = null;
         /// <summary>
@@ -32,9 +32,9 @@ namespace Engine
         /// </summary>
         private bool hasDataToWrite = false;
         /// <summary>
-        /// Independant transforms flag
+        /// Independent transforms flag
         /// </summary>
-        private bool hasIndependantTransforms = false;
+        private bool hasIndependentTransforms = false;
 
         /// <summary>
         /// Instancing buffer
@@ -128,7 +128,7 @@ namespace Engine
 
             MaximumCount = -1;
 
-            hasIndependantTransforms = Description.TransformDependences?.Any() == true;
+            hasIndependentTransforms = Description.TransformDependences?.Any() == true;
         }
 
         /// <inheritdoc/>
@@ -190,12 +190,12 @@ namespace Engine
             hasDataToWrite = instanceIndex > 0;
         }
         /// <summary>
-        /// Updates independant transforms
+        /// Updates independent transforms
         /// </summary>
         /// <param name="meshName">Mesh name</param>
-        private void UpdateIndependantTransforms(string meshName)
+        private void UpdateIndependentTransforms(string meshName)
         {
-            if (!hasIndependantTransforms)
+            if (!hasIndependentTransforms)
             {
                 return;
             }
@@ -329,7 +329,7 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    UpdateIndependantTransforms(meshName);
+                    UpdateIndependentTransforms(meshName);
 
                     count += DrawShadowMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;
@@ -458,7 +458,7 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    UpdateIndependantTransforms(meshName);
+                    UpdateIndependentTransforms(meshName);
 
                     count += DrawMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;

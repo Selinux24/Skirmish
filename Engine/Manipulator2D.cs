@@ -53,7 +53,7 @@ namespace Engine
         public float LinearVelocity { get; set; } = 1f;
 
         /// <summary>
-        /// Contructor
+        /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
         public Manipulator2D(Game game)
@@ -206,7 +206,7 @@ namespace Engine
             updateInternals = true;
         }
         /// <summary>
-        /// Stes rotation
+        /// Sets rotation
         /// </summary>
         /// <param name="angle">Rotation angle in radians</param>
         public void SetRotation(float angle)

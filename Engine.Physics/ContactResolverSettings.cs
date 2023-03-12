@@ -32,12 +32,12 @@ namespace Engine.Physics
         /// <summary>
         /// To avoid instability, speeds less than this value are considered 0
         /// </summary>
-        /// <remarks>The higher this number, the more the interpenetration will be visually noticeable.</remarks>
+        /// <remarks>The higher this number, the more the inter-penetration will be visually noticeable.</remarks>
         public float VelocityEpsilon { get; set; } = 0.001f;
         /// <summary>
-        /// To avoid instability, penetrations less than this value are considered as no interpenetrations.
+        /// To avoid instability, penetrations less than this value are considered as no inter penetrations.
         /// </summary>
-        /// <remarks>The higher this number, the more the interpenetration will be visually noticeable.</remarks>
+        /// <remarks>The higher this number, the more the inter penetration will be visually noticeable.</remarks>
         public float PositionEpsilon { get; set; } = 0.001f;
         /// <summary> 
         /// Friction factor to add in all collisions

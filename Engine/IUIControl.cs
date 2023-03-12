@@ -98,7 +98,7 @@ namespace Engine
         /// </summary>
         RectangleF AbsoluteRectangle { get; }
         /// <summary>
-        /// Gets the control's rectangle coordinates relative to inmediate parent control position
+        /// Gets the control's rectangle coordinates relative to immediate parent control position
         /// </summary>
         RectangleF RelativeToParentRectangle { get; }
         /// <summary>
@@ -146,7 +146,7 @@ namespace Engine
         float Alpha { get; set; }
 
         /// <summary>
-        /// Tooltip text
+        /// Tool-tip text
         /// </summary>
         string TooltipText { get; set; }
 
@@ -254,7 +254,7 @@ namespace Engine
         /// <summary>
         /// Gets the render area in absolute coordinates from screen origin
         /// </summary>
-        /// <param name="applyPadding">Apply the padding to the resulting reactangle, if any.</param>
+        /// <param name="applyPadding">Apply the padding to the resulting rectangle, if any.</param>
         /// <returns>Returns the control render area</returns>
         RectangleF GetRenderArea(bool applyPadding);
         /// <summary>

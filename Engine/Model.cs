@@ -166,7 +166,7 @@ namespace Engine
 
             if (dependences.Any(i => i < -1 || i > dependences.Length - 1))
             {
-                throw new EngineException("Bad transform dependences indices.");
+                throw new EngineException("Bad transformation dependency indices.");
             }
 
             for (int i = 0; i < names.Length; i++)
@@ -498,7 +498,7 @@ namespace Engine
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
         /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
@@ -511,7 +511,7 @@ namespace Engine
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
         /// </summary>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {

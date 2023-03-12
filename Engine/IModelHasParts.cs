@@ -16,7 +16,7 @@ namespace Engine
         /// Gets the transform by transform name
         /// </summary>
         /// <param name="name">Transform name</param>
-        /// <returns>Retusn the transform of the specified transform name</returns>
+        /// <returns>Return the transform of the specified transform name</returns>
         Matrix GetTransformByName(string name);
         /// <summary>
         /// Gets the model part by name

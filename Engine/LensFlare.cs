@@ -13,7 +13,7 @@ namespace Engine
     public sealed class LensFlare : Drawable<LensFlareDescription>
     {
         /// <summary>
-        /// Glow sprote
+        /// Glow sprite
         /// </summary>
         private Sprite glowSprite;
         /// <summary>

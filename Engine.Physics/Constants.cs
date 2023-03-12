@@ -47,5 +47,13 @@ namespace Engine.Physics
         /// Angular damping
         /// </summary>
         public static float AngularDamping { get; set; } = 0.8f;
+        /// <summary>
+        /// Zero tolerance value
+        /// </summary>
+        public static float ZeroTolerance { get; set; } = MathUtil.ZeroTolerance;
+        /// <summary>
+        /// Zero tolerance vector
+        /// </summary>
+        public static Vector3 ZeroToleranceVector { get; set; } = new Vector3(MathUtil.ZeroTolerance);
     }
 }

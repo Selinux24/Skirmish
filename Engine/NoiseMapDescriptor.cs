@@ -25,7 +25,7 @@ namespace Engine
         /// </summary>
         public int Octaves { get; set; } = 4;
         /// <summary>
-        /// Persistance
+        /// Persistence
         /// </summary>
         public float Persistance { get; set; } = 0.5f;
         /// <summary>

@@ -236,7 +236,7 @@ namespace Engine
                 {
                     float theta = sl * thetaStep;
 
-                    //Spherical to cartesian
+                    //Spherical to Cartesian
                     Vector3 position = new Vector3(
                         radius * (float)Math.Sin(phi) * (float)Math.Cos(theta),
                         radius * (float)Math.Cos(phi),
@@ -541,7 +541,7 @@ namespace Engine
             return lines;
         }
         /// <summary>
-        /// Eval arc
+        /// Evaluates arc
         /// </summary>
         /// <param name="v0">First point</param>
         /// <param name="v1">Second point</param>

@@ -233,7 +233,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="lod">Level of detail</param>
         /// <returns>Returns the drawing data object</returns>
-        /// <remarks>If the sepecified level of detail not exists, returns the first available drawing data.</remarks>
+        /// <remarks>If the specified level of detail not exists, returns the first available drawing data.</remarks>
         public DrawingData GetDrawingData(LevelOfDetail lod)
         {
             if (meshesByLOD == null)
@@ -249,7 +249,7 @@ namespace Engine.Common
             return GetFirstDrawingData(LevelOfDetail.Minimum);
         }
         /// <summary>
-        /// Gets the first drawing data avaliable for the specified level of detail, from the specified one
+        /// Gets the first drawing data available for the specified level of detail, from the specified one
         /// </summary>
         /// <param name="lod">First level of detail</param>
         /// <returns>Returns the first available level of detail drawing data</returns>

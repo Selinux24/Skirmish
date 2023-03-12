@@ -476,7 +476,7 @@ namespace Engine.Physics
             velocityChange[0] = Vector3.Zero;
             velocityChange[0] += Vector3.Multiply(impulse, body1.InverseMass);
 
-            // Aplicar los cambios e el cuerpo
+            // Apply the changes to the body
             body1.AddLinearVelocity(velocityChange[0]);
             body1.AddAngularVelocity(rotationChange[0]);
 
