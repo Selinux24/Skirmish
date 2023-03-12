@@ -4,7 +4,6 @@ using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Engine.PhysicsTests
 {
@@ -71,7 +70,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(true, intersectionTri);
 
             var contactsTri = dataTri.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
-            Assert.AreEqual(1, contactsTri.Count());
+            Assert.AreEqual(1, contactsTri.Length);
         }
 
         [TestMethod()]

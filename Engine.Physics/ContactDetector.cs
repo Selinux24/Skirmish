@@ -1,9 +1,9 @@
+using Engine.Common;
 using SharpDX;
 using System.Linq;
 
 namespace Engine.Physics
 {
-    using Engine.Common;
     using Engine.Physics.GJK;
 
     /// <summary>
@@ -11,15 +11,6 @@ namespace Engine.Physics
     /// </summary>
     public static class ContactDetector
     {
-        /// <summary>
-        /// The value for which all absolute numbers smaller than are considered equal to zero
-        /// </summary>
-        public static readonly float ZeroTolerance = MathUtil.ZeroTolerance;
-        /// <summary>
-        /// The value for which all vectors smaller than are considered equal to Vector3.Zero
-        /// </summary>
-        public static readonly Vector3 ZeroToleranceVector = new Vector3(MathUtil.ZeroTolerance);
-
         /// <summary>
         /// Detect collision between two primitives
         /// </summary>
@@ -59,6 +50,11 @@ namespace Engine.Physics
                 return SphereAndPrimitive(sphere1, primitive2, data);
             }
 
+            if (primitive1 is CollisionTriangle triangle)
+            {
+                return TriangleAndPrimitive(triangle, primitive2, data);
+            }
+
             if (primitive1 is CollisionTriangleSoup triangleSoup)
             {
                 return TriangleSoupAndPrimitive(triangleSoup, primitive2, data);
@@ -86,6 +82,11 @@ namespace Engine.Physics
                 return BoxAndSphere(box1, sphere2, data);
             }
 
+            if (primitive2 is CollisionTriangle triangle2)
+            {
+                return BoxAndTriangle(box1, triangle2, data);
+            }
+
             if (primitive2 is CollisionTriangleSoup soup2)
             {
                 return BoxAndTriangleSoup(box1, soup2, data);
@@ -97,43 +98,6 @@ namespace Engine.Physics
             }
 
             return false;
-        }
-        /// <summary>
-        /// Detects the collision between box and plane
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="plane">Plane</param>
-        /// <param name="data">Collision data</param>
-        /// <returns>Returns true if there has been a collision</returns>
-        public static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
-        {
-            var corners = box.OrientedBoundingBox.GetVertices();
-
-            bool intersectionExists = false;
-            for (int i = 0; i < 8; i++)
-            {
-                Vector3 vertexPos = corners.ElementAt(i);
-
-                // Distance to plane
-                float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
-                if (vertexDistance > 0f && !MathUtil.IsZero(vertexDistance))
-                {
-                    continue;
-                }
-
-                intersectionExists = true;
-
-                // The point of contact is halfway between the vertex and the plane.
-                // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
-                data.AddContact(box.RigidBody, plane.RigidBody, vertexPos, plane.Normal, -vertexDistance);
-
-                if (!data.HasFreeContacts())
-                {
-                    break;
-                }
-            }
-
-            return intersectionExists;
         }
         /// <summary>
         /// Detect the collision between boxes
@@ -186,6 +150,32 @@ namespace Engine.Physics
             return true;
         }
         /// <summary>
+        /// Detect collision between box and triangle
+        /// </summary>
+        /// <param name="box">box</param>
+        /// <param name="triangle">Triangle</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool BoxAndTriangle(CollisionBox box, CollisionTriangle triangle, ContactResolver data)
+        {
+            var collider1 = new BoxCollider(box.Extents);
+            collider1.Position = box.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(box.RigidBody.Rotation);
+
+            var collider2 = new TriangleCollider(triangle.GetTriangle());
+            collider2.Position = triangle.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(triangle.RigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
+            {
+                return false;
+            }
+
+            data.AddContact(box.RigidBody, triangle.RigidBody, position, normal, penetration);
+
+            return true;
+        }
+        /// <summary>
         /// Detect the collision between a box and a collection of triangles
         /// </summary>
         /// <param name="box">Box</param>
@@ -212,31 +202,41 @@ namespace Engine.Physics
             return true;
         }
         /// <summary>
-        /// Detect collision between box and triangle
+        /// Detects the collision between box and plane
         /// </summary>
-        /// <param name="box">box</param>
-        /// <param name="triangle">Triangle</param>
-        /// <param name="rigidBody">Rigid body</param>
+        /// <param name="box">Box</param>
+        /// <param name="plane">Plane</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        public static bool BoxAndTriangle(CollisionBox box, Triangle triangle, IRigidBody rigidBody, ContactResolver data)
+        public static bool BoxAndHalfSpace(CollisionBox box, CollisionPlane plane, ContactResolver data)
         {
-            var collider1 = new BoxCollider(box.Extents);
-            collider1.Position = box.RigidBody.Position;
-            collider1.RotationScale = Matrix.RotationQuaternion(box.RigidBody.Rotation);
+            var corners = box.OrientedBoundingBox.GetVertices();
 
-            var collider2 = new TriangleCollider(triangle);
-            collider2.Position = rigidBody.Position;
-            collider2.RotationScale = Matrix.RotationQuaternion(rigidBody.Rotation);
-
-            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
+            bool intersectionExists = false;
+            for (int i = 0; i < 8; i++)
             {
-                return false;
+                Vector3 vertexPos = corners.ElementAt(i);
+
+                // Distance to plane
+                float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
+                if (vertexDistance > 0f && !MathUtil.IsZero(vertexDistance))
+                {
+                    continue;
+                }
+
+                intersectionExists = true;
+
+                // The point of contact is halfway between the vertex and the plane.
+                // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
+                data.AddContact(box.RigidBody, plane.RigidBody, vertexPos, plane.Normal, -vertexDistance);
+
+                if (!data.HasFreeContacts())
+                {
+                    break;
+                }
             }
 
-            data.AddContact(box.RigidBody, rigidBody, position, normal, penetration);
-
-            return true;
+            return intersectionExists;
         }
 
         /// <summary>
@@ -258,6 +258,11 @@ namespace Engine.Physics
                 return SphereAndSphere(sphere1, sphere2, data);
             }
 
+            if (primitive2 is CollisionTriangle triangle2)
+            {
+                return SphereAndTriangle(sphere1, triangle2, data);
+            }
+
             if (primitive2 is CollisionTriangleSoup soup2)
             {
                 return SphereAndTriangleSoup(sphere1, soup2, data);
@@ -269,31 +274,6 @@ namespace Engine.Physics
             }
 
             return false;
-        }
-        /// <summary>
-        /// Detect the collision between a sphere and a plane
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="plane">Plane</param>
-        /// <param name="data">Collision data</param>
-        /// <returns>Returns true if there has been a collision</returns>
-        public static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, ContactResolver data)
-        {
-            // Distance from center to plane
-            float centerToPlane = Vector3.Dot(plane.Normal, sphere.RigidBody.Position) + plane.D;
-
-            // Obtain the penetration of the sphere in the plane.
-            float penetration = centerToPlane - sphere.Radius;
-            if (penetration > 0f && !MathUtil.IsZero(penetration))
-            {
-                return false;
-            }
-
-            // Create the contact. It has a normal in the direction of the plane.
-            var position = sphere.RigidBody.Position - plane.Normal * centerToPlane;
-            data.AddContact(sphere.RigidBody, plane.RigidBody, position, plane.Normal, -penetration);
-
-            return true;
         }
         /// <summary>
         /// Detect the collision between two spheres
@@ -354,27 +334,177 @@ namespace Engine.Physics
         /// </summary>
         /// <param name="sphere">Sphere</param>
         /// <param name="triangle">Triangle</param>
-        /// <param name="rigidBody">Rigid body</param>
         /// <param name="data">Collision data</param>
         /// <returns>Returns true if there has been a collision</returns>
-        public static bool SphereAndTriangle(CollisionSphere sphere, Triangle triangle, IRigidBody rigidBody, ContactResolver data)
+        public static bool SphereAndTriangle(CollisionSphere sphere, CollisionTriangle triangle, ContactResolver data)
         {
             var collider1 = new SphereCollider(sphere.Radius);
             collider1.Position = sphere.RigidBody.Position;
             collider1.RotationScale = Matrix.RotationQuaternion(sphere.RigidBody.Rotation);
 
-            var collider2 = new TriangleCollider(triangle);
-            collider2.Position = rigidBody.Position;
-            collider2.RotationScale = Matrix.RotationQuaternion(rigidBody.Rotation);
+            var collider2 = new TriangleCollider(triangle.GetTriangle());
+            collider2.Position = triangle.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(triangle.RigidBody.Rotation);
 
             if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
             {
                 return false;
             }
 
-            data.AddContact(sphere.RigidBody, rigidBody, position, normal, penetration);
+            data.AddContact(sphere.RigidBody, triangle.RigidBody, position, normal, penetration);
 
             return true;
+        }
+        /// <summary>
+        /// Detect the collision between a sphere and a plane
+        /// </summary>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="plane">Plane</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool SphereAndHalfSpace(CollisionSphere sphere, CollisionPlane plane, ContactResolver data)
+        {
+            // Distance from center to plane
+            float centerToPlane = Vector3.Dot(plane.Normal, sphere.RigidBody.Position) + plane.D;
+
+            // Obtain the penetration of the sphere in the plane.
+            float penetration = centerToPlane - sphere.Radius;
+            if (penetration > 0f && !MathUtil.IsZero(penetration))
+            {
+                return false;
+            }
+
+            // Create the contact. It has a normal in the direction of the plane.
+            var position = sphere.RigidBody.Position - plane.Normal * centerToPlane;
+            data.AddContact(sphere.RigidBody, plane.RigidBody, position, plane.Normal, -penetration);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Detect collision between a triangle and a primitive
+        /// </summary>
+        /// <param name="triangle1">Triangle</param>
+        /// <param name="primitive2">Primitive</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool TriangleAndPrimitive(CollisionTriangle triangle1, ICollisionPrimitive primitive2, ContactResolver data)
+        {
+            if (primitive2 is CollisionBox box2)
+            {
+                return BoxAndTriangle(box2, triangle1, data);
+            }
+
+            if (primitive2 is CollisionSphere sphere2)
+            {
+                return SphereAndTriangle(sphere2, triangle1, data);
+            }
+
+            if (primitive2 is CollisionTriangle triangle2)
+            {
+                return TriangleAndTriangle(triangle1, triangle2, data);
+            }
+
+            if (primitive2 is CollisionTriangleSoup soup2)
+            {
+                return TriangleAndTriangleSoup(triangle1, soup2, data);
+            }
+
+            if (primitive2 is CollisionPlane plane2)
+            {
+                return TriangleAndHalfSpace(triangle1, plane2, data);
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Detect the collision between two triangles
+        /// </summary>
+        /// <param name="triangle1">First triangle</param>
+        /// <param name="triangle2">Second triangle</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool TriangleAndTriangle(CollisionTriangle triangle1, CollisionTriangle triangle2, ContactResolver data)
+        {
+            var collider1 = new TriangleCollider(triangle1.GetTriangle());
+            collider1.Position = triangle1.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(triangle1.RigidBody.Rotation);
+
+            var collider2 = new TriangleCollider(triangle2.GetTriangle());
+            collider2.Position = triangle2.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(triangle2.RigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
+            {
+                return false;
+            }
+
+            data.AddContact(triangle1.RigidBody, triangle2.RigidBody, position, normal, penetration);
+
+            return true;
+        }
+        /// <summary>
+        /// Detect collision between a triangle and a triangle soup
+        /// </summary>
+        /// <param name="triangle1">Triangle</param>
+        /// <param name="triangleSoup2">Triangle soup</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool TriangleAndTriangleSoup(CollisionTriangle triangle1, CollisionTriangleSoup triangleSoup2, ContactResolver data)
+        {
+            var collider1 = new TriangleCollider(triangle1.GetTriangle());
+            collider1.Position = triangle1.RigidBody.Position;
+            collider1.RotationScale = Matrix.RotationQuaternion(triangle1.RigidBody.Rotation);
+
+            var collider2 = new PolytopeCollider(triangleSoup2.GetVertices());
+            collider2.Position = triangleSoup2.RigidBody.Position;
+            collider2.RotationScale = Matrix.RotationQuaternion(triangleSoup2.RigidBody.Rotation);
+
+            if (!Solver.GJK(collider1, collider2, true, out var position, out var normal, out var penetration))
+            {
+                return false;
+            }
+
+            data.AddContact(triangle1.RigidBody, triangleSoup2.RigidBody, position, normal, penetration);
+
+            return true;
+        }
+        /// <summary>
+        /// Detect the collision between a triangle and a plane
+        /// </summary>
+        /// <param name="triangle">Triangle</param>
+        /// <param name="plane">Plane</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool TriangleAndHalfSpace(CollisionTriangle triangle, CollisionPlane plane, ContactResolver data)
+        {
+            var tris = triangle.GetVertices(true);
+
+            bool intersectionExists = false;
+            for (int i = 0; i < tris.Count(); i++)
+            {
+                Vector3 vertexPos = tris.ElementAt(i);
+
+                // Distance to plane
+                float vertexDistance = plane.D + Vector3.Dot(vertexPos, plane.Normal);
+                if (vertexDistance > 0f)
+                {
+                    continue;
+                }
+
+                intersectionExists = true;
+
+                // The point of contact is halfway between the vertex and the plane.
+                // It is obtained by multiplying the direction by half the separation distance, and adding the position of the vertex.
+                data.AddContact(triangle.RigidBody, plane.RigidBody, vertexPos, plane.Normal, -vertexDistance);
+
+                if (!data.HasFreeContacts())
+                {
+                    break;
+                }
+            }
+
+            return intersectionExists;
         }
 
         /// <summary>
@@ -394,6 +524,11 @@ namespace Engine.Physics
             if (primitive2 is CollisionSphere sphere2)
             {
                 return SphereAndTriangleSoup(sphere2, triangleSoup1, data);
+            }
+
+            if (primitive2 is CollisionTriangle triangle2)
+            {
+                return TriangleAndTriangleSoup(triangle2, triangleSoup1, data);
             }
 
             if (primitive2 is CollisionTriangleSoup soup2)
