@@ -944,7 +944,7 @@ namespace Engine.Common
                 }
             }
 
-            int southPoleIndex = (int)vertList.Count - 1;
+            int southPoleIndex = vertList.Count - 1;
 
             baseIndex = southPoleIndex - ringVertexCount;
 

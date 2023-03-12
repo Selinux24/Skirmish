@@ -4,7 +4,7 @@ using Engine.Content;
 using Engine.Physics;
 using Engine.UI;
 using SharpDX;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -12,6 +12,8 @@ namespace Physics
 {
     class TestScene : Scene
     {
+        private const float floorSize = 40f;
+
         private Sprite panel = null;
         private UITextArea title = null;
         private UITextArea runtimeText = null;
@@ -20,11 +22,11 @@ namespace Physics
 
         private readonly Simulator simulator = new Simulator() { Velocity = 1f };
         private readonly float bodyTime = 20f;
-        private readonly float bodyDistance = 50f * 50f;
+        private readonly float bodyDistance = floorSize * floorSize;
 
         private Model floor = null;
 
-        private readonly List<ColliderData> colliders = new List<ColliderData>();
+        private readonly ConcurrentBag<ColliderData> colliders = new ConcurrentBag<ColliderData>();
 
         private bool gameReady = false;
 
@@ -84,7 +86,7 @@ namespace Physics
         }
         private async Task InitializeFloor()
         {
-            float l = 50f;
+            float l = floorSize;
             float h = 0f;
 
             VertexData[] vertices = new VertexData[]
@@ -139,7 +141,8 @@ namespace Physics
             sphere1.Lines = Line3D.CreateWiredSphere(sphere1.Model.GetBoundingSphere(), slices * 2, stacks * 2);
             sphere2.Lines = Line3D.CreateWiredSphere(sphere2.Model.GetBoundingSphere(), slices * 2, stacks * 2);
 
-            colliders.AddRange(new[] { sphere1, sphere2 });
+            colliders.Add(sphere1);
+            colliders.Add(sphere2);
         }
         private async Task InitializeBoxes()
         {
@@ -166,7 +169,8 @@ namespace Physics
             box1.Lines = Line3D.CreateWiredBox(box1.Model.GetOrientedBoundingBox());
             box2.Lines = Line3D.CreateWiredBox(box2.Model.GetOrientedBoundingBox());
 
-            colliders.AddRange(new[] { box1, box2 });
+            colliders.Add(box1);
+            colliders.Add(box2);
         }
         private async Task InitializePyramids()
         {
@@ -193,7 +197,8 @@ namespace Physics
             pyramid1.Lines = Line3D.CreateWiredPyramid(pyramid1.Model.GetPoints());
             pyramid2.Lines = Line3D.CreateWiredPyramid(pyramid2.Model.GetPoints());
 
-            colliders.AddRange(new[] { pyramid1, pyramid2 });
+            colliders.Add(pyramid1);
+            colliders.Add(pyramid2);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -212,7 +217,7 @@ namespace Physics
             var floorBody = new PhysicsFloor(new RigidBody(float.PositiveInfinity, floor.Manipulator.FinalTransform), floor);
             simulator.AddPhysicsObject(floorBody);
 
-            colliders.ForEach(c =>
+            colliders.ToList().ForEach(c =>
             {
                 c.Initialize();
                 simulator.AddPhysicsObject(c.PhysicsObject);
@@ -243,8 +248,6 @@ namespace Physics
 
             UpdateInputCamera(gameTime);
             UpdateInputBodies();
-
-            simulator.Update(gameTime);
 
             UpdateStateBodies(gameTime);
 
@@ -305,7 +308,10 @@ namespace Physics
         {
             if (Game.Input.KeyJustReleased(Keys.Tab))
             {
-                Reset();
+                colliders.ToList().ForEach(c =>
+                {
+                    c.Reset();
+                });
             }
 
             if (Game.Input.KeyJustReleased(Keys.D1))
@@ -335,13 +341,15 @@ namespace Physics
         }
         private void UpdateStateBodies(GameTime gameTime)
         {
-            float elapsed = gameTime.ElapsedSeconds;
-
             lineDrawer.Clear();
 
-            colliders.ForEach(c =>
+            simulator.Update(gameTime);
+
+            float elapsed = gameTime.ElapsedSeconds;
+
+            colliders.ToList().ForEach(c =>
             {
-                c.UpdateBodyState(elapsed, bodyTime, bodyDistance);
+                c.UpdateBodyState(elapsed, bodyTime / simulator.Velocity, bodyDistance);
                 c.SetLines(lineDrawer);
             });
         }
@@ -360,65 +368,6 @@ namespace Physics
 
             panel.Width = Game.Form.RenderWidth;
             panel.Height = info.Top + info.Height + 3;
-        }
-
-        private void Reset()
-        {
-            colliders.ForEach(c =>
-            {
-                c.Reset();
-            });
-        }
-    }
-
-    class ColliderData
-    {
-        public float Mass = 1;
-        public Matrix Transform = Matrix.Identity;
-        public Model Model = null;
-        public IPhysicsObject PhysicsObject = null;
-        public ISceneLightPoint Light;
-        public float Time = 0f;
-        public IEnumerable<Line3D> Lines;
-
-        public ColliderData(float mass, Matrix transform)
-        {
-            Mass = mass;
-            Transform = transform;
-        }
-
-        public void Initialize()
-        {
-            Model.Manipulator.SetTransform(Transform);
-
-            PhysicsObject = new PhysicsObject(new RigidBody(10, Model.Manipulator.FinalTransform), Model);
-
-            float radius = Model.GetBoundingSphere().Radius * 2f;
-            Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));
-        }
-
-        public void UpdateBodyState(float elapsed, float bodyTime, float bodyDistance)
-        {
-            Time += elapsed;
-
-            if (Time > bodyTime || Model.Manipulator.Position.LengthSquared() > bodyDistance)
-            {
-                Reset();
-            }
-
-            Model.Manipulator.UpdateInternals(true);
-            Light.Position = PhysicsObject.Body.Position;
-        }
-
-        public void SetLines(PrimitiveListDrawer<Line3D> lineDrawer)
-        {
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.FinalTransform));
-        }
-
-        public void Reset()
-        {
-            PhysicsObject.Reset(Transform);
-            Time = 0;
         }
     }
 }
