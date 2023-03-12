@@ -2,12 +2,12 @@ using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine.Physics
+namespace Engine.Physics.Colliders
 {
     /// <summary>
     /// Collision triangle
     /// </summary>
-    public class CollisionTriangle : CollisionPrimitive
+    public class TriangleCollider : Collider
     {
         /// <summary>
         /// Triangle
@@ -22,7 +22,7 @@ namespace Engine.Physics
         /// Constructor
         /// </summary>
         /// <param name="triangle">Triangle</param>
-        public CollisionTriangle(Triangle triangle) : base()
+        public TriangleCollider(Triangle triangle) : base()
         {
             this.triangle = triangle;
 
@@ -71,6 +71,34 @@ namespace Engine.Physics
             var verts = vertices.ToArray();
             Vector3.TransformCoordinate(verts, ref trn, verts);
             return verts;
+        }
+
+        /// <inheritdoc/>
+        public override Vector3 Support(Vector3 dir)
+        {
+            //Find which triangle vertex is furthest along dir
+            float dot0 = Vector3.Dot(triangle.Point1, dir);
+            float dot1 = Vector3.Dot(triangle.Point2, dir);
+            float dot2 = Vector3.Dot(triangle.Point3, dir);
+            Vector3 furthest_point = triangle.Point1;
+            if (dot1 > dot0)
+            {
+                furthest_point = triangle.Point2;
+                if (dot2 > dot1)
+                    furthest_point = triangle.Point3;
+            }
+            else if (dot2 > dot0)
+            {
+                furthest_point = triangle.Point3;
+            }
+
+            //fake some depth behind triangle so we have volume
+            if (Vector3.Dot(dir, triangle.Normal) < 0)
+            {
+                furthest_point -= triangle.Normal;
+            }
+
+            return furthest_point;
         }
     }
 }

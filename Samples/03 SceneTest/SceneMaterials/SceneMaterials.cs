@@ -14,7 +14,7 @@ namespace SceneTest.SceneMaterials
     {
         private readonly float spaceSize = 40;
         private readonly float radius = 1;
-        private readonly uint stacks = 40;
+        private readonly int stacks = 40;
 
         private Sprite backpanel = null;
         private UITextArea title = null;

@@ -75,10 +75,19 @@ namespace Engine.Physics
         {
             SetMass(mass);
 
-            initialTransform.Decompose(out _, out var rotation, out var translation);
-            SetInitialState(translation, rotation);
+            SetInitialState(initialTransform);
         }
 
+        /// <inheritdoc/>
+        public void SetInitialState(Matrix transform)
+        {
+            if (!transform.Decompose(out var scale, out var rotation, out var translation))
+            {
+                throw new ArgumentException("Bad transform. A rotation * translation without scale matrix must be specified.", nameof(transform));
+            }
+
+            SetInitialState(translation, rotation);
+        }
         /// <inheritdoc/>
         public void SetInitialState(Vector3 position, Quaternion rotation)
         {

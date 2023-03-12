@@ -1,4 +1,5 @@
 ﻿using Engine.Physics;
+using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
@@ -15,25 +16,25 @@ namespace Engine.PhysicsTests
 
         static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
 
-        static CollisionBox FromAABB(Vector3 extents, Matrix transform)
+        static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
-            CollisionBox box = new CollisionBox(extents);
+            BoxCollider box = new BoxCollider(extents);
             RigidBody boxBody = new RigidBody(1, transform);
             box.Attach(boxBody);
 
             return box;
         }
-        static CollisionPlane FromPlane(Plane plane, Matrix transform)
+        static HalfSpaceCollider FromPlane(Plane plane, Matrix transform)
         {
-            CollisionPlane p = new CollisionPlane(plane);
+            HalfSpaceCollider p = new HalfSpaceCollider(plane);
             RigidBody triBody = new RigidBody(2, transform);
             p.Attach(triBody);
 
             return p;
         }
-        static CollisionTriangleSoup FromTriangle(Triangle tri, Matrix transform)
+        static MeshCollider FromTriangle(Triangle tri, Matrix transform)
         {
-            CollisionTriangleSoup ctri = new CollisionTriangleSoup(new[] { tri });
+            MeshCollider ctri = new MeshCollider(new[] { tri });
             RigidBody triBody = new RigidBody(2, transform);
             ctri.Attach(triBody);
 
@@ -66,7 +67,7 @@ namespace Engine.PhysicsTests
 
             var triSoup = FromTriangle(tri, Matrix.Identity);
 
-            bool intersectionTri = ContactDetector.BoxAndTriangleSoup(box, triSoup, dataTri);
+            bool intersectionTri = ContactDetector.BetweenObjects(box, triSoup, dataTri);
             Assert.AreEqual(true, intersectionTri);
 
             var contactsTri = dataTri.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();
@@ -88,10 +89,10 @@ namespace Engine.PhysicsTests
             var tri = new Triangle(p1, p2, p3);
             var triSoup = FromTriangle(tri, Matrix.Identity);
 
-            bool intersectionPln = ContactDetector.TriangleSoupAndHalfSpace(triSoup, plane, dataPln);
+            bool intersectionPln = ContactDetector.BetweenObjects(triSoup, plane, dataPln);
             Assert.AreEqual(true, intersectionPln);
 
-            bool intersectionTri = ContactDetector.BoxAndTriangleSoup(box, triSoup, dataTri);
+            bool intersectionTri = ContactDetector.BetweenObjects(box, triSoup, dataTri);
             Assert.AreEqual(true, intersectionTri);
 
             var contactsPln = dataPln.GetContacts();

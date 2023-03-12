@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Physics;
+using Engine.Physics.Colliders;
 using SharpDX;
 using System;
 
@@ -8,25 +9,25 @@ namespace Physics
     public class PhysicsObject : IPhysicsObject
     {
         public IRigidBody Body { get; private set; }
-        public ICollisionPrimitive Collider { get; private set; }
+        public ICollider Collider { get; private set; }
         public Model Model { get; private set; }
 
-        private static CollisionTriangleSoup CollisionTriangleSoupFromModel(Model model)
+        private static MeshCollider CollisionTriangleSoupFromModel(Model model)
         {
             var tris = model.GetTriangles(true);
             tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.FinalTransform));
 
-            return new CollisionTriangleSoup(tris);
+            return new MeshCollider(tris);
         }
 
-        private static CollisionBox CollisionBoxFromModel(Model model)
+        private static BoxCollider CollisionBoxFromModel(Model model)
         {
-            return new CollisionBox(model.GetOrientedBoundingBox(true).Extents);
+            return new BoxCollider(model.GetOrientedBoundingBox(true).Extents);
         }
 
-        private static CollisionSphere CollisionSphereFromModel(Model model)
+        private static SphereCollider CollisionSphereFromModel(Model model)
         {
-            return new CollisionSphere(model.GetBoundingSphere(true).Radius);
+            return new SphereCollider(model.GetBoundingSphere(true).Radius);
         }
 
         public PhysicsObject(IRigidBody body, Model model)
@@ -57,6 +58,16 @@ namespace Physics
 
             Model.Manipulator.SetRotation(Body.Rotation);
             Model.Manipulator.SetPosition(Body.Position);
+        }
+
+        public void Reset(Matrix transform)
+        {
+            if (Body == null)
+            {
+                return;
+            }
+
+            Body.SetInitialState(transform);
         }
 
         public void Reset(Vector3 position, Quaternion rotation)

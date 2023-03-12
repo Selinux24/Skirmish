@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 
-namespace Engine.Physics.GJK
+namespace Engine.Physics.Colliders
 {
     /// <summary>
     /// Capsule: Height-aligned with y-axis
     /// </summary>
-    public struct CapsuleCollider : ICollider
+    public struct CapsuleCollider
     {
         public float R { get; set; } = 0;
         public float YBase { get; set; } = 0;
@@ -24,7 +24,7 @@ namespace Engine.Physics.GJK
             dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
 
             Vector3 result = Vector3.Normalize(dir) * R;
-            result.Y += (dir.Y > 0) ? YCap : YBase;
+            result.Y += dir.Y > 0 ? YCap : YBase;
 
             return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space
         }

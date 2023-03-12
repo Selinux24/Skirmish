@@ -1,5 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Physics;
+using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
@@ -14,18 +15,18 @@ namespace Engine.PhysicsTests
     {
         static TestContext _testContext;
 
-        static CollisionBox FromAABB(Vector3 extents, Matrix transform)
+        static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
-            CollisionBox box = new CollisionBox(extents);
+            BoxCollider box = new BoxCollider(extents);
             RigidBody boxBody = new RigidBody(1, transform);
             box.Attach(boxBody);
 
             return box;
         }
-        static CollisionTriangleSoup FromBox(Vector3 extents, Matrix transform)
+        static MeshCollider FromBox(Vector3 extents, Matrix transform)
         {
             var tris = Triangle.ComputeTriangleList(Topology.TriangleList, new BoundingBox(-extents, extents));
-            CollisionTriangleSoup box = new CollisionTriangleSoup(tris);
+            MeshCollider box = new MeshCollider(tris);
             RigidBody boxBody = new RigidBody(1, transform);
             box.Attach(boxBody);
 
@@ -61,9 +62,9 @@ namespace Engine.PhysicsTests
             var box2 = FromAABB(Vector3.One, boxTrn2);
             var box3 = FromBox(Vector3.One, boxTrn2);
 
-            bool intersectionWith2 = ContactDetector.BoxAndBox(box1, box2, data2);
+            bool intersectionWith2 = ContactDetector.BetweenObjects(box1, box2, data2);
             Assert.AreEqual(true, intersectionWith2);
-            bool intersectionWith3 = ContactDetector.BoxAndTriangleSoup(box1, box3, data3);
+            bool intersectionWith3 = ContactDetector.BetweenObjects(box1, box3, data3);
             Assert.AreEqual(true, intersectionWith3);
 
             var contactsWith2 = data2.GetContacts().Select(c => (c.Position, c.Normal, c.Penetration)).ToArray();

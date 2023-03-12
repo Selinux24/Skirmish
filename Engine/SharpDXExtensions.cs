@@ -608,6 +608,42 @@ namespace Engine
         }
 
         /// <summary>
+        /// Projects the specified box to the given vector
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="vector">Vector</param>
+        public static float ProjectToVector(this BoundingBox box, Vector3 vector)
+        {
+            return ProjectToVector(box.GetExtents(), Matrix.Identity, vector);
+        }
+        /// <summary>
+        /// Projects the specified box to the given vector
+        /// </summary>
+        /// <param name="box">Box</param>
+        /// <param name="vector">Vector</param>
+        public static float ProjectToVector(this OrientedBoundingBox box, Vector3 vector)
+        {
+            return ProjectToVector(box.Extents, box.Transformation, vector);
+        }
+        /// <summary>
+        /// Projects the specified box to the given vector
+        /// </summary>
+        /// <param name="extents">Box extents</param>
+        /// <param name="trn">Box transform</param>
+        /// <param name="vector">Vector</param>
+        public static float ProjectToVector(Vector3 extents, Matrix trn, Vector3 vector)
+        {
+            var xAxis = trn.Right;
+            var yAxis = trn.Up;
+            var zAxis = trn.Backward;
+
+            return
+                extents.X * Math.Abs(Vector3.Dot(vector, xAxis)) +
+                extents.Y * Math.Abs(Vector3.Dot(vector, yAxis)) +
+                extents.Z * Math.Abs(Vector3.Dot(vector, zAxis));
+        }
+
+        /// <summary>
         /// Gets whether almost one of the instance attributes is not a number
         /// </summary>
         /// <param name="vector">Vector</param>

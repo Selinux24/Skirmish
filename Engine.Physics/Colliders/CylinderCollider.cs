@@ -1,11 +1,11 @@
 ﻿using SharpDX;
 
-namespace Engine.Physics.GJK
+namespace Engine.Physics.Colliders
 {
     /// <summary>
     /// Cylinder: Height-aligned with y-axis (rotate using matRS)
     /// </summary>
-    public struct CylinderCollider : ICollider
+    public struct CylinderCollider
     {
         public float R { get; set; } = 0;
         public float YBase { get; set; } = 0;
@@ -25,7 +25,7 @@ namespace Engine.Physics.GJK
 
             Vector3 dir_xz = new Vector3(dir.X, 0, dir.Z);
             Vector3 result = Vector3.Normalize(dir_xz) * R;
-            result.Y = (dir.Y > 0) ? YCap : YBase;
+            result.Y = dir.Y > 0 ? YCap : YBase;
 
             return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space
         }

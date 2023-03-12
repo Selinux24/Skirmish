@@ -5,6 +5,7 @@ using Engine.Physics;
 using Engine.UI;
 using SharpDX;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Physics
@@ -23,47 +24,7 @@ namespace Physics
 
         private Model floor = null;
 
-        private readonly Vector3 sphere1Position = Vector3.Up * 10f;
-        private Model sphere1 = null;
-        private PhysicsObject sphere1Body = null;
-        private SceneLightPoint sphere1Light;
-        private float sphere1Time = 0f;
-        private IEnumerable<Line3D> sphere1Lines;
-
-        private readonly Vector3 sphere2Position = Vector3.Up * 15f;
-        private Model sphere2 = null;
-        private PhysicsObject sphere2Body = null;
-        private SceneLightPoint sphere2Light;
-        private float sphere2Time = 0f;
-        private IEnumerable<Line3D> sphere2Lines;
-
-        private readonly Vector3 box1Position = Vector3.Up * 20f;
-        private Model box1 = null;
-        private PhysicsObject box1Body = null;
-        private SceneLightPoint box1Light;
-        private float box1Time = 0f;
-        private IEnumerable<Line3D> box1Lines;
-
-        private readonly Vector3 box2Position = Vector3.Up * 25f;
-        private Model box2 = null;
-        private PhysicsObject box2Body = null;
-        private SceneLightPoint box2Light;
-        private float box2Time = 0f;
-        private IEnumerable<Line3D> box2Lines;
-
-        private readonly Vector3 pyramid1Position = Vector3.Up * 30f;
-        private Model pyramid1 = null;
-        private PhysicsObject pyramid1Body = null;
-        private SceneLightPoint pyramid1Light;
-        private float pyramid1Time = 0f;
-        private IEnumerable<Line3D> pyramid1Lines;
-
-        private readonly Vector3 pyramid2Position = Vector3.Up * 50f;
-        private Model pyramid2 = null;
-        private PhysicsObject pyramid2Body = null;
-        private SceneLightPoint pyramid2Light;
-        private float pyramid2Time = 0f;
-        private IEnumerable<Line3D> pyramid2Lines;
+        private readonly List<ColliderData> colliders = new List<ColliderData>();
 
         private bool gameReady = false;
 
@@ -156,7 +117,9 @@ namespace Physics
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
-            var sphere = GeometryUtil.CreateSphere(2f, 32, 32);
+            int slices = 16;
+            int stacks = 16;
+            var sphere = GeometryUtil.CreateSphere(2f, slices, stacks);
 
             var desc = new ModelDescription()
             {
@@ -164,14 +127,19 @@ namespace Physics
                 CullingVolumeType = CullingVolumeTypes.SphericVolume,
             };
 
-            sphere1 = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
-            sphere2 = await AddComponent<Model, ModelDescription>("sphere2", "sphere2", desc);
+            ColliderData sphere1 = new(15, Matrix.Translation(Vector3.Up * 10f));
+            ColliderData sphere2 = new(10, Matrix.Translation(Vector3.Up * 15f));
 
-            sphere1.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
-            sphere2.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
+            sphere1.Model = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
+            sphere2.Model = await AddComponent<Model, ModelDescription>("sphere2", "sphere2", desc);
 
-            sphere1Lines = Line3D.CreateWiredSphere(sphere1.GetBoundingSphere(), 32, 6);
-            sphere2Lines = Line3D.CreateWiredSphere(sphere2.GetBoundingSphere(), 32, 6);
+            sphere1.Model.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
+            sphere2.Model.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
+
+            sphere1.Lines = Line3D.CreateWiredSphere(sphere1.Model.GetBoundingSphere(), slices * 2, stacks * 2);
+            sphere2.Lines = Line3D.CreateWiredSphere(sphere2.Model.GetBoundingSphere(), slices * 2, stacks * 2);
+
+            colliders.AddRange(new[] { sphere1, sphere2 });
         }
         private async Task InitializeBoxes()
         {
@@ -186,14 +154,19 @@ namespace Physics
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
             };
 
-            box1 = await AddComponent<Model, ModelDescription>("box1", "box1", desc);
-            box2 = await AddComponent<Model, ModelDescription>("box2", "box2", desc);
+            ColliderData box1 = new(15, Matrix.Translation(Vector3.Up * 20f));
+            ColliderData box2 = new(10, Matrix.Translation(Vector3.Up * 25f));
 
-            box1.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
-            box2.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
+            box1.Model = await AddComponent<Model, ModelDescription>("box1", "box1", desc);
+            box2.Model = await AddComponent<Model, ModelDescription>("box2", "box2", desc);
 
-            box1Lines = Line3D.CreateWiredBox(box1.GetOrientedBoundingBox());
-            box2Lines = Line3D.CreateWiredBox(box2.GetOrientedBoundingBox());
+            box1.Model.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
+            box2.Model.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
+
+            box1.Lines = Line3D.CreateWiredBox(box1.Model.GetOrientedBoundingBox());
+            box2.Lines = Line3D.CreateWiredBox(box2.Model.GetOrientedBoundingBox());
+
+            colliders.AddRange(new[] { box1, box2 });
         }
         private async Task InitializePyramids()
         {
@@ -208,14 +181,19 @@ namespace Physics
                 CullingVolumeType = CullingVolumeTypes.None,
             };
 
-            pyramid1 = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
-            pyramid2 = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);
+            ColliderData pyramid1 = new(15, Matrix.Translation(Vector3.Up * 30f));
+            ColliderData pyramid2 = new(10, Matrix.Translation(Vector3.Up * 35f));
 
-            pyramid1.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
-            pyramid2.TintColor = Color4.AdjustSaturation(Color.Beige, 20f);
+            pyramid1.Model = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
+            pyramid2.Model = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);
 
-            pyramid1Lines = Line3D.CreateWiredPyramid(pyramid1.GetPoints());
-            pyramid2Lines = Line3D.CreateWiredPyramid(pyramid2.GetPoints());
+            pyramid1.Model.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
+            pyramid2.Model.TintColor = Color4.AdjustSaturation(Color.Beige, 20f);
+
+            pyramid1.Lines = Line3D.CreateWiredPyramid(pyramid1.Model.GetPoints());
+            pyramid2.Lines = Line3D.CreateWiredPyramid(pyramid2.Model.GetPoints());
+
+            colliders.AddRange(new[] { pyramid1, pyramid2 });
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -232,48 +210,14 @@ namespace Physics
 
             floor.Manipulator.SetRotation(0f, -0.2f, 0f);
             var floorBody = new PhysicsFloor(new RigidBody(float.PositiveInfinity, floor.Manipulator.FinalTransform), floor);
-
-            sphere1.Manipulator.SetPosition(sphere1Position);
-            sphere1Body = new PhysicsObject(new RigidBody(10, sphere1.Manipulator.FinalTransform), sphere1);
-
-            sphere2.Manipulator.SetScale(0.5f);
-            sphere2.Manipulator.SetPosition(sphere2Position);
-            sphere2Body = new PhysicsObject(new RigidBody(5, sphere2.Manipulator.FinalTransform), sphere2);
-
-            box1.Manipulator.SetPosition(box1Position);
-            box1Body = new PhysicsObject(new RigidBody(15, box1.Manipulator.FinalTransform), box1);
-
-            box2.Manipulator.SetPosition(box2Position);
-            box2Body = new PhysicsObject(new RigidBody(20, box2.Manipulator.FinalTransform), box2);
-
-            pyramid1.Manipulator.SetPosition(pyramid1Position);
-            pyramid1Body = new PhysicsObject(new RigidBody(15, pyramid1.Manipulator.FinalTransform), pyramid1);
-
-            pyramid2.Manipulator.SetScale(0.5f);
-            pyramid2.Manipulator.SetPosition(pyramid2Position);
-            pyramid2Body = new PhysicsObject(new RigidBody(20, pyramid2.Manipulator.FinalTransform), pyramid2);
-
             simulator.AddPhysicsObject(floorBody);
-            simulator.AddPhysicsObject(sphere1Body);
-            simulator.AddPhysicsObject(sphere2Body);
-            simulator.AddPhysicsObject(box1Body);
-            simulator.AddPhysicsObject(box2Body);
-            simulator.AddPhysicsObject(pyramid1Body);
-            simulator.AddPhysicsObject(pyramid2Body);
 
-            sphere1Light = new SceneLightPoint(nameof(sphere1), true, sphere1.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 5f, 2f));
-            sphere2Light = new SceneLightPoint(nameof(sphere2), true, sphere2.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
-            box1Light = new SceneLightPoint(nameof(box1), true, box1.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
-            box2Light = new SceneLightPoint(nameof(box2), true, box2.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 7.5f, 2f));
-            pyramid1Light = new SceneLightPoint(nameof(pyramid1), true, pyramid1.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
-            pyramid2Light = new SceneLightPoint(nameof(pyramid2), true, pyramid2.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, 2.5f, 2f));
-
-            Lights.Add(sphere1Light);
-            Lights.Add(sphere2Light);
-            Lights.Add(box1Light);
-            Lights.Add(box2Light);
-            Lights.Add(pyramid1Light);
-            Lights.Add(pyramid2Light);
+            colliders.ForEach(c =>
+            {
+                c.Initialize();
+                simulator.AddPhysicsObject(c.PhysicsObject);
+                Lights.Add(c.Light);
+            });
 
             gameReady = true;
         }
@@ -366,99 +310,40 @@ namespace Physics
 
             if (Game.Input.KeyJustReleased(Keys.D1))
             {
-                sphere1Body.Reset(sphere1Position, Quaternion.Identity);
-                sphere1Time = 0;
+                colliders.ElementAtOrDefault(0)?.Reset();
             }
             if (Game.Input.KeyJustReleased(Keys.D2))
             {
-                sphere2Body.Reset(sphere2Position, Quaternion.Identity);
-                sphere2Time = 0;
+                colliders.ElementAtOrDefault(1)?.Reset();
             }
             if (Game.Input.KeyJustReleased(Keys.D3))
             {
-                box1Body.Reset(box1Position, Quaternion.Identity);
-                box1Time = 0;
+                colliders.ElementAtOrDefault(2)?.Reset();
             }
             if (Game.Input.KeyJustReleased(Keys.D4))
             {
-                box2Body.Reset(box2Position, Quaternion.Identity);
-                box2Time = 0;
+                colliders.ElementAtOrDefault(3)?.Reset();
             }
             if (Game.Input.KeyJustReleased(Keys.D5))
             {
-                pyramid1Body.Reset(pyramid1Position, Quaternion.Identity);
-                pyramid1Time = 0;
+                colliders.ElementAtOrDefault(4)?.Reset();
+            }
+            if (Game.Input.KeyJustReleased(Keys.D6))
+            {
+                colliders.ElementAtOrDefault(5)?.Reset();
             }
         }
         private void UpdateStateBodies(GameTime gameTime)
         {
             float elapsed = gameTime.ElapsedSeconds;
 
-            sphere1Time += elapsed;
-            sphere2Time += elapsed;
-            box1Time += elapsed;
-            box2Time += elapsed;
-            pyramid1Time += elapsed;
-            pyramid2Time += elapsed;
-
-            if (sphere1Time > bodyTime || sphere1.Manipulator.Position.LengthSquared() > bodyDistance)
-            {
-                sphere1Body.Reset(sphere1Position, Quaternion.Identity);
-                sphere1Time = 0;
-            }
-
-            if (sphere2Time > bodyTime || sphere2.Manipulator.Position.LengthSquared() > bodyDistance)
-            {
-                sphere2Body.Reset(sphere2Position, Quaternion.Identity);
-                sphere2Time = 0;
-            }
-
-            if (box1Time > bodyTime || box1.Manipulator.Position.LengthSquared() > bodyDistance)
-            {
-                box1Body.Reset(box1Position, Quaternion.Identity);
-                box1Time = 0;
-            }
-
-            if (box2Time > bodyTime || box1.Manipulator.Position.LengthSquared() > bodyDistance)
-            {
-                box2Body.Reset(box2Position, Quaternion.Identity);
-                box2Time = 0;
-            }
-
-            if (pyramid1Time > bodyTime || pyramid1.Manipulator.Position.LengthSquared() > bodyDistance)
-            {
-                pyramid1Body.Reset(pyramid1Position, Quaternion.Identity);
-                pyramid1Time = 0;
-            }
-
-            if (pyramid2Time > bodyTime || pyramid2.Manipulator.Position.LengthSquared() > bodyDistance)
-            {
-                pyramid2Body.Reset(pyramid2Position, Quaternion.Identity);
-                pyramid2Time = 0;
-            }
-
             lineDrawer.Clear();
 
-            sphere1.Manipulator.UpdateInternals(false);
-            sphere2.Manipulator.UpdateInternals(false);
-            sphere1Light.Position = sphere1Body.Body.Position;
-            sphere2Light.Position = sphere2Body.Body.Position;
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(sphere1.TintColor, 0.1f), Line3D.Transform(sphere1Lines, sphere1.Manipulator.FinalTransform));
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(sphere2.TintColor, 0.1f), Line3D.Transform(sphere2Lines, sphere2.Manipulator.FinalTransform));
-
-            box1.Manipulator.UpdateInternals(false);
-            box2.Manipulator.UpdateInternals(false);
-            box1Light.Position = box1Body.Body.Position;
-            box2Light.Position = box2Body.Body.Position;
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(box1.TintColor, 0.1f), Line3D.Transform(box1Lines, box1.Manipulator.FinalTransform));
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(box2.TintColor, 0.1f), Line3D.Transform(box2Lines, box2.Manipulator.FinalTransform));
-
-            pyramid1.Manipulator.UpdateInternals(false);
-            pyramid2.Manipulator.UpdateInternals(false);
-            pyramid1Light.Position = pyramid1Body.Body.Position;
-            pyramid2Light.Position = pyramid1Body.Body.Position;
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(pyramid1.TintColor, 0.1f), Line3D.Transform(pyramid1Lines, pyramid1.Manipulator.FinalTransform));
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(pyramid2.TintColor, 0.1f), Line3D.Transform(pyramid2Lines, pyramid2.Manipulator.FinalTransform));
+            colliders.ForEach(c =>
+            {
+                c.UpdateBodyState(elapsed, bodyTime, bodyDistance);
+                c.SetLines(lineDrawer);
+            });
         }
 
         public override void GameGraphicsResized()
@@ -479,19 +364,61 @@ namespace Physics
 
         private void Reset()
         {
-            sphere1Body.Reset(sphere1Position, Quaternion.Identity);
-            sphere2Body.Reset(sphere2Position, Quaternion.Identity);
-            box1Body.Reset(box1Position, Quaternion.Identity);
-            box2Body.Reset(box2Position, Quaternion.Identity);
-            pyramid1Body.Reset(pyramid1Position, Quaternion.Identity);
-            pyramid2Body.Reset(pyramid2Position, Quaternion.Identity);
+            colliders.ForEach(c =>
+            {
+                c.Reset();
+            });
+        }
+    }
 
-            sphere1Time = 0f;
-            sphere2Time = 0f;
-            box1Time = 0f;
-            box2Time = 0f;
-            pyramid1Time = 0f;
-            pyramid2Time = 0f;
+    class ColliderData
+    {
+        public float Mass = 1;
+        public Matrix Transform = Matrix.Identity;
+        public Model Model = null;
+        public IPhysicsObject PhysicsObject = null;
+        public ISceneLightPoint Light;
+        public float Time = 0f;
+        public IEnumerable<Line3D> Lines;
+
+        public ColliderData(float mass, Matrix transform)
+        {
+            Mass = mass;
+            Transform = transform;
+        }
+
+        public void Initialize()
+        {
+            Model.Manipulator.SetTransform(Transform);
+
+            PhysicsObject = new PhysicsObject(new RigidBody(10, Model.Manipulator.FinalTransform), Model);
+
+            float radius = Model.GetBoundingSphere().Radius * 2f;
+            Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));
+        }
+
+        public void UpdateBodyState(float elapsed, float bodyTime, float bodyDistance)
+        {
+            Time += elapsed;
+
+            if (Time > bodyTime || Model.Manipulator.Position.LengthSquared() > bodyDistance)
+            {
+                Reset();
+            }
+
+            Model.Manipulator.UpdateInternals(true);
+            Light.Position = PhysicsObject.Body.Position;
+        }
+
+        public void SetLines(PrimitiveListDrawer<Line3D> lineDrawer)
+        {
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.FinalTransform));
+        }
+
+        public void Reset()
+        {
+            PhysicsObject.Reset(Transform);
+            Time = 0;
         }
     }
 }

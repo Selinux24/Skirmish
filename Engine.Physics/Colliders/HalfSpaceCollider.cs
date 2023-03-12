@@ -1,11 +1,11 @@
 using SharpDX;
 
-namespace Engine.Physics
+namespace Engine.Physics.Colliders
 {
     /// <summary>
     /// Collision plane
     /// </summary>
-    public class CollisionPlane : CollisionPrimitive
+    public class HalfSpaceCollider : Collider
     {
         /// <summary>
         /// Gets the plane
@@ -25,7 +25,7 @@ namespace Engine.Physics
         /// </summary>
         /// <param name="normal">Plate normal</param>
         /// <param name="d">Plane distance</param>
-        public CollisionPlane(Vector3 normal, float d) : this(new Plane(normal, d))
+        public HalfSpaceCollider(Vector3 normal, float d) : this(new Plane(normal, d))
         {
 
         }
@@ -33,9 +33,15 @@ namespace Engine.Physics
         /// Constructor
         /// </summary>
         /// <param name="plane">Plane</param>
-        public CollisionPlane(Plane plane) : base()
+        public HalfSpaceCollider(Plane plane) : base()
         {
             Plane = plane;
+        }
+
+        /// <inheritdoc/>
+        public override Vector3 Support(Vector3 dir)
+        {
+            return Vector3.Cross(Normal, dir);
         }
     }
 }

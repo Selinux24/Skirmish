@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Physics.Colliders;
+using SharpDX;
 using System;
 
 namespace Engine.Physics.SeparatingAxis
@@ -22,7 +23,7 @@ namespace Engine.Physics.SeparatingAxis
         /// <param name="normal">Contact normal</param>
         /// <param name="penetration">Penetration</param>
         /// <returns>Returns true if collision found</returns>
-        public static bool BoxAndBox(CollisionBox one, CollisionBox two, out Vector3 position, out Vector3 normal, out float penetration)
+        public static bool BoxAndBox(BoxCollider one, BoxCollider two, out Vector3 position, out Vector3 normal, out float penetration)
         {
             position = Vector3.Zero;
             normal = Vector3.Zero;

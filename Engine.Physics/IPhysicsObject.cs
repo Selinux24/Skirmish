@@ -12,14 +12,19 @@ namespace Engine.Physics
         /// </summary>
         IRigidBody Body { get; }
         /// <summary>
-        /// Primiteve collider
+        /// Primitive collider
         /// </summary>
-        ICollisionPrimitive Collider { get; }
+        ICollider Collider { get; }
 
         /// <summary>
         /// Updates the object state
         /// </summary>
         void Update();
+        /// <summary>
+        /// Resets the object state
+        /// </summary>
+        /// <param name="transform">Transform</param>
+        void Reset(Matrix transform);
         /// <summary>
         /// Resets the object state
         /// </summary>

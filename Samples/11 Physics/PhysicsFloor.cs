@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Physics;
+using Engine.Physics.Colliders;
 using SharpDX;
 using System;
 
@@ -8,7 +9,7 @@ namespace Physics
     public class PhysicsFloor : IPhysicsObject
     {
         public IRigidBody Body { get; private set; }
-        public ICollisionPrimitive Collider { get; private set; }
+        public ICollider Collider { get; private set; }
         public Model Model { get; private set; }
 
         public PhysicsFloor(IRigidBody body, Model model)
@@ -16,7 +17,7 @@ namespace Physics
             Body = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
             Model = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");
 
-            Collider = new CollisionPlane(new Plane(model.Manipulator.Up, 0));
+            Collider = new HalfSpaceCollider(new Plane(model.Manipulator.Up, 0));
             Collider.Attach(body);
         }
 
@@ -34,6 +35,16 @@ namespace Physics
 
             Model.Manipulator.SetRotation(Body.Rotation);
             Model.Manipulator.SetPosition(Body.Position);
+        }
+
+        public void Reset(Matrix transform)
+        {
+            if (Body == null)
+            {
+                return;
+            }
+
+            Body.SetInitialState(transform);
         }
 
         public void Reset(Vector3 position, Quaternion rotation)

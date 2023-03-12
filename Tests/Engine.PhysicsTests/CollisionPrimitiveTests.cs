@@ -1,5 +1,6 @@
 ﻿using Engine.Common;
 using Engine.Physics;
+using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
@@ -33,7 +34,7 @@ namespace Engine.PhysicsTests
             float distance = 1f;
             Plane sourcePlane = new Plane(normal, distance);
 
-            CollisionPlane plane = new CollisionPlane(sourcePlane);
+            HalfSpaceCollider plane = new HalfSpaceCollider(sourcePlane);
             Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
@@ -41,7 +42,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());
             Assert.AreEqual(plane.OrientedBoundingBox, new OrientedBoundingBox());
 
-            plane = new CollisionPlane(normal, distance);
+            plane = new HalfSpaceCollider(normal, distance);
             Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
             Assert.AreEqual(plane.Plane, sourcePlane);
@@ -78,7 +79,7 @@ namespace Engine.PhysicsTests
             BoundingSphere sphere = BoundingSphere.FromPoints(sourceBox.GetVertices().ToArray());
             OrientedBoundingBox obb = new OrientedBoundingBox(sourceBox.GetVertices().ToArray());
 
-            CollisionBox box = new CollisionBox(extents);
+            BoxCollider box = new BoxCollider(extents);
             Assert.AreEqual(box.Extents, extents);
             Assert.AreEqual(box.BoundingBox, sourceBox);
             Assert.AreEqual(box.BoundingSphere, sphere);
@@ -111,7 +112,7 @@ namespace Engine.PhysicsTests
             BoundingBox box = BoundingBox.FromSphere(sourceSphere);
             OrientedBoundingBox obb = new OrientedBoundingBox(box.GetVertices().ToArray());
 
-            CollisionSphere sphere = new CollisionSphere(radius);
+            SphereCollider sphere = new SphereCollider(radius);
             Assert.AreEqual(sphere.Radius, radius);
             Assert.AreEqual(sphere.BoundingSphere, sourceSphere);
             Assert.AreEqual(sphere.BoundingBox, box);
@@ -151,7 +152,7 @@ namespace Engine.PhysicsTests
             BoundingBox box = BoundingBox.FromPoints(distinctPoints);
             OrientedBoundingBox obb = new OrientedBoundingBox(distinctPoints);
 
-            CollisionTriangleSoup soup = new CollisionTriangleSoup(allTris);
+            MeshCollider soup = new MeshCollider(allTris);
             CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
             CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
             Assert.AreEqual(soup.BoundingSphere, sphere);
@@ -182,14 +183,14 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollisionTriangleSoup(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new CollisionTriangleSoup(Enumerable.Empty<Triangle>()));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new MeshCollider(null));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new MeshCollider(Enumerable.Empty<Triangle>()));
         }
 
         [TestMethod()]
         public void CollisionPrimitiveAttachTest()
         {
-            CollisionBox box = new CollisionBox(Vector3.One);
+            BoxCollider box = new BoxCollider(Vector3.One);
 
             RigidBody body = new RigidBody(1, Matrix.Identity);
             box.Attach(body);

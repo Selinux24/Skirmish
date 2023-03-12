@@ -4,13 +4,13 @@ using System;
 namespace Engine.Physics
 {
     /// <summary>
-    /// Collision primitive
+    /// Collider
     /// </summary>
-    public abstract class CollisionPrimitive : ICollisionPrimitive
+    public abstract class Collider : ICollider
     {
-        private static readonly BoundingSphere EmptyBoundingSphere = new BoundingSphere();
-        private static readonly BoundingBox EmptyBoundingBox = new BoundingBox();
-        private static readonly OrientedBoundingBox EmptyOrientedBoundingBox = new OrientedBoundingBox();
+        private static readonly BoundingSphere EmptyBoundingSphere = new();
+        private static readonly BoundingBox EmptyBoundingBox = new();
+        private static readonly OrientedBoundingBox EmptyOrientedBoundingBox = new();
 
         /// <summary>
         /// Untransformed bounding box
@@ -24,6 +24,47 @@ namespace Engine.Physics
         /// Untransformed oriented bounding box
         /// </summary>
         protected OrientedBoundingBox orientedBoundingBox;
+
+        /// <inheritdoc/>
+        public Vector3 Position
+        {
+            get
+            {
+                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                {
+                    return Vector3.Zero;
+                }
+
+                return RigidBody.Position;
+            }
+        }
+        /// <inheritdoc/>
+        public Matrix RotationScale
+        {
+            get
+            {
+                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                {
+                    return Matrix.Identity;
+                }
+
+                return Matrix.RotationQuaternion(RigidBody.Rotation);
+            }
+        }
+        /// <inheritdoc/>
+        public Matrix RotationScaleInverse
+        {
+            get
+            {
+                var trn = RotationScale;
+                if (trn.IsIdentity)
+                {
+                    return Matrix.Identity;
+                }
+
+                return Matrix.Invert(RotationScale);
+            }
+        }
 
         /// <inheritdoc/>
         public IRigidBody RigidBody { get; private set; }
@@ -85,7 +126,7 @@ namespace Engine.Physics
         /// <summary>
         /// Constructor
         /// </summary>
-        protected CollisionPrimitive()
+        protected Collider()
         {
 
         }
@@ -93,7 +134,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void Attach(IRigidBody body)
         {
-            RigidBody = body ?? throw new ArgumentNullException(nameof(body), $"{nameof(CollisionPrimitive)} must have a rigid body.");
+            RigidBody = body ?? throw new ArgumentNullException(nameof(body), $"{nameof(Collider)} must have a rigid body.");
 
             if (!RigidBody.HasFiniteMass())
             {
@@ -108,5 +149,7 @@ namespace Engine.Physics
                 0.3333f * (squares.X + squares.Z),
                 0.3333f * (squares.X + squares.Y));
         }
+        /// <inheritdoc/>
+        public abstract Vector3 Support(Vector3 dir);
     }
 }

@@ -73,7 +73,12 @@ namespace Engine.Physics
         bool CanSleep { get; }
 
         /// <summary>
-        /// Sets the initial state of the body to the indicated position and rotation
+        /// Sets the initial state of the body
+        /// </summary>
+        /// <param name="transform">Transform matrix</param>
+        void SetInitialState(Matrix transform);
+        /// <summary>
+        /// Sets the initial state of the body to the indicated position, scale and rotation
         /// </summary>
         /// <param name="position">Initial position</param>
         /// <param name="rotation">Initial rotation</param>

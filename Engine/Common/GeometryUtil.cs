@@ -828,7 +828,7 @@ namespace Engine.Common
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(BoundingSphere sphere, uint sliceCount, uint stackCount)
+        public static GeometryDescriptor CreateSphere(BoundingSphere sphere, int sliceCount, int stackCount)
         {
             return CreateSphere(sphere.Center, sphere.Radius, sliceCount, stackCount);
         }
@@ -839,7 +839,7 @@ namespace Engine.Common
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(float radius, uint sliceCount, uint stackCount)
+        public static GeometryDescriptor CreateSphere(float radius, int sliceCount, int stackCount)
         {
             return CreateSphere(Vector3.Zero, radius, sliceCount, stackCount);
         }
@@ -851,7 +851,7 @@ namespace Engine.Common
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Vector3 center, float radius, uint sliceCount, uint stackCount)
+        public static GeometryDescriptor CreateSphere(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<Vector3> normList = new List<Vector3>();
@@ -917,22 +917,22 @@ namespace Engine.Common
 
             #endregion
 
-            List<uint> indexList = new List<uint>();
+            List<int> indexList = new List<int>();
 
             #region Indexes
 
-            for (uint index = 1; index <= sliceCount; ++index)
+            for (int index = 1; index <= sliceCount; ++index)
             {
                 indexList.Add(0);
                 indexList.Add(index + 1);
                 indexList.Add(index);
             }
 
-            uint baseIndex = 1;
-            uint ringVertexCount = sliceCount + 1;
-            for (uint st = 0; st < stackCount - 2; ++st)
+            int baseIndex = 1;
+            int ringVertexCount = sliceCount + 1;
+            for (int st = 0; st < stackCount - 2; ++st)
             {
-                for (uint sl = 0; sl < sliceCount; ++sl)
+                for (int sl = 0; sl < sliceCount; ++sl)
                 {
                     indexList.Add(baseIndex + st * ringVertexCount + sl);
                     indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
@@ -944,11 +944,11 @@ namespace Engine.Common
                 }
             }
 
-            uint southPoleIndex = (uint)vertList.Count - 1;
+            int southPoleIndex = (int)vertList.Count - 1;
 
             baseIndex = southPoleIndex - ringVertexCount;
 
-            for (uint index = 0; index < sliceCount; ++index)
+            for (int index = 0; index < sliceCount; ++index)
             {
                 indexList.Add(southPoleIndex);
                 indexList.Add(baseIndex + index);
@@ -964,7 +964,7 @@ namespace Engine.Common
                 Tangents = tangList.ToArray(),
                 Binormals = binmList.ToArray(),
                 Uvs = uvList.ToArray(),
-                Indices = indexList.ToArray(),
+                Indices = indexList.Select(i => (uint)i).ToArray(),
             };
         }
         /// <summary>
@@ -974,7 +974,7 @@ namespace Engine.Common
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateHemispheric(float radius, uint sliceCount, uint stackCount)
+        public static GeometryDescriptor CreateHemispheric(float radius, int sliceCount, int stackCount)
         {
             return CreateHemispheric(Vector3.Zero, radius, sliceCount, stackCount);
         }
@@ -986,7 +986,7 @@ namespace Engine.Common
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateHemispheric(Vector3 center, float radius, uint sliceCount, uint stackCount)
+        public static GeometryDescriptor CreateHemispheric(Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<Vector3> normList = new List<Vector3>();
@@ -1049,14 +1049,14 @@ namespace Engine.Common
 
             #endregion
 
-            List<uint> indexList = new List<uint>();
+            List<int> indexList = new List<int>();
 
             #region Indexes
 
-            uint ringVertexCount = sliceCount + 1;
-            for (uint st = 0; st < stackCount; st++)
+            int ringVertexCount = sliceCount + 1;
+            for (int st = 0; st < stackCount; st++)
             {
-                for (uint sl = 0; sl < sliceCount; sl++)
+                for (int sl = 0; sl < sliceCount; sl++)
                 {
                     indexList.Add((st + 1) * ringVertexCount + sl + 0);
                     indexList.Add((st + 0) * ringVertexCount + sl + 1);
@@ -1082,7 +1082,7 @@ namespace Engine.Common
                 Tangents = tangList.ToArray(),
                 Binormals = binmList.ToArray(),
                 Uvs = uvList.ToArray(),
-                Indices = indexList.ToArray(),
+                Indices = indexList.Select(i => (uint)i).ToArray(),
             };
         }
         /// <summary>

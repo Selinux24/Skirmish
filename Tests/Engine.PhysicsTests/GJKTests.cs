@@ -1,4 +1,6 @@
-﻿using Engine.Physics.GJK;
+﻿using Engine.Physics;
+using Engine.Physics.Colliders;
+using Engine.Physics.GJK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
@@ -14,6 +16,32 @@ namespace Engine.PhysicsTests
 
         static readonly float toleranze = Solver.EPA_TOLERANCE;
 
+        static BoxCollider BoxFromExtents(Vector3 extents, Matrix transform)
+        {
+            var collider = new BoxCollider(extents);
+            var body = new RigidBody(1, transform);
+            collider.Attach(body);
+
+            return collider;
+        }
+        static SphereCollider SphereFromRadius(float r, Matrix transform)
+        {
+            var collider = new SphereCollider(r);
+            var body = new RigidBody(1, transform);
+            collider.Attach(body);
+
+            return collider;
+        }
+        static MeshCollider MeshFromExtents(Vector3 extents, Matrix transform)
+        {
+            var triangles = Triangle.ComputeTriangleList(Topology.TriangleList, new BoundingBox(-extents, extents));
+            var collider = new MeshCollider(triangles);
+            var body = new RigidBody(1, transform);
+            collider.Attach(body);
+
+            return collider;
+        }
+
         [ClassInitialize]
         public static void ClassInitialize(TestContext context)
         {
@@ -27,55 +55,10 @@ namespace Engine.PhysicsTests
         }
 
         [TestMethod()]
-        public void CubeSphere1Test()
-        {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Identity };
-
-            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
-
-            Assert.AreEqual(true, contact);
-            Assert.AreEqual(0, penetration, toleranze);
-        }
-        [TestMethod()]
-        public void CubeSphere2Test()
-        {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(3, 0, 0), RotationScale = Matrix.Identity };
-
-            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
-
-            Assert.AreEqual(false, contact);
-            Assert.AreEqual(0, penetration, toleranze);
-        }
-        [TestMethod()]
-        public void CubeSphere3Test()
-        {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(1, 0, 0), RotationScale = Matrix.Identity };
-
-            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
-
-            Assert.AreEqual(true, contact);
-            Assert.AreEqual(1, penetration, toleranze);
-        }
-        [TestMethod()]
-        public void CubeSphere4Test()
-        {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Scaling(2) };
-
-            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
-
-            Assert.AreEqual(true, contact);
-            Assert.AreEqual(1, penetration, toleranze);
-        }
-
-        [TestMethod()]
         public void SphereSphere1Test()
         {
-            var s1 = new SphereCollider { R = 1, Position = new Vector3(0, 0, 0), RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = SphereFromRadius(1, Matrix.Identity);
+            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -85,8 +68,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void SphereSphere2Test()
         {
-            var s1 = new SphereCollider { R = 1, Position = new Vector3(0, 0, 0), RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(3, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = SphereFromRadius(1, Matrix.Identity);
+            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -95,8 +78,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void SphereSphere3Test()
         {
-            var s1 = new SphereCollider { R = 1, Position = new Vector3(0, 0, 0), RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(1, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = SphereFromRadius(1, Matrix.Identity);
+            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -106,8 +89,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void SphereSphere4Test()
         {
-            var s1 = new SphereCollider { R = 1, Position = new Vector3(0, 0, 0), RotationScale = Matrix.Identity };
-            var s2 = new SphereCollider { R = 1, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Scaling(2) };
+            var s1 = SphereFromRadius(1, Matrix.Identity);
+            var s2 = SphereFromRadius(2, Matrix.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -116,10 +99,55 @@ namespace Engine.PhysicsTests
         }
 
         [TestMethod()]
+        public void CubeSphere1Test()
+        {
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(2, 0, 0)));
+
+            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
+
+            Assert.AreEqual(true, contact);
+            Assert.AreEqual(0, penetration, toleranze);
+        }
+        [TestMethod()]
+        public void CubeSphere2Test()
+        {
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(3, 0, 0)));
+
+            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
+
+            Assert.AreEqual(false, contact);
+            Assert.AreEqual(0, penetration, toleranze);
+        }
+        [TestMethod()]
+        public void CubeSphere3Test()
+        {
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = SphereFromRadius(1, Matrix.Translation(new Vector3(1, 0, 0)));
+
+            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
+
+            Assert.AreEqual(true, contact);
+            Assert.AreEqual(1, penetration, toleranze);
+        }
+        [TestMethod()]
+        public void CubeSphere4Test()
+        {
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = SphereFromRadius(2, Matrix.Translation(new Vector3(2, 0, 0)));
+
+            bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
+
+            Assert.AreEqual(true, contact);
+            Assert.AreEqual(1, penetration, toleranze);
+        }
+
+        [TestMethod()]
         public void CubeCube1Test()
         {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -129,8 +157,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeCube2Test()
         {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(3, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -140,8 +168,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeCube3Test()
         {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(1, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -151,8 +179,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void CubeCube4Test()
         {
-            var s1 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Scaling(2) };
+            var s1 = BoxFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -161,11 +189,10 @@ namespace Engine.PhysicsTests
         }
 
         [TestMethod()]
-        public void PolytopeCube1Test()
+        public void CubePolytope1Test()
         {
-            var vertices = new BoundingBox(-Vector3.One, Vector3.One).GetCorners();
-            var s1 = new PolytopeCollider { Points = vertices, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -173,11 +200,10 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(0, penetration, toleranze);
         }
         [TestMethod()]
-        public void PolytopeCube2Test()
+        public void CubePolytope2Test()
         {
-            var vertices = new BoundingBox(-Vector3.One, Vector3.One).GetCorners();
-            var s1 = new PolytopeCollider { Points = vertices, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(3, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(3, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -185,11 +211,10 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(0, penetration, toleranze);
         }
         [TestMethod()]
-        public void PolytopeCube3Test()
+        public void CubePolytope3Test()
         {
-            var vertices = new BoundingBox(-Vector3.One, Vector3.One).GetCorners();
-            var s1 = new PolytopeCollider { Points = vertices, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(1, 0, 0), RotationScale = Matrix.Identity };
+            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One, Matrix.Translation(new Vector3(1, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 
@@ -197,11 +222,10 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(1, penetration, toleranze);
         }
         [TestMethod()]
-        public void PolytopeCube4Test()
+        public void CubePolytope4Test()
         {
-            var vertices = new BoundingBox(-Vector3.One, Vector3.One).GetCorners();
-            var s1 = new PolytopeCollider { Points = vertices, Position = Vector3.Zero, RotationScale = Matrix.Identity };
-            var s2 = new BoxCollider { Min = -Vector3.One, Max = Vector3.One, Position = new Vector3(2, 0, 0), RotationScale = Matrix.Scaling(2) };
+            var s1 = MeshFromExtents(Vector3.One, Matrix.Identity);
+            var s2 = BoxFromExtents(Vector3.One * 2f, Matrix.Translation(new Vector3(2, 0, 0)));
 
             bool contact = Solver.GJK(s1, s2, true, out _, out _, out var penetration);
 

@@ -127,6 +127,22 @@ namespace Engine.Physics
         }
 
         /// <summary>
+        /// Adds a new physics object list to the simulation
+        /// </summary>
+        /// <param name="physicsObjects">Physics object list</param>
+        public void AddPhysicsObjects(IEnumerable<IPhysicsObject> physicsObjects)
+        {
+            if (physicsObjects?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var physicsObject in physicsObjects)
+            {
+                AddPhysicsObject(physicsObject);
+            }
+        }
+        /// <summary>
         /// Adds a new physics object to the simulation
         /// </summary>
         /// <param name="physicsObject">Physics object</param>
@@ -154,6 +170,22 @@ namespace Engine.Physics
             });
         }
         /// <summary>
+        /// Adds a new force generator list to the simulation
+        /// </summary>
+        /// <param name="forceGenerators">Force generator list</param>
+        public void AddForces(IEnumerable<IForceGenerator> forceGenerators)
+        {
+            if (forceGenerators?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var forceGenerator in forceGenerators)
+            {
+                AddForce(forceGenerator);
+            }
+        }
+        /// <summary>
         /// Adds a new force generator to the simulation
         /// </summary>
         /// <param name="forceGenerator">Force generator</param>
@@ -170,6 +202,22 @@ namespace Engine.Physics
             }
 
             forceGenerators.Add(forceGenerator);
+        }
+        /// <summary>
+        /// Adds a new contact generator list to the simulation
+        /// </summary>
+        /// <param name="contactGenerators">Contact generator list</param>
+        public void AddContacts(IEnumerable<IContactGenerator> contactGenerators)
+        {
+            if (contactGenerators?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var contactGenerator in contactGenerators)
+            {
+                AddContact(contactGenerator);
+            }
         }
         /// <summary>
         /// Adds a new contact generator to the simulation

@@ -3,12 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Engine.Physics
+namespace Engine.Physics.Colliders
 {
     /// <summary>
     /// Collision triangle soup
     /// </summary>
-    public class CollisionTriangleSoup : CollisionPrimitive
+    public class MeshCollider : Collider
     {
         /// <summary>
         /// Triangle list
@@ -23,11 +23,11 @@ namespace Engine.Physics
         /// Constructor
         /// </summary>
         /// <param name="triangles">Triangle list</param>
-        public CollisionTriangleSoup(IEnumerable<Triangle> triangles) : base()
+        public MeshCollider(IEnumerable<Triangle> triangles) : base()
         {
             if (triangles?.Any() != true)
             {
-                throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(CollisionTriangleSoup)} must have one triangle at least.");
+                throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(MeshCollider)} must have one triangle at least.");
             }
 
             this.triangles = triangles.Distinct().ToArray();
@@ -77,6 +77,29 @@ namespace Engine.Physics
             var verts = vertices.ToArray();
             Vector3.TransformCoordinate(verts, ref trn, verts);
             return verts;
+        }
+
+        /// <inheritdoc/>
+        public override Vector3 Support(Vector3 dir)
+        {
+            // Dumb O(n) support function, just brute force check all points
+            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
+
+            Vector3 furthest_point = vertices[0];
+            float max_dot = Vector3.Dot(furthest_point, dir);
+
+            for (int i = 1; i < vertices.Length; i++)
+            {
+                Vector3 v = vertices[i];
+                float d = Vector3.Dot(v, dir);
+                if (d > max_dot)
+                {
+                    max_dot = d;
+                    furthest_point = v;
+                }
+            }
+
+            return Vector3.TransformNormal(furthest_point, RotationScale) + Position; //convert support to world space
         }
     }
 }

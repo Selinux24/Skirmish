@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Physics
 {
@@ -67,24 +66,6 @@ namespace Engine.Physics
             result.Y = vector.X * matrix.M12 + vector.Y * matrix.M22 + vector.Z * matrix.M32;
             result.Z = vector.X * matrix.M13 + vector.Y * matrix.M23 + vector.Z * matrix.M33;
             return result;
-        }
-
-        /// <summary>
-        /// Projects the specified box to the given vector
-        /// </summary>
-        /// <param name="box">Box</param>
-        /// <param name="vector">Vector</param>
-        public static float ProjectToVector(this OrientedBoundingBox box, Vector3 vector)
-        {
-            var trn = box.Transformation;
-            var xAxis = trn.Right;
-            var yAxis = trn.Up;
-            var zAxis = trn.Backward;
-
-            return
-                box.Extents.X * Math.Abs(Vector3.Dot(vector, xAxis)) +
-                box.Extents.Y * Math.Abs(Vector3.Dot(vector, yAxis)) +
-                box.Extents.Z * Math.Abs(Vector3.Dot(vector, zAxis));
         }
     }
 }

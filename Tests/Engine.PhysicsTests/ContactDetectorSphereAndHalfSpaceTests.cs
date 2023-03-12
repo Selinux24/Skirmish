@@ -1,4 +1,5 @@
 ﻿using Engine.Physics;
+using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
@@ -15,19 +16,19 @@ namespace Engine.PhysicsTests
 
         static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
 
-        static CollisionPlane FromPlane(Vector3 normal, float d, Matrix transform)
+        static HalfSpaceCollider FromPlane(Vector3 normal, float d, Matrix transform)
         {
             Plane p = new Plane(normal, d);
-            CollisionPlane plane = new CollisionPlane(p);
+            HalfSpaceCollider plane = new HalfSpaceCollider(p);
             RigidBody planeBody = new RigidBody(float.PositiveInfinity, transform);
             plane.Attach(planeBody);
 
             return plane;
         }
 
-        static CollisionSphere FromRadius(float radius, Matrix transform)
+        static SphereCollider FromRadius(float radius, Matrix transform)
         {
-            CollisionSphere sphere = new CollisionSphere(radius);
+            SphereCollider sphere = new SphereCollider(radius);
             RigidBody boxBody = new RigidBody(1, transform);
             sphere.Attach(boxBody);
 
@@ -131,7 +132,7 @@ namespace Engine.PhysicsTests
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 
             var sphere = FromRadius(1f, testData.SphereTransform);
-            bool intersection = ContactDetector.SphereAndHalfSpace(sphere, plane, data);
+            bool intersection = ContactDetector.BetweenObjects(sphere, plane, data);
 
             Assert.AreEqual(testData.IntersectioExpected, intersection, testData.IntersectioExpected ? "Intersection expected" : "No intersection expected");
 

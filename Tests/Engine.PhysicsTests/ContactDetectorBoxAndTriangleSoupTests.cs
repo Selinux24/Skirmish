@@ -1,4 +1,5 @@
 ﻿using Engine.Physics;
+using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
@@ -16,16 +17,16 @@ namespace Engine.PhysicsTests
 
         static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
 
-        static CollisionBox FromAABB(Vector3 extents, Matrix transform)
+        static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
-            CollisionBox box = new CollisionBox(extents);
+            BoxCollider box = new BoxCollider(extents);
             RigidBody boxBody = new RigidBody(1, transform);
             box.Attach(boxBody);
 
             return box;
         }
 
-        static CollisionTriangleSoup FromRectangle(RectangleF rect, float d, Matrix transform)
+        static MeshCollider FromRectangle(RectangleF rect, float d, Matrix transform)
         {
             Vector3 p1 = new Vector3(rect.BottomLeft.X, d, rect.BottomLeft.Y);
             Vector3 p2 = new Vector3(rect.BottomRight.X, d, rect.BottomRight.Y);
@@ -35,7 +36,7 @@ namespace Engine.PhysicsTests
             Triangle tri1 = new Triangle(p1, p2, p3);
             Triangle tri2 = new Triangle(p3, p2, p4);
 
-            CollisionTriangleSoup ctri = new CollisionTriangleSoup(new[] { tri1, tri2 });
+            MeshCollider ctri = new MeshCollider(new[] { tri1, tri2 });
             RigidBody triBody = new RigidBody(2, transform);
             ctri.Attach(triBody);
 
@@ -672,7 +673,7 @@ namespace Engine.PhysicsTests
 
             var box = FromAABB(Vector3.One, testData.BoxTransform);
 
-            bool intersection = ContactDetector.BoxAndTriangleSoup(box, soup, data);
+            bool intersection = ContactDetector.BetweenObjects(box, soup, data);
 
             Assert.AreEqual(testData.IntersectioExpected, intersection, testData.IntersectioExpected ? "Intersection expected" : "No intersection expected");
             Assert.AreEqual(testData.ContactCount, data.ContactCount, $"{testData.ContactCount} contacts expected");
