@@ -39,8 +39,8 @@ namespace Tanks
         /// Adds a tree to the controller
         /// </summary>
         /// <param name="tree">Tree</param>
-        /// <param name="durationSeconds">Seconds to disapear</param>
-        private static void AddBrokenTree(ModelInstance tree, float durationSeconds)
+        /// <param name="durationSeconds">Seconds to disappear</param>
+        public static void AddBrokenTree(ModelInstance tree, float durationSeconds)
         {
             trees.Add(new BrokenTreeController() { Tree = tree, DurationSeconds = durationSeconds, Active = true });
         }
@@ -143,7 +143,7 @@ namespace Tanks
             /// </summary>
             public ModelInstance Tree { get; set; }
             /// <summary>
-            /// Disapearing duration
+            /// Disappearing duration
             /// </summary>
             public float DurationSeconds { get; set; }
             /// <summary>

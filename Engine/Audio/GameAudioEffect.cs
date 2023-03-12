@@ -394,14 +394,14 @@ namespace Engine.Audio
         /// </summary>
         private void PlayAsync()
         {
-            AudioStart?.Invoke(this, new GameAudioEventArgs());
+            AudioStart?.Invoke(this, new GameAudioEventArgs(this));
 
             DueToDispose = false;
 
             PlaySound();
         }
         /// <summary>
-        /// Plays de sound
+        /// Plays the sound
         /// </summary>
         private void PlaySound()
         {
@@ -430,13 +430,13 @@ namespace Engine.Audio
                 {
                     if (!IsLooped)
                     {
-                        AudioEnd?.Invoke(this, new GameAudioEventArgs());
+                        AudioEnd?.Invoke(this, new GameAudioEventArgs(this));
                         Stop();
                         DueToDispose = true;
                     }
                     else
                     {
-                        LoopEnd?.Invoke(this, new GameAudioEventArgs());
+                        LoopEnd?.Invoke(this, new GameAudioEventArgs(this));
                     }
                 }
             }
@@ -467,7 +467,7 @@ namespace Engine.Audio
                 isFirstTime = false;
 
                 // Fires the progress event
-                PlayProgress?.Invoke(this, new GameAudioProgressEventArgs(Duration, playPosition));
+                PlayProgress?.Invoke(this, new GameAudioProgressEventArgs(this, Duration, playPosition));
             }
         }
         /// <summary>
@@ -597,16 +597,13 @@ namespace Engine.Audio
         /// <param name="elapsedSeconds">Elapsed seconds</param>
         private void UpdateListener(float elapsedSeconds)
         {
-            if (listener == null)
+            listener ??= new Listener()
             {
-                listener = new Listener()
-                {
-                    OrientFront = Listener.Forward,
-                    OrientTop = Listener.Up,
-                    Position = Listener.Position,
-                    Velocity = Vector3.Zero,
-                };
-            }
+                OrientFront = Listener.Forward,
+                OrientTop = Listener.Up,
+                Position = Listener.Position,
+                Velocity = Vector3.Zero,
+            };
 
             if (elapsedSeconds > 0)
             {
@@ -619,10 +616,7 @@ namespace Engine.Audio
 
             if (Listener.Cone.HasValue)
             {
-                if (listener.Cone == null)
-                {
-                    listener.Cone = new Cone();
-                }
+                listener.Cone ??= new Cone();
 
                 listener.Cone.InnerAngle = Listener.Cone.Value.InnerAngle;
                 listener.Cone.InnerVolume = Listener.Cone.Value.InnerVolume;
@@ -645,16 +639,13 @@ namespace Engine.Audio
         /// <param name="elapsedSeconds">Elapsed seconds</param>
         private void UpdateEmitter(float elapsedSeconds)
         {
-            if (emitter == null)
+            emitter ??= new Emitter()
             {
-                emitter = new Emitter()
-                {
-                    OrientFront = Emitter.Forward,
-                    OrientTop = Emitter.Up,
-                    Position = Emitter.Position,
-                    Velocity = Vector3.Zero,
-                };
-            }
+                OrientFront = Emitter.Forward,
+                OrientTop = Emitter.Up,
+                Position = Emitter.Position,
+                Velocity = Vector3.Zero
+            };
 
             if (elapsedSeconds > 0)
             {
@@ -684,10 +675,7 @@ namespace Engine.Audio
 
             if (Emitter.Cone.HasValue)
             {
-                if (emitter.Cone == null)
-                {
-                    emitter.Cone = new Cone();
-                }
+                emitter.Cone ??= new Cone();
 
                 emitter.Cone.InnerAngle = Emitter.Cone.Value.InnerAngle;
                 emitter.Cone.InnerVolume = Emitter.Cone.Value.InnerVolume;
@@ -731,17 +719,12 @@ namespace Engine.Audio
         /// <summary>
         /// Calculates instance positions
         /// </summary>
-        /// <param name="elapsedSeconds">Elpased time</param>
+        /// <param name="elapsedSeconds">Elapsed time</param>
         private void Calculate3D()
         {
             var flags = Calculate3DFlags();
 
-            if (dspSettings == null)
-            {
-                dspSettings = new DspSettings(
-                    audioFile.WaveFormat.Channels,
-                    gameAudio.InputChannelCount);
-            }
+            dspSettings ??= new DspSettings(audioFile.WaveFormat.Channels, gameAudio.InputChannelCount);
 
             gameAudio.Calculate3D(listener, emitter, flags, dspSettings);
         }
@@ -816,10 +799,7 @@ namespace Engine.Audio
         /// <param name="reverb">Reverb index</param>
         public bool SetReverb(ReverbPresets? reverb)
         {
-            if (submixVoice == null)
-            {
-                submixVoice = gameAudio.CreateReverbVoice();
-            }
+            submixVoice ??= gameAudio.CreateReverbVoice();
 
             if (!reverbPreset.HasValue && reverb.HasValue)
             {
