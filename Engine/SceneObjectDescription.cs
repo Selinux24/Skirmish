@@ -78,5 +78,9 @@ namespace Engine
         /// Spheric volume
         /// </summary>
         SphericVolume = 2,
+        /// <summary>
+        /// Cylinder volume
+        /// </summary>
+        CylinderVolume = 3,
     }
 }

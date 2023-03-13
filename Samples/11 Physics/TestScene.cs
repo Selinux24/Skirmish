@@ -52,6 +52,7 @@ namespace Physics
                     InitializeFloor(),
                     InitializeSpheres(),
                     InitializeBoxes(),
+                    InitializeCylinders(),
                     InitializePyramids(),
                 },
                 InitializeComponentsCompleted);
@@ -171,6 +172,42 @@ namespace Physics
 
             colliders.Add(box1);
             colliders.Add(box2);
+        }
+        private async Task InitializeCylinders()
+        {
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color3.White;
+
+            float radius = 2f;
+            float height = 4f;
+            Vector3 position = Vector3.Down * height * 0.5f;
+            int stackCount = 16;
+
+            var cylinder = GeometryUtil.CreateCylinder(radius, position, height, stackCount);
+
+            var desc = new ModelDescription()
+            {
+                Content = ContentDescription.FromContentData(cylinder, mat),
+                CullingVolumeType = CullingVolumeTypes.CylinderVolume,
+            };
+
+            ColliderData cylinder1 = new(15, Matrix.Translation(Vector3.Up * 20f));
+            ColliderData cylinder2 = new(10, Matrix.Translation(Vector3.Up * 25f));
+
+            cylinder1.Model = await AddComponent<Model, ModelDescription>("cylinder1", "cylinder1", desc);
+            cylinder2.Model = await AddComponent<Model, ModelDescription>("cylinder2", "cylinder2", desc);
+
+            cylinder1.Model.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
+            cylinder2.Model.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
+
+            cylinder1.Lines = Line3D.CreateWiredCylinder(radius, position, height, stackCount);
+            cylinder2.Lines = Line3D.CreateWiredCylinder(radius, position, height, stackCount);
+
+            cylinder1.Model.Visible = false;
+            cylinder2.Model.Visible = false;
+
+            //colliders.Add(cylinder1)
+            //colliders.Add(cylinder2)
         }
         private async Task InitializePyramids()
         {

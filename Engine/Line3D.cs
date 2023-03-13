@@ -296,27 +296,35 @@ namespace Engine
 
             return CreateFromVertices(vertList, indexList);
         }
-        public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int segments)
+        public static IEnumerable<Line3D> CreateWiredCylinder(float radius, float height, int stackCount)
+        {
+            return CreateWiredCylinder(new BoundingCylinder(Vector3.Zero, radius, height), stackCount);
+        }
+        public static IEnumerable<Line3D> CreateWiredCylinder(float radius, Vector3 basePosition, float height, int stackCount)
+        {
+            return CreateWiredCylinder(new BoundingCylinder(basePosition, radius, height), stackCount);
+        }
+        public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int stackCount)
         {
             List<Line3D> resultList = new List<Line3D>();
 
-            var verts = cylinder.GetVertices(segments).ToArray();
+            var verts = cylinder.GetVertices(stackCount).ToArray();
 
-            for (int i = 0; i < segments; i++)
+            for (int i = 0; i < stackCount; i++)
             {
-                if (i == segments - 1)
+                if (i == stackCount - 1)
                 {
                     resultList.Add(new Line3D(verts[i], verts[0]));
-                    resultList.Add(new Line3D(verts[i + segments], verts[0 + segments]));
+                    resultList.Add(new Line3D(verts[i + stackCount], verts[0 + stackCount]));
 
-                    resultList.Add(new Line3D(verts[i], verts[i + segments]));
+                    resultList.Add(new Line3D(verts[i], verts[i + stackCount]));
                 }
                 else
                 {
                     resultList.Add(new Line3D(verts[i], verts[i + 1]));
-                    resultList.Add(new Line3D(verts[i + segments], verts[i + 1 + segments]));
+                    resultList.Add(new Line3D(verts[i + stackCount], verts[i + 1 + stackCount]));
 
-                    resultList.Add(new Line3D(verts[i], verts[i + segments]));
+                    resultList.Add(new Line3D(verts[i], verts[i + stackCount]));
                 }
             }
 

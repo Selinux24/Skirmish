@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿/// <returns>Returns a geometry descriptor</returns>
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1085,6 +1086,91 @@ namespace Engine.Common
                 Indices = indexList.Select(i => (uint)i).ToArray(),
             };
         }
+        /// <summary>
+        /// Creates a cylinder
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="height">Height</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCylinder(float radius, float height, int stackCount)
+        {
+            return CreateCylinder(radius, Vector3.Zero, height, stackCount);
+        }
+        /// <summary>
+        /// Creates a cylinder
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="basePosition">Base position</param>
+        /// <param name="height">Height</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCylinder(float radius, Vector3 basePosition, float height, int stackCount)
+        {
+            return CreateCylinder(new BoundingCylinder(basePosition, radius, height), stackCount);
+        }
+        /// <summary>
+        /// Creates a cylinder
+        /// </summary>
+        /// <param name="cylinder">Bounding cylinder</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCylinder(BoundingCylinder cylinder, int stackCount)
+        {
+            List<int> indexList = new List<int>();
+
+            List<Vector3> verts = new List<Vector3>(cylinder.GetVertices(stackCount));
+            verts.AddRange(new[] { cylinder.Position, cylinder.Position + (Vector3.Up * cylinder.Height) });
+
+            int cBase = verts.Count - 2;
+            int cCap = verts.Count - 1;
+
+            for (int i = 0; i < stackCount; i++)
+            {
+                var p0Base = i;
+                var p1Base = (i + 1) % stackCount;
+
+                var p0Cap = p0Base + stackCount;
+                var p1Cap = p1Base + stackCount;
+
+                indexList.AddRange(new[]
+                {
+                    // Base circle
+                    cBase,
+                    p1Base,
+                    p0Base,
+                    
+                    // Cap circle
+                    cCap,
+                    p0Cap,
+                    p1Cap,
+
+                    // Side
+                    p0Base, p1Base, p0Cap,
+                    p1Base, p1Cap, p0Cap,
+                });
+            }
+
+            List<Vector3> norms = new List<Vector3>();
+
+            for (int i = 0; i < stackCount * 2; i++)
+            {
+                norms.Add(Vector3.Normalize(new(verts[i].X, 0, verts[i].Z)));
+            }
+
+            norms.AddRange(new[] { Vector3.Down, Vector3.Up });
+
+            return new GeometryDescriptor()
+            {
+                Vertices = verts,
+                Normals = norms,
+                Tangents = null,
+                Binormals = null,
+                Uvs = null,
+                Indices = indexList.Select(i => (uint)i).ToArray(),
+            };
+        }
+
         /// <summary>
         /// Creates a XZ plane
         /// </summary>

@@ -41,7 +41,11 @@ namespace Engine.Physics.Colliders
         /// <inheritdoc/>
         public override Vector3 Support(Vector3 dir)
         {
-            return Vector3.Cross(Normal, dir);
+            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
+
+            Vector3 result = Vector3.Cross(Vector3.Normalize(dir), Normal);
+
+            return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space
         }
     }
 }
