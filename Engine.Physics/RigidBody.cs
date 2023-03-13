@@ -37,6 +37,10 @@ namespace Engine.Physics
         public float Mass { get; private set; } = 0f;
         /// <inheritdoc/>
         public float InverseMass { get; private set; } = float.PositiveInfinity;
+        /// <inheritdoc/>
+        public float Friction { get; private set; } = 0f;
+        /// <inheritdoc/>
+        public float Restitution { get; private set; } = 0f;
 
         /// <inheritdoc/>
         public Vector3 Position { get; private set; } = Vector3.Zero;
@@ -71,11 +75,14 @@ namespace Engine.Physics
         /// <summary>
         /// Constructor
         /// </summary>
-        public RigidBody(float mass, Matrix initialTransform)
+        /// <param name="bodyState">Body state</param>
+        public RigidBody(RigidBodyState bodyState)
         {
-            SetMass(mass);
+            SetMass(bodyState.Mass);
+            SetFriction(bodyState.Friction);
+            SetRestitution(bodyState.Restitution);
 
-            SetInitialState(initialTransform);
+            SetInitialState(bodyState.InitialTransform);
         }
 
         /// <inheritdoc/>
@@ -104,7 +111,7 @@ namespace Engine.Physics
             ClearAccumulators();
             CalculateDerivedData();
         }
-     
+
         /// <inheritdoc/>
         public void SetState(Matrix transform)
         {
@@ -134,6 +141,17 @@ namespace Engine.Physics
         public bool HasFiniteMass()
         {
             return InverseMass >= 0f && !float.IsPositiveInfinity(Mass);
+        }
+
+        /// <inheritdoc/>
+        public void SetFriction(float friction)
+        {
+            Friction = friction;
+        }
+        /// <inheritdoc/>
+        public void SetRestitution(float restitution)
+        {
+            Restitution = restitution;
         }
 
         /// <inheritdoc/>
@@ -479,6 +497,46 @@ namespace Engine.Physics
         public Vector3 GetDirectionInWorldSpace(Vector3 direction)
         {
             return Vector3.TransformNormal(direction, Transform);
+        }
+    }
+
+    /// <summary>
+    /// Rigid body state parameters
+    /// </summary>
+    public struct RigidBodyState
+    {
+        /// <summary> 
+        /// Friction factor to add in all collisions
+        /// </summary>
+        public const float DefaultFriction = 0.9f;
+        /// <summary> 
+        /// Restitution factor to add on all collisions
+        /// </summary>
+        public const float DefaultRestitution = 0.001f;
+
+        /// <summary>
+        /// Mass
+        /// </summary>
+        public float Mass { get; set; } = 1f;
+        /// <summary>
+        /// Friction factor
+        /// </summary>
+        public float Friction { get; set; } = DefaultFriction;
+        /// <summary>
+        /// Restitution factor
+        /// </summary>
+        public float Restitution { get; set; } = DefaultRestitution;
+        /// <summary>
+        /// Initial transform
+        /// </summary>
+        public Matrix InitialTransform { get; set; } = Matrix.Identity;
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public RigidBodyState()
+        {
+
         }
     }
 }

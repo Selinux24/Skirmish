@@ -19,7 +19,7 @@ namespace Engine.PhysicsTests
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
             BoxCollider box = new BoxCollider(extents);
-            RigidBody boxBody = new RigidBody(1, transform);
+            RigidBody boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -27,7 +27,7 @@ namespace Engine.PhysicsTests
         static HalfSpaceCollider FromPlane(Plane plane, Matrix transform)
         {
             HalfSpaceCollider p = new HalfSpaceCollider(plane);
-            RigidBody triBody = new RigidBody(2, transform);
+            RigidBody triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
             p.Attach(triBody);
 
             return p;
@@ -35,7 +35,7 @@ namespace Engine.PhysicsTests
         static MeshCollider FromTriangle(Triangle tri, Matrix transform)
         {
             MeshCollider ctri = new MeshCollider(new[] { tri });
-            RigidBody triBody = new RigidBody(2, transform);
+            RigidBody triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
             ctri.Attach(triBody);
 
             return ctri;

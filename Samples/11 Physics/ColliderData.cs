@@ -26,7 +26,13 @@ namespace Physics
         {
             Model.Manipulator.SetTransform(transform);
 
-            PhysicsObject = new PhysicsObject(new RigidBody(mass, Model.Manipulator.FinalTransform), Model);
+            var rbState = new RigidBodyState
+            {
+                Mass = mass,
+                InitialTransform = Model.Manipulator.FinalTransform,
+            };
+
+            PhysicsObject = new PhysicsObject(new RigidBody(rbState), Model);
 
             float radius = Model.GetBoundingSphere().Radius * 2f;
             Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));

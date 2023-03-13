@@ -24,15 +24,6 @@ namespace Engine.Physics
         private int currentContactIndex = 0;
 
         /// <summary> 
-        /// Friction factor to add in all collisions
-        /// </summary>
-        public float Friction { get; set; } = 0f;
-        /// <summary> 
-        /// Restitution factor to add on all collisions
-        /// </summary>
-        public float Restitution { get; set; } = 0f;
-
-        /// <summary> 
         /// Gets the current contact
         /// </summary>
         public Contact CurrentContact
@@ -89,9 +80,6 @@ namespace Engine.Physics
             {
                 contacts[i] = new Contact();
             }
-
-            Friction = settings.Friction;
-            Restitution = settings.Restitution;
         }
 
         /// <summary>
@@ -118,7 +106,7 @@ namespace Engine.Physics
                 return;
             }
 
-            if (CurrentContact?.SetContactData(one, two, Friction, Restitution, position, normal, penetration) == true)
+            if (CurrentContact?.SetContactData(one, two, position, normal, penetration) == true)
             {
                 currentContactIndex++;
             }

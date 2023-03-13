@@ -15,6 +15,14 @@ namespace Engine.Physics
         /// Gets the body inverse mass
         /// </summary>
         float InverseMass { get; }
+        /// <summary>
+        /// Gets the friction factor
+        /// </summary>
+        float Friction { get; }
+        /// <summary>
+        /// Gets the restitution factor
+        /// </summary>
+        float Restitution { get; }
 
         /// <summary>
         /// Gets the body position
@@ -83,7 +91,7 @@ namespace Engine.Physics
         /// <param name="position">Initial position</param>
         /// <param name="rotation">Initial rotation</param>
         void SetInitialState(Vector3 position, Quaternion rotation);
-   
+
         /// <summary>
         /// Sets the state of the body
         /// </summary>
@@ -105,6 +113,17 @@ namespace Engine.Physics
         /// Gets whether the body has a finite mass
         /// </summary>
         bool HasFiniteMass();
+
+        /// <summary>
+        /// Sets the friction factor for collision
+        /// </summary>
+        /// <param name="friction">Friction</param>
+        void SetFriction(float friction);
+        /// <summary>
+        /// Sets the restitution factor for collision
+        /// </summary>
+        /// <param name="restitution">Restitution</param>
+        void SetRestitution(float restitution);
 
         /// <summary>
         /// Sets the inertia tensor coefficient

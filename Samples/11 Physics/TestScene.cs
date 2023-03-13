@@ -214,7 +214,8 @@ namespace Physics
             Camera.FarPlaneDistance = 250;
 
             floor.Manipulator.SetRotation(0f, -0.2f, 0f);
-            var floorBody = new PhysicsFloor(new RigidBody(float.PositiveInfinity, floor.Manipulator.FinalTransform), floor);
+            var rbState = new RigidBodyState { Mass = float.PositiveInfinity, InitialTransform = floor.Manipulator.FinalTransform };
+            var floorBody = new PhysicsFloor(new RigidBody(rbState), floor);
             simulator.AddPhysicsObject(floorBody);
 
             colliders.ToList().ForEach(c =>

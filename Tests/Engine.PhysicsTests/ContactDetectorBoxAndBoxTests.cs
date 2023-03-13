@@ -18,7 +18,7 @@ namespace Engine.PhysicsTests
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
             BoxCollider box = new BoxCollider(extents);
-            RigidBody boxBody = new RigidBody(1, transform);
+            RigidBody boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -27,7 +27,7 @@ namespace Engine.PhysicsTests
         {
             var tris = Triangle.ComputeTriangleList(Topology.TriangleList, new BoundingBox(-extents, extents));
             MeshCollider box = new MeshCollider(tris);
-            RigidBody boxBody = new RigidBody(1, transform);
+            RigidBody boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -54,7 +54,7 @@ namespace Engine.PhysicsTests
             //Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
             //Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);
             //var boxTrn1 = r2 * r1 * Matrix.Translation(new Vector3(0, 2, 1.5f));
-            
+
             var boxTrn1 = Matrix.Translation(new Vector3(0, 0, 0));
             var boxTrn2 = Matrix.Translation(new Vector3(2, 0, 0));
 

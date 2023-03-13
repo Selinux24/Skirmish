@@ -20,7 +20,7 @@ namespace Engine.PhysicsTests
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
             BoxCollider box = new BoxCollider(extents);
-            RigidBody boxBody = new RigidBody(1, transform);
+            RigidBody boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -37,7 +37,7 @@ namespace Engine.PhysicsTests
             Triangle tri2 = new Triangle(p3, p2, p4);
 
             MeshCollider ctri = new MeshCollider(new[] { tri1, tri2 });
-            RigidBody triBody = new RigidBody(2, transform);
+            RigidBody triBody = new RigidBody(new() { Mass = 2, InitialTransform = transform });
             ctri.Attach(triBody);
 
             return ctri;

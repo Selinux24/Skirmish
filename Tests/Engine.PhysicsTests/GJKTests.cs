@@ -19,7 +19,7 @@ namespace Engine.PhysicsTests
         static BoxCollider BoxFromExtents(Vector3 extents, Matrix transform)
         {
             var collider = new BoxCollider(extents);
-            var body = new RigidBody(1, transform);
+            var body = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             collider.Attach(body);
 
             return collider;
@@ -27,7 +27,7 @@ namespace Engine.PhysicsTests
         static SphereCollider SphereFromRadius(float r, Matrix transform)
         {
             var collider = new SphereCollider(r);
-            var body = new RigidBody(1, transform);
+            var body = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             collider.Attach(body);
 
             return collider;
@@ -36,7 +36,7 @@ namespace Engine.PhysicsTests
         {
             var triangles = Triangle.ComputeTriangleList(Topology.TriangleList, new BoundingBox(-extents, extents));
             var collider = new MeshCollider(triangles);
-            var body = new RigidBody(1, transform);
+            var body = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             collider.Attach(body);
 
             return collider;

@@ -1,5 +1,4 @@
-﻿using Engine.Common;
-using Engine.Physics;
+﻿using Engine.Physics;
 using Engine.Physics.Colliders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
@@ -50,7 +49,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(plane.BoundingSphere, new BoundingSphere());
             Assert.AreEqual(plane.OrientedBoundingBox, new OrientedBoundingBox());
 
-            RigidBody rbody = new RigidBody(1f, Matrix.Identity);
+            RigidBody rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             plane.Attach(rbody);
             Assert.AreEqual(plane.Normal, normal);
             Assert.AreEqual(plane.D, distance);
@@ -60,7 +59,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(plane.OrientedBoundingBox, new OrientedBoundingBox());
 
             var trn = Matrix.Translation(Vector3.One);
-            rbody = new RigidBody(1f, trn);
+            rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
 
             plane.Attach(rbody);
             Assert.AreEqual(plane.Normal, normal);
@@ -85,7 +84,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(box.BoundingSphere, sphere);
             Assert.AreEqual(box.OrientedBoundingBox, obb);
 
-            RigidBody rbody = new RigidBody(1f, Matrix.Identity);
+            RigidBody rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             box.Attach(rbody);
             Assert.AreEqual(box.Extents, extents);
             Assert.AreEqual(box.BoundingBox, sourceBox);
@@ -93,7 +92,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(box.OrientedBoundingBox, obb);
 
             var trn = Matrix.Translation(Vector3.One);
-            rbody = new RigidBody(1f, trn);
+            rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
             sourceBox = sourceBox.SetTransform(trn);
             sphere = sphere.SetTransform(trn);
             obb = obb.SetTransform(trn);
@@ -118,7 +117,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(sphere.BoundingBox, box);
             Assert.AreEqual(sphere.OrientedBoundingBox, obb);
 
-            RigidBody rbody = new RigidBody(1f, Matrix.Identity);
+            RigidBody rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             sphere.Attach(rbody);
             Assert.AreEqual(sphere.Radius, radius);
             Assert.AreEqual(sphere.BoundingSphere, sourceSphere);
@@ -126,7 +125,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(sphere.OrientedBoundingBox, obb);
 
             var trn = Matrix.Translation(Vector3.One);
-            rbody = new RigidBody(1f, trn);
+            rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
             sourceSphere = sourceSphere.SetTransform(trn);
             box = box.SetTransform(trn);
             obb = obb.SetTransform(trn);
@@ -159,7 +158,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
-            RigidBody rbody = new RigidBody(1f, Matrix.Identity);
+            RigidBody rbody = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             soup.Attach(rbody);
             CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
             CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
@@ -168,7 +167,7 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
             var trn = Matrix.Translation(Vector3.One);
-            rbody = new RigidBody(1f, trn);
+            rbody = new RigidBody(new() { Mass = 1f, InitialTransform = trn });
             allTris = allTris.Select(t => Triangle.Transform(t, trn)).ToArray();
             distinctTris = allTris.Distinct().ToArray();
             allPoints = allTris.SelectMany(t => t.GetVertices()).ToArray();
@@ -192,7 +191,7 @@ namespace Engine.PhysicsTests
         {
             BoxCollider box = new BoxCollider(Vector3.One);
 
-            RigidBody body = new RigidBody(1, Matrix.Identity);
+            RigidBody body = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             box.Attach(body);
             Assert.AreEqual(box.RigidBody, body);
 

@@ -39,14 +39,6 @@ namespace Engine.Physics
         /// </summary>
         /// <remarks>The higher this number, the more the inter penetration will be visually noticeable.</remarks>
         public float PositionEpsilon { get; set; } = 0.001f;
-        /// <summary> 
-        /// Friction factor to add in all collisions
-        /// </summary>
-        public float Friction { get; set; } = 0.9f;
-        /// <summary> 
-        /// Restitution factor to add on all collisions
-        /// </summary>
-        public float Restitution { get; set; } = 0.001f;
 
         /// <summary>
         /// Constructor

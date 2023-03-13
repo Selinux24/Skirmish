@@ -20,7 +20,7 @@ namespace Engine.PhysicsTests
         {
             Plane p = new Plane(normal, d);
             HalfSpaceCollider plane = new HalfSpaceCollider(p);
-            RigidBody planeBody = new RigidBody(float.PositiveInfinity, transform);
+            RigidBody planeBody = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             plane.Attach(planeBody);
 
             return plane;
@@ -29,7 +29,7 @@ namespace Engine.PhysicsTests
         static SphereCollider FromRadius(float radius, Matrix transform)
         {
             SphereCollider sphere = new SphereCollider(radius);
-            RigidBody boxBody = new RigidBody(1, transform);
+            RigidBody boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             sphere.Attach(boxBody);
 
             return sphere;
