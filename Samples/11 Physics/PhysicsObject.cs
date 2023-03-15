@@ -34,7 +34,7 @@ namespace Physics
         {
             var extents = model.GetBoundingBox(true).GetExtents();
 
-            return new CylinderCollider(extents.X, -extents.Y, extents.Y);
+            return new CylinderCollider(extents.X, extents.Y * 2);
         }
 
         public PhysicsObject(IRigidBody body, Model model)

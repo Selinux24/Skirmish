@@ -12,7 +12,7 @@ namespace Physics
 {
     class TestScene : Scene
     {
-        private const float floorSize = 40f;
+        private const float floorSize = 50f;
 
         private Sprite panel = null;
         private UITextArea title = null;
@@ -180,10 +180,10 @@ namespace Physics
 
             float radius = 2f;
             float height = 4f;
-            Vector3 position = Vector3.Down * height * 0.5f;
+            Vector3 center = Vector3.Zero;
             int stackCount = 16;
 
-            var cylinder = GeometryUtil.CreateCylinder(radius, position, height, stackCount);
+            var cylinder = GeometryUtil.CreateCylinder(center, radius, height, stackCount);
 
             var desc = new ModelDescription()
             {
@@ -191,17 +191,17 @@ namespace Physics
                 CullingVolumeType = CullingVolumeTypes.CylinderVolume,
             };
 
-            ColliderData cylinder1 = new(15, Matrix.Translation(Vector3.Up * 20f));
-            ColliderData cylinder2 = new(10, Matrix.Translation(Vector3.Up * 25f));
+            ColliderData cylinder1 = new(15, Matrix.Translation(Vector3.Up * 30f));
+            ColliderData cylinder2 = new(10, Matrix.Translation(Vector3.Up * 35f));
 
             cylinder1.Model = await AddComponent<Model, ModelDescription>("cylinder1", "cylinder1", desc);
             cylinder2.Model = await AddComponent<Model, ModelDescription>("cylinder2", "cylinder2", desc);
 
-            cylinder1.Model.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
-            cylinder2.Model.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
+            cylinder1.Model.TintColor = Color4.AdjustSaturation(Color.Yellow, 20f);
+            cylinder2.Model.TintColor = Color4.AdjustSaturation(Color.Purple, 20f);
 
-            cylinder1.Lines = Line3D.CreateWiredCylinder(radius, position, height, stackCount);
-            cylinder2.Lines = Line3D.CreateWiredCylinder(radius, position, height, stackCount);
+            cylinder1.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
+            cylinder2.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
 
             cylinder1.Model.Visible = false;
             cylinder2.Model.Visible = false;
@@ -222,8 +222,8 @@ namespace Physics
                 CullingVolumeType = CullingVolumeTypes.None,
             };
 
-            ColliderData pyramid1 = new(15, Matrix.Translation(Vector3.Up * 30f));
-            ColliderData pyramid2 = new(10, Matrix.Translation(Vector3.Up * 35f));
+            ColliderData pyramid1 = new(15, Matrix.Translation(Vector3.Up * 40f));
+            ColliderData pyramid2 = new(10, Matrix.Translation(Vector3.Up * 45f));
 
             pyramid1.Model = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
             pyramid2.Model = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);
@@ -288,6 +288,8 @@ namespace Physics
             UpdateInputBodies();
 
             UpdateStateBodies(gameTime);
+
+            //info.Text = $"{colliders.FirstOrDefault(c => c.Model.Name == "cylinder1")?.Model.Manipulator}"
 
             base.Update(gameTime);
         }

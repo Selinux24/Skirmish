@@ -9,9 +9,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
     public struct ObstacleCylinder : IObstacle
     {
         /// <summary>
-        /// Base center position
+        /// Center position
         /// </summary>
-        public Vector3 Position { get; set; }
+        public Vector3 Center { get; set; }
         /// <summary>
         /// Radius
         /// </summary>
@@ -27,7 +27,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="cylinder">Cylinder</param>
         public ObstacleCylinder(BoundingCylinder cylinder)
         {
-            Position = cylinder.Position;
+            Center = cylinder.Center;
             Radius = cylinder.Radius;
             Height = cylinder.Height;
         }
@@ -40,13 +40,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         {
             Vector3 bmin;
             Vector3 bmax;
+            float hh = Height * 0.5f;
 
-            bmin.X = Position.X - Radius;
-            bmin.Y = Position.Y;
-            bmin.Z = Position.Z - Radius;
-            bmax.X = Position.X + Radius;
-            bmax.Y = Position.Y + Height;
-            bmax.Z = Position.Z + Radius;
+            bmin.X = Center.X - Radius;
+            bmin.Y = Center.Y - hh;
+            bmin.Z = Center.Z - Radius;
+            bmax.X = Center.X + Radius;
+            bmax.Y = Center.Y + hh;
+            bmax.Z = Center.Z + Radius;
 
             return new BoundingBox(bmin, bmax);
         }
@@ -70,8 +71,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             float ics = 1.0f / cs;
             float ich = 1.0f / ch;
 
-            float px = (Position.X - orig.X) * ics;
-            float pz = (Position.Z - orig.Z) * ics;
+            float px = (Center.X - orig.X) * ics;
+            float pz = (Center.Z - orig.Z) * ics;
 
             var bounds = ComputeBounds(bbox, orig, w, h, ics, ich);
             if (!bounds.HasValue)

@@ -373,6 +373,69 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Determines whether a cylinder intersects with a plane
+        /// </summary>
+        /// <param name="cylinder">Axis aligned cylinder</param>
+        /// <param name="plane">Plane</param>
+        /// <returns>Returns true if the cylinder intersects the plane</returns>
+        public static bool CylinderIntersectsPlane(BoundingCylinder cylinder, Plane plane)
+        {
+            // Bounding cylinder is axis aligned. The direction of the cylinder is the up vector
+            var cDir = Vector3.Up;
+
+            // dir points towards the plane and -dir in the opposite direction
+            var dir = Vector3.Cross(plane.Normal, cDir);
+            if (MathUtil.IsZero(dir.Length()))
+            {
+                // Perfect base contact. Test distance from center
+                var h = cylinder.Height * 0.5f;
+                var c = cylinder.Center;
+                float distance = Vector3.Dot(plane.Normal, c) + plane.D - h;
+
+                return distance <= 0;
+            }
+            else
+            {
+                dir = Vector3.Normalize(Vector3.Cross(dir, cDir));
+
+                // Find the 4 points to test with the plane
+                var h = cylinder.Height * 0.5f;
+                var capPosition = cylinder.Center + (cDir * h);
+                var basePosition = cylinder.Center - (cDir * h);
+
+                var base1 = basePosition + dir;
+                float distance = Vector3.Dot(plane.Normal, base1) + plane.D;
+                if (distance <= 0)
+                {
+                    return true;
+                }
+
+                var cap1 = capPosition + dir;
+                distance = Vector3.Dot(plane.Normal, cap1) + plane.D;
+                if (distance <= 0)
+                {
+                    return true;
+                }
+
+                var base2 = basePosition - dir;
+                distance = Vector3.Dot(plane.Normal, base2) + plane.D;
+                if (distance <= 0)
+                {
+                    return true;
+                }
+
+                var cap2 = capPosition - dir;
+                distance = Vector3.Dot(plane.Normal, cap2) + plane.D;
+                if (distance <= 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Determines whether a frustum intersects with a frustum
         /// </summary>
         /// <param name="frustum1">Frustum one</param>
@@ -746,6 +809,31 @@ namespace Engine.Common
             distance = Vector3.Distance(closestPoint, point);
 
             return closestPoint;
+        }
+        /// <summary>
+        /// Gets the closest point in a ray from a specified point
+        /// </summary>
+        /// <param name="point1">First ray point</param>
+        /// <param name="point2">Second ray point</param>
+        /// <param name="point">Point</param>
+        /// <returns>Returns the resulting minimum distance from point to ray</returns>
+        public static Vector3 ClosestPointInRay(Vector3 point1, Vector3 point2, Vector3 point)
+        {
+            var dir = Vector3.Normalize(point2 - point1);
+            return ClosestPointInRay(new Ray(point1, dir), point);
+        }
+        /// <summary>
+        /// Gets the closest point in a ray from a specified point
+        /// </summary>
+        /// <param name="point1">First ray point</param>
+        /// <param name="point2">Second ray point</param>
+        /// <param name="point">Point</param>
+        /// <param name="distance">Distance</param>
+        /// <returns>Returns the resulting minimum distance from point to ray</returns>
+        public static Vector3 ClosestPointInRay(Vector3 point1, Vector3 point2, Vector3 point, out float distance)
+        {
+            var dir = Vector3.Normalize(point2 - point1);
+            return ClosestPointInRay(new Ray(point1, dir), point, out distance);
         }
 
         /// <summary>

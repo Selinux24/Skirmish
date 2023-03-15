@@ -79,6 +79,11 @@ namespace Engine.Physics
                 return HalfSpaceAndSphere(halfSpace, sphere, data);
             }
 
+            if (primitive is CylinderCollider cylinder)
+            {
+                return HalfSpaceAndCylinder(halfSpace, cylinder, data);
+            }
+
             if (primitive is BoxCollider box)
             {
                 return HalfSpaceAndPointList(halfSpace, box.OrientedBoundingBox.GetVertices(), box.RigidBody, data);
@@ -97,7 +102,7 @@ namespace Engine.Physics
             return false;
         }
         /// <summary>
-        /// Detect the collision between a sphere and a half space
+        /// Detects the collision between a sphere and a half space
         /// </summary>
         /// <param name="halfSpace">Half space</param>
         /// <param name="sphere">Sphere</param>
@@ -123,7 +128,113 @@ namespace Engine.Physics
             return true;
         }
         /// <summary>
-        /// Detect the collision between a point list and a half pace
+        /// Detects the collision between a cylinder and a half space
+        /// </summary>
+        /// <param name="halfSpace">Half space</param>
+        /// <param name="cylinder">Cylinder</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool HalfSpaceAndCylinder(HalfSpaceCollider halfSpace, CylinderCollider cylinder, ContactResolver data)
+        {
+            bool contact = false;
+            Vector3 contactPoint = Vector3.Zero;
+            float penetration = float.MaxValue;
+
+            // Set cylinder as world
+            var cDir = Vector3.Up;
+            var center = Vector3.Zero;
+            float height = cylinder.CapHeight - cylinder.BaseHeight;
+            float hh = height * 0.5f;
+
+            // Transform plane to rigid body transform
+            var pPoint = Vector3.Zero - (halfSpace.Normal * halfSpace.D);
+            var pNormal = Vector3.TransformNormal(halfSpace.Normal, halfSpace.RigidBody.Transform);
+            pPoint = Vector3.TransformCoordinate(pPoint, halfSpace.RigidBody.Transform);
+            var plane = new Plane(pPoint, pNormal);
+
+            // Move plane to cylinder space
+            pNormal = plane.Normal;
+            pPoint = Vector3.Zero - (pNormal * plane.D);
+            pNormal = Vector3.TransformNormal(pNormal, cylinder.RotationScaleInverse);
+            pPoint = Vector3.TransformCoordinate(pPoint, cylinder.RotationScaleInverse) - cylinder.Position;
+            plane = new Plane(pPoint, pNormal);
+
+            // dir points towards the plane and -dir in the opposite direction
+            var dir = Vector3.Cross(plane.Normal, cDir);
+            if (MathUtil.IsZero(dir.Length()))
+            {
+                // Perfect base contact. Test base and cap
+
+                var bse = new Vector3(center.X, center.Y - hh, center.Z);
+                float d = Vector3.Dot(plane.Normal, bse) + plane.D;
+                if (d <= 0 && d < penetration)
+                {
+                    contact = true;
+                    contactPoint = bse;
+                    penetration = d;
+                }
+
+                var cap = new Vector3(center.X, center.Y + hh, center.Z);
+                d = Vector3.Dot(plane.Normal, cap) + plane.D;
+                if (d <= 0 && d < penetration)
+                {
+                    contact = true;
+                    contactPoint = cap;
+                    penetration = d;
+                }
+            }
+            else
+            {
+                dir = Vector3.Normalize(Vector3.Cross(dir, cDir));
+
+                // Find the 4 points to test with the plane
+                var capPosition = center + (cDir * hh);
+                var basePosition = center - (cDir * hh);
+
+                var base1 = basePosition + dir;
+                var base2 = basePosition - dir;
+                var cap1 = capPosition + dir;
+                var cap2 = capPosition - dir;
+
+                float d = Vector3.Dot(plane.Normal, base1) + plane.D;
+                if (d <= 0 && d < penetration)
+                {
+                    contact = true;
+                    contactPoint = base1;
+                    penetration = d;
+                }
+                d = Vector3.Dot(plane.Normal, base2) + plane.D;
+                if (d <= 0 && d < penetration)
+                {
+                    contact = true;
+                    contactPoint = base1;
+                    penetration = d;
+                }
+                d = Vector3.Dot(plane.Normal, cap1) + plane.D;
+                if (d <= 0 && d < penetration)
+                {
+                    contact = true;
+                    contactPoint = base1;
+                    penetration = d;
+                }
+                d = Vector3.Dot(plane.Normal, cap2) + plane.D;
+                if (d <= 0 && d < penetration)
+                {
+                    contact = true;
+                    contactPoint = base1;
+                    penetration = d;
+                }
+            }
+
+            if (contact)
+            {
+                data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, contactPoint, plane.Normal, -penetration);
+            }
+
+            return contact;
+        }
+        /// <summary>
+        /// Detects the collision between a point list and a half pace
         /// </summary>
         /// <param name="halfSpace">Half space</param>
         /// <param name="points">Point list</param>
@@ -161,7 +272,7 @@ namespace Engine.Physics
             return intersectionExists;
         }
         /// <summary>
-        /// Detect the collision between two spheres
+        /// Detects the collision between two spheres
         /// </summary>
         /// <param name="one">First sphere</param>
         /// <param name="two">Second sphere</param>

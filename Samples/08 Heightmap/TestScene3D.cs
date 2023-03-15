@@ -1373,7 +1373,8 @@ namespace Heightmap
                 foreach (var t in troops.GetInstances())
                 {
                     var bbox = t.GetBoundingBox();
-                    BoundingCylinder bc = new BoundingCylinder(t.Manipulator.Position, 1.5f, bbox.Height);
+                    var center = t.Manipulator.Position + (Vector3.Up * bbox.Height * 0.5f);
+                    BoundingCylinder bc = new BoundingCylinder(center, 1.5f, bbox.Height);
 
                     NavigationGraph.AddObstacle(bc);
                 }

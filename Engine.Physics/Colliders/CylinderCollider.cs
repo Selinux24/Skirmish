@@ -24,13 +24,19 @@ namespace Engine.Physics.Colliders
         /// Constructor
         /// </summary>
         /// <param name="radius">Radius</param>
-        /// <param name="baseHeight">Base height</param>
-        /// <param name="capHeight">Cap height</param>
-        public CylinderCollider(float radius, float baseHeight, float capHeight) : base()
+        /// <param name="height">Height</param>
+        public CylinderCollider(float radius, float height) : base()
         {
             Radius = radius;
-            BaseHeight = baseHeight;
-            CapHeight = capHeight;
+
+            float hh = height * 0.5f;
+            BaseHeight = -hh;
+            CapHeight = hh;
+
+            var extents = new Vector3(radius, hh, radius);
+            boundingBox = new BoundingBox(-extents, extents);
+            boundingSphere = BoundingSphere.FromBox(boundingBox);
+            orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 
         /// <inheritdoc/>

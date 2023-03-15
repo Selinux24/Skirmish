@@ -10,15 +10,15 @@ namespace Engine.PhysicsTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
-    public class ContactDetectorSphereAndHalfSpaceTests
+    public class ContactDetectorHalfSpaceAndCylinderTests
     {
         static TestContext _testContext;
 
         static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
 
-        static HalfSpaceCollider FromPlane(Vector3 normal, float d, Matrix transform)
+        static HalfSpaceCollider FromPlane(Vector3 point, Vector3 normal, Matrix transform)
         {
-            Plane p = new Plane(normal, d);
+            Plane p = new Plane(point, normal);
             HalfSpaceCollider plane = new HalfSpaceCollider(p);
             RigidBody planeBody = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             plane.Attach(planeBody);
@@ -26,13 +26,13 @@ namespace Engine.PhysicsTests
             return plane;
         }
 
-        static SphereCollider FromRadius(float radius, Matrix transform)
+        static CylinderCollider FromRadius(float radius, float height, Matrix transform)
         {
-            SphereCollider sphere = new SphereCollider(radius);
+            CylinderCollider cylinder = new CylinderCollider(radius, height);
             RigidBody boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
-            sphere.Attach(boxBody);
+            cylinder.Attach(boxBody);
 
-            return sphere;
+            return cylinder;
         }
 
         [ClassInitialize]
@@ -47,20 +47,20 @@ namespace Engine.PhysicsTests
             Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
         }
 
-        public struct SphereAndHalfSpaceData
+        public struct HalfSpaceAndCylinderData
         {
             public Matrix Transform { get; set; }
             public bool IntersectionExpected { get; set; }
-            public SphereAndHalfSpaceContactData Contact { get; set; }
+            public HalfSpaceAndCylinderContactData Contact { get; set; }
         }
 
-        public struct SphereAndHalfSpaceContactData
+        public struct HalfSpaceAndCylinderContactData
         {
             public Vector3 Point { get; set; }
             public float Penetration { get; set; }
         }
 
-        public static IEnumerable<object[]> SphereAndHalfSpaceTestData
+        public static IEnumerable<object[]> HalfSpaceAndCylinderTestData
         {
             get
             {
@@ -68,7 +68,7 @@ namespace Engine.PhysicsTests
                 {
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndCylinderData
                         {
                             Transform = Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
@@ -76,47 +76,47 @@ namespace Engine.PhysicsTests
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndCylinderData
                         {
                             Transform = Matrix.Translation(Vector3.Up),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 0 },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Penetration = 0 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndCylinderData
                         {
                             Transform = Matrix.Identity,
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 1 },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Penetration = 1 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndCylinderData
                         {
                             Transform = Matrix.Translation(Vector3.Down),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 2 },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Penetration = 2 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndCylinderData
                         {
                             Transform = Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 3 },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Penetration = 3 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndCylinderData
                         {
                             Transform = Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 6 },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Penetration = 6 },
                         }
                     },
                 };
@@ -124,15 +124,15 @@ namespace Engine.PhysicsTests
         }
 
         [TestMethod()]
-        [DynamicData(nameof(SphereAndHalfSpaceTestData))]
-        public void ContactDetectorSphereAndHalfSpaceTest(SphereAndHalfSpaceData testData)
+        [DynamicData(nameof(HalfSpaceAndCylinderTestData))]
+        public void ContactDetectorHalfSpaceAndCylinderTest(HalfSpaceAndCylinderData testData)
         {
             ContactResolver data = new ContactResolver();
 
-            var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
+            var plane = FromPlane(Vector3.Zero, Vector3.Up, Matrix.Identity);
 
-            var sphere = FromRadius(1f, testData.Transform);
-            bool intersection = ContactDetector.BetweenObjects(sphere, plane, data);
+            var cylinder = FromRadius(1f, 2f, testData.Transform);
+            bool intersection = ContactDetector.BetweenObjects(cylinder, plane, data);
 
             Assert.AreEqual(testData.IntersectionExpected, intersection, testData.IntersectionExpected ? "Intersection expected" : "No intersection expected");
 

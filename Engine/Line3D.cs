@@ -300,9 +300,9 @@ namespace Engine
         {
             return CreateWiredCylinder(new BoundingCylinder(Vector3.Zero, radius, height), stackCount);
         }
-        public static IEnumerable<Line3D> CreateWiredCylinder(float radius, Vector3 basePosition, float height, int stackCount)
+        public static IEnumerable<Line3D> CreateWiredCylinder(Vector3 center, float radius, float height, int stackCount)
         {
-            return CreateWiredCylinder(new BoundingCylinder(basePosition, radius, height), stackCount);
+            return CreateWiredCylinder(new BoundingCylinder(center, radius, height), stackCount);
         }
         public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int stackCount)
         {

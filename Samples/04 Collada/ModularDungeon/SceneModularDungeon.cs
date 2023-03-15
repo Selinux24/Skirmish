@@ -1673,8 +1673,10 @@ namespace Collada.ModularDungeon
             //Human obstacles
             for (int i = 0; i < human.InstanceCount; i++)
             {
-                var pos = human[i].Manipulator.Position;
-                var bc = new BoundingCylinder(pos, 0.8f, 1.5f);
+                float h = 1.5f;
+                float r = 0.8f;
+                var center = human[i].Manipulator.Position + (Vector3.Up * h * 0.5f);
+                var bc = new BoundingCylinder(center, r, h);
 
                 int index = AddObstacle(bc);
                 if (index >= 0)

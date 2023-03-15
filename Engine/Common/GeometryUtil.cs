@@ -1095,19 +1095,19 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCylinder(float radius, float height, int stackCount)
         {
-            return CreateCylinder(radius, Vector3.Zero, height, stackCount);
+            return CreateCylinder(Vector3.Zero, radius, height, stackCount);
         }
         /// <summary>
         /// Creates a cylinder
         /// </summary>
+        /// <param name="center">Center position</param>
         /// <param name="radius">Radius</param>
-        /// <param name="basePosition">Base position</param>
         /// <param name="height">Height</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(float radius, Vector3 basePosition, float height, int stackCount)
+        public static GeometryDescriptor CreateCylinder(Vector3 center, float radius, float height, int stackCount)
         {
-            return CreateCylinder(new BoundingCylinder(basePosition, radius, height), stackCount);
+            return CreateCylinder(new BoundingCylinder(center, radius, height), stackCount);
         }
         /// <summary>
         /// Creates a cylinder
@@ -1120,7 +1120,7 @@ namespace Engine.Common
             List<int> indexList = new List<int>();
 
             List<Vector3> verts = new List<Vector3>(cylinder.GetVertices(stackCount));
-            verts.AddRange(new[] { cylinder.Position, cylinder.Position + (Vector3.Up * cylinder.Height) });
+            verts.AddRange(new[] { cylinder.BasePosition, cylinder.CapPosition });
 
             int cBase = verts.Count - 2;
             int cCap = verts.Count - 1;
