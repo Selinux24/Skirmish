@@ -140,24 +140,21 @@ namespace Engine.Physics
             Vector3 contactPoint = Vector3.Zero;
             float penetration = float.MaxValue;
 
-            // Set cylinder as world
-            var cDir = Vector3.Up;
-            var center = Vector3.Zero;
+            // Set plane as world origin
+            var plane = new Plane(Vector3.Up, 0);
+            var trn = halfSpace.RigidBody.Transform;
+            var invTrn = Matrix.Invert(trn);
+
+            // Transform cylinder to its space using the rigid body matrix
+            var cylTrn = cylinder.RigidBody.Transform;
+            var cDir = Vector3.TransformNormal(Vector3.Up, cylTrn);
+            var center = Vector3.TransformCoordinate(Vector3.Zero, cylTrn);
             float height = cylinder.CapHeight - cylinder.BaseHeight;
             float hh = height * 0.5f;
 
-            // Transform plane to rigid body transform
-            var pPoint = Vector3.Zero - (halfSpace.Normal * halfSpace.D);
-            var pNormal = Vector3.TransformNormal(halfSpace.Normal, halfSpace.RigidBody.Transform);
-            pPoint = Vector3.TransformCoordinate(pPoint, halfSpace.RigidBody.Transform);
-            var plane = new Plane(pPoint, pNormal);
-
-            // Move plane to cylinder space
-            pNormal = plane.Normal;
-            pPoint = Vector3.Zero - (pNormal * plane.D);
-            pNormal = Vector3.TransformNormal(pNormal, cylinder.RotationScaleInverse);
-            pPoint = Vector3.TransformCoordinate(pPoint, cylinder.RotationScaleInverse) - cylinder.Position;
-            plane = new Plane(pPoint, pNormal);
+            // Transform cylinder to plane space using the plane inverse matrix
+            cDir = Vector3.TransformNormal(cDir, invTrn);
+            center = Vector3.TransformCoordinate(center, invTrn);
 
             // dir points towards the plane and -dir in the opposite direction
             var dir = Vector3.Cross(plane.Normal, cDir);
@@ -185,12 +182,11 @@ namespace Engine.Physics
             }
             else
             {
-                dir = Vector3.Normalize(Vector3.Cross(dir, cDir));
-
                 // Find the 4 points to test with the plane
                 var capPosition = center + (cDir * hh);
                 var basePosition = center - (cDir * hh);
 
+                dir = Vector3.Normalize(Vector3.Cross(dir, cDir)) * cylinder.Radius;
                 var base1 = basePosition + dir;
                 var base2 = basePosition - dir;
                 var cap1 = capPosition + dir;
@@ -228,7 +224,11 @@ namespace Engine.Physics
 
             if (contact)
             {
-                data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, contactPoint, plane.Normal, -penetration);
+                var invCylTrn = Matrix.Invert(cylTrn);
+                contactPoint = Vector3.TransformCoordinate(contactPoint, trn * invCylTrn);
+                var contactNormal = Vector3.TransformNormal(plane.Normal, trn * invCylTrn);
+
+                data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, contactPoint, contactNormal, -penetration);
             }
 
             return contact;

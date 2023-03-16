@@ -396,7 +396,7 @@ namespace Engine.Common
             }
             else
             {
-                dir = Vector3.Normalize(Vector3.Cross(dir, cDir));
+                dir = Vector3.Normalize(Vector3.Cross(dir, cDir)) * cylinder.Radius;
 
                 // Find the 4 points to test with the plane
                 var h = cylinder.Height * 0.5f;

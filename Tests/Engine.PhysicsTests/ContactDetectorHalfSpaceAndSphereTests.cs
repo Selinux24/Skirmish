@@ -10,7 +10,7 @@ namespace Engine.PhysicsTests
 {
     [ExcludeFromCodeCoverage]
     [TestClass()]
-    public class ContactDetectorSphereAndHalfSpaceTests
+    public class ContactDetectorHalfSpaceAndSphereTests
     {
         static TestContext _testContext;
 
@@ -47,20 +47,20 @@ namespace Engine.PhysicsTests
             Console.WriteLine($"TestContext.TestName='{_testContext.TestName}'");
         }
 
-        public struct SphereAndHalfSpaceData
+        public struct HalfSpaceAndSphereData
         {
             public Matrix Transform { get; set; }
             public bool IntersectionExpected { get; set; }
-            public SphereAndHalfSpaceContactData Contact { get; set; }
+            public HalfSpaceAndSphereContactData Contact { get; set; }
         }
 
-        public struct SphereAndHalfSpaceContactData
+        public struct HalfSpaceAndSphereContactData
         {
             public Vector3 Point { get; set; }
             public float Penetration { get; set; }
         }
 
-        public static IEnumerable<object[]> SphereAndHalfSpaceTestData
+        public static IEnumerable<object[]> HalfSpaceAndSphereTestData
         {
             get
             {
@@ -68,7 +68,7 @@ namespace Engine.PhysicsTests
                 {
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
@@ -76,47 +76,47 @@ namespace Engine.PhysicsTests
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Up),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 0 },
+                            Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 0 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Identity,
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 1 },
+                            Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 1 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Down),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 2 },
+                            Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 2 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 3 },
+                            Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 3 },
                         }
                     },
                     new object[]
                     {
-                        new SphereAndHalfSpaceData
+                        new HalfSpaceAndSphereData
                         {
                             Transform = Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
-                            Contact = new SphereAndHalfSpaceContactData{ Point = Vector3.Zero, Penetration = 6 },
+                            Contact = new HalfSpaceAndSphereContactData{ Point = Vector3.Zero, Penetration = 6 },
                         }
                     },
                 };
@@ -124,8 +124,8 @@ namespace Engine.PhysicsTests
         }
 
         [TestMethod()]
-        [DynamicData(nameof(SphereAndHalfSpaceTestData))]
-        public void ContactDetectorSphereAndHalfSpaceTest(SphereAndHalfSpaceData testData)
+        [DynamicData(nameof(HalfSpaceAndSphereTestData))]
+        public void ContactDetectorHalfSpaceAndSphereTest(HalfSpaceAndSphereData testData)
         {
             ContactResolver data = new ContactResolver();
 
