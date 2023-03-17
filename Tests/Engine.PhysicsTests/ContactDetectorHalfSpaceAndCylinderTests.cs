@@ -50,9 +50,15 @@ namespace Engine.PhysicsTests
         public struct HalfSpaceAndCylinderData
         {
             public string Description { get; set; }
-            public Matrix Transform { get; set; }
-            public bool IntersectionExpected { get; set; }
+            public Matrix PlaneTransform { get; set; } = Matrix.Identity;
+            public Matrix CylinderTransform { get; set; } = Matrix.Identity;
+            public bool IntersectionExpected { get; set; } = false;
             public HalfSpaceAndCylinderContactData Contact { get; set; }
+
+            public HalfSpaceAndCylinderData()
+            {
+
+            }
         }
 
         public struct HalfSpaceAndCylinderContactData
@@ -61,6 +67,16 @@ namespace Engine.PhysicsTests
             public Vector3 Normal { get; set; }
             public float Penetration { get; set; }
         }
+
+        private const float PiOverFourDisplacement = 0.41421354f;
+        private static readonly Vector3 Normal45 = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.PiOverFour));
+        private static readonly Vector3 Normal135 = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.PiOverFour + MathUtil.PiOverTwo));
+        private static readonly Vector3 Normal10 = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.DegreesToRadians(10)));
+        private static readonly Vector3 Normal10m = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.DegreesToRadians(-10)));
+        private static readonly Vector3 Normal100 = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.DegreesToRadians(100)));
+        private static readonly Vector3 Normal100m = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.DegreesToRadians(-100)));
+        private static readonly Vector3 Normal190 = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.DegreesToRadians(190)));
+        private static readonly Vector3 Normal190m = Vector3.TransformNormal(Vector3.Up, Matrix.RotationAxis(Vector3.Left, MathUtil.DegreesToRadians(-190)));
 
         public static IEnumerable<object[]> HalfSpaceAndCylinderTestData
         {
@@ -74,7 +90,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "Axis Aligned Cylinder over the plane with no intersection.",
-                            Transform = Matrix.Translation(Vector3.Up * 5f),
+                            CylinderTransform = Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
                         }
                     },
@@ -83,7 +99,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "Axis Aligned Cylinder over the plane with perfect base intersection.",
-                            Transform = Matrix.Translation(Vector3.Up),
+                            CylinderTransform = Matrix.Translation(Vector3.Up),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 0 },
                         }
@@ -93,7 +109,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "Axis Aligned Cylinder over the plane with intersection and penetration of 1.",
-                            Transform = Matrix.Translation(Vector3.Zero),
+                            CylinderTransform = Matrix.Translation(Vector3.Zero),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 1 },
                         }
@@ -103,7 +119,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "Axis Aligned Cylinder below the plane with perfect cap intersection and penetration of 2.",
-                            Transform = Matrix.Translation(Vector3.Down),
+                            CylinderTransform = Matrix.Translation(Vector3.Down),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 2 },
                         }
@@ -113,7 +129,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "Axis Aligned Cylinder below the plane with intersection and penetration of 3.",
-                            Transform = Matrix.Translation(Vector3.Down * 2f),
+                            CylinderTransform = Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 3 },
                         }
@@ -123,7 +139,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "Axis Aligned Cylinder below the plane with intersection and penetration of 6.",
-                            Transform = Matrix.Translation(Vector3.Down * 5f),
+                            CylinderTransform = Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 6 },
                         }
@@ -135,7 +151,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "90º rotated Cylinder over the plane with no intersection.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
                         }
                     },
@@ -144,9 +160,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "90º rotated Cylinder over the plane with perfect side intersection.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 1f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 1f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Vector3.BackwardLH, Penetration = 0f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 1, 1), Normal = Vector3.BackwardLH, Penetration = 0f },
                         }
                     },
                     new object[]
@@ -154,9 +170,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "90º rotated Cylinder over the plane with intersection and penetration of 1.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Zero),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Zero),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Vector3.BackwardLH, Penetration = 1f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 1, 1), Normal = Vector3.BackwardLH, Penetration = 1f },
                         }
                     },
                     new object[]
@@ -164,9 +180,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "90º rotated Cylinder below the plane with perfect side intersection and penetration of 2.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 1f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 1f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Vector3.BackwardLH, Penetration = 2f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Vector3.BackwardLH, Penetration = 2f },
                         }
                     },
                     new object[]
@@ -174,9 +190,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "90º rotated Cylinder below the plane with intersection and penetration of 3.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Vector3.BackwardLH, Penetration = 3f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -1, 1), Normal = Vector3.BackwardLH, Penetration = 3f },
                         }
                     },
                     new object[]
@@ -184,9 +200,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "90º rotated Cylinder below the plane with intersection and penetration of 6.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Vector3.BackwardLH, Penetration = 6f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -1, 1), Normal = Vector3.BackwardLH, Penetration = 6f },
                         }
                     },
 
@@ -196,7 +212,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "-90º rotated Cylinder over the plane with no intersection.",
-                            Transform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
+                            CylinderTransform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
                         }
                     },
@@ -205,9 +221,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "-90º rotated Cylinder over the plane with perfect side intersection.",
-                            Transform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 1f),
+                            CylinderTransform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 1f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, -1), Normal = Vector3.ForwardLH, Penetration = 0f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, -1), Normal = Vector3.ForwardLH, Penetration = 0f },
                         }
                     },
                     new object[]
@@ -215,9 +231,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "-90º rotated Cylinder over the plane with intersection and penetration of 1.",
-                            Transform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Zero),
+                            CylinderTransform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Zero),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, -1), Normal = Vector3.ForwardLH, Penetration = 1f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, -1), Normal = Vector3.ForwardLH, Penetration = 1f },
                         }
                     },
                     new object[]
@@ -225,9 +241,9 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "-90º rotated Cylinder below the plane with perfect side intersection and penetration of 2.",
-                            Transform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 1f),
+                            CylinderTransform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 1f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, -1), Normal = Vector3.ForwardLH, Penetration = 2f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, -1), Normal = Vector3.ForwardLH, Penetration = 2f },
                         }
                     },
                     new object[]
@@ -235,7 +251,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "-90º rotated Cylinder below the plane with intersection and penetration of 3.",
-                            Transform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
+                            CylinderTransform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, -1), Normal = Vector3.ForwardLH, Penetration = 3f },
                         }
@@ -245,7 +261,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "-90º rotated Cylinder below the plane with intersection and penetration of 6.",
-                            Transform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
+                            CylinderTransform = Matrix.RotationX(-MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, -1), Normal = Vector3.ForwardLH, Penetration = 6f },
                         }
@@ -257,7 +273,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "180º rotated Cylinder over the plane with no intersection.",
-                            Transform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 5f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
                         }
                     },
@@ -266,7 +282,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "180º rotated Cylinder over the plane with perfect cap intersection.",
-                            Transform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 1f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Up * 1f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 1, 0), Normal = Vector3.Down, Penetration = 0f },
                         }
@@ -276,7 +292,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "180º rotated Cylinder over the plane with intersection and penetration of 1.",
-                            Transform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Zero),
+                            CylinderTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Zero),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 1, 0), Normal = Vector3.Down, Penetration = 1f },
                         }
@@ -286,7 +302,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "180º rotated Cylinder below the plane with perfect base intersection and penetration of 2.",
-                            Transform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 1f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 1f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 1, 0), Normal = Vector3.Down, Penetration = 2f },
                         }
@@ -296,7 +312,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "180º rotated Cylinder below the plane with intersection and penetration of 3.",
-                            Transform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 2f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 1, 0), Normal = Vector3.Down, Penetration = 3f },
                         }
@@ -306,7 +322,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "180º rotated Cylinder below the plane with intersection and penetration of 6.",
-                            Transform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 5f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.Pi) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
                             Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 1, 0), Normal = Vector3.Down, Penetration = 6f },
                         }
@@ -318,7 +334,7 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "45º rotated Cylinder over the plane with no intersection.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Up * 5f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Up * 5f),
                             IntersectionExpected = false,
                         }
                     },
@@ -327,49 +343,303 @@ namespace Engine.PhysicsTests
                         new HalfSpaceAndCylinderData
                         {
                             Description = "45º rotated Cylinder over the plane with perfect point intersection.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Up * 1.414213562f),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Up * (1 + PiOverFourDisplacement)),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = new Vector3(0, 0.7071067f, -0.7071068f), Penetration = 0f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Normal45, Penetration = 0f },
                         }
                     },
                     new object[]
                     {
                         new HalfSpaceAndCylinderData
                         {
-                            Description = "45º rotated Cylinder over the plane with intersection and penetration of 1.4142135f.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Zero),
+                            Description = $"45º rotated Cylinder over the plane with intersection and penetration of {1 + PiOverFourDisplacement}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Zero),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = new Vector3(0, 0.7071067f, -0.7071068f), Penetration = 1.4142135f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Normal45, Penetration = 1 + PiOverFourDisplacement },
                         }
                     },
                     new object[]
                     {
                         new HalfSpaceAndCylinderData
                         {
-                            Description = "45º rotated Cylinder below the plane with perfect side intersection and penetration of 2x1.4142135f.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Down * 1.4142135f),
+                            Description = $"45º rotated Cylinder below the plane with perfect side intersection and penetration of {(1 + PiOverFourDisplacement) * 2f}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Down * (1 + PiOverFourDisplacement)),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = new Vector3(0, 0.7071067f, -0.7071068f), Penetration = 1.4142135f * 2f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Normal45, Penetration = (1 + PiOverFourDisplacement) * 2f },
                         }
                     },
                     new object[]
                     {
                         new HalfSpaceAndCylinderData
                         {
-                            Description = "45º rotated Cylinder below the plane with intersection and penetration of 3.4142134f.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Down * 2f),
+                            Description = $"45º rotated Cylinder below the plane with intersection and penetration of {3 + PiOverFourDisplacement}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Down * 2f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = new Vector3(0, 0.7071067f, -0.7071068f), Penetration = 3.4142134f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Normal45, Penetration = 3 + PiOverFourDisplacement },
                         }
                     },
                     new object[]
                     {
                         new HalfSpaceAndCylinderData
                         {
-                            Description = "45º rotated Cylinder below the plane with intersection and penetration of 6.414213f.",
-                            Transform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Down * 5f),
+                            Description = $"45º rotated Cylinder below the plane with intersection and penetration of {6 + PiOverFourDisplacement}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Down * 5f),
                             IntersectionExpected = true,
-                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = new Vector3(0, 0.7071067f, -0.7071068f), Penetration = 6.414213f },
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Normal45, Penetration = 6 + PiOverFourDisplacement },
+                        }
+                    },
+
+                    // 135º rotated Cylinder
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "135º rotated Cylinder over the plane with no intersection.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * 5f),
+                            IntersectionExpected = false,
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "135º rotated Cylinder over the plane with perfect point intersection.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Up * (1 + PiOverFourDisplacement)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal135, Penetration = 0f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = $"135º rotated Cylinder over the plane with intersection and penetration of {1 + PiOverFourDisplacement}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Zero),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal135, Penetration = 1 + PiOverFourDisplacement },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = $"135º rotated Cylinder below the plane with perfect side intersection and penetration of {(1 + PiOverFourDisplacement) * 2f}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * (1 + PiOverFourDisplacement)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal135, Penetration = (1 + PiOverFourDisplacement) * 2f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = $"135º rotated Cylinder below the plane with intersection and penetration of {3 + PiOverFourDisplacement}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 2f),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal135, Penetration = 3 + PiOverFourDisplacement },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = $"135º rotated Cylinder below the plane with intersection and penetration of {6 + PiOverFourDisplacement}.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour + MathUtil.PiOverTwo) * Matrix.Translation(Vector3.Down * 5f),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal135, Penetration = 6 + PiOverFourDisplacement },
+                        }
+                    },
+             
+                    // Cylinder's cap parallel to 45º rotated plane - To test when both rigid body has transforms
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder's cap parallel to 45º rotated plane over the plane with no intersection.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Up * -PiOverFourDisplacement),
+                            CylinderTransform = Matrix.RotationX(MathUtil.PiOverFour) * Matrix.Translation(Vector3.Up * 5f),
+                            IntersectionExpected = false,
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder's cap parallel to 45º rotated plane over the plane with perfect base intersection.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.PiOverFour),
+                            CylinderTransform = Matrix.Translation(Vector3.Up) * Matrix.RotationX(MathUtil.PiOverFour),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 0 },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder's cap parallel to 45º rotated plane over the plane with intersection and penetration of 1.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.PiOverFour),
+                            CylinderTransform = Matrix.Translation(Vector3.Zero) * Matrix.RotationX(MathUtil.PiOverFour),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 1 },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder's cap parallel to 45º rotated plane below the plane with perfect cap intersection and penetration of 2.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.PiOverFour),
+                            CylinderTransform =  Matrix.Translation(Vector3.Down) * Matrix.RotationX(MathUtil.PiOverFour),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 2 },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder's cap parallel to 45º rotated plane below the plane with intersection and penetration of 3.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.PiOverFour),
+                            CylinderTransform = Matrix.Translation(Vector3.Down * 2) * Matrix.RotationX(MathUtil.PiOverFour),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 3 },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder's cap parallel to 45º rotated plane below the plane with intersection and penetration of 6.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.PiOverFour),
+                            CylinderTransform = Matrix.Translation(Vector3.Down * 5) * Matrix.RotationX(MathUtil.PiOverFour),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = Vector3.Down, Normal = Vector3.Up, Penetration = 6 },
+                        }
+                    },
+
+                    // 10º Maximum penetration test
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "10º rotated Cylinder with plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(10)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Normal10, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "-10º rotated Cylinder with plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(-10)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, -1), Normal = Normal10m, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder with -10º rotated plane cut.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.DegreesToRadians(-10)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, 1), Normal = Normal10, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder with 10º rotated plane cut.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.DegreesToRadians(10)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, -1, -1), Normal = Normal10m, Penetration = 1.158456f },
+                        }
+                    },
+
+                    // 100º Maximum penetration test
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "100º rotated Cylinder with plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(100)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal100, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "-100º rotated Cylinder with plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(-100)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, -1), Normal = Normal100m, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder with -100º rotated plane cut.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.DegreesToRadians(-100)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal100, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder with 100º rotated plane cut.",
+                            PlaneTransform = Matrix.RotationX(MathUtil.DegreesToRadians(100)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, -1), Normal = Normal100m, Penetration = 1.158456f },
+                        }
+                    },
+
+                    // 190º Maximum penetration test
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "190º rotated Cylinder with plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(190)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, -1), Normal = Normal190, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "-190º rotated Cylinder with plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(-190)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal190m, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder with -190º rotated plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(-190)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, 1), Normal = Normal190m, Penetration = 1.158456f },
+                        }
+                    },
+                    new object[]
+                    {
+                        new HalfSpaceAndCylinderData
+                        {
+                            Description = "Cylinder with 190º rotated plane cut.",
+                            CylinderTransform = Matrix.RotationX(MathUtil.DegreesToRadians(190)),
+                            IntersectionExpected = true,
+                            Contact = new HalfSpaceAndCylinderContactData{ Point = new Vector3(0f, 1, -1), Normal = Normal190, Penetration = 1.158456f },
                         }
                     },
                 };
@@ -384,9 +654,9 @@ namespace Engine.PhysicsTests
 
             ContactResolver data = new ContactResolver();
 
-            var plane = FromPlane(Vector3.Zero, Vector3.Up, Matrix.Identity);
+            var plane = FromPlane(Vector3.Zero, Vector3.Up, testData.PlaneTransform);
 
-            var cylinder = FromRadius(1f, 2f, testData.Transform);
+            var cylinder = FromRadius(1f, 2f, testData.CylinderTransform);
             bool intersection = ContactDetector.BetweenObjects(cylinder, plane, data);
 
             Assert.AreEqual(testData.IntersectionExpected, intersection, testData.IntersectionExpected ? "Intersection expected" : "No intersection expected");

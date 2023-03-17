@@ -142,27 +142,36 @@ namespace Engine.Physics
 
             // Set plane as world origin
             var plane = new Plane(Vector3.Up, 0);
-            var trn = halfSpace.RigidBody.Transform;
-            var invTrn = Matrix.Invert(trn);
+            var planeTrn = halfSpace.RigidBody.Transform;
 
             // Transform cylinder to its space using the rigid body matrix
             var cylTrn = cylinder.RigidBody.Transform;
-            var cDir = Vector3.TransformNormal(Vector3.Up, cylTrn);
-            var center = Vector3.TransformCoordinate(Vector3.Zero, cylTrn);
-            float height = cylinder.CapHeight - cylinder.BaseHeight;
-            float hh = height * 0.5f;
+            var cylDir = Vector3.Up;
+            var cylCenter = Vector3.Zero;
+            if (!cylTrn.IsIdentity)
+            {
+                cylDir = Vector3.TransformNormal(Vector3.Up, cylTrn);
+                cylCenter = Vector3.TransformCoordinate(Vector3.Zero, cylTrn);
+            }
 
             // Transform cylinder to plane space using the plane inverse matrix
-            cDir = Vector3.TransformNormal(cDir, invTrn);
-            center = Vector3.TransformCoordinate(center, invTrn);
+                var invTrn = Matrix.Invert(planeTrn);
+            if (!planeTrn.IsIdentity)
+            {
+                cylDir = Vector3.TransformNormal(cylDir, invTrn);
+                cylCenter = Vector3.TransformCoordinate(cylCenter, invTrn);
+            }
+
+            float cylHeight = cylinder.CapHeight - cylinder.BaseHeight;
+            float hh = cylHeight * 0.5f;
 
             // dir points towards the plane and -dir in the opposite direction
-            var dir = Vector3.Cross(plane.Normal, cDir);
+            var dir = Vector3.Cross(plane.Normal, cylDir);
             if (MathUtil.IsZero(dir.Length()))
             {
                 // Perfect base contact. Test base and cap
 
-                var bse = new Vector3(center.X, center.Y - hh, center.Z);
+                var bse = new Vector3(cylCenter.X, cylCenter.Y - hh, cylCenter.Z);
                 float d = Vector3.Dot(plane.Normal, bse) + plane.D;
                 if (d <= 0 && d < penetration)
                 {
@@ -171,7 +180,7 @@ namespace Engine.Physics
                     penetration = d;
                 }
 
-                var cap = new Vector3(center.X, center.Y + hh, center.Z);
+                var cap = new Vector3(cylCenter.X, cylCenter.Y + hh, cylCenter.Z);
                 d = Vector3.Dot(plane.Normal, cap) + plane.D;
                 if (d <= 0 && d < penetration)
                 {
@@ -183,10 +192,10 @@ namespace Engine.Physics
             else
             {
                 // Find the 4 points to test with the plane
-                var capPosition = center + (cDir * hh);
-                var basePosition = center - (cDir * hh);
+                var capPosition = cylCenter + (cylDir * hh);
+                var basePosition = cylCenter - (cylDir * hh);
 
-                dir = Vector3.Normalize(Vector3.Cross(dir, cDir)) * cylinder.Radius;
+                dir = Vector3.Normalize(Vector3.Cross(dir, cylDir)) * cylinder.Radius;
                 var base1 = basePosition + dir;
                 var base2 = basePosition - dir;
                 var cap1 = capPosition + dir;
@@ -203,35 +212,48 @@ namespace Engine.Physics
                 if (d <= 0 && d < penetration)
                 {
                     contact = true;
-                    contactPoint = base1;
+                    contactPoint = base2;
                     penetration = d;
                 }
                 d = Vector3.Dot(plane.Normal, cap1) + plane.D;
                 if (d <= 0 && d < penetration)
                 {
                     contact = true;
-                    contactPoint = base1;
+                    contactPoint = cap1;
                     penetration = d;
                 }
                 d = Vector3.Dot(plane.Normal, cap2) + plane.D;
                 if (d <= 0 && d < penetration)
                 {
                     contact = true;
-                    contactPoint = base1;
+                    contactPoint = cap2;
                     penetration = d;
                 }
             }
 
-            if (contact)
+            if (!contact)
             {
-                var invCylTrn = Matrix.Invert(cylTrn);
-                contactPoint = Vector3.TransformCoordinate(contactPoint, trn * invCylTrn);
-                var contactNormal = Vector3.TransformNormal(plane.Normal, trn * invCylTrn);
-
-                data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, contactPoint, contactNormal, -penetration);
+                return false;
             }
 
-            return contact;
+            var contactNormal = plane.Normal;
+
+            if (!planeTrn.IsIdentity)
+            {
+                contactPoint = Vector3.TransformCoordinate(contactPoint, planeTrn);
+                contactNormal = Vector3.TransformNormal(plane.Normal, planeTrn);
+            }
+
+            if (!cylTrn.IsIdentity)
+            {
+                var invCylTrn = Matrix.Invert(cylTrn);
+                contactPoint = Vector3.TransformCoordinate(contactPoint, invCylTrn);
+                contactNormal = Vector3.TransformNormal(contactNormal, invCylTrn);
+            }
+
+            data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, contactPoint, contactNormal, -penetration);
+
+            return true;
         }
         /// <summary>
         /// Detects the collision between a point list and a half pace

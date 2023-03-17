@@ -224,14 +224,14 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void CalculateDerivedData()
         {
+            // Calculate transformation matrix with orientation and position
+            Rotation = Quaternion.Normalize(Rotation);
+            Transform = Matrix.RotationQuaternion(Rotation) * Matrix.Translation(Position);
+
             if (!HasFiniteMass())
             {
                 return;
             }
-
-            // Calculate transformation matrix with orientation and position
-            Rotation = Quaternion.Normalize(Rotation);
-            Transform = Matrix.RotationQuaternion(Rotation) * Matrix.Translation(Position);
 
             // Calculate the inertia tensor in world coordinates
             InverseInertiaTensorWorld = InverseInertiaTensor.Transform(Transform);
