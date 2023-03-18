@@ -38,6 +38,25 @@ namespace Engine.Physics.Colliders
             Plane = plane;
         }
 
+        /// <summary>
+        /// Gets the plane
+        /// </summary>
+        /// <param name="transform">Use rigid body transform matrix</param>
+        public Plane GetPlane(bool transform = false)
+        {
+            if (!transform)
+            {
+                return Plane;
+            }
+
+            if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+            {
+                return Plane;
+            }
+
+            return Plane.Transform(Plane, RigidBody.Transform);
+        }
+
         /// <inheritdoc/>
         public override Vector3 Support(Vector3 dir)
         {

@@ -110,9 +110,12 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool HalfSpaceAndSphere(HalfSpaceCollider halfSpace, SphereCollider sphere, ContactResolver data)
         {
+            var plane = halfSpace.GetPlane(true);
+            Vector3 normal = plane.Normal;
+            float d = plane.D;
+
             // Distance from center to plane
-            Vector3 normal = Vector3.TransformNormal(halfSpace.Normal, halfSpace.RigidBody.Transform);
-            float centerToPlane = Vector3.Dot(normal, sphere.RigidBody.Position) + halfSpace.D;
+            float centerToPlane = Vector3.Dot(normal, sphere.RigidBody.Position) + d;
 
             // Obtain the penetration of the sphere in the plane.
             float penetration = centerToPlane - sphere.Radius;
@@ -136,10 +139,6 @@ namespace Engine.Physics
         /// <returns>Returns true if there has been a collision</returns>
         public static bool HalfSpaceAndCylinder(HalfSpaceCollider halfSpace, CylinderCollider cylinder, ContactResolver data)
         {
-            bool contact = false;
-            Vector3 contactPoint = Vector3.Zero;
-            float penetration = float.MaxValue;
-
             // Set plane as world origin
             var plane = new Plane(Vector3.Up, 0);
             var planeTrn = halfSpace.RigidBody.Transform;
@@ -155,38 +154,36 @@ namespace Engine.Physics
             }
 
             // Transform cylinder to plane space using the plane inverse matrix
-                var invTrn = Matrix.Invert(planeTrn);
+            var invTrn = Matrix.Invert(planeTrn);
             if (!planeTrn.IsIdentity)
             {
                 cylDir = Vector3.TransformNormal(cylDir, invTrn);
                 cylCenter = Vector3.TransformCoordinate(cylCenter, invTrn);
             }
 
-            float cylHeight = cylinder.CapHeight - cylinder.BaseHeight;
-            float hh = cylHeight * 0.5f;
+            float cylR = cylinder.Radius;
+            float cylH = cylinder.CapHeight - cylinder.BaseHeight;
+            float hh = cylH * 0.5f;
+
+            List<(Vector3 point, float penetration)> contacts = new List<(Vector3 point, float penetration)>();
 
             // dir points towards the plane and -dir in the opposite direction
             var dir = Vector3.Cross(plane.Normal, cylDir);
             if (MathUtil.IsZero(dir.Length()))
             {
                 // Perfect base contact. Test base and cap
-
                 var bse = new Vector3(cylCenter.X, cylCenter.Y - hh, cylCenter.Z);
                 float d = Vector3.Dot(plane.Normal, bse) + plane.D;
-                if (d <= 0 && d < penetration)
+                if (d <= 0 || MathUtil.IsZero(d))
                 {
-                    contact = true;
-                    contactPoint = bse;
-                    penetration = d;
+                    contacts.Add((bse, d));
                 }
 
                 var cap = new Vector3(cylCenter.X, cylCenter.Y + hh, cylCenter.Z);
                 d = Vector3.Dot(plane.Normal, cap) + plane.D;
-                if (d <= 0 && d < penetration)
+                if (d <= 0 || MathUtil.IsZero(d))
                 {
-                    contact = true;
-                    contactPoint = cap;
-                    penetration = d;
+                    contacts.Add((cap, d));
                 }
             }
             else
@@ -195,63 +192,54 @@ namespace Engine.Physics
                 var capPosition = cylCenter + (cylDir * hh);
                 var basePosition = cylCenter - (cylDir * hh);
 
-                dir = Vector3.Normalize(Vector3.Cross(dir, cylDir)) * cylinder.Radius;
+                dir = Vector3.Normalize(Vector3.Cross(dir, cylDir)) * cylR;
                 var base1 = basePosition + dir;
                 var base2 = basePosition - dir;
                 var cap1 = capPosition + dir;
                 var cap2 = capPosition - dir;
 
                 float d = Vector3.Dot(plane.Normal, base1) + plane.D;
-                if (d <= 0 && d < penetration)
+                if (d <= 0 || MathUtil.IsZero(d))
                 {
-                    contact = true;
-                    contactPoint = base1;
-                    penetration = d;
+                    contacts.Add((base1, d));
                 }
                 d = Vector3.Dot(plane.Normal, base2) + plane.D;
-                if (d <= 0 && d < penetration)
+                if (d <= 0 || MathUtil.IsZero(d))
                 {
-                    contact = true;
-                    contactPoint = base2;
-                    penetration = d;
+                    contacts.Add((base2, d));
                 }
                 d = Vector3.Dot(plane.Normal, cap1) + plane.D;
-                if (d <= 0 && d < penetration)
+                if (d <= 0 || MathUtil.IsZero(d))
                 {
-                    contact = true;
-                    contactPoint = cap1;
-                    penetration = d;
+                    contacts.Add((cap1, d));
                 }
                 d = Vector3.Dot(plane.Normal, cap2) + plane.D;
-                if (d <= 0 && d < penetration)
+                if (d <= 0 || MathUtil.IsZero(d))
                 {
-                    contact = true;
-                    contactPoint = cap2;
-                    penetration = d;
+                    contacts.Add((cap2, d));
                 }
             }
 
-            if (!contact)
+            if (!contacts.Any())
             {
                 return false;
             }
 
-            var contactNormal = plane.Normal;
-
-            if (!planeTrn.IsIdentity)
+            foreach (var (point, penetration) in contacts)
             {
-                contactPoint = Vector3.TransformCoordinate(contactPoint, planeTrn);
-                contactNormal = Vector3.TransformNormal(plane.Normal, planeTrn);
-            }
+                var contactPoint = point;
+                if (!planeTrn.IsIdentity)
+                {
+                    contactPoint = Vector3.TransformCoordinate(contactPoint, planeTrn);
+                }
 
-            if (!cylTrn.IsIdentity)
-            {
-                var invCylTrn = Matrix.Invert(cylTrn);
-                contactPoint = Vector3.TransformCoordinate(contactPoint, invCylTrn);
-                contactNormal = Vector3.TransformNormal(contactNormal, invCylTrn);
-            }
+                data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, contactPoint, halfSpace.Normal, -penetration);
 
-            data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, contactPoint, contactNormal, -penetration);
+                if (!data.HasFreeContacts())
+                {
+                    break;
+                }
+            }
 
             return true;
         }
@@ -269,14 +257,16 @@ namespace Engine.Physics
                 return false;
             }
 
-            Vector3 normal = Vector3.TransformNormal(halfSpace.Normal, halfSpace.RigidBody.Transform);
+            var plane = halfSpace.GetPlane(true);
+            Vector3 normal = plane.Normal;
+            float d = plane.D;
 
             bool intersectionExists = false;
 
             foreach (var point in points)
             {
                 // Distance to plane
-                float penetration = halfSpace.D + Vector3.Dot(point, normal);
+                float penetration = d + Vector3.Dot(point, normal);
                 if (penetration > 0f && !MathUtil.IsZero(penetration))
                 {
                     continue;

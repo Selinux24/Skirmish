@@ -114,6 +114,12 @@ namespace Physics
             };
 
             floor = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
+
+            var floorTrn = Matrix.RotationYawPitchRoll(0f, -0.2f, 0f);
+            var rbState = new RigidBodyState { Mass = float.PositiveInfinity, InitialTransform = floorTrn };
+            var floorBody = new PhysicsFloor(new RigidBody(rbState), floor);
+
+            simulator.AddPhysicsObject(floorBody);
         }
         private async Task InitializeSpheres()
         {
@@ -130,7 +136,7 @@ namespace Physics
                 CullingVolumeType = CullingVolumeTypes.SphericVolume,
             };
 
-            ColliderData sphere1 = new(15, Matrix.Translation(Vector3.Up * 10f));
+            ColliderData sphere1 = new(20, Matrix.Translation(Vector3.Up * 10f));
             ColliderData sphere2 = new(10, Matrix.Translation(Vector3.Up * 15f));
 
             sphere1.Model = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
@@ -203,11 +209,8 @@ namespace Physics
             cylinder1.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
             cylinder2.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
 
-            cylinder1.Model.Visible = false;
-            cylinder2.Model.Visible = false;
-
-            //colliders.Add(cylinder1)
-            //colliders.Add(cylinder2)
+            colliders.Add(cylinder1);
+            colliders.Add(cylinder2);
         }
         private async Task InitializePyramids()
         {
@@ -250,11 +253,6 @@ namespace Physics
             Camera.LookTo(Vector3.Zero);
             Camera.FarPlaneDistance = 250;
 
-            floor.Manipulator.SetRotation(0f, -0.2f, 0f);
-            var rbState = new RigidBodyState { Mass = float.PositiveInfinity, InitialTransform = floor.Manipulator.FinalTransform };
-            var floorBody = new PhysicsFloor(new RigidBody(rbState), floor);
-            simulator.AddPhysicsObject(floorBody);
-
             colliders.ToList().ForEach(c =>
             {
                 c.Initialize();
@@ -288,8 +286,6 @@ namespace Physics
             UpdateInputBodies();
 
             UpdateStateBodies(gameTime);
-
-            //info.Text = $"{colliders.FirstOrDefault(c => c.Model.Name == "cylinder1")?.Model.Manipulator}"
 
             base.Update(gameTime);
         }
