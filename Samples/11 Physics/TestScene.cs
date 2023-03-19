@@ -20,13 +20,11 @@ namespace Physics
         private UITextArea info = null;
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
 
-        private readonly Simulator simulator = new Simulator() { Velocity = 1f };
+        private readonly Simulator simulator = new() { Velocity = 1f };
         private readonly float bodyTime = 20f;
         private readonly float bodyDistance = floorSize * floorSize;
 
-        private Model floor = null;
-
-        private readonly ConcurrentBag<ColliderData> colliders = new ConcurrentBag<ColliderData>();
+        private readonly ConcurrentBag<ColliderData> colliders = new();
 
         private bool gameReady = false;
 
@@ -113,7 +111,7 @@ namespace Physics
                 Content = ContentDescription.FromContentData(vertices, indices, material),
             };
 
-            floor = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
+            var floor = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
 
             var floorTrn = Matrix.RotationYawPitchRoll(0f, -0.2f, 0f);
             var rbState = new RigidBodyState { Mass = float.PositiveInfinity, InitialTransform = floorTrn };
@@ -318,14 +316,14 @@ namespace Physics
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Vector3 fwd = new Vector3(Camera.Forward.X, 0, Camera.Forward.Z);
+                Vector3 fwd = new(Camera.Forward.X, 0, Camera.Forward.Z);
                 fwd.Normalize();
                 Camera.Move(gameTime, fwd, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Vector3 bwd = new Vector3(Camera.Backward.X, 0, Camera.Backward.Z);
+                Vector3 bwd = new(Camera.Backward.X, 0, Camera.Backward.Z);
                 bwd.Normalize();
                 Camera.Move(gameTime, bwd, Game.Input.ShiftPressed);
             }
