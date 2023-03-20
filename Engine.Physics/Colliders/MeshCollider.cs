@@ -50,7 +50,7 @@ namespace Engine.Physics.Colliders
                 return triangles;
             }
 
-            if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+            if ((RigidBody?.Transform ?? Matrix.Identity).IsIdentity)
             {
                 return triangles;
             }

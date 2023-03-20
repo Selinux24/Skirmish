@@ -44,7 +44,7 @@ namespace Engine.Physics.Colliders
                 return triangle;
             }
 
-            if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+            if ((RigidBody?.Transform ?? Matrix.Identity).IsIdentity)
             {
                 return triangle;
             }

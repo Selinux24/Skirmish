@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.Physics.Colliders
 {
@@ -37,6 +38,46 @@ namespace Engine.Physics.Colliders
             boundingBox = new BoundingBox(-extents, extents);
             boundingSphere = BoundingSphere.FromBox(boundingBox);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
+        }
+
+        /// <summary>
+        /// Gets the four rectangle points, resulting from the cylinder projection on the specified normal
+        /// </summary>
+        /// <param name="normal">Projection normal</param>
+        /// <param name="transform">Use rigid body transform matrix</param>
+        public IEnumerable<Vector3> GetProjectionPoints(Vector3 normal, bool transform = false)
+        {
+            var bse = new Vector3(0, BaseHeight, 0);
+            var cap = new Vector3(0, CapHeight, 0);
+
+            if (!transform)
+            {
+                return new[] { bse, cap };
+            }
+
+            if ((RigidBody?.Transform ?? Matrix.Identity).IsIdentity)
+            {
+                return new[] { bse, cap };
+            }
+
+            var trn = RigidBody.Transform;
+            bse = Vector3.TransformCoordinate(bse, trn);
+            cap = Vector3.TransformCoordinate(cap, trn);
+            var cNorm = Vector3.Normalize(cap - bse);
+            var dir = Vector3.Cross(normal, cNorm);
+
+            if (MathUtil.IsZero(dir.Length()))
+            {
+                return new[] { bse, cap };
+            }
+
+            dir = Vector3.Normalize(Vector3.Cross(dir, cNorm)) * Radius;
+            var bse1 = bse + dir;
+            var bse2 = bse - dir;
+            var cap1 = cap + dir;
+            var cap2 = cap - dir;
+
+            return new[] { bse1, bse2, cap1, cap2 };
         }
 
         /// <inheritdoc/>

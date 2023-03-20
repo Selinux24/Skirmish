@@ -71,6 +71,7 @@ namespace Engine.PhysicsTests
 
         private const float PiOverFourDisplacement = 0.41421354f;
         private const float PiOverFourNormal = 0.7071067f;
+        private static readonly Vector3 PiOverFourPlaneNormal = Vector3.TransformNormal(Vector3.Up, Matrix.RotationX(MathUtil.PiOverFour));
 
         public static IEnumerable<object[]> HalfSpaceAndCylinderTestData
         {
@@ -376,8 +377,8 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -2, 0), Normal = Vector3.Up, Penetration = 2f },
                                 new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 0, 0), Normal = Vector3.Up, Penetration = 0f },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -2, 0), Normal = Vector3.Up, Penetration = 2f },
                             }
                         }
                     },
@@ -390,8 +391,8 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -3, 0), Normal = Vector3.Up, Penetration = 3f },
                                 new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -1, 0), Normal = Vector3.Up, Penetration = 1f },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -3, 0), Normal = Vector3.Up, Penetration = 3f },
                             }
                         }
                     },
@@ -404,8 +405,8 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -6, 0), Normal = Vector3.Up, Penetration = 6f },
                                 new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -4, 0), Normal = Vector3.Up, Penetration = 4f },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -6, 0), Normal = Vector3.Up, Penetration = 6f },
                             }
                         }
                     },
@@ -605,7 +606,7 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 0, 0), Normal = Vector3.Up, Penetration = 0 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 0, 0), Normal = PiOverFourPlaneNormal, Penetration = 0 },
                             }
                         }
                     },
@@ -619,7 +620,7 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal, -PiOverFourNormal), Normal = Vector3.Up, Penetration = 1 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal, -PiOverFourNormal), Normal = PiOverFourPlaneNormal, Penetration = 1 },
                             }
                         }
                     },
@@ -633,8 +634,8 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 2, -PiOverFourNormal * 2), Normal = Vector3.Up, Penetration = 2 },
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 0, 0), Normal = Vector3.Up, Penetration = 0 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 2, -PiOverFourNormal * 2), Normal = PiOverFourPlaneNormal, Penetration = 2 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, 0, 0), Normal = PiOverFourPlaneNormal, Penetration = 0 },
                             }
                         }
                     },
@@ -648,8 +649,8 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 3, -PiOverFourNormal * 3), Normal = Vector3.Up, Penetration = 3 },
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal, -PiOverFourNormal), Normal = Vector3.Up, Penetration = 1 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 3, -PiOverFourNormal * 3), Normal = PiOverFourPlaneNormal, Penetration = 3 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal, -PiOverFourNormal), Normal = PiOverFourPlaneNormal, Penetration = 1 },
                             }
                         }
                     },
@@ -663,8 +664,8 @@ namespace Engine.PhysicsTests
                             IntersectionExpected = true,
                             Contacts = new[]
                             {
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 6, -PiOverFourNormal * 6), Normal = Vector3.Up, Penetration = 6 },
-                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 4, -PiOverFourNormal * 4), Normal = Vector3.Up, Penetration = 4 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 6, -PiOverFourNormal * 6), Normal = PiOverFourPlaneNormal, Penetration = 6 },
+                                new HalfSpaceAndCylinderContactData{ Point = new Vector3(0, -PiOverFourNormal * 4, -PiOverFourNormal * 4), Normal = PiOverFourPlaneNormal, Penetration = 4 },
                             }
                         }
                     },
