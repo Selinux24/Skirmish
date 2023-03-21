@@ -1170,6 +1170,87 @@ namespace Engine.Common
                 Indices = indexList.Select(i => (uint)i).ToArray(),
             };
         }
+        /// <summary>
+        /// Creates a capsule
+        /// </summary>
+        /// <param name="radius">Radius</param>
+        /// <param name="height">Height</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCapsule(float radius, float height, int sliceCount, int stackCount)
+        {
+            return CreateCapsule(Vector3.Zero, radius, height, sliceCount, stackCount);
+        }
+        /// <summary>
+        /// Creates a capsule
+        /// </summary>
+        /// <param name="center">Center</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="height">Height</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCapsule(Vector3 center, float radius, float height, int sliceCount, int stackCount)
+        {
+            List<uint> indexList = new List<uint>();
+            List<Vector3> verts = new List<Vector3>();
+            List<Vector3> norms = new List<Vector3>();
+
+            // Create a hemispheric for each position
+            var hemispheric = CreateHemispheric(Vector3.Zero, radius, sliceCount, stackCount);
+
+            float hh = (height - radius - radius) * 0.5f;
+
+            // Cap
+            indexList.AddRange(hemispheric.Indices);
+            verts.AddRange(hemispheric.Vertices.Select(v => new Vector3(v.X, v.Y + hh, v.Z)));
+            norms.AddRange(hemispheric.Normals);
+
+            // Base
+            // Reverse y coordinate and offset the indices
+            uint offset = (uint)verts.Count;
+            for (uint i = 0; i < hemispheric.Indices.Count(); i += 3)
+            {
+                indexList.Add(hemispheric.Indices.ElementAt((int)i + 0) + offset);
+                indexList.Add(hemispheric.Indices.ElementAt((int)i + 2) + offset);
+                indexList.Add(hemispheric.Indices.ElementAt((int)i + 1) + offset);
+            }
+            verts.AddRange(hemispheric.Vertices.Select(v => new Vector3(v.X, -v.Y - hh, v.Z)));
+            norms.AddRange(hemispheric.Normals.Select(n => new Vector3(n.X, -n.Y, n.Z)));
+
+            if (center != Vector3.Zero)
+            {
+                verts.ForEach(v => v += center);
+            }
+
+            uint capCylinderOffset = offset - (uint)sliceCount;
+            uint bseCylinderOffset = (uint)verts.Count - (uint)sliceCount;
+
+            // Add the side faces
+            for (uint i = 0; i < sliceCount; i++)
+            {
+                uint p0 = i;
+                uint p1 = (i + 1) % (uint)sliceCount;
+
+                indexList.AddRange(new[]
+                {
+                    // Side
+                    p0 + bseCylinderOffset, p0 + capCylinderOffset, p1 + bseCylinderOffset,
+                    p1 + bseCylinderOffset, p0 + capCylinderOffset, p1 + capCylinderOffset,
+                });
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = verts,
+                Normals = norms,
+                Tangents = null,
+                Binormals = null,
+                Uvs = null,
+                Indices = indexList,
+            };
+        }
 
         /// <summary>
         /// Creates a XZ plane

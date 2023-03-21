@@ -30,7 +30,7 @@ namespace Engine.Physics
         {
             get
             {
-                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                if (!HasTransform)
                 {
                     return Vector3.Zero;
                 }
@@ -43,7 +43,7 @@ namespace Engine.Physics
         {
             get
             {
-                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                if (!HasTransform)
                 {
                     return Matrix.Identity;
                 }
@@ -56,13 +56,20 @@ namespace Engine.Physics
         {
             get
             {
-                var trn = RotationScale;
-                if (trn.IsIdentity)
+                if (!HasTransform)
                 {
                     return Matrix.Identity;
                 }
 
                 return Matrix.Invert(RotationScale);
+            }
+        }
+        /// <inheritdoc/>
+        public bool HasTransform
+        {
+            get
+            {
+                return !(RigidBody?.Transform ?? Matrix.Identity).IsIdentity;
             }
         }
 
@@ -78,7 +85,7 @@ namespace Engine.Physics
                     return boundingBox;
                 }
 
-                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                if (!HasTransform)
                 {
                     return boundingBox;
                 }
@@ -96,7 +103,7 @@ namespace Engine.Physics
                     return boundingSphere;
                 }
 
-                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                if (!HasTransform)
                 {
                     return boundingSphere;
                 }
@@ -114,7 +121,7 @@ namespace Engine.Physics
                     return orientedBoundingBox;
                 }
 
-                if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+                if (!HasTransform)
                 {
                     return orientedBoundingBox;
                 }

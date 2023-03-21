@@ -27,6 +27,10 @@ namespace Engine.Physics
         /// Inverse rotation/scale component of model matrix
         /// </summary>
         Matrix RotationScaleInverse { get; }
+        /// <summary>
+        /// Gets whether the collider has transform or not
+        /// </summary>
+        bool HasTransform { get; }
 
         /// <summary>
         /// Bounding sphere

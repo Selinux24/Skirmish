@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.Physics.Colliders
 {
@@ -24,13 +25,40 @@ namespace Engine.Physics.Colliders
         /// Constructor
         /// </summary>
         /// <param name="radius">Radius</param>
-        /// <param name="baseHeight">Base height</param>
-        /// <param name="capHeight">Cap height</param>
-        public CapsuleCollider(float radius, float baseHeight, float capHeight) : base()
+        /// <param name="height">Height</param>
+        public CapsuleCollider(float radius, float height) : base()
         {
             Radius = radius;
-            BaseHeight = baseHeight;
-            CapHeight = capHeight;
+
+            float hh = (height - (radius * 2f)) * 0.5f;
+            BaseHeight = -hh;
+            CapHeight = hh;
+
+            var extents = new Vector3(radius, height * 0.5f, radius);
+            boundingBox = new BoundingBox(-extents, extents);
+            boundingSphere = BoundingSphere.FromBox(boundingBox);
+            orientedBoundingBox = new OrientedBoundingBox(boundingBox);
+        }
+
+        /// <summary>
+        /// Gets the capsule axis segment points
+        /// </summary>
+        /// <param name="transform">Use rigid body transform matrix</param>
+        public IEnumerable<Vector3> GetPoints(bool transform = false)
+        {
+            var bse = new Vector3(0, BaseHeight, 0);
+            var cap = new Vector3(0, CapHeight, 0);
+
+            if (!transform || !HasTransform)
+            {
+                return new[] { bse, cap };
+            }
+
+            var trn = RigidBody.Transform;
+            bse = Vector3.TransformCoordinate(bse, trn);
+            cap = Vector3.TransformCoordinate(cap, trn);
+
+            return new[] { bse, cap };
         }
 
         /// <inheritdoc/>

@@ -1,5 +1,7 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Engine
 {
@@ -62,6 +64,19 @@ namespace Engine
             Point1 = point1;
             Point2 = point2;
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Segment(IEnumerable<Vector3> points)
+        {
+            if (points?.Count() != 2)
+            {
+                throw new ArgumentOutOfRangeException(nameof(points), "A segment must contains two defined points.");
+            }
+
+            Point1 = points.ElementAt(0);
+            Point2 = points.ElementAt(1);
+        }
 
         /// <inheritdoc/>
         public static bool operator ==(Segment left, Segment right)
@@ -81,7 +96,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is Segment))
+            if (obj is not Segment)
             {
                 return false;
             }

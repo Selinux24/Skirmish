@@ -50,12 +50,7 @@ namespace Engine.Physics.Colliders
             var bse = new Vector3(0, BaseHeight, 0);
             var cap = new Vector3(0, CapHeight, 0);
 
-            if (!transform)
-            {
-                return new[] { bse, cap };
-            }
-
-            if ((RigidBody?.Transform ?? Matrix.Identity).IsIdentity)
+            if (!transform || !HasTransform)
             {
                 return new[] { bse, cap };
             }

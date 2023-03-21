@@ -9,7 +9,7 @@ namespace Engine.Common
     /// Intersections
     /// </summary>
     /// <remarks>
-    /// Many of this code was extracted from Christer Ericson's book Real-Time Collision Detection, and refactored in several iterations.
+    /// Many of this code was extracted from Christer Ericson's book Real-Time Collision Detection, and refactorized in several iterations.
     /// </remarks>
     public static class Intersection
     {
@@ -434,6 +434,24 @@ namespace Engine.Common
 
             return false;
         }
+        /// <summary>
+        /// Determines whether a capsule intersects with a plane
+        /// </summary>
+        /// <param name="capsule">Axis aligned capsule</param>
+        /// <param name="plane">Plane</param>
+        /// <returns>Returns true if the capsule intersects the plane</returns>
+        public static bool CapsuleIntersectsPlane(BoundingCapsule capsule, Plane plane)
+        {
+            var p1 = capsule.BasePosition;
+            float d = Collision.DistancePlanePoint(ref plane, ref p1);
+            if (d <= capsule.Radius) return true;
+
+            var p2 = capsule.BasePosition;
+            d = Collision.DistancePlanePoint(ref plane, ref p2);
+            if (d <= capsule.Radius) return true;
+
+            return false;
+        }
 
         /// <summary>
         /// Determines whether a frustum intersects with a frustum
@@ -834,6 +852,49 @@ namespace Engine.Common
         {
             var dir = Vector3.Normalize(point2 - point1);
             return ClosestPointInRay(new Ray(point1, dir), point, out distance);
+        }
+        /// <summary>
+        /// Gets the closest point in a segment from a specified point
+        /// </summary>
+        /// <param name="point1">First segment point</param>
+        /// <param name="point2">Second segment point</param>
+        /// <param name="point">Point</param>
+        /// <param name="distance">Distance</param>
+        /// <returns>Returns the resulting minimum distance from point to segment</returns>
+        public static Vector3 ClosestPointInSegment(Vector3 point1, Vector3 point2, Vector3 point, out float distance)
+        {
+            var ab = point2 - point1;
+
+            // Project point onto segment
+            distance = Vector3.Dot(point - point1, ab);
+            if (distance <= 0.0f)
+            {
+                // point projects outside the segment on the point1 side
+                distance = -distance;
+                return point1;
+            }
+
+            float denom = Vector3.Dot(ab, ab);
+            if (distance >= denom)
+            {
+                // point projects outside the segment on the point2 side
+                return point2;
+            }
+
+            // point projects inside the segment
+            distance /= denom;
+            return point1 + distance * ab;
+        }
+        /// <summary>
+        /// Gets the closest point in a segment from a specified point
+        /// </summary>
+        /// <param name="segment">Segment</param>
+        /// <param name="point">Point</param>
+        /// <param name="distance">Distance</param>
+        /// <returns>Returns the resulting minimum distance from point to segment</returns>
+        public static Vector3 ClosestPointInSegment(Segment segment, Vector3 point, out float distance)
+        {
+            return ClosestPointInSegment(segment.Point1, segment.Point2, point, out distance);
         }
 
         /// <summary>

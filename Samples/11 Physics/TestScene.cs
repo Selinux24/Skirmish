@@ -52,6 +52,7 @@ namespace Physics
                     InitializeBoxes(),
                     InitializeCylinders(),
                     InitializePyramids(),
+                    InitializeCapsules(),
                 },
                 InitializeComponentsCompleted);
         }
@@ -209,6 +210,40 @@ namespace Physics
 
             colliders.Add(cylinder1);
             colliders.Add(cylinder2);
+        }
+        private async Task InitializeCapsules()
+        {
+            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color3.White;
+
+            float radius = 2f;
+            float height = 4f;
+            Vector3 center = Vector3.Zero;
+            int sliceCount = 8;
+            int stackCount = 16;
+
+            var capsule = GeometryUtil.CreateCapsule(center, radius, height + radius + radius, sliceCount, stackCount);
+
+            var desc = new ModelDescription()
+            {
+                Content = ContentDescription.FromContentData(capsule, mat),
+                CullingVolumeType = CullingVolumeTypes.CapsuleVolume,
+            };
+
+            ColliderData capsule1 = new(15, Matrix.Translation(Vector3.Up * 40f));
+            ColliderData capsule2 = new(10, Matrix.Translation(Vector3.Up * 45f));
+
+            capsule1.Model = await AddComponent<Model, ModelDescription>("capsule1", "capsule1", desc);
+            capsule2.Model = await AddComponent<Model, ModelDescription>("capsule2", "capsule2", desc);
+
+            capsule1.Model.TintColor = Color4.AdjustSaturation(Color.Orchid, 20f);
+            capsule2.Model.TintColor = Color4.AdjustSaturation(Color.AliceBlue, 20f);
+
+            capsule1.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
+            capsule2.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
+
+            colliders.Add(capsule1);
+            colliders.Add(capsule2);
         }
         private async Task InitializePyramids()
         {

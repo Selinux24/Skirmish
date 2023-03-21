@@ -79,6 +79,11 @@ namespace Engine.Physics
                 return HalfSpaceAndSphere(halfSpace, sphere, data);
             }
 
+            if (primitive is CapsuleCollider capsule)
+            {
+                return HalfSpaceAndCapsule(halfSpace, capsule, data);
+            }
+
             if (primitive is CylinderCollider cylinder)
             {
                 return HalfSpaceAndCylinder(halfSpace, cylinder, data);
@@ -158,6 +163,44 @@ namespace Engine.Physics
                 intersectionExists = true;
 
                 data.AddContact(cylinder.RigidBody, halfSpace.RigidBody, point, normal, -penetration);
+                if (!data.HasFreeContacts())
+                {
+                    break;
+                }
+            }
+
+            return intersectionExists;
+        }
+        /// <summary>
+        /// Detects the collision between a capsule and a half space
+        /// </summary>
+        /// <param name="halfSpace">Half space</param>
+        /// <param name="capsule">Capsule</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool HalfSpaceAndCapsule(HalfSpaceCollider halfSpace, CapsuleCollider capsule, ContactResolver data)
+        {
+            var plane = halfSpace.GetPlane(true);
+            Vector3 normal = plane.Normal;
+
+            var points = capsule.GetPoints(true);
+
+            bool intersectionExists = false;
+
+            foreach (var point in points)
+            {
+                var p = point;
+                float d = Collision.DistancePlanePoint(ref plane, ref p);
+                if (d > capsule.Radius)
+                {
+                    continue;
+                }
+
+                intersectionExists = true;
+
+                var contactPoint = p - (normal * capsule.Radius);
+                float penetration = capsule.Radius - d;
+                data.AddContact(capsule.RigidBody, halfSpace.RigidBody, contactPoint, normal, penetration);
                 if (!data.HasFreeContacts())
                 {
                     break;

@@ -44,12 +44,7 @@ namespace Engine.Physics.Colliders
         /// <param name="transform">Use rigid body transform matrix</param>
         public Plane GetPlane(bool transform = false)
         {
-            if (!transform)
-            {
-                return Plane;
-            }
-
-            if ((RigidBody?.Transform ?? Matrix.Identity).IsIdentity)
+            if (!transform || !HasTransform)
             {
                 return Plane;
             }

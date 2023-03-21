@@ -82,5 +82,9 @@ namespace Engine
         /// Cylinder volume
         /// </summary>
         CylinderVolume = 3,
+        /// <summary>
+        /// Capsule volume
+        /// </summary>
+        CapsuleVolume = 4,
     }
 }

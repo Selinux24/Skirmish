@@ -37,6 +37,13 @@ namespace Physics
             return new CylinderCollider(extents.X, extents.Y * 2);
         }
 
+        private static CapsuleCollider CollisionCapsuleFromModel(Model model)
+        {
+            var extents = model.GetBoundingBox(true).GetExtents();
+
+            return new CapsuleCollider(extents.X, extents.Y * 2);
+        }
+
         public PhysicsObject(IRigidBody body, Model model)
         {
             Body = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
@@ -47,6 +54,7 @@ namespace Physics
                 CullingVolumeTypes.None => CollisionTriangleSoupFromModel(model),
                 CullingVolumeTypes.BoxVolume => CollisionBoxFromModel(model),
                 CullingVolumeTypes.CylinderVolume => CollisionCylinderFromModel(model),
+                CullingVolumeTypes.CapsuleVolume => CollisionCapsuleFromModel(model),
                 _ => CollisionSphereFromModel(model),
             };
             Collider.Attach(body);

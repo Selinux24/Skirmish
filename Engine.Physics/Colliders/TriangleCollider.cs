@@ -39,12 +39,7 @@ namespace Engine.Physics.Colliders
         /// <param name="transform">Use rigid body transform matrix</param>
         public Triangle GetTriangle(bool transform = false)
         {
-            if (!transform)
-            {
-                return triangle;
-            }
-
-            if ((RigidBody?.Transform ?? Matrix.Identity).IsIdentity)
+            if (!transform || !HasTransform)
             {
                 return triangle;
             }
@@ -57,12 +52,7 @@ namespace Engine.Physics.Colliders
         /// <param name="transform">Use rigid body transform matrix</param>
         public IEnumerable<Vector3> GetVertices(bool transform = false)
         {
-            if (!transform)
-            {
-                return vertices;
-            }
-
-            if ((RigidBody?.Transform ?? Matrix.Identity) == Matrix.Identity)
+            if (!transform || !HasTransform)
             {
                 return vertices;
             }
