@@ -306,25 +306,47 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int stackCount)
         {
-            List<Line3D> resultList = new List<Line3D>();
-
             var verts = cylinder.GetVertices(stackCount).ToArray();
+
+            List<Line3D> resultList = new List<Line3D>();
 
             for (int i = 0; i < stackCount; i++)
             {
-                if (i == stackCount - 1)
-                {
-                    resultList.Add(new Line3D(verts[i], verts[0]));
-                    resultList.Add(new Line3D(verts[i + stackCount], verts[0 + stackCount]));
+                int i0 = i;
+                int i1 = (i + 1) % stackCount;
 
-                    resultList.Add(new Line3D(verts[i], verts[i + stackCount]));
-                }
-                else
-                {
-                    resultList.Add(new Line3D(verts[i], verts[i + 1]));
-                    resultList.Add(new Line3D(verts[i + stackCount], verts[i + 1 + stackCount]));
+                resultList.Add(new Line3D(verts[i0], verts[i1]));
+                resultList.Add(new Line3D(verts[i0 + stackCount], verts[i1 + stackCount]));
 
-                    resultList.Add(new Line3D(verts[i], verts[i + stackCount]));
+                resultList.Add(new Line3D(verts[i0], verts[i0 + stackCount]));
+            }
+
+            return resultList;
+        }
+        public static IEnumerable<Line3D> CreateWiredCapsule(float radius, float height, int sliceCount, int stackCount)
+        {
+            return CreateWiredCapsule(Vector3.Zero, radius, height, sliceCount, stackCount);
+        }
+        public static IEnumerable<Line3D> CreateWiredCapsule(Vector3 center, float radius, float height, int sliceCount, int stackCount)
+        {
+            return CreateWiredCapsule(new BoundingCapsule(center, radius, height), sliceCount, stackCount);
+        }
+        public static IEnumerable<Line3D> CreateWiredCapsule(BoundingCapsule capsule, int sliceCount, int stackCount)
+        {
+            var verts = capsule.GetVertices(sliceCount, stackCount).ToArray();
+
+            List<Line3D> resultList = new List<Line3D>();
+
+            var count = verts.Length / sliceCount;
+
+            for (int r = 0; r < count; r++)
+            {
+                for (int i = 0; i < sliceCount; i++)
+                {
+                    int i0 = (sliceCount * r) + i;
+                    int i1 = (sliceCount * r) + ((i + 1) % sliceCount);
+
+                    resultList.Add(new Line3D(verts[i0], verts[i1]));
                 }
             }
 
@@ -527,7 +549,6 @@ namespace Engine
 
             return lines;
         }
-
         private static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<int> indices)
         {
             List<Line3D> lines = new List<Line3D>();

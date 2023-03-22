@@ -1,5 +1,4 @@
-﻿/// <returns>Returns a geometry descriptor</returns>
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -1107,20 +1106,23 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCylinder(Vector3 center, float radius, float height, int stackCount)
         {
-            return CreateCylinder(new BoundingCylinder(center, radius, height), stackCount);
-        }
-        /// <summary>
-        /// Creates a cylinder
-        /// </summary>
-        /// <param name="cylinder">Bounding cylinder</param>
-        /// <param name="stackCount">Stack count</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(BoundingCylinder cylinder, int stackCount)
-        {
             List<int> indexList = new List<int>();
+            List<Vector3> verts = new List<Vector3>();
 
-            List<Vector3> verts = new List<Vector3>(cylinder.GetVertices(stackCount));
-            verts.AddRange(new[] { cylinder.BasePosition, cylinder.CapPosition });
+            var bsePosition = new Vector3(center.X, center.Y - (height * 0.5f), center.Z);
+            var capPosition = new Vector3(center.X, center.Y + (height * 0.5f), center.Z);
+
+            for (int i = 0; i < 2; i++)
+            {
+                for (int j = 0; j < stackCount; j++)
+                {
+                    float theta = (j / (float)stackCount) * 2 * (float)Math.PI;
+                    float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
+
+                    verts.Add(bsePosition + new Vector3(radius * st, height * i, radius * ct));
+                }
+            }
+            verts.AddRange(new[] { bsePosition, capPosition });
 
             int cBase = verts.Count - 2;
             int cCap = verts.Count - 1;
@@ -1169,6 +1171,16 @@ namespace Engine.Common
                 Uvs = null,
                 Indices = indexList.Select(i => (uint)i).ToArray(),
             };
+        }
+        /// <summary>
+        /// Creates a cylinder
+        /// </summary>
+        /// <param name="cylinder">Bounding cylinder</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCylinder(BoundingCylinder cylinder, int stackCount)
+        {
+            return CreateCylinder(cylinder.Center, cylinder.Radius, cylinder.Height, stackCount);
         }
         /// <summary>
         /// Creates a capsule
@@ -1221,7 +1233,7 @@ namespace Engine.Common
 
             if (center != Vector3.Zero)
             {
-                verts.ForEach(v => v += center);
+                verts = verts.Select(v => v + center).ToList();
             }
 
             uint capCylinderOffset = offset - (uint)sliceCount;
@@ -1250,6 +1262,17 @@ namespace Engine.Common
                 Uvs = null,
                 Indices = indexList,
             };
+        }
+        /// <summary>
+        /// Creates a capsule
+        /// </summary>
+        /// <param name="capsule">Axis aligned bounding capsule</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateCapsule(BoundingCapsule capsule, int sliceCount, int stackCount)
+        {
+            return CreateCapsule(capsule.Center, capsule.Radius, capsule.Height, sliceCount, stackCount);
         }
 
         /// <summary>
@@ -1493,58 +1516,48 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Generates a bounding box from a vertex list item list
+        /// Generates a bounding box from a vertex item list
         /// </summary>
-        /// <param name="vertexListItems">Vertex list item list</param>
-        /// <returns>Returns the minimum bounding box that contains all the specified vertex list item list</returns>
+        /// <param name="vertexListItems">Vertex item list</param>
+        /// <returns>Returns the minimum bounding box that contains all the specified vertex item list</returns>
         public static BoundingBox CreateBoundingBox<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
-            var bbox = new BoundingBox();
-            bool initialized = false;
+            var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            foreach (var item in vertexListItems)
-            {
-                var tbox = BoundingBox.FromPoints(item.GetVertices().ToArray());
-
-                if (!initialized)
-                {
-                    bbox = tbox;
-                    initialized = true;
-                }
-                else
-                {
-                    bbox = BoundingBox.Merge(bbox, tbox);
-                }
-            }
-
-            return bbox;
+            return BoundingBox.FromPoints(points);
         }
         /// <summary>
-        /// Generates a bounding sphere from a vertex list item list
+        /// Generates a bounding sphere from a vertex item list
         /// </summary>
-        /// <param name="vertexListItems">Vertex list item list</param>
-        /// <returns>Returns the minimum bounding sphere that contains all the specified vertex list item list</returns>
+        /// <param name="vertexListItems">Vertex item list</param>
+        /// <returns>Returns the minimum bounding sphere that contains all the specified vertex item list</returns>
         public static BoundingSphere CreateBoundingSphere<T>(IEnumerable<T> vertexListItems) where T : IVertexList
         {
-            BoundingSphere bsph = new BoundingSphere();
-            bool initialized = false;
+            var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            foreach (var vertexItem in vertexListItems)
-            {
-                BoundingSphere tsph = BoundingSphere.FromPoints(vertexItem.GetVertices().ToArray());
+            return BoundingSphere.FromPoints(points);
+        }
+        /// <summary>
+        /// Generates a bounding cylinder from a vertex item list
+        /// </summary>
+        /// <param name="vertexListItems">Vertex item list</param>
+        /// <returns>Returns the minimum bounding cylinder that contains all the specified vertex item list</returns>
+        public static BoundingCylinder CreateBoundingCylinder<T>(IEnumerable<T> vertexListItems) where T : IVertexList
+        {
+            var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-                if (!initialized)
-                {
-                    bsph = tsph;
-                    initialized = true;
-                }
-                else
-                {
-                    bsph = BoundingSphere.Merge(bsph, tsph);
-                }
-            }
+            return BoundingCylinder.FromPoints(points);
+        }
+        /// <summary>
+        /// Generates a bounding capsule from a vertex item list
+        /// </summary>
+        /// <param name="vertexListItems">Vertex item list</param>
+        /// <returns>Returns the minimum bounding capsule that contains all the specified vertex item list</returns>
+        public static BoundingCapsule CreateBoundingCapsule<T>(IEnumerable<T> vertexListItems) where T : IVertexList
+        {
+            var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return bsph;
+            return BoundingCapsule.FromPoints(points);
         }
 
         /// <summary>

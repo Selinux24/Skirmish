@@ -239,8 +239,8 @@ namespace Physics
             capsule1.Model.TintColor = Color4.AdjustSaturation(Color.Orchid, 20f);
             capsule2.Model.TintColor = Color4.AdjustSaturation(Color.AliceBlue, 20f);
 
-            capsule1.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
-            capsule2.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
+            capsule1.Lines = Line3D.CreateWiredCapsule(center, radius, height, sliceCount, stackCount);
+            capsule2.Lines = Line3D.CreateWiredCapsule(center, radius, height, sliceCount, stackCount);
 
             colliders.Add(capsule1);
             colliders.Add(capsule2);

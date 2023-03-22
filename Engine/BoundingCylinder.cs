@@ -161,26 +161,13 @@ namespace Engine
         /// <summary>
         /// Gets the cylinder vertices
         /// </summary>
-        /// <param name="segments">Vertical segments</param>
+        /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a point array of vertices</returns>
-        public IEnumerable<Vector3> GetVertices(int segments)
+        public IEnumerable<Vector3> GetVertices(int stackCount)
         {
-            List<Vector3> verts = new List<Vector3>();
+            var geom = GeometryUtil.CreateCylinder(Center, Radius, Height, stackCount);
 
-            var p = BasePosition;
-
-            for (int i = 0; i < 2; i++)
-            {
-                for (int j = 0; j < segments; j++)
-                {
-                    float theta = (j / (float)segments) * 2 * (float)Math.PI;
-                    float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
-
-                    verts.Add(p + new Vector3(Radius * st, Height * i, Radius * ct));
-                }
-            }
-
-            return verts.ToArray();
+            return geom.Vertices.ToArray();
         }
 
         /// <inheritdoc/>

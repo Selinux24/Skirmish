@@ -147,9 +147,11 @@ namespace Engine
         /// Gets the capsule segment vertices
         /// </summary>
         /// <returns>Returns a two point array of vertices, representing the capsule axis segment</returns>
-        public IEnumerable<Vector3> GetVertices()
+        public IEnumerable<Vector3> GetVertices(int sliceCount, int stackCount)
         {
-            return new[] { BasePosition, CapPosition };
+            var geom = GeometryUtil.CreateCapsule(Center, Radius, Height, sliceCount, stackCount);
+
+            return geom.Vertices.ToArray();
         }
 
         /// <inheritdoc/>

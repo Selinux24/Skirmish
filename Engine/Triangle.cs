@@ -187,86 +187,9 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingBox bbox)
         {
-            List<Triangle> triangleList = new List<Triangle>();
+            var geom = GeometryUtil.CreateBox(bbox);
 
-            if (topology == Topology.TriangleList)
-            {
-                var v = new Vector3[24];
-
-                float xm = bbox.Minimum.X;
-                float ym = bbox.Minimum.Y;
-                float zm = bbox.Minimum.Z;
-
-                float xM = bbox.Maximum.X;
-                float yM = bbox.Maximum.Y;
-                float zM = bbox.Maximum.Z;
-
-                // Fill in the front face vertex data.
-                v[0] = new Vector3(xm, ym, zm);
-                v[1] = new Vector3(xm, yM, zm);
-                v[2] = new Vector3(xM, yM, zm);
-                v[3] = new Vector3(xM, ym, zm);
-
-                // Fill in the back face vertex data.
-                v[4] = new Vector3(xm, ym, zM);
-                v[5] = new Vector3(xM, ym, zM);
-                v[6] = new Vector3(xM, yM, zM);
-                v[7] = new Vector3(xm, yM, zM);
-
-                // Fill in the top face vertex data.
-                v[8] = new Vector3(xm, yM, zm);
-                v[9] = new Vector3(xm, yM, zM);
-                v[10] = new Vector3(xM, yM, zM);
-                v[11] = new Vector3(xM, yM, zm);
-
-                // Fill in the bottom face vertex data.
-                v[12] = new Vector3(xm, ym, zm);
-                v[13] = new Vector3(xM, ym, zm);
-                v[14] = new Vector3(xM, ym, zM);
-                v[15] = new Vector3(xm, ym, zM);
-
-                // Fill in the left face vertex data.
-                v[16] = new Vector3(xm, ym, zM);
-                v[17] = new Vector3(xm, yM, zM);
-                v[18] = new Vector3(xm, yM, zm);
-                v[19] = new Vector3(xm, ym, zm);
-
-                // Fill in the right face vertex data.
-                v[20] = new Vector3(xM, ym, zm);
-                v[21] = new Vector3(xM, yM, zm);
-                v[22] = new Vector3(xM, yM, zM);
-                v[23] = new Vector3(xM, ym, zM);
-
-                // Fill in the front face index data
-                triangleList.Add(new Triangle(v[0], v[1], v[2]));
-                triangleList.Add(new Triangle(v[0], v[2], v[3]));
-
-                // Fill in the back face index data
-                triangleList.Add(new Triangle(v[4], v[5], v[6]));
-                triangleList.Add(new Triangle(v[4], v[6], v[7]));
-
-                // Fill in the top face index data
-                triangleList.Add(new Triangle(v[8], v[9], v[10]));
-                triangleList.Add(new Triangle(v[8], v[10], v[11]));
-
-                // Fill in the bottom face index data
-                triangleList.Add(new Triangle(v[12], v[13], v[14]));
-                triangleList.Add(new Triangle(v[12], v[14], v[15]));
-
-                // Fill in the left face index data
-                triangleList.Add(new Triangle(v[16], v[17], v[18]));
-                triangleList.Add(new Triangle(v[16], v[18], v[19]));
-
-                // Fill in the right face index data
-                triangleList.Add(new Triangle(v[20], v[21], v[22]));
-                triangleList.Add(new Triangle(v[20], v[22], v[23]));
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-
-            return triangleList.ToArray();
+            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from OBB
@@ -276,42 +199,9 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, OrientedBoundingBox obb)
         {
-            List<Triangle> triangleList = new List<Triangle>();
+            var geom = GeometryUtil.CreateBox(obb);
 
-            if (topology == Topology.TriangleList)
-            {
-                Vector3[] v = obb.GetVertices().ToArray();
-
-                // Fill in the front face index data
-                triangleList.Add(new Triangle(v[0], v[1], v[2]));
-                triangleList.Add(new Triangle(v[0], v[2], v[3]));
-
-                // Fill in the back face index data
-                triangleList.Add(new Triangle(v[4], v[6], v[5]));
-                triangleList.Add(new Triangle(v[4], v[7], v[6]));
-
-                // Fill in the top face index data
-                triangleList.Add(new Triangle(v[0], v[3], v[7]));
-                triangleList.Add(new Triangle(v[0], v[7], v[4]));
-
-                // Fill in the bottom face index data
-                triangleList.Add(new Triangle(v[1], v[6], v[2]));
-                triangleList.Add(new Triangle(v[1], v[5], v[6]));
-
-                // Fill in the left face index data
-                triangleList.Add(new Triangle(v[3], v[2], v[6]));
-                triangleList.Add(new Triangle(v[3], v[6], v[7]));
-
-                // Fill in the right face index data
-                triangleList.Add(new Triangle(v[0], v[5], v[1]));
-                triangleList.Add(new Triangle(v[0], v[4], v[5]));
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-
-            return triangleList.ToArray();
+            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from sphere
@@ -321,127 +211,38 @@ namespace Engine
         /// <param name="sliceCount">Slices</param>
         /// <param name="stackCount">Stacks</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingSphere sph, uint sliceCount, uint stackCount)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingSphere sph, int sliceCount, int stackCount)
         {
-            List<Vector3> vertList = new List<Vector3>();
+            var geom = GeometryUtil.CreateSphere(sph, sliceCount, stackCount);
 
-            sliceCount--;
-            stackCount++;
-
-            #region Positions
-
-            //North pole
-            vertList.Add(new Vector3(0.0f, sph.Radius, 0.0f) + sph.Center);
-
-            float phiStep = MathUtil.Pi / stackCount;
-            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
-
-            for (int st = 1; st <= stackCount - 1; ++st)
-            {
-                float phi = st * phiStep;
-
-                for (int sl = 0; sl <= sliceCount; ++sl)
-                {
-                    float theta = sl * thetaStep;
-
-                    float x = (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    float y = (float)Math.Cos(phi);
-                    float z = (float)Math.Sin(phi) * (float)Math.Sin(theta);
-
-                    Vector3 position = sph.Radius * new Vector3(x, y, z);
-
-                    vertList.Add(position + sph.Center);
-                }
-            }
-
-            //South pole
-            vertList.Add(new Vector3(0.0f, -sph.Radius, 0.0f) + sph.Center);
-
-            #endregion
-
-            List<uint> indexList = new List<uint>();
-
-            #region Indexes
-
-            for (uint index = 1; index <= sliceCount; ++index)
-            {
-                indexList.Add(0);
-                indexList.Add(index + 1);
-                indexList.Add(index);
-            }
-
-            uint baseIndex = 1;
-            uint ringVertexCount = sliceCount + 1;
-            for (uint st = 0; st < stackCount - 2; ++st)
-            {
-                for (uint sl = 0; sl < sliceCount; ++sl)
-                {
-                    indexList.Add(baseIndex + st * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
-                }
-            }
-
-            uint southPoleIndex = (uint)vertList.Count - 1;
-
-            baseIndex = southPoleIndex - ringVertexCount;
-
-            for (uint index = 0; index < sliceCount; ++index)
-            {
-                indexList.Add(southPoleIndex);
-                indexList.Add(baseIndex + index);
-                indexList.Add(baseIndex + index + 1);
-            }
-
-            #endregion
-
-            return ComputeTriangleList(topology, vertList, indexList);
+            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from cylinder
         /// </summary>
         /// <param name="topology">Topology</param>
         /// <param name="cylinder">Cylinder</param>
-        /// <param name="segments">Number of segments</param>
+        /// <param name="stackCount">Stack count</param>
         /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCylinder cylinder, int segments)
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCylinder cylinder, int stackCount)
         {
-            List<Triangle> triangleList = new List<Triangle>();
+            var geom = GeometryUtil.CreateCylinder(cylinder, stackCount);
 
-            if (topology == Topology.TriangleList)
-            {
-                var verts = cylinder.GetVertices(segments).ToArray();
+            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
+        }
+        /// <summary>
+        /// Generate a triangle list from capsule
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="capsule">Capsule</param>
+        /// <param name="sliceCount">Slices</param>
+        /// <param name="stackCount">Stacks</param>
+        /// <returns>Returns the triangle list</returns>
+        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCapsule capsule, int sliceCount, int stackCount)
+        {
+            var geom = GeometryUtil.CreateCapsule(capsule, sliceCount, stackCount);
 
-                for (int i = 0; i < segments - 2; i++)
-                {
-                    triangleList.Add(new Triangle(verts[0], verts[i + 2], verts[i + 1]));
-                    triangleList.Add(new Triangle(verts[0 + segments], verts[i + 1 + segments], verts[i + 2 + segments]));
-                }
-
-                for (int i = 0; i < segments; i++)
-                {
-                    if (i == segments - 1)
-                    {
-                        triangleList.Add(new Triangle(verts[i], verts[0], verts[i + segments]));
-                        triangleList.Add(new Triangle(verts[0], verts[0 + segments], verts[i + segments]));
-                    }
-                    else
-                    {
-                        triangleList.Add(new Triangle(verts[i], verts[i + 1], verts[i + segments]));
-                        triangleList.Add(new Triangle(verts[i + 1], verts[i + 1 + segments], verts[i + segments]));
-                    }
-                }
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-
-            return triangleList.ToArray();
+            return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
         /// <summary>
         /// Generate a triangle list from polygon
