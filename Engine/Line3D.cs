@@ -296,29 +296,29 @@ namespace Engine
 
             return CreateFromVertices(vertList, indexList);
         }
-        public static IEnumerable<Line3D> CreateWiredCylinder(float radius, float height, int stackCount)
+        public static IEnumerable<Line3D> CreateWiredCylinder(float radius, float height, int sliceCount)
         {
-            return CreateWiredCylinder(new BoundingCylinder(Vector3.Zero, radius, height), stackCount);
+            return CreateWiredCylinder(new BoundingCylinder(Vector3.Zero, radius, height), sliceCount);
         }
-        public static IEnumerable<Line3D> CreateWiredCylinder(Vector3 center, float radius, float height, int stackCount)
+        public static IEnumerable<Line3D> CreateWiredCylinder(Vector3 center, float radius, float height, int sliceCount)
         {
-            return CreateWiredCylinder(new BoundingCylinder(center, radius, height), stackCount);
+            return CreateWiredCylinder(new BoundingCylinder(center, radius, height), sliceCount);
         }
-        public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int stackCount)
+        public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int sliceCount)
         {
-            var verts = cylinder.GetVertices(stackCount).ToArray();
+            var verts = cylinder.GetVertices(sliceCount).ToArray();
 
             List<Line3D> resultList = new List<Line3D>();
 
-            for (int i = 0; i < stackCount; i++)
+            for (int i = 0; i < sliceCount; i++)
             {
                 int i0 = i;
-                int i1 = (i + 1) % stackCount;
+                int i1 = (i + 1) % sliceCount;
 
                 resultList.Add(new Line3D(verts[i0], verts[i1]));
-                resultList.Add(new Line3D(verts[i0 + stackCount], verts[i1 + stackCount]));
+                resultList.Add(new Line3D(verts[i0 + sliceCount], verts[i1 + sliceCount]));
 
-                resultList.Add(new Line3D(verts[i0], verts[i0 + stackCount]));
+                resultList.Add(new Line3D(verts[i0], verts[i0 + sliceCount]));
             }
 
             return resultList;

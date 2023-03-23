@@ -161,11 +161,11 @@ namespace Engine
         /// <summary>
         /// Gets the cylinder vertices
         /// </summary>
-        /// <param name="stackCount">Stack count</param>
+        /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a point array of vertices</returns>
-        public IEnumerable<Vector3> GetVertices(int stackCount)
+        public IEnumerable<Vector3> GetVertices(int sliceCount)
         {
-            var geom = GeometryUtil.CreateCylinder(Center, Radius, Height, stackCount);
+            var geom = GeometryUtil.CreateCylinder(Center, Radius, Height, sliceCount);
 
             return geom.Vertices.ToArray();
         }

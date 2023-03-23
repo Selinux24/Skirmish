@@ -186,9 +186,9 @@ namespace Physics
             float radius = 2f;
             float height = 4f;
             Vector3 center = Vector3.Zero;
-            int stackCount = 16;
+            int sliceCount = 16;
 
-            var cylinder = GeometryUtil.CreateCylinder(center, radius, height, stackCount);
+            var cylinder = GeometryUtil.CreateCylinder(center, radius, height, sliceCount);
 
             var desc = new ModelDescription()
             {
@@ -205,8 +205,8 @@ namespace Physics
             cylinder1.Model.TintColor = Color4.AdjustSaturation(Color.Yellow, 20f);
             cylinder2.Model.TintColor = Color4.AdjustSaturation(Color.Purple, 20f);
 
-            cylinder1.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
-            cylinder2.Lines = Line3D.CreateWiredCylinder(center, radius, height, stackCount);
+            cylinder1.Lines = Line3D.CreateWiredCylinder(center, radius, height, sliceCount);
+            cylinder2.Lines = Line3D.CreateWiredCylinder(center, radius, height, sliceCount);
 
             colliders.Add(cylinder1);
             colliders.Add(cylinder2);
@@ -217,12 +217,12 @@ namespace Physics
             mat.EmissiveColor = Color3.White;
 
             float radius = 2f;
-            float height = 4f;
+            float height = 8f;
             Vector3 center = Vector3.Zero;
-            int sliceCount = 8;
-            int stackCount = 16;
+            int sliceCount = 16;
+            int stackCount = 8;
 
-            var capsule = GeometryUtil.CreateCapsule(center, radius, height + radius + radius, sliceCount, stackCount);
+            var capsule = GeometryUtil.CreateCapsule(center, radius, height, sliceCount, stackCount);
 
             var desc = new ModelDescription()
             {
@@ -236,8 +236,8 @@ namespace Physics
             capsule1.Model = await AddComponent<Model, ModelDescription>("capsule1", "capsule1", desc);
             capsule2.Model = await AddComponent<Model, ModelDescription>("capsule2", "capsule2", desc);
 
-            capsule1.Model.TintColor = Color4.AdjustSaturation(Color.Orchid, 20f);
-            capsule2.Model.TintColor = Color4.AdjustSaturation(Color.AliceBlue, 20f);
+            capsule1.Model.TintColor = Color4.AdjustSaturation(Color.Gray, 20f);
+            capsule2.Model.TintColor = Color.SandyBrown;
 
             capsule1.Lines = Line3D.CreateWiredCapsule(center, radius, height, sliceCount, stackCount);
             capsule2.Lines = Line3D.CreateWiredCapsule(center, radius, height, sliceCount, stackCount);

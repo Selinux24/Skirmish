@@ -1090,11 +1090,11 @@ namespace Engine.Common
         /// </summary>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
-        /// <param name="stackCount">Stack count</param>
+        /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(float radius, float height, int stackCount)
+        public static GeometryDescriptor CreateCylinder(float radius, float height, int sliceCount)
         {
-            return CreateCylinder(Vector3.Zero, radius, height, stackCount);
+            return CreateCylinder(Vector3.Zero, radius, height, sliceCount);
         }
         /// <summary>
         /// Creates a cylinder
@@ -1102,9 +1102,9 @@ namespace Engine.Common
         /// <param name="center">Center position</param>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
-        /// <param name="stackCount">Stack count</param>
+        /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(Vector3 center, float radius, float height, int stackCount)
+        public static GeometryDescriptor CreateCylinder(Vector3 center, float radius, float height, int sliceCount)
         {
             List<int> indexList = new List<int>();
             List<Vector3> verts = new List<Vector3>();
@@ -1114,9 +1114,9 @@ namespace Engine.Common
 
             for (int i = 0; i < 2; i++)
             {
-                for (int j = 0; j < stackCount; j++)
+                for (int j = 0; j < sliceCount; j++)
                 {
-                    float theta = (j / (float)stackCount) * 2 * (float)Math.PI;
+                    float theta = (j / (float)sliceCount) * 2 * (float)Math.PI;
                     float st = (float)Math.Sin(theta), ct = (float)Math.Cos(theta);
 
                     verts.Add(bsePosition + new Vector3(radius * st, height * i, radius * ct));
@@ -1127,13 +1127,13 @@ namespace Engine.Common
             int cBase = verts.Count - 2;
             int cCap = verts.Count - 1;
 
-            for (int i = 0; i < stackCount; i++)
+            for (int i = 0; i < sliceCount; i++)
             {
                 var p0Base = i;
-                var p1Base = (i + 1) % stackCount;
+                var p1Base = (i + 1) % sliceCount;
 
-                var p0Cap = p0Base + stackCount;
-                var p1Cap = p1Base + stackCount;
+                var p0Cap = p0Base + sliceCount;
+                var p1Cap = p1Base + sliceCount;
 
                 indexList.AddRange(new[]
                 {
@@ -1155,7 +1155,7 @@ namespace Engine.Common
 
             List<Vector3> norms = new List<Vector3>();
 
-            for (int i = 0; i < stackCount * 2; i++)
+            for (int i = 0; i < sliceCount * 2; i++)
             {
                 norms.Add(Vector3.Normalize(new(verts[i].X, 0, verts[i].Z)));
             }
@@ -1176,11 +1176,11 @@ namespace Engine.Common
         /// Creates a cylinder
         /// </summary>
         /// <param name="cylinder">Bounding cylinder</param>
-        /// <param name="stackCount">Stack count</param>
+        /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(BoundingCylinder cylinder, int stackCount)
+        public static GeometryDescriptor CreateCylinder(BoundingCylinder cylinder, int sliceCount)
         {
-            return CreateCylinder(cylinder.Center, cylinder.Radius, cylinder.Height, stackCount);
+            return CreateCylinder(cylinder.Center, cylinder.Radius, cylinder.Height, sliceCount);
         }
         /// <summary>
         /// Creates a capsule
