@@ -250,11 +250,12 @@ namespace Physics
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
-            var pyramid = GeometryUtil.CreatePyramid(Vector3.Zero, 2f, 2f, 2f);
+            var pyramid3d = GeometryUtil.CreatePyramid(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);
+            var pyramid2d = GeometryUtil.CreatePyramid(Topology.LineList, Vector3.Zero, 2f, 2f, 2f);
 
             var desc = new ModelDescription()
             {
-                Content = ContentDescription.FromContentData(pyramid, mat),
+                Content = ContentDescription.FromContentData(pyramid3d, mat),
                 CullingVolumeType = CullingVolumeTypes.None,
             };
 
@@ -267,8 +268,8 @@ namespace Physics
             pyramid1.Model.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
             pyramid2.Model.TintColor = Color4.AdjustSaturation(Color.Beige, 20f);
 
-            pyramid1.Lines = Line3D.CreateWiredPyramid(pyramid1.Model.GetPoints());
-            pyramid2.Lines = Line3D.CreateWiredPyramid(pyramid2.Model.GetPoints());
+            pyramid1.Lines = Line3D.CreateFromVertices(pyramid2d.Vertices, pyramid2d.Indices);
+            pyramid2.Lines = Line3D.CreateFromVertices(pyramid2d.Vertices, pyramid2d.Indices);
 
             colliders.Add(pyramid1);
             colliders.Add(pyramid2);

@@ -722,39 +722,192 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Creates a pyramid
+        /// Creates a tetrahedron
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="center">Center</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="depth">Depth</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreatePyramid(Vector3 center, float width, float height, float depth)
+        public static GeometryDescriptor CreateTetrahedron(Topology topology, Vector3 center, float width, float height, float depth)
         {
-            Vector3[] vertices = new Vector3[5];
-            uint[][] indices = new uint[6][];
+            uint[] indices;
+            if (topology == Topology.TriangleList)
+            {
+                indices = new uint[]
+                {
+                    0, 1, 2,
+                    0, 2, 3,
+                    1, 3, 2,
+                    0, 3, 1,
+                };
+            }
+            else if (topology == Topology.LineList)
+            {
+                indices = new uint[]
+                {
+                    0, 1,
+                    1, 2,
+                    2, 0,
+                    0, 3,
+                    1, 3,
+                    2, 3,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
 
-            vertices[0] = new Vector3(0.0f, 1.0f, 0.0f);
-            vertices[1] = new Vector3(-1.0f, -1.0f, 1.0f);
-            vertices[2] = new Vector3(1.0f, -1.0f, 1.0f);
-            vertices[3] = new Vector3(1.0f, -1.0f, -1.0f);
-            vertices[4] = new Vector3(-1.0f, -1.0f, -1.0f);
-
-            indices[0] = new uint[] { 0, 1, 2 };
-            indices[1] = new uint[] { 0, 2, 3 };
-            indices[2] = new uint[] { 0, 3, 4 };
-            indices[3] = new uint[] { 0, 4, 1 };
-            indices[4] = new uint[] { 1, 3, 2 };
-            indices[5] = new uint[] { 3, 1, 4 };
+            var vertices = new[]
+            {
+                new Vector3(1f, 1f, 1f),
+                new Vector3(1f, -1f, -1f),
+                new Vector3(-1f, 1f, -1f),
+                new Vector3(-1f, -1f, 1),
+            };
 
             Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
-
             Vector3.TransformCoordinate(vertices, ref trn, vertices);
 
             return new GeometryDescriptor()
             {
                 Vertices = vertices,
-                Indices = indices.SelectMany(i => i.ToArray()),
+                Indices = indices,
+            };
+        }
+        /// <summary>
+        /// Creates a octahedron
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Center</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateOctahedron(Topology topology, Vector3 center, float width, float height, float depth)
+        {
+            uint[] indices;
+            if (topology == Topology.TriangleList)
+            {
+                indices = new uint[]
+                {
+                    0, 1, 2,
+                    0, 2, 3,
+                    0, 3, 4,
+                    0, 4, 1,
+
+                    5, 2, 1,
+                    5, 3, 2,
+                    5, 4, 3,
+                    5, 1, 4,
+                };
+            }
+            else if (topology == Topology.LineList)
+            {
+                indices = new uint[]
+                {
+                    0, 1,
+                    0, 2,
+                    0, 3,
+                    0, 4,
+
+                    5, 1,
+                    5, 2,
+                    5, 3,
+                    5, 4,
+
+                    1, 2,
+                    2, 3,
+                    3, 4,
+                    4, 1,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            var vertices = new[]
+            {
+                new Vector3(0f, 1f, 0f),
+                new Vector3(1f, 0f, 0f),
+                new Vector3(0f, 0f, -1f),
+                new Vector3(-1f, 0f, 0f),
+                new Vector3(0f, 0f, 1f),
+                new Vector3(0f, -1f, 0f),
+            };
+
+            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
+            };
+        }
+        /// <summary>
+        /// Creates a pyramid
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Center</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreatePyramid(Topology topology, Vector3 center, float width, float height, float depth)
+        {
+            uint[] indices;
+            if (topology == Topology.TriangleList)
+            {
+                indices = new uint[]
+                {
+                    0, 1, 2,
+                    0, 2, 3,
+                    0, 3, 4,
+                    0, 4, 1,
+                    1, 3, 2,
+                    3, 1, 4,
+                };
+            }
+            else if (topology == Topology.LineList)
+            {
+                indices = new uint[]
+                {
+                    0, 1,
+                    0, 2,
+                    0, 3,
+                    0, 4,
+
+                    1, 2,
+                    2, 3,
+                    3, 4,
+                    4, 1,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            var vertices = new[]
+            {
+                new Vector3(0f, 1f, 0f),
+                new Vector3(-1f, -1f, 1f),
+                new Vector3(1f, -1f, 1f),
+                new Vector3(1f, -1f, -1f),
+                new Vector3(-1f, -1f, -1f),
+            };
+
+            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
             };
         }
         /// <summary>
