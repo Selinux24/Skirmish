@@ -12,6 +12,20 @@ namespace Engine.Common
     public static class GeometryUtil
     {
         /// <summary>
+        /// Golden ratio value
+        /// </summary>
+        /// <seealso cref="https://en.wikipedia.org/wiki/Golden_ratio"/>
+        public const float GoldenRatio = 1.6180f;
+        /// <summary>
+        /// Inverse golden ratio value
+        /// </summary>
+        public const float InverseGoldenRatio = 1f / GoldenRatio;
+        /// <summary>
+        /// Quad inverse golden ratio value
+        /// </summary>
+        public const float QuadInverseGoldenRatio = InverseGoldenRatio * InverseGoldenRatio;
+
+        /// <summary>
         /// Generates a index for a triangle soup quad with the specified shape
         /// </summary>
         /// <param name="bufferShape">Buffer shape</param>
@@ -849,6 +863,303 @@ namespace Engine.Common
             };
         }
         /// <summary>
+        /// Creates a icosahedron
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Center</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateIcosahedron(Topology topology, Vector3 center, float width, float height, float depth)
+        {
+            uint[] indices;
+            if (topology == Topology.TriangleList)
+            {
+                indices = new uint[]
+                {
+                    0,1,2,
+                    0,3,1,
+                    0,2,4,
+                    0,5,3,
+                    0,4,5,
+
+                    1,6,2,
+                    1,3,7,
+                    1,7,6,
+
+                    2,8,4,
+                    2,6,8,
+
+                    3,9,7,
+                    3,5,9,
+
+                    11,8,6,
+                    11,7,9,
+                    11,6,7,
+
+                    10,4,8,
+                    10,9,5,
+                    10,5,4,
+                    10,11,9,
+                    10,8,11,
+                };
+            }
+            else if (topology == Topology.LineList)
+            {
+                indices = new uint[]
+                {
+                    0, 1,
+                    0, 2,
+                    0, 3,
+                    1, 2,
+                    1, 3,
+
+                    0, 4,
+                    0, 5,
+                    4, 5,
+                    4, 2,
+                    5, 3,
+
+                    1, 6,
+                    1, 7,
+                    6, 7,
+                    6, 2,
+                    7, 3,
+
+                    2, 8,
+                    3, 9,
+
+                    11, 6,
+                    11, 7,
+                    6, 7,
+                    6, 8,
+                    7, 9,
+
+                    10, 4,
+                    10, 5,
+                    4, 5,
+                    4, 8,
+                    5, 9,
+
+                    10, 11,
+                    10, 9,
+                    10, 8,
+                    11, 9,
+                    11, 8,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            var vertices = new[]
+            {
+                new Vector3(-InverseGoldenRatio, +1f, 0f),
+                new Vector3(+InverseGoldenRatio, +1f, 0f),
+
+                new Vector3(0f, +InverseGoldenRatio, -1f),
+                new Vector3(0f, +InverseGoldenRatio, +1f),
+
+                new Vector3(-1f, 0f, -InverseGoldenRatio),
+                new Vector3(-1f, 0f, +InverseGoldenRatio),
+                new Vector3(+1f, 0f, -InverseGoldenRatio),
+                new Vector3(+1f, 0f, +InverseGoldenRatio),
+
+                new Vector3(0f, -InverseGoldenRatio, -1f),
+                new Vector3(0f, -InverseGoldenRatio, +1f),
+
+                new Vector3(-InverseGoldenRatio, -1f, 0f),
+                new Vector3(+InverseGoldenRatio, -1f, 0f),
+            };
+
+            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
+            };
+        }
+        /// <summary>
+        /// Creates a dodecahedron
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Center</param>
+        /// <param name="width">Width</param>
+        /// <param name="height">Height</param>
+        /// <param name="depth">Depth</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateDodecahedron(Topology topology, Vector3 center, float width, float height, float depth)
+        {
+            uint[] indices;
+            if (topology == Topology.TriangleList)
+            {
+                indices = new uint[]
+                {
+                    //0,1,4,6,2,
+                    0,6,2,
+                    0,4,6,
+                    0,1,4,
+                    
+                    //0,2,8,9,3,
+                    0,9,3,
+                    0,8,9,
+                    0,2,8,
+
+                    //1,0,3,7,5,
+                    1,7,5,
+                    1,3,7,
+                    1,0,3,
+                    
+                    //1,5,11,10,4,
+                    1,10,4,
+                    1,11,10,
+                    1,5,11,
+
+                    //6,4,10,16,12,
+                    6,16,12,
+                    6,10,16,
+                    6,4,10,
+
+                    //6,12,14,8,2,
+                    6,8,2,
+                    6,14,8,
+                    6,12,14,
+
+                    //7,13,17,11,5,
+                    7,11,5,
+                    7,17,11,
+                    7,13,17,
+
+                    //7,3,9,15,13,
+                    7,15,13,
+                    7,9,15,
+                    7,3,9,
+
+                    //18,19,16,12,14,
+                    18,14,12,
+                    18,12,16,
+                    18,16,19,
+
+                    //18,14,8,9,15,
+                    18,15,9,
+                    18,9,8,
+                    18,8,14,
+
+                    //19,18,15,13,17,
+                    19,17,13,
+                    19,13,15,
+                    19,15,18,
+
+                    //19,17,11,10,16,
+                    19,16,10,
+                    19,10,11,
+                    19,11,17,
+                };
+            }
+            else if (topology == Topology.LineList)
+            {
+                indices = new uint[]
+                {
+                    //0,1,4,6,2,
+                    0,1,
+                    1,4,
+                    4,6,
+                    6,2,
+                    2,0,
+
+                    //0,2,8,9,3,
+                    2,8,
+                    8,9,
+                    9,3,
+                    3,0,
+
+                    //1,0,3,7,5,
+                    3,7,
+                    7,5,
+                    5,1,
+
+                    //1,5,11,10,4,
+                    5,11,
+                    11,10,
+                    10,4,
+
+                    //6,4,10,16,12,
+                    6,12,
+                    7,13,
+
+                    //18,19,16,12,14,
+                    18,19,
+                    19,16,
+                    16,12,
+                    12,14,
+                    14,18,
+
+                    //18,14,8,9,15,
+                    14,8,
+                    8,9,
+                    9,15,
+                    15,18,
+
+                    //19,18,15,13,17,
+                    15,13,
+                    13,17,
+                    17,19,
+
+                    //19,17,11,10,16,
+                    17,11,
+                    11,10,
+                    10,16,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            var vertices = new[]
+            {
+                new Vector3(-QuadInverseGoldenRatio, +1f, 0f),
+                new Vector3(+QuadInverseGoldenRatio, +1f, 0f),
+
+                new Vector3(-InverseGoldenRatio, +InverseGoldenRatio, -InverseGoldenRatio),
+                new Vector3(-InverseGoldenRatio, +InverseGoldenRatio, +InverseGoldenRatio),
+                new Vector3(+InverseGoldenRatio, +InverseGoldenRatio, -InverseGoldenRatio),
+                new Vector3(+InverseGoldenRatio, +InverseGoldenRatio, +InverseGoldenRatio),
+
+                new Vector3(0f, +QuadInverseGoldenRatio, -1f),
+                new Vector3(0f, +QuadInverseGoldenRatio, +1f),
+
+                new Vector3(-1f, 0f, -QuadInverseGoldenRatio),
+                new Vector3(-1f, 0f, +QuadInverseGoldenRatio),
+                new Vector3(+1f, 0f, -QuadInverseGoldenRatio),
+                new Vector3(+1f, 0f, +QuadInverseGoldenRatio),
+
+                new Vector3(0f, -QuadInverseGoldenRatio, -1f),
+                new Vector3(0f, -QuadInverseGoldenRatio, +1f),
+
+                new Vector3(-InverseGoldenRatio, -InverseGoldenRatio, -InverseGoldenRatio),
+                new Vector3(-InverseGoldenRatio, -InverseGoldenRatio, +InverseGoldenRatio),
+                new Vector3(+InverseGoldenRatio, -InverseGoldenRatio, -InverseGoldenRatio),
+                new Vector3(+InverseGoldenRatio, -InverseGoldenRatio, +InverseGoldenRatio),
+
+                new Vector3(-QuadInverseGoldenRatio, -1f, 0f),
+                new Vector3(+QuadInverseGoldenRatio, -1f, 0f),
+            };
+
+            Matrix trn = Matrix.Scaling(width, height, depth) * Matrix.Translation(center);
+            Vector3.TransformCoordinate(vertices, ref trn, vertices);
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
+            };
+        }
+        /// <summary>
         /// Creates a pyramid
         /// </summary>
         /// <param name="topology">Topology</param>
@@ -937,7 +1248,7 @@ namespace Engine.Common
                 Vector3 tangent;
                 Vector2 texture;
 
-                // spherical to cartesian
+                // Spherical to Cartesian
                 position.X = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
                 position.Y = -height;
                 position.Z = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
@@ -1497,7 +1808,7 @@ namespace Engine.Common
             Vector3 axis;
             if (angle == MathUtil.Pi)
             {
-                //Paralell negative axis: Vector3.Down
+                //Parallel negative axis: Vector3.Down
                 axis = Vector3.Left;
             }
             else
@@ -1617,7 +1928,7 @@ namespace Engine.Common
             };
         }
         /// <summary>
-        /// Calculate tangent, normal and binormals of triangle vertices
+        /// Calculate tangent, normal and bi-normals of triangle vertices
         /// </summary>
         /// <param name="p1">Point 1</param>
         /// <param name="p2">Point 2</param>
@@ -1636,10 +1947,10 @@ namespace Engine.Common
             Vector2 tuVector = new Vector2(uv2.X - uv1.X, uv3.X - uv1.X);
             Vector2 tvVector = new Vector2(uv2.Y - uv1.Y, uv3.Y - uv1.Y);
 
-            // Calculate the denominator of the tangent / binormal equation.
+            // Calculate the denominator of the tangent / bi-normal equation.
             var den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
 
-            // Calculate the cross products and multiply by the coefficient to get the tangent and binormal.
+            // Calculate the cross products and multiply by the coefficient to get the tangent and bi-normal.
             Vector3 tangent = new Vector3
             {
                 X = (tvVector[1] * vector1.X - tvVector[0] * vector2.X) * den,
@@ -1657,7 +1968,7 @@ namespace Engine.Common
             tangent.Normalize();
             binormal.Normalize();
 
-            // Calculate the cross product of the tangent and binormal which will give the normal vector.
+            // Calculate the cross product of the tangent and bi-normal which will give the normal vector.
             Vector3 normal = Vector3.Cross(tangent, binormal);
 
             return new NormalDescriptor()
@@ -1789,7 +2100,7 @@ namespace Engine.Common
             List<VertexData> tmpVertices = new List<VertexData>();
             List<Tuple<uint, uint>> dict = new List<Tuple<uint, uint>>();
 
-            // Adds all the selected vertices for each unique index, and create a index traductor for the new vertext list
+            // Adds all the selected vertices for each unique index, and create a index translator for the new vertex list
             foreach (uint index in tmpIndices.Distinct())
             {
                 tmpVertices.Add(vertices.ElementAt((int)index));
