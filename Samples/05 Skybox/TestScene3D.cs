@@ -7,7 +7,6 @@ using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
 using SharpDX;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -659,24 +658,16 @@ namespace Skybox
 
         private void DEBUGUpdateVolumesDrawer()
         {
-            volumesDrawer.SetPrimitives(ruinsVolumeColor, Line3D.CreateWiredBox(ruins.GetBoundingBox()));
+            volumesDrawer.SetPrimitives(ruinsVolumeColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, ruins.GetBoundingBox())));
 
-            List<Line3D> volumesTorchs = new List<Line3D>();
-            for (int i = 0; i < torchs.InstanceCount; i++)
-            {
-                volumesTorchs.AddRange(Line3D.CreateWiredBox(torchs[i].GetBoundingBox()));
-            }
-            volumesDrawer.SetPrimitives(torchVolumeColor, volumesTorchs);
+            var volumesTorchs = torchs.GetInstances().Select(i=> i.GetBoundingBox());
+            volumesDrawer.SetPrimitives(torchVolumeColor, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, volumesTorchs)));
 
-            List<Line3D> volumesObelisks = new List<Line3D>();
-            for (int i = 0; i < obelisks.InstanceCount; i++)
-            {
-                volumesObelisks.AddRange(Line3D.CreateWiredBox(obelisks[i].GetBoundingBox()));
-            }
-            volumesDrawer.SetPrimitives(obeliskVolumeColor, volumesObelisks);
+            var volumesObelisks = obelisks.GetInstances().Select(i => i.GetBoundingBox());
+            volumesDrawer.SetPrimitives(obeliskVolumeColor, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, volumesObelisks)));
 
-            var volumeFountain = Line3D.CreateWiredBox(fountain.GetBoundingBox());
-            volumesDrawer.SetPrimitives(fountainVolumeColor, volumeFountain);
+            var volumeFountain = fountain.GetBoundingBox();
+            volumesDrawer.SetPrimitives(fountainVolumeColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, volumeFountain)));
 
             for (int i = 1; i < Lights.PointLights.Length; i++)
             {

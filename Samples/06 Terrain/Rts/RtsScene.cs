@@ -488,6 +488,7 @@ namespace Terrain.Rts
                 CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
                 TextureIndex = 0,
                 Content = ContentDescription.FromFile("Rts/resources/Helicopter", "M24.json"),
+                CullingVolumeType = CullingVolumeTypes.BoxVolume,
             };
             helicopter = await AddComponentAgent<Model, ModelDescription>("Helicopter", "Helicopter", hDesc);
             helicopter.Visible = false;
@@ -2028,8 +2029,8 @@ namespace Terrain.Rts
             var hPos = heliport.Manipulator.Position;
             if (FindTopGroundPosition(hPos.X, hPos.Z, out PickingResult<Triangle> r))
             {
-                cPoints[cPoints.Length - 2] = r.Position + helicopterHeightOffset;
-                cPoints[cPoints.Length - 1] = r.Position;
+                cPoints[^2] = r.Position + helicopterHeightOffset;
+                cPoints[^1] = r.Position;
             }
 
             float time = 0;
@@ -2312,7 +2313,7 @@ namespace Terrain.Rts
                 terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
                 if (positions.Length > 1)
                 {
-                    terrainPointDrawer.SetPrimitives(Color.Cyan, new Line3D(positions[0], positions[positions.Length - 1]));
+                    terrainPointDrawer.SetPrimitives(Color.Cyan, new Line3D(positions[0], positions[^1]));
                 }
             }
         }
@@ -2485,34 +2486,22 @@ namespace Terrain.Rts
                 return;
             }
 
+            var boxes = new List<BoundingBox>
+            {
+                heliport.GetBoundingBox(),
+                garage.GetBoundingBox()
+            };
+            boxes.AddRange(obelisk.GetInstances().Select(i => i.GetBoundingBox()));
+            boxes.AddRange(rocks.GetInstances().Select(i => i.GetBoundingBox()));
+
+            List<Triangle> tris = new List<Triangle>();
+            tris.AddRange(tree1.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.Hull)));
+            tris.AddRange(tree2.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.Hull)));
+
             List<Line3D> lines = new List<Line3D>();
-            lines.AddRange(Line3D.CreateWiredBox(heliport.GetBoundingBox()));
-            lines.AddRange(Line3D.CreateWiredBox(garage.GetBoundingBox()));
-            for (int i = 0; i < obelisk.InstanceCount; i++)
-            {
-                var instance = obelisk[i];
 
-                lines.AddRange(Line3D.CreateWiredBox(instance.GetBoundingBox()));
-            }
-            for (int i = 0; i < rocks.InstanceCount; i++)
-            {
-                var instance = rocks[i];
-
-                lines.AddRange(Line3D.CreateWiredBox(instance.GetBoundingBox()));
-            }
-            for (int i = 0; i < tree1.InstanceCount; i++)
-            {
-                var instance = tree1[i];
-
-                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetGeometry(GeometryTypes.Hull)));
-            }
-
-            for (int i = 0; i < tree2.InstanceCount; i++)
-            {
-                var instance = tree2[i];
-
-                lines.AddRange(Line3D.CreateWiredTriangle(instance.GetGeometry(GeometryTypes.Hull)));
-            }
+            lines.AddRange(Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
+            lines.AddRange(Line3D.CreateWiredTriangle(tris));
 
             staticObjLineDrawer.SetPrimitives(objColor, lines.ToArray());
         }
@@ -2524,11 +2513,14 @@ namespace Terrain.Rts
             }
 
             var hsph = helicopter.GetBoundingSphere();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, }, 50, 20));
+            var t1sph = tankP1.GetBoundingSphere();
+            var t2sph = tankP2.GetBoundingSphere();
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, t1sph, t2sph }, 50, 20));
 
-            var t1sph = tankP1.GetBoundingBox();
-            var t2sph = tankP2.GetBoundingBox();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateWiredBox(new[] { t1sph, t2sph, }));
+            var hbox = helicopter.GetOrientedBoundingBox();
+            var t1box = tankP1.GetOrientedBoundingBox();
+            var t2box = tankP2.GetOrientedBoundingBox();
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.YellowGreen.ToColor3(), 0.55f), Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, new[] { hbox, t1box, t2box, })));
         }
     }
 

@@ -51,11 +51,13 @@ namespace Engine.Common
         {
             if (points.Any())
             {
+                var distinctPoints = points.Distinct().ToArray();
+
                 //Initialize the identity sphere
-                initialSphere = BoundingSphere.FromPoints(points.ToArray());
+                initialSphere = BoundingSphere.FromPoints(distinctPoints);
 
                 //Initialize the identity box
-                initialBox = BoundingBox.FromPoints(points.ToArray());
+                initialBox = BoundingBox.FromPoints(distinctPoints);
             }
             else
             {

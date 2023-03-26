@@ -811,7 +811,7 @@ namespace Collada.ModularDungeon
                 var color = rndBoxes.NextColor().ToColor4();
                 color.Alpha = 0.40f;
 
-                bboxesDrawer.SetPrimitives(color, Line3D.CreateWiredBox(item.ToArray()));
+                bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, item.ToArray())));
             }
 
             //Objects
@@ -823,16 +823,8 @@ namespace Collada.ModularDungeon
         }
         private void UpdateBoundingBoxes(IEnumerable<ModelInstance> items, Color color)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var item in items)
-            {
-                var bbox = item.GetBoundingBox(true);
-
-                lines.AddRange(Line3D.CreateWiredBox(bbox));
-            }
-
-            bboxesDrawer.SetPrimitives(color, lines);
+            var boxes = items.Select(i => i.GetBoundingBox());
+            bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
         }
         private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)
         {
@@ -952,7 +944,7 @@ namespace Collada.ModularDungeon
             if (Game.Input.KeyJustReleased(Keys.F))
             {
                 //Frustum
-                var frustum = Line3D.CreateWiredFrustum(Camera.Frustum);
+                var frustum = Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, Camera.Frustum));
 
                 bboxesDrawer.SetPrimitives(Color.White, frustum);
             }
@@ -1108,7 +1100,7 @@ namespace Collada.ModularDungeon
             {
                 var bbox = rat.GetBoundingBox();
 
-                ratDrawer.SetPrimitives(Color.White, Line3D.CreateWiredBox(bbox));
+                ratDrawer.SetPrimitives(Color.White, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, bbox)));
             }
         }
         private bool CalcPath(AgentType agent, Vector3 from, Vector3 to)

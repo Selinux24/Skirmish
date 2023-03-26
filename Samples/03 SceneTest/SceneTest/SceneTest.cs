@@ -1004,28 +1004,21 @@ namespace SceneTest.SceneTest
         {
             lightsVolumeDrawer.Clear();
 
-            foreach (var spot in Lights.SpotLights)
+            var spotLines = Lights.SpotLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(10) });
+            foreach (var spot in spotLines)
             {
-                var lines = spot.GetVolume(10);
-
-                lightsVolumeDrawer.AddPrimitives(new Color4(spot.DiffuseColor, 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(spot.Color, spot.Volume);
             }
 
-            foreach (var point in Lights.PointLights)
+            var pointLines = Lights.PointLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(12, 5) });
+            foreach (var point in pointLines)
             {
-                var lines = point.GetVolume(12, 5);
-
-                lightsVolumeDrawer.AddPrimitives(new Color4(point.DiffuseColor, 0.15f), lines);
+                lightsVolumeDrawer.AddPrimitives(point.Color, point.Volume);
             }
 
-            var pLines = new List<Line3D>();
-            var count = pManager.Count;
-            for (int i = 0; i < count; i++)
-            {
-                pLines.AddRange(Line3D.CreateWiredBox(pManager.GetParticleSystem(i).Emitter.GetBoundingBox()));
-            }
+            var pBoxes = pManager.ParticleSystems.Select(s => s.Emitter.GetBoundingBox());
+            var pLines = Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, pBoxes));
             lightsVolumeDrawer.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
-
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
         private void UpdateLightCullingVolumes()

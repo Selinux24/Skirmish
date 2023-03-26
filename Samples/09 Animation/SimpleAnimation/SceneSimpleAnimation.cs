@@ -682,7 +682,7 @@ namespace Animation.SimpleAnimation
                 var bbox = selectedItem.GetBoundingBox();
 
                 itemTris.SetPrimitives(itemTrisColor, tris);
-                itemLines.SetPrimitives(itemLinesColor, Line3D.CreateWiredBox(bbox));
+                itemLines.SetPrimitives(itemLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, bbox)));
 
                 itemTris.Active = itemTris.Visible = true;
                 itemLines.Active = itemLines.Visible = true;
