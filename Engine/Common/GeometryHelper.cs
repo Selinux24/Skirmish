@@ -43,7 +43,7 @@ namespace Engine.Common
         /// <param name="drawingData">Drawing data</param>
         /// <param name="controller">Animation controller</param>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(DrawingData drawingData, AnimationController controller, Manipulator3D manipulator, bool refresh = false)
         {
@@ -85,7 +85,7 @@ namespace Engine.Common
         /// <param name="drawingData">Drawing data</param>
         /// <param name="controller">Animation controller</param>
         /// <param name="manipulator">Manipulator</param>
-        /// <param name="refresh">Sets if the cache must be refresehd or not</param>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(DrawingData drawingData, AnimationController controller, Manipulator3D manipulator, bool refresh = false)
         {

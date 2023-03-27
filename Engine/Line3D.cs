@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Common;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,70 +136,6 @@ namespace Engine
             }
 
             return CreateFromVertices(points, indexes);
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<BoundingBox> bboxList)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var bbox in bboxList)
-            {
-                lines.AddRange(CreateWiredBox(bbox));
-            }
-
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(BoundingBox bbox)
-        {
-            return CreateWiredBox(bbox.GetVertices());
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<OrientedBoundingBox> obboxList)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var obbox in obboxList)
-            {
-                lines.AddRange(CreateWiredBox(obbox));
-            }
-
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(OrientedBoundingBox obbox)
-        {
-            return CreateWiredBox(obbox.GetVertices());
-        }
-        public static IEnumerable<Line3D> CreateWiredBox(IEnumerable<Vector3> corners)
-        {
-            List<int> indexes = new List<int>(24)
-            {
-                0,
-                1,
-                0,
-                3,
-                1,
-                2,
-                3,
-                2,
-
-                4,
-                5,
-                4,
-                7,
-                5,
-                6,
-                7,
-                6,
-
-                0,
-                4,
-                1,
-                5,
-                2,
-                6,
-                3,
-                7
-            };
-
-            return CreateFromVertices(corners, indexes.ToArray());
         }
         public static IEnumerable<Line3D> CreateWiredSphere(IEnumerable<BoundingSphere> bsphList, int sliceCount, int stackCount)
         {
@@ -351,10 +288,6 @@ namespace Engine
             }
 
             return resultList;
-        }
-        public static IEnumerable<Line3D> CreateWiredFrustum(BoundingFrustum frustum)
-        {
-            return CreateWiredBox(frustum.GetCorners());
         }
         public static IEnumerable<Line3D> CreatePath(IEnumerable<Vector3> path)
         {
@@ -510,23 +443,46 @@ namespace Engine
 
             return lines;
         }
+        public static IEnumerable<Line3D> CreateFromVertices(GeometryDescriptor geometry)
+        {
+            return CreateFromVertices(geometry.Vertices, geometry.Indices);
+        }
         public static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<uint> indices)
         {
-            return CreateFromVertices(vertices, indices.Select(i => (int)i));
+            return CreateFromVertices(vertices, indices.Select(i => (int)i).ToArray());
         }
         public static IEnumerable<Line3D> CreateFromVertices(IEnumerable<Vector3> vertices, IEnumerable<int> indices)
         {
+            if (vertices?.Any() != true)
+            {
+                return Enumerable.Empty<Line3D>();
+            }
+
             List<Line3D> lines = new List<Line3D>();
 
-            var vTmp = vertices.ToArray();
-            var iTmp = indices.ToArray();
+            if (indices?.Any() != true)
+            {
+                // Use vertices only
+                for (int i = 0; i < vertices.Count(); i += 2)
+                {
+                    Line3D l = new Line3D()
+                    {
+                        Point1 = vertices.ElementAtOrDefault(i),
+                        Point2 = vertices.ElementAtOrDefault(i + 1),
+                    };
 
-            for (int i = 0; i < iTmp.Length; i += 2)
+                    lines.Add(l);
+                }
+
+                return lines;
+            }
+
+            for (int i = 0; i < indices.Count(); i += 2)
             {
                 Line3D l = new Line3D()
                 {
-                    Point1 = vTmp[iTmp[i + 0]],
-                    Point2 = vTmp[iTmp[i + 1]],
+                    Point1 = vertices.ElementAtOrDefault(indices.ElementAtOrDefault(i)),
+                    Point2 = vertices.ElementAtOrDefault(indices.ElementAtOrDefault(i + 1)),
                 };
 
                 lines.Add(l);

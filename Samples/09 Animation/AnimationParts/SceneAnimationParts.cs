@@ -330,8 +330,8 @@ namespace Animation.AnimationParts
             itemTris.Active = itemTris.Visible = true;
 
             itemLines.SetPrimitives(sphLinesColor, Line3D.CreateWiredSphere(sph, 20, 20));
-            itemLines.SetPrimitives(boxLinesColor, Line3D.CreateWiredBox(box));
-            itemLines.SetPrimitives(obbLinesColor, Line3D.CreateWiredBox(obb));
+            itemLines.SetPrimitives(boxLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, box)));
+            itemLines.SetPrimitives(obbLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, obb)));
             itemLines.Active = itemLines.Visible = true;
         }
 

@@ -155,7 +155,8 @@ namespace Physics
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
-            var box = GeometryUtil.CreateBox(2f, 2f, 2f);
+            var box = GeometryUtil.CreateBox(Topology.TriangleList, 2f, 2f, 2f);
+            var wiredBox = GeometryUtil.CreateBox(Topology.LineList, 2f, 2f, 2f);
 
             var desc = new ModelDescription()
             {
@@ -172,8 +173,8 @@ namespace Physics
             box1.Model.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
             box2.Model.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
 
-            box1.Lines = Line3D.CreateWiredBox(box1.Model.GetOrientedBoundingBox());
-            box2.Lines = Line3D.CreateWiredBox(box2.Model.GetOrientedBoundingBox());
+            box1.Lines = Line3D.CreateFromVertices(wiredBox);
+            box2.Lines = Line3D.CreateFromVertices(wiredBox);
 
             colliders.Add(box1);
             colliders.Add(box2);

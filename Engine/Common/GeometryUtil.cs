@@ -618,108 +618,99 @@ namespace Engine.Common
         /// <summary>
         /// Creates a box
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="bbox">Bounding box</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateBox(BoundingBox bbox)
+        public static GeometryDescriptor CreateBox(Topology topology, BoundingBox bbox)
         {
-            return CreateBox(bbox.Center, bbox.Width, bbox.Height, bbox.Depth);
+            return CreateBox(topology, bbox.Center, bbox.Width, bbox.Height, bbox.Depth);
         }
         /// <summary>
         /// Creates a box
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="obb">Oriented bounding box</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateBox(OrientedBoundingBox obb)
+        public static GeometryDescriptor CreateBox(Topology topology, OrientedBoundingBox obb)
         {
-            return CreateBox(obb.Center, obb.Extents.X * 2, obb.Extents.Y * 2, obb.Extents.Z * 2);
+            var geom = CreateBox(topology, Vector3.Zero, obb.Extents.X * 2, obb.Extents.Y * 2, obb.Extents.Z * 2);
+
+            var trn = obb.Transformation;
+            if (!trn.IsIdentity)
+            {
+                var vertices = geom.Vertices.ToArray();
+                Vector3.TransformCoordinate(vertices, ref trn, vertices);
+                geom.Vertices = vertices;
+            }
+
+            return geom;
         }
         /// <summary>
         /// Creates a box
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="depth">Depth</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateBox(float width, float height, float depth)
+        public static GeometryDescriptor CreateBox(Topology topology, float width, float height, float depth)
         {
-            return CreateBox(Vector3.Zero, width, height, depth);
+            return CreateBox(topology, Vector3.Zero, width, height, depth);
         }
         /// <summary>
         /// Creates a box
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="center">Box center</param>
         /// <param name="width">Width</param>
         /// <param name="height">Height</param>
         /// <param name="depth">Depth</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateBox(Vector3 center, float width, float height, float depth)
+        public static GeometryDescriptor CreateBox(Topology topology, Vector3 center, float width, float height, float depth)
         {
-            Vector3[] vertices = new Vector3[24];
-            uint[] indices = new uint[36];
-
             float w2 = 0.5f * width;
             float h2 = 0.5f * height;
             float d2 = 0.5f * depth;
 
-            // Fill in the front face vertex data.
-            vertices[0] = new Vector3(-w2, -h2, -d2);
-            vertices[1] = new Vector3(-w2, +h2, -d2);
-            vertices[2] = new Vector3(+w2, +h2, -d2);
-            vertices[3] = new Vector3(+w2, -h2, -d2);
+            //Create separate faces to make sharp edges
+            var vertices = new[]
+            {
+                // Fill in the front face vertex data.
+                new Vector3(-w2, -h2, -d2),
+                new Vector3(-w2, +h2, -d2),
+                new Vector3(+w2, +h2, -d2),
+                new Vector3(+w2, -h2, -d2),
 
-            // Fill in the back face vertex data.
-            vertices[4] = new Vector3(-w2, -h2, +d2);
-            vertices[5] = new Vector3(+w2, -h2, +d2);
-            vertices[6] = new Vector3(+w2, +h2, +d2);
-            vertices[7] = new Vector3(-w2, +h2, +d2);
+                // Fill in the back face vertex data.
+                new Vector3(-w2, -h2, +d2),
+                new Vector3(+w2, -h2, +d2),
+                new Vector3(+w2, +h2, +d2),
+                new Vector3(-w2, +h2, +d2),
 
-            // Fill in the top face vertex data.
-            vertices[8] = new Vector3(-w2, +h2, -d2);
-            vertices[9] = new Vector3(-w2, +h2, +d2);
-            vertices[10] = new Vector3(+w2, +h2, +d2);
-            vertices[11] = new Vector3(+w2, +h2, -d2);
+                // Fill in the top face vertex data.
+                new Vector3(-w2, +h2, -d2),
+                new Vector3(-w2, +h2, +d2),
+                new Vector3(+w2, +h2, +d2),
+                new Vector3(+w2, +h2, -d2),
 
-            // Fill in the bottom face vertex data.
-            vertices[12] = new Vector3(-w2, -h2, -d2);
-            vertices[13] = new Vector3(+w2, -h2, -d2);
-            vertices[14] = new Vector3(+w2, -h2, +d2);
-            vertices[15] = new Vector3(-w2, -h2, +d2);
+                // Fill in the bottom face vertex data.
+                new Vector3(-w2, -h2, -d2),
+                new Vector3(+w2, -h2, -d2),
+                new Vector3(+w2, -h2, +d2),
+                new Vector3(-w2, -h2, +d2),
 
-            // Fill in the left face vertex data.
-            vertices[16] = new Vector3(-w2, -h2, +d2);
-            vertices[17] = new Vector3(-w2, +h2, +d2);
-            vertices[18] = new Vector3(-w2, +h2, -d2);
-            vertices[19] = new Vector3(-w2, -h2, -d2);
+                // Fill in the left face vertex data.
+                new Vector3(-w2, -h2, +d2),
+                new Vector3(-w2, +h2, +d2),
+                new Vector3(-w2, +h2, -d2),
+                new Vector3(-w2, -h2, -d2),
 
-            // Fill in the right face vertex data.
-            vertices[20] = new Vector3(+w2, -h2, -d2);
-            vertices[21] = new Vector3(+w2, +h2, -d2);
-            vertices[22] = new Vector3(+w2, +h2, +d2);
-            vertices[23] = new Vector3(+w2, -h2, +d2);
-
-            // Fill in the front face index data
-            indices[0] = 0; indices[1] = 1; indices[2] = 2;
-            indices[3] = 0; indices[4] = 2; indices[5] = 3;
-
-            // Fill in the back face index data
-            indices[6] = 4; indices[7] = 5; indices[8] = 6;
-            indices[9] = 4; indices[10] = 6; indices[11] = 7;
-
-            // Fill in the top face index data
-            indices[12] = 8; indices[13] = 9; indices[14] = 10;
-            indices[15] = 8; indices[16] = 10; indices[17] = 11;
-
-            // Fill in the bottom face index data
-            indices[18] = 12; indices[19] = 13; indices[20] = 14;
-            indices[21] = 12; indices[22] = 14; indices[23] = 15;
-
-            // Fill in the left face index data
-            indices[24] = 16; indices[25] = 17; indices[26] = 18;
-            indices[27] = 16; indices[28] = 18; indices[29] = 19;
-
-            // Fill in the right face index data
-            indices[30] = 20; indices[31] = 21; indices[32] = 22;
-            indices[33] = 20; indices[34] = 22; indices[35] = 23;
+                // Fill in the right face vertex data.
+                new Vector3(+w2, -h2, -d2),
+                new Vector3(+w2, +h2, -d2),
+                new Vector3(+w2, +h2, +d2),
+                new Vector3(+w2, -h2, +d2),
+            };
 
             if (center != Vector3.Zero)
             {
@@ -727,6 +718,150 @@ namespace Engine.Common
                 {
                     vertices[i] += center;
                 }
+            }
+
+            uint[] indices;
+            if (topology == Topology.TriangleList)
+            {
+                indices = new uint[36];
+
+                // Fill in the front face index data
+                indices[0] = 0; indices[1] = 1; indices[2] = 2;
+                indices[3] = 0; indices[4] = 2; indices[5] = 3;
+
+                // Fill in the back face index data
+                indices[6] = 4; indices[7] = 5; indices[8] = 6;
+                indices[9] = 4; indices[10] = 6; indices[11] = 7;
+
+                // Fill in the top face index data
+                indices[12] = 8; indices[13] = 9; indices[14] = 10;
+                indices[15] = 8; indices[16] = 10; indices[17] = 11;
+
+                // Fill in the bottom face index data
+                indices[18] = 12; indices[19] = 13; indices[20] = 14;
+                indices[21] = 12; indices[22] = 14; indices[23] = 15;
+
+                // Fill in the left face index data
+                indices[24] = 16; indices[25] = 17; indices[26] = 18;
+                indices[27] = 16; indices[28] = 18; indices[29] = 19;
+
+                // Fill in the right face index data
+                indices[30] = 20; indices[31] = 21; indices[32] = 22;
+                indices[33] = 20; indices[34] = 22; indices[35] = 23;
+            }
+            else if (topology == Topology.LineList)
+            {
+                indices = new uint[]
+                {
+                    0, 1,
+                    0, 3,
+                    1, 2,
+                    3, 2,
+
+                    4, 5,
+                    4, 7,
+                    5, 6,
+                    7, 6,
+
+                    0, 4,
+                    1, 7,
+                    2, 6,
+                    3, 5,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertices,
+                Indices = indices,
+            };
+        }
+        /// <summary>
+        /// Creates a box list
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="obbList">Oriented bounding box list</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBoxes(Topology topology, IEnumerable<OrientedBoundingBox> obbList)
+        {
+            var gList = obbList.Select(b => CreateBox(topology, b));
+
+            return new GeometryDescriptor(gList);
+        }
+        /// <summary>
+        /// Creates a box list
+        /// </summary>
+        /// <param name="topology"></param>
+        /// <param name="bboxList">Bounding box list</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBoxes(Topology topology, IEnumerable<BoundingBox> bboxList)
+        {
+            var gList = bboxList.Select(b => CreateBox(topology, b));
+
+            return new GeometryDescriptor(gList);
+        }
+        /// <summary>
+        /// Creates a frustum
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="frustum">Bounding frustum</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateFrustum(Topology topology, BoundingFrustum frustum)
+        {
+            //Get the 8 corners of the frustum
+            var vertices = frustum.GetCorners();
+
+            uint[] indices;
+            if (topology == Topology.TriangleList)
+            {
+                indices = new uint[]
+                {
+                    0,1,2,
+                    0,2,3,
+
+                    4,6,5,
+                    4,7,6,
+
+                    3,6,2,
+                    3,7,6,
+
+                    0,1,5,
+                    0,5,4,
+
+                    2,1,5,
+                    2,5,6,
+
+                    0,3,7,
+                    0,7,4,
+                };
+            }
+            else if (topology == Topology.LineList)
+            {
+                indices = new uint[]
+                {
+                    0, 1,
+                    0, 3,
+                    1, 2,
+                    3, 2,
+
+                    4, 5,
+                    4, 7,
+                    5, 6,
+                    7, 6,
+
+                    0, 4,
+                    1, 5,
+                    2, 6,
+                    3, 7
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
             }
 
             return new GeometryDescriptor()

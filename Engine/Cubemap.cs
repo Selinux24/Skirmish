@@ -114,10 +114,10 @@ namespace Engine
         protected void InitializeBuffers(string name, CubemapDescription.CubeMapGeometry geometry, bool reverse)
         {
             GeometryDescriptor geom;
-            if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(1, 10, 10);
+            if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(Topology.TriangleList, 1, 10, 10);
             else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(1, 10, 10);
             else if (geometry == CubemapDescription.CubeMapGeometry.Hemispheric) geom = GeometryUtil.CreateHemispheric(1, 10, 10);
-            else throw new ArgumentException("Bad geometry enum type", nameof(geometry));
+            else throw new ArgumentException("Bad geometry enumeration type", nameof(geometry));
 
             if (textureCubic)
             {

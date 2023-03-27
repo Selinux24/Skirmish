@@ -1,5 +1,6 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
@@ -1096,12 +1097,14 @@ namespace Heightmap
         }
         private void SetDebugInfo()
         {
-            var listBoxes = Line3D.CreateWiredBox(terrain.GetBoundingBoxes(5));
+            var terrainBoxes = terrain.GetBoundingBoxes(5);
+            var terrainBoxesDesc = GeometryUtil.CreateBoxes(Topology.LineList, terrainBoxes);
+            var listBoxes = Line3D.CreateFromVertices(terrainBoxesDesc);
             bboxesDrawer.AddPrimitives(new Color4(1.0f, 0.0f, 0.0f, 0.55f), listBoxes);
 
-            var a1Lines = Line3D.CreateWiredBox(gardenerArea.Value);
+            var a1Lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, gardenerArea.Value));
             bboxesDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.55f), a1Lines);
-            var a2Lines = Line3D.CreateWiredBox(gardenerArea2.Value);
+            var a2Lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, gardenerArea2.Value));
             bboxesDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.55f), a2Lines);
 
             var tris1 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea.Value);
@@ -1634,7 +1637,7 @@ namespace Heightmap
                 soldierTris.SetPrimitives(color, tris);
             }
 
-            BoundingBox[] bboxes = new BoundingBox[]
+            var bboxes = new[]
             {
                 soldier.GetBoundingBox(true),
                 troops[0].GetBoundingBox(true),
@@ -1643,11 +1646,13 @@ namespace Heightmap
                 troops[3].GetBoundingBox(true),
             };
 
+            var lines = Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, bboxes));
+
             if (soldierLines == null)
             {
                 var desc = new PrimitiveListDrawerDescription<Line3D>()
                 {
-                    Primitives = Line3D.CreateWiredBox(bboxes).ToArray(),
+                    Primitives = lines.ToArray(),
                     Color = color
                 };
                 var t = AddComponent<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("SoldierLines", "SoldierLines", desc);
@@ -1655,7 +1660,7 @@ namespace Heightmap
             }
             else
             {
-                soldierLines.SetPrimitives(color, Line3D.CreateWiredBox(bboxes));
+                soldierLines.SetPrimitives(color, lines);
             }
         }
         private void UpdateLightDrawingVolumes()

@@ -469,7 +469,10 @@ namespace ModelDrawing
             var count = pManager.Count;
             for (int i = 0; i < count; i++)
             {
-                lines.AddRange(Line3D.CreateWiredBox(pManager.GetParticleSystem(i).Emitter.GetBoundingBox()));
+                var bbox = pManager.GetParticleSystem(i).Emitter.GetBoundingBox();
+                var geom = GeometryUtil.CreateBox(Topology.LineList, bbox);
+
+                lines.AddRange(Line3D.CreateFromVertices(geom));
             }
 
             pManagerLineDrawer.SetPrimitives(Color.Red, lines.ToArray());

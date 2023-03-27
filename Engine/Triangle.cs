@@ -187,7 +187,7 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingBox bbox)
         {
-            var geom = GeometryUtil.CreateBox(bbox);
+            var geom = GeometryUtil.CreateBox(topology, bbox);
 
             return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
@@ -199,7 +199,7 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, OrientedBoundingBox obb)
         {
-            var geom = GeometryUtil.CreateBox(obb);
+            var geom = GeometryUtil.CreateBox(topology, obb);
 
             return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
@@ -603,7 +603,7 @@ namespace Engine
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (!(obj is Triangle))
+            if (obj is not Triangle)
             {
                 return false;
             }

@@ -723,7 +723,7 @@ namespace GameLogic
 
         private void SetFrustum()
         {
-            lineDrawer.SetPrimitives(frstColor, Line3D.CreateWiredFrustum(Camera.Frustum));
+            lineDrawer.SetPrimitives(frstColor, Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, Camera.Frustum)));
         }
 
         protected void NewGame()

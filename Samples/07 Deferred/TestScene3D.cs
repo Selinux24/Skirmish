@@ -1,5 +1,7 @@
 ﻿using Engine;
 using Engine.Animation;
+using Engine.Collada;
+using Engine.Common;
 using Engine.Content;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
@@ -501,7 +503,7 @@ namespace Deferred
 
             if (Game.Input.KeyPressed(Keys.Space))
             {
-                lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateWiredFrustum(Camera.Frustum));
+                lineDrawer.SetPrimitives(Color.Yellow, Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, Camera.Frustum)));
                 lineDrawer.Visible = true;
             }
         }
