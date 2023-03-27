@@ -234,14 +234,14 @@ namespace Engine
                 return sphere;
             }
 
+            // Extract scaling
+            if (!transform.Decompose(out var scale, out _, out _))
+            {
+                return sphere;
+            }
+
             // Gets the new position
             var center = Vector3.TransformCoordinate(sphere.Center, transform);
-
-            // Calculates the scale vector
-            var scale = new Vector3(
-                transform.Column1.Length(),
-                transform.Column2.Length(),
-                transform.Column3.Length());
 
             // Gets the new sphere radius, based on the maximum scale axis value
             float radius = sphere.Radius * Math.Max(Math.Max(scale.X, scale.Y), scale.Z);

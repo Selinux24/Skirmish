@@ -132,7 +132,7 @@ namespace Physics
             var desc = new ModelDescription()
             {
                 Content = ContentDescription.FromContentData(sphere, mat),
-                CullingVolumeType = CullingVolumeTypes.SphericVolume,
+                ColliderType = ColliderTypes.Spheric,
             };
 
             ColliderData sphere1 = new(20, Matrix.Translation(Vector3.Up * 10f));
@@ -160,7 +160,7 @@ namespace Physics
             var desc = new ModelDescription()
             {
                 Content = ContentDescription.FromContentData(box, mat),
-                CullingVolumeType = CullingVolumeTypes.BoxVolume,
+                ColliderType = ColliderTypes.Box,
             };
 
             ColliderData box1 = new(15, Matrix.Translation(Vector3.Up * 20f));
@@ -256,7 +256,7 @@ namespace Physics
             var desc = new ModelDescription()
             {
                 Content = ContentDescription.FromContentData(pyramid3d, mat),
-                CullingVolumeType = CullingVolumeTypes.None,
+                ColliderType = ColliderTypes.Mesh,
             };
 
             ColliderData pyramid1 = new(15, Matrix.Translation(Vector3.Up * 40f));
