@@ -48,7 +48,7 @@ namespace Physics
             }
 
             Model.Manipulator.UpdateInternals(true);
-            Light.Position = PhysicsObject.Body.Position;
+            Light.Position = PhysicsObject.RigidBody.Position;
         }
 
         public void SetLines(PrimitiveListDrawer<Line3D> lineDrawer)

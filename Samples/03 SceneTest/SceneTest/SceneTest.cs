@@ -282,7 +282,7 @@ namespace SceneTest.SceneTest
         {
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
@@ -292,7 +292,7 @@ namespace SceneTest.SceneTest
 
             var descI = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
@@ -327,7 +327,7 @@ namespace SceneTest.SceneTest
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.Opaque,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
@@ -336,7 +336,7 @@ namespace SceneTest.SceneTest
 
             var descI = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.Opaque,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 UseAnisotropicFiltering = true,
@@ -367,7 +367,7 @@ namespace SceneTest.SceneTest
                 "Obelisk",
                 new ModelDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SceneTest/buildings/obelisk", "Obelisk.json"),
@@ -378,7 +378,7 @@ namespace SceneTest.SceneTest
                 "ObeliskI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     UseAnisotropicFiltering = true,
                     Instances = 4,
@@ -412,7 +412,7 @@ namespace SceneTest.SceneTest
                 new ModelDescription()
                 {
                     TextureIndex = 1,
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
                 });
 
@@ -421,7 +421,7 @@ namespace SceneTest.SceneTest
                 "SoldierI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/character/soldier", "soldier_anim2.json"),
                 });
@@ -458,7 +458,7 @@ namespace SceneTest.SceneTest
                 "Challenger",
                 new ModelDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/Challenger", "Challenger.json"),
                 });
@@ -468,7 +468,7 @@ namespace SceneTest.SceneTest
                 "LeopardI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/vehicles/leopard", "Leopard.json"),
@@ -507,7 +507,7 @@ namespace SceneTest.SceneTest
                 "Lamp",
                 new ModelDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
                 });
@@ -517,7 +517,7 @@ namespace SceneTest.SceneTest
                 "LampI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 4,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "lamp.json"),
@@ -557,7 +557,7 @@ namespace SceneTest.SceneTest
                 "Street Lamp",
                 new ModelDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
                 });
@@ -567,7 +567,7 @@ namespace SceneTest.SceneTest
                 "Street LampI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = 9,
                     Content = ContentDescription.FromFile("SceneTest/lamps", "streetlamp.json"),
@@ -622,7 +622,7 @@ namespace SceneTest.SceneTest
                 "Container",
                 new ModelDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
                 });
@@ -632,7 +632,7 @@ namespace SceneTest.SceneTest
                 "ContainerI",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     CullingVolumeType = CullingVolumeTypes.BoxVolume,
                     Instances = instances,
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),

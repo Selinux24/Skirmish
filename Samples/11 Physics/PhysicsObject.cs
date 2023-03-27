@@ -8,9 +8,9 @@ namespace Physics
 {
     public class PhysicsObject : IPhysicsObject
     {
-        public IRigidBody Body { get; private set; }
-        public ICollider Collider { get; private set; }
+        public IRigidBody RigidBody { get; private set; }
         public Model Model { get; private set; }
+        public ICollider Collider { get; private set; }
 
         private static MeshCollider CollisionTriangleSoupFromModel(Model model)
         {
@@ -19,24 +19,20 @@ namespace Physics
 
             return new MeshCollider(tris);
         }
-
         private static BoxCollider CollisionBoxFromModel(Model model)
         {
             return new BoxCollider(model.GetOrientedBoundingBox(true).Extents);
         }
-
         private static SphereCollider CollisionSphereFromModel(Model model)
         {
             return new SphereCollider(model.GetBoundingSphere(true).Radius);
         }
-
         private static CylinderCollider CollisionCylinderFromModel(Model model)
         {
             var extents = model.GetBoundingBox(true).GetExtents();
 
             return new CylinderCollider(extents.X, extents.Y * 2);
         }
-
         private static CapsuleCollider CollisionCapsuleFromModel(Model model)
         {
             var extents = model.GetBoundingBox(true).GetExtents();
@@ -44,25 +40,26 @@ namespace Physics
             return new CapsuleCollider(extents.X, extents.Y * 2);
         }
 
-        public PhysicsObject(IRigidBody body, Model model)
+        public PhysicsObject(IRigidBody rigidBody, Model model)
         {
-            Body = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
+            RigidBody = rigidBody ?? throw new ArgumentNullException(nameof(rigidBody), $"Physics object must have a rigid body.");
             Model = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");
 
-            Collider = model.CullingVolumeType switch
+            Collider = model.ColliderType switch
             {
-                CullingVolumeTypes.None => CollisionTriangleSoupFromModel(model),
-                CullingVolumeTypes.BoxVolume => CollisionBoxFromModel(model),
-                CullingVolumeTypes.CylinderVolume => CollisionCylinderFromModel(model),
-                CullingVolumeTypes.CapsuleVolume => CollisionCapsuleFromModel(model),
-                _ => CollisionSphereFromModel(model),
+                ColliderTypes.Spheric => CollisionSphereFromModel(model),
+                ColliderTypes.Box => CollisionBoxFromModel(model),
+                ColliderTypes.Cylinder => CollisionCylinderFromModel(model),
+                ColliderTypes.Capsule => CollisionCapsuleFromModel(model),
+                ColliderTypes.Mesh => CollisionTriangleSoupFromModel(model),
+                _ => null,
             };
-            Collider.Attach(body);
+            Collider?.Attach(rigidBody);
         }
 
         public void Update()
         {
-            if (Body == null)
+            if (RigidBody == null)
             {
                 return;
             }
@@ -72,28 +69,28 @@ namespace Physics
                 return;
             }
 
-            Model.Manipulator.SetRotation(Body.Rotation);
-            Model.Manipulator.SetPosition(Body.Position);
+            Model.Manipulator.SetRotation(RigidBody.Rotation);
+            Model.Manipulator.SetPosition(RigidBody.Position);
         }
 
         public void Reset(Matrix transform)
         {
-            if (Body == null)
+            if (RigidBody == null)
             {
                 return;
             }
 
-            Body.SetInitialState(transform);
+            RigidBody.SetInitialState(transform);
         }
 
         public void Reset(Vector3 position, Quaternion rotation)
         {
-            if (Body == null)
+            if (RigidBody == null)
             {
                 return;
             }
 
-            Body.SetInitialState(position, rotation);
+            RigidBody.SetInitialState(position, rotation);
         }
     }
 }

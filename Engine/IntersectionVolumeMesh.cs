@@ -10,7 +10,7 @@ namespace Engine
     /// <summary>
     /// Mesh intersection volume
     /// </summary>
-    public struct IntersectionVolumeMesh : IIntersectionVolume
+    public struct IntersectionVolumeMesh : ICullingVolume
     {
         /// <summary>
         /// Triangle list

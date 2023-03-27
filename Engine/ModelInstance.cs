@@ -374,7 +374,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public virtual bool Cull(IIntersectionVolume volume, out float distance)
+        public virtual bool Cull(ICullingVolume volume, out float distance)
         {
             return boundsHelper.Cull(Manipulator, model.CullingVolumeType, volume, out distance);
         }
@@ -419,12 +419,12 @@ namespace Engine
             return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
-        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
+        public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
-        public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
+        public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
         {
             if (detectionMode == IntersectDetectionMode.Box)
             {

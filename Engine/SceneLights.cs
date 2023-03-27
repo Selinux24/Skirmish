@@ -365,7 +365,7 @@ namespace Engine
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
         /// <param name="distance">Light maximum distance</param>
-        public void Cull(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
+        public void Cull(ICullingVolume volume, Vector3 viewerPosition, float distance)
         {
             visibleLights.Clear();
 
@@ -388,7 +388,7 @@ namespace Engine
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
         /// <param name="distance">Light maximum distance</param>
-        private IEnumerable<ISceneLight> CullPointLights(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
+        private IEnumerable<ISceneLight> CullPointLights(ICullingVolume volume, Vector3 viewerPosition, float distance)
         {
             var pLights = pointLights
                 .Where(l =>
@@ -426,7 +426,7 @@ namespace Engine
         /// <param name="volume">Volume</param>
         /// <param name="viewerPosition">Viewer position</param>
         /// <param name="distance">Light maximum distance</param>
-        private IEnumerable<ISceneLight> CullSpotLights(IIntersectionVolume volume, Vector3 viewerPosition, float distance)
+        private IEnumerable<ISceneLight> CullSpotLights(ICullingVolume volume, Vector3 viewerPosition, float distance)
         {
             var sLights = spotLights
                 .Where(l =>

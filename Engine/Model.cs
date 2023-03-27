@@ -418,7 +418,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool Cull(IIntersectionVolume volume, out float distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
             return boundsHelper.Cull(Manipulator, CullingVolumeType, volume, out distance);
         }
@@ -588,12 +588,12 @@ namespace Engine
             return IntersectionHelper.Intersects(this, detectionModeThis, other, detectionModeOther);
         }
         /// <inheritdoc/>
-        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
+        public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, volume);
         }
         /// <inheritdoc/>
-        public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
+        public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
         {
             if (detectionMode == IntersectDetectionMode.Box)
             {

@@ -1505,7 +1505,7 @@ namespace Engine.Modular
         }
 
         /// <inheritdoc/>
-        public override IIntersectionVolume GetCullingVolume()
+        public override ICullingVolume GetCullingVolume()
         {
             return assetMapIntersections;
         }
@@ -1513,7 +1513,7 @@ namespace Engine.Modular
         /// <summary>
         /// Asset map intersection helpers
         /// </summary>
-        class AssetMapIntersections : IIntersectionVolume
+        class AssetMapIntersections : ICullingVolume
         {
             /// <summary>
             /// Asset map

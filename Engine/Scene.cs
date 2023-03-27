@@ -1168,7 +1168,7 @@ namespace Engine
         /// Gets the scene volume for culling tests
         /// </summary>
         /// <returns>Returns the scene volume</returns>
-        public IIntersectionVolume GetSceneVolume()
+        public ICullingVolume GetSceneVolume()
         {
             var ground = GetComponents<IDrawable>()
                 .Where(c => c.Usage.HasFlag(SceneObjectUsages.Ground))

@@ -138,7 +138,7 @@ Space: Finds random over navmesh";
             var desc = new ModelDescription()
             {
                 TextureIndex = 0,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = contentDesc,
             };

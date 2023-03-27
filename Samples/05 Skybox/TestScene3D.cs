@@ -217,7 +217,7 @@ namespace Skybox
             var torchDesc = new ModelInstancedDescription()
             {
                 Instances = firePositions.Length,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Resources", "torch.json"),
             };
 
@@ -230,7 +230,7 @@ namespace Skybox
             var obeliskDesc = new ModelInstancedDescription()
             {
                 Instances = firePositions.Length,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
             };
 
@@ -240,7 +240,7 @@ namespace Skybox
         {
             var fountainDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
             };
 

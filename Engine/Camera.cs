@@ -1136,7 +1136,7 @@ namespace Engine
         /// <param name="detectionModeThis">Detection mode for this object</param>
         /// <param name="volume">Volume</param>
         /// <returns>Returns true if have intersection</returns>
-        public bool Intersects(IntersectDetectionMode detectionModeThis, IIntersectionVolume volume)
+        public bool Intersects(IntersectDetectionMode detectionModeThis, ICullingVolume volume)
         {
             return IntersectionHelper.Intersects(this, detectionModeThis, volume);
         }
@@ -1146,7 +1146,7 @@ namespace Engine
         /// </summary>
         /// <param name="detectionMode">Detection mode</param>
         /// <returns>Returns an intersection volume</returns>
-        public IIntersectionVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
+        public ICullingVolume GetIntersectionVolume(IntersectDetectionMode detectionMode)
         {
             if (detectionMode == IntersectDetectionMode.Sphere)
             {

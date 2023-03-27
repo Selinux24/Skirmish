@@ -4,9 +4,9 @@ using System.Collections.Generic;
 namespace Engine
 {
     /// <summary>
-    /// Intersection volume interface
+    /// Culling volume interface
     /// </summary>
-    public interface IIntersectionVolume
+    public interface ICullingVolume
     {
         /// <summary>
         /// Gets the volume center position

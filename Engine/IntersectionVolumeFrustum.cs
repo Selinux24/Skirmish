@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Frustum intersection volume
     /// </summary>
-    public struct IntersectionVolumeFrustum : IIntersectionVolume
+    public struct IntersectionVolumeFrustum : ICullingVolume
     {
         /// <summary>
         /// Internal volume

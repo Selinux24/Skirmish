@@ -354,7 +354,7 @@ namespace Engine
             /// Cull non contained nodes
             /// </summary>
             /// <param name="volume">Volume</param>
-            private (MapGridNode[] visibleNodesHigh, MapGridNode[] visibleNodesMedium, MapGridNode[] visibleNodesLow, MapGridNode[] visibleNodesMinimum) Cull(IIntersectionVolume volume)
+            private (MapGridNode[] visibleNodesHigh, MapGridNode[] visibleNodesMedium, MapGridNode[] visibleNodesLow, MapGridNode[] visibleNodesMinimum) Cull(ICullingVolume volume)
             {
                 var visibleNodesHigh = Array.FindAll(NodesHigh, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);
                 var visibleNodesMedium = Array.FindAll(NodesMedium, n => n.Node != null && volume.Contains(n.Node.BoundingBox) != ContainmentType.Disjoint);

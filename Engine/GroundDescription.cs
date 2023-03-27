@@ -80,7 +80,7 @@ namespace Engine
         public GroundDescription()
             : base()
         {
-            CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point;
+            CastShadow = ShadowCastingAlgorihtms.All;
         }
 
         /// <summary>

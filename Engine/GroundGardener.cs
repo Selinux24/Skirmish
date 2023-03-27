@@ -826,7 +826,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool Cull(IIntersectionVolume volume, out float distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -937,7 +937,7 @@ namespace Engine
         /// <param name="volume">Culling volume</param>
         /// <param name="sph">Foliagle bounding sphere</param>
         /// <returns>Returns a node list</returns>
-        private IEnumerable<QuadTreeNode> GetFoliageNodes(IIntersectionVolume volume, BoundingSphere sph)
+        private IEnumerable<QuadTreeNode> GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
         {
             var nodes = foliageQuadtree.GetNodesInVolume(ref sph);
             if (nodes?.Any() != true)

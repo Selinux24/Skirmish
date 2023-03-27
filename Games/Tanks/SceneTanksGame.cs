@@ -510,7 +510,7 @@ namespace Tanks
         {
             var tDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Optimize = false,
                 Content = ContentDescription.FromFile("Resources/Leopard", "Leopard.json"),
                 Instances = 2,

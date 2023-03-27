@@ -143,7 +143,7 @@ namespace SceneTest.SceneMaterials
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
@@ -350,7 +350,7 @@ namespace SceneTest.SceneMaterials
 
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Instances = count,
                 Content = ContentDescription.FromContentData(vertices, indices, materials),

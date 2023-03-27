@@ -107,7 +107,7 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public virtual bool Cull(IIntersectionVolume volume, out float distance)
+        public virtual bool Cull(ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

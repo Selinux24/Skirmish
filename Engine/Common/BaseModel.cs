@@ -38,6 +38,10 @@ namespace Engine.Common
         /// Culling volume for culling test
         /// </summary>
         public CullingVolumeTypes CullingVolumeType { get; private set; }
+        /// <summary>
+        /// Collider type for collision tests
+        /// </summary>
+        public ColliderTypes ColliderType { get; private set; }
 
         /// <summary>
         /// Base model
@@ -77,6 +81,7 @@ namespace Engine.Common
 
             UseAnisotropicFiltering = description?.UseAnisotropicFiltering ?? false;
             CullingVolumeType = description?.CullingVolumeType ?? CullingVolumeTypes.SphericVolume;
+            ColliderType = description?.ColliderType ?? ColliderTypes.None;
         }
         /// <summary>
         /// Initializes model geometry

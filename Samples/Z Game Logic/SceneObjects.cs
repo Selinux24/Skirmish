@@ -167,7 +167,7 @@ namespace GameLogic
                 new ModelInstancedDescription()
                 {
                     Instances = skirmishGame.AllSoldiers.Length,
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Content = ContentDescription.FromFile("Resources3D", "soldier_anim2.json"),
                 });
 

@@ -135,7 +135,7 @@ namespace Instancing
 
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Instances = side * side,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
@@ -166,7 +166,7 @@ namespace Instancing
 
             var treeDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = instances,
                 BlendMode = BlendModes.DefaultTransparent,
                 UseAnisotropicFiltering = true,
@@ -209,7 +209,7 @@ namespace Instancing
             var tDesc = new ModelInstancedDescription()
             {
                 Instances = 100,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
@@ -265,7 +265,7 @@ namespace Instancing
                 new ModelInstancedDescription()
                 {
                     Instances = 40,
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("Resources/Wall", "wall.json"),
                 });

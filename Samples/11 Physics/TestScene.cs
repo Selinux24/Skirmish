@@ -193,7 +193,7 @@ namespace Physics
             var desc = new ModelDescription()
             {
                 Content = ContentDescription.FromContentData(cylinder, mat),
-                CullingVolumeType = CullingVolumeTypes.CylinderVolume,
+                ColliderType = ColliderTypes.Cylinder,
             };
 
             ColliderData cylinder1 = new(15, Matrix.Translation(Vector3.Up * 30f));
@@ -227,7 +227,7 @@ namespace Physics
             var desc = new ModelDescription()
             {
                 Content = ContentDescription.FromContentData(capsule, mat),
-                CullingVolumeType = CullingVolumeTypes.CapsuleVolume,
+                ColliderType = ColliderTypes.Capsule,
             };
 
             ColliderData capsule1 = new(15, Matrix.Translation(Vector3.Up * 40f));

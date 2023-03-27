@@ -29,7 +29,7 @@ namespace Engine.Common
         /// <param name="detectionModeOne">Detection mode for one</param>
         /// <param name="twoVolume">Volume</param>
         /// <returns>Returns true if have intersection</returns>
-        public static bool Intersects(IIntersectable one, IntersectDetectionMode detectionModeOne, IIntersectionVolume twoVolume)
+        public static bool Intersects(IIntersectable one, IntersectDetectionMode detectionModeOne, ICullingVolume twoVolume)
         {
             var oneVolume = one?.GetIntersectionVolume(detectionModeOne);
 
@@ -41,7 +41,7 @@ namespace Engine.Common
         /// <param name="one">Volume one</param>
         /// <param name="two">Volume two</param>
         /// <returns>Returns true if have intersection</returns>
-        public static bool Intersects(IIntersectionVolume one, IIntersectionVolume two)
+        public static bool Intersects(ICullingVolume one, ICullingVolume two)
         {
             if (one == null || two == null)
             {

@@ -35,6 +35,10 @@ namespace Engine
         /// Culling volume by default
         /// </summary>
         public CullingVolumeTypes CullingVolumeType { get; set; } = CullingVolumeTypes.SphericVolume;
+        /// <summary>
+        /// Collider type
+        /// </summary>
+        public ColliderTypes ColliderType { get; set; } = ColliderTypes.None;
     }
 
     /// <summary>
@@ -59,6 +63,10 @@ namespace Engine
         /// Point shadow casting
         /// </summary>
         Point = 4,
+        /// <summary>
+        /// All shadow types
+        /// </summary>
+        All = Directional | Spot | Point,
     }
 
     /// <summary>
@@ -78,13 +86,36 @@ namespace Engine
         /// Spheric volume
         /// </summary>
         SphericVolume = 2,
+    }
+
+    /// <summary>
+    /// Collider types
+    /// </summary>
+    public enum ColliderTypes
+    {
         /// <summary>
-        /// Cylinder volume
+        /// None
         /// </summary>
-        CylinderVolume = 3,
+        None = 0,
         /// <summary>
-        /// Capsule volume
+        /// Sphere
         /// </summary>
-        CapsuleVolume = 4,
+        Spheric = 1,
+        /// <summary>
+        /// Oriented box
+        /// </summary>
+        Box = 2,
+        /// <summary>
+        /// Cylinder
+        /// </summary>
+        Cylinder = 3,
+        /// <summary>
+        /// Capsule
+        /// </summary>
+        Capsule = 4,
+        /// <summary>
+        /// Mesh
+        /// </summary>
+        Mesh = 5,
     }
 }

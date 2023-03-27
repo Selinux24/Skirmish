@@ -95,7 +95,7 @@ namespace SceneTest.SceneLights
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
@@ -107,7 +107,7 @@ namespace SceneTest.SceneLights
             var desc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
             };

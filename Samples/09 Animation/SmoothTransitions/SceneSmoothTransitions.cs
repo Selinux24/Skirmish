@@ -134,7 +134,7 @@ namespace Animation.SmoothTransitions
 
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
                 Instances = 9,
@@ -160,7 +160,7 @@ namespace Animation.SmoothTransitions
                 "Soldier",
                 new ModelDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SmoothTransitions/Resources/Soldier", "soldier_anim2.json"),
                     TextureIndex = 1,

@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -25,7 +24,7 @@ namespace Engine.Common
         /// <summary>
         /// Initial bounding box
         /// </summary>
-        private BoundingBox initialBox;
+        private BoundingBox initialAabb;
         /// <summary>
         /// Transformed bounding box
         /// </summary>
@@ -34,6 +33,10 @@ namespace Engine.Common
         /// Update bounding box flag
         /// </summary>
         private bool updateBoundingBox;
+        /// <summary>
+        /// Initial oriented bounding box
+        /// </summary>
+        private OrientedBoundingBox initialObb;
         /// <summary>
         /// Transformed bounding box
         /// </summary>
@@ -51,22 +54,29 @@ namespace Engine.Common
         {
             if (points.Any())
             {
+                var distinctPoints = points.Distinct().ToArray();
+
                 //Initialize the identity sphere
-                initialSphere = BoundingSphere.FromPoints(points.ToArray());
+                initialSphere = BoundingSphere.FromPoints(distinctPoints);
 
                 //Initialize the identity box
-                initialBox = BoundingBox.FromPoints(points.ToArray());
+                initialAabb = BoundingBox.FromPoints(distinctPoints);
+
+                //Initialize the identity obb
+                initialObb = new OrientedBoundingBox(initialAabb);
             }
             else
             {
                 initialSphere = new BoundingSphere();
 
-                initialBox = new BoundingBox();
+                initialAabb = new BoundingBox();
+
+                initialObb = new OrientedBoundingBox();
             }
 
             boundingSphere = initialSphere;
-            boundingBox = initialBox;
-            orientedBox = new OrientedBoundingBox(initialBox);
+            boundingBox = initialAabb;
+            orientedBox = initialObb;
 
             updateBoundingSphere = false;
             updateBoundingBox = false;
@@ -92,10 +102,7 @@ namespace Engine.Common
         {
             if (updateBoundingSphere || refresh)
             {
-                float maxScale = Math.Max(manipulator.Scaling.X, manipulator.Scaling.Y);
-                maxScale = Math.Max(maxScale, manipulator.Scaling.Z);
-
-                boundingSphere = new BoundingSphere(initialSphere.Center + manipulator.Position, initialSphere.Radius * maxScale);
+                boundingSphere = initialSphere.SetTransform(manipulator.FinalTransform);
 
                 updateBoundingSphere = false;
             }
@@ -112,9 +119,7 @@ namespace Engine.Common
         {
             if (updateBoundingBox || refresh)
             {
-                var obb = new OrientedBoundingBox(initialBox);
-                obb.Transform(manipulator.FinalTransform);
-                boundingBox = obb.GetBoundingBox();
+                boundingBox = GetOrientedBoundingBox(manipulator, refresh).GetBoundingBox();
 
                 updateBoundingBox = false;
             }
@@ -131,8 +136,7 @@ namespace Engine.Common
         {
             if (updateOrientedBox || refresh)
             {
-                orientedBox = new OrientedBoundingBox(initialBox);
-                orientedBox.Transform(manipulator.FinalTransform);
+                orientedBox = initialObb.SetTransform(manipulator.FinalTransform);
 
                 updateOrientedBox = false;
             }
@@ -148,7 +152,7 @@ namespace Engine.Common
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public bool Cull(Manipulator3D manipulator, CullingVolumeTypes volumeType, IIntersectionVolume volume, out float distance)
+        public bool Cull(Manipulator3D manipulator, CullingVolumeTypes volumeType, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -176,7 +180,7 @@ namespace Engine.Common
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public bool CullBoundingSphere(Manipulator3D manipulator, IIntersectionVolume volume, out float distance)
+        public bool CullBoundingSphere(Manipulator3D manipulator, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -197,7 +201,7 @@ namespace Engine.Common
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public bool CullBoundingBox(Manipulator3D manipulator, IIntersectionVolume volume, out float distance)
+        public bool CullBoundingBox(Manipulator3D manipulator, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

@@ -176,7 +176,7 @@ namespace Deferred
         {
             var desc1 = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 TextureIndex = 2,
                 Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
@@ -185,7 +185,7 @@ namespace Deferred
 
             var desc2 = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 2,
                 Content = ContentDescription.FromFile("Resources", "m24.json"),
             };
@@ -201,7 +201,7 @@ namespace Deferred
         {
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Resources", "leopard.json"),
                 Instances = 5,
             };
@@ -269,7 +269,7 @@ namespace Deferred
         {
             var desc1 = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("resources/trees", "birch_a.json"),
             };
@@ -277,7 +277,7 @@ namespace Deferred
 
             var desc2 = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 10,
                 Content = ContentDescription.FromFile("resources/trees", "birch_b.json"),

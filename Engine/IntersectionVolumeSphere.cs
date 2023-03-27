@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Sphere intersection volume
     /// </summary>
-    public struct IntersectionVolumeSphere : IIntersectionVolume
+    public struct IntersectionVolumeSphere : ICullingVolume
     {
         /// <summary>
         /// Bounding sphere

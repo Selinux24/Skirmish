@@ -10,7 +10,7 @@ namespace Engine.Physics
         /// <summary>
         /// Rigid body
         /// </summary>
-        IRigidBody Body { get; }
+        IRigidBody RigidBody { get; }
         /// <summary>
         /// Primitive collider
         /// </summary>

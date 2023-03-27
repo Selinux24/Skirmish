@@ -115,7 +115,7 @@ namespace Animation.Mixamo
 
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
                 Instances = 9,
@@ -141,7 +141,7 @@ namespace Animation.Mixamo
                 "TestModel",
                 new ModelDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Content = ContentDescription.FromFile("Mixamo/resources/TestModel", "TestModel.json"),
                 });
 

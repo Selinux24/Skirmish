@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// Bounding box intersection volume
     /// </summary>
-    public struct IntersectionVolumeAxisAlignedBox : IIntersectionVolume
+    public struct IntersectionVolumeAxisAlignedBox : ICullingVolume
     {
         /// <summary>
         /// Bounding box

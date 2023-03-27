@@ -226,7 +226,7 @@ namespace Heightmap
             sw.Restart();
             var rDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 250,
                 Content = ContentDescription.FromFile(@"Resources/Rocks", @"boulder.json"),
             };
@@ -243,7 +243,7 @@ namespace Heightmap
             sw.Restart();
             var treeDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"Resources/Trees", @"tree.json"),
@@ -261,7 +261,7 @@ namespace Heightmap
             sw.Restart();
             var tree2Desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 200,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile(@"Resources/Trees2", @"tree.json"),
@@ -281,7 +281,7 @@ namespace Heightmap
             var sDesc = new ModelDescription()
             {
                 TextureIndex = 0,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
             soldier = await AddComponentAgent<Model, ModelDescription>("Soldier", "Soldier", sDesc);
@@ -298,7 +298,7 @@ namespace Heightmap
             var tDesc = new ModelInstancedDescription()
             {
                 Instances = 4,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(@"Resources/Soldier", @"soldier_anim2.json"),
             };
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
@@ -314,7 +314,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 3,
                 Content = ContentDescription.FromFile(@"Resources/m24", @"m24.json"),
             };
@@ -332,7 +332,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/Bradley", @"Bradley.json"),
             };
@@ -350,7 +350,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/buildings", @"Affgan1.json"),
             };
@@ -368,7 +368,7 @@ namespace Heightmap
             sw.Restart();
             var mDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile(@"Resources/Watch Tower", @"Watch Tower.json"),
             };
             watchTower = await AddComponent<Model, ModelDescription>("Watch Tower", "Watch Tower", mDesc);
@@ -385,7 +385,7 @@ namespace Heightmap
             sw.Restart();
             var desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 CullingVolumeType = CullingVolumeTypes.BoxVolume,
                 Instances = 5,
                 Content = ContentDescription.FromFile(@"Resources/container", "Container.json"),
@@ -634,7 +634,7 @@ namespace Heightmap
                 ContentPath = "Resources/Scenery/Foliage/Billboard",
                 VegetationMap = "map.png",
                 PlantingArea = gardenerArea,
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 ChannelRed = new GroundGardenerDescription.Channel()
                 {
                     VegetationTextures = new[] { "grass_v.dds" },

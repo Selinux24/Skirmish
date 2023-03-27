@@ -191,7 +191,7 @@ namespace Animation.SimpleAnimation
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };
@@ -206,7 +206,7 @@ namespace Animation.SimpleAnimation
                 new ModelInstancedDescription()
                 {
                     Instances = 2,
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder.json"),
                 });
@@ -243,7 +243,7 @@ namespace Animation.SimpleAnimation
                 "Ladder2",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_2.json"),
@@ -254,7 +254,7 @@ namespace Animation.SimpleAnimation
                 "Ladder22",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Ladder", "Dn_Anim_Ladder_22.json"),
@@ -302,7 +302,7 @@ namespace Animation.SimpleAnimation
                 "Soldier",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Soldier", "soldier_anim2.json"),
@@ -347,7 +347,7 @@ namespace Animation.SimpleAnimation
                 "Rat",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 2,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Rat", "rat.json"),
@@ -373,7 +373,7 @@ namespace Animation.SimpleAnimation
                 "Doors",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Doors.json"),
@@ -384,7 +384,7 @@ namespace Animation.SimpleAnimation
                 "DoorWalls",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall1.json"),
@@ -427,7 +427,7 @@ namespace Animation.SimpleAnimation
                 "Walls",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Wall2.json"),
@@ -442,7 +442,7 @@ namespace Animation.SimpleAnimation
                 "Jails",
                 new ModelInstancedDescription()
                 {
-                    CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                    CastShadow = ShadowCastingAlgorihtms.All,
                     Instances = 1,
                     UseAnisotropicFiltering = true,
                     Content = ContentDescription.FromFile("SimpleAnimation/Resources/Doors", "Dn_Jails.json"),

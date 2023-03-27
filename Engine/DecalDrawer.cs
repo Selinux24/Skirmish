@@ -179,7 +179,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool Cull(IIntersectionVolume volume, out float distance)
+        public override bool Cull(ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

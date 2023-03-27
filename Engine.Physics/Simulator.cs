@@ -62,7 +62,7 @@ namespace Engine.Physics
         {
             //Apply force generators
             var bodies = physicsObjects
-                .Select(o => o.Body)
+                .Select(o => o.RigidBody)
                 .ToArray();
 
             foreach (var body in bodies)
@@ -76,9 +76,9 @@ namespace Engine.Physics
             //Integrate forces
             foreach (var obj in physicsObjects)
             {
-                if (obj.Body?.IsAwake == true)
+                if (obj.RigidBody?.IsAwake == true)
                 {
-                    obj.Body.Integrate(time);
+                    obj.RigidBody.Integrate(time);
                 }
 
                 obj.Update();
@@ -163,8 +163,8 @@ namespace Engine.Physics
             //Order by mass
             physicsObjects.Sort((p, b) =>
             {
-                float pMass = p.Body?.Mass ?? float.PositiveInfinity;
-                float bMass = b.Body?.Mass ?? float.PositiveInfinity;
+                float pMass = p.RigidBody?.Mass ?? float.PositiveInfinity;
+                float bMass = b.RigidBody?.Mass ?? float.PositiveInfinity;
 
                 return pMass.CompareTo(bMass);
             });

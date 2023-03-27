@@ -8,13 +8,13 @@ namespace Physics
 {
     public class PhysicsFloor : IPhysicsObject
     {
-        public IRigidBody Body { get; private set; }
+        public IRigidBody RigidBody { get; private set; }
         public ICollider Collider { get; private set; }
         public Model Model { get; private set; }
 
         public PhysicsFloor(IRigidBody body, Model model)
         {
-            Body = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
+            RigidBody = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
             Model = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");
 
             Collider = new HalfSpaceCollider(new Plane(model.Manipulator.Up, 0));
@@ -23,7 +23,7 @@ namespace Physics
 
         public void Update()
         {
-            if (Body == null)
+            if (RigidBody == null)
             {
                 return;
             }
@@ -33,28 +33,28 @@ namespace Physics
                 return;
             }
 
-            Model.Manipulator.SetRotation(Body.Rotation);
-            Model.Manipulator.SetPosition(Body.Position);
+            Model.Manipulator.SetRotation(RigidBody.Rotation);
+            Model.Manipulator.SetPosition(RigidBody.Position);
         }
 
         public void Reset(Matrix transform)
         {
-            if (Body == null)
+            if (RigidBody == null)
             {
                 return;
             }
 
-            Body.SetInitialState(transform);
+            RigidBody.SetInitialState(transform);
         }
 
         public void Reset(Vector3 position, Quaternion rotation)
         {
-            if (Body == null)
+            if (RigidBody == null)
             {
                 return;
             }
 
-            Body.SetInitialState(position, rotation);
+            RigidBody.SetInitialState(position, rotation);
         }
     }
 }

@@ -88,7 +88,7 @@ namespace Animation.AnimationParts
         {
             var tDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Optimize = false,
                 Content = ContentDescription.FromFile("AnimationParts/Resources/Leopard", "Leopard.json"),
                 TransformNames = new[]
@@ -134,7 +134,7 @@ namespace Animation.AnimationParts
 
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 Content = ContentDescription.FromContentData(vertices, indices, mat),
             };

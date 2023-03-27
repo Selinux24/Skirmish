@@ -485,7 +485,7 @@ namespace Terrain.Rts
 
             var hDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 TextureIndex = 0,
                 Content = ContentDescription.FromFile("Rts/resources/Helicopter", "M24.json"),
             };
@@ -510,7 +510,7 @@ namespace Terrain.Rts
 
             var tDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Optimize = false,
                 Content = ContentDescription.FromFile("Rts/resources/Leopard", "Leopard.json"),
                 TransformNames = new[] { "Barrel-mesh", "Turret-mesh", "Hull-mesh" },
@@ -560,7 +560,7 @@ namespace Terrain.Rts
 
             var hpDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Rts/resources/Heliport", "Heliport.json"),
             };
             heliport = await AddComponent<Model, ModelDescription>("Heliport", "Heliport", hpDesc);
@@ -583,7 +583,7 @@ namespace Terrain.Rts
 
             var gDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Rts/resources/Garage", "Garage.json"),
             };
             garage = await AddComponent<Model, ModelDescription>("Garage", "Garage", gDesc);
@@ -606,7 +606,7 @@ namespace Terrain.Rts
 
             var gDesc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Rts/resources/Buildings", "Building_1.json"),
             };
             building = await AddComponent<Model, ModelDescription>("Buildings", "Buildings", gDesc);
@@ -629,7 +629,7 @@ namespace Terrain.Rts
 
             var oDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 4,
                 Content = ContentDescription.FromFile("Rts/resources/Obelisk", "Obelisk.json"),
             };
@@ -651,7 +651,7 @@ namespace Terrain.Rts
 
             var rDesc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 Instances = 250,
                 Content = ContentDescription.FromFile("Rts/resources/Rocks", "boulder.json"),
             };
@@ -673,14 +673,14 @@ namespace Terrain.Rts
 
             var t1Desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
                 Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_a.json"),
             };
             var t2Desc = new ModelInstancedDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional | ShadowCastingAlgorihtms.Spot | ShadowCastingAlgorihtms.Point,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.DefaultTransparent,
                 Instances = 100,
                 Content = ContentDescription.FromFile("Rts/resources/Trees", "birch_b.json"),
