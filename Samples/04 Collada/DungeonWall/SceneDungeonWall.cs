@@ -100,7 +100,7 @@ namespace Collada.DungeonWall
             var mat = MaterialPhongContent.Default;
             mat.EmissiveColor = Color.White.RGB();
 
-            var sphere = GeometryUtil.CreateSphere(0.05f, 16, 5);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 16, 5);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
 

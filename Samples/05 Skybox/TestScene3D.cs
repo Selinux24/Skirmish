@@ -269,7 +269,7 @@ namespace Skybox
             var mat = MaterialCookTorranceContent.Default;
             mat.EmissiveColor = Color.Yellow.RGB();
 
-            var sphere = GeometryUtil.CreateSphere(0.05f, 32, 32);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.05f, 32, 32);
 
             var mFireDesc = new ModelDescription()
             {
@@ -660,7 +660,7 @@ namespace Skybox
         {
             volumesDrawer.SetPrimitives(ruinsVolumeColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, ruins.GetBoundingBox())));
 
-            var volumesTorchs = torchs.GetInstances().Select(i=> i.GetBoundingBox());
+            var volumesTorchs = torchs.GetInstances().Select(i => i.GetBoundingBox());
             volumesDrawer.SetPrimitives(torchVolumeColor, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, volumesTorchs)));
 
             var volumesObelisks = obelisks.GetInstances().Select(i => i.GetBoundingBox());
@@ -669,22 +669,21 @@ namespace Skybox
             var volumeFountain = fountain.GetBoundingBox();
             volumesDrawer.SetPrimitives(fountainVolumeColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, volumeFountain)));
 
-            for (int i = 1; i < Lights.PointLights.Length; i++)
+            var lights = Lights.PointLights.Select(l => new { Color = l.DiffuseColor, Sphere = l.BoundingSphere });
+            foreach (var light in lights)
             {
-                var light = Lights.PointLights[i];
+                var g = GeometryUtil.CreateSphere(Topology.LineList, light.Sphere, bsphSlices, bsphStacks);
 
-                volumesDrawer.SetPrimitives(
-                    new Color4(light.DiffuseColor, alpha),
-                    Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
+                volumesDrawer.SetPrimitives(new Color4(light.Color, alpha), Line3D.CreateFromVertices(g));
             }
         }
         private void DEBUGUpdateMovingVolumesDrawer()
         {
             var light = Lights.PointLights[0];
 
-            volumesDrawer.SetPrimitives(
-                new Color4(light.DiffuseColor, alpha),
-                Line3D.CreateWiredSphere(light.BoundingSphere, bsphSlices, bsphStacks));
+            var g = GeometryUtil.CreateSphere(Topology.LineList, light.BoundingSphere, bsphSlices, bsphStacks);
+
+            volumesDrawer.SetPrimitives(new Color4(light.DiffuseColor, alpha), Line3D.CreateFromVertices(g));
         }
         private void DEBUGUpdateGraphDrawer()
         {

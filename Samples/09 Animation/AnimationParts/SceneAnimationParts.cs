@@ -329,7 +329,7 @@ namespace Animation.AnimationParts
             itemTris.SetPrimitives(obbTrisColor, Triangle.ComputeTriangleList(Topology.TriangleList, obb));
             itemTris.Active = itemTris.Visible = true;
 
-            itemLines.SetPrimitives(sphLinesColor, Line3D.CreateWiredSphere(sph, 20, 20));
+            itemLines.SetPrimitives(sphLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, sph, 20, 20)));
             itemLines.SetPrimitives(boxLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, box)));
             itemLines.SetPrimitives(obbLinesColor, Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, obb)));
             itemLines.Active = itemLines.Visible = true;

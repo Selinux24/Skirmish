@@ -5,6 +5,8 @@ using System.Linq;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Spot light
     /// </summary>
@@ -216,7 +218,7 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public IEnumerable<Line3D> GetVolume(int sliceCount)
         {
-            var coneLines = Line3D.CreateWiredConeAngle(FallOffAngleRadians, Radius, sliceCount);
+            var coneLines = Line3D.CreateFromVertices(GeometryUtil.CreateConeCupAngle(Topology.LineList, FallOffAngleRadians, Radius, sliceCount));
 
             //The wired cone has his basin on the XZ plane. Light points along the Z axis, we have to rotate 90 degrees around the X axis
             Matrix rot = Matrix.RotationX(MathUtil.PiOverTwo);

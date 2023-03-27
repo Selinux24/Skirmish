@@ -165,7 +165,7 @@ namespace Engine
         /// <returns>Returns a point array of vertices</returns>
         public IEnumerable<Vector3> GetVertices(int sliceCount)
         {
-            var geom = GeometryUtil.CreateCylinder(Center, Radius, Height, sliceCount);
+            var geom = GeometryUtil.CreateCylinder(Topology.TriangleList, Center, Radius, Height, sliceCount);
 
             return geom.Vertices.ToArray();
         }

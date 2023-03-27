@@ -850,7 +850,7 @@ namespace GameLogic
             BoundingSphere bsph = soldierModels[soldier].GetBoundingSphere();
 
             Camera.LookTo(bsph.Center, CameraTranslations.Quick);
-            lineDrawer.SetPrimitives(bsphColor, Line3D.CreateWiredSphere(bsph, bsphSlices, bsphStacks));
+            lineDrawer.SetPrimitives(bsphColor, Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, bsph, bsphSlices, bsphStacks)));
         }
         protected void UpdateSoldierStates()
         {

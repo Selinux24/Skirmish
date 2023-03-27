@@ -115,8 +115,8 @@ namespace Engine
         {
             GeometryDescriptor geom;
             if (geometry == CubemapDescription.CubeMapGeometry.Box) geom = GeometryUtil.CreateBox(Topology.TriangleList, 1, 10, 10);
-            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(1, 10, 10);
-            else if (geometry == CubemapDescription.CubeMapGeometry.Hemispheric) geom = GeometryUtil.CreateHemispheric(1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Sphere) geom = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 10, 10);
+            else if (geometry == CubemapDescription.CubeMapGeometry.Hemispheric) geom = GeometryUtil.CreateHemispheric(Topology.TriangleList, 1, 10, 10);
             else throw new ArgumentException("Bad geometry enumeration type", nameof(geometry));
 
             if (textureCubic)

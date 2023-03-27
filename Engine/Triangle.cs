@@ -213,7 +213,7 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingSphere sph, int sliceCount, int stackCount)
         {
-            var geom = GeometryUtil.CreateSphere(sph, sliceCount, stackCount);
+            var geom = GeometryUtil.CreateSphere(topology, sph, sliceCount, stackCount);
 
             return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
@@ -226,7 +226,7 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCylinder cylinder, int stackCount)
         {
-            var geom = GeometryUtil.CreateCylinder(cylinder, stackCount);
+            var geom = GeometryUtil.CreateCylinder(topology, cylinder, stackCount);
 
             return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }
@@ -240,7 +240,7 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, BoundingCapsule capsule, int sliceCount, int stackCount)
         {
-            var geom = GeometryUtil.CreateCapsule(capsule, sliceCount, stackCount);
+            var geom = GeometryUtil.CreateCapsule(topology, capsule, sliceCount, stackCount);
 
             return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
         }

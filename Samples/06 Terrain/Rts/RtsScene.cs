@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 
 namespace Terrain.Rts
 {
+    using Engine.Collada;
     using Terrain.Rts.AI;
     using Terrain.Rts.AI.Agents;
     using Terrain.Rts.Controllers;
@@ -2463,19 +2464,13 @@ namespace Terrain.Rts
 
             lightsVolumeDrawer.Clear();
 
-            foreach (var spot in Lights.SpotLights)
-            {
-                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 10, 10);
+            var spheres =
+                Lights.SpotLights.Select(l => l.BoundingSphere)
+                .Concat(Lights.PointLights.Select(l => l.BoundingSphere));
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
-            }
+            var g = GeometryUtil.CreateSpheres(Topology.LineList, spheres, 10, 10);
 
-            foreach (var point in Lights.PointLights)
-            {
-                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 10, 10);
-
-                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
-            }
+            lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), Line3D.CreateFromVertices(g));
 
             lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
         }
@@ -2512,10 +2507,12 @@ namespace Terrain.Rts
                 return;
             }
 
+            movingObjLineDrawer.Clear();
+
             var hsph = helicopter.GetBoundingSphere();
             var t1sph = tankP1.GetBoundingSphere();
             var t2sph = tankP2.GetBoundingSphere();
-            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateWiredSphere(new[] { hsph, t1sph, t2sph }, 50, 20));
+            movingObjLineDrawer.SetPrimitives(new Color4(Color.White.ToColor3(), 0.55f), Line3D.CreateFromVertices(GeometryUtil.CreateSpheres(Topology.LineList, new[] { hsph, t1sph, t2sph }, 50, 20)));
 
             var hbox = helicopter.GetOrientedBoundingBox();
             var t1box = tankP1.GetOrientedBoundingBox();

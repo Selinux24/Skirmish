@@ -1027,14 +1027,14 @@ namespace SceneTest.SceneTest
 
             foreach (var spot in Lights.SpotLights)
             {
-                var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 12, 5);
+                var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, spot.BoundingSphere, 12, 5));
 
                 lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
-                var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 12, 5);
+                var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, point.BoundingSphere, 12, 5));
 
                 lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }

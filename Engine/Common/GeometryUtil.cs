@@ -319,146 +319,59 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Creates a line list
+        /// Creates a screen
         /// </summary>
-        /// <param name="lines">Line list</param>
+        /// <param name="form">Form</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateLineList(IEnumerable<Line3D> lines)
+        public static GeometryDescriptor CreateScreen(IEngineForm form)
         {
-            List<Vector3> data = new List<Vector3>();
-
-            foreach (var line in lines)
-            {
-                data.Add(line.Point1);
-                data.Add(line.Point2);
-            }
-
-            return new GeometryDescriptor()
-            {
-                Vertices = data.ToArray()
-            };
+            return CreateScreen(form.RenderWidth, form.RenderHeight);
         }
         /// <summary>
-        /// Creates a line list
+        /// Creates a screen
         /// </summary>
-        /// <param name="lines">Line list</param>
+        /// <param name="renderWidth">Render area width</param>
+        /// <param name="renderHeight">Render area height</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateIndexedLineList(IEnumerable<Line3D> lines)
+        public static GeometryDescriptor CreateScreen(int renderWidth, int renderHeight)
         {
-            List<Vector3> vData = new List<Vector3>();
-            List<uint> iData = new List<uint>();
+            Vector3[] vertices = new Vector3[4];
+            Vector2[] uvs = new Vector2[4];
+            uint[] indices = new uint[6];
 
-            foreach (var line in lines)
-            {
-                var p1 = line.Point1;
-                var p2 = line.Point2;
+            float width = renderWidth;
+            float height = renderHeight;
 
-                var i1 = vData.IndexOf(p1);
-                var i2 = vData.IndexOf(p2);
+            float left = ((width / 2) * -1);
+            float right = left + width;
+            float top = (height / 2);
+            float bottom = top - height;
 
-                if (i1 >= 0)
-                {
-                    iData.Add((uint)i1);
-                }
-                else
-                {
-                    vData.Add(p1);
-                    iData.Add((uint)vData.Count - 1);
-                }
+            vertices[0] = new Vector3(left, top, 0.0f);
+            uvs[0] = new Vector2(0.0f, 0.0f);
 
-                if (i2 >= 0)
-                {
-                    iData.Add((uint)i2);
-                }
-                else
-                {
-                    vData.Add(p2);
-                    iData.Add((uint)vData.Count - 1);
-                }
-            }
+            vertices[1] = new Vector3(right, bottom, 0.0f);
+            uvs[1] = new Vector2(1.0f, 1.0f);
+
+            vertices[2] = new Vector3(left, bottom, 0.0f);
+            uvs[2] = new Vector2(0.0f, 1.0f);
+
+            vertices[3] = new Vector3(right, top, 0.0f);
+            uvs[3] = new Vector2(1.0f, 0.0f);
+
+            indices[0] = 0;
+            indices[1] = 1;
+            indices[2] = 2;
+
+            indices[3] = 0;
+            indices[4] = 3;
+            indices[5] = 1;
 
             return new GeometryDescriptor()
             {
-                Vertices = vData.ToArray(),
-                Indices = iData.ToArray(),
-            };
-        }
-        /// <summary>
-        /// Creates a triangle list
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateTriangleList(IEnumerable<Triangle> triangles)
-        {
-            List<Vector3> vData = new List<Vector3>();
-
-            foreach (var triangle in triangles)
-            {
-                vData.Add(triangle.Point1);
-                vData.Add(triangle.Point2);
-                vData.Add(triangle.Point3);
-            }
-
-            return new GeometryDescriptor()
-            {
-                Vertices = vData.ToArray(),
-            };
-        }
-        /// <summary>
-        /// Creates a triangle list
-        /// </summary>
-        /// <param name="triangles">Triangle list</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateIndexedTriangleList(IEnumerable<Triangle> triangles)
-        {
-            List<Vector3> vData = new List<Vector3>();
-            List<uint> iData = new List<uint>();
-
-            foreach (var triangle in triangles)
-            {
-                var p1 = triangle.Point1;
-                var p2 = triangle.Point2;
-                var p3 = triangle.Point3;
-
-                var i1 = vData.IndexOf(p1);
-                var i2 = vData.IndexOf(p2);
-                var i3 = vData.IndexOf(p3);
-
-                if (i1 >= 0)
-                {
-                    iData.Add((uint)i1);
-                }
-                else
-                {
-                    vData.Add(p1);
-                    iData.Add((uint)vData.Count - 1);
-                }
-
-                if (i2 >= 0)
-                {
-                    iData.Add((uint)i2);
-                }
-                else
-                {
-                    vData.Add(p2);
-                    iData.Add((uint)vData.Count - 1);
-                }
-
-                if (i3 >= 0)
-                {
-                    iData.Add((uint)i3);
-                }
-                else
-                {
-                    vData.Add(p3);
-                    iData.Add((uint)vData.Count - 1);
-                }
-            }
-
-            return new GeometryDescriptor()
-            {
-                Vertices = vData.ToArray(),
-                Indices = iData.ToArray(),
+                Vertices = vertices,
+                Indices = indices,
+                Uvs = uvs,
             };
         }
         /// <summary>
@@ -559,62 +472,221 @@ namespace Engine.Common
                 Uvs = uvs,
             };
         }
+
         /// <summary>
-        /// Creates a screen
+        /// Creates a sphere
         /// </summary>
-        /// <param name="form">Form</param>
+        /// <param name="topology">Topology</param>
+        /// <param name="sphere">Sphere</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateScreen(IEngineForm form)
+        public static GeometryDescriptor CreateSphere(Topology topology, BoundingSphere sphere, int sliceCount, int stackCount)
         {
-            return CreateScreen(form.RenderWidth, form.RenderHeight);
+            return CreateSphere(topology, sphere.Center, sphere.Radius, sliceCount, stackCount);
         }
         /// <summary>
-        /// Creates a screen
+        /// Creates a sphere
         /// </summary>
-        /// <param name="renderWidth">Render area width</param>
-        /// <param name="renderHeight">Render area height</param>
+        /// <param name="topology">Topology</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateScreen(int renderWidth, int renderHeight)
+        public static GeometryDescriptor CreateSphere(Topology topology, float radius, int sliceCount, int stackCount)
         {
-            Vector3[] vertices = new Vector3[4];
-            Vector2[] uvs = new Vector2[4];
-            uint[] indices = new uint[6];
-
-            float width = renderWidth;
-            float height = renderHeight;
-
-            float left = ((width / 2) * -1);
-            float right = left + width;
-            float top = (height / 2);
-            float bottom = top - height;
-
-            vertices[0] = new Vector3(left, top, 0.0f);
-            uvs[0] = new Vector2(0.0f, 0.0f);
-
-            vertices[1] = new Vector3(right, bottom, 0.0f);
-            uvs[1] = new Vector2(1.0f, 1.0f);
-
-            vertices[2] = new Vector3(left, bottom, 0.0f);
-            uvs[2] = new Vector2(0.0f, 1.0f);
-
-            vertices[3] = new Vector3(right, top, 0.0f);
-            uvs[3] = new Vector2(1.0f, 0.0f);
-
-            indices[0] = 0;
-            indices[1] = 1;
-            indices[2] = 2;
-
-            indices[3] = 0;
-            indices[4] = 3;
-            indices[5] = 1;
-
-            return new GeometryDescriptor()
+            return CreateSphere(topology, Vector3.Zero, radius, sliceCount, stackCount);
+        }
+        /// <summary>
+        /// Creates a sphere
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="center">Sphere center</param>
+        /// <param name="radius">Radius</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSphere(Topology topology, Vector3 center, float radius, int sliceCount, int stackCount)
+        {
+            if (topology == Topology.TriangleList)
             {
-                Vertices = vertices,
-                Indices = indices,
-                Uvs = uvs,
-            };
+                List<Vector3> vertList = new List<Vector3>();
+                List<Vector3> normList = new List<Vector3>();
+                List<Vector3> tangList = new List<Vector3>();
+                List<Vector3> binmList = new List<Vector3>();
+                List<Vector2> uvList = new List<Vector2>();
+
+                sliceCount--;
+                stackCount++;
+
+                #region Positions
+
+                //North pole
+                vertList.Add(new Vector3(0.0f, radius, 0.0f) + center);
+                normList.Add(new Vector3(0.0f, 1.0f, 0.0f));
+                tangList.Add(new Vector3(0.0f, 0.0f, 1.0f));
+                binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
+                uvList.Add(new Vector2(0.0f, 0.0f));
+
+                float phiStep = MathUtil.Pi / stackCount;
+                float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+
+                for (int st = 1; st <= stackCount - 1; ++st)
+                {
+                    float phi = st * phiStep;
+
+                    for (int sl = 0; sl <= sliceCount; ++sl)
+                    {
+                        float theta = sl * thetaStep;
+
+                        float x = (float)Math.Sin(phi) * (float)Math.Cos(theta);
+                        float y = (float)Math.Cos(phi);
+                        float z = (float)Math.Sin(phi) * (float)Math.Sin(theta);
+
+                        float tX = -(float)Math.Sin(phi) * (float)Math.Sin(theta);
+                        float tY = 0.0f;
+                        float tZ = +(float)Math.Sin(phi) * (float)Math.Cos(theta);
+
+                        Vector3 position = radius * new Vector3(x, y, z);
+                        Vector3 normal = new Vector3(x, y, z);
+                        Vector3 tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
+                        Vector3 binormal = Vector3.Cross(normal, tangent);
+
+                        float u = theta / MathUtil.Pi * 2f;
+                        float v = phi / MathUtil.Pi;
+
+                        Vector2 texture = new Vector2(u, v);
+
+                        vertList.Add(position + center);
+                        normList.Add(normal);
+                        tangList.Add(tangent);
+                        binmList.Add(binormal);
+                        uvList.Add(texture);
+                    }
+                }
+
+                //South pole
+                vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
+                normList.Add(new Vector3(0.0f, -1.0f, 0.0f));
+                tangList.Add(new Vector3(0.0f, 0.0f, -1.0f));
+                binmList.Add(new Vector3(-1.0f, 0.0f, 0.0f));
+                uvList.Add(new Vector2(0.0f, 1.0f));
+
+                #endregion
+
+                List<int> indexList = new List<int>();
+
+                #region Indexes
+
+                for (int index = 1; index <= sliceCount; ++index)
+                {
+                    indexList.Add(0);
+                    indexList.Add(index + 1);
+                    indexList.Add(index);
+                }
+
+                int baseIndex = 1;
+                int ringVertexCount = sliceCount + 1;
+                for (int st = 0; st < stackCount - 2; ++st)
+                {
+                    for (int sl = 0; sl < sliceCount; ++sl)
+                    {
+                        indexList.Add(baseIndex + st * ringVertexCount + sl);
+                        indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                        indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+
+                        indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
+                        indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
+                        indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
+                    }
+                }
+
+                int southPoleIndex = vertList.Count - 1;
+
+                baseIndex = southPoleIndex - ringVertexCount;
+
+                for (int index = 0; index < sliceCount; ++index)
+                {
+                    indexList.Add(southPoleIndex);
+                    indexList.Add(baseIndex + index);
+                    indexList.Add(baseIndex + index + 1);
+                }
+
+                #endregion
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = vertList.ToArray(),
+                    Normals = normList.ToArray(),
+                    Tangents = tangList.ToArray(),
+                    Binormals = binmList.ToArray(),
+                    Uvs = uvList.ToArray(),
+                    Indices = indexList.Select(i => (uint)i).ToArray(),
+                };
+            }
+            else if (topology == Topology.LineList)
+            {
+                List<Vector3> vertList = new List<Vector3>();
+                List<int> indexList = new List<int>();
+
+                //North pole
+                vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
+
+                float phiStep = MathUtil.Pi / (stackCount + 1);
+                float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
+
+                //Compute vertices for each stack ring (do not count the poles as rings).
+                for (int st = 1; st < (stackCount + 1); ++st)
+                {
+                    float phi = st * phiStep;
+
+                    //Vertices of ring.
+                    for (int sl = 0; sl <= sliceCount; ++sl)
+                    {
+                        float theta = sl * thetaStep;
+
+                        //Spherical to Cartesian
+                        Vector3 position = new Vector3(
+                            radius * (float)Math.Sin(phi) * (float)Math.Cos(theta),
+                            radius * (float)Math.Cos(phi),
+                            radius * (float)Math.Sin(phi) * (float)Math.Sin(theta));
+
+                        indexList.Add(vertList.Count);
+                        indexList.Add(sl == sliceCount ? vertList.Count - sliceCount : vertList.Count + 1);
+
+                        vertList.Add(position + center);
+                    }
+                }
+
+                //South pole
+                vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = vertList.ToArray(),
+                    Indices = indexList.Select(i => (uint)i).ToArray(),
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
+        /// <summary>
+        /// Creates a sphere list
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="sphereList">Sphere list</param>
+        /// <param name="sliceCount">Slice count</param>
+        /// <param name="stackCount">Stack count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateSpheres(Topology topology, IEnumerable<BoundingSphere> sphereList, int sliceCount, int stackCount)
+        {
+            var gList = sphereList.Select(s => CreateSphere(topology, s, sliceCount, stackCount));
+
+            return new GeometryDescriptor(gList);
+        }
+
         /// <summary>
         /// Creates a box
         /// </summary>
@@ -784,18 +856,6 @@ namespace Engine.Common
         /// Creates a box list
         /// </summary>
         /// <param name="topology">Topology</param>
-        /// <param name="obbList">Oriented bounding box list</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateBoxes(Topology topology, IEnumerable<OrientedBoundingBox> obbList)
-        {
-            var gList = obbList.Select(b => CreateBox(topology, b));
-
-            return new GeometryDescriptor(gList);
-        }
-        /// <summary>
-        /// Creates a box list
-        /// </summary>
-        /// <param name="topology"></param>
         /// <param name="bboxList">Bounding box list</param>
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateBoxes(Topology topology, IEnumerable<BoundingBox> bboxList)
@@ -804,6 +864,102 @@ namespace Engine.Common
 
             return new GeometryDescriptor(gList);
         }
+        /// <summary>
+        /// Creates a box list
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="obbList">Oriented bounding box list</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateBoxes(Topology topology, IEnumerable<OrientedBoundingBox> obbList)
+        {
+            var gList = obbList.Select(b => CreateBox(topology, b));
+
+            return new GeometryDescriptor(gList);
+        }
+
+        /// <summary>
+        /// Creates a cone
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="baseRadius">The base radius</param>
+        /// <param name="height">Cone height</param>
+        /// <param name="sliceCount">The base slice count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateConeBaseRadius(Topology topology, float baseRadius, float height, int sliceCount)
+        {
+            List<Vector3> vertList = new List<Vector3>();
+            List<uint> indexList = new List<uint>();
+
+            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
+            vertList.Add(new Vector3(0.0f, -height, 0.0f));
+
+            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
+
+            for (int sl = 0; sl < sliceCount; sl++)
+            {
+                float theta = sl * thetaStep;
+
+                Vector3 position = new Vector3(
+                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
+                    -height,
+                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
+
+                vertList.Add(position);
+            }
+
+            if (topology == Topology.TriangleList)
+            {
+                for (uint index = 0; index < sliceCount; index++)
+                {
+                    indexList.Add(0);
+                    indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+                    indexList.Add(index + 2);
+
+                    indexList.Add(1);
+                    indexList.Add(index + 2);
+                    indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+                }
+            }
+            else if (topology == Topology.LineList)
+            {
+                for (uint index = 0; index < sliceCount; index++)
+                {
+                    indexList.Add(0);
+                    indexList.Add(index + 2);
+
+                    indexList.Add(1);
+                    indexList.Add(index + 2);
+
+                    indexList.Add(index + 2);
+                    indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
+                }
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+
+            return new GeometryDescriptor()
+            {
+                Vertices = vertList.ToArray(),
+                Indices = indexList.ToArray(),
+            };
+        }
+        /// <summary>
+        /// Creates a cone
+        /// </summary>
+        /// <param name="topology">Topology</param>
+        /// <param name="cupAngle">The cup angle</param>
+        /// <param name="height">Cone height</param>
+        /// <param name="sliceCount">The base slice count</param>
+        /// <returns>Returns a geometry descriptor</returns>
+        public static GeometryDescriptor CreateConeCupAngle(Topology topology, float cupAngle, float height, int sliceCount)
+        {
+            float baseRadius = (float)Math.Tan(cupAngle) * height;
+
+            return CreateConeBaseRadius(topology, baseRadius, height, sliceCount);
+        }
+
         /// <summary>
         /// Creates a frustum
         /// </summary>
@@ -1356,236 +1512,29 @@ namespace Engine.Common
                 Indices = indices,
             };
         }
-        /// <summary>
-        /// Creates a cone
-        /// </summary>
-        /// <param name="radius">The base radius</param>
-        /// <param name="sliceCount">The base slice count</param>
-        /// <param name="height">Cone height</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCone(float radius, uint sliceCount, float height)
-        {
-            List<Vector3> vertList = new List<Vector3>();
-            List<uint> indexList = new List<uint>();
 
-            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
-
-            vertList.Add(new Vector3(0.0f, -height, 0.0f));
-
-            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
-
-            for (int sl = 0; sl < sliceCount; sl++)
-            {
-                float theta = sl * thetaStep;
-
-                Vector3 position;
-                Vector3 normal;
-                Vector3 tangent;
-                Vector2 texture;
-
-                // Spherical to Cartesian
-                position.X = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
-                position.Y = -height;
-                position.Z = radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
-
-                normal = position;
-                normal.Normalize();
-
-                // Partial derivative of P with respect to theta
-                tangent.X = -radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta);
-                tangent.Y = 0.0f;
-                tangent.Z = +radius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta);
-                tangent.Normalize();
-
-                texture.X = theta / MathUtil.TwoPi;
-                texture.Y = 1f;
-
-                vertList.Add(position);
-            }
-
-            for (uint index = 0; index < sliceCount; index++)
-            {
-                indexList.Add(0);
-                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
-                indexList.Add(index + 2);
-
-                indexList.Add(1);
-                indexList.Add(index + 2);
-                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
-            }
-
-            return new GeometryDescriptor()
-            {
-                Vertices = vertList.ToArray(),
-                Indices = indexList.ToArray(),
-            };
-        }
-        /// <summary>
-        /// Creates a sphere
-        /// </summary>
-        /// <param name="sphere">Sphere</param>
-        /// <param name="sliceCount">Slice count</param>
-        /// <param name="stackCount">Stack count</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(BoundingSphere sphere, int sliceCount, int stackCount)
-        {
-            return CreateSphere(sphere.Center, sphere.Radius, sliceCount, stackCount);
-        }
-        /// <summary>
-        /// Creates a sphere
-        /// </summary>
-        /// <param name="radius">Radius</param>
-        /// <param name="sliceCount">Slice count</param>
-        /// <param name="stackCount">Stack count</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(float radius, int sliceCount, int stackCount)
-        {
-            return CreateSphere(Vector3.Zero, radius, sliceCount, stackCount);
-        }
-        /// <summary>
-        /// Creates a sphere
-        /// </summary>
-        /// <param name="center">Sphere center</param>
-        /// <param name="radius">Radius</param>
-        /// <param name="sliceCount">Slice count</param>
-        /// <param name="stackCount">Stack count</param>
-        /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateSphere(Vector3 center, float radius, int sliceCount, int stackCount)
-        {
-            List<Vector3> vertList = new List<Vector3>();
-            List<Vector3> normList = new List<Vector3>();
-            List<Vector3> tangList = new List<Vector3>();
-            List<Vector3> binmList = new List<Vector3>();
-            List<Vector2> uvList = new List<Vector2>();
-
-            sliceCount--;
-            stackCount++;
-
-            #region Positions
-
-            //North pole
-            vertList.Add(new Vector3(0.0f, radius, 0.0f) + center);
-            normList.Add(new Vector3(0.0f, 1.0f, 0.0f));
-            tangList.Add(new Vector3(0.0f, 0.0f, 1.0f));
-            binmList.Add(new Vector3(1.0f, 0.0f, 0.0f));
-            uvList.Add(new Vector2(0.0f, 0.0f));
-
-            float phiStep = MathUtil.Pi / stackCount;
-            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
-
-            for (int st = 1; st <= stackCount - 1; ++st)
-            {
-                float phi = st * phiStep;
-
-                for (int sl = 0; sl <= sliceCount; ++sl)
-                {
-                    float theta = sl * thetaStep;
-
-                    float x = (float)Math.Sin(phi) * (float)Math.Cos(theta);
-                    float y = (float)Math.Cos(phi);
-                    float z = (float)Math.Sin(phi) * (float)Math.Sin(theta);
-
-                    float tX = -(float)Math.Sin(phi) * (float)Math.Sin(theta);
-                    float tY = 0.0f;
-                    float tZ = +(float)Math.Sin(phi) * (float)Math.Cos(theta);
-
-                    Vector3 position = radius * new Vector3(x, y, z);
-                    Vector3 normal = new Vector3(x, y, z);
-                    Vector3 tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
-                    Vector3 binormal = Vector3.Cross(normal, tangent);
-
-                    float u = theta / MathUtil.Pi * 2f;
-                    float v = phi / MathUtil.Pi;
-
-                    Vector2 texture = new Vector2(u, v);
-
-                    vertList.Add(position + center);
-                    normList.Add(normal);
-                    tangList.Add(tangent);
-                    binmList.Add(binormal);
-                    uvList.Add(texture);
-                }
-            }
-
-            //South pole
-            vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
-            normList.Add(new Vector3(0.0f, -1.0f, 0.0f));
-            tangList.Add(new Vector3(0.0f, 0.0f, -1.0f));
-            binmList.Add(new Vector3(-1.0f, 0.0f, 0.0f));
-            uvList.Add(new Vector2(0.0f, 1.0f));
-
-            #endregion
-
-            List<int> indexList = new List<int>();
-
-            #region Indexes
-
-            for (int index = 1; index <= sliceCount; ++index)
-            {
-                indexList.Add(0);
-                indexList.Add(index + 1);
-                indexList.Add(index);
-            }
-
-            int baseIndex = 1;
-            int ringVertexCount = sliceCount + 1;
-            for (int st = 0; st < stackCount - 2; ++st)
-            {
-                for (int sl = 0; sl < sliceCount; ++sl)
-                {
-                    indexList.Add(baseIndex + st * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl);
-                    indexList.Add(baseIndex + st * ringVertexCount + sl + 1);
-                    indexList.Add(baseIndex + (st + 1) * ringVertexCount + sl + 1);
-                }
-            }
-
-            int southPoleIndex = vertList.Count - 1;
-
-            baseIndex = southPoleIndex - ringVertexCount;
-
-            for (int index = 0; index < sliceCount; ++index)
-            {
-                indexList.Add(southPoleIndex);
-                indexList.Add(baseIndex + index);
-                indexList.Add(baseIndex + index + 1);
-            }
-
-            #endregion
-
-            return new GeometryDescriptor()
-            {
-                Vertices = vertList.ToArray(),
-                Normals = normList.ToArray(),
-                Tangents = tangList.ToArray(),
-                Binormals = binmList.ToArray(),
-                Uvs = uvList.ToArray(),
-                Indices = indexList.Select(i => (uint)i).ToArray(),
-            };
-        }
         /// <summary>
         /// Creates a hemispheric
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateHemispheric(float radius, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateHemispheric(Topology topology, float radius, int sliceCount, int stackCount)
         {
-            return CreateHemispheric(Vector3.Zero, radius, sliceCount, stackCount);
+            return CreateHemispheric(topology, Vector3.Zero, radius, sliceCount, stackCount);
         }
         /// <summary>
         /// Creates a hemispheric
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="sliceCount">Slices (vertical)</param>
         /// <param name="stackCount">Stacks (horizontal)</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateHemispheric(Vector3 center, float radius, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateHemispheric(Topology topology, Vector3 center, float radius, int sliceCount, int stackCount)
         {
             List<Vector3> vertList = new List<Vector3>();
             List<Vector3> normList = new List<Vector3>();
@@ -1648,64 +1597,97 @@ namespace Engine.Common
 
             #endregion
 
-            List<int> indexList = new List<int>();
-
-            #region Indexes
-
-            int ringVertexCount = sliceCount + 1;
-            for (int st = 0; st < stackCount; st++)
+            if (topology == Topology.TriangleList)
             {
-                for (int sl = 0; sl < sliceCount; sl++)
+                List<int> indexList = new List<int>();
+
+                #region Indexes
+
+                int ringVertexCount = sliceCount + 1;
+                for (int st = 0; st < stackCount; st++)
                 {
-                    indexList.Add((st + 1) * ringVertexCount + sl + 0);
-                    indexList.Add((st + 0) * ringVertexCount + sl + 1);
-                    indexList.Add((st + 1) * ringVertexCount + sl + 1);
-
-                    if (st == 0)
+                    for (int sl = 0; sl < sliceCount; sl++)
                     {
-                        continue;
+                        indexList.Add((st + 1) * ringVertexCount + sl + 0);
+                        indexList.Add((st + 0) * ringVertexCount + sl + 1);
+                        indexList.Add((st + 1) * ringVertexCount + sl + 1);
+
+                        if (st == 0)
+                        {
+                            continue;
+                        }
+
+                        indexList.Add((st + 0) * ringVertexCount + sl + 0);
+                        indexList.Add((st + 0) * ringVertexCount + sl + 1);
+                        indexList.Add((st + 1) * ringVertexCount + sl + 0);
                     }
-
-                    indexList.Add((st + 0) * ringVertexCount + sl + 0);
-                    indexList.Add((st + 0) * ringVertexCount + sl + 1);
-                    indexList.Add((st + 1) * ringVertexCount + sl + 0);
                 }
+
+                #endregion
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = vertList.ToArray(),
+                    Normals = normList.ToArray(),
+                    Tangents = tangList.ToArray(),
+                    Binormals = binmList.ToArray(),
+                    Uvs = uvList.ToArray(),
+                    Indices = indexList.Select(i => (uint)i).ToArray(),
+                };
             }
-
-            #endregion
-
-            return new GeometryDescriptor()
+            else if (topology == Topology.LineList)
             {
-                Vertices = vertList.ToArray(),
-                Normals = normList.ToArray(),
-                Tangents = tangList.ToArray(),
-                Binormals = binmList.ToArray(),
-                Uvs = uvList.ToArray(),
-                Indices = indexList.Select(i => (uint)i).ToArray(),
-            };
+                List<uint> indexList = new List<uint>();
+
+                var count = vertList.Count / sliceCount;
+
+                for (uint r = 0; r < count; r++)
+                {
+                    for (uint i = 0; i < sliceCount; i++)
+                    {
+                        uint i0 = ((uint)sliceCount * r) + i;
+                        uint i1 = ((uint)sliceCount * r) + ((i + 1) % (uint)sliceCount);
+
+                        indexList.Add(i0);
+                        indexList.Add(i1);
+                    }
+                }
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = vertList,
+                    Indices = indexList,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
+
         /// <summary>
         /// Creates a cylinder
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(float radius, float height, int sliceCount)
+        public static GeometryDescriptor CreateCylinder(Topology topology, float radius, float height, int sliceCount)
         {
-            return CreateCylinder(Vector3.Zero, radius, height, sliceCount);
+            return CreateCylinder(topology, Vector3.Zero, radius, height, sliceCount);
         }
         /// <summary>
         /// Creates a cylinder
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="center">Center position</param>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(Vector3 center, float radius, float height, int sliceCount)
+        public static GeometryDescriptor CreateCylinder(Topology topology, Vector3 center, float radius, float height, int sliceCount)
         {
-            List<int> indexList = new List<int>();
             List<Vector3> verts = new List<Vector3>();
 
             var bsePosition = new Vector3(center.X, center.Y - (height * 0.5f), center.Z);
@@ -1723,19 +1705,23 @@ namespace Engine.Common
             }
             verts.AddRange(new[] { bsePosition, capPosition });
 
-            int cBase = verts.Count - 2;
-            int cCap = verts.Count - 1;
-
-            for (int i = 0; i < sliceCount; i++)
+            if (topology == Topology.TriangleList)
             {
-                var p0Base = i;
-                var p1Base = (i + 1) % sliceCount;
+                int cBase = verts.Count - 2;
+                int cCap = verts.Count - 1;
 
-                var p0Cap = p0Base + sliceCount;
-                var p1Cap = p1Base + sliceCount;
+                List<int> indexList = new List<int>();
 
-                indexList.AddRange(new[]
+                for (int i = 0; i < sliceCount; i++)
                 {
+                    var p0Base = i;
+                    var p1Base = (i + 1) % sliceCount;
+
+                    var p0Cap = p0Base + sliceCount;
+                    var p1Cap = p1Base + sliceCount;
+
+                    indexList.AddRange(new[]
+                    {
                     // Base circle
                     cBase,
                     p1Base,
@@ -1750,128 +1736,191 @@ namespace Engine.Common
                     p0Base, p1Base, p0Cap,
                     p1Base, p1Cap, p0Cap,
                 });
+                }
+
+                List<Vector3> norms = new List<Vector3>();
+
+                for (int i = 0; i < sliceCount * 2; i++)
+                {
+                    norms.Add(Vector3.Normalize(new(verts[i].X, 0, verts[i].Z)));
+                }
+
+                norms.AddRange(new[] { Vector3.Down, Vector3.Up });
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = verts,
+                    Normals = norms,
+                    Indices = indexList.Select(i => (uint)i).ToArray(),
+                };
             }
-
-            List<Vector3> norms = new List<Vector3>();
-
-            for (int i = 0; i < sliceCount * 2; i++)
+            else if (topology == Topology.LineList)
             {
-                norms.Add(Vector3.Normalize(new(verts[i].X, 0, verts[i].Z)));
+                List<int> indexList = new List<int>();
+
+                for (int i = 0; i < sliceCount; i++)
+                {
+                    int i0 = i;
+                    int i1 = (i + 1) % sliceCount;
+
+                    indexList.AddRange(new[] { i0, i1 });
+                    indexList.AddRange(new[] { i0 + sliceCount, i1 + sliceCount });
+
+                    indexList.AddRange(new[] { i0, i0 + sliceCount });
+                }
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = verts,
+                    Indices = indexList.Select(i => (uint)i).ToArray(),
+                };
             }
-
-            norms.AddRange(new[] { Vector3.Down, Vector3.Up });
-
-            return new GeometryDescriptor()
+            else
             {
-                Vertices = verts,
-                Normals = norms,
-                Tangents = null,
-                Binormals = null,
-                Uvs = null,
-                Indices = indexList.Select(i => (uint)i).ToArray(),
-            };
+                throw new NotImplementedException();
+            }
         }
         /// <summary>
         /// Creates a cylinder
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="cylinder">Bounding cylinder</param>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCylinder(BoundingCylinder cylinder, int sliceCount)
+        public static GeometryDescriptor CreateCylinder(Topology topology, BoundingCylinder cylinder, int sliceCount)
         {
-            return CreateCylinder(cylinder.Center, cylinder.Radius, cylinder.Height, sliceCount);
+            return CreateCylinder(topology, cylinder.Center, cylinder.Radius, cylinder.Height, sliceCount);
         }
+
         /// <summary>
         /// Creates a capsule
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCapsule(float radius, float height, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateCapsule(Topology topology, float radius, float height, int sliceCount, int stackCount)
         {
-            return CreateCapsule(Vector3.Zero, radius, height, sliceCount, stackCount);
+            return CreateCapsule(topology, Vector3.Zero, radius, height, sliceCount, stackCount);
         }
         /// <summary>
         /// Creates a capsule
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="center">Center</param>
         /// <param name="radius">Radius</param>
         /// <param name="height">Height</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCapsule(Vector3 center, float radius, float height, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateCapsule(Topology topology, Vector3 center, float radius, float height, int sliceCount, int stackCount)
         {
-            List<uint> indexList = new List<uint>();
             List<Vector3> verts = new List<Vector3>();
-            List<Vector3> norms = new List<Vector3>();
 
             // Create a hemispheric for each position
-            var hemispheric = CreateHemispheric(Vector3.Zero, radius, sliceCount, stackCount);
+            var hemispheric = CreateHemispheric(topology, Vector3.Zero, radius, sliceCount, stackCount);
 
             float hh = (height - radius - radius) * 0.5f;
 
             // Cap
-            indexList.AddRange(hemispheric.Indices);
             verts.AddRange(hemispheric.Vertices.Select(v => new Vector3(v.X, v.Y + hh, v.Z)));
-            norms.AddRange(hemispheric.Normals);
+            uint offset = (uint)verts.Count;
 
             // Base
-            // Reverse y coordinate and offset the indices
-            uint offset = (uint)verts.Count;
-            for (uint i = 0; i < hemispheric.Indices.Count(); i += 3)
-            {
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 0) + offset);
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 2) + offset);
-                indexList.Add(hemispheric.Indices.ElementAt((int)i + 1) + offset);
-            }
             verts.AddRange(hemispheric.Vertices.Select(v => new Vector3(v.X, -v.Y - hh, v.Z)));
-            norms.AddRange(hemispheric.Normals.Select(n => new Vector3(n.X, -n.Y, n.Z)));
 
             if (center != Vector3.Zero)
             {
+                // Translate to center
                 verts = verts.Select(v => v + center).ToList();
             }
 
-            uint capCylinderOffset = offset - (uint)sliceCount;
-            uint bseCylinderOffset = (uint)verts.Count - (uint)sliceCount;
-
-            // Add the side faces
-            for (uint i = 0; i < sliceCount; i++)
+            if (topology == Topology.TriangleList)
             {
-                uint p0 = i;
-                uint p1 = (i + 1) % (uint)sliceCount;
+                List<Vector3> norms = new List<Vector3>();
 
-                indexList.AddRange(new[]
+                //Populate normals
+                norms.AddRange(hemispheric.Normals);
+                norms.AddRange(hemispheric.Normals.Select(n => new Vector3(n.X, -n.Y, n.Z)));
+
+                List<uint> indexList = new List<uint>();
+
+                //Cap
+                indexList.AddRange(hemispheric.Indices);
+
+                //Base (reverse faces)
+                for (uint i = 0; i < hemispheric.Indices.Count(); i += 3)
                 {
-                    // Side
-                    p0 + bseCylinderOffset, p0 + capCylinderOffset, p1 + bseCylinderOffset,
-                    p1 + bseCylinderOffset, p0 + capCylinderOffset, p1 + capCylinderOffset,
-                });
-            }
+                    indexList.Add(hemispheric.Indices.ElementAt((int)i + 0) + offset);
+                    indexList.Add(hemispheric.Indices.ElementAt((int)i + 2) + offset);
+                    indexList.Add(hemispheric.Indices.ElementAt((int)i + 1) + offset);
+                }
 
-            return new GeometryDescriptor()
+                //Add the side faces
+                uint capCylinderOffset = offset - (uint)sliceCount;
+                uint bseCylinderOffset = (uint)verts.Count - (uint)sliceCount;
+                for (uint i = 0; i < sliceCount; i++)
+                {
+                    uint p0 = i;
+                    uint p1 = (i + 1) % (uint)sliceCount;
+
+                    indexList.AddRange(new[]
+                    {
+                        // Side
+                        p0 + bseCylinderOffset, p0 + capCylinderOffset, p1 + bseCylinderOffset,
+                        p1 + bseCylinderOffset, p0 + capCylinderOffset, p1 + capCylinderOffset,
+                    });
+                }
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = verts,
+                    Normals = norms,
+                    Indices = indexList,
+                };
+            }
+            else if (topology == Topology.LineList)
             {
-                Vertices = verts,
-                Normals = norms,
-                Tangents = null,
-                Binormals = null,
-                Uvs = null,
-                Indices = indexList,
-            };
+                List<uint> indexList = new List<uint>();
+
+                var count = verts.Count / sliceCount;
+
+                for (uint r = 0; r < count; r++)
+                {
+                    for (uint i = 0; i < sliceCount; i++)
+                    {
+                        uint i0 = ((uint)sliceCount * r) + i;
+                        uint i1 = ((uint)sliceCount * r) + ((i + 1) % (uint)sliceCount);
+
+                        indexList.Add(i0);
+                        indexList.Add(i1);
+                    }
+                }
+
+                return new GeometryDescriptor()
+                {
+                    Vertices = verts,
+                    Indices = indexList,
+                };
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
         }
         /// <summary>
         /// Creates a capsule
         /// </summary>
+        /// <param name="topology">Topology</param>
         /// <param name="capsule">Axis aligned bounding capsule</param>
         /// <param name="sliceCount">Slice count</param>
         /// <param name="stackCount">Stack count</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCapsule(BoundingCapsule capsule, int sliceCount, int stackCount)
+        public static GeometryDescriptor CreateCapsule(Topology topology, BoundingCapsule capsule, int sliceCount, int stackCount)
         {
-            return CreateCapsule(capsule.Center, capsule.Radius, capsule.Height, sliceCount, stackCount);
+            return CreateCapsule(topology, capsule.Center, capsule.Radius, capsule.Height, sliceCount, stackCount);
         }
 
         /// <summary>

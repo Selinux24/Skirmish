@@ -122,12 +122,13 @@ namespace Physics
         }
         private async Task InitializeSpheres()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
             int slices = 16;
             int stacks = 16;
-            var sphere = GeometryUtil.CreateSphere(2f, slices, stacks);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 2f, slices, stacks);
+            var wiredSphere = GeometryUtil.CreateSphere(Topology.LineList, 2f, slices * 2, stacks * 2);
 
             var desc = new ModelDescription()
             {
@@ -144,15 +145,15 @@ namespace Physics
             sphere1.Model.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
             sphere2.Model.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
 
-            sphere1.Lines = Line3D.CreateWiredSphere(sphere1.Model.GetBoundingSphere(), slices * 2, stacks * 2);
-            sphere2.Lines = Line3D.CreateWiredSphere(sphere2.Model.GetBoundingSphere(), slices * 2, stacks * 2);
+            sphere1.Lines = Line3D.CreateFromVertices(wiredSphere);
+            sphere2.Lines = Line3D.CreateFromVertices(wiredSphere);
 
             colliders.Add(sphere1);
             colliders.Add(sphere2);
         }
         private async Task InitializeBoxes()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
             var box = GeometryUtil.CreateBox(Topology.TriangleList, 2f, 2f, 2f);
@@ -181,15 +182,15 @@ namespace Physics
         }
         private async Task InitializeCylinders()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
             float radius = 2f;
             float height = 4f;
             Vector3 center = Vector3.Zero;
             int sliceCount = 16;
-
-            var cylinder = GeometryUtil.CreateCylinder(center, radius, height, sliceCount);
+            var cylinder = GeometryUtil.CreateCylinder(Topology.TriangleList, center, radius, height, sliceCount);
+            var wiredCylinder = GeometryUtil.CreateCylinder(Topology.LineList, center, radius, height, sliceCount);
 
             var desc = new ModelDescription()
             {
@@ -206,15 +207,15 @@ namespace Physics
             cylinder1.Model.TintColor = Color4.AdjustSaturation(Color.Yellow, 20f);
             cylinder2.Model.TintColor = Color4.AdjustSaturation(Color.Purple, 20f);
 
-            cylinder1.Lines = Line3D.CreateWiredCylinder(center, radius, height, sliceCount);
-            cylinder2.Lines = Line3D.CreateWiredCylinder(center, radius, height, sliceCount);
+            cylinder1.Lines = Line3D.CreateFromVertices(wiredCylinder);
+            cylinder2.Lines = Line3D.CreateFromVertices(wiredCylinder);
 
             colliders.Add(cylinder1);
             colliders.Add(cylinder2);
         }
         private async Task InitializeCapsules()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
             float radius = 2f;
@@ -222,8 +223,8 @@ namespace Physics
             Vector3 center = Vector3.Zero;
             int sliceCount = 16;
             int stackCount = 8;
-
-            var capsule = GeometryUtil.CreateCapsule(center, radius, height, sliceCount, stackCount);
+            var capsule = GeometryUtil.CreateCapsule(Topology.TriangleList, center, radius, height, sliceCount, stackCount);
+            var wiredCapsule = GeometryUtil.CreateCapsule(Topology.LineList, center, radius, height, sliceCount, stackCount);
 
             var desc = new ModelDescription()
             {
@@ -240,15 +241,15 @@ namespace Physics
             capsule1.Model.TintColor = Color4.AdjustSaturation(Color.Gray, 20f);
             capsule2.Model.TintColor = Color.SandyBrown;
 
-            capsule1.Lines = Line3D.CreateWiredCapsule(center, radius, height, sliceCount, stackCount);
-            capsule2.Lines = Line3D.CreateWiredCapsule(center, radius, height, sliceCount, stackCount);
+            capsule1.Lines = Line3D.CreateFromVertices(wiredCapsule);
+            capsule2.Lines = Line3D.CreateFromVertices(wiredCapsule);
 
             colliders.Add(capsule1);
             colliders.Add(capsule2);
         }
         private async Task InitializePyramids()
         {
-            MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
+            var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
             var pyramid3d = GeometryUtil.CreatePyramid(Topology.TriangleList, Vector3.Zero, 2f, 2f, 2f);

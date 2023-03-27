@@ -118,6 +118,18 @@ namespace Engine
 
             return CreateFromVertices(corners, indexes);
         }
+        public static IEnumerable<Line3D> CreateWiredRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
+        {
+            List<Line3D> lines = new List<Line3D>
+            {
+                new Line3D(v0, v1),
+                new Line3D(v1, v2),
+                new Line3D(v2, v3),
+                new Line3D(v3, v0)
+            };
+
+            return lines;
+        }
         public static IEnumerable<Line3D> CreateWiredPolygon(IEnumerable<Vector3> points)
         {
             int count = points.Count();
@@ -137,158 +149,7 @@ namespace Engine
 
             return CreateFromVertices(points, indexes);
         }
-        public static IEnumerable<Line3D> CreateWiredSphere(IEnumerable<BoundingSphere> bsphList, int sliceCount, int stackCount)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var bsph in bsphList)
-            {
-                lines.AddRange(CreateWiredSphere(bsph, sliceCount, stackCount));
-            }
-
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateWiredSphere(BoundingSphere bsph, int sliceCount, int stackCount)
-        {
-            return CreateWiredSphere(bsph.Center, bsph.Radius, sliceCount, stackCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredSphere(Vector3 center, float radius, int sliceCount, int stackCount)
-        {
-            List<Vector3> vertList = new List<Vector3>();
-            List<int> indexList = new List<int>();
-
-            //North pole
-            vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
-
-            float phiStep = MathUtil.Pi / (stackCount + 1);
-            float thetaStep = 2.0f * MathUtil.Pi / sliceCount;
-
-            //Compute vertices for each stack ring (do not count the poles as rings).
-            for (int st = 1; st < (stackCount + 1); ++st)
-            {
-                float phi = st * phiStep;
-
-                //Vertices of ring.
-                for (int sl = 0; sl <= sliceCount; ++sl)
-                {
-                    float theta = sl * thetaStep;
-
-                    //Spherical to Cartesian
-                    Vector3 position = new Vector3(
-                        radius * (float)Math.Sin(phi) * (float)Math.Cos(theta),
-                        radius * (float)Math.Cos(phi),
-                        radius * (float)Math.Sin(phi) * (float)Math.Sin(theta));
-
-                    indexList.Add(vertList.Count);
-                    indexList.Add(sl == sliceCount ? vertList.Count - sliceCount : vertList.Count + 1);
-
-                    vertList.Add(position + center);
-                }
-            }
-
-            //South pole
-            vertList.Add(new Vector3(0.0f, -radius, 0.0f) + center);
-
-            return CreateFromVertices(vertList, indexList);
-        }
-        public static IEnumerable<Line3D> CreateWiredConeAngle(float cupAngle, float height, int sliceCount)
-        {
-            float baseRadius = (float)Math.Tan(cupAngle) * height;
-
-            return CreateWiredConeBaseRadius(baseRadius, height, sliceCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredConeBaseRadius(float baseRadius, float height, int sliceCount)
-        {
-            List<Vector3> vertList = new List<Vector3>();
-            List<int> indexList = new List<int>();
-
-            vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
-            vertList.Add(new Vector3(0.0f, -height, 0.0f));
-
-            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
-
-            for (int sl = 0; sl < sliceCount; sl++)
-            {
-                float theta = sl * thetaStep;
-
-                Vector3 position = new Vector3(
-                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
-                    -height,
-                    baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
-
-                vertList.Add(position);
-            }
-
-            for (int index = 0; index < sliceCount; index++)
-            {
-                indexList.Add(0);
-                indexList.Add(index + 2);
-
-                indexList.Add(1);
-                indexList.Add(index + 2);
-
-                indexList.Add(index + 2);
-                indexList.Add(index == sliceCount - 1 ? 2 : index + 3);
-            }
-
-            return CreateFromVertices(vertList, indexList);
-        }
-        public static IEnumerable<Line3D> CreateWiredCylinder(float radius, float height, int sliceCount)
-        {
-            return CreateWiredCylinder(new BoundingCylinder(Vector3.Zero, radius, height), sliceCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredCylinder(Vector3 center, float radius, float height, int sliceCount)
-        {
-            return CreateWiredCylinder(new BoundingCylinder(center, radius, height), sliceCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredCylinder(BoundingCylinder cylinder, int sliceCount)
-        {
-            var verts = cylinder.GetVertices(sliceCount).ToArray();
-
-            List<Line3D> resultList = new List<Line3D>();
-
-            for (int i = 0; i < sliceCount; i++)
-            {
-                int i0 = i;
-                int i1 = (i + 1) % sliceCount;
-
-                resultList.Add(new Line3D(verts[i0], verts[i1]));
-                resultList.Add(new Line3D(verts[i0 + sliceCount], verts[i1 + sliceCount]));
-
-                resultList.Add(new Line3D(verts[i0], verts[i0 + sliceCount]));
-            }
-
-            return resultList;
-        }
-        public static IEnumerable<Line3D> CreateWiredCapsule(float radius, float height, int sliceCount, int stackCount)
-        {
-            return CreateWiredCapsule(Vector3.Zero, radius, height, sliceCount, stackCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredCapsule(Vector3 center, float radius, float height, int sliceCount, int stackCount)
-        {
-            return CreateWiredCapsule(new BoundingCapsule(center, radius, height), sliceCount, stackCount);
-        }
-        public static IEnumerable<Line3D> CreateWiredCapsule(BoundingCapsule capsule, int sliceCount, int stackCount)
-        {
-            var verts = capsule.GetVertices(sliceCount, stackCount).ToArray();
-
-            List<Line3D> resultList = new List<Line3D>();
-
-            var count = verts.Length / sliceCount;
-
-            for (int r = 0; r < count; r++)
-            {
-                for (int i = 0; i < sliceCount; i++)
-                {
-                    int i0 = (sliceCount * r) + i;
-                    int i1 = (sliceCount * r) + ((i + 1) % sliceCount);
-
-                    resultList.Add(new Line3D(verts[i0], verts[i1]));
-                }
-            }
-
-            return resultList;
-        }
+        
         public static IEnumerable<Line3D> CreatePath(IEnumerable<Vector3> path)
         {
             List<Line3D> lines = new List<Line3D>();
@@ -431,18 +292,7 @@ namespace Engine
 
             return lines;
         }
-        public static IEnumerable<Line3D> CreateWiredRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
-        {
-            List<Line3D> lines = new List<Line3D>
-            {
-                new Line3D(v0, v1),
-                new Line3D(v1, v2),
-                new Line3D(v2, v3),
-                new Line3D(v3, v0)
-            };
 
-            return lines;
-        }
         public static IEnumerable<Line3D> CreateFromVertices(GeometryDescriptor geometry)
         {
             return CreateFromVertices(geometry.Vertices, geometry.Indices);
@@ -490,6 +340,7 @@ namespace Engine
 
             return lines;
         }
+
         /// <summary>
         /// Evaluates arc
         /// </summary>

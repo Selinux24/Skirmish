@@ -155,7 +155,7 @@ namespace SceneTest.SceneMaterials
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
-            var sphere = GeometryUtil.CreateSphere(0.25f, 32, 32);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.25f, 32, 32);
 
             var desc = new ModelDescription()
             {
@@ -344,7 +344,7 @@ namespace SceneTest.SceneMaterials
         }
         private async Task<ModelInstanced> InitializeSphereInstanced(string name, int count, IEnumerable<IMaterialContent> materials)
         {
-            var sphere = GeometryUtil.CreateSphere(radius, stacks, stacks);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, radius, stacks, stacks);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
 

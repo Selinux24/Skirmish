@@ -106,7 +106,7 @@ namespace SceneTest.SceneStencilPass
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color.White.RGB();
 
-            var sphere = GeometryUtil.CreateSphere(0.1f, 16, 5);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(sphere);
             var indices = sphere.Indices;
 
@@ -282,14 +282,14 @@ namespace SceneTest.SceneStencilPass
 
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 24, 24);
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, spot.BoundingSphere, 24, 24));
 
                     lightsVolumeDrawer.AddPrimitives(color, lines);
                 }
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 24, 24);
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, point.BoundingSphere, 24, 24));
 
                     lightsVolumeDrawer.AddPrimitives(color, lines);
                 }

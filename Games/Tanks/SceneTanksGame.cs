@@ -586,7 +586,7 @@ namespace Tanks
         }
         private async Task InitializeModelProjectile()
         {
-            var sphereDesc = GeometryUtil.CreateSphere(1, 5, 5);
+            var sphereDesc = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 5, 5);
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseColor = Color.Black;
 

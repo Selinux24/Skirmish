@@ -287,7 +287,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         private void InitializeBuffers(string name)
         {
-            var sphere = GeometryUtil.CreateSphere(1, 10, 75);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 10, 75);
 
             var vertices = VertexPosition.Generate(sphere.Vertices);
             var indices = GeometryUtil.ChangeCoordinate(sphere.Indices);

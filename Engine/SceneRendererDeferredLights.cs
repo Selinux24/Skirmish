@@ -243,7 +243,7 @@ namespace Engine
         /// <param name="indx">Index list</param>
         private void CreatePointLight(List<VertexPosition> verts, List<uint> indx)
         {
-            var sphere = GeometryUtil.CreateSphere(1, 16, 16);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
             pointLightGeometry.Offset = indx.Count;
             pointLightGeometry.IndexCount = sphere.Indices.Count();
@@ -263,7 +263,7 @@ namespace Engine
         /// <param name="indx">Index list</param>
         private void CreateSpotLight(List<VertexPosition> verts, List<uint> indx)
         {
-            var sphere = GeometryUtil.CreateSphere(1, 16, 16);
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
             spotLightGeometry.Offset = indx.Count;
             spotLightGeometry.IndexCount = sphere.Indices.Count();

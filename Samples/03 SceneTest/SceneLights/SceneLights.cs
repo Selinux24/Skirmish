@@ -118,7 +118,7 @@ namespace SceneTest.SceneLights
         {
             var desc = new ModelDescription()
             {
-                CastShadow = ShadowCastingAlgorihtms.Directional,
+                CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
                 Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
@@ -131,7 +131,7 @@ namespace SceneTest.SceneLights
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color.White.RGB();
 
-            var s = GeometryUtil.CreateSphere(0.1f, 16, 5);
+            var s = GeometryUtil.CreateSphere(Topology.TriangleList, 0.1f, 16, 5);
             var vertices = VertexData.FromDescriptor(s);
             var indices = s.Indices;
 
@@ -147,7 +147,7 @@ namespace SceneTest.SceneLights
         {
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
 
-            var cone = GeometryUtil.CreateCone(0.25f, 16, 0.5f);
+            var cone = GeometryUtil.CreateConeBaseRadius(Topology.TriangleList, 0.25f, 0.5f, 16);
 
             //Transform base position
             Matrix m = Matrix.RotationX(MathUtil.PiOverTwo) * Matrix.Translation(Vector3.ForwardLH * 0.5f);
@@ -405,14 +405,14 @@ namespace SceneTest.SceneLights
 
                 foreach (var spot in Lights.SpotLights)
                 {
-                    var lines = Line3D.CreateWiredSphere(spot.BoundingSphere, 24, 24);
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, spot.BoundingSphere, 24, 24));
 
                     lightsVolumeDrawer.AddPrimitives(spotColor, lines);
                 }
 
                 foreach (var point in Lights.PointLights)
                 {
-                    var lines = Line3D.CreateWiredSphere(point.BoundingSphere, 24, 24);
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, point.BoundingSphere, 24, 24));
 
                     lightsVolumeDrawer.AddPrimitives(pointColor, lines);
                 }

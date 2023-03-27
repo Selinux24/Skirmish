@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// Point light
     /// </summary>
@@ -150,7 +152,7 @@ namespace Engine
         /// <returns>Returns a line list representing the light volume</returns>
         public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
-            return Line3D.CreateWiredSphere(BoundingSphere, sliceCount, stackCount);
+            return Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, BoundingSphere, sliceCount, stackCount));
         }
 
         /// <inheritdoc/>
