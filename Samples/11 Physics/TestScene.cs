@@ -86,30 +86,15 @@ namespace Physics
         }
         private async Task InitializeFloor()
         {
-            float l = floorSize;
-            float h = 0f;
-
-            VertexData[] vertices = new VertexData[]
-            {
-                new VertexData{ Position = new Vector3(-l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(0.0f, 0.0f) },
-                new VertexData{ Position = new Vector3(-l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(0.0f, l) },
-                new VertexData{ Position = new Vector3(+l, -h, -l), Normal = Vector3.Up, Texture = new Vector2(l, 0.0f) },
-                new VertexData{ Position = new Vector3(+l, -h, +l), Normal = Vector3.Up, Texture = new Vector2(l, l) },
-            };
-
-            uint[] indices = new uint[]
-            {
-                0, 1, 2,
-                1, 3, 2,
-            };
-
             var material = MaterialBlinnPhongContent.Default;
             material.DiffuseTexture = "resources/floor.png";
+
+            var plane = GeometryUtil.CreatePlane(floorSize * 2f, 0f, Vector3.Up);
 
             var desc = new ModelDescription()
             {
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(vertices, indices, material),
+                Content = ContentDescription.FromContentData(plane, material),
             };
 
             var floor = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
