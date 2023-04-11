@@ -72,24 +72,32 @@ namespace Engine.Physics.Colliders
         /// <inheritdoc/>
         public override Vector3 Support(Vector3 dir)
         {
-            // Dumb O(n) support function, just brute force check all points
-            dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
+            //find support in model space
+            dir = Vector3.TransformNormal(dir, RotationScaleInverse);
+            var furthest_point = triangles[0].Point1;
 
-            Vector3 furthest_point = vertices[0];
+            // Dumb O(n) support function, just brute force check all points
             float max_dot = Vector3.Dot(furthest_point, dir);
 
-            for (int i = 1; i < vertices.Length; i++)
+            for (int t = 0; t < triangles.Length; t++)
             {
-                Vector3 v = vertices[i];
-                float d = Vector3.Dot(v, dir);
-                if (d > max_dot)
+                var verts = triangles[t].GetVertices();
+
+                for (int i = 0; i < 3; i++)
                 {
-                    max_dot = d;
-                    furthest_point = v;
+                    var v = verts.ElementAt(i);
+
+                    float d = Vector3.Dot(v, dir);
+                    if (d > max_dot)
+                    {
+                        max_dot = d;
+                        furthest_point = v;
+                    }
                 }
             }
 
-            return Vector3.TransformNormal(furthest_point, RotationScale) + Position; //convert support to world space
+            //convert support to world space
+            return Vector3.TransformNormal(furthest_point, RotationScale) + Position;
         }
     }
 }

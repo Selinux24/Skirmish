@@ -66,29 +66,36 @@ namespace Engine.Physics.Colliders
         /// <inheritdoc/>
         public override Vector3 Support(Vector3 dir)
         {
+            //find support in model space
+            dir = Vector3.TransformNormal(dir, RotationScaleInverse);
+            var furthest_point = triangle.Point1;
+
             //Find which triangle vertex is furthest along dir
             float dot0 = Vector3.Dot(triangle.Point1, dir);
             float dot1 = Vector3.Dot(triangle.Point2, dir);
             float dot2 = Vector3.Dot(triangle.Point3, dir);
-            Vector3 furthest_point = triangle.Point1;
+
             if (dot1 > dot0)
             {
                 furthest_point = triangle.Point2;
                 if (dot2 > dot1)
+                {
                     furthest_point = triangle.Point3;
+                }
             }
             else if (dot2 > dot0)
             {
                 furthest_point = triangle.Point3;
             }
 
-            //fake some depth behind triangle so we have volume
+            //Fake some depth behind triangle so we have volume
             if (Vector3.Dot(dir, triangle.Normal) < 0)
             {
                 furthest_point -= triangle.Normal;
             }
 
-            return furthest_point;
+            //convert support to world space
+            return Vector3.TransformNormal(furthest_point, RotationScale) + Position;
         }
     }
 }

@@ -106,14 +106,11 @@ namespace Engine.Physics.GJK
                 {
                     if (calcContact)
                     {
-                        var (faces, sdist) = EPA(a, b, c, d, coll1, coll2);
+                        var (snormal, sdist) = EPA(a, b, c, d, coll1, coll2);
 
-                        // Dot vertex with normal to resolve collision along normal!
-                        CalcBarycentric(faces[0], faces[1], faces[2], faces[3], out Vector3 bc);
-
-                        point = bc.X * faces[0] + bc.Y * faces[1] + bc.Z * faces[2];
-                        normal = Vector3.Normalize(faces[3]);
-                        penetration = (faces[3] * sdist).Length();
+                        normal = snormal;
+                        penetration = sdist;
+                        point = coll1.Position + (normal * sdist);
                     }
 
                     return true;
@@ -245,7 +242,7 @@ namespace Engine.Physics.GJK
         /// <summary>
         /// Expanding Polytope Algorithm. Used to find the minimum transaction vector of two intersecting colliders using the final simplex obtained with the GJK algorithm
         /// </summary>
-        private static (Vector3[] faces, float dist) EPA(Vector3 a, Vector3 b, Vector3 c, Vector3 d, ICollider coll1, ICollider coll2)
+        private static (Vector3 normal, float dist) EPA(Vector3 a, Vector3 b, Vector3 c, Vector3 d, ICollider coll1, ICollider coll2)
         {
             // Array of faces, each with 3 vertices and a normal
             Vector3[,] faces = new Vector3[EPA_MAX_NUM_FACES, 4];
@@ -294,7 +291,7 @@ namespace Engine.Physics.GJK
                 if (sdist - min_dist < EPA_TOLERANCE)
                 {
                     // Convergence (new point is not significantly further from origin)
-                    return (new[] { faces[closest_face, 0], faces[closest_face, 1], faces[closest_face, 2], faces[closest_face, 3] }, sdist);
+                    return (faces[closest_face, 3], sdist);
                 }
 
                 Vector3[,] loose_edges = new Vector3[EPA_MAX_NUM_LOOSE_EDGES, 2];
@@ -384,85 +381,7 @@ namespace Engine.Physics.GJK
             Console.WriteLine("EPA did not converge");
 
             // Return most recent closest point
-            return (new[] { faces[closest_face, 0], faces[closest_face, 1], faces[closest_face, 2], faces[closest_face, 3] }, Vector3.Dot(faces[closest_face, 0], faces[closest_face, 3]));
-        }
-        /// <summary>
-        /// Calculate the barycentric coordinates of the origin (0,0,0) projected onto the plane of the triangle.
-        /// </summary>
-        /// <param name="a">Point a</param>
-        /// <param name="b">Point b</param>
-        /// <param name="c">Point c</param>
-        /// <param name="normal">Plane normal</param>
-        /// <param name="result">Barycentric coordinates</param>
-        /// <remarks>
-        /// [W. Heidrich, Journal of Graphics, GPU, and Game Tools,Volume 10, Issue 3, 2005.]
-        /// </remarks>
-        private static void CalcBarycentric(Vector3 a, Vector3 b, Vector3 c, Vector3 normal, out Vector3 result)
-        {
-            Vector3 u = Vector3.Subtract(a, b);
-            Vector3 v = Vector3.Subtract(a, c);
-
-            float t = normal.LengthSquared();
-            Vector3 tmp = Vector3.Cross(u, a);
-            float gamma = Vector3.Dot(tmp, normal) / t;
-            tmp = Vector3.Cross(a, v);
-            float beta = Vector3.Dot(tmp, normal) / t;
-            float alpha = 1f - gamma - beta;
-
-            // Clamp the projected barycentric coordinates to lie within the triangle, such that the clamped coordinates are closest (euclidean) to the original point.
-            // [https://math.stackexchange.com/questions/1092912/find-closest-point-in-triangle-given-barycentric-coordinates-outside]
-            if (alpha >= 0f && beta < 0f)
-            {
-                t = Vector3.Dot(a, u);
-                if ((gamma < 0f) && (t > 0f))
-                {
-                    beta = Math.Min(1f, t / u.LengthSquared());
-                    alpha = 1f - beta;
-                    gamma = 0f;
-                }
-                else
-                {
-                    gamma = Math.Min(1f, Math.Max(0f, Vector3.Dot(a, v) / v.LengthSquared()));
-                    alpha = 1f - gamma;
-                    beta = 0f;
-                }
-            }
-            else if (beta >= 0f && gamma < 0f)
-            {
-                Vector3 w = Vector3.Subtract(b, c);
-                t = Vector3.Dot(b, w);
-                if ((alpha < 0f) && (t > 0f))
-                {
-                    gamma = Math.Min(1f, t / w.LengthSquared());
-                    beta = 1f - gamma;
-                    alpha = 0f;
-                }
-                else
-                {
-                    alpha = Math.Min(1f, Math.Max(0f, -Vector3.Dot(b, u) / u.LengthSquared()));
-                    beta = 1f - alpha;
-                    gamma = 0f;
-                }
-            }
-            else if (gamma >= 0f && alpha < 0f)
-            {
-                Vector3 w = Vector3.Subtract(b, c);
-                t = -Vector3.Dot(c, v);
-                if ((beta < 0f) && (t > 0f))
-                {
-                    alpha = Math.Min(1f, t / v.LengthSquared());
-                    gamma = 1f - alpha;
-                    beta = 0f;
-                }
-                else
-                {
-                    beta = Math.Min(1f, Math.Max(0f, -Vector3.Dot(c, w) / w.LengthSquared()));
-                    gamma = 1f - beta;
-                    alpha = 0f;
-                }
-            }
-
-            result = new Vector3(alpha, beta, gamma);
+            return (faces[closest_face, 3], Vector3.Dot(faces[closest_face, 0], faces[closest_face, 3]));
         }
     }
 }

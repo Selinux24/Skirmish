@@ -17,6 +17,10 @@ namespace Physics
             RigidBody = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
             Model = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");
 
+            var tris = model.GetTriangles(true);
+            tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.FinalTransform));
+            Collider = new MeshCollider(tris);
+
             Collider = new HalfSpaceCollider(new Plane(model.Manipulator.Up, 0));
             Collider.Attach(body);
         }
