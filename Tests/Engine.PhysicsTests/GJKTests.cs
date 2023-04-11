@@ -1,10 +1,11 @@
 ﻿using Engine.Physics;
 using Engine.Physics.Colliders;
-using Engine.Physics.GJK;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Solver = Engine.Physics.GJK.Solver;
+using EPASolver = Engine.Physics.EPA.Solver;
 
 namespace Engine.PhysicsTests
 {
@@ -14,7 +15,7 @@ namespace Engine.PhysicsTests
     {
         static TestContext _testContext;
 
-        static readonly float toleranze = Solver.EPA_TOLERANCE;
+        static readonly float toleranze = EPASolver.EPA_TOLERANCE;
 
         static BoxCollider BoxFromExtents(Vector3 extents, Matrix transform)
         {
@@ -231,6 +232,25 @@ namespace Engine.PhysicsTests
 
             Assert.AreEqual(true, contact);
             Assert.AreEqual(1, penetration, toleranze);
+        }
+
+        [TestMethod()]
+        public void ContactPointTest()
+        {
+            var box = BoxFromExtents(Vector3.One, Matrix.Translation(0, 0, 0));
+            var sph = SphereFromRadius(1, Matrix.Translation(2, -1, 0));
+
+            var contact = Solver.GJK(box, sph, true, out var point, out var normal, out var penetration);
+
+            bool expectedContact = true;
+            Vector3 expectedPoint = new Vector3(0, 0, 0);
+            Vector3 expectedNormal = new Vector3(-1, 0, 0);
+            float expectedPenetration = 0;
+
+            Assert.AreEqual(expectedContact, contact, "Contact expected");
+            Assert.IsTrue(Vector3.NearEqual(expectedPoint, point, new Vector3(toleranze)), $"Expected position {expectedPoint} != {point}");
+            Assert.IsTrue(Vector3.NearEqual(expectedNormal, normal, new Vector3(toleranze)), $"Expected normal {expectedNormal} != {normal}");
+            Assert.AreEqual(expectedPenetration, penetration, toleranze, $"Expected penetration {expectedPenetration} != {penetration}");
         }
     }
 }
