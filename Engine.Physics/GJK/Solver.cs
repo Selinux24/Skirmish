@@ -22,12 +22,13 @@
 //-----------------------------------------------------------------------------
 
 using SharpDX;
-using System;
 
 namespace Engine.Physics.GJK
 {
+    using EPASolver = EPA.Solver;
+
     /// <summary>
-    /// GJK-EPA solver class
+    /// GJK solver class
     /// </summary>
     public static class Solver
     {
@@ -39,9 +40,11 @@ namespace Engine.Physics.GJK
         /// <param name="coll1">First collider</param>
         /// <param name="coll2">Second collider</param>
         /// <param name="calcContact">Calculate the minimum translation vector</param>
-        /// <param name="mtv">Returns the minimum translation vector</param>
+        /// <param name="point">Contact point</param>
+        /// <param name="normal">Contact normal</param>
+        /// <param name="penetration">Contact penetration</param>
         /// <remarks>
-        /// If <paramref name="calcContact"/> supplied the EPA will be used to find the <paramref name="mtv"/> to separate coll1 from coll2
+        /// If <paramref name="calcContact"/> supplied the EPA will be used to find the contact <paramref name="point"/>, <paramref name="normal"/> and <paramref name="penetration"/> to separate coll1 from coll2
         /// </remarks>
         /// <returns>Returns true if the colliders are intersecting</returns>
         public static bool GJK(ICollider coll1, ICollider coll2, bool calcContact, out Vector3 point, out Vector3 normal, out float penetration)
@@ -51,69 +54,71 @@ namespace Engine.Physics.GJK
             penetration = 0;
 
             // Simplex: just a set of points (a is always most recently added)
-            Vector3 a, b, c, d = Vector3.Zero;
+            var simplex = new Simplex();
 
             // Initial search direction between colliders
-            Vector3 search_dir = coll1.Position - coll2.Position;
+            simplex.SearchDir = coll1.Position - coll2.Position;
 
             // Get initial point for simplex
-            c = coll2.Support(search_dir) - coll1.Support(-search_dir);
+            simplex.C = coll2.Support(simplex.SearchDir) - coll1.Support(-simplex.SearchDir);
             // Search in direction of origin
-            search_dir = -c;
+            simplex.SearchDir = -simplex.C;
 
             // Get second point for a line segment simplex
-            b = coll2.Support(search_dir) - coll1.Support(-search_dir);
+            simplex.B = coll2.Support(simplex.SearchDir) - coll1.Support(-simplex.SearchDir);
 
-            if (Vector3.Dot(b, search_dir) < 0)
+            if (Vector3.Dot(simplex.B, simplex.SearchDir) < 0)
             {
                 // We didn't reach the origin, won't enclose it
                 return false;
             }
 
             // Search perpendicular to line segment towards origin
-            search_dir = Vector3.Cross(Vector3.Cross(c - b, -b), c - b);
-            if (search_dir == Vector3.Zero)
+            simplex.SearchDir = Vector3.Cross(Vector3.Cross(simplex.C - simplex.B, -simplex.B), simplex.C - simplex.B);
+            if (simplex.SearchDir == Vector3.Zero)
             {
                 // Origin is on this line segment, apparently any normal search vector will do?
 
                 // Normal with x-axis
-                search_dir = Vector3.Cross(c - b, Vector3.Right);
-                if (search_dir == Vector3.Zero)
+                simplex.SearchDir = Vector3.Cross(simplex.C - simplex.B, Vector3.Right);
+                if (simplex.SearchDir == Vector3.Zero)
                 {
                     // Normal with z-axis
-                    search_dir = Vector3.Cross(c - b, Vector3.BackwardLH);
+                    simplex.SearchDir = Vector3.Cross(simplex.C - simplex.B, Vector3.BackwardLH);
                 }
             }
 
             // Simplex dimension
-            int simp_dim = 2;
+            simplex.Dimension = 2;
+
             for (int iterations = 0; iterations < GJK_MAX_NUM_ITERATIONS; iterations++)
             {
-                a = coll2.Support(search_dir) - coll1.Support(-search_dir);
-                float dd = Vector3.Dot(a, search_dir);
+                simplex.A = coll2.Support(simplex.SearchDir) - coll1.Support(-simplex.SearchDir);
+
+                float dd = Vector3.Dot(simplex.A, simplex.SearchDir);
                 if (!MathUtil.IsZero(dd) && dd < 0)
                 {
                     // We didn't reach the origin, won't enclose it
                     return false;
                 }
 
-                simp_dim++;
-                if (simp_dim == 3)
+                simplex.Dimension++;
+                if (simplex.Dimension == 3)
                 {
-                    UpdateSimplex3(ref a, ref b, ref c, ref d, ref simp_dim, ref search_dir);
+                    simplex = UpdateSimplex3(simplex);
+
+                    continue;
                 }
-                else if (UpdateSimplex4(ref a, ref b, ref c, ref d, ref simp_dim, ref search_dir))
+
+                if (UpdateSimplex4(simplex, out simplex))
                 {
                     if (calcContact)
                     {
-                        var (faces, sdist) = EPA(a, b, c, d, coll1, coll2);
+                        var (_, _, _, n, sdist) = EPASolver.EPA(simplex.A, simplex.B, simplex.C, simplex.D, coll1, coll2);
 
-                        // Dot vertex with normal to resolve collision along normal!
-                        CalcBarycentric(faces[0], faces[1], faces[2], faces[3], out Vector3 bc);
-
-                        point = bc.X * faces[0] + bc.Y * faces[1] + bc.Z * faces[2];
-                        normal = Vector3.Normalize(faces[3]);
-                        penetration = (faces[3] * sdist).Length();
+                        normal = Vector3.Normalize(n);
+                        penetration = sdist;
+                        point = coll1.Position + (normal * sdist);
                     }
 
                     return true;
@@ -125,76 +130,78 @@ namespace Engine.Physics.GJK
         /// <summary>
         /// Triangle case
         /// </summary>
-        private static void UpdateSimplex3(ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d, ref int simp_dim, ref Vector3 search_dir)
+        /// <remarks>
+        /// Required winding order:
+        ///  b
+        ///  | \
+        ///  |   \
+        ///  |    a
+        ///  |   /
+        ///  | /
+        ///  c
+        /// </remarks>
+        private static Simplex UpdateSimplex3(Simplex simplex)
         {
-            /* Required winding order:
-            //  b
-            //  | \
-            //  |   \
-            //  |    a
-            //  |   /
-            //  | /
-            //  c
-            */
+            Simplex nSimplex = simplex;
 
             // Triangle's normal
-            Vector3 n = Vector3.Cross(b - a, c - a);
+            Vector3 n = nSimplex.ABC;
 
             // Direction to origin
-            Vector3 AO = -a;
+            Vector3 AO = nSimplex.AO;
 
             // Determine which feature is closest to origin, make that the new simplex
-            simp_dim = 2;
-            if (Vector3.Dot(Vector3.Cross(b - a, n), AO) > 0)
+            nSimplex.Dimension = 2;
+            if (Vector3.Dot(Vector3.Cross(nSimplex.B - nSimplex.A, n), AO) > 0)
             {
                 // Closest to edge AB
-                c = a;
-                search_dir = Vector3.Cross(Vector3.Cross(b - a, AO), b - a);
-                return;
+                nSimplex.C = nSimplex.A;
+                nSimplex.SearchDir = Vector3.Cross(Vector3.Cross(nSimplex.B - nSimplex.A, AO), nSimplex.B - nSimplex.A);
+                return nSimplex;
             }
 
-            if (Vector3.Dot(Vector3.Cross(n, c - a), AO) > 0)
+            if (Vector3.Dot(Vector3.Cross(n, nSimplex.C - nSimplex.A), AO) > 0)
             {
                 // Closest to edge AC
-                b = a;
-                search_dir = Vector3.Cross(Vector3.Cross(c - a, AO), c - a);
-                return;
+                nSimplex.B = nSimplex.A;
+                nSimplex.SearchDir = Vector3.Cross(Vector3.Cross(nSimplex.C - nSimplex.A, AO), nSimplex.C - nSimplex.A);
+                return nSimplex;
             }
 
-            simp_dim = 3;
+            nSimplex.Dimension = 3;
             if (Vector3.Dot(n, AO) > 0)
             {
                 // Above triangle
-                d = c;
-                c = b;
-                b = a;
-                search_dir = n;
-                return;
+                nSimplex.D = nSimplex.C;
+                nSimplex.C = nSimplex.B;
+                nSimplex.B = nSimplex.A;
+                nSimplex.SearchDir = n;
+                return nSimplex;
             }
 
             // Below triangle
-            d = b;
-            b = a;
-            search_dir = -n;
+            nSimplex.D = nSimplex.B;
+            nSimplex.B = nSimplex.A;
+            nSimplex.SearchDir = -n;
+            return nSimplex;
         }
         /// <summary>
         /// Tetrahedral case
         /// </summary>
-        private static bool UpdateSimplex4(ref Vector3 a, ref Vector3 b, ref Vector3 c, ref Vector3 d, ref int simp_dim, ref Vector3 search_dir)
+        /// <remarks>
+        /// (a) is peak/tip of pyramid, BCD is the base (counterclockwise winding order)
+        /// </remarks>
+        private static bool UpdateSimplex4(Simplex simplex, out Simplex nSimplex)
         {
-            // (a) is peak/tip of pyramid, BCD is the base (counterclockwise winding order)
+            nSimplex = simplex;
 
             // We know a priori that origin is above BCD and below (a)
 
-            // Get normals of three new faces
-            Vector3 ABC = Vector3.Cross(b - a, c - a);
-            Vector3 ACD = Vector3.Cross(c - a, d - a);
-            Vector3 ADB = Vector3.Cross(d - a, b - a);
-
             //Direction to origin
-            Vector3 AO = -a;
+            Vector3 AO = nSimplex.AO;
+
             // Hoisting this just cause
-            simp_dim = 3;
+            nSimplex.Dimension = 3;
 
             // Plane-test origin with 3 faces
             // Note: Kind of primitive approach used here; If origin is in front of a face, just use it as the new simplex.
@@ -202,31 +209,38 @@ namespace Engine.Physics.GJK
             // Not sure this is optimal or if edges should be considered as possible simplices?
             // Thinking this through in my head I feel like this method is good enough.
             // Makes no difference for AABBS, should test with more complex colliders.
+
+            //Get ABC face normal
+            Vector3 ABC = nSimplex.ABC;
             if (Vector3.Dot(ABC, AO) > 0)
             {
                 //In front of ABC
-                d = c;
-                c = b;
-                b = a;
-                search_dir = ABC;
+                nSimplex.D = nSimplex.C;
+                nSimplex.C = nSimplex.B;
+                nSimplex.B = nSimplex.A;
+                nSimplex.SearchDir = ABC;
                 return false;
             }
 
+            //Get ACD face normal
+            Vector3 ACD = nSimplex.ACD;
             if (Vector3.Dot(ACD, AO) > 0)
             {
                 // In front of ACD
-                b = a;
-                search_dir = ACD;
+                nSimplex.B = nSimplex.A;
+                nSimplex.SearchDir = ACD;
                 return false;
             }
 
+            //Get ADB face normal
+            Vector3 ADB = nSimplex.ADB;
             if (Vector3.Dot(ADB, AO) > 0)
             {
                 // In front of ADB
-                c = d;
-                d = b;
-                b = a;
-                search_dir = ADB;
+                nSimplex.C = nSimplex.D;
+                nSimplex.D = nSimplex.B;
+                nSimplex.B = nSimplex.A;
+                nSimplex.SearchDir = ADB;
                 return false;
             }
 
@@ -236,233 +250,35 @@ namespace Engine.Physics.GJK
             // Note: in the case where two of the faces have similar normals, the origin could conceivably be closest to an edge on the tetrahedron
             // Right now I don't think it'll make a difference to limit our new simplices to just one of the faces, maybe test it later.
         }
+    }
 
-        public const float EPA_TOLERANCE = 0.0001f;
-        private const int EPA_MAX_NUM_FACES = 64;
-        private const int EPA_MAX_NUM_LOOSE_EDGES = 32;
-        private const int EPA_MAX_NUM_ITERATIONS = 64;
+    /// <summary>
+    /// Simplex data
+    /// </summary>
+    public struct Simplex
+    {
+        public Vector3 A { get; set; }
+        public Vector3 B { get; set; }
+        public Vector3 C { get; set; }
+        public Vector3 D { get; set; }
+        public int Dimension { get; set; }
+        public Vector3 SearchDir { get; set; }
 
         /// <summary>
-        /// Expanding Polytope Algorithm. Used to find the minimum transaction vector of two intersecting colliders using the final simplex obtained with the GJK algorithm
+        /// Direction to origin
         /// </summary>
-        private static (Vector3[] faces, float dist) EPA(Vector3 a, Vector3 b, Vector3 c, Vector3 d, ICollider coll1, ICollider coll2)
-        {
-            // Array of faces, each with 3 vertices and a normal
-            Vector3[,] faces = new Vector3[EPA_MAX_NUM_FACES, 4];
-
-            // Initialize with final simplex from GJK
-            faces[0, 0] = a;
-            faces[0, 1] = b;
-            faces[0, 2] = c;
-            faces[0, 3] = Vector3.Normalize(Vector3.Cross(b - a, c - a)); //ABC
-            faces[1, 0] = a;
-            faces[1, 1] = c;
-            faces[1, 2] = d;
-            faces[1, 3] = Vector3.Normalize(Vector3.Cross(c - a, d - a)); //ACD
-            faces[2, 0] = a;
-            faces[2, 1] = d;
-            faces[2, 2] = b;
-            faces[2, 3] = Vector3.Normalize(Vector3.Cross(d - a, b - a)); //ADB
-            faces[3, 0] = b;
-            faces[3, 1] = d;
-            faces[3, 2] = c;
-            faces[3, 3] = Vector3.Normalize(Vector3.Cross(d - b, c - b)); //BDC
-
-            int num_faces = 4;
-            int closest_face = 0;
-
-            for (int iterations = 0; iterations < EPA_MAX_NUM_ITERATIONS; iterations++)
-            {
-                // Find face that's closest to origin
-                float min_dist = Vector3.Dot(faces[0, 0], faces[0, 3]);
-                closest_face = 0;
-                for (int i = 1; i < num_faces; i++)
-                {
-                    float dist = Vector3.Dot(faces[i, 0], faces[i, 3]);
-                    if (dist < min_dist)
-                    {
-                        min_dist = dist;
-                        closest_face = i;
-                    }
-                }
-
-                // Search normal to face that's closest to origin
-                Vector3 search_dir = faces[closest_face, 3];
-                Vector3 p = coll2.Support(search_dir) - coll1.Support(-search_dir);
-
-                float sdist = Vector3.Dot(p, search_dir);
-                if (sdist - min_dist < EPA_TOLERANCE)
-                {
-                    // Convergence (new point is not significantly further from origin)
-                    return (new[] { faces[closest_face, 0], faces[closest_face, 1], faces[closest_face, 2], faces[closest_face, 3] }, sdist);
-                }
-
-                Vector3[,] loose_edges = new Vector3[EPA_MAX_NUM_LOOSE_EDGES, 2];
-                // Keep track of edges we need to fix after removing faces
-                int num_loose_edges = 0;
-
-                // Find all triangles that are facing p
-                for (int i = 0; i < num_faces; i++)
-                {
-                    if (Vector3.Dot(faces[i, 3], p - faces[i, 0]) <= 0)
-                    {
-                        continue;
-                    }
-
-                    // Triangle i faces p, remove it
-                    // Add removed triangle's edges to loose edge list.
-                    // If it's already there, remove it (both triangles it belonged to are gone)
-
-                    // Three edges per face
-                    for (int j = 0; j < 3; j++)
-                    {
-                        Vector3[] current_edge = new Vector3[] { faces[i, j], faces[i, (j + 1) % 3] };
-                        bool found_edge = false;
-                        for (int k = 0; k < num_loose_edges; k++) //Check if current edge is already in list
-                        {
-                            if (loose_edges[k, 1] == current_edge[0] && loose_edges[k, 0] == current_edge[1])
-                            {
-                                // Edge is already in the list, remove it
-                                // THIS ASSUMES EDGE CAN ONLY BE SHARED BY 2 TRIANGLES (which should be true)
-                                // THIS ALSO ASSUMES SHARED EDGE WILL BE REVERSED IN THE TRIANGLES (which 
-                                // Should be true provided every triangle is wound CCW)
-                                loose_edges[k, 0] = loose_edges[num_loose_edges - 1, 0]; //Overwrite current edge
-                                loose_edges[k, 1] = loose_edges[num_loose_edges - 1, 1]; //with last edge in list
-                                num_loose_edges--;
-                                found_edge = true;
-
-                                //Exit loop because edge can only be shared once
-                                break;
-                            }
-                        }
-
-                        if (!found_edge)
-                        {
-                            // Add current edge to list
-                            if (num_loose_edges >= EPA_MAX_NUM_LOOSE_EDGES) break;
-                            loose_edges[num_loose_edges, 0] = current_edge[0];
-                            loose_edges[num_loose_edges, 1] = current_edge[1];
-                            num_loose_edges++;
-                        }
-                    }
-
-                    // Remove triangle i from list
-                    faces[i, 0] = faces[num_faces - 1, 0];
-                    faces[i, 1] = faces[num_faces - 1, 1];
-                    faces[i, 2] = faces[num_faces - 1, 2];
-                    faces[i, 3] = faces[num_faces - 1, 3];
-                    num_faces--;
-                    i--;
-                }
-
-                // Reconstruct polytope with p added
-                for (int i = 0; i < num_loose_edges; i++)
-                {
-                    if (num_faces >= EPA_MAX_NUM_FACES)
-                    {
-                        break;
-                    }
-
-                    faces[num_faces, 0] = loose_edges[i, 0];
-                    faces[num_faces, 1] = loose_edges[i, 1];
-                    faces[num_faces, 2] = p;
-                    faces[num_faces, 3] = Vector3.Normalize(Vector3.Cross(loose_edges[i, 0] - loose_edges[i, 1], loose_edges[i, 0] - p));
-
-                    // Check for wrong normal to maintain CCW winding in case dot result is only slightly < 0 (because origin is on face)
-                    float bias = 0.000001f;
-                    float dd = Vector3.Dot(faces[num_faces, 0], faces[num_faces, 3]) + bias;
-                    if (dd < 0)
-                    {
-                        (faces[num_faces, 1], faces[num_faces, 0]) = (faces[num_faces, 0], faces[num_faces, 1]);
-                        faces[num_faces, 3] = -faces[num_faces, 3];
-                    }
-
-                    num_faces++;
-                }
-            }
-
-            Console.WriteLine("EPA did not converge");
-
-            // Return most recent closest point
-            return (new[] { faces[closest_face, 0], faces[closest_face, 1], faces[closest_face, 2], faces[closest_face, 3] }, Vector3.Dot(faces[closest_face, 0], faces[closest_face, 3]));
-        }
+        public Vector3 AO { get { return -A; } }
         /// <summary>
-        /// Calculate the barycentric coordinates of the origin (0,0,0) projected onto the plane of the triangle.
+        /// ABC face normal
         /// </summary>
-        /// <param name="a">Point a</param>
-        /// <param name="b">Point b</param>
-        /// <param name="c">Point c</param>
-        /// <param name="normal">Plane normal</param>
-        /// <param name="result">Barycentric coordinates</param>
-        /// <remarks>
-        /// [W. Heidrich, Journal of Graphics, GPU, and Game Tools,Volume 10, Issue 3, 2005.]
-        /// </remarks>
-        private static void CalcBarycentric(Vector3 a, Vector3 b, Vector3 c, Vector3 normal, out Vector3 result)
-        {
-            Vector3 u = Vector3.Subtract(a, b);
-            Vector3 v = Vector3.Subtract(a, c);
-
-            float t = normal.LengthSquared();
-            Vector3 tmp = Vector3.Cross(u, a);
-            float gamma = Vector3.Dot(tmp, normal) / t;
-            tmp = Vector3.Cross(a, v);
-            float beta = Vector3.Dot(tmp, normal) / t;
-            float alpha = 1f - gamma - beta;
-
-            // Clamp the projected barycentric coordinates to lie within the triangle, such that the clamped coordinates are closest (euclidean) to the original point.
-            // [https://math.stackexchange.com/questions/1092912/find-closest-point-in-triangle-given-barycentric-coordinates-outside]
-            if (alpha >= 0f && beta < 0f)
-            {
-                t = Vector3.Dot(a, u);
-                if ((gamma < 0f) && (t > 0f))
-                {
-                    beta = Math.Min(1f, t / u.LengthSquared());
-                    alpha = 1f - beta;
-                    gamma = 0f;
-                }
-                else
-                {
-                    gamma = Math.Min(1f, Math.Max(0f, Vector3.Dot(a, v) / v.LengthSquared()));
-                    alpha = 1f - gamma;
-                    beta = 0f;
-                }
-            }
-            else if (beta >= 0f && gamma < 0f)
-            {
-                Vector3 w = Vector3.Subtract(b, c);
-                t = Vector3.Dot(b, w);
-                if ((alpha < 0f) && (t > 0f))
-                {
-                    gamma = Math.Min(1f, t / w.LengthSquared());
-                    beta = 1f - gamma;
-                    alpha = 0f;
-                }
-                else
-                {
-                    alpha = Math.Min(1f, Math.Max(0f, -Vector3.Dot(b, u) / u.LengthSquared()));
-                    beta = 1f - alpha;
-                    gamma = 0f;
-                }
-            }
-            else if (gamma >= 0f && alpha < 0f)
-            {
-                Vector3 w = Vector3.Subtract(b, c);
-                t = -Vector3.Dot(c, v);
-                if ((beta < 0f) && (t > 0f))
-                {
-                    alpha = Math.Min(1f, t / v.LengthSquared());
-                    gamma = 1f - alpha;
-                    beta = 0f;
-                }
-                else
-                {
-                    beta = Math.Min(1f, Math.Max(0f, -Vector3.Dot(c, w) / w.LengthSquared()));
-                    gamma = 1f - beta;
-                    alpha = 0f;
-                }
-            }
-
-            result = new Vector3(alpha, beta, gamma);
-        }
+        public Vector3 ABC { get { return Vector3.Cross(B - A, C - A); } }
+        /// <summary>
+        /// ACB face normal
+        /// </summary>
+        public Vector3 ACD { get { return Vector3.Cross(C - A, D - A); } }
+        /// <summary>
+        /// ADB face normal
+        /// </summary>
+        public Vector3 ADB { get { return Vector3.Cross(D - A, B - A); } }
     }
 }
