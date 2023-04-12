@@ -32,6 +32,7 @@ namespace Engine.Physics.EPA
     public static class Solver
     {
         public const float EPA_TOLERANCE = 0.0001f;
+        public const float EPA_BIAS = 0.000001f;
         private const int EPA_MAX_NUM_FACES = 64;
         private const int EPA_MAX_NUM_LOOSE_EDGES = 32;
         private const int EPA_MAX_NUM_ITERATIONS = 64;
@@ -163,8 +164,7 @@ namespace Engine.Physics.EPA
                     faces[num_faces, 3] = Vector3.Normalize(Vector3.Cross(loose_edges[i, 0] - loose_edges[i, 1], loose_edges[i, 0] - p));
 
                     // Check for wrong normal to maintain CCW winding in case dot result is only slightly < 0 (because origin is on face)
-                    float bias = 0.000001f;
-                    float dd = Vector3.Dot(faces[num_faces, 0], faces[num_faces, 3]) + bias;
+                    float dd = Vector3.Dot(faces[num_faces, 0], faces[num_faces, 3]) + EPA_BIAS;
                     if (dd < 0)
                     {
                         (faces[num_faces, 1], faces[num_faces, 0]) = (faces[num_faces, 0], faces[num_faces, 1]);
