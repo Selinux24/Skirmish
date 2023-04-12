@@ -20,8 +20,6 @@ namespace Physics
             var tris = model.GetTriangles(true);
             tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.FinalTransform));
             Collider = new MeshCollider(tris);
-
-            Collider = new HalfSpaceCollider(new Plane(model.Manipulator.Up, 0));
             Collider.Attach(body);
         }
 

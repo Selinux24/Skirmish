@@ -23,7 +23,7 @@ namespace Physics
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("11 Physics", WindowsEngineForm.ScreenSize * 0.2f))
+                using (Game cl = new Game("11 Physics", WindowsEngineForm.ScreenSize * 0.8f))
 #else
                 using (Game cl = new Game("11 Physics"))
 #endif

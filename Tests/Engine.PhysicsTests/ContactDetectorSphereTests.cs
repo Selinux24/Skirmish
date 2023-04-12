@@ -95,11 +95,12 @@ namespace Engine.PhysicsTests
 
             var b = FromRadius(r, trnB);
 
-            float penetration = r - (ah - bh) + r;
+            float penetration = r - (ah - bh);
+            float penetrationHf = penetration + r;
 
-            bool intersection1 = ContactDetector.BetweenObjects(b, c1, data1);
-            bool intersection2 = ContactDetector.BetweenObjects(b, c2, data2);
-            bool intersection3 = ContactDetector.BetweenObjects(b, c3, data3);
+            bool intersection1 = ContactDetector.BetweenObjects(c1, b, data1);
+            bool intersection2 = ContactDetector.BetweenObjects(c2, b, data2);
+            bool intersection3 = ContactDetector.BetweenObjects(c3, b, data3);
 
             Assert.AreEqual(true, intersection1, "Intersection expected.");
             Assert.AreEqual(true, intersection2, "Intersection expected.");
@@ -113,15 +114,17 @@ namespace Engine.PhysicsTests
             var contact2 = data2.GetContact(0);
             var contact3 = data3.GetContact(0);
 
-            Assert.AreEqual(penetration, contact1.Penetration, Epsilon);
-            Assert.AreEqual(penetration, contact2.Penetration, Epsilon);
+            Assert.AreEqual(penetrationHf, contact1.Penetration, Epsilon);
+            Assert.AreEqual(penetrationHf, contact2.Penetration, Epsilon);
             Assert.AreEqual(penetration, contact3.Penetration, Epsilon);
 
-            Assert.AreEqual(contact1.Normal, contact2.Normal);
-            Assert.AreEqual(contact1.Normal, contact3.Normal);
+            Assert.AreEqual(Vector3.Up, contact1.Normal);
+            Assert.AreEqual(Vector3.Down, contact2.Normal);
+            Assert.AreEqual(Vector3.Down, contact3.Normal);
 
-            Assert.AreEqual(contact1.Position, contact2.Position);
-            Assert.AreEqual(contact1.Position, contact3.Position);
+            Assert.AreEqual(Vector3.Zero, contact1.Position);
+            Assert.AreEqual(new Vector3(0, penetrationHf, 0), contact2.Position);
+            Assert.AreEqual(new Vector3(0, penetration, 0), contact3.Position);
         }
     }
 }

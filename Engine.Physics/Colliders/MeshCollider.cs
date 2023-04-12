@@ -74,25 +74,18 @@ namespace Engine.Physics.Colliders
         {
             //find support in model space
             dir = Vector3.TransformNormal(dir, RotationScaleInverse);
-            var furthest_point = triangles[0].Point1;
 
-            // Dumb O(n) support function, just brute force check all points
+            Vector3 furthest_point = vertices[0];
             float max_dot = Vector3.Dot(furthest_point, dir);
 
-            for (int t = 0; t < triangles.Length; t++)
+            for (int i = 1; i < vertices.Length; i++)
             {
-                var verts = triangles[t].GetVertices();
-
-                for (int i = 0; i < 3; i++)
+                Vector3 v = vertices[i];
+                float d = Vector3.Dot(v, dir);
+                if (d > max_dot)
                 {
-                    var v = verts.ElementAt(i);
-
-                    float d = Vector3.Dot(v, dir);
-                    if (d > max_dot)
-                    {
-                        max_dot = d;
-                        furthest_point = v;
-                    }
+                    max_dot = d;
+                    furthest_point = v;
                 }
             }
 

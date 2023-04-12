@@ -4,10 +4,8 @@ using System.Linq;
 
 namespace Engine.Physics
 {
-    using Engine.Common;
     using Engine.Physics.Colliders;
     using Engine.Physics.GJK;
-    using System;
 
     /// <summary>
     /// Contact detector
@@ -38,12 +36,6 @@ namespace Engine.Physics
                 // Half spaces must be always the first component
                 (primitive1, primitive2) = (primitive2, primitive1);
             }
-
-            //if (primitive1 is SphereCollider sphere1)
-            //{
-            //    // Special case with spheres
-            //    return SphereAndPrimitive(sphere1, primitive2, data);
-            //}
 
             if (primitive1 is HalfSpaceCollider halfSpace1)
             {
@@ -250,100 +242,6 @@ namespace Engine.Physics
             }
 
             return intersectionExists;
-        }
-
-        public static bool SphereAndPrimitive(SphereCollider sphere, ICollider primitive, ContactResolver data)
-        {
-            if (primitive is SphereCollider sphere1)
-            {
-                return SphereAndSphere(sphere, sphere1, data);
-            }
-
-            if (primitive is TriangleCollider triangle)
-            {
-                return SphereAndTriangle(sphere, triangle, data);
-            }
-
-            if (Solver.GJK(sphere, primitive, true, out var position, out var normal, out var penetration))
-            {
-                data.AddContact(sphere.RigidBody, primitive.RigidBody, position, normal, penetration);
-
-                return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Detects the collision between two spheres
-        /// </summary>
-        /// <param name="one">First sphere</param>
-        /// <param name="two">Second sphere</param>
-        /// <param name="data">Collision data</param>
-        /// <returns>Returns true if there has been a collision</returns>
-        public static bool SphereAndSphere(SphereCollider one, SphereCollider two, ContactResolver data)
-        {
-            // Find the vector between the objects
-            var positionOne = one.RigidBody.Position;
-            var positionTwo = two.RigidBody.Position;
-            var midline = positionOne - positionTwo;
-            float size = midline.Length();
-
-            // Check for errors
-            if (size <= float.Epsilon || size >= one.Radius + two.Radius)
-            {
-                return false;
-            }
-
-            var normal = Vector3.Normalize(midline);
-            var position = positionOne + midline * 0.5f;
-            var penetration = one.Radius + two.Radius - size;
-            data.AddContact(one.RigidBody, two.RigidBody, position, normal, penetration);
-
-            return true;
-        }
-        /// <summary>
-        /// Detect the collision between a sphere and a triangle
-        /// </summary>
-        /// <param name="one">Sphere</param>
-        /// <param name="two">Triangle</param>
-        /// <param name="closestPoint">Closest point</param>
-        /// <param name="penetration">Penetration</param>
-        /// <returns>Returns true if there has been a collision</returns>
-        public static bool SphereAndTriangle(SphereCollider one, TriangleCollider two, ContactResolver data)
-        {
-            // Check if the sphere and triangle are separated in the X, Y and Z axis
-            var tri = two.GetTriangle(true);
-            var triCenter = tri.Center;
-            float triRadius = tri.GetRadius();
-            float radius = one.Radius + triRadius;
-            if (Math.Abs(one.RigidBody.Position.X - triCenter.X) > radius)
-            {
-                return false;
-            }
-            if (Math.Abs(one.RigidBody.Position.Y - triCenter.Y) > radius)
-            {
-                return false;
-            }
-            if (Math.Abs(one.RigidBody.Position.Z - triCenter.Z) > radius)
-            {
-                return false;
-            }
-
-            // Get the point of the triangle closest to the center of the sphere
-            var closestPoint = Intersection.ClosestPointInTriangle(one.RigidBody.Position, tri);
-
-            // Obtain the distance of the obtained point to the center of the sphere
-            float distance = Vector3.Distance(closestPoint, one.RigidBody.Position);
-            if (distance > one.Radius)
-            {
-                return false;
-            }
-
-            float penetration = one.Radius - distance;
-
-            data.AddContact(one.RigidBody, two.RigidBody, closestPoint, tri.Normal, penetration);
-
-            return true;
         }
     }
 }

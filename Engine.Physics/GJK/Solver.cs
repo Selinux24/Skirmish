@@ -63,8 +63,6 @@ namespace Engine.Physics.GJK
 
             for (int iterations = 0; iterations < GJK_MAX_NUM_ITERATIONS; iterations++)
             {
-                simplex.UpdatePoint(coll1, coll2);
-
                 if (!simplex.UpdatePoint(coll1, coll2))
                 {
                     // We didn't reach the origin, won't enclose it
