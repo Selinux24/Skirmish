@@ -21,7 +21,6 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
-using Engine.Physics.EPA;
 using SharpDX;
 
 namespace Engine.Physics.GJK

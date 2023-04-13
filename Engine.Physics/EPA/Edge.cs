@@ -10,10 +10,10 @@ namespace Engine.Physics.EPA
         /// <summary>
         /// Point A
         /// </summary>
-        public Vector3 A;
+        public Vector3 A { get; set; }
         /// <summary>
         /// Point B
         /// </summary>
-        public Vector3 B;
+        public Vector3 B { get; set; }
     }
 }

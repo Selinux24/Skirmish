@@ -11,19 +11,19 @@ namespace Engine.Physics.EPA
         /// <summary>
         /// Point A
         /// </summary>
-        public Vector3 A;
+        public Vector3 A { get; set; }
         /// <summary>
         /// Point B
         /// </summary>
-        public Vector3 B;
+        public Vector3 B { get; set; }
         /// <summary>
         /// Point C
         /// </summary>
-        public Vector3 C;
+        public Vector3 C { get; set; }
         /// <summary>
         /// Normal
         /// </summary>
-        public Vector3 Normal;
+        public Vector3 Normal { get; private set; }
 
         /// <summary>
         /// Gets the face point by index
