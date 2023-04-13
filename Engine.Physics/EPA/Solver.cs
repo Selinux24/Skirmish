@@ -26,13 +26,15 @@ using System;
 
 namespace Engine.Physics.EPA
 {
+    using Engine.Physics.GJK;
+
     /// <summary>
     /// EPA solver class
     /// </summary>
     public static class Solver
     {
         public const float EPA_TOLERANCE = 0.0001f;
-        public const float EPA_BIAS = 0.000001f;
+        private const float EPA_BIAS = 0.000001f;
         private const int EPA_MAX_NUM_FACES = 64;
         private const int EPA_MAX_NUM_LOOSE_EDGES = 32;
         private const int EPA_MAX_NUM_ITERATIONS = 64;
@@ -40,66 +42,38 @@ namespace Engine.Physics.EPA
         /// <summary>
         /// Expanding Polytope Algorithm. Used to find the minimum translation vector of two intersecting colliders using the final simplex obtained with the GJK algorithm
         /// </summary>
-        public static (Vector3 p1, Vector3 p2, Vector3 p3, Vector3 normal, float dist) EPA(Vector3 a, Vector3 b, Vector3 c, Vector3 d, ICollider coll1, ICollider coll2)
+        public static (Face face, float dist) EPA(Simplex simplex, ICollider coll1, ICollider coll2)
         {
             // Array of faces, each with 3 vertices and a normal
-            Vector3[,] faces = new Vector3[EPA_MAX_NUM_FACES, 4];
-
             // Initialize with final simplex from GJK
-            faces[0, 0] = a;
-            faces[0, 1] = b;
-            faces[0, 2] = c;
-            faces[0, 3] = Vector3.Normalize(Vector3.Cross(b - a, c - a)); //ABC
-            faces[1, 0] = a;
-            faces[1, 1] = c;
-            faces[1, 2] = d;
-            faces[1, 3] = Vector3.Normalize(Vector3.Cross(c - a, d - a)); //ACD
-            faces[2, 0] = a;
-            faces[2, 1] = d;
-            faces[2, 2] = b;
-            faces[2, 3] = Vector3.Normalize(Vector3.Cross(d - a, b - a)); //ADB
-            faces[3, 0] = b;
-            faces[3, 1] = d;
-            faces[3, 2] = c;
-            faces[3, 3] = Vector3.Normalize(Vector3.Cross(d - b, c - b)); //BDC
-
-            int num_faces = 4;
+            var faces = Initialize(simplex, out int num_faces);
             int closest_face = 0;
+
+            var loose_edges = new Edge[EPA_MAX_NUM_LOOSE_EDGES];
 
             for (int iterations = 0; iterations < EPA_MAX_NUM_ITERATIONS; iterations++)
             {
                 // Find face that's closest to origin
-                float min_dist = Vector3.Dot(faces[0, 0], faces[0, 3]);
-                closest_face = 0;
-                for (int i = 1; i < num_faces; i++)
-                {
-                    float dist = Vector3.Dot(faces[i, 0], faces[i, 3]);
-                    if (dist < min_dist)
-                    {
-                        min_dist = dist;
-                        closest_face = i;
-                    }
-                }
+                GetClosestFaceToOrigin(faces, num_faces, out float min_dist, out closest_face);
 
                 // Search normal to face that's closest to origin
-                Vector3 search_dir = faces[closest_face, 3];
-                Vector3 p = coll2.Support(search_dir) - coll1.Support(-search_dir);
+                var search_dir = faces[closest_face].Normal;
+                var p = coll2.Support(search_dir) - coll1.Support(-search_dir);
 
                 float sdist = Vector3.Dot(p, search_dir);
                 if (sdist - min_dist < EPA_TOLERANCE)
                 {
                     // Convergence (new point is not significantly further from origin)
-                    return (faces[closest_face, 0], faces[closest_face, 1], faces[closest_face, 2], faces[closest_face, 3], sdist);
+                    return (faces[closest_face], sdist);
                 }
 
-                Vector3[,] loose_edges = new Vector3[EPA_MAX_NUM_LOOSE_EDGES, 2];
                 // Keep track of edges we need to fix after removing faces
                 int num_loose_edges = 0;
 
                 // Find all triangles that are facing p
                 for (int i = 0; i < num_faces; i++)
                 {
-                    if (Vector3.Dot(faces[i, 3], p - faces[i, 0]) <= 0)
+                    if (Vector3.Dot(faces[i].Normal, p - faces[i].A) <= 0)
                     {
                         continue;
                     }
@@ -111,18 +85,19 @@ namespace Engine.Physics.EPA
                     // Three edges per face
                     for (int j = 0; j < 3; j++)
                     {
-                        Vector3[] current_edge = new Vector3[] { faces[i, j], faces[i, (j + 1) % 3] };
+                        var current_edge = faces[i].GetEdge(j);
                         bool found_edge = false;
-                        for (int k = 0; k < num_loose_edges; k++) //Check if current edge is already in list
+
+                        //Check if current edge is already in list
+                        for (int k = 0; k < num_loose_edges; k++)
                         {
-                            if (loose_edges[k, 1] == current_edge[0] && loose_edges[k, 0] == current_edge[1])
+                            if (loose_edges[k].B == current_edge.A && loose_edges[k].A == current_edge.B)
                             {
                                 // Edge is already in the list, remove it
                                 // THIS ASSUMES EDGE CAN ONLY BE SHARED BY 2 TRIANGLES (which should be true)
                                 // THIS ALSO ASSUMES SHARED EDGE WILL BE REVERSED IN THE TRIANGLES (which 
                                 // Should be true provided every triangle is wound CCW)
-                                loose_edges[k, 0] = loose_edges[num_loose_edges - 1, 0]; //Overwrite current edge
-                                loose_edges[k, 1] = loose_edges[num_loose_edges - 1, 1]; //with last edge in list
+                                loose_edges[k] = loose_edges[num_loose_edges - 1]; //Overwrite current edge with last edge in list
                                 num_loose_edges--;
                                 found_edge = true;
 
@@ -135,17 +110,13 @@ namespace Engine.Physics.EPA
                         {
                             // Add current edge to list
                             if (num_loose_edges >= EPA_MAX_NUM_LOOSE_EDGES) break;
-                            loose_edges[num_loose_edges, 0] = current_edge[0];
-                            loose_edges[num_loose_edges, 1] = current_edge[1];
+                            loose_edges[num_loose_edges] = current_edge;
                             num_loose_edges++;
                         }
                     }
 
                     // Remove triangle i from list
-                    faces[i, 0] = faces[num_faces - 1, 0];
-                    faces[i, 1] = faces[num_faces - 1, 1];
-                    faces[i, 2] = faces[num_faces - 1, 2];
-                    faces[i, 3] = faces[num_faces - 1, 3];
+                    faces[i] = faces[num_faces - 1];
                     num_faces--;
                     i--;
                 }
@@ -158,27 +129,66 @@ namespace Engine.Physics.EPA
                         break;
                     }
 
-                    faces[num_faces, 0] = loose_edges[i, 0];
-                    faces[num_faces, 1] = loose_edges[i, 1];
-                    faces[num_faces, 2] = p;
-                    faces[num_faces, 3] = Vector3.Normalize(Vector3.Cross(loose_edges[i, 0] - loose_edges[i, 1], loose_edges[i, 0] - p));
+                    faces[num_faces] = new Face(loose_edges[i].A, loose_edges[i].B, p);
 
                     // Check for wrong normal to maintain CCW winding in case dot result is only slightly < 0 (because origin is on face)
-                    float dd = Vector3.Dot(faces[num_faces, 0], faces[num_faces, 3]) + EPA_BIAS;
-                    if (dd < 0)
+                    if (Vector3.Dot(faces[num_faces].A, faces[num_faces].Normal) + EPA_BIAS < 0)
                     {
-                        (faces[num_faces, 1], faces[num_faces, 0]) = (faces[num_faces, 0], faces[num_faces, 1]);
-                        faces[num_faces, 3] = -faces[num_faces, 3];
+                        faces[num_faces].Reverse();
                     }
 
                     num_faces++;
                 }
             }
 
+#if DEBUG
             Console.WriteLine("EPA did not converge");
+#endif
 
             // Return most recent closest point
-            return (faces[closest_face, 0], faces[closest_face, 1], faces[closest_face, 2], faces[closest_face, 3], Vector3.Dot(faces[closest_face, 0], faces[closest_face, 3]));
+            return (faces[closest_face], Vector3.Dot(faces[closest_face].A, faces[closest_face].Normal));
+        }
+        /// <summary>
+        /// Initialize the face list
+        /// </summary>
+        /// <param name="simplex">GJK simplex</param>
+        /// <param name="num_faces">Number of initial faces</param>
+        private static Face[] Initialize(Simplex simplex, out int num_faces)
+        {
+            // Array of faces, each with 3 vertices and a normal
+            Face[] faces = new Face[EPA_MAX_NUM_FACES];
+
+            // Initialize with final simplex from GJK
+            faces[0] = new Face(simplex.A, simplex.B, simplex.C); //ABC
+            faces[1] = new Face(simplex.A, simplex.C, simplex.D); //ACD
+            faces[2] = new Face(simplex.A, simplex.D, simplex.B); //ADB
+            faces[3] = new Face(simplex.B, simplex.D, simplex.C); //BDC
+
+            num_faces = 4;
+
+            return faces;
+        }
+        /// <summary>
+        /// Find face that's closest to origin
+        /// </summary>
+        /// <param name="faces">Face list</param>
+        /// <param name="num_faces">Number of faces</param>
+        /// <param name="min_dist">Minimal distance to origin</param>
+        /// <param name="closest_face">Closest face index</param>
+        private static void GetClosestFaceToOrigin(Face[] faces, int num_faces, out float min_dist, out int closest_face)
+        {
+            min_dist = Vector3.Dot(faces[0].A, faces[0].Normal);
+            closest_face = 0;
+
+            for (int i = 1; i < num_faces; i++)
+            {
+                float dist = Vector3.Dot(faces[i].A, faces[i].Normal);
+                if (dist < min_dist)
+                {
+                    min_dist = dist;
+                    closest_face = i;
+                }
+            }
         }
     }
 }

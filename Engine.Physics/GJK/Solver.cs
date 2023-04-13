@@ -21,6 +21,7 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
+using Engine.Physics.EPA;
 using SharpDX;
 
 namespace Engine.Physics.GJK
@@ -80,9 +81,9 @@ namespace Engine.Physics.GJK
                 {
                     if (calcContact)
                     {
-                        var (_, _, _, n, sdist) = EPASolver.EPA(simplex.A, simplex.B, simplex.C, simplex.D, coll1, coll2);
+                        var (face, sdist) = EPASolver.EPA(simplex, coll1, coll2);
 
-                        normal = Vector3.Normalize(n);
+                        normal = Vector3.Normalize(face.Normal);
                         penetration = sdist;
                         point = coll1.Position + (normal * sdist);
                     }
