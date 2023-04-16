@@ -363,6 +363,45 @@ namespace Engine
 
             return result;
         }
+        /// <summary>
+        /// Gets the barycentric coordinates of a triangle, given a reference point
+        /// </summary>
+        /// <param name="a">First triangle point</param>
+        /// <param name="b">Second triangle point</param>
+        /// <param name="c">Third triangle point</param>
+        /// <param name="p">Point</param>
+        /// <remarks>
+        /// Point must be into the triangle
+        /// Code from Christen Erickson's Real-Time Collision Detection
+        /// </remarks>
+        public static Vector3 CalculateBarycenter(Vector3 a, Vector3 b, Vector3 c, Vector3 p)
+        {
+            Vector3 v0 = b - a;
+            Vector3 v1 = c - a;
+            Vector3 v2 = p - a;
+
+            float d00 = Vector3.Dot(v0, v0);
+            float d01 = Vector3.Dot(v0, v1);
+            float d11 = Vector3.Dot(v1, v1);
+            float d20 = Vector3.Dot(v2, v0);
+            float d21 = Vector3.Dot(v2, v1);
+            float denom = d00 * d11 - d01 * d01;
+
+            float v = (d11 * d20 - d01 * d21) / denom;
+            float w = (d00 * d21 - d01 * d20) / denom;
+            float u = 1.0f - v - w;
+
+            return new Vector3(u, v, w);
+        }
+        /// <summary>
+        /// Gets the barycentric coordinates of a triangle, given a reference point
+        /// </summary>
+        /// <param name="t">Triangle</param>
+        /// <param name="p">Point</param>
+        public static Vector3 CalculateBarycenter(Triangle t, Vector3 p)
+        {
+            return CalculateBarycenter(t.Point1, t.Point2, t.Point3, p);
+        }
 
         /// <summary>
         /// Constructor
@@ -583,6 +622,15 @@ namespace Engine
         public Triangle ReverseNormal()
         {
             return new Triangle(Point1, Point3, Point2);
+        }
+
+        /// <summary>
+        /// Gets the barycenter
+        /// </summary>
+        /// <param name="p">Reference point</param>
+        public Vector3 GetBarycenter(Vector3 p)
+        {
+            return CalculateBarycenter(this, p);
         }
 
         /// <inheritdoc/>

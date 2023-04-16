@@ -1,7 +1,8 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Physics.EPA
 {
+    using GJKSupportPoint = GJK.SupportPoint;
+
     /// <summary>
     /// Edge helper
     /// </summary>
@@ -10,10 +11,10 @@ namespace Engine.Physics.EPA
         /// <summary>
         /// Point A
         /// </summary>
-        public Vector3 A { get; set; }
+        public GJKSupportPoint A { get; set; }
         /// <summary>
         /// Point B
         /// </summary>
-        public Vector3 B { get; set; }
+        public GJKSupportPoint B { get; set; }
     }
 }

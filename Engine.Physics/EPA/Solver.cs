@@ -26,14 +26,15 @@ using System;
 
 namespace Engine.Physics.EPA
 {
-    using Engine.Physics.GJK;
+    using GJKSimplex = GJK.Simplex;
+    using GJKSupportPoint = GJK.SupportPoint;
 
     /// <summary>
     /// EPA solver class
     /// </summary>
     public static class Solver
     {
-        public const float EPA_TOLERANCE = 0.0001f;
+        public const float EPA_TOLERANCE = 0.0005f;
         private const float EPA_BIAS = 0.000001f;
         private const int EPA_MAX_NUM_FACES = 64;
         private const int EPA_MAX_NUM_LOOSE_EDGES = 32;
@@ -42,7 +43,7 @@ namespace Engine.Physics.EPA
         /// <summary>
         /// Expanding Polytope Algorithm. Used to find the minimum translation vector of two intersecting colliders using the final simplex obtained with the GJK algorithm
         /// </summary>
-        public static (Face face, float dist) EPA(Simplex simplex, ICollider coll1, ICollider coll2)
+        public static (Face face, float dist) EPA(GJKSimplex simplex, ICollider coll1, ICollider coll2)
         {
             // Array of faces, each with 3 vertices and a normal
             // Initialize with final simplex from GJK
@@ -58,9 +59,9 @@ namespace Engine.Physics.EPA
 
                 // Search normal to face that's closest to origin
                 var search_dir = faces[closest_face].Normal;
-                var p = coll2.Support(search_dir) - coll1.Support(-search_dir);
+                var p = new GJKSupportPoint(coll1, coll2, search_dir);
 
-                float sdist = Vector3.Dot(p, search_dir);
+                float sdist = Vector3.Dot(p.Point, search_dir);
                 if (sdist - min_dist < EPA_TOLERANCE)
                 {
                     // Convergence (new point is not significantly further from origin)
@@ -73,7 +74,7 @@ namespace Engine.Physics.EPA
                 // Find all triangles that are facing p
                 for (int i = 0; i < num_faces; i++)
                 {
-                    if (Vector3.Dot(faces[i].Normal, p - faces[i].A) <= 0)
+                    if (Vector3.Dot(faces[i].Normal, p.Point - faces[i].A.Point) <= 0)
                     {
                         continue;
                     }
@@ -91,7 +92,7 @@ namespace Engine.Physics.EPA
                         //Check if current edge is already in list
                         for (int k = 0; k < num_loose_edges; k++)
                         {
-                            if (loose_edges[k].B == current_edge.A && loose_edges[k].A == current_edge.B)
+                            if (loose_edges[k].B.Point == current_edge.A.Point && loose_edges[k].A.Point == current_edge.B.Point)
                             {
                                 // Edge is already in the list, remove it
                                 // THIS ASSUMES EDGE CAN ONLY BE SHARED BY 2 TRIANGLES (which should be true)
@@ -132,7 +133,7 @@ namespace Engine.Physics.EPA
                     faces[num_faces] = new Face(loose_edges[i].A, loose_edges[i].B, p);
 
                     // Check for wrong normal to maintain CCW winding in case dot result is only slightly < 0 (because origin is on face)
-                    if (Vector3.Dot(faces[num_faces].A, faces[num_faces].Normal) + EPA_BIAS < 0)
+                    if (Vector3.Dot(faces[num_faces].A.Point, faces[num_faces].Normal) + EPA_BIAS < 0)
                     {
                         faces[num_faces].Reverse();
                     }
@@ -146,14 +147,14 @@ namespace Engine.Physics.EPA
 #endif
 
             // Return most recent closest point
-            return (faces[closest_face], Vector3.Dot(faces[closest_face].A, faces[closest_face].Normal));
+            return (faces[closest_face], Vector3.Dot(faces[closest_face].A.Point, faces[closest_face].Normal));
         }
         /// <summary>
         /// Initialize the face list
         /// </summary>
         /// <param name="simplex">GJK simplex</param>
         /// <param name="num_faces">Number of initial faces</param>
-        private static Face[] Initialize(Simplex simplex, out int num_faces)
+        private static Face[] Initialize(GJKSimplex simplex, out int num_faces)
         {
             // Array of faces, each with 3 vertices and a normal
             Face[] faces = new Face[EPA_MAX_NUM_FACES];
@@ -177,12 +178,12 @@ namespace Engine.Physics.EPA
         /// <param name="closest_face">Closest face index</param>
         private static void GetClosestFaceToOrigin(Face[] faces, int num_faces, out float min_dist, out int closest_face)
         {
-            min_dist = Vector3.Dot(faces[0].A, faces[0].Normal);
+            min_dist = Vector3.Dot(faces[0].A.Point, faces[0].Normal);
             closest_face = 0;
 
             for (int i = 1; i < num_faces; i++)
             {
-                float dist = Vector3.Dot(faces[i].A, faces[i].Normal);
+                float dist = Vector3.Dot(faces[i].A.Point, faces[i].Normal);
                 if (dist < min_dist)
                 {
                     min_dist = dist;

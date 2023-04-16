@@ -238,12 +238,12 @@ namespace Engine.PhysicsTests
         public void ContactPointTest()
         {
             var box = BoxFromExtents(Vector3.One, Matrix.Translation(0, 0, 0));
-            var sph = SphereFromRadius(1, Matrix.Translation(2, -1, 0));
+            var sph = SphereFromRadius(1, Matrix.Translation(2, 0, 0));
 
             var contact = Solver.GJK(box, sph, true, out var point, out var normal, out var penetration);
 
             bool expectedContact = true;
-            Vector3 expectedPoint = new Vector3(0, 0, 0);
+            Vector3 expectedPoint = new Vector3(1, 0, 0);
             Vector3 expectedNormal = new Vector3(-1, 0, 0);
             float expectedPenetration = 0;
 

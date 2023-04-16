@@ -26,6 +26,7 @@ using SharpDX;
 namespace Engine.Physics.GJK
 {
     using EPASolver = EPA.Solver;
+    using EPAFace = EPA.Face;
 
     /// <summary>
     /// GJK solver class
@@ -55,7 +56,7 @@ namespace Engine.Physics.GJK
 
             var simplex = new Simplex();
 
-            if(!simplex.Initialize(coll1, coll2))
+            if (!simplex.Initialize(coll1, coll2))
             {
                 // We didn't reach the origin, won't enclose it
                 return false;
@@ -82,9 +83,7 @@ namespace Engine.Physics.GJK
                     {
                         var (face, sdist) = EPASolver.EPA(simplex, coll1, coll2);
 
-                        normal = Vector3.Normalize(face.Normal);
-                        penetration = sdist;
-                        point = coll1.Position + (normal * sdist);
+                        ComputeContactPoint(face, sdist, out point, out normal, out penetration);
                     }
 
                     return true;
@@ -92,6 +91,32 @@ namespace Engine.Physics.GJK
             }
 
             return false;
+        }
+        /// <summary>
+        /// Computes the contact point, penetration and normal
+        /// </summary>
+        /// <param name="face">EPA resulting face</param>
+        /// <param name="dist">Distance</param>
+        /// <param name="point">Contact point</param>
+        /// <param name="normal">Normal</param>
+        /// <param name="penetration">Penetration</param>
+        /// <remarks>
+        /// Taken from Jacob Tyndall's lattice3d engine
+        /// <see cref="https://bitbucket.org/Hacktank/lattice3d/src/adfb28ffe5b51dbd1a173cbd43c6e387f1b4c12d/Lattice3D/src/physics/contact_generator/GJKEPAGenerator.cpp?at=master"/>
+        /// </remarks>
+        private static void ComputeContactPoint(EPAFace face, float dist, out Vector3 point, out Vector3 normal, out float penetration)
+        {
+            normal = Vector3.Normalize(face.Normal);
+            penetration = dist;
+
+            // Get the minimum translation vector
+            var mtv = normal * penetration;
+
+            // Calculates barycentric coordinates from mtv vector
+            var bc = Triangle.CalculateBarycenter(face.A.Point, face.B.Point, face.C.Point, mtv);
+
+            // Interpolate the barycentric coordinates using the simplex cached support points of the first collider in the collision
+            point = bc.X * face.A.Support1 + bc.Y * face.B.Support1 + bc.Z * face.C.Support1;
         }
     }
 }

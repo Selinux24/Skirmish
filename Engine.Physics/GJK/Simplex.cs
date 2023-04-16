@@ -35,19 +35,19 @@ namespace Engine.Physics.GJK
         /// <summary>
         /// Point A. Last added point
         /// </summary>
-        public Vector3 A { get; set; }
+        public SupportPoint A { get; set; }
         /// <summary>
         /// Point B
         /// </summary>
-        public Vector3 B { get; set; }
+        public SupportPoint B { get; set; }
         /// <summary>
         /// Point C
         /// </summary>
-        public Vector3 C { get; set; }
+        public SupportPoint C { get; set; }
         /// <summary>
         /// Point D. Ignored if triangle
         /// </summary>
-        public Vector3 D { get; set; }
+        public SupportPoint D { get; set; }
         /// <summary>
         /// Simplex dimension
         /// </summary>
@@ -60,19 +60,19 @@ namespace Engine.Physics.GJK
         /// <summary>
         /// Direction to origin
         /// </summary>
-        public Vector3 AO { get { return -A; } }
+        public Vector3 AO { get { return -A.Point; } }
         /// <summary>
         /// ABC face normal
         /// </summary>
-        public Vector3 ABC { get { return Vector3.Cross(B - A, C - A); } }
+        public Vector3 ABC { get { return Vector3.Cross(B.Point - A.Point, C.Point - A.Point); } }
         /// <summary>
         /// ACB face normal
         /// </summary>
-        public Vector3 ACD { get { return Vector3.Cross(C - A, D - A); } }
+        public Vector3 ACD { get { return Vector3.Cross(C.Point - A.Point, D.Point - A.Point); } }
         /// <summary>
         /// ADB face normal
         /// </summary>
-        public Vector3 ADB { get { return Vector3.Cross(D - A, B - A); } }
+        public Vector3 ADB { get { return Vector3.Cross(D.Point - A.Point, B.Point - A.Point); } }
 
         /// <summary>
         /// Initializes the simplex, and performs early exit test
@@ -85,15 +85,15 @@ namespace Engine.Physics.GJK
             SearchDir = coll1.Position - coll2.Position;
 
             // Get initial point for simplex
-            C = coll2.Support(SearchDir) - coll1.Support(-SearchDir);
+            C = new SupportPoint(coll1, coll2, SearchDir);
 
             // Search in direction of origin
-            SearchDir = -C;
+            SearchDir = -C.Point;
 
             // Get second point for a line segment simplex
-            B = coll2.Support(SearchDir) - coll1.Support(-SearchDir);
+            B = new SupportPoint(coll1, coll2, SearchDir);
 
-            float d = Vector3.Dot(B, SearchDir);
+            float d = Vector3.Dot(B.Point, SearchDir);
             if (!MathUtil.IsZero(d) && d < 0)
             {
                 // We didn't reach the origin, won't enclose it
@@ -101,17 +101,17 @@ namespace Engine.Physics.GJK
             }
 
             // Search perpendicular to line segment towards origin
-            SearchDir = Vector3.Cross(Vector3.Cross(C - B, -B), C - B);
+            SearchDir = Vector3.Cross(Vector3.Cross(C.Point - B.Point, -B.Point), C.Point - B.Point);
             if (Vector3.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
             {
                 // Origin is on this line segment, apparently any normal search vector will do?
 
                 // Normal with x-axis
-                SearchDir = Vector3.Cross(C - B, Vector3.Right);
+                SearchDir = Vector3.Cross(C.Point - B.Point, Vector3.Right);
                 if (Vector3.NearEqual(SearchDir, Vector3.Zero, ZeroTolerance))
                 {
                     // Normal with z-axis
-                    SearchDir = Vector3.Cross(C - B, Vector3.BackwardLH);
+                    SearchDir = Vector3.Cross(C.Point - B.Point, Vector3.BackwardLH);
                 }
             }
 
@@ -128,9 +128,9 @@ namespace Engine.Physics.GJK
         /// <returns>Returns whether the current simplex reachs the origin or not</returns>
         public bool UpdatePoint(ICollider coll1, ICollider coll2)
         {
-            A = coll2.Support(SearchDir) - coll1.Support(-SearchDir);
+            A = new SupportPoint(coll1, coll2, SearchDir);
 
-            float d = Vector3.Dot(A, SearchDir);
+            float d = Vector3.Dot(A.Point, SearchDir);
             if (!MathUtil.IsZero(d) && d < 0)
             {
                 return false;
@@ -160,19 +160,19 @@ namespace Engine.Physics.GJK
 
             // Determine which feature is closest to origin, make that the new simplex
             Dimension = 2;
-            if (Vector3.Dot(Vector3.Cross(B - A, n), AO) > 0)
+            if (Vector3.Dot(Vector3.Cross(B.Point - A.Point, n), AO) > 0)
             {
                 // Closest to edge AB
                 C = A;
-                SearchDir = Vector3.Cross(Vector3.Cross(B - A, AO), B - A);
+                SearchDir = Vector3.Cross(Vector3.Cross(B.Point - A.Point, AO), B.Point - A.Point);
                 return;
             }
 
-            if (Vector3.Dot(Vector3.Cross(n, C - A), AO) > 0)
+            if (Vector3.Dot(Vector3.Cross(n, C.Point - A.Point), AO) > 0)
             {
                 // Closest to edge AC
                 B = A;
-                SearchDir = Vector3.Cross(Vector3.Cross(C - A, AO), C - A);
+                SearchDir = Vector3.Cross(Vector3.Cross(C.Point - A.Point, AO), C.Point - A.Point);
                 return;
             }
 
@@ -219,6 +219,7 @@ namespace Engine.Physics.GJK
                 D = C;
                 C = B;
                 B = A;
+
                 SearchDir = ABC;
                 return false;
             }
