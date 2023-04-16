@@ -5,7 +5,9 @@ using System.Linq;
 namespace Engine.Physics
 {
     using Engine.Physics.Colliders;
-    using Engine.Physics.GJK;
+    using EPAFace = EPA.Face;
+    using EPASolver = EPA.Solver;
+    using GJKSolver = GJK.Solver;
 
     /// <summary>
     /// Contact detector
@@ -43,14 +45,38 @@ namespace Engine.Physics
                 return HalfSpaceAndPrimitive(halfSpace1, primitive2, data);
             }
 
-            if (Solver.GJK(primitive1, primitive2, true, out var position, out var normal, out var penetration))
+            if (GJKSolver.GJK(primitive1, primitive2, out var simplex))
             {
+                var (face, dist) = EPASolver.EPA(simplex, primitive1, primitive2);
+                var normal = face.Normal;
+                var penetration = dist;
+                var mtv = normal * penetration;
+                var position = ComputeContactPoint(face, mtv);
+
                 data.AddContact(primitive1.RigidBody, primitive2.RigidBody, position, normal, penetration);
 
                 return true;
             }
 
             return false;
+        }
+        /// <summary>
+        /// Computes the contact point, penetration and normal
+        /// </summary>
+        /// <param name="face">EPA resulting face</param>
+        /// <param name="mtv">Minimum translation vector</param>
+        /// <returns>Returns the resulting contact point</returns>
+        /// <remarks>
+        /// Taken from Jacob Tyndall's lattice3d engine
+        /// <see cref="https://bitbucket.org/Hacktank/lattice3d/src/adfb28ffe5b51dbd1a173cbd43c6e387f1b4c12d/Lattice3D/src/physics/contact_generator/GJKEPAGenerator.cpp?at=master"/>
+        /// </remarks>
+        private static Vector3 ComputeContactPoint(EPAFace face, Vector3 mtv)
+        {
+            // Calculates barycentric coordinates using minimum translation vector as reference point
+            var bc = Triangle.CalculateBarycenter(face.A.Point, face.B.Point, face.C.Point, mtv);
+
+            // Interpolate the barycentric coordinates using the simplex cached support points of the first collider in the collision
+            return bc.X * face.A.Support1 + bc.Y * face.B.Support1 + bc.Z * face.C.Support1;
         }
 
         /// <summary>

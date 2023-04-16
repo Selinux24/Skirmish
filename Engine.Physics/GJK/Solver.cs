@@ -21,13 +21,8 @@
 // https://www.youtube.com/watch?v=6rgiPrzqt9w
 //-----------------------------------------------------------------------------
 
-using SharpDX;
-
 namespace Engine.Physics.GJK
 {
-    using EPASolver = EPA.Solver;
-    using EPAFace = EPA.Face;
-
     /// <summary>
     /// GJK solver class
     /// </summary>
@@ -40,21 +35,14 @@ namespace Engine.Physics.GJK
         /// </summary>
         /// <param name="coll1">First collider</param>
         /// <param name="coll2">Second collider</param>
-        /// <param name="calcContact">Calculate the minimum translation vector</param>
-        /// <param name="point">Contact point</param>
-        /// <param name="normal">Contact normal</param>
-        /// <param name="penetration">Contact penetration</param>
+        /// <param name="simplex">Returns the las checked simplex</param>
         /// <remarks>
         /// If <paramref name="calcContact"/> supplied the EPA will be used to find the contact <paramref name="point"/>, <paramref name="normal"/> and <paramref name="penetration"/> to separate coll1 from coll2
         /// </remarks>
         /// <returns>Returns true if the colliders are intersecting</returns>
-        public static bool GJK(ICollider coll1, ICollider coll2, bool calcContact, out Vector3 point, out Vector3 normal, out float penetration)
+        public static bool GJK(ICollider coll1, ICollider coll2, out Simplex simplex)
         {
-            point = Vector3.Zero;
-            normal = Vector3.Zero;
-            penetration = 0;
-
-            var simplex = new Simplex();
+            simplex = new Simplex();
 
             if (!simplex.Initialize(coll1, coll2))
             {
@@ -79,44 +67,11 @@ namespace Engine.Physics.GJK
 
                 if (simplex.UpdateSimplex4())
                 {
-                    if (calcContact)
-                    {
-                        var (face, sdist) = EPASolver.EPA(simplex, coll1, coll2);
-
-                        ComputeContactPoint(face, sdist, out point, out normal, out penetration);
-                    }
-
                     return true;
                 }
             }
 
             return false;
-        }
-        /// <summary>
-        /// Computes the contact point, penetration and normal
-        /// </summary>
-        /// <param name="face">EPA resulting face</param>
-        /// <param name="dist">Distance</param>
-        /// <param name="point">Contact point</param>
-        /// <param name="normal">Normal</param>
-        /// <param name="penetration">Penetration</param>
-        /// <remarks>
-        /// Taken from Jacob Tyndall's lattice3d engine
-        /// <see cref="https://bitbucket.org/Hacktank/lattice3d/src/adfb28ffe5b51dbd1a173cbd43c6e387f1b4c12d/Lattice3D/src/physics/contact_generator/GJKEPAGenerator.cpp?at=master"/>
-        /// </remarks>
-        private static void ComputeContactPoint(EPAFace face, float dist, out Vector3 point, out Vector3 normal, out float penetration)
-        {
-            normal = Vector3.Normalize(face.Normal);
-            penetration = dist;
-
-            // Get the minimum translation vector
-            var mtv = normal * penetration;
-
-            // Calculates barycentric coordinates from mtv vector
-            var bc = Triangle.CalculateBarycenter(face.A.Point, face.B.Point, face.C.Point, mtv);
-
-            // Interpolate the barycentric coordinates using the simplex cached support points of the first collider in the collision
-            point = bc.X * face.A.Support1 + bc.Y * face.B.Support1 + bc.Z * face.C.Support1;
         }
     }
 }
