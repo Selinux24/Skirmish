@@ -45,6 +45,12 @@ namespace Engine.Physics
                 return HalfSpaceAndPrimitive(halfSpace1, primitive2, data);
             }
 
+            if (primitive1 is SphereCollider sphere1 && primitive2 is SphereCollider sphere2)
+            {
+                // Special case with spheres
+                return SphereAndSphere(sphere1, sphere2, data);
+            }
+
             if (GJKSolver.GJK(primitive1, primitive2, out var simplex))
             {
                 var (face, dist) = EPASolver.EPA(simplex, primitive1, primitive2);
@@ -268,6 +274,35 @@ namespace Engine.Physics
             }
 
             return intersectionExists;
+        }
+
+        /// <summary>
+        /// Detect the collision between two spheres
+        /// </summary>
+        /// <param name="one">First sphere</param>
+        /// <param name="two">Second sphere</param>
+        /// <param name="data">Collision data</param>
+        /// <returns>Returns true if there has been a collision</returns>
+        public static bool SphereAndSphere(SphereCollider one, SphereCollider two, ContactResolver data)
+        {
+            // Find the vector between the objects
+            var positionOne = one.RigidBody.Position;
+            var positionTwo = two.RigidBody.Position;
+            var midline = positionOne - positionTwo;
+            float size = midline.Length();
+
+            // Check for errors
+            if (size <= float.Epsilon || size >= one.Radius + two.Radius)
+            {
+                return false;
+            }
+
+            var normal = Vector3.Normalize(midline);
+            var position = positionOne - (normal * one.Radius);
+            var penetration = one.Radius + two.Radius - size;
+            data.AddContact(one.RigidBody, two.RigidBody, position, normal, penetration);
+
+            return true;
         }
     }
 }

@@ -30,6 +30,8 @@ namespace Physics
             {
                 Mass = mass,
                 InitialTransform = Model.Manipulator.FinalTransform,
+                Restitution = 0.95f,
+                Friction = 0.5f,
             };
 
             PhysicsObject = new PhysicsObject(new RigidBody(rbState), Model);

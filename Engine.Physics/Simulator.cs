@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,6 +10,11 @@ namespace Engine.Physics
     /// </summary>
     public sealed class Simulator
     {
+        /// <summary>
+        /// Maximum iterations in the update pass
+        /// </summary>
+        public const int MaximumSimulationIterations = 100;
+
         /// <summary>
         /// Collision data structure
         /// </summary>
@@ -30,6 +36,10 @@ namespace Engine.Physics
         /// Simulation velocity
         /// </summary>
         public float Velocity { get; set; } = 1f;
+        /// <summary>
+        /// Simulation iterations
+        /// </summary>
+        public int SimulationIterations { get; set; } = 24;
 
         /// <summary>
         /// Update physics
@@ -37,21 +47,26 @@ namespace Engine.Physics
         /// <param name="gameTime">Game time</param>
         public void Update(GameTime gameTime)
         {
+            int iterations = Math.Clamp(SimulationIterations, 1, MaximumSimulationIterations);
+
             // Get time simulation
-            float time = Math.Min(gameTime.ElapsedSeconds, 0.05f) * Velocity;
-            if (time <= 0.0f)
+            float time = gameTime.ElapsedSeconds * Velocity / iterations;
+            if (MathUtil.IsZero(time))
             {
                 return;
             }
 
-            // Update simulation objects
-            UpdateObjects(time);
+            for (int i = 0; i < iterations; i++)
+            {
+                // Update simulation objects
+                UpdateObjects(time);
 
-            // Generate contacts
-            GenerateContacts();
+                // Generate contacts
+                GenerateContacts();
 
-            // Resolve the contacts
-            contactResolver.Resolve(time);
+                // Resolve the contacts
+                contactResolver.Resolve(time);
+            }
         }
 
         /// <summary>
