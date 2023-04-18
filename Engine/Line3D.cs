@@ -55,31 +55,31 @@ namespace Engine
         /// <returns>Returns new line list</returns>
         public static IEnumerable<Line3D> Transform(IEnumerable<Line3D> lines, Matrix transform)
         {
+            if (lines?.Any() != true)
+            {
+                return Enumerable.Empty<Line3D>();
+            }
+
             if (transform.IsIdentity)
             {
-                return new List<Line3D>(lines);
+                return Enumerable.AsEnumerable(lines);
             }
 
-            List<Line3D> trnLines = new List<Line3D>();
-
-            foreach (var line in lines)
-            {
-                trnLines.Add(Transform(line, transform));
-            }
-
-            return trnLines;
+            return lines
+                .Select(l => Transform(l, transform))
+                .AsEnumerable();
         }
 
         public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Triangle> triangleList)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var triangle in triangleList)
+            if (triangleList?.Any() != true)
             {
-                lines.AddRange(CreateWiredTriangle(triangle));
+                return Enumerable.Empty<Line3D>();
             }
 
-            return lines;
+            return triangleList
+                .SelectMany(CreateWiredTriangle)
+                .AsEnumerable();
         }
         public static IEnumerable<Line3D> CreateWiredTriangle(Triangle triangle)
         {
@@ -120,15 +120,13 @@ namespace Engine
         }
         public static IEnumerable<Line3D> CreateWiredRectangle(Vector3 v0, Vector3 v1, Vector3 v2, Vector3 v3)
         {
-            List<Line3D> lines = new List<Line3D>
+            return new[]
             {
                 new Line3D(v0, v1),
                 new Line3D(v1, v2),
                 new Line3D(v2, v3),
                 new Line3D(v3, v0)
             };
-
-            return lines;
         }
         public static IEnumerable<Line3D> CreateWiredPolygon(IEnumerable<Vector3> points)
         {
@@ -149,7 +147,7 @@ namespace Engine
 
             return CreateFromVertices(points, indexes);
         }
-        
+
         public static IEnumerable<Line3D> CreatePath(IEnumerable<Vector3> path)
         {
             List<Line3D> lines = new List<Line3D>();
