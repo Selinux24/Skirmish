@@ -40,6 +40,10 @@ namespace Engine
         /// Item topology
         /// </summary>
         private Topology topology;
+        /// <summary>
+        /// Buffer exchange data list
+        /// </summary>
+        private List<VertexPositionColor> bufferData = new List<VertexPositionColor>();
 
         /// <summary>
         /// Returns true if the buffers were ready
@@ -98,6 +102,8 @@ namespace Engine
             int count;
             if (Description.Primitives?.Length > 0)
             {
+                bufferData = new List<VertexPositionColor>(Description.Primitives.Length);
+
                 count = Description.Primitives.Length * stride;
 
                 dictionary.TryAdd(Description.Color, new List<T>(Description.Primitives));
@@ -105,6 +111,8 @@ namespace Engine
             }
             else
             {
+                bufferData = new List<VertexPositionColor>(Description.Count);
+
                 count = Description.Count * stride;
 
                 dictionaryChanged = false;
@@ -167,7 +175,7 @@ namespace Engine
         /// Set primitives list
         /// </summary>
         /// <param name="primitivesDict">Primitives by color dictionary</param>
-        public void SetPrimitives(Dictionary<Color4, IEnumerable<T>> primitivesDict)
+        public void SetPrimitives(IDictionary<Color4, IEnumerable<T>> primitivesDict)
         {
             foreach (var primitive in primitivesDict)
             {
@@ -203,7 +211,7 @@ namespace Engine
         /// Add primitives to list
         /// </summary>
         /// <param name="primitivesDict">Primitives by color dictionary</param>
-        public void AddPrimitives(Dictionary<Color4, IEnumerable<T>> primitivesDict)
+        public void AddPrimitives(IDictionary<Color4, IEnumerable<T>> primitivesDict)
         {
             foreach (var primitive in primitivesDict)
             {
@@ -288,7 +296,7 @@ namespace Engine
                 return;
             }
 
-            List<VertexPositionColor> data = new List<VertexPositionColor>();
+            bufferData.Clear();
 
             var copy = dictionary.ToArray();
 
@@ -302,7 +310,7 @@ namespace Engine
                     var vList = primitives[i].GetVertices();
                     for (int v = 0; v < vList.Count(); v++)
                     {
-                        data.Add(new VertexPositionColor()
+                        bufferData.Add(new VertexPositionColor()
                         {
                             Position = vList.ElementAt(v),
                             Color = color
@@ -311,12 +319,12 @@ namespace Engine
                 }
             }
 
-            if (!BufferManager.WriteVertexBuffer(vertexBuffer, data))
+            if (!BufferManager.WriteVertexBuffer(vertexBuffer, bufferData))
             {
                 return;
             }
 
-            drawCount = data.Count;
+            drawCount = bufferData.Count;
 
             dictionaryChanged = false;
         }

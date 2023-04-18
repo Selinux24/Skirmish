@@ -39,17 +39,14 @@ namespace Engine.Common
         {
             if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
 
-            var vArray = vertices.ToArray();
-            var uvArray = uvs.ToArray();
-
-            List<VertexFont> res = new List<VertexFont>();
-
-            for (int i = 0; i < vArray.Length; i++)
+            if (!vertices.Any())
             {
-                res.Add(new VertexFont() { Position = vArray[i], Texture = uvArray[i], Color = color });
+                return Enumerable.Empty<VertexFont>();
             }
 
-            return res.ToArray();
+            return vertices
+                .Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = color })
+                .ToArray();
         }
         /// <summary>
         /// Generates a vertex array from specified components
@@ -63,18 +60,14 @@ namespace Engine.Common
             if (vertices.Count() != uvs.Count()) throw new ArgumentException("Vertices and uvs must have the same length");
             if (vertices.Count() != colors.Count()) throw new ArgumentException("Vertices and colors must have the same length");
 
-            var vArray = vertices.ToArray();
-            var uvArray = uvs.ToArray();
-            var cArray = colors.ToArray();
-
-            List<VertexFont> res = new List<VertexFont>();
-
-            for (int i = 0; i < vArray.Length; i++)
+            if (!vertices.Any())
             {
-                res.Add(new VertexFont() { Position = vArray[i], Texture = uvArray[i], Color = cArray[i] });
+                return Enumerable.Empty<VertexFont>();
             }
 
-            return res.ToArray();
+            return vertices
+                .Select((v, index) => new VertexFont() { Position = v, Texture = uvs.ElementAt(index), Color = colors.ElementAt(index) })
+                .ToArray();
         }
 
         /// <summary>

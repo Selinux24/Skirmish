@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -507,9 +506,6 @@ namespace Engine.UI
                 return;
             }
 
-            List<VertexFont> vList = new List<VertexFont>();
-            List<uint> iList = new List<uint>();
-
             var parsed = FontMapParser.ParseSentence(text, textColor, shadowColor);
             ParsedText = parsed.Text;
 
@@ -524,8 +520,9 @@ namespace Engine.UI
 
             TextSize = colorW.Size;
 
-            iList.AddRange(colorW.Indices);
-            vList.AddRange(colorW.Vertices);
+            var iList = colorW.Indices.ToList();
+            var vList = colorW.Vertices.ToList();
+            uint vCount = (uint)vList.Count;
 
             if (ShadowColor != Color.Transparent)
             {
@@ -536,7 +533,7 @@ namespace Engine.UI
                     horizontalAlign,
                     verticalAlign);
 
-                colorS.Indices.ToList().ForEach((i) => { iList.Add(i + (uint)vList.Count); });
+                iList.AddRange(colorS.Indices.Select(i => i + vCount));
                 vList.AddRange(colorS.Vertices);
             }
 

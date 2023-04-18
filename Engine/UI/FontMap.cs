@@ -619,7 +619,8 @@ namespace Engine.UI
                 uv);
 
             //Add indices to word index list
-            s.Indices.ToList().ForEach((i) => { indexList.Add(i + (uint)vertList.Count); });
+            uint vertCount = (uint)vertList.Count;
+            s.Indices.ToList().ForEach((i) => { indexList.Add(i + vertCount); });
 
             //Store the vertices
             vertList.AddRange(VertexFont.Generate(s.Vertices, s.Uvs, color));

@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Log entry
     /// </summary>
-    public class LogEntry
+    public record LogEntry
     {
         /// <summary>
         /// Event date
