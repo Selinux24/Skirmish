@@ -169,10 +169,10 @@ namespace Engine.Physics
         /// </remarks>
         private void Prepare(float time)
         {
-            for (int i = 0; i < ContactCount; i++)
-            {
-                contacts[i].CalculateInternals(time);
-            }
+            contacts
+                .Take(ContactCount)
+                .AsParallel()
+                .ForAll(c => c.CalculateInternals(time));
         }
 
         /// <summary>
