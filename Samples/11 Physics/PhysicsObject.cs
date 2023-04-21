@@ -8,8 +8,8 @@ namespace Physics
 {
     public class PhysicsObject : IPhysicsObject
     {
-        public IRigidBody RigidBody { get; private set; }
         public Model Model { get; private set; }
+        public IRigidBody RigidBody { get; private set; }
         public ICollider Collider { get; private set; }
 
         private static MeshCollider CollisionTriangleSoupFromModel(Model model)
@@ -40,7 +40,7 @@ namespace Physics
             return new CapsuleCollider(extents.X, extents.Y * 2);
         }
 
-        public PhysicsObject(IRigidBody rigidBody, Model model)
+        public PhysicsObject(Model model, IRigidBody rigidBody)
         {
             RigidBody = rigidBody ?? throw new ArgumentNullException(nameof(rigidBody), $"Physics object must have a rigid body.");
             Model = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");

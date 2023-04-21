@@ -19,6 +19,8 @@ namespace Physics
         private UITextArea runtimeText = null;
         private UITextArea info = null;
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
+        private Joint joint;
+        private Rod rod;
 
         private readonly Simulator simulator = new() { Velocity = 1f };
         private readonly float bodyTime = 20f;
@@ -55,6 +57,7 @@ namespace Physics
                     InitializePyramids(),
                     InitializeCapsules(),
                     InitializeJoint(),
+                    InitializeRod(),
                 },
                 InitializeComponentsCompleted);
         }
@@ -133,9 +136,8 @@ namespace Physics
             {
                 Mass = 20,
                 InitialTransform = Matrix.Translation(Vector3.Up * 10f),
-                Restitution = 0f,
-                Friction = 0.9f,
-                IsStatic = true,
+                Restitution = 0.95f,
+                Friction = 0.5f,
             };
             var rbState2 = new RigidBodyState
             {
@@ -344,7 +346,7 @@ namespace Physics
             var mat = MaterialBlinnPhongContent.Default;
             mat.EmissiveColor = Color3.White;
 
-            int slices = 8;
+            int slices = 16;
             int stacks = 8;
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.5f, slices, stacks);
             var wiredSphere = GeometryUtil.CreateSphere(Topology.LineList, 0.5f, slices * 2, stacks * 2);
@@ -358,13 +360,13 @@ namespace Physics
             var jsphere1Model = await AddComponent<Model, ModelDescription>("jsphere1", "jsphere1", desc);
             var jsphere2Model = await AddComponent<Model, ModelDescription>("jsphere2", "jsphere2", desc);
 
-            jsphere1Model.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
-            jsphere2Model.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
+            jsphere1Model.TintColor = Color4.AdjustSaturation(Color.DarkSlateGray, 10f);
+            jsphere2Model.TintColor = Color4.AdjustSaturation(Color.SaddleBrown, 10f);
 
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
-                InitialTransform = Matrix.Translation(new Vector3(-15, 20, 0)),
+                InitialTransform = Matrix.Translation(new Vector3(-15, 10, 0)),
                 Restitution = 0f,
                 Friction = 0.9f,
                 IsStatic = true,
@@ -372,7 +374,7 @@ namespace Physics
             var rbState2 = new RigidBodyState
             {
                 Mass = 50,
-                InitialTransform = Matrix.Translation(new Vector3(-20, 20, 0)),
+                InitialTransform = Matrix.Translation(new Vector3(-20, 10, 0)),
                 Restitution = 0.95f,
                 Friction = 0.5f,
             };
@@ -386,12 +388,66 @@ namespace Physics
             colliders.Add(jsphere1);
             colliders.Add(jsphere2);
 
-            var joint = new Joint(
+            joint = new Joint(
                 jsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f,
                 jsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f,
                 2f);
 
             contactGenerators.Add(joint);
+        }
+        private async Task InitializeRod()
+        {
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color3.White;
+
+            int slices = 16;
+            int stacks = 8;
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.5f, slices, stacks);
+            var wiredSphere = GeometryUtil.CreateSphere(Topology.LineList, 0.5f, slices * 2, stacks * 2);
+
+            var desc = new ModelDescription()
+            {
+                Content = ContentDescription.FromContentData(sphere, mat),
+                ColliderType = ColliderTypes.Spheric,
+            };
+
+            var rsphere1Model = await AddComponent<Model, ModelDescription>("rsphere1", "rsphere1", desc);
+            var rsphere2Model = await AddComponent<Model, ModelDescription>("rsphere2", "rsphere2", desc);
+
+            rsphere1Model.TintColor = Color4.AdjustSaturation(Color.DarkCyan, 10f);
+            rsphere2Model.TintColor = Color4.AdjustSaturation(Color.AntiqueWhite, 10f);
+
+            var rbState1 = new RigidBodyState
+            {
+                Mass = 20,
+                InitialTransform = Matrix.Translation(new Vector3(15, 10, 0)),
+                Restitution = 0f,
+                Friction = 0.9f,
+                IsStatic = true,
+            };
+            var rbState2 = new RigidBodyState
+            {
+                Mass = 50,
+                InitialTransform = Matrix.Translation(new Vector3(20, 10, 0)),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData rsphere1 = new(rbState1, rsphere1Model);
+            ColliderData rsphere2 = new(rbState2, rsphere2Model);
+
+            rsphere1.Lines = Line3D.CreateFromVertices(wiredSphere);
+            rsphere2.Lines = Line3D.CreateFromVertices(wiredSphere);
+
+            colliders.Add(rsphere1);
+            colliders.Add(rsphere2);
+
+            rod = new Rod(
+                rsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f,
+                rsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f,
+                2f, 0.0001f);
+
+            contactGenerators.Add(rod);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -543,6 +599,11 @@ namespace Physics
                 c.UpdateBodyState(elapsed, bodyTime / simulator.Velocity, bodyDistance);
                 c.SetLines(lineDrawer);
             });
+
+            var lJoint = new Line3D(joint.PositionWorldOne, joint.PositionWorldTwo);
+            var rJoint = new Line3D(rod.PositionWorldOne, rod.PositionWorldTwo);
+
+            lineDrawer.AddPrimitives(Color4.White, new[] { lJoint, rJoint });
         }
 
         public override void GameGraphicsResized()

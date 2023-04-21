@@ -19,8 +19,8 @@ namespace Physics
         {
             this.rbState = rbState;
 
+            PhysicsObject = new PhysicsObject(model, new RigidBody(rbState));
             Model = model;
-            PhysicsObject = new PhysicsObject(new RigidBody(rbState), model);
         }
 
         public void Initialize()

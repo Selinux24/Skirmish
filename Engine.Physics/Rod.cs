@@ -1,12 +1,11 @@
 ﻿using SharpDX;
-using System;
 
 namespace Engine.Physics
 {
     /// <summary>
-    /// Joint between two bodies
+    /// Rod
     /// </summary>
-    public class Joint : IContactGenerator
+    public class Rod : IContactGenerator
     {
         /// <summary>
         /// First body
@@ -25,9 +24,13 @@ namespace Engine.Physics
         /// </summary>
         public Vector3 PositionTwo { get; set; }
         /// <summary>
-        /// Maximum joint distance
+        /// Rod distance
         /// </summary>
-        public float Error { get; set; }
+        public float Length { get; set; }
+        /// <summary>
+        /// Tolerance
+        /// </summary>
+        public float Tolerance { get; set; }
         /// <summary>
         /// World position of the connection in the first body
         /// </summary>
@@ -52,12 +55,7 @@ namespace Engine.Physics
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="a_pos"></param>
-        /// <param name="b"></param>
-        /// <param name="b_pos"></param>
-        /// <param name="error"></param>
-        public Joint(IRigidBody a, Vector3 a_pos, IRigidBody b, Vector3 b_pos, float error)
+        public Rod(IRigidBody a, Vector3 a_pos, IRigidBody b, Vector3 b_pos, float length, float tolerance)
         {
             BodyOne = a;
             BodyTwo = b;
@@ -65,7 +63,8 @@ namespace Engine.Physics
             PositionOne = a_pos;
             PositionTwo = b_pos;
 
-            Error = error;
+            Length = length;
+            Tolerance = tolerance;
         }
 
         /// <inheritdoc/>
@@ -76,22 +75,28 @@ namespace Engine.Physics
                 return false;
             }
 
-            var positionOneWorld = PositionWorldOne;
-            var positionTwoWorld = PositionWorldTwo;
+            // Find current separation length
+            Vector3 positionOneWorld = PositionWorldOne;
+            Vector3 positionTwoWorld = PositionWorldTwo;
+            float currentLen = Vector3.Distance(positionOneWorld, positionTwoWorld);
 
-            float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
-            if (Math.Abs(distance) <= Error)
+            if (MathUtil.NearEqual(Length - currentLen, Tolerance))
             {
-                // Valid joint
                 return false;
             }
 
-            // Adjust bodies
-            var normal = Vector3.Normalize(positionTwoWorld - positionOneWorld);
             var point = (positionOneWorld + positionTwoWorld) * 0.5f;
-            var penetration = distance - Error;
+            var normal = Vector3.Normalize(BodyTwo.Position - BodyOne.Position);
+            float penetration = currentLen - Length;
 
-            contactData.AddContact(BodyOne, BodyTwo, point, normal, penetration, 0.5f, 0f);
+            // The contact normal depends on whether it is necessary to extend or contract to preserve the length
+            if (currentLen <= Length)
+            {
+                normal = -normal;
+                penetration = -penetration;
+            }
+
+            contactData.AddContact(BodyOne, BodyTwo, point, normal, penetration, 0f, 1f);
 
             return true;
         }
