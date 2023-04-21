@@ -71,6 +71,8 @@ namespace Engine.Physics
         public bool IsAwake { get; private set; } = false;
         /// <inheritdoc/>
         public bool CanSleep { get; private set; } = false;
+        /// <inheritdoc/>
+        public bool IsStatic { get; private set; } = false;
 
         /// <summary>
         /// Constructor
@@ -78,6 +80,8 @@ namespace Engine.Physics
         /// <param name="bodyState">Body state</param>
         public RigidBody(RigidBodyState bodyState)
         {
+            IsStatic = bodyState.IsStatic;
+
             SetMass(bodyState.Mass);
             SetFriction(bodyState.Friction);
             SetRestitution(bodyState.Restitution);
@@ -113,6 +117,12 @@ namespace Engine.Physics
         }
 
         /// <inheritdoc/>
+        public void SetStatic(bool isStatic)
+        {
+            IsStatic = isStatic;
+        }
+
+        /// <inheritdoc/>
         public void SetState(Matrix transform)
         {
             if (!transform.Decompose(out var scale, out var rotation, out var translation) || !Vector3.NearEqual(Vector3.One, scale, Constants.ZeroToleranceVector))
@@ -140,7 +150,7 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public bool HasFiniteMass()
         {
-            return InverseMass >= 0f && !float.IsPositiveInfinity(Mass);
+            return !IsStatic && InverseMass >= 0f && !float.IsPositiveInfinity(Mass);
         }
 
         /// <inheritdoc/>
@@ -240,12 +250,12 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public void Integrate(float time)
         {
-            if (!HasFiniteMass())
+            if (!IsAwake)
             {
                 return;
             }
 
-            if (!IsAwake)
+            if (!HasFiniteMass())
             {
                 return;
             }
@@ -530,6 +540,10 @@ namespace Engine.Physics
         /// Initial transform
         /// </summary>
         public Matrix InitialTransform { get; set; } = Matrix.Identity;
+        /// <summary>
+        /// Static body
+        /// </summary>
+        public bool IsStatic { get; set; } = false;
 
         /// <summary>
         /// Constructor

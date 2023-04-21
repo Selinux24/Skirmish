@@ -79,6 +79,10 @@ namespace Engine.Physics
         /// Gets whether the body can sleep or not
         /// </summary>
         bool CanSleep { get; }
+        /// <summary>
+        /// Gets whether the body is affected by others or not
+        /// </summary>
+        bool IsStatic { get; }
 
         /// <summary>
         /// Sets the initial state of the body
@@ -91,6 +95,12 @@ namespace Engine.Physics
         /// <param name="position">Initial position</param>
         /// <param name="rotation">Initial rotation</param>
         void SetInitialState(Vector3 position, Quaternion rotation);
+
+        /// <summary>
+        /// Sets whether the body is affected by others or not 
+        /// </summary>
+        /// <param name="isStatic">Static</param>
+        void SetStatic(bool isStatic);
 
         /// <summary>
         /// Sets the state of the body

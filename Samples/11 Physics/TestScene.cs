@@ -121,8 +121,24 @@ namespace Physics
                 ColliderType = ColliderTypes.Spheric,
             };
 
-            ColliderData sphere1 = new(20, Matrix.Translation(Vector3.Up * 10f));
-            ColliderData sphere2 = new(10, Matrix.Translation(Vector3.Up * 15f));
+            var rbState1 = new RigidBodyState
+            {
+                Mass = 20,
+                InitialTransform = Matrix.Translation(Vector3.Up * 10f),
+                Restitution = 0f,
+                Friction = 0.9f,
+                IsStatic = true,
+            };
+            var rbState2 = new RigidBodyState
+            {
+                Mass = 10,
+                InitialTransform = Matrix.Translation(Vector3.Up * 15f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData sphere1 = new(rbState1);
+            ColliderData sphere2 = new(rbState2);
 
             sphere1.Model = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
             sphere2.Model = await AddComponent<Model, ModelDescription>("sphere2", "sphere2", desc);
@@ -150,8 +166,23 @@ namespace Physics
                 ColliderType = ColliderTypes.Box,
             };
 
-            ColliderData box1 = new(15, Matrix.Translation(Vector3.Up * 20f));
-            ColliderData box2 = new(10, Matrix.Translation(Vector3.Up * 25f));
+            var rbState1 = new RigidBodyState
+            {
+                Mass = 15,
+                InitialTransform = Matrix.Translation(Vector3.Up * 20f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+            var rbState2 = new RigidBodyState
+            {
+                Mass = 10,
+                InitialTransform = Matrix.Translation(Vector3.Up * 25f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData box1 = new(rbState1);
+            ColliderData box2 = new(rbState2);
 
             box1.Model = await AddComponent<Model, ModelDescription>("box1", "box1", desc);
             box2.Model = await AddComponent<Model, ModelDescription>("box2", "box2", desc);
@@ -183,8 +214,23 @@ namespace Physics
                 ColliderType = ColliderTypes.Cylinder,
             };
 
-            ColliderData cylinder1 = new(15, Matrix.Translation(Vector3.Up * 30f));
-            ColliderData cylinder2 = new(10, Matrix.Translation(Vector3.Up * 35f));
+            var rbState1 = new RigidBodyState
+            {
+                Mass = 15,
+                InitialTransform = Matrix.Translation(Vector3.Up * 30f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+            var rbState2 = new RigidBodyState
+            {
+                Mass = 10,
+                InitialTransform = Matrix.Translation(Vector3.Up * 35f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData cylinder1 = new(rbState1);
+            ColliderData cylinder2 = new(rbState2);
 
             cylinder1.Model = await AddComponent<Model, ModelDescription>("cylinder1", "cylinder1", desc);
             cylinder2.Model = await AddComponent<Model, ModelDescription>("cylinder2", "cylinder2", desc);
@@ -217,8 +263,23 @@ namespace Physics
                 ColliderType = ColliderTypes.Capsule,
             };
 
-            ColliderData capsule1 = new(15, Matrix.Translation(Vector3.Up * 40f));
-            ColliderData capsule2 = new(10, Matrix.Translation(Vector3.Up * 45f));
+            var rbState1 = new RigidBodyState
+            {
+                Mass = 15,
+                InitialTransform = Matrix.Translation(Vector3.Up * 40f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+            var rbState2 = new RigidBodyState
+            {
+                Mass = 10,
+                InitialTransform = Matrix.Translation(Vector3.Up * 45f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData capsule1 = new(rbState1);
+            ColliderData capsule2 = new(rbState2);
 
             capsule1.Model = await AddComponent<Model, ModelDescription>("capsule1", "capsule1", desc);
             capsule2.Model = await AddComponent<Model, ModelDescription>("capsule2", "capsule2", desc);
@@ -246,8 +307,23 @@ namespace Physics
                 ColliderType = ColliderTypes.Mesh,
             };
 
-            ColliderData pyramid1 = new(15, Matrix.Translation(Vector3.Up * 40f));
-            ColliderData pyramid2 = new(10, Matrix.Translation(Vector3.Up * 45f));
+            var rbState1 = new RigidBodyState
+            {
+                Mass = 15,
+                InitialTransform = Matrix.Translation(Vector3.Up * 40f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+            var rbState2 = new RigidBodyState
+            {
+                Mass = 10,
+                InitialTransform = Matrix.Translation(Vector3.Up * 45f),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData pyramid1 = new(rbState1);
+            ColliderData pyramid2 = new(rbState2);
 
             pyramid1.Model = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
             pyramid2.Model = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);

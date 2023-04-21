@@ -7,8 +7,7 @@ namespace Physics
 {
     class ColliderData
     {
-        private readonly float mass;
-        private readonly Matrix transform;
+        private readonly RigidBodyState rbState;
         private float time;
 
         public Model Model { get; set; }
@@ -16,23 +15,14 @@ namespace Physics
         public IPhysicsObject PhysicsObject { get; private set; }
         public ISceneLightPoint Light { get; private set; }
 
-        public ColliderData(float mass, Matrix transform)
+        public ColliderData(RigidBodyState rbState)
         {
-            this.mass = mass;
-            this.transform = transform;
+            this.rbState = rbState;
         }
 
         public void Initialize()
         {
-            Model.Manipulator.SetTransform(transform);
-
-            var rbState = new RigidBodyState
-            {
-                Mass = mass,
-                InitialTransform = Model.Manipulator.FinalTransform,
-                Restitution = 0.95f,
-                Friction = 0.5f,
-            };
+            Model.Manipulator.SetTransform(rbState.InitialTransform);
 
             PhysicsObject = new PhysicsObject(new RigidBody(rbState), Model);
 
@@ -60,7 +50,7 @@ namespace Physics
 
         public void Reset()
         {
-            PhysicsObject.Reset(transform);
+            PhysicsObject.Reset(rbState.InitialTransform);
             time = 0;
         }
     }

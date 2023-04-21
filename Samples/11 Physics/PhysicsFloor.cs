@@ -41,22 +41,12 @@ namespace Physics
 
         public void Reset(Matrix transform)
         {
-            if (RigidBody == null)
-            {
-                return;
-            }
-
-            RigidBody.SetInitialState(transform);
+            RigidBody?.SetInitialState(transform);
         }
 
         public void Reset(Vector3 position, Quaternion rotation)
         {
-            if (RigidBody == null)
-            {
-                return;
-            }
-
-            RigidBody.SetInitialState(position, rotation);
+            RigidBody?.SetInitialState(position, rotation);
         }
     }
 }

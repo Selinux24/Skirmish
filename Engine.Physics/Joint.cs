@@ -49,29 +49,29 @@ namespace Engine.Physics
         }
 
         /// <inheritdoc/>
-        public bool AddContact(ContactResolver data, int limit)
+        public bool AddContact(ContactResolver contactData, int limit)
         {
-            if (!data.HasFreeContacts())
+            if (!contactData.HasFreeContacts())
             {
                 return false;
             }
 
-            Vector3 positionOneWorld = BodyOne.GetPointInWorldSpace(PositionOne);
-            Vector3 positionTwoWorld = BodyTwo.GetPointInWorldSpace(PositionTwo);
+            var positionOneWorld = BodyOne.GetPointInWorldSpace(PositionOne);
+            var positionTwoWorld = BodyTwo.GetPointInWorldSpace(PositionTwo);
 
-            float length = Vector3.Distance(positionTwoWorld, positionOneWorld);
-
-            // Check if it is violated
-            if (Math.Abs(length) <= Error)
+            float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
+            if (Math.Abs(distance) <= Error)
             {
+                // Valid joint
                 return false;
             }
 
+            // Adjust bodies
             var normal = Vector3.Normalize(positionTwoWorld - positionOneWorld);
             var point = (positionOneWorld + positionTwoWorld) * 0.5f;
-            var penetration = length - Error;
+            var penetration = distance - Error;
 
-            data.AddContact(BodyOne, BodyTwo, point, normal, penetration);
+            contactData.AddContact(BodyOne, BodyTwo, point, normal, penetration);
 
             return true;
         }
