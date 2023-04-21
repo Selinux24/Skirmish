@@ -11,11 +11,11 @@ namespace Engine.Physics
         /// <summary>
         /// First body
         /// </summary>
-        public RigidBody BodyOne { get; set; }
+        public IRigidBody BodyOne { get; set; }
         /// <summary>
         /// Second body
         /// </summary>
-        public RigidBody BodyTwo { get; set; }
+        public IRigidBody BodyTwo { get; set; }
         /// <summary>
         /// Relative position of the connection in the first body
         /// </summary>
@@ -37,7 +37,7 @@ namespace Engine.Physics
         /// <param name="b"></param>
         /// <param name="b_pos"></param>
         /// <param name="error"></param>
-        public Joint(RigidBody a, Vector3 a_pos, RigidBody b, Vector3 b_pos, float error)
+        public Joint(IRigidBody a, Vector3 a_pos, IRigidBody b, Vector3 b_pos, float error)
         {
             BodyOne = a;
             BodyTwo = b;
@@ -71,7 +71,7 @@ namespace Engine.Physics
             var point = (positionOneWorld + positionTwoWorld) * 0.5f;
             var penetration = distance - Error;
 
-            contactData.AddContact(BodyOne, BodyTwo, point, normal, penetration);
+            contactData.AddContact(BodyOne, BodyTwo, point, normal, penetration, 0f, 1f);
 
             return true;
         }

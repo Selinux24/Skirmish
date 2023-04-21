@@ -25,6 +25,7 @@ namespace Physics
         private readonly float bodyDistance = floorSize * floorSize;
 
         private readonly ConcurrentBag<ColliderData> colliders = new();
+        private readonly ConcurrentBag<IContactGenerator> contactGenerators = new();
 
         private bool gameReady = false;
 
@@ -53,6 +54,7 @@ namespace Physics
                     InitializeCylinders(),
                     InitializePyramids(),
                     InitializeCapsules(),
+                    InitializeJoint(),
                 },
                 InitializeComponentsCompleted);
         }
@@ -121,6 +123,12 @@ namespace Physics
                 ColliderType = ColliderTypes.Spheric,
             };
 
+            var sphere1Model = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
+            var sphere2Model = await AddComponent<Model, ModelDescription>("sphere2", "sphere2", desc);
+
+            sphere1Model.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
+            sphere2Model.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
+
             var rbState1 = new RigidBodyState
             {
                 Mass = 20,
@@ -137,14 +145,8 @@ namespace Physics
                 Friction = 0.5f,
             };
 
-            ColliderData sphere1 = new(rbState1);
-            ColliderData sphere2 = new(rbState2);
-
-            sphere1.Model = await AddComponent<Model, ModelDescription>("sphere1", "sphere1", desc);
-            sphere2.Model = await AddComponent<Model, ModelDescription>("sphere2", "sphere2", desc);
-
-            sphere1.Model.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
-            sphere2.Model.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
+            ColliderData sphere1 = new(rbState1, sphere1Model);
+            ColliderData sphere2 = new(rbState2, sphere2Model);
 
             sphere1.Lines = Line3D.CreateFromVertices(wiredSphere);
             sphere2.Lines = Line3D.CreateFromVertices(wiredSphere);
@@ -166,6 +168,12 @@ namespace Physics
                 ColliderType = ColliderTypes.Box,
             };
 
+            var box1Model = await AddComponent<Model, ModelDescription>("box1", "box1", desc);
+            var box2Model = await AddComponent<Model, ModelDescription>("box2", "box2", desc);
+
+            box1Model.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
+            box2Model.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
+
             var rbState1 = new RigidBodyState
             {
                 Mass = 15,
@@ -181,14 +189,8 @@ namespace Physics
                 Friction = 0.5f,
             };
 
-            ColliderData box1 = new(rbState1);
-            ColliderData box2 = new(rbState2);
-
-            box1.Model = await AddComponent<Model, ModelDescription>("box1", "box1", desc);
-            box2.Model = await AddComponent<Model, ModelDescription>("box2", "box2", desc);
-
-            box1.Model.TintColor = Color4.AdjustSaturation(Color.Blue, 20f);
-            box2.Model.TintColor = Color4.AdjustSaturation(Color.Pink, 20f);
+            ColliderData box1 = new(rbState1, box1Model);
+            ColliderData box2 = new(rbState2, box2Model);
 
             box1.Lines = Line3D.CreateFromVertices(wiredBox);
             box2.Lines = Line3D.CreateFromVertices(wiredBox);
@@ -214,6 +216,12 @@ namespace Physics
                 ColliderType = ColliderTypes.Cylinder,
             };
 
+            var cylinder1Model = await AddComponent<Model, ModelDescription>("cylinder1", "cylinder1", desc);
+            var cylinder2Model = await AddComponent<Model, ModelDescription>("cylinder2", "cylinder2", desc);
+
+            cylinder1Model.TintColor = Color4.AdjustSaturation(Color.Yellow, 20f);
+            cylinder2Model.TintColor = Color4.AdjustSaturation(Color.Purple, 20f);
+
             var rbState1 = new RigidBodyState
             {
                 Mass = 15,
@@ -229,14 +237,8 @@ namespace Physics
                 Friction = 0.5f,
             };
 
-            ColliderData cylinder1 = new(rbState1);
-            ColliderData cylinder2 = new(rbState2);
-
-            cylinder1.Model = await AddComponent<Model, ModelDescription>("cylinder1", "cylinder1", desc);
-            cylinder2.Model = await AddComponent<Model, ModelDescription>("cylinder2", "cylinder2", desc);
-
-            cylinder1.Model.TintColor = Color4.AdjustSaturation(Color.Yellow, 20f);
-            cylinder2.Model.TintColor = Color4.AdjustSaturation(Color.Purple, 20f);
+            ColliderData cylinder1 = new(rbState1, cylinder1Model);
+            ColliderData cylinder2 = new(rbState2, cylinder2Model);
 
             cylinder1.Lines = Line3D.CreateFromVertices(wiredCylinder);
             cylinder2.Lines = Line3D.CreateFromVertices(wiredCylinder);
@@ -263,6 +265,12 @@ namespace Physics
                 ColliderType = ColliderTypes.Capsule,
             };
 
+            var capsule1Model = await AddComponent<Model, ModelDescription>("capsule1", "capsule1", desc);
+            var capsule2Model = await AddComponent<Model, ModelDescription>("capsule2", "capsule2", desc);
+
+            capsule1Model.TintColor = Color4.AdjustSaturation(Color.Gray, 20f);
+            capsule2Model.TintColor = Color.SandyBrown;
+
             var rbState1 = new RigidBodyState
             {
                 Mass = 15,
@@ -278,14 +286,8 @@ namespace Physics
                 Friction = 0.5f,
             };
 
-            ColliderData capsule1 = new(rbState1);
-            ColliderData capsule2 = new(rbState2);
-
-            capsule1.Model = await AddComponent<Model, ModelDescription>("capsule1", "capsule1", desc);
-            capsule2.Model = await AddComponent<Model, ModelDescription>("capsule2", "capsule2", desc);
-
-            capsule1.Model.TintColor = Color4.AdjustSaturation(Color.Gray, 20f);
-            capsule2.Model.TintColor = Color.SandyBrown;
+            ColliderData capsule1 = new(rbState1, capsule1Model);
+            ColliderData capsule2 = new(rbState2, capsule2Model);
 
             capsule1.Lines = Line3D.CreateFromVertices(wiredCapsule);
             capsule2.Lines = Line3D.CreateFromVertices(wiredCapsule);
@@ -307,6 +309,12 @@ namespace Physics
                 ColliderType = ColliderTypes.Mesh,
             };
 
+            var pyramid1Model = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
+            var pyramid2Model = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);
+
+            pyramid1Model.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
+            pyramid2Model.TintColor = Color4.AdjustSaturation(Color.Beige, 20f);
+
             var rbState1 = new RigidBodyState
             {
                 Mass = 15,
@@ -322,20 +330,68 @@ namespace Physics
                 Friction = 0.5f,
             };
 
-            ColliderData pyramid1 = new(rbState1);
-            ColliderData pyramid2 = new(rbState2);
-
-            pyramid1.Model = await AddComponent<Model, ModelDescription>("pyramid1", "pyramid1", desc);
-            pyramid2.Model = await AddComponent<Model, ModelDescription>("pyramid2", "pyramid2", desc);
-
-            pyramid1.Model.TintColor = Color4.AdjustSaturation(Color.Cyan, 20f);
-            pyramid2.Model.TintColor = Color4.AdjustSaturation(Color.Beige, 20f);
+            ColliderData pyramid1 = new(rbState1, pyramid1Model);
+            ColliderData pyramid2 = new(rbState2, pyramid2Model);
 
             pyramid1.Lines = Line3D.CreateFromVertices(pyramid2d.Vertices, pyramid2d.Indices);
             pyramid2.Lines = Line3D.CreateFromVertices(pyramid2d.Vertices, pyramid2d.Indices);
 
             colliders.Add(pyramid1);
             colliders.Add(pyramid2);
+        }
+        private async Task InitializeJoint()
+        {
+            var mat = MaterialBlinnPhongContent.Default;
+            mat.EmissiveColor = Color3.White;
+
+            int slices = 8;
+            int stacks = 8;
+            var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 0.5f, slices, stacks);
+            var wiredSphere = GeometryUtil.CreateSphere(Topology.LineList, 0.5f, slices * 2, stacks * 2);
+
+            var desc = new ModelDescription()
+            {
+                Content = ContentDescription.FromContentData(sphere, mat),
+                ColliderType = ColliderTypes.Spheric,
+            };
+
+            var jsphere1Model = await AddComponent<Model, ModelDescription>("jsphere1", "jsphere1", desc);
+            var jsphere2Model = await AddComponent<Model, ModelDescription>("jsphere2", "jsphere2", desc);
+
+            jsphere1Model.TintColor = Color4.AdjustSaturation(Color.Red, 10f);
+            jsphere2Model.TintColor = Color4.AdjustSaturation(Color.Green, 10f);
+
+            var rbState1 = new RigidBodyState
+            {
+                Mass = 20,
+                InitialTransform = Matrix.Translation(new Vector3(-15, 20, 0)),
+                Restitution = 0f,
+                Friction = 0.9f,
+                IsStatic = true,
+            };
+            var rbState2 = new RigidBodyState
+            {
+                Mass = 50,
+                InitialTransform = Matrix.Translation(new Vector3(-20, 20, 0)),
+                Restitution = 0.95f,
+                Friction = 0.5f,
+            };
+
+            ColliderData jsphere1 = new(rbState1, jsphere1Model);
+            ColliderData jsphere2 = new(rbState2, jsphere2Model);
+
+            jsphere1.Lines = Line3D.CreateFromVertices(wiredSphere);
+            jsphere2.Lines = Line3D.CreateFromVertices(wiredSphere);
+
+            colliders.Add(jsphere1);
+            colliders.Add(jsphere2);
+
+            var joint = new Joint(
+                jsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f,
+                jsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f,
+                2f);
+
+            contactGenerators.Add(joint);
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -356,6 +412,8 @@ namespace Physics
                 simulator.AddPhysicsObject(c.PhysicsObject);
                 Lights.Add(c.Light);
             });
+
+            simulator.AddContacts(contactGenerators);
 
             gameReady = true;
         }

@@ -162,7 +162,9 @@ namespace Engine.Physics
         /// <param name="position">Position in world coordinates</param>
         /// <param name="normal">Normal in world coordinates</param>
         /// <param name="penetration">Penetration</param>
-        public bool SetContactData(IRigidBody body1, IRigidBody body2, Vector3 position, Vector3 normal, float penetration)
+        /// <param name="restitution">Restitution</param>
+        /// <param name="friction">Friction</param>
+        public bool SetContactData(IRigidBody body1, IRigidBody body2, Vector3 position, Vector3 normal, float penetration, float restitution, float friction)
         {
             if (!body1.HasFiniteMass() && !body2.HasFiniteMass())
             {
@@ -171,9 +173,9 @@ namespace Engine.Physics
 
             this.body1 = body1;
             this.body2 = body2;
-            
-            friction = (body1.Friction + body2.Friction) * 0.5f;
-            restitution = (body1.Restitution + body2.Restitution) * 0.5f;
+
+            this.restitution = restitution;
+            this.friction = friction;
 
             Position = position;
             Normal = normal;

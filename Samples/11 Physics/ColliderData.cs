@@ -10,21 +10,22 @@ namespace Physics
         private readonly RigidBodyState rbState;
         private float time;
 
-        public Model Model { get; set; }
-        public IEnumerable<Line3D> Lines { get; set; }
         public IPhysicsObject PhysicsObject { get; private set; }
+        public Model Model { get; private set; }
+        public IEnumerable<Line3D> Lines { get; set; }
         public ISceneLightPoint Light { get; private set; }
 
-        public ColliderData(RigidBodyState rbState)
+        public ColliderData(RigidBodyState rbState, Model model)
         {
             this.rbState = rbState;
+
+            Model = model;
+            PhysicsObject = new PhysicsObject(new RigidBody(rbState), model);
         }
 
         public void Initialize()
         {
             Model.Manipulator.SetTransform(rbState.InitialTransform);
-
-            PhysicsObject = new PhysicsObject(new RigidBody(rbState), Model);
 
             float radius = Model.GetBoundingSphere().Radius * 2f;
             Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));

@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Engine.Physics
 {
@@ -99,14 +100,36 @@ namespace Engine.Physics
         /// <summary>
         /// Notifies the instance that a contact has been added.
         /// </summary>
+        /// <param name="one">First body</param>
+        /// <param name="two">Second body</param>
+        /// <param name="position">Contact position</param>
+        /// <param name="normal">Contact normal</param>
+        /// <param name="penetration">Contact penetration</param>
         public void AddContact(IRigidBody one, IRigidBody two, Vector3 position, Vector3 normal, float penetration)
+        {
+            float restitution = (one?.Restitution ?? 1f + two?.Restitution ?? 1f) * 0.5f;
+            float friction = Math.Max(one?.Friction ?? 0f, two?.Friction ?? 0f);
+
+            AddContact(one, two, position, normal, penetration, restitution, friction);
+        }
+        /// <summary>
+        /// Notifies the instance that a contact has been added.
+        /// </summary>
+        /// <param name="one">First body</param>
+        /// <param name="two">Second body</param>
+        /// <param name="position">Contact position</param>
+        /// <param name="normal">Contact normal</param>
+        /// <param name="penetration">Contact penetration</param>
+        /// <param name="restitution">Restitution</param>
+        /// <param name="friction">Friction</param>
+        public void AddContact(IRigidBody one, IRigidBody two, Vector3 position, Vector3 normal, float penetration, float restitution, float friction)
         {
             if (!HasFreeContacts())
             {
                 return;
             }
 
-            if (CurrentContact?.SetContactData(one, two, position, normal, penetration) == true)
+            if (CurrentContact?.SetContactData(one, two, position, normal, penetration, restitution, friction) == true)
             {
                 currentContactIndex++;
             }
