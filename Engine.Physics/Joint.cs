@@ -8,64 +8,29 @@ namespace Engine.Physics
     /// </summary>
     public class Joint : IContactGenerator
     {
-        /// <summary>
-        /// First body
-        /// </summary>
-        public IRigidBody BodyOne { get; set; }
-        /// <summary>
-        /// Second body
-        /// </summary>
-        public IRigidBody BodyTwo { get; set; }
-        /// <summary>
-        /// Relative position of the connection in the first body
-        /// </summary>
-        public Vector3 PositionOne { get; set; }
-        /// <summary>
-        /// Relative position of the connection in the second body
-        /// </summary>
-        public Vector3 PositionTwo { get; set; }
+        /// <inheritdoc/>
+        public IContactEndPoint One { get; set; }
+        /// <inheritdoc/>
+        public IContactEndPoint Two { get; set; }
         /// <summary>
         /// Maximum joint distance
         /// </summary>
-        public float Error { get; set; }
-        /// <summary>
-        /// World position of the connection in the first body
-        /// </summary>
-        public Vector3 PositionWorldOne
-        {
-            get
-            {
-                return BodyOne?.GetPointInWorldSpace(PositionOne) ?? Vector3.Zero;
-            }
-        }
-        /// <summary>
-        /// World position of the connection in the second body
-        /// </summary>
-        public Vector3 PositionWorldTwo
-        {
-            get
-            {
-                return BodyTwo?.GetPointInWorldSpace(PositionTwo) ?? Vector3.Zero;
-            }
-        }
+        public float Length { get; set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="a"></param>
-        /// <param name="a_pos"></param>
-        /// <param name="b"></param>
-        /// <param name="b_pos"></param>
-        /// <param name="error"></param>
-        public Joint(IRigidBody a, Vector3 a_pos, IRigidBody b, Vector3 b_pos, float error)
+        public Joint(IContactEndPoint one, IContactEndPoint two, float length)
         {
-            BodyOne = a;
-            BodyTwo = b;
+            One = one ?? throw new ArgumentNullException(nameof(one));
+            Two = two ?? throw new ArgumentNullException(nameof(two));
 
-            PositionOne = a_pos;
-            PositionTwo = b_pos;
+            if (one is FixedEndPoint && two is FixedEndPoint)
+            {
+                throw new ArgumentException("Invalid end-points. No connection between fixed positions permited.", nameof(two));
+            }
 
-            Error = error;
+            Length = length;
         }
 
         /// <inheritdoc/>
@@ -76,11 +41,12 @@ namespace Engine.Physics
                 return false;
             }
 
-            var positionOneWorld = PositionWorldOne;
-            var positionTwoWorld = PositionWorldTwo;
+            // Find current separation length
+            var positionOneWorld = One.PositionWorld;
+            var positionTwoWorld = Two.PositionWorld;
 
             float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
-            if (Math.Abs(distance) <= Error)
+            if (Math.Abs(distance) <= Length)
             {
                 // Valid joint
                 return false;
@@ -89,11 +55,87 @@ namespace Engine.Physics
             // Adjust bodies
             var normal = Vector3.Normalize(positionTwoWorld - positionOneWorld);
             var point = (positionOneWorld + positionTwoWorld) * 0.5f;
-            var penetration = distance - Error;
+            float penetration = distance - Length;
 
-            contactData.AddContact(BodyOne, BodyTwo, point, normal, penetration, 0.5f, 0f);
+            // The contact normal depends on whether it is necessary to extend or contract to preserve the length
+            if (distance <= Length)
+            {
+                normal = -normal;
+                penetration = -penetration;
+            }
+
+            contactData.AddContact(One.Body, Two.Body, point, normal, penetration, 0f, 1f);
 
             return true;
+        }
+    }
+
+    public interface IContactEndPoint
+    {
+        /// <summary>
+        /// Body
+        /// </summary>
+        IRigidBody Body { get; }
+        /// <summary>
+        /// Gets the body position
+        /// </summary>
+        Vector3 BodyPosition { get; }
+        /// <summary>
+        /// Relative position of the connection in the body
+        /// </summary>
+        Vector3 PositionLocal { get; }
+        /// <summary>
+        /// World position of the connection in the body
+        /// </summary>
+        Vector3 PositionWorld { get; }
+    }
+
+    /// <summary>
+    /// Body end-point
+    /// </summary>
+    /// <remarks>Used for connect rigid bodies</remarks>
+    public class BodyEndPoint : IContactEndPoint
+    {
+        /// <inheritdoc/>
+        public IRigidBody Body { get; set; }
+        /// <inheritdoc/>
+        public Vector3 BodyPosition { get => Body.Position; }
+        /// <inheritdoc/>
+        public Vector3 PositionLocal { get; set; }
+        /// <inheritdoc/>
+        public Vector3 PositionWorld { get => Body.GetPointInWorldSpace(PositionLocal); }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public BodyEndPoint(IRigidBody body, Vector3 positionLocal)
+        {
+            Body = body ?? throw new ArgumentNullException(nameof(body), $"A body must be specified. For contacts without body, use {nameof(FixedEndPoint)} instead.");
+            PositionLocal = positionLocal;
+        }
+    }
+
+    /// <summary>
+    /// Fixed end-point
+    /// </summary>
+    /// <remarks>Used for connect a rigid body with a fixed world position</remarks>
+    public class FixedEndPoint : IContactEndPoint
+    {
+        /// <inheritdoc/>
+        public IRigidBody Body { get => null; }
+        /// <inheritdoc/>
+        public Vector3 BodyPosition { get => PositionWorld; }
+        /// <inheritdoc/>
+        public Vector3 PositionLocal { get => PositionWorld; }
+        /// <inheritdoc/>
+        public Vector3 PositionWorld { get; set; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public FixedEndPoint(Vector3 positionWorld)
+        {
+            PositionWorld = positionWorld;
         }
     }
 }

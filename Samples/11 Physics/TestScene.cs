@@ -388,10 +388,9 @@ namespace Physics
             colliders.Add(jsphere1);
             colliders.Add(jsphere2);
 
-            joint = new Joint(
-                jsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f,
-                jsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f,
-                2f);
+            var endPointOne = new BodyEndPoint(jsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f);
+            var endPointTwo = new BodyEndPoint(jsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f);
+            joint = new Joint(endPointOne, endPointTwo, 2f);
 
             contactGenerators.Add(joint);
         }
@@ -442,10 +441,9 @@ namespace Physics
             colliders.Add(rsphere1);
             colliders.Add(rsphere2);
 
-            rod = new Rod(
-                rsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f,
-                rsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f,
-                2f, 0.0001f);
+            var endPointOne = new BodyEndPoint(rsphere1.PhysicsObject.RigidBody, Vector3.Down * 0.5f);
+            var endPointTwo = new BodyEndPoint(rsphere2.PhysicsObject.RigidBody, Vector3.Up * 0.5f);
+            rod = new Rod(endPointOne, endPointTwo, 2f, 0.0001f);
 
             contactGenerators.Add(rod);
         }
@@ -600,8 +598,8 @@ namespace Physics
                 c.SetLines(lineDrawer);
             });
 
-            var lJoint = new Line3D(joint.PositionWorldOne, joint.PositionWorldTwo);
-            var rJoint = new Line3D(rod.PositionWorldOne, rod.PositionWorldTwo);
+            var lJoint = new Line3D(joint.One.PositionWorld, joint.Two.PositionWorld);
+            var rJoint = new Line3D(rod.One.PositionWorld, rod.Two.PositionWorld);
 
             lineDrawer.AddPrimitives(Color4.White, new[] { lJoint, rJoint });
         }

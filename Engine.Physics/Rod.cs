@@ -1,28 +1,17 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.Physics
 {
     /// <summary>
-    /// Rod
+    /// Rod between two bodies
     /// </summary>
     public class Rod : IContactGenerator
     {
-        /// <summary>
-        /// First body
-        /// </summary>
-        public IRigidBody BodyOne { get; set; }
-        /// <summary>
-        /// Second body
-        /// </summary>
-        public IRigidBody BodyTwo { get; set; }
-        /// <summary>
-        /// Relative position of the connection in the first body
-        /// </summary>
-        public Vector3 PositionOne { get; set; }
-        /// <summary>
-        /// Relative position of the connection in the second body
-        /// </summary>
-        public Vector3 PositionTwo { get; set; }
+        /// <inheritdoc/>
+        public IContactEndPoint One { get; set; }
+        /// <inheritdoc/>
+        public IContactEndPoint Two { get; set; }
         /// <summary>
         /// Rod distance
         /// </summary>
@@ -31,37 +20,19 @@ namespace Engine.Physics
         /// Tolerance
         /// </summary>
         public float Tolerance { get; set; }
-        /// <summary>
-        /// World position of the connection in the first body
-        /// </summary>
-        public Vector3 PositionWorldOne
-        {
-            get
-            {
-                return BodyOne?.GetPointInWorldSpace(PositionOne) ?? Vector3.Zero;
-            }
-        }
-        /// <summary>
-        /// World position of the connection in the second body
-        /// </summary>
-        public Vector3 PositionWorldTwo
-        {
-            get
-            {
-                return BodyTwo?.GetPointInWorldSpace(PositionTwo) ?? Vector3.Zero;
-            }
-        }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public Rod(IRigidBody a, Vector3 a_pos, IRigidBody b, Vector3 b_pos, float length, float tolerance)
+        public Rod(IContactEndPoint one, IContactEndPoint two, float length, float tolerance)
         {
-            BodyOne = a;
-            BodyTwo = b;
+            One = one ?? throw new ArgumentNullException(nameof(one));
+            Two = two ?? throw new ArgumentNullException(nameof(two));
 
-            PositionOne = a_pos;
-            PositionTwo = b_pos;
+            if (one is FixedEndPoint && two is FixedEndPoint)
+            {
+                throw new ArgumentException("Invalid end-points. No connection between fixed positions permited.", nameof(two));
+            }
 
             Length = length;
             Tolerance = tolerance;
@@ -76,27 +47,29 @@ namespace Engine.Physics
             }
 
             // Find current separation length
-            Vector3 positionOneWorld = PositionWorldOne;
-            Vector3 positionTwoWorld = PositionWorldTwo;
-            float currentLen = Vector3.Distance(positionOneWorld, positionTwoWorld);
+            var positionOneWorld = One.PositionWorld;
+            var positionTwoWorld = Two.PositionWorld;
 
-            if (MathUtil.NearEqual(Length - currentLen, Tolerance))
+            float distance = Vector3.Distance(positionTwoWorld, positionOneWorld);
+            if (MathUtil.NearEqual(Length - distance, Tolerance))
             {
+                // Valid rod
                 return false;
             }
 
+            // Adjust bodies
+            var normal = Vector3.Normalize(Two.BodyPosition - One.BodyPosition);
             var point = (positionOneWorld + positionTwoWorld) * 0.5f;
-            var normal = Vector3.Normalize(BodyTwo.Position - BodyOne.Position);
-            float penetration = currentLen - Length;
+            float penetration = distance - Length;
 
             // The contact normal depends on whether it is necessary to extend or contract to preserve the length
-            if (currentLen <= Length)
+            if (distance <= Length)
             {
                 normal = -normal;
                 penetration = -penetration;
             }
 
-            contactData.AddContact(BodyOne, BodyTwo, point, normal, penetration, 0f, 1f);
+            contactData.AddContact(One.Body, Two.Body, point, normal, penetration, 0f, 1f);
 
             return true;
         }

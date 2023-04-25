@@ -7,6 +7,15 @@ namespace Engine.Physics
     public interface IContactGenerator
     {
         /// <summary>
+        /// First end-point
+        /// </summary>
+        IContactEndPoint One { get; set; }
+        /// <summary>
+        /// Second end-point
+        /// </summary>
+        IContactEndPoint Two { get; set; }
+
+        /// <summary>
         /// Generate contacts between the bodies included in the contact generator
         /// </summary>
         /// <param name="contactData">Contact data</param>
