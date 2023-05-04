@@ -9,20 +9,6 @@ namespace Engine.Physics
     public class Spring : IForceGenerator
     {
         /// <summary>
-        /// Spring connection point in local coordinates
-        /// </summary>
-        private readonly Vector3 connectionPoint;
-
-        /// <summary>
-        /// Connection point of the spring with the other body, in coordinates of the other body
-        /// </summary>
-        private readonly Vector3 otherConnectionPoint;
-        /// <summary>
-        /// The body on the other side of the spring
-        /// </summary>
-        private readonly IRigidBody other;
-
-        /// <summary>
         /// Spring constant
         /// </summary>
         private readonly float springConstant;
@@ -31,27 +17,39 @@ namespace Engine.Physics
         /// </summary>
         private readonly float restLength;
 
+        /// <inheritdoc/>
+        public IContactEndPoint Source { get; private set; }
+        /// <inheritdoc/>
+        public IContactEndPoint Target { get; private set; }
+        /// <inheritdoc/>
+        public bool IsActive { get; private set; } = true;
+
         /// <summary>
         /// Constructor
         /// </summary>
-        public Spring(Vector3 connectionPoint, IRigidBody other, Vector3 otherConnectionPoint, float springConstant, float restLength)
+        public Spring(IContactEndPoint source, IContactEndPoint target, float springConstant, float restLength)
         {
-            this.connectionPoint = connectionPoint;
-            this.other = other;
-            this.otherConnectionPoint = otherConnectionPoint;
+            Source = source;
+            Target = target;
+
             this.springConstant = springConstant;
             this.restLength = restLength;
         }
 
         /// <inheritdoc/>
-        public void UpdateForce(IRigidBody rigidBody, float time)
+        public void UpdateForce(float time)
         {
+            if (!IsActive)
+            {
+                return;
+            }
+
             // Calculate the two ends in world space
-            Vector3 lws = rigidBody.GetPointInWorldSpace(connectionPoint);
-            Vector3 ows = other.GetPointInWorldSpace(otherConnectionPoint);
+            Vector3 swp = Source.PositionWorld;
+            Vector3 twp = Target.PositionWorld;
 
             // Calculate the vector of the spring
-            Vector3 force = lws - ows;
+            Vector3 force = twp - swp;
 
             // Calculate the magnitude of the force
             float magnitude = force.Length();
@@ -61,7 +59,7 @@ namespace Engine.Physics
             // Calculate the final force and apply it
             force.Normalize();
             force *= -magnitude;
-            rigidBody.AddForceAtPoint(force, lws);
+            Target.Body.AddForceAtPoint(force, twp);
         }
     }
 }

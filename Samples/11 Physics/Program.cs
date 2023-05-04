@@ -29,11 +29,11 @@ namespace Physics
 #endif
                 {
 #if DEBUG
-                    cl.VisibleMouse = false;
+                    cl.VisibleMouse = true;
                     cl.LockMouse = false;
 #else
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = true;
+                    cl.VisibleMouse = true;
+                    cl.LockMouse = false;
 #endif
 
                     GameResourceManager.RegisterLoader<LoaderCollada>();

@@ -26,6 +26,8 @@ namespace Physics
         private readonly float bodyTime = 20f;
         private readonly float bodyDistance = floorSize * floorSize;
 
+        private readonly ExplosionDescription explosionTemplate = ExplosionDescription.CreateExplosion();
+
         private readonly ConcurrentBag<ColliderData> colliders = new();
         private readonly ConcurrentBag<IContactGenerator> contactGenerators = new();
 
@@ -548,6 +550,11 @@ namespace Physics
             {
                 Camera.MoveUp(gameTime, Game.Input.ShiftPressed);
             }
+
+            if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
+            {
+                GenerateExplosion(GetPickingRay());
+            }
         }
         private void UpdateInputBodies()
         {
@@ -618,6 +625,16 @@ namespace Physics
 
             panel.Width = Game.Form.RenderWidth;
             panel.Height = info.Top + info.Height + 3;
+        }
+
+        private void GenerateExplosion(PickingRay pickingRay)
+        {
+            if (!this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.None, out var p))
+            {
+                return;
+            }
+
+            simulator.AddForce(new Explosion(p.PickingResult.Position, explosionTemplate));
         }
     }
 }

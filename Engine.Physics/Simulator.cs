@@ -24,6 +24,10 @@ namespace Engine.Physics
         /// </summary>
         private readonly List<IPhysicsObject> physicsObjects = new List<IPhysicsObject>();
         /// <summary>
+        /// Global force generator list
+        /// </summary>
+        private readonly List<IGlobalForceGenerator> globalForceGenerators = new List<IGlobalForceGenerator>();
+        /// <summary>
         /// Force generator list
         /// </summary>
         private readonly List<IForceGenerator> forceGenerators = new List<IForceGenerator>();
@@ -75,29 +79,22 @@ namespace Engine.Physics
         /// <param name="time">Time</param>
         private void UpdateObjects(float time)
         {
-            //Apply force generators
-            var bodies = physicsObjects
-                .Select(o => o.RigidBody)
-                .ToArray();
+            //Update local force generators
+            forceGenerators.ForEach(f => f.UpdateForce(time));
 
-            foreach (var body in bodies)
-            {
-                foreach (var forceGenerator in forceGenerators)
-                {
-                    forceGenerator.UpdateForce(body, time);
-                }
-            }
+            //Update global force generators
+            physicsObjects.ForEach(o => globalForceGenerators.ForEach(f => f.UpdateForce(o.RigidBody, time)));
 
             //Integrate forces
-            foreach (var obj in physicsObjects)
+            physicsObjects.ForEach(o =>
             {
-                if (obj.RigidBody?.IsAwake == true)
+                if (o.RigidBody?.IsAwake == true)
                 {
-                    obj.RigidBody.Integrate(time);
+                    o.RigidBody.Integrate(time);
                 }
 
-                obj.Update();
-            }
+                o.Update();
+            });
         }
         /// <summary>
         /// Gets the contacts for the current moment
@@ -183,6 +180,40 @@ namespace Engine.Physics
 
                 return pMass.CompareTo(bMass);
             });
+        }
+        /// <summary>
+        /// Adds a new global force generator list to the simulation
+        /// </summary>
+        /// <param name="forceGenerators">Force generator list</param>
+        public void AddForces(IEnumerable<IGlobalForceGenerator> forceGenerators)
+        {
+            if (forceGenerators?.Any() != true)
+            {
+                return;
+            }
+
+            foreach (var forceGenerator in forceGenerators)
+            {
+                AddForce(forceGenerator);
+            }
+        }
+        /// <summary>
+        /// Adds a new global force generator to the simulation
+        /// </summary>
+        /// <param name="forceGenerator">Force generator</param>
+        public void AddForce(IGlobalForceGenerator forceGenerator)
+        {
+            if (forceGenerator == null)
+            {
+                return;
+            }
+
+            if (globalForceGenerators.Contains(forceGenerator))
+            {
+                return;
+            }
+
+            globalForceGenerators.Add(forceGenerator);
         }
         /// <summary>
         /// Adds a new force generator list to the simulation
