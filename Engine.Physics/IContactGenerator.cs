@@ -16,6 +16,11 @@ namespace Engine.Physics
         IContactEndPoint Two { get; set; }
 
         /// <summary>
+        /// Gets whether the contact generator is active or not
+        /// </summary>
+        bool IsActive { get; }
+
+        /// <summary>
         /// Generate contacts between the bodies included in the contact generator
         /// </summary>
         /// <param name="contactData">Contact data</param>

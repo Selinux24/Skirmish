@@ -15,10 +15,14 @@ namespace Engine.Physics
         bool IsActive { get; }
 
         /// <summary>
-        /// Calculates the force and applies it to the specified object
+        /// Applies the force to the specified object
         /// </summary>
         /// <param name="rigidBody">Rigid body</param>
-        /// <param name="time">Time</param>
-        void UpdateForce(IRigidBody rigidBody, float time);
+        void ApplyForce(IRigidBody rigidBody);
+        /// <summary>
+        /// Updates the force state
+        /// </summary>
+        /// <param name="time">Elapsed time</param>
+        void UpdateForce(float time);
     }
 }

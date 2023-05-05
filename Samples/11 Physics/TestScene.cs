@@ -4,6 +4,7 @@ using Engine.Content;
 using Engine.Physics;
 using Engine.UI;
 using SharpDX;
+using System;
 using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,8 @@ namespace Physics
         private readonly float bodyDistance = floorSize * floorSize;
 
         private readonly ExplosionDescription explosionTemplate = ExplosionDescription.CreateExplosion();
+        private readonly ExplosionDescription bigExplosionTemplate = ExplosionDescription.CreateBigExplosion();
+        private Explosion lastExplosion = null;
 
         private readonly ConcurrentBag<ColliderData> colliders = new();
         private readonly ConcurrentBag<IContactGenerator> contactGenerators = new();
@@ -498,6 +501,8 @@ namespace Physics
 
             UpdateStateBodies(gameTime);
 
+            UpdateText();
+
             base.Update(gameTime);
         }
         private void UpdateInputCamera(GameTime gameTime)
@@ -553,7 +558,7 @@ namespace Physics
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                GenerateExplosion(GetPickingRay());
+                GenerateExplosion(GetPickingRay(), Game.Input.ShiftPressed);
             }
         }
         private void UpdateInputBodies()
@@ -610,6 +615,10 @@ namespace Physics
 
             lineDrawer.AddPrimitives(Color4.White, new[] { lJoint, rJoint });
         }
+        private void UpdateText()
+        {
+            runtimeText.Text = $"Explosion time: {Math.Round(lastExplosion?.TotalElapsedTime ?? 0, 2)}; Phase: {lastExplosion?.CurrentPhase}; Active: {lastExplosion?.IsActive}";
+        }
 
         public override void GameGraphicsResized()
         {
@@ -627,14 +636,17 @@ namespace Physics
             panel.Height = info.Top + info.Height + 3;
         }
 
-        private void GenerateExplosion(PickingRay pickingRay)
+        private void GenerateExplosion(PickingRay pickingRay, bool big)
         {
             if (!this.PickNearest<Triangle>(pickingRay, SceneObjectUsages.None, out var p))
             {
                 return;
             }
 
-            simulator.AddForce(new Explosion(p.PickingResult.Position, explosionTemplate));
+            var explosionTmp = big ? bigExplosionTemplate : explosionTemplate;
+            lastExplosion = new Explosion(p.PickingResult.Position, explosionTmp);
+
+            simulator.AddGlobalForce(lastExplosion);
         }
     }
 }

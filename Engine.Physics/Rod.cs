@@ -12,6 +12,8 @@ namespace Engine.Physics
         public IContactEndPoint One { get; set; }
         /// <inheritdoc/>
         public IContactEndPoint Two { get; set; }
+        /// <inheritdoc/>
+        public bool IsActive { get; set; } = true;
         /// <summary>
         /// Rod distance
         /// </summary>
@@ -41,6 +43,11 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public bool AddContact(ContactResolver contactData, int limit)
         {
+            if (!IsActive)
+            {
+                return false;
+            }
+
             if (!contactData.HasFreeContacts())
             {
                 return false;

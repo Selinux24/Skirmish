@@ -2,12 +2,12 @@
 namespace Engine.Physics
 {
     /// <summary>
-    /// Force generator interface
+    /// Local force generator interface
     /// </summary>
     /// <remarks>
     /// A force that affects two bodies in the physics simulator
     /// </remarks>
-    public interface IForceGenerator
+    public interface ILocalForceGenerator
     {
         /// <summary>
         /// Force source end-point

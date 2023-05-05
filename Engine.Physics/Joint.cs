@@ -12,6 +12,8 @@ namespace Engine.Physics
         public IContactEndPoint One { get; set; }
         /// <inheritdoc/>
         public IContactEndPoint Two { get; set; }
+        /// <inheritdoc/>
+        public bool IsActive { get; set; } = true;
         /// <summary>
         /// Maximum joint distance
         /// </summary>
@@ -36,6 +38,11 @@ namespace Engine.Physics
         /// <inheritdoc/>
         public bool AddContact(ContactResolver contactData, int limit)
         {
+            if (!IsActive)
+            {
+                return false;
+            }
+
             if (!contactData.HasFreeContacts())
             {
                 return false;
@@ -67,75 +74,6 @@ namespace Engine.Physics
             contactData.AddContact(One.Body, Two.Body, point, normal, penetration, 0f, 1f);
 
             return true;
-        }
-    }
-
-    public interface IContactEndPoint
-    {
-        /// <summary>
-        /// Body
-        /// </summary>
-        IRigidBody Body { get; }
-        /// <summary>
-        /// Gets the body position
-        /// </summary>
-        Vector3 BodyPosition { get; }
-        /// <summary>
-        /// Relative position of the connection in the body
-        /// </summary>
-        Vector3 PositionLocal { get; }
-        /// <summary>
-        /// World position of the connection in the body
-        /// </summary>
-        Vector3 PositionWorld { get; }
-    }
-
-    /// <summary>
-    /// Body end-point
-    /// </summary>
-    /// <remarks>Used for connect rigid bodies</remarks>
-    public class BodyEndPoint : IContactEndPoint
-    {
-        /// <inheritdoc/>
-        public IRigidBody Body { get; set; }
-        /// <inheritdoc/>
-        public Vector3 BodyPosition { get => Body.Position; }
-        /// <inheritdoc/>
-        public Vector3 PositionLocal { get; set; }
-        /// <inheritdoc/>
-        public Vector3 PositionWorld { get => Body.GetPointInWorldSpace(PositionLocal); }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public BodyEndPoint(IRigidBody body, Vector3 positionLocal)
-        {
-            Body = body ?? throw new ArgumentNullException(nameof(body), $"A body must be specified. For contacts without body, use {nameof(FixedEndPoint)} instead.");
-            PositionLocal = positionLocal;
-        }
-    }
-
-    /// <summary>
-    /// Fixed end-point
-    /// </summary>
-    /// <remarks>Used for connect a rigid body with a fixed world position</remarks>
-    public class FixedEndPoint : IContactEndPoint
-    {
-        /// <inheritdoc/>
-        public IRigidBody Body { get => null; }
-        /// <inheritdoc/>
-        public Vector3 BodyPosition { get => PositionWorld; }
-        /// <inheritdoc/>
-        public Vector3 PositionLocal { get => PositionWorld; }
-        /// <inheritdoc/>
-        public Vector3 PositionWorld { get; set; }
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        public FixedEndPoint(Vector3 positionWorld)
-        {
-            PositionWorld = positionWorld;
         }
     }
 }

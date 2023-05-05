@@ -18,23 +18,23 @@ namespace Engine.Physics
         /// <summary>
         /// Collision data structure
         /// </summary>
-        private readonly ContactResolver contactResolver = new ContactResolver();
+        private readonly ContactResolver contactResolver = new();
         /// <summary>
         /// Physics object list
         /// </summary>
-        private readonly List<IPhysicsObject> physicsObjects = new List<IPhysicsObject>();
+        private readonly List<IPhysicsObject> physicsObjects = new();
         /// <summary>
         /// Global force generator list
         /// </summary>
-        private readonly List<IGlobalForceGenerator> globalForceGenerators = new List<IGlobalForceGenerator>();
+        private readonly List<IGlobalForceGenerator> globalForceGenerators = new();
         /// <summary>
-        /// Force generator list
+        /// Local force generator list
         /// </summary>
-        private readonly List<IForceGenerator> forceGenerators = new List<IForceGenerator>();
+        private readonly List<ILocalForceGenerator> localForceGenerators = new();
         /// <summary>
         /// Contact generator list
         /// </summary>
-        private readonly List<IContactGenerator> contactGenerators = new List<IContactGenerator>();
+        private readonly List<IContactGenerator> contactGenerators = new();
 
         /// <summary>
         /// Simulation velocity
@@ -46,6 +46,23 @@ namespace Engine.Physics
         public int SimulationIterations { get; set; } = 24;
 
         /// <summary>
+        /// Gets the physics objects count
+        /// </summary>
+        public int PhysicsObjectsCount { get => physicsObjects?.Count ?? 0; }
+        /// <summary>
+        /// Gets the global forces count
+        /// </summary>
+        public int GlobalForcesCount { get => globalForceGenerators?.Count ?? 0; }
+        /// <summary>
+        /// Gets the local forces count
+        /// </summary>
+        public int LocalForcesCount { get => localForceGenerators?.Count ?? 0; }
+        /// <summary>
+        /// Gets the contact generators count
+        /// </summary>
+        public int ContactGeneratorsCount { get => contactGenerators?.Count ?? 0; }
+
+        /// <summary>
         /// Update physics
         /// </summary>
         /// <param name="gameTime">Game time</param>
@@ -53,17 +70,21 @@ namespace Engine.Physics
         {
             int iterations = Math.Clamp(SimulationIterations, 1, MaximumSimulationIterations);
 
-            // Get time simulation
+            // Gets the simulation elapsed time
             float time = gameTime.ElapsedSeconds * Velocity / iterations;
             if (MathUtil.IsZero(time))
             {
                 return;
             }
 
+            // Iterate each time amount
             for (int i = 0; i < iterations; i++)
             {
-                // Update simulation objects
-                UpdateObjects(time);
+                // Update active force generators
+                UpdateForces(time);
+
+                // Integrate bodies
+                IntegrateBodies(time);
 
                 // Generate contacts
                 GenerateContacts();
@@ -71,20 +92,33 @@ namespace Engine.Physics
                 // Resolve the contacts
                 contactResolver.Resolve(time);
             }
+
+            // Clean inactive objects
+            Clean();
         }
 
         /// <summary>
         /// Updates the simulation objects
         /// </summary>
-        /// <param name="time">Time</param>
-        private void UpdateObjects(float time)
+        /// <param name="time">Elapsed time</param>
+        private void UpdateForces(float time)
         {
             //Update local force generators
-            forceGenerators.ForEach(f => f.UpdateForce(time));
+            localForceGenerators.ForEach(f => f.UpdateForce(time));
 
             //Update global force generators
-            physicsObjects.ForEach(o => globalForceGenerators.ForEach(f => f.UpdateForce(o.RigidBody, time)));
-
+            globalForceGenerators.ForEach(f =>
+            {
+                f.UpdateForce(time);
+                physicsObjects.ForEach(o => f.ApplyForce(o.RigidBody));
+            });
+        }
+        /// <summary>
+        /// Integrate bodies
+        /// </summary>
+        /// <param name="time">Elapsed time</param>
+        private void IntegrateBodies(float time)
+        {
             //Integrate forces
             physicsObjects.ForEach(o =>
             {
@@ -137,6 +171,41 @@ namespace Engine.Physics
                 }
             }
         }
+        /// <summary>
+        /// Clean inactive generators
+        /// </summary>
+        private void Clean()
+        {
+            for (int i = globalForceGenerators.Count - 1; i >= 0; i--)
+            {
+                if (globalForceGenerators[i].IsActive)
+                {
+                    continue;
+                }
+
+                globalForceGenerators.RemoveAt(i);
+            }
+
+            for (int i = localForceGenerators.Count - 1; i >= 0; i--)
+            {
+                if (localForceGenerators[i].IsActive)
+                {
+                    continue;
+                }
+
+                localForceGenerators.RemoveAt(i);
+            }
+
+            for (int i = contactGenerators.Count - 1; i >= 0; i--)
+            {
+                if (contactGenerators[i].IsActive)
+                {
+                    continue;
+                }
+
+                contactGenerators.RemoveAt(i);
+            }
+        }
 
         /// <summary>
         /// Adds a new physics object list to the simulation
@@ -182,10 +251,36 @@ namespace Engine.Physics
             });
         }
         /// <summary>
+        /// Removes the physics object from simulation
+        /// </summary>
+        /// <param name="physicsObject">Physics object</param>
+        public void RemovePhysicsObject(IPhysicsObject physicsObject)
+        {
+            if (physicsObject == null)
+            {
+                return;
+            }
+
+            if (!physicsObjects.Contains(physicsObject))
+            {
+                return;
+            }
+
+            physicsObjects.Remove(physicsObject);
+        }
+        /// <summary>
+        /// Clears the physics object list
+        /// </summary>
+        public void ClearPhysicsObjects()
+        {
+            physicsObjects.Clear();
+        }
+
+        /// <summary>
         /// Adds a new global force generator list to the simulation
         /// </summary>
         /// <param name="forceGenerators">Force generator list</param>
-        public void AddForces(IEnumerable<IGlobalForceGenerator> forceGenerators)
+        public void AddGlobalForces(IEnumerable<IGlobalForceGenerator> forceGenerators)
         {
             if (forceGenerators?.Any() != true)
             {
@@ -194,14 +289,14 @@ namespace Engine.Physics
 
             foreach (var forceGenerator in forceGenerators)
             {
-                AddForce(forceGenerator);
+                AddGlobalForce(forceGenerator);
             }
         }
         /// <summary>
         /// Adds a new global force generator to the simulation
         /// </summary>
         /// <param name="forceGenerator">Force generator</param>
-        public void AddForce(IGlobalForceGenerator forceGenerator)
+        public void AddGlobalForce(IGlobalForceGenerator forceGenerator)
         {
             if (forceGenerator == null)
             {
@@ -216,10 +311,36 @@ namespace Engine.Physics
             globalForceGenerators.Add(forceGenerator);
         }
         /// <summary>
-        /// Adds a new force generator list to the simulation
+        /// Removes the global force generator from simulation
+        /// </summary>
+        /// <param name="forceGenerator">Force generator</param>
+        public void RemoveGlobalForce(IGlobalForceGenerator forceGenerator)
+        {
+            if (forceGenerator == null)
+            {
+                return;
+            }
+
+            if (!globalForceGenerators.Contains(forceGenerator))
+            {
+                return;
+            }
+
+            globalForceGenerators.Remove(forceGenerator);
+        }
+        /// <summary>
+        /// Clears the global force generators list
+        /// </summary>
+        public void ClearGlobalForces()
+        {
+            globalForceGenerators.Clear();
+        }
+
+        /// <summary>
+        /// Adds a new local force generator list to the simulation
         /// </summary>
         /// <param name="forceGenerators">Force generator list</param>
-        public void AddForces(IEnumerable<IForceGenerator> forceGenerators)
+        public void AddLocalForces(IEnumerable<ILocalForceGenerator> forceGenerators)
         {
             if (forceGenerators?.Any() != true)
             {
@@ -228,27 +349,53 @@ namespace Engine.Physics
 
             foreach (var forceGenerator in forceGenerators)
             {
-                AddForce(forceGenerator);
+                AddLocalForce(forceGenerator);
             }
         }
         /// <summary>
-        /// Adds a new force generator to the simulation
+        /// Adds a new local force generator to the simulation
         /// </summary>
         /// <param name="forceGenerator">Force generator</param>
-        public void AddForce(IForceGenerator forceGenerator)
+        public void AddLocalForce(ILocalForceGenerator forceGenerator)
         {
             if (forceGenerator == null)
             {
                 return;
             }
 
-            if (forceGenerators.Contains(forceGenerator))
+            if (localForceGenerators.Contains(forceGenerator))
             {
                 return;
             }
 
-            forceGenerators.Add(forceGenerator);
+            localForceGenerators.Add(forceGenerator);
         }
+        /// <summary>
+        /// Removes the local force generator from simulation
+        /// </summary>
+        /// <param name="forceGenerator">Force generator</param>
+        public void RemoveLocalForce(ILocalForceGenerator forceGenerator)
+        {
+            if (forceGenerator == null)
+            {
+                return;
+            }
+
+            if (!localForceGenerators.Contains(forceGenerator))
+            {
+                return;
+            }
+
+            localForceGenerators.Remove(forceGenerator);
+        }
+        /// <summary>
+        /// Clears the force generators list
+        /// </summary>
+        public void ClearLocalForces()
+        {
+            localForceGenerators.Clear();
+        }
+
         /// <summary>
         /// Adds a new contact generator list to the simulation
         /// </summary>
@@ -282,6 +429,31 @@ namespace Engine.Physics
             }
 
             contactGenerators.Add(contactGenerator);
+        }
+        /// <summary>
+        /// Removes the contact generator from simulation
+        /// </summary>
+        /// <param name="contactGenerator">Contact generator</param>
+        public void RemoveContact(IContactGenerator contactGenerator)
+        {
+            if (contactGenerator == null)
+            {
+                return;
+            }
+
+            if (!contactGenerators.Contains(contactGenerator))
+            {
+                return;
+            }
+
+            contactGenerators.Remove(contactGenerator);
+        }
+        /// <summary>
+        /// Clears the contact generators list
+        /// </summary>
+        public void ClearContacts()
+        {
+            contactGenerators.Clear();
         }
     }
 }

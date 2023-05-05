@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine.Physics
 {
@@ -10,29 +11,29 @@ namespace Engine.Physics
         /// <summary>
         /// Explosion total elapsed time
         /// </summary>
-        private float totalElapsedTime = 0f;
+        public float TotalElapsedTime { get; private set; } = 0f;
 
         /// <summary>
         /// The location of the detonation
         /// </summary>
-        public Vector3 Position { get; set; }
+        public Vector3 Position { get; private set; }
 
         /// <summary>
         /// Radius in which the objects are not attracted in the implosion, because they are trapped in the epicenter
         /// </summary>
-        public float ImplosionMinRadius { get; set; }
+        public float ImplosionMinRadius { get; private set; }
         /// <summary>
         /// Radius at which objects are attracted in the first phase of the explosion.
         /// </summary>
-        public float ImplosionMaxRadius { get; set; }
+        public float ImplosionMaxRadius { get; private set; }
         /// <summary>
         /// Implosion Phase Duration
         /// </summary>
-        public float ImplosionDuration { get; set; }
+        public float ImplosionDuration { get; private set; }
         /// <summary>
         /// The maximum force that is applied in the implosion
         /// </summary>
-        public float ImplosionForce { get; set; }
+        public float ImplosionForce { get; private set; }
 
         /// <summary>
         /// Speed at which the shock wave travels
@@ -40,28 +41,49 @@ namespace Engine.Physics
         /// <remarks>
         /// The width of the shock wave must be greater than or equal to the maximum distance it can reach. Width >= Speed * Duration
         /// </remarks>
-        public float ShockwaveSpeed { get; set; }
+        public float ShockwaveSpeed { get; private set; }
         /// <summary>
         /// Shock wave width
         /// </summary>
         /// <remarks>
         /// The faster the wave, the wider the wave should be
         /// </remarks>
-        public float ShockwaveThickness { get; set; }
+        public float ShockwaveThickness { get; private set; }
+        /// <summary>
+        /// Attenuation when the shock wave overtakes an object
+        /// </summary>
+        public float ShockwaveOvertakenAttenuation { get; private set; }
         /// <summary>
         /// Force applied at the center of the blast wave on a stationary object.
         /// </summary>
         /// <remarks>
         /// Objects in front of or behind the wave gain proportionally less force.
         /// </remarks>
-        public float PeakConcussionForce { get; set; }
+        public float PeakConcussionForce { get; private set; }
         /// <summary>
         /// The duration of the shock wave phase
         /// </summary>
         /// <remarks>
         /// The closer to the end, the less powerful the wave.
         /// </remarks>
-        public float ConcussionDuration { get; set; }
+        public float ConcussionDuration { get; private set; }
+
+        /// <summary>
+        /// Gets the explosion maximum distance
+        /// </summary>
+        public float MaximumDistance { get => (ShockwaveSpeed * ConcussionDuration) + ShockwaveThickness; }
+        /// <summary>
+        /// Gets the explosion total duration
+        /// </summary>
+        public float TotalDuration { get => ImplosionDuration + ConcussionDuration; }
+        /// <summary>
+        /// Gets the implosion area distance
+        /// </summary>
+        public float ImplosionArea { get => ImplosionMaxRadius - ImplosionMinRadius; }
+        /// <summary>
+        /// Explosion phase
+        /// </summary>
+        public ExplosionPhases CurrentPhase { get; private set; }
 
         /// <inheritdoc/>
         public bool IsActive { get; private set; } = true;
@@ -73,26 +95,62 @@ namespace Engine.Physics
         {
             Position = position;
 
+            float implosionArea = description.ImplosionMaxRadius - description.ImplosionMinRadius;
+            if (MathUtil.IsZero(implosionArea) || implosionArea <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ImplosionMinRadius)} - {nameof(description.ImplosionMaxRadius)} must be major than 0.");
+            }
             ImplosionMinRadius = description.ImplosionMinRadius;
             ImplosionMaxRadius = description.ImplosionMaxRadius;
+
+            if (MathUtil.IsZero(description.ImplosionDuration) || description.ImplosionDuration <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ImplosionDuration)} must be major than 0.");
+            }
             ImplosionDuration = description.ImplosionDuration;
+
+            if (MathUtil.IsZero(description.ImplosionForce) || description.ImplosionForce <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ImplosionForce)} must be major than 0.");
+            }
             ImplosionForce = description.ImplosionForce;
 
+            float maxDistance = (description.ShockwaveSpeed * description.ConcussionDuration) + description.ShockwaveThickness;
+            if (MathUtil.IsZero(maxDistance) || maxDistance <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(description), $"({nameof(description.ShockwaveSpeed)} * {nameof(description.ConcussionDuration)}) - {nameof(description.ShockwaveThickness)} must be major than 0.");
+            }
             ShockwaveSpeed = description.ShockwaveSpeed;
             ShockwaveThickness = description.ShockwaveThickness;
-            PeakConcussionForce = description.PeakConcussionForce;
             ConcussionDuration = description.ConcussionDuration;
+
+            if (MathUtil.IsZero(description.PeakConcussionForce) || description.PeakConcussionForce <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.PeakConcussionForce)} must be major than 0.");
+            }
+            PeakConcussionForce = description.PeakConcussionForce;
+
+            if (MathUtil.IsZero(description.ShockwaveOvertakenAttenuation) || description.ShockwaveOvertakenAttenuation <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(description), $"{nameof(description.ShockwaveOvertakenAttenuation)} must be major than 0.");
+            }
+            ShockwaveOvertakenAttenuation = description.ShockwaveOvertakenAttenuation;
         }
 
         /// <inheritdoc/>
-        public void UpdateForce(IRigidBody body, float time)
+        public void UpdateForce(float time)
         {
-            if (body == null)
+            if (MathUtil.IsZero(time))
             {
                 return;
             }
 
-            if (MathUtil.IsZero(time))
+            TotalElapsedTime += time;
+        }
+        /// <inheritdoc/>
+        public void ApplyForce(IRigidBody rigidBody)
+        {
+            if (rigidBody == null)
             {
                 return;
             }
@@ -103,106 +161,23 @@ namespace Engine.Physics
             }
 
             // Detect the phase of the explosion in which we are
-            var phase = DetectPhase();
+            CurrentPhase = DetectPhase();
 
-            switch (phase)
+            float forceMagnitude = 0;
+            Vector3 forceNormal = Vector3.Zero;
+            switch (CurrentPhase)
             {
                 case ExplosionPhases.Implosion:
-                    ImplosionPhase(body);
+                    forceMagnitude = CalculateImplosionPhaseForce(rigidBody);
+                    forceNormal = Vector3.Normalize(Position - rigidBody.Position);
                     break;
                 case ExplosionPhases.ExpansiveWave:
-                    ExpansiveWavePhase(body, time);
+                    forceMagnitude = CalculateExpansiveWavePhaseForce(rigidBody);
+                    forceNormal = Vector3.Normalize(rigidBody.Position - Position);
                     break;
-                case ExplosionPhases.None:
                 default:
                     IsActive = false;
                     break;
-            }
-
-            totalElapsedTime += time;
-        }
-        /// <summary>
-        /// Detects the explosion phase
-        /// </summary>
-        /// <returns>Returns the current explosion phase</returns>
-        private ExplosionPhases DetectPhase()
-        {
-            if (totalElapsedTime <= ImplosionDuration) return ExplosionPhases.Implosion;
-            if (totalElapsedTime <= (ImplosionDuration + ConcussionDuration)) return ExplosionPhases.ExpansiveWave;
-
-            return ExplosionPhases.None;
-        }
-        /// <summary>
-        /// Executes implosion phase
-        /// </summary>
-        /// <param name="body">Rigid body</param>
-        private void ImplosionPhase(IRigidBody body)
-        {
-            float distance = Vector3.Distance(body.Position, Position);
-            if (distance > ImplosionMinRadius && distance <= ImplosionMaxRadius)
-            {
-                // The body is in the implosion area. Apply forces
-                float max = ImplosionMaxRadius - ImplosionMinRadius;
-                if (MathUtil.IsZero(max))
-                {
-                    return;
-                }
-
-                float forceMagnitude = (distance - ImplosionMinRadius) / max;
-
-                Vector3 force = Vector3.Normalize(Position - body.Position) * ImplosionForce * forceMagnitude;
-
-                body.AddForce(force);
-            }
-        }
-        /// <summary>
-        /// Executes expansive wave phase
-        /// </summary>
-        /// <param name="body">Rigid body</param>
-        /// <param name="time">Time</param>
-        private void ExpansiveWavePhase(IRigidBody body, float time)
-        {
-            float totalDuration = ConcussionDuration + ImplosionDuration;
-            if (MathUtil.IsZero(totalDuration))
-            {
-                return;
-            }
-
-            float maxDistance = (ShockwaveSpeed * ConcussionDuration) + ShockwaveThickness;
-            if (MathUtil.IsZero(maxDistance))
-            {
-                return;
-            }
-
-            // Current explosion time, from 0 to 1
-            float relativeTime = totalElapsedTime < totalDuration ? 1f - (totalElapsedTime / totalDuration) : 0f;
-
-            // Current interval of maximum action of the wave
-            float min = ShockwaveSpeed * totalElapsedTime;
-            float max = ShockwaveSpeed * (totalElapsedTime + time);
-
-            // Distance to the center of the object
-            float distance = Vector3.Distance(body.Position, Position);
-
-            float forceMagnitude = 0f;
-            if (distance >= min && distance <= max)
-            {
-                // In full expansive wave. Attenuated forces are applied only for the duration
-                forceMagnitude = PeakConcussionForce * relativeTime;
-            }
-            else if (distance < min)
-            {
-                // The object has been overtaken by the shock wave. Minimally attenuated force
-                forceMagnitude = PeakConcussionForce * relativeTime;
-            }
-            else if (distance > max && distance <= maxDistance)
-            {
-                // The object has not been hit by the blast wave. Strength attenuated by time and distance
-
-                // Distance to center, from 0 to 1
-                float relativeDistance = distance < maxDistance ? 1f - (distance / maxDistance) : 0f;
-
-                forceMagnitude = PeakConcussionForce * relativeDistance * relativeTime;
             }
 
             if (MathUtil.IsZero(forceMagnitude))
@@ -210,81 +185,88 @@ namespace Engine.Physics
                 return;
             }
 
-            Vector3 force = Vector3.Normalize(body.Position - Position) * forceMagnitude;
-
-            body.AddForce(force);
-
+            rigidBody.AddForce(forceNormal * forceMagnitude);
         }
-    }
-
-    /// <summary>
-    /// Explosion description
-    /// </summary>
-    public struct ExplosionDescription
-    {
         /// <summary>
-        /// Radius at which objects are attracted in the first phase of the explosion.
+        /// Detects the explosion phase
         /// </summary>
-        public float ImplosionMaxRadius { get; set; }
-        /// <summary>
-        /// Radius in which the objects are not attracted in the implosion, because they are trapped in the epicenter
-        /// </summary>
-        public float ImplosionMinRadius { get; set; }
-        /// <summary>
-        /// Implosion Phase Duration
-        /// </summary>
-        public float ImplosionDuration { get; set; }
-        /// <summary>
-        /// The maximum force that is applied in the implosion
-        /// </summary>
-        public float ImplosionForce { get; set; }
-
-        /// <summary>
-        /// Speed at which the shock wave travels
-        /// </summary>
-        /// <remarks>
-        /// The width of the shock wave must be greater than or equal to the maximum distance it can reach. Width >= Speed * Duration
-        /// </remarks>
-        public float ShockwaveSpeed { get; set; }
-        /// <summary>
-        /// Shock wave width
-        /// </summary>
-        /// <remarks>
-        /// The faster the wave, the wider the wave should be
-        /// </remarks>
-        public float ShockwaveThickness { get; set; }
-        /// <summary>
-        /// Force applied at the center of the blast wave on a stationary object.
-        /// </summary>
-        /// <remarks>
-        /// Objects in front of or behind the wave gain proportionally less force.
-        /// </remarks>
-        public float PeakConcussionForce { get; set; }
-        /// <summary>
-        /// The duration of the shock wave phase
-        /// </summary>
-        /// <remarks>
-        /// The closer to the end, the less powerful the wave.
-        /// </remarks>
-        public float ConcussionDuration { get; set; }
-
-        /// <summary>
-        /// Creates an explosion at the specified position
-        /// </summary>
-        /// <returns>Gets the explosion force generator</returns>
-        public static ExplosionDescription CreateExplosion()
+        /// <returns>Returns the current explosion phase</returns>
+        private ExplosionPhases DetectPhase()
         {
-            return new ExplosionDescription
+            if (TotalElapsedTime <= ImplosionDuration) return ExplosionPhases.Implosion;
+            if (TotalElapsedTime <= TotalDuration) return ExplosionPhases.ExpansiveWave;
+
+            return ExplosionPhases.None;
+        }
+        /// <summary>
+        /// Calculates the implosion phase force magnitude
+        /// </summary>
+        /// <param name="body">Rigid body</param>
+        private float CalculateImplosionPhaseForce(IRigidBody body)
+        {
+            float distance = Vector3.Distance(body.Position, Position);
+            if (distance > ImplosionMinRadius && distance <= ImplosionMaxRadius)
             {
-                ImplosionMaxRadius = 3f,
-                ImplosionMinRadius = 1f,
-                ImplosionDuration = 0.2f,
-                ImplosionForce = 1000f,
-                ShockwaveSpeed = 50f,
-                ShockwaveThickness = 2f,
-                PeakConcussionForce = 100000f,
-                ConcussionDuration = 0.5f
-            };
+                // The body is in the implosion area
+                return (distance - ImplosionMinRadius) / ImplosionArea * ImplosionForce;
+            }
+
+            return 0;
+        }
+        /// <summary>
+        /// Executes expansive wave phase
+        /// </summary>
+        /// <param name="body">Rigid body</param>
+        private float CalculateExpansiveWavePhaseForce(IRigidBody body)
+        {
+            // Distance to the center of the object
+            float distance = Vector3.Distance(body.Position, Position);
+
+            // Current position of the shock wave
+            float minShockwave = ShockwaveSpeed * TotalElapsedTime;
+            float maxShockwave = (ShockwaveSpeed * TotalElapsedTime) + ShockwaveThickness;
+
+            if (distance < minShockwave)
+            {
+                // The object has been overtaken by the shock wave.
+                float concussionAttenuation = CalculateAttenuation(TotalElapsedTime, TotalDuration);
+
+                return PeakConcussionForce * concussionAttenuation * ShockwaveOvertakenAttenuation;
+            }
+
+            if (distance < maxShockwave)
+            {
+                // The object is in full expansive wave.
+                float concussionAttenuation = CalculateAttenuation(TotalElapsedTime, TotalDuration);
+
+                return PeakConcussionForce * concussionAttenuation;
+            }
+
+            float maxDistance = MaximumDistance;
+            if (distance < maxDistance)
+            {
+                // The object has not been hit by the blast wave. Strength attenuated by time and distance
+                float concussionAttenuation = CalculateAttenuation(TotalElapsedTime, TotalDuration);
+                float distanceAttenuation = CalculateAttenuation(distance, maxDistance);
+
+                return PeakConcussionForce * concussionAttenuation * distanceAttenuation;
+            }
+
+            return 0;
+        }
+        /// <summary>
+        /// Gets the attenuation from 0 to 1
+        /// </summary>
+        /// <param name="current">Current value</param>
+        /// <param name="max">Max value</param>
+        private static float CalculateAttenuation(float current, float max)
+        {
+            if (MathUtil.IsZero(max) || max < 0)
+            {
+                return 0;
+            }
+
+            return current < max ? 1f - (current / max) : 0f;
         }
     }
 }

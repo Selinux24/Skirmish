@@ -6,7 +6,7 @@ namespace Engine.Physics
     /// <summary>
     /// Spring force generator
     /// </summary>
-    public class Spring : IForceGenerator
+    public class Spring : ILocalForceGenerator
     {
         /// <summary>
         /// Spring constant
