@@ -3,7 +3,7 @@ using SharpDX;
 namespace Engine.Physics.Colliders
 {
     /// <summary>
-    /// Collision sphere
+    /// Sphere collider
     /// </summary>
     public class SphereCollider : Collider
     {

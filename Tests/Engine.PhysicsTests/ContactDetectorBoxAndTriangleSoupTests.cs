@@ -26,7 +26,7 @@ namespace Engine.PhysicsTests
             return box;
         }
 
-        static MeshCollider FromRectangle(RectangleF rect, float d, Matrix transform)
+        static ConvexMeshCollider FromRectangle(RectangleF rect, float d, Matrix transform)
         {
             Vector3 p1 = new Vector3(rect.BottomLeft.X, d, rect.BottomLeft.Y);
             Vector3 p2 = new Vector3(rect.BottomRight.X, d, rect.BottomRight.Y);
@@ -36,7 +36,7 @@ namespace Engine.PhysicsTests
             Triangle tri1 = new Triangle(p1, p2, p3);
             Triangle tri2 = new Triangle(p3, p2, p4);
 
-            MeshCollider ctri = new MeshCollider(new[] { tri1, tri2 });
+            ConvexMeshCollider ctri = new ConvexMeshCollider(new[] { tri1, tri2 });
             RigidBody triBody = new RigidBody(new() { Mass = 2, InitialTransform = transform });
             ctri.Attach(triBody);
 

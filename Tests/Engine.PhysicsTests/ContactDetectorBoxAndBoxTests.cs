@@ -23,10 +23,10 @@ namespace Engine.PhysicsTests
 
             return box;
         }
-        static MeshCollider FromBox(Vector3 extents, Matrix transform)
+        static ConvexMeshCollider FromBox(Vector3 extents, Matrix transform)
         {
             var tris = Triangle.ComputeTriangleList(Topology.TriangleList, new BoundingBox(-extents, extents));
-            MeshCollider box = new MeshCollider(tris);
+            ConvexMeshCollider box = new ConvexMeshCollider(tris);
             RigidBody boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
 

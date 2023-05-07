@@ -5,7 +5,7 @@ using System.Linq;
 namespace Engine.Physics.Colliders
 {
     /// <summary>
-    /// Collision triangle
+    /// Triangle collider
     /// </summary>
     public class TriangleCollider : Collider
     {
@@ -68,24 +68,19 @@ namespace Engine.Physics.Colliders
         {
             //find support in model space
             dir = Vector3.TransformNormal(dir, RotationScaleInverse);
-            var furthest_point = triangle.Point1;
 
-            //Find which triangle vertex is furthest along dir
-            float dot0 = Vector3.Dot(triangle.Point1, dir);
-            float dot1 = Vector3.Dot(triangle.Point2, dir);
-            float dot2 = Vector3.Dot(triangle.Point3, dir);
+            Vector3 furthest_point = vertices[0];
+            float max_dot = Vector3.Dot(furthest_point, dir);
 
-            if (dot1 > dot0)
+            for (int i = 1; i < vertices.Length; i++)
             {
-                furthest_point = triangle.Point2;
-                if (dot2 > dot1)
+                Vector3 v = vertices[i];
+                float d = Vector3.Dot(v, dir);
+                if (d > max_dot)
                 {
-                    furthest_point = triangle.Point3;
+                    max_dot = d;
+                    furthest_point = v;
                 }
-            }
-            else if (dot2 > dot0)
-            {
-                furthest_point = triangle.Point3;
             }
 
             //Fake some depth behind triangle so we have volume

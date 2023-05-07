@@ -1,23 +1,34 @@
 ﻿using Engine;
+using Engine.Common;
 using Engine.Physics;
 using Engine.Physics.Colliders;
 using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Physics
 {
+    /// <summary>
+    /// Physics object
+    /// </summary>
     public class PhysicsObject : IPhysicsObject
     {
-        public Model Model { get; private set; }
+        /// <inheritdoc/>
         public IRigidBody RigidBody { get; private set; }
-        public ICollider Collider { get; private set; }
+        /// <inheritdoc/>
+        public IEnumerable<ICollider> Colliders { get; private set; }
+        /// <summary>
+        /// Model
+        /// </summary>
+        public Model Model { get; private set; }
 
-        private static MeshCollider CollisionTriangleSoupFromModel(Model model)
+        private static ConvexMeshCollider CollisionTriangleSoupFromModel(Model model)
         {
             var tris = model.GetTriangles(true);
             tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.FinalTransform));
 
-            return new MeshCollider(tris);
+            return new ConvexMeshCollider(tris);
         }
         private static BoxCollider CollisionBoxFromModel(Model model)
         {
@@ -40,12 +51,15 @@ namespace Physics
             return new CapsuleCollider(extents.X, extents.Y * 2);
         }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public PhysicsObject(Model model, IRigidBody rigidBody)
         {
             RigidBody = rigidBody ?? throw new ArgumentNullException(nameof(rigidBody), $"Physics object must have a rigid body.");
             Model = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");
 
-            Collider = model.ColliderType switch
+            ICollider collider = model.ColliderType switch
             {
                 ColliderTypes.Spheric => CollisionSphereFromModel(model),
                 ColliderTypes.Box => CollisionBoxFromModel(model),
@@ -54,9 +68,12 @@ namespace Physics
                 ColliderTypes.Mesh => CollisionTriangleSoupFromModel(model),
                 _ => null,
             };
-            Collider?.Attach(rigidBody);
+            collider.Attach(rigidBody);
+
+            Colliders = new[] { collider };
         }
 
+        /// <inheritdoc/>
         public void Update()
         {
             if (RigidBody == null)
@@ -72,12 +89,34 @@ namespace Physics
             Model.Manipulator.SetRotation(RigidBody.Rotation);
             Model.Manipulator.SetPosition(RigidBody.Position);
         }
+        /// <inheritdoc/>
+        public bool BroadPhaseTest(IPhysicsObject obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
 
+            return Model.Intersects(IntersectDetectionMode.Sphere, obj.GetBroadPhaseBounds());
+        }
+        /// <inheritdoc/>
+        public IEnumerable<ICollider> GetBroadPhaseColliders(IPhysicsObject obj)
+        {
+            var cullingVolume = obj.GetBroadPhaseBounds();
+
+            return Colliders.Where(c => IntersectionHelper.Intersects(cullingVolume, (IntersectionVolumeSphere)c.BoundingSphere));
+        }
+        /// <inheritdoc/>
+        public ICullingVolume GetBroadPhaseBounds()
+        {
+            return Model.GetIntersectionVolume(IntersectDetectionMode.Sphere);
+        }
+        /// <inheritdoc/>
         public void Reset(Matrix transform)
         {
             RigidBody?.SetInitialState(transform);
         }
-
+        /// <inheritdoc/>
         public void Reset(Vector3 position, Quaternion rotation)
         {
             RigidBody?.SetInitialState(position, rotation);

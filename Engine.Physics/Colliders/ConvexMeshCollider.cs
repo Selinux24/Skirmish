@@ -6,9 +6,9 @@ using System.Linq;
 namespace Engine.Physics.Colliders
 {
     /// <summary>
-    /// Collision triangle soup
+    /// Convex mesh collider
     /// </summary>
-    public class MeshCollider : Collider
+    public class ConvexMeshCollider : Collider
     {
         /// <summary>
         /// Triangle list
@@ -23,11 +23,11 @@ namespace Engine.Physics.Colliders
         /// Constructor
         /// </summary>
         /// <param name="triangles">Triangle list</param>
-        public MeshCollider(IEnumerable<Triangle> triangles) : base()
+        public ConvexMeshCollider(IEnumerable<Triangle> triangles) : base()
         {
             if (triangles?.Any() != true)
             {
-                throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(MeshCollider)} must have one triangle at least.");
+                throw new ArgumentOutOfRangeException(nameof(triangles), $"{nameof(ConvexMeshCollider)} must have one triangle at least.");
             }
 
             this.triangles = triangles.Distinct().ToArray();

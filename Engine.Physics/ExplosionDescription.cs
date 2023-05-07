@@ -67,12 +67,12 @@ namespace Engine.Physics
                 ImplosionMinRadius = 1f,
                 ImplosionMaxRadius = 3f,
                 ImplosionDuration = 0.2f,
-                ImplosionForce = 1000f,
+                ImplosionForce = 100f,
 
                 ShockwaveSpeed = 50f,
                 ShockwaveThickness = 2f,
                 ShockwaveOvertakenAttenuation = 0.5f,
-                PeakConcussionForce = 100000f,
+                PeakConcussionForce = 2000f,
                 ConcussionDuration = 0.5f
             };
         }

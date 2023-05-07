@@ -23,7 +23,7 @@ namespace Physics
         private Joint joint;
         private Rod rod;
 
-        private readonly Simulator simulator = new() { Velocity = 1f };
+        private readonly Simulator simulator = new() { Velocity = 0.6666f };
         private readonly float bodyTime = 20f;
         private readonly float bodyDistance = floorSize * floorSize;
 
@@ -101,6 +101,9 @@ namespace Physics
 
             var plane = GeometryUtil.CreatePlane(floorSize * 2f, 0f, Vector3.Up);
 
+            //Makes the plane a piece of concave geometry
+            plane.Vertices = plane.Vertices.Select((v, i) => i == 0 ? new Vector3(v.X, v.Y, v.Z) : new Vector3(v.X, v.Y + (i * 5) - 15, v.Z));
+
             var desc = new ModelDescription()
             {
                 UseAnisotropicFiltering = true,
@@ -111,9 +114,9 @@ namespace Physics
 
             var floorTrn = Matrix.RotationYawPitchRoll(0f, -0.2f, 0f);
             var rbState = new RigidBodyState { Mass = float.PositiveInfinity, InitialTransform = floorTrn };
-            var floorBody = new PhysicsFloor(new RigidBody(rbState), floor);
+            var pFloor = new PhysicsFloor(new RigidBody(rbState), floor);
 
-            simulator.AddPhysicsObject(floorBody);
+            simulator.AddPhysicsObject(pFloor);
         }
         private async Task InitializeSpheres()
         {
@@ -472,7 +475,7 @@ namespace Physics
                 Lights.Add(c.Light);
             });
 
-            simulator.AddContacts(contactGenerators);
+            simulator.AddContactGenerators(contactGenerators);
 
             gameReady = true;
         }
@@ -612,7 +615,6 @@ namespace Physics
 
             var lJoint = new Line3D(joint.One.PositionWorld, joint.Two.PositionWorld);
             var rJoint = new Line3D(rod.One.PositionWorld, rod.Two.PositionWorld);
-
             lineDrawer.AddPrimitives(Color4.White, new[] { lJoint, rJoint });
         }
         private void UpdateText()

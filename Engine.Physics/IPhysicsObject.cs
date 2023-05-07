@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 
 namespace Engine.Physics
 {
@@ -12,9 +13,24 @@ namespace Engine.Physics
         /// </summary>
         IRigidBody RigidBody { get; }
         /// <summary>
-        /// Primitive collider
+        /// Collider list
         /// </summary>
-        ICollider Collider { get; }
+        IEnumerable<ICollider> Colliders { get; }
+
+        /// <summary>
+        /// Gets whether the specified object is close enough to the current object that a possible collision exists 
+        /// </summary>
+        /// <param name="obj">Physics object</param>
+        bool BroadPhaseTest(IPhysicsObject obj);
+        /// <summary>
+        /// Gets the bounding sphere for the broad phase test
+        /// </summary>
+        ICullingVolume GetBroadPhaseBounds();
+        /// <summary>
+        /// Gets the candidate collider list for the specified object
+        /// </summary>
+        /// <param name="obj">Physics object</param>
+        IEnumerable<ICollider> GetBroadPhaseColliders(IPhysicsObject obj);
 
         /// <summary>
         /// Updates the object state

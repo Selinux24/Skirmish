@@ -4,8 +4,11 @@ using System.Collections.Generic;
 namespace Engine.Physics.Colliders
 {
     /// <summary>
-    /// Capsule: Height-aligned with y-axis
+    /// Capsule collider
     /// </summary>
+    /// <remarks>
+    /// Height-aligned with y-axis
+    /// </remarks>
     public class CapsuleCollider : Collider
     {
         /// <summary>

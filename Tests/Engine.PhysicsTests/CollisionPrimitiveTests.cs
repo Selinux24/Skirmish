@@ -151,7 +151,7 @@ namespace Engine.PhysicsTests
             BoundingBox box = BoundingBox.FromPoints(distinctPoints);
             OrientedBoundingBox obb = new OrientedBoundingBox(distinctPoints);
 
-            MeshCollider soup = new MeshCollider(allTris);
+            ConvexMeshCollider soup = new ConvexMeshCollider(allTris);
             CollectionAssert.AreEquivalent(soup.GetTriangles(true).ToArray(), distinctTris);
             CollectionAssert.AreEquivalent(soup.GetVertices(true).ToArray(), distinctPoints);
             Assert.AreEqual(soup.BoundingSphere, sphere);
@@ -182,8 +182,8 @@ namespace Engine.PhysicsTests
             Assert.AreEqual(soup.BoundingBox, box);
             Assert.AreEqual(soup.OrientedBoundingBox, obb);
 
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new MeshCollider(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new MeshCollider(Enumerable.Empty<Triangle>()));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ConvexMeshCollider(null));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ConvexMeshCollider(Enumerable.Empty<Triangle>()));
         }
 
         [TestMethod()]

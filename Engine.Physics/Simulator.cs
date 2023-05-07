@@ -157,6 +157,8 @@ namespace Engine.Physics
                     break;
                 }
 
+                var obj1 = physicsObjects[i];
+
                 for (int j = i + 1; j < physicsObjects.Count; j++)
                 {
                     if (!contactResolver.HasFreeContacts())
@@ -164,12 +166,61 @@ namespace Engine.Physics
                         break;
                     }
 
-                    var collider1 = physicsObjects[i].Collider;
-                    var collider2 = physicsObjects[j].Collider;
+                    var obj2 = physicsObjects[j];
 
-                    ContactDetector.BetweenObjects(collider1, collider2, contactResolver);
+                    if (!obj1.BroadPhaseTest(obj2))
+                    {
+                        continue;
+                    }
+
+                    var colliders1 = obj1.GetBroadPhaseColliders(obj2);
+                    var colliders2 = obj2.GetBroadPhaseColliders(obj1);
+
+                    TestColliders(colliders1, colliders2);
                 }
             }
+        }
+        /// <summary>
+        /// Test each collider from the first collection with the colliders from the second collection
+        /// </summary>
+        /// <param name="colliders1">First collider collection</param>
+        /// <param name="colliders2">Second collider collection</param>
+        private bool TestColliders(IEnumerable<ICollider> colliders1, IEnumerable<ICollider> colliders2)
+        {
+            if (!colliders1.Any())
+            {
+                return false;
+            }
+
+            if (!colliders2.Any())
+            {
+                return false;
+            }
+
+            bool found = false;
+
+            foreach (var collider1 in colliders1)
+            {
+                if (!contactResolver.HasFreeContacts())
+                {
+                    break;
+                }
+
+                foreach (var collider2 in colliders2)
+                {
+                    if (!contactResolver.HasFreeContacts())
+                    {
+                        break;
+                    }
+
+                    if (ContactDetector.BetweenObjects(collider1, collider2, contactResolver))
+                    {
+                        found = true;
+                    }
+                }
+            }
+
+            return found;
         }
         /// <summary>
         /// Clean inactive generators
@@ -207,6 +258,13 @@ namespace Engine.Physics
             }
         }
 
+        /// <summary>
+        /// Gets the physics objects list
+        /// </summary>
+        public IEnumerable<IPhysicsObject> GetPhysicsObjects()
+        {
+            return physicsObjects.AsReadOnly();
+        }
         /// <summary>
         /// Adds a new physics object list to the simulation
         /// </summary>
@@ -277,6 +335,13 @@ namespace Engine.Physics
         }
 
         /// <summary>
+        /// Gets the global force generators list
+        /// </summary>
+        public IEnumerable<IGlobalForceGenerator> GetGlobalForces()
+        {
+            return globalForceGenerators.AsReadOnly();
+        }
+        /// <summary>
         /// Adds a new global force generator list to the simulation
         /// </summary>
         /// <param name="forceGenerators">Force generator list</param>
@@ -336,6 +401,13 @@ namespace Engine.Physics
             globalForceGenerators.Clear();
         }
 
+        /// <summary>
+        /// Gets the local force generators list
+        /// </summary>
+        public IEnumerable<ILocalForceGenerator> GetLocalForces()
+        {
+            return localForceGenerators.AsReadOnly();
+        }
         /// <summary>
         /// Adds a new local force generator list to the simulation
         /// </summary>
@@ -397,10 +469,17 @@ namespace Engine.Physics
         }
 
         /// <summary>
+        /// Gets the contact generators list
+        /// </summary>
+        public IEnumerable<IContactGenerator> GetContactGenerators()
+        {
+            return contactGenerators.AsReadOnly();
+        }
+        /// <summary>
         /// Adds a new contact generator list to the simulation
         /// </summary>
         /// <param name="contactGenerators">Contact generator list</param>
-        public void AddContacts(IEnumerable<IContactGenerator> contactGenerators)
+        public void AddContactGenerators(IEnumerable<IContactGenerator> contactGenerators)
         {
             if (contactGenerators?.Any() != true)
             {
@@ -409,14 +488,14 @@ namespace Engine.Physics
 
             foreach (var contactGenerator in contactGenerators)
             {
-                AddContact(contactGenerator);
+                AddContactGenerator(contactGenerator);
             }
         }
         /// <summary>
         /// Adds a new contact generator to the simulation
         /// </summary>
         /// <param name="contactGenerator">Contact generator</param>
-        public void AddContact(IContactGenerator contactGenerator)
+        public void AddContactGenerator(IContactGenerator contactGenerator)
         {
             if (contactGenerator == null)
             {
@@ -434,7 +513,7 @@ namespace Engine.Physics
         /// Removes the contact generator from simulation
         /// </summary>
         /// <param name="contactGenerator">Contact generator</param>
-        public void RemoveContact(IContactGenerator contactGenerator)
+        public void RemoveContactGenerator(IContactGenerator contactGenerator)
         {
             if (contactGenerator == null)
             {
@@ -451,7 +530,7 @@ namespace Engine.Physics
         /// <summary>
         /// Clears the contact generators list
         /// </summary>
-        public void ClearContacts()
+        public void ClearContactGenerators()
         {
             contactGenerators.Clear();
         }

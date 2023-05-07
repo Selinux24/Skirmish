@@ -4,8 +4,11 @@ using System.Collections.Generic;
 namespace Engine.Physics.Colliders
 {
     /// <summary>
-    /// Cylinder: Height-aligned with y-axis (rotate using matRS)
+    /// Cylinder collider
     /// </summary>
+    /// <remarks>
+    /// Height-aligned with y-axis
+    /// </remarks>
     public class CylinderCollider : Collider
     {
         /// <summary>

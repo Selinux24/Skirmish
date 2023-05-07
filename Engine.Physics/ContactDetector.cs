@@ -125,7 +125,7 @@ namespace Engine.Physics
                 return HalfSpaceAndPointList(halfSpace, triangle.GetVertices(true), triangle.RigidBody, data);
             }
 
-            if (primitive is MeshCollider soup)
+            if (primitive is ConvexMeshCollider soup)
             {
                 return HalfSpaceAndPointList(halfSpace, soup.GetVertices(true), soup.RigidBody, data);
             }

@@ -33,9 +33,9 @@ namespace Engine.PhysicsTests
 
             return c;
         }
-        static MeshCollider FromTriangles(IEnumerable<Triangle> tris, Matrix transform)
+        static ConvexMeshCollider FromTriangles(IEnumerable<Triangle> tris, Matrix transform)
         {
-            MeshCollider c = new MeshCollider(tris);
+            ConvexMeshCollider c = new ConvexMeshCollider(tris);
             RigidBody rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             c.Attach(rb);
 

@@ -3,7 +3,7 @@ using SharpDX;
 namespace Engine.Physics.Colliders
 {
     /// <summary>
-    /// Collision box
+    /// Box collider
     /// </summary>
     public class BoxCollider : Collider
     {

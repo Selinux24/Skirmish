@@ -3,8 +3,11 @@ using SharpDX;
 namespace Engine.Physics.Colliders
 {
     /// <summary>
-    /// Collision plane
+    /// Half-space collider
     /// </summary>
+    /// <remarks>
+    /// A plane dividing two spaces
+    /// </remarks>
     public class HalfSpaceCollider : Collider
     {
         /// <summary>

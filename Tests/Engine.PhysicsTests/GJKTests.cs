@@ -30,10 +30,10 @@ namespace Engine.PhysicsTests
 
             return collider;
         }
-        static MeshCollider MeshFromExtents(Vector3 extents, Matrix transform)
+        static ConvexMeshCollider MeshFromExtents(Vector3 extents, Matrix transform)
         {
             var triangles = Triangle.ComputeTriangleList(Topology.TriangleList, new BoundingBox(-extents, extents));
-            var collider = new MeshCollider(triangles);
+            var collider = new ConvexMeshCollider(triangles);
             var body = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             collider.Attach(body);
 
