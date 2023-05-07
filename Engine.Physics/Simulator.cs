@@ -81,13 +81,19 @@ namespace Engine.Physics
             for (int i = 0; i < iterations; i++)
             {
                 // Update active force generators
-                UpdateForces(time);
+                UpdateForceGenerators(time);
 
                 // Integrate bodies
                 IntegrateBodies(time);
 
-                // Generate contacts
-                GenerateContacts();
+                // Reset contact data
+                contactResolver.Reset();
+
+                // Update active contact generators
+                UpdateContactGenerators();
+
+                // Generate contacts between objects
+                BroadPhase();
 
                 // Resolve the contacts
                 contactResolver.Resolve(time);
@@ -98,10 +104,10 @@ namespace Engine.Physics
         }
 
         /// <summary>
-        /// Updates the simulation objects
+        /// Updates the force generators
         /// </summary>
         /// <param name="time">Elapsed time</param>
-        private void UpdateForces(float time)
+        private void UpdateForceGenerators(float time)
         {
             //Update local force generators
             localForceGenerators.ForEach(f => f.UpdateForce(time));
@@ -131,13 +137,10 @@ namespace Engine.Physics
             });
         }
         /// <summary>
-        /// Gets the contacts for the current moment
+        /// Updates the contact generators
         /// </summary>
-        private void GenerateContacts()
+        private void UpdateContactGenerators()
         {
-            // Reset contact data
-            contactResolver.Reset();
-
             // Process contact generators
             foreach (var contactGenerator in contactGenerators)
             {
@@ -148,7 +151,12 @@ namespace Engine.Physics
 
                 contactGenerator.AddContact(contactResolver, 0);
             }
-
+        }
+        /// <summary>
+        /// Gets the contacts for the current moment
+        /// </summary>
+        private void BroadPhase()
+        {
             // Test physics bodies contacts
             for (int i = 0; i < physicsObjects.Count; i++)
             {
@@ -173,31 +181,28 @@ namespace Engine.Physics
                         continue;
                     }
 
-                    var colliders1 = obj1.GetBroadPhaseColliders(obj2);
-                    var colliders2 = obj2.GetBroadPhaseColliders(obj1);
-
-                    TestColliders(colliders1, colliders2);
+                    NarrowPhase(obj1, obj2);
                 }
             }
         }
         /// <summary>
         /// Test each collider from the first collection with the colliders from the second collection
         /// </summary>
-        /// <param name="colliders1">First collider collection</param>
-        /// <param name="colliders2">Second collider collection</param>
-        private bool TestColliders(IEnumerable<ICollider> colliders1, IEnumerable<ICollider> colliders2)
+        /// <param name="obj1">First object</param>
+        /// <param name="obj2">Second object</param>
+        private void NarrowPhase(IPhysicsObject obj1, IPhysicsObject obj2)
         {
+            var colliders1 = obj1.GetBroadPhaseColliders(obj2);
             if (!colliders1.Any())
             {
-                return false;
+                return;
             }
 
+            var colliders2 = obj2.GetBroadPhaseColliders(obj1);
             if (!colliders2.Any())
             {
-                return false;
+                return;
             }
-
-            bool found = false;
 
             foreach (var collider1 in colliders1)
             {
@@ -213,14 +218,9 @@ namespace Engine.Physics
                         break;
                     }
 
-                    if (ContactDetector.BetweenObjects(collider1, collider2, contactResolver))
-                    {
-                        found = true;
-                    }
+                    ContactDetector.BetweenObjects(collider1, collider2, contactResolver);
                 }
             }
-
-            return found;
         }
         /// <summary>
         /// Clean inactive generators

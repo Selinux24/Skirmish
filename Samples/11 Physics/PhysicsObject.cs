@@ -66,7 +66,7 @@ namespace Physics
                 ColliderTypes.Cylinder => CollisionCylinderFromModel(model),
                 ColliderTypes.Capsule => CollisionCapsuleFromModel(model),
                 ColliderTypes.Mesh => CollisionTriangleSoupFromModel(model),
-                _ => null,
+                _ => CollisionSphereFromModel(model),
             };
             collider.Attach(rigidBody);
 

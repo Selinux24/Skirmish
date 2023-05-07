@@ -23,7 +23,7 @@ namespace Physics
         private Joint joint;
         private Rod rod;
 
-        private readonly Simulator simulator = new() { Velocity = 0.6666f };
+        private readonly Simulator simulator = new() { Velocity = 1f };
         private readonly float bodyTime = 20f;
         private readonly float bodyDistance = floorSize * floorSize;
 
