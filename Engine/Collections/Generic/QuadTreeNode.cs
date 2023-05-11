@@ -7,14 +7,14 @@ namespace Engine.Collections.Generic
     using Engine.Common;
 
     /// <summary>
-    /// Quadtree node
+    /// Quad-tree node
     /// </summary>
     public class QuadTreeNode<T> where T : IVertexList
     {
         /// <summary>
         /// Recursive partition creation
         /// </summary>
-        /// <param name="quadTree">Quadtree</param>
+        /// <param name="quadTree">Quad-tree</param>
         /// <param name="parent">Parent node</param>
         /// <param name="bbox">Parent bounding box</param>
         /// <param name="items">All items</param>
@@ -66,9 +66,9 @@ namespace Engine.Collections.Generic
             return null;
         }
         /// <summary>
-        /// Initializes node partitinos
+        /// Initializes node partitions
         /// </summary>
-        /// <param name="quadTree">Quadtree</param>
+        /// <param name="quadTree">Quad-tree</param>
         /// <param name="node">Current node</param>
         /// <param name="bbox">Bounding box</param>
         /// <param name="items">Items into the node</param>
@@ -126,19 +126,19 @@ namespace Engine.Collections.Generic
         /// </summary>
         public QuadTreeNode<T> Parent { get; private set; }
         /// <summary>
-        /// Gets the child node al top lef position (from above)
+        /// Gets the child node at top left position (from above)
         /// </summary>
         public QuadTreeNode<T> TopLeftChild { get; private set; }
         /// <summary>
-        /// Gets the child node al top right position (from above)
+        /// Gets the child node at top right position (from above)
         /// </summary>
         public QuadTreeNode<T> TopRightChild { get; private set; }
         /// <summary>
-        /// Gets the child node al bottom lef position (from above)
+        /// Gets the child node at bottom left position (from above)
         /// </summary>
         public QuadTreeNode<T> BottomLeftChild { get; private set; }
         /// <summary>
-        /// Gets the child node al bottom right position (from above)
+        /// Gets the child node at bottom right position (from above)
         /// </summary>
         public QuadTreeNode<T> BottomRightChild { get; private set; }
 
@@ -209,7 +209,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="quadTree">Quadtree</param>
+        /// <param name="quadTree">Quad-tree</param>
         /// <param name="parent">Parent node</param>
         public QuadTreeNode(QuadTree<T> quadTree, QuadTreeNode<T> parent) : base()
         {
@@ -240,7 +240,7 @@ namespace Engine.Collections.Generic
             }
         }
         /// <summary>
-        /// Searchs for the neighbor node at top position (from above)
+        /// Searches for the neighbor node at top position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at top position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtTop()
@@ -276,7 +276,7 @@ namespace Engine.Collections.Generic
             return null;
         }
         /// <summary>
-        /// Searchs for the neighbor node at bottom position (from above)
+        /// Searches for the neighbor node at bottom position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at bottom position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtBottom()
@@ -312,7 +312,7 @@ namespace Engine.Collections.Generic
             return null;
         }
         /// <summary>
-        /// Searchs for the neighbor node at right position(from above)
+        /// Searches for the neighbor node at right position(from above)
         /// </summary>
         /// <returns>Returns the neighbor node at top position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtRight()
@@ -348,7 +348,7 @@ namespace Engine.Collections.Generic
             return null;
         }
         /// <summary>
-        /// Searchs for the neighbor node at left position (from above)
+        /// Searches for the neighbor node at left position (from above)
         /// </summary>
         /// <returns>Returns the neighbor node at left position if exists.</returns>
         private QuadTreeNode<T> FindNeighborNodeAtLeft()
@@ -558,7 +558,7 @@ namespace Engine.Collections.Generic
         /// Gets node at position
         /// </summary>
         /// <param name="position">Position</param>
-        /// <returns>Returns the leaf node wich contains the specified position</returns>
+        /// <returns>Returns the leaf node which contains the specified position</returns>
         public QuadTreeNode<T> GetNode(Vector3 position)
         {
             if (Children == null)
@@ -594,7 +594,7 @@ namespace Engine.Collections.Generic
             else
             {
                 //Node
-                return string.Format("QuadTreeNode {0}; Depth {1}; Childs {2}", Id, Level, Children.Count);
+                return string.Format("QuadTreeNode {0}; Depth {1}; Children {2}", Id, Level, Children.Count);
             }
         }
     }

@@ -43,7 +43,7 @@ namespace Engine
             /// </summary>
             public bool Planted { get; protected set; }
             /// <summary>
-            /// Gets the node to wich this patch is currently assigned
+            /// Gets the node to which this patch is currently assigned
             /// </summary>
             public QuadTreeNode CurrentNode { get; protected set; }
             /// <summary>
@@ -220,7 +220,7 @@ namespace Engine
             }
 
             /// <summary>
-            /// Launchs foliage population asynchronous task
+            /// Launches foliage population asynchronous task
             /// </summary>
             /// <param name="scene">Scene</param>
             /// <param name="node">Foliage Node</param>
@@ -456,7 +456,7 @@ namespace Engine
             }
 
             /// <summary>
-            /// Attachs the specified patch to buffer
+            /// Attaches the specified patch to buffer
             /// </summary>
             /// <param name="eyePosition">Eye position</param>
             /// <param name="transparent">The billboards were transparent</param>
@@ -538,7 +538,7 @@ namespace Engine
         /// </summary>
         private EngineShaderResourceView textureRandom = null;
         /// <summary>
-        /// Folliage map for vegetation planting task
+        /// Foliage map for vegetation planting task
         /// </summary>
         private FoliageMap foliageMap = null;
         /// <summary>
@@ -554,7 +554,7 @@ namespace Engine
         /// </summary>
         private BoundingSphere foliageSphere;
         /// <summary>
-        /// Foliage quadtree
+        /// Foliage quad-tree
         /// </summary>
         private QuadTree foliageQuadtree;
         /// <summary>
@@ -915,15 +915,15 @@ namespace Engine
             toAssign.AddRange(await DoPlantAsync(bbox.Value));
         }
         /// <summary>
-        /// Builds the quadtree from the specified bounding box
+        /// Builds the quad-tree from the specified bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
-        /// <param name="nodeSize">Maximum quadtree node size</param>
+        /// <param name="nodeSize">Maximum quad-tree node size</param>
         private void BuildQuadtree(BoundingBox bbox, float nodeSize)
         {
             if (foliageQuadtree == null || foliageQuadtree.BoundingBox != bbox)
             {
-                //Creates the quadtree if not exists, or if the reference bounding box has changed
+                //Creates the quad-tree if not exists, or if the reference bounding box has changed
                 float sizeParts = Math.Max(bbox.Width, bbox.Depth) / nodeSize;
 
                 int levels = Math.Max(1, (int)Math.Log(sizeParts, 2));
@@ -935,7 +935,7 @@ namespace Engine
         /// Gets the node list suitable for foliage planting
         /// </summary>
         /// <param name="volume">Culling volume</param>
-        /// <param name="sph">Foliagle bounding sphere</param>
+        /// <param name="sph">Foliage bounding sphere</param>
         /// <returns>Returns a node list</returns>
         private IEnumerable<QuadTreeNode> GetFoliageNodes(ICullingVolume volume, BoundingSphere sph)
         {
@@ -952,7 +952,7 @@ namespace Engine
         /// </summary>
         /// <param name="gameTime">Game time</param>
         /// <param name="eyePosition">Eye position</param>
-        /// <param name="transparent">Specifies wether the billboards are transparent or not</param>
+        /// <param name="transparent">Specifies whether the billboards are transparent or not</param>
         /// <remarks>Sorts nodes every second</remarks>
         private void SortVisibleNodes(GameTime gameTime, Vector3 eyePosition, bool transparent)
         {
@@ -974,7 +974,7 @@ namespace Engine
         /// <param name="bbox">Relative bounding box to plant</param>
         /// <returns>Returns a list of patches</returns>
         /// <remarks>
-        /// Foreach high lod visible node, look for planted foliagePatches.
+        /// For each high LOD visible node, look for planted foliagePatches.
         /// - If planted, see if they were assigned to a foliageBuffer
         ///   - If assigned, do nothing
         ///   - If not, add to toAssign list
@@ -1086,7 +1086,7 @@ namespace Engine
         /// For each node to assign
         /// - Look for a free buffer. It's free if unassigned or assigned to not visible node
         ///   - If free buffer found, assign
-        ///   - If not, look for a buffer to free, farthests from camera first
+        ///   - If not, look for a buffer to free, farthest from camera first
         /// </remarks>
         private void AttachFreePatches(Vector3 eyePosition)
         {

@@ -91,7 +91,7 @@ namespace Engine
         /// <inheritdoc/>
         public virtual BoundingBox GetBoundingBox(bool refresh = false)
         {
-            return GroundPickingQuadtree != null ? GroundPickingQuadtree.BoundingBox : new BoundingBox();
+            return GroundPickingQuadtree?.BoundingBox ?? new BoundingBox();
         }
         /// <inheritdoc/>
         public virtual OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false)

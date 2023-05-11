@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Engine.Physics
 {
@@ -129,7 +128,7 @@ namespace Engine.Physics
                 return;
             }
 
-            if (CurrentContact?.SetContactData(one, two, position, normal, penetration, restitution, friction) == true)
+            if(CurrentContact?.SetContactData(one, two, position, normal, penetration, restitution, friction) == true)
             {
                 currentContactIndex++;
             }

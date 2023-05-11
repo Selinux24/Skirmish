@@ -13,7 +13,7 @@ namespace Physics
 {
     class TestScene : Scene
     {
-        private const float floorSize = 50f;
+        private const float floorSize = 100f;
 
         private Sprite panel = null;
         private UITextArea title = null;
@@ -23,8 +23,8 @@ namespace Physics
         private Joint joint;
         private Rod rod;
 
-        private readonly Simulator simulator = new() { Velocity = 1f };
-        private readonly float bodyTime = 20f;
+        private readonly Simulator simulator = new(new BoundingBox(Vector3.One * -floorSize, Vector3.One * floorSize), 8) { Velocity = 1f };
+        private readonly float bodyTime = 60f;
         private readonly float bodyDistance = floorSize * floorSize;
 
         private readonly ExplosionDescription explosionTemplate = ExplosionDescription.CreateExplosion();
@@ -55,7 +55,7 @@ namespace Physics
                 {
                     InitializeTexts(),
                     InitializeLineDrawer(),
-                    InitializeFloor(),
+                    InitializeTerrain(),
                     InitializeSpheres(),
                     InitializeBoxes(),
                     InitializeCylinders(),
@@ -94,29 +94,19 @@ namespace Physics
                 "EdgeDrawer",
                 desc);
         }
-        private async Task InitializeFloor()
+        private async Task InitializeTerrain()
         {
-            var material = MaterialBlinnPhongContent.Default;
-            material.DiffuseTexture = "resources/floor.png";
+            var desc = GroundDescription.FromFile("resources/terrain", "collisionTerrain.json");
+            desc.ColliderType = ColliderTypes.Box;
+            desc.CullingVolumeType = CullingVolumeTypes.BoxVolume;
+            desc.BlendMode = BlendModes.Opaque;
 
-            var plane = GeometryUtil.CreatePlane(floorSize * 2f, 0f, Vector3.Up);
+            var terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", desc);
 
-            //Makes the plane a piece of concave geometry
-            plane.Vertices = plane.Vertices.Select((v, i) => i == 0 ? new Vector3(v.X, v.Y, v.Z) : new Vector3(v.X, v.Y + (i * 5) - 15, v.Z));
+            var rbState = new RigidBodyState { Mass = float.PositiveInfinity };
+            var pTerrain = new PhysicsTerrain(new RigidBody(rbState), terrain);
 
-            var desc = new ModelDescription()
-            {
-                UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromContentData(plane, material),
-            };
-
-            var floor = await AddComponentGround<Model, ModelDescription>("Floor", "Floor", desc);
-
-            var floorTrn = Matrix.RotationYawPitchRoll(0f, -0.2f, 0f);
-            var rbState = new RigidBodyState { Mass = float.PositiveInfinity, InitialTransform = floorTrn };
-            var pFloor = new PhysicsFloor(new RigidBody(rbState), floor);
-
-            simulator.AddPhysicsObject(pFloor);
+            simulator.AddPhysicsObject(pTerrain);
         }
         private async Task InitializeSpheres()
         {
@@ -464,9 +454,9 @@ namespace Physics
 
             UpdateLayout();
 
-            Camera.Goto(new Vector3(-48, 8, -30));
+            Camera.Goto(new Vector3(120, 40, 75));
             Camera.LookTo(Vector3.Zero);
-            Camera.FarPlaneDistance = 250;
+            Camera.FarPlaneDistance = 300;
 
             colliders.ToList().ForEach(c =>
             {
@@ -510,7 +500,6 @@ namespace Physics
         }
         private void UpdateInputCamera(GameTime gameTime)
         {
-#if DEBUG
             if (Game.Input.MouseButtonPressed(MouseButtons.Right))
             {
                 Camera.RotateMouse(
@@ -518,12 +507,6 @@ namespace Physics
                     Game.Input.MouseXDelta,
                     Game.Input.MouseYDelta);
             }
-#else
-            Camera.RotateMouse(
-                Game.GameTime,
-                Game.Input.MouseXDelta,
-                Game.Input.MouseYDelta);
-#endif
 
             if (Game.Input.KeyPressed(Keys.A))
             {

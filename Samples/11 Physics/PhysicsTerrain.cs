@@ -1,5 +1,5 @@
 ﻿using Engine;
-using Engine.Common;
+using Engine.Collections.Generic;
 using Engine.Physics;
 using Engine.Physics.Colliders;
 using SharpDX;
@@ -10,35 +10,47 @@ using System.Linq;
 namespace Physics
 {
     /// <summary>
-    /// Floor
+    /// Terrain
     /// </summary>
-    public class PhysicsFloor : IPhysicsObject
+    public class PhysicsTerrain : IPhysicsObject
     {
+        /// <summary>
+        /// OcTree
+        /// </summary>
+        private readonly OcTree<ICollider> octree;
+
         /// <inheritdoc/>
         public IRigidBody RigidBody { get; private set; }
         /// <inheritdoc/>
         public IEnumerable<ICollider> Colliders { get; private set; }
         /// <summary>
-        /// Model
+        /// Terrain
         /// </summary>
-        public Model Model { get; private set; }
+        public Scenery Terrain { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        public PhysicsFloor(IRigidBody body, Model model)
+        public PhysicsTerrain(IRigidBody body, Scenery model)
         {
             RigidBody = body ?? throw new ArgumentNullException(nameof(body), $"Physics object must have a rigid body.");
-            Model = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");
+            Terrain = model ?? throw new ArgumentNullException(nameof(model), $"Physics object must have a model.");
+
+            var bbox = model.GetBoundingBox();
+            octree = new OcTree<ICollider>(bbox, 50);
 
             var tris = model.GetTriangles(true);
-            tris = Triangle.Transform(tris, Matrix.Invert(model.Manipulator.FinalTransform));
-
             var colliders = new ICollider[tris.Count()];
             for (int i = 0; i < tris.Count(); i++)
             {
-                colliders[i] = new TriangleCollider(tris.ElementAt(i));
+                var tri = tris.ElementAt(i);
+
+                colliders[i] = new TriangleCollider(tri);
                 colliders[i].Attach(body);
+
+                var colliderBox = colliders[i].BoundingBox;
+
+                octree.Insert((IntersectionVolumeAxisAlignedBox)colliderBox, colliders[i]);
             }
 
             Colliders = colliders;
@@ -47,18 +59,7 @@ namespace Physics
         /// <inheritdoc/>
         public void Update()
         {
-            if (RigidBody == null)
-            {
-                return;
-            }
-
-            if (Model == null)
-            {
-                return;
-            }
-
-            Model.Manipulator.SetRotation(RigidBody.Rotation);
-            Model.Manipulator.SetPosition(RigidBody.Position);
+            return;
         }
         /// <inheritdoc/>
         public bool BroadPhaseTest(IPhysicsObject obj)
@@ -68,19 +69,23 @@ namespace Physics
                 return false;
             }
 
-            return Model.Intersects(IntersectDetectionMode.Box, obj.GetBroadPhaseBounds());
+            var intersects = Terrain.Intersects(IntersectDetectionMode.Box, obj.GetBroadPhaseBounds());
+
+            return intersects;
         }
         /// <inheritdoc/>
         public IEnumerable<ICollider> GetBroadPhaseColliders(IPhysicsObject obj)
         {
             var cullingVolume = obj.GetBroadPhaseBounds();
 
-            return Colliders.Where(c => IntersectionHelper.Intersects(cullingVolume, (IntersectionVolumeSphere)c.BoundingSphere));
+            var colliders = octree.Query(cullingVolume);
+
+            return colliders;
         }
         /// <inheritdoc/>
         public ICullingVolume GetBroadPhaseBounds()
         {
-            return Model.GetIntersectionVolume(IntersectDetectionMode.Box);
+            return Terrain.GetIntersectionVolume(IntersectDetectionMode.Box);
         }
         /// <inheritdoc/>
         public void Reset(Matrix transform)

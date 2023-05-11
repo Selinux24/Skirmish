@@ -7,7 +7,7 @@ namespace Engine.Collections.Generic
     using Engine.Common;
 
     /// <summary>
-    /// Quad tree
+    /// Quad-tree
     /// </summary>
     public class QuadTree<T> where T : IVertexList
     {
@@ -34,18 +34,18 @@ namespace Engine.Collections.Generic
             var bbox = GeometryUtil.CreateBoundingBox(items);
             var bsph = GeometryUtil.CreateBoundingSphere(items);
 
-            this.BoundingBox = bbox;
-            this.BoundingSphere = bsph;
+            BoundingBox = bbox;
+            BoundingSphere = bsph;
 
             int nodeCount = 0;
-            this.Root = QuadTreeNode<T>.CreatePartitions(
+            Root = QuadTreeNode<T>.CreatePartitions(
                 this, null,
                 bbox, items,
                 maxDepth,
                 0,
                 ref nodeCount);
 
-            this.Root.ConnectNodes();
+            Root.ConnectNodes();
         }
 
         /// <summary>
@@ -55,7 +55,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            return this.Root.GetBoundingBoxes(maxDepth);
+            return Root.GetBoundingBoxes(maxDepth);
         }
         /// <summary>
         /// Gets the nodes contained into the specified frustum
@@ -67,7 +67,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(ref frustum);
+                return Root.GetNodesInVolume(ref frustum);
             }
             finally
             {
@@ -86,7 +86,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(ref bbox);
+                return Root.GetNodesInVolume(ref bbox);
             }
             finally
             {
@@ -105,7 +105,7 @@ namespace Engine.Collections.Generic
             Stopwatch w = Stopwatch.StartNew();
             try
             {
-                return this.Root.GetNodesInVolume(ref sphere);
+                return Root.GetNodesInVolume(ref sphere);
             }
             finally
             {
@@ -117,10 +117,10 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Gets all leaf nodes
         /// </summary>
-        /// <returns>Returns all leaf nodel</returns>
+        /// <returns>Returns all leaf node</returns>
         public IEnumerable<QuadTreeNode<T>> GetLeafNodes()
         {
-            return this.Root.GetLeafNodes();
+            return Root.GetLeafNodes();
         }
         /// <summary>
         /// Gets the closest node to the specified position
@@ -129,11 +129,11 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the closest node to the specified position</returns>
         public QuadTreeNode<T> FindNode(Vector3 position)
         {
-            var node = this.Root.GetNode(position);
+            var node = Root.GetNode(position);
             if (node == null)
             {
                 //Look for the closest node
-                var leafNodes = this.GetLeafNodes();
+                var leafNodes = GetLeafNodes();
 
                 float dist = float.MaxValue;
                 foreach (var leafNode in leafNodes)
@@ -156,9 +156,9 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            if (this.Root != null)
+            if (Root != null)
             {
-                return string.Format("QuadTree Levels {0}", this.Root.GetMaxLevel() + 1);
+                return string.Format("QuadTree Levels {0}", Root.GetMaxLevel() + 1);
             }
             else
             {

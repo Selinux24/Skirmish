@@ -26,7 +26,7 @@ namespace Engine
         class MapGrid : IDisposable
         {
             /// <summary>
-            /// Level of detail leves in map
+            /// Level of detail levels in map
             /// </summary>
             public const int LODLevels = 3;
 
@@ -140,7 +140,7 @@ namespace Engine
                     IndexBufferShapes.CornerBottomRight,
                 };
 
-                //Populate shapes dictionaty
+                //Populate shapes dictionary
                 foreach (var lod in lodList)
                 {
                     foreach (var shape in shapeList)
@@ -631,7 +631,7 @@ namespace Engine
         private HeightMap heightMap = null;
 
         /// <summary>
-        /// Heightmap texture resolution
+        /// Height-map texture resolution
         /// </summary>
         private float textureResolution;
         /// <summary>
@@ -643,7 +643,7 @@ namespace Engine
         /// </summary>
         private BuiltInTerrainModes terrainMode;
         /// <summary>
-        /// Lerping proportion between alhpa mapping and slope texturing
+        /// Lerp proportion between alpha mapping and slope texturing
         /// </summary>
         private float proportion;
         /// <summary>
@@ -725,12 +725,12 @@ namespace Engine
 
             if (Description.Heightmap == null)
             {
-                throw new EngineException($"Terrain initialization error. Heightmap description not found.");
+                throw new EngineException($"Terrain initialization error. Height-map description not found.");
             }
 
             useAnisotropic = Description.UseAnisotropic;
 
-            // Read heightmap
+            // Read height-map
             heightMap = HeightMap.FromDescription(Description.Heightmap);
             float heightMapCellSize = Description.Heightmap.CellSize;
             float heightMapHeight = Description.Heightmap.MaximumHeight;
@@ -759,7 +759,7 @@ namespace Engine
             // Read material
             terrainMaterial = MeshMaterial.DefaultBlinnPhong;
 
-            // Get vertices and indices from heightmap
+            // Get vertices and indices from height-map
             var (Vertices, Indices) = await heightMap.BuildGeometry(
                 heightMapCellSize,
                 heightMapHeight,
@@ -773,7 +773,7 @@ namespace Engine
                 Vertices.Select(v => v.Position.Value).ToArray(),
                 Indices.ToArray());
 
-            // Initialize quadtree for ray picking
+            // Initialize quad-tree for ray picking
             GroundPickingQuadtree = Description.ReadQuadTree(tris);
 
             //Initialize map

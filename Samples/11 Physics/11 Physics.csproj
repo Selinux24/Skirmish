@@ -12,10 +12,18 @@
 
   <ItemGroup>
     <None Remove="Resources\floor.png" />
+    <None Remove="Resources\Terrain\collisionTerrain.dae" />
+    <None Remove="Resources\Terrain\collisionTerrain.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Content Include="Resources\floor.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\collisionTerrain.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Terrain\collisionTerrain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

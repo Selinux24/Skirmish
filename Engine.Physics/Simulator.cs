@@ -1,4 +1,5 @@
-﻿using SharpDX;
+﻿using Engine.Collections.Generic;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,6 +36,10 @@ namespace Engine.Physics
         /// Contact generator list
         /// </summary>
         private readonly List<IContactGenerator> contactGenerators = new();
+        /// <summary>
+        /// Space partitioning OcTree
+        /// </summary>
+        private readonly OcTree<IPhysicsObject> octree;
 
         /// <summary>
         /// Simulation velocity
@@ -61,6 +66,14 @@ namespace Engine.Physics
         /// Gets the contact generators count
         /// </summary>
         public int ContactGeneratorsCount { get => contactGenerators?.Count ?? 0; }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Simulator(BoundingBox worldBounds, int itemsPerNode)
+        {
+            octree = new OcTree<IPhysicsObject>(worldBounds, itemsPerNode);
+        }
 
         /// <summary>
         /// Update physics
@@ -157,6 +170,10 @@ namespace Engine.Physics
         /// </summary>
         private void BroadPhase()
         {
+            // Populate OcTree
+            octree.Clear();
+            physicsObjects.ForEach(p => octree.Insert(p.GetBroadPhaseBounds(), p));
+
             // Test physics bodies contacts
             for (int i = 0; i < physicsObjects.Count; i++)
             {
@@ -167,14 +184,20 @@ namespace Engine.Physics
 
                 var obj1 = physicsObjects[i];
 
-                for (int j = i + 1; j < physicsObjects.Count; j++)
+                var colliders = octree.Query(obj1.GetBroadPhaseBounds());
+
+                for (int j = 0; j < colliders.Count(); j++)
                 {
                     if (!contactResolver.HasFreeContacts())
                     {
                         break;
                     }
 
-                    var obj2 = physicsObjects[j];
+                    var obj2 = colliders.ElementAt(j);
+                    if (obj1 == obj2)
+                    {
+                        continue;
+                    }
 
                     if (!obj1.BroadPhaseTest(obj2))
                     {

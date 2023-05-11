@@ -28,13 +28,8 @@ namespace Physics
                 using (Game cl = new Game("11 Physics"))
 #endif
                 {
-#if DEBUG
                     cl.VisibleMouse = true;
                     cl.LockMouse = false;
-#else
-                    cl.VisibleMouse = true;
-                    cl.LockMouse = false;
-#endif
 
                     GameResourceManager.RegisterLoader<LoaderCollada>();
 

@@ -204,6 +204,11 @@ namespace Engine.Physics
         /// <param name="time">Time</param>
         public void CalculateInternals(float time)
         {
+            if (body1 == null || body2 == null)
+            {
+                return;
+            }
+
             // Calculate a coordinate axis from the contact point
             contactToWorld = CalculateContactBasis(Normal);
 

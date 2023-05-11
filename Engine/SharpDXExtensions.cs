@@ -598,13 +598,56 @@ namespace Engine
             Matrix inv = Matrix.Invert(transform);
             Vector3.TransformCoordinate(ptArray, ref inv, ptArray);
 
-            //Create the obb from origin points
+            //Create the OBB from origin points
             var obb = new OrientedBoundingBox(ptArray);
 
-            //Apply the original transform to obb
+            //Apply the original transform to OBB
             obb.Transformation *= transform;
 
             return obb;
+        }
+
+        /// <summary>
+        /// Generates a list of eight bounding boxes which makes an OcTree subdivision of the specified bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns eight boxes</returns>
+        /// <remarks>
+        /// By index:
+        /// 0 - Top Left Front
+        /// 1 - Top Left Back
+        /// 2 - Top Right Front
+        /// 3 - Top Right Back
+        /// 4 - Bottom Left Front
+        /// 5 - Bottom Left Back
+        /// 6 - Bottom Right Front
+        /// 7 - Bottom Right Back
+        /// </remarks>
+        public static IEnumerable<BoundingBox> Octree(this BoundingBox bbox)
+        {
+            Vector3 m = bbox.Minimum;
+            Vector3 M = bbox.Maximum;
+            Vector3 c = bbox.Center;
+
+            //-1+0-1   +0+1+0 - Top Left Front
+            yield return new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+            //-1+0+0   +0+1+1 - Top Left Back
+            yield return new BoundingBox(new Vector3(m.X, c.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+
+            //+0+0-1   +1+1+0 - Top Right Front
+            yield return new BoundingBox(new Vector3(c.X, c.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+            //+0+0+0   +1+1+1 - Top Right Back
+            yield return new BoundingBox(new Vector3(c.X, c.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+
+            //-1-1-1   +0+0+0 - Bottom Left Front
+            yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, c.Y, c.Z));
+            //-1-1+0   +0+0+1 - Bottom Left Back
+            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, c.Y, M.Z));
+
+            //+0-1-1   +1+0+0 - Bottom Right Front
+            yield return new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, c.Y, c.Z));
+            //+0-1+0   +1+0+1 - Bottom Right Back
+            yield return new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, c.Y, M.Z));
         }
 
         /// <summary>
