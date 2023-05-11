@@ -306,6 +306,8 @@ namespace Engine
                 return Enumerable.Empty<Line3D>();
             }
 
+            var vArray = vertices.ToArray();
+
             List<Line3D> lines = new List<Line3D>();
 
             if (indices?.Any() != true)
@@ -315,8 +317,8 @@ namespace Engine
                 {
                     Line3D l = new Line3D()
                     {
-                        Point1 = vertices.ElementAtOrDefault(i),
-                        Point2 = vertices.ElementAtOrDefault(i + 1),
+                        Point1 = vArray[i],
+                        Point2 = vArray[i + 1],
                     };
 
                     lines.Add(l);
@@ -325,12 +327,14 @@ namespace Engine
                 return lines;
             }
 
-            for (int i = 0; i < indices.Count(); i += 2)
+            var iArray = indices.ToArray();
+
+            for (int i = 0; i < iArray.Length; i += 2)
             {
                 Line3D l = new Line3D()
                 {
-                    Point1 = vertices.ElementAtOrDefault(indices.ElementAtOrDefault(i)),
-                    Point2 = vertices.ElementAtOrDefault(indices.ElementAtOrDefault(i + 1)),
+                    Point1 = vArray[iArray[i]],
+                    Point2 = vArray[iArray[i + 1]],
                 };
 
                 lines.Add(l);

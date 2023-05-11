@@ -34,11 +34,6 @@ namespace Engine.Collections.Generic
         private int storedItems;
 
         /// <summary>
-        /// Gets the actual items in the node
-        /// </summary>
-        public IEnumerable<T> Items { get => items.Take(storedItems).Select(i => i.item).ToArray(); }
-
-        /// <summary>
         /// Top left front node
         /// </summary>
         public OcTreeNode<T> TopLeftFront { get; private set; }
@@ -84,6 +79,14 @@ namespace Engine.Collections.Generic
             this.root = root;
             items = root ? Array.Empty<(ICullingVolume volume, T item)>() : new (ICullingVolume, T)[itemsPerNode];
             storedItems = 0;
+        }
+
+        /// <summary>
+        /// Gets the actual items in the node
+        /// </summary>
+        public IEnumerable<T> GetItems()
+        {
+            return items.Take(storedItems).Select(i => i.item).ToArray();
         }
 
         /// <summary>
@@ -154,7 +157,7 @@ namespace Engine.Collections.Generic
                 5 => BottomLeftBack,
                 6 => BottomRightFront,
                 7 => BottomRightBack,
-                _ => throw new ArgumentOutOfRangeException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(index)),
             };
         }
         /// <summary>
@@ -201,8 +204,8 @@ namespace Engine.Collections.Generic
                 case 7:
                     BottomRightBack = node;
                     break;
-                default: throw new ArgumentOutOfRangeException();
-            };
+                default: throw new ArgumentOutOfRangeException(nameof(index));
+            }
         }
 
         /// <summary>

@@ -151,7 +151,9 @@ namespace Engine
                     }
                 }
 
-                res.drawingQuadTree = new QuadTree<VertexData>(vertices, LODLevels);
+                var bbox = BoundingBox.FromPoints(vertices.SelectMany(v => v.GetVertices()).Distinct().ToArray());
+                var items = vertices.Select(v => (BoundingBox.FromPoints(v.GetVertices().ToArray()), v));
+                res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, LODLevels);
 
                 //Populate nodes dictionary
                 var nodes = res.drawingQuadTree.GetLeafNodes();

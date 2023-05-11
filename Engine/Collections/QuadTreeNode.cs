@@ -68,23 +68,12 @@ namespace Engine.Collections
             int nextTreeDepth,
             ref int nodeCount)
         {
-            Vector3 M = bbox.Maximum;
-            Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-            Vector3 m = bbox.Minimum;
+            var boxes = bbox.QuadTree();
 
-            //-1-1-1   +0+1+0   -->   mmm    cMc
-            BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-            //-1-1+0   +0+1+1   -->   mmc    cMM
-            BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-            //+0-1-1   +1+1+0   -->   cmm    MMc
-            BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-            //+0-1+0   +1+1+1   -->   cmc    MMM
-            BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-
-            var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, maxDepth, nextTreeDepth, ref nodeCount);
-            var topRightChild = CreatePartitions(quadTree, node, topRightBox, maxDepth, nextTreeDepth, ref nodeCount);
-            var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, maxDepth, nextTreeDepth, ref nodeCount);
-            var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, maxDepth, nextTreeDepth, ref nodeCount);
+            var topLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(0), maxDepth, nextTreeDepth, ref nodeCount);
+            var topRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(1), maxDepth, nextTreeDepth, ref nodeCount);
+            var bottomLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(2), maxDepth, nextTreeDepth, ref nodeCount);
+            var bottomRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(3), maxDepth, nextTreeDepth, ref nodeCount);
 
             List<QuadTreeNode> childList = new List<QuadTreeNode>();
 

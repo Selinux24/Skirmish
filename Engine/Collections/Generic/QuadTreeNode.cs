@@ -9,7 +9,7 @@ namespace Engine.Collections.Generic
     /// <summary>
     /// Quad-tree node
     /// </summary>
-    public class QuadTreeNode<T> where T : IVertexList
+    public class QuadTreeNode<T> //where T : IVertexList
     {
         /// <summary>
         /// Recursive partition creation
@@ -24,46 +24,42 @@ namespace Engine.Collections.Generic
         /// <returns>Returns new node</returns>
         public static QuadTreeNode<T> CreatePartitions(
             QuadTree<T> quadTree, QuadTreeNode<T> parent,
-            BoundingBox bbox, IEnumerable<T> items,
+            BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items,
             int maxDepth,
             int treeDepth,
             ref int nodeCount)
         {
-            if (treeDepth <= maxDepth)
+            if (treeDepth > maxDepth)
             {
-                var nodeItems = items.Where(i =>
-                {
-                    var tbox = BoundingBox.FromPoints(i.GetVertices().ToArray());
-
-                    return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
-                });
-
-                if (nodeItems.Any())
-                {
-                    var node = new QuadTreeNode<T>(quadTree, parent)
-                    {
-                        Id = -1,
-                        Level = treeDepth,
-                        BoundingBox = bbox,
-                    };
-
-                    bool haltByDepth = treeDepth == maxDepth;
-                    if (haltByDepth)
-                    {
-                        node.Id = nodeCount++;
-                        node.Items.AddRange(nodeItems);
-                    }
-                    else
-                    {
-                        // Initialize node partitions
-                        IntializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1, ref nodeCount);
-                    }
-
-                    return node;
-                }
+                return null;
             }
 
-            return null;
+            var nodeItems = items.Where(i => Intersection.BoxContainsBox(bbox, i.Box) != ContainmentType.Disjoint);
+            if (!nodeItems.Any())
+            {
+                return null;
+            }
+
+            var node = new QuadTreeNode<T>(quadTree, parent)
+            {
+                Id = -1,
+                Level = treeDepth,
+                BoundingBox = bbox,
+            };
+
+            bool haltByDepth = treeDepth == maxDepth;
+            if (haltByDepth)
+            {
+                node.Id = nodeCount++;
+                node.Items.AddRange(nodeItems.Select(i => i.Item));
+            }
+            else
+            {
+                // Initialize node partitions
+                IntializeNode(quadTree, node, bbox, nodeItems, maxDepth, treeDepth + 1, ref nodeCount);
+            }
+
+            return node;
         }
         /// <summary>
         /// Initializes node partitions
@@ -77,28 +73,17 @@ namespace Engine.Collections.Generic
         /// <param name="nodeCount">Node count</param>
         private static void IntializeNode(
             QuadTree<T> quadTree, QuadTreeNode<T> node,
-            BoundingBox bbox, IEnumerable<T> items,
+            BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items,
             int maxDepth,
             int nextTreeDepth,
             ref int nodeCount)
         {
-            Vector3 M = bbox.Maximum;
-            Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-            Vector3 m = bbox.Minimum;
+            var boxes = bbox.QuadTree();
 
-            //-1-1-1   +0+1+0   -->   mmm    cMc
-            BoundingBox topLeftBox = new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
-            //-1-1+0   +0+1+1   -->   mmc    cMM
-            BoundingBox topRightBox = new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
-            //+0-1-1   +1+1+0   -->   cmm    MMc
-            BoundingBox bottomLeftBox = new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
-            //+0-1+0   +1+1+1   -->   cmc    MMM
-            BoundingBox bottomRightBox = new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
-
-            var topLeftChild = CreatePartitions(quadTree, node, topLeftBox, items, maxDepth, nextTreeDepth, ref nodeCount);
-            var topRightChild = CreatePartitions(quadTree, node, topRightBox, items, maxDepth, nextTreeDepth, ref nodeCount);
-            var bottomLeftChild = CreatePartitions(quadTree, node, bottomLeftBox, items, maxDepth, nextTreeDepth, ref nodeCount);
-            var bottomRightChild = CreatePartitions(quadTree, node, bottomRightBox, items, maxDepth, nextTreeDepth, ref nodeCount);
+            var topLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(0), items, maxDepth, nextTreeDepth, ref nodeCount);
+            var topRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(1), items, maxDepth, nextTreeDepth, ref nodeCount);
+            var bottomLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(2), items, maxDepth, nextTreeDepth, ref nodeCount);
+            var bottomRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(3), items, maxDepth, nextTreeDepth, ref nodeCount);
 
             List<QuadTreeNode<T>> childList = new List<QuadTreeNode<T>>();
 

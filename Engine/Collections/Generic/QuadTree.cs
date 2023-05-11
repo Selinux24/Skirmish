@@ -4,12 +4,10 @@ using System.Diagnostics;
 
 namespace Engine.Collections.Generic
 {
-    using Engine.Common;
-
     /// <summary>
     /// Quad-tree
     /// </summary>
-    public class QuadTree<T> where T : IVertexList
+    public class QuadTree<T>
     {
         /// <summary>
         /// Root node
@@ -19,23 +17,15 @@ namespace Engine.Collections.Generic
         /// Global bounding box
         /// </summary>
         public BoundingBox BoundingBox { get; private set; }
-        /// <summary>
-        /// Global bounding sphere
-        /// </summary>
-        public BoundingSphere BoundingSphere { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="items">Partitioning items</param>
         /// <param name="maxDepth">Maximum depth</param>
-        public QuadTree(IEnumerable<T> items, int maxDepth)
+        public QuadTree(BoundingBox bbox, IEnumerable<(BoundingBox Box, T Item)> items, int maxDepth)
         {
-            var bbox = GeometryUtil.CreateBoundingBox(items);
-            var bsph = GeometryUtil.CreateBoundingSphere(items);
-
             BoundingBox = bbox;
-            BoundingSphere = bsph;
 
             int nodeCount = 0;
             Root = QuadTreeNode<T>.CreatePartitions(
@@ -167,4 +157,3 @@ namespace Engine.Collections.Generic
         }
     }
 }
-

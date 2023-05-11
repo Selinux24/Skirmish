@@ -608,6 +608,33 @@ namespace Engine
         }
 
         /// <summary>
+        /// Generates a list of four bounding boxes which makes an QuadTree subdivision of the specified bounding box
+        /// </summary>
+        /// <param name="bbox">Bounding box</param>
+        /// <returns>Returns four boxes</returns>
+        /// <remarks>
+        /// By index:
+        /// 0 - Top Left
+        /// 1 - Top Right
+        /// 2 - Bottom Left
+        /// 3 - Bottom Right
+        /// </remarks>
+        public static IEnumerable<BoundingBox> QuadTree(this BoundingBox bbox)
+        {
+            Vector3 M = bbox.Maximum;
+            Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+            Vector3 m = bbox.Minimum;
+
+            //-1-1-1   +0+1+0 - Top Left
+            yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
+            //-1-1+0   +0+1+1 - Top Right
+            yield return new BoundingBox(new Vector3(m.X, m.Y, c.Z), new Vector3(c.X, M.Y, M.Z));
+            //+0-1-1   +1+1+0 - Bottom Left
+            yield return new BoundingBox(new Vector3(c.X, m.Y, m.Z), new Vector3(M.X, M.Y, c.Z));
+            //+0-1+0   +1+1+1 - Bottom Right
+            yield return new BoundingBox(new Vector3(c.X, m.Y, c.Z), new Vector3(M.X, M.Y, M.Z));
+        }
+        /// <summary>
         /// Generates a list of eight bounding boxes which makes an OcTree subdivision of the specified bounding box
         /// </summary>
         /// <param name="bbox">Bounding box</param>
