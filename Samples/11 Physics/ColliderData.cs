@@ -27,7 +27,7 @@ namespace Physics
         {
             Model.Manipulator.SetTransform(rbState.InitialTransform);
 
-            float radius = Model.GetBoundingSphere().Radius * 2f;
+            float radius = Model.GetBoundingSphere().Radius * 3f;
             Light = new SceneLightPoint(Model.Name, true, Model.TintColor.RGB(), Color.Yellow.RGB(), true, SceneLightPointDescription.Create(Vector3.Zero, radius, 2f));
         }
 
@@ -42,6 +42,7 @@ namespace Physics
 
             Model.Manipulator.UpdateInternals(true);
             Light.Position = PhysicsObject.RigidBody.Position;
+            Light.Enabled = PhysicsObject.RigidBody.IsAwake;
         }
 
         public void SetLines(PrimitiveListDrawer<Line3D> lineDrawer)

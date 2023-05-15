@@ -209,6 +209,11 @@ namespace Engine.Physics
                         continue;
                     }
 
+                    if (!obj1.RigidBody.IsAwake && !obj2.RigidBody.IsAwake)
+                    {
+                        continue;
+                    }
+
                     if (!obj1.BroadPhaseTest(obj2))
                     {
                         continue;
