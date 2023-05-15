@@ -121,5 +121,11 @@ namespace Physics
         {
             RigidBody?.SetInitialState(position, rotation);
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Model}";
+        }
     }
 }

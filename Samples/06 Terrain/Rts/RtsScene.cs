@@ -2310,7 +2310,7 @@ namespace Terrain.Rts
                 var positions = results.Select(r => r.Position).ToArray();
                 var triangles = results.Select(r => r.Primitive).ToArray();
 
-                terrainPointDrawer.SetPrimitives(Color.Magenta, Line3D.CreateCrossList(positions, 1f));
+                terrainPointDrawer.SetPrimitives(Color.Magenta, Line3D.CreateCross(positions, 1f));
                 terrainPointDrawer.SetPrimitives(Color.DarkCyan, Line3D.CreateWiredTriangle(triangles));
                 if (positions.Length > 1)
                 {
@@ -2336,9 +2336,9 @@ namespace Terrain.Rts
                 path.Add(pos);
             }
 
-            curveLineDrawer.SetPrimitives(curvesColor, Line3D.CreatePath(path.ToArray()));
-            curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCrossList(curve.Points, 0.5f));
-            curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreatePath(curve.Points));
+            curveLineDrawer.SetPrimitives(curvesColor, Line3D.CreateLineList(path.ToArray()));
+            curveLineDrawer.SetPrimitives(pointsColor, Line3D.CreateCross(curve.Points, 0.5f));
+            curveLineDrawer.SetPrimitives(segmentsColor, Line3D.CreateLineList(curve.Points));
         }
         private void DEBUGDrawPath(IEnumerable<Vector3> path, Color pathColor)
         {

@@ -70,36 +70,6 @@ namespace Engine
                 .AsEnumerable();
         }
 
-        public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Triangle> triangleList)
-        {
-            if (triangleList?.Any() != true)
-            {
-                return Enumerable.Empty<Line3D>();
-            }
-
-            return triangleList
-                .SelectMany(CreateWiredTriangle)
-                .AsEnumerable();
-        }
-        public static IEnumerable<Line3D> CreateWiredTriangle(Triangle triangle)
-        {
-            return CreateWiredTriangle(triangle.GetVertices());
-        }
-        public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Vector3> corners)
-        {
-            int[] indexes = new int[6];
-
-            indexes[0] = 0;
-            indexes[1] = 1;
-
-            indexes[2] = 1;
-            indexes[3] = 2;
-
-            indexes[4] = 2;
-            indexes[5] = 0;
-
-            return CreateFromVertices(corners, indexes);
-        }
         public static IEnumerable<Line3D> CreateWiredSquare(IEnumerable<Vector3> corners)
         {
             int[] indexes = new int[8];
@@ -128,6 +98,19 @@ namespace Engine
                 new Line3D(v3, v0)
             };
         }
+        public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> path)
+        {
+            List<Line3D> lines = new List<Line3D>();
+
+            var tmp = path.ToArray();
+
+            for (int i = 0; i < tmp.Length - 1; i++)
+            {
+                lines.Add(new Line3D(tmp[i], tmp[i + 1]));
+            }
+
+            return lines.ToArray();
+        }
         public static IEnumerable<Line3D> CreateWiredPolygon(IEnumerable<Vector3> points)
         {
             int count = points.Count();
@@ -148,18 +131,35 @@ namespace Engine
             return CreateFromVertices(points, indexes);
         }
 
-        public static IEnumerable<Line3D> CreatePath(IEnumerable<Vector3> path)
+        public static IEnumerable<Line3D> CreateWiredTriangle(Vector3 v0, Vector3 v1, Vector3 v2)
         {
-            List<Line3D> lines = new List<Line3D>();
+            int[] indexes = new int[6];
 
-            var tmp = path.ToArray();
+            indexes[0] = 0;
+            indexes[1] = 1;
 
-            for (int i = 0; i < tmp.Length - 1; i++)
+            indexes[2] = 1;
+            indexes[3] = 2;
+
+            indexes[4] = 2;
+            indexes[5] = 0;
+
+            return CreateFromVertices(new[] { v0, v1, v2 }, indexes);
+        }
+        public static IEnumerable<Line3D> CreateWiredTriangle(Triangle triangle)
+        {
+            return CreateWiredTriangle(triangle.Point1, triangle.Point2, triangle.Point3);
+        }
+        public static IEnumerable<Line3D> CreateWiredTriangle(IEnumerable<Triangle> triangleList)
+        {
+            if (triangleList?.Any() != true)
             {
-                lines.Add(new Line3D(tmp[i], tmp[i + 1]));
+                return Enumerable.Empty<Line3D>();
             }
 
-            return lines.ToArray();
+            return triangleList
+                .SelectMany(CreateWiredTriangle)
+                .AsEnumerable();
         }
         public static IEnumerable<Line3D> CreateAxis(Matrix transform, float size)
         {
@@ -184,6 +184,17 @@ namespace Engine
 
             return lines;
         }
+        public static IEnumerable<Line3D> CreateAxis(IEnumerable<Matrix> transforms, float size)
+        {
+            if (transforms?.Any() != true)
+            {
+                return Enumerable.Empty<Line3D>();
+            }
+
+            return transforms
+                .SelectMany(t => CreateAxis(t, size))
+                .AsEnumerable();
+        }
         public static IEnumerable<Line3D> CreateCross(Vector3 point, float size)
         {
             List<Line3D> lines = new List<Line3D>();
@@ -196,35 +207,16 @@ namespace Engine
 
             return lines;
         }
-        public static IEnumerable<Line3D> CreateCrossList(IEnumerable<Vector3> points, float size)
+        public static IEnumerable<Line3D> CreateCross(IEnumerable<Vector3> points, float size)
         {
-            List<Line3D> lines = new List<Line3D>();
-
-            foreach (var point in points)
+            if (points?.Any() != true)
             {
-                lines.AddRange(CreateCross(point, size));
+                return Enumerable.Empty<Line3D>();
             }
 
-            return lines;
-        }
-        public static IEnumerable<Line3D> CreateLineList(IEnumerable<Vector3> points)
-        {
-            List<Line3D> lines = new List<Line3D>();
-
-            var tmp = points.ToArray();
-
-            Vector3 p0 = tmp[0];
-
-            for (int i = 1; i < tmp.Length; i++)
-            {
-                Vector3 p1 = tmp[i];
-
-                lines.Add(new Line3D(p0, p1));
-
-                p0 = p1;
-            }
-
-            return lines;
+            return points
+                .SelectMany(p => CreateCross(p, size))
+                .AsEnumerable();
         }
         public static IEnumerable<Line3D> CreateArc(Vector3 from, Vector3 to, float h, int points)
         {
@@ -250,6 +242,17 @@ namespace Engine
 
             return lines;
         }
+        public static IEnumerable<Line3D> CreateArc(IEnumerable<(Vector3 from, Vector3 to)> arcs, float h, int points)
+        {
+            if (arcs?.Any() != true)
+            {
+                return Enumerable.Empty<Line3D>();
+            }
+
+            return arcs
+                .SelectMany(a => CreateArc(a.from, a.to, h, points))
+                .AsEnumerable();
+        }
         public static IEnumerable<Line3D> CreateCircle(Vector3 center, float r, int segments)
         {
             List<Line3D> lines = new List<Line3D>();
@@ -274,6 +277,17 @@ namespace Engine
 
             return lines;
         }
+        public static IEnumerable<Line3D> CreateCircle(IEnumerable<(Vector3 center, float r)> circles, int segments)
+        {
+            if (circles?.Any() != true)
+            {
+                return Enumerable.Empty<Line3D>();
+            }
+
+            return circles
+                .SelectMany(c => CreateCircle(c.center, c.r, segments))
+                .AsEnumerable();
+        }
         public static IEnumerable<Line3D> CreateArrow(Vector3 position, Vector3 point, float edgeSize)
         {
             List<Line3D> lines = new List<Line3D>();
@@ -289,6 +303,17 @@ namespace Engine
             }
 
             return lines;
+        }
+        public static IEnumerable<Line3D> CreateArrow(IEnumerable<(Vector3 position, Vector3 point)> arrows, float edgeSize)
+        {
+            if (arrows?.Any() != true)
+            {
+                return Enumerable.Empty<Line3D>();
+            }
+
+            return arrows
+                .SelectMany(a => CreateArrow(a.point, a.point, edgeSize))
+                .AsEnumerable();
         }
 
         public static IEnumerable<Line3D> CreateFromVertices(GeometryDescriptor geometry)

@@ -40,6 +40,10 @@ namespace Engine.Physics
         /// Space partitioning OcTree
         /// </summary>
         private readonly OcTree<IPhysicsObject> octree;
+        /// <summary>
+        /// Broad phase contact pair list
+        /// </summary>
+        private readonly List<ContactPair> contactPairs = new();
 
         /// <summary>
         /// Simulation velocity
@@ -105,8 +109,11 @@ namespace Engine.Physics
                 // Update active contact generators
                 UpdateContactGenerators();
 
-                // Generate contacts between objects
+                // Broad phase
                 BroadPhase();
+
+                // Narrow phase
+                NarrowPhase();
 
                 // Resolve the contacts
                 contactResolver.Resolve(time);
@@ -166,13 +173,16 @@ namespace Engine.Physics
             }
         }
         /// <summary>
-        /// Gets the contacts for the current moment
+        /// Detect potential contacts between objects
         /// </summary>
         private void BroadPhase()
         {
             // Populate OcTree
             octree.Clear();
             physicsObjects.ForEach(p => octree.Insert(p.GetBroadPhaseBounds(), p));
+
+            // Clear contact pairs
+            contactPairs.Clear();
 
             // Test physics bodies contacts
             for (int i = 0; i < physicsObjects.Count; i++)
@@ -204,24 +214,56 @@ namespace Engine.Physics
                         continue;
                     }
 
-                    NarrowPhase(obj1, obj2);
+                    AddPair(obj1, obj2);
                 }
             }
         }
         /// <summary>
-        /// Test each collider from the first collection with the colliders from the second collection
+        /// Adds a new contact pair to the broad phase contact collection
         /// </summary>
-        /// <param name="obj1">First object</param>
-        /// <param name="obj2">Second object</param>
-        private void NarrowPhase(IPhysicsObject obj1, IPhysicsObject obj2)
+        /// <param name="obj1">First physics object</param>
+        /// <param name="obj2">Second physics object</param>
+        private void AddPair(IPhysicsObject obj1, IPhysicsObject obj2)
         {
-            var colliders1 = obj1.GetBroadPhaseColliders(obj2);
+            var contactPair = new ContactPair { Obj1 = obj1, Obj2 = obj2 };
+
+            if (contactPairs.Contains(contactPair))
+            {
+                return;
+            }
+
+            if (contactPairs.Contains(new ContactPair { Obj1 = obj2, Obj2 = obj1 }))
+            {
+                return;
+            }
+
+            contactPairs.Add(contactPair);
+        }
+        /// <summary>
+        /// Detect contacts between potential contact pairs
+        /// </summary>
+        private void NarrowPhase()
+        {
+            if (!contactPairs.Any())
+            {
+                return;
+            }
+
+            contactPairs.ForEach(EvaluateContactPair);
+        }
+        /// <summary>
+        /// Evaluates the contact pair collision
+        /// </summary>
+        /// <param name="contactPair">Contact pair</param>
+        private void EvaluateContactPair(ContactPair contactPair)
+        {
+            var colliders1 = contactPair.Obj1.GetBroadPhaseColliders(contactPair.Obj2);
             if (!colliders1.Any())
             {
                 return;
             }
 
-            var colliders2 = obj2.GetBroadPhaseColliders(obj1);
+            var colliders2 = contactPair.Obj2.GetBroadPhaseColliders(contactPair.Obj1);
             if (!colliders2.Any())
             {
                 return;
