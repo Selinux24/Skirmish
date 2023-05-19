@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -33,11 +34,15 @@ namespace Engine.UI
         /// <summary>
         /// Vertices
         /// </summary>
-        private VertexFont[] vertices;
+        private VertexFont[] vertices = new VertexFont[MAXTEXTLENGTH * 4];
+
+        private int verticesCount = 0;
         /// <summary>
         /// Indices
         /// </summary>
-        private uint[] indices;
+        private uint[] indices = new uint[MAXTEXTLENGTH * 6];
+
+        private int indicesCount = 0;
         /// <summary>
         /// Update buffers flag
         /// </summary>
@@ -484,14 +489,14 @@ namespace Engine.UI
                 return;
             }
 
-            bool vertsWrited = BufferManager.WriteVertexBuffer(vertexBuffer, vertices);
-            bool idxWrited = BufferManager.WriteIndexBuffer(indexBuffer, indices);
+            bool vertsWrited = BufferManager.WriteVertexBuffer(vertexBuffer, vertices.Take(verticesCount));
+            bool idxWrited = BufferManager.WriteIndexBuffer(indexBuffer, indices.Take(indicesCount));
             if (!vertsWrited || !idxWrited)
             {
                 return;
             }
 
-            indexDrawCount = indices?.Length ?? 0;
+            indexDrawCount = indicesCount;
 
             updateBuffers = false;
         }
@@ -537,8 +542,10 @@ namespace Engine.UI
                 vList.AddRange(colorS.Vertices);
             }
 
-            vertices = vList.ToArray();
-            indices = iList.ToArray();
+            verticesCount = vList.Count;
+            indicesCount = iList.Count;
+            Array.Copy(vList.ToArray(), vertices, verticesCount);
+            Array.Copy(iList.ToArray(), indices, indicesCount);
 
             updateBuffers = true;
         }

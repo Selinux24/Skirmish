@@ -63,12 +63,14 @@ namespace Engine.UI
             }
             set
             {
-                if (!string.Equals(value, textDrawer.Text))
+                if (string.Equals(value, textDrawer.Text))
                 {
-                    textDrawer.Text = value;
-
-                    GrowControl();
+                    return;
                 }
+
+                textDrawer.Text = value;
+
+                GrowControl();
             }
         }
         /// <summary>

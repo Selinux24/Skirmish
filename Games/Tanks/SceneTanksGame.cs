@@ -119,7 +119,9 @@ namespace Tanks
         private PlayerStatus TargetStatus { get { return currentPlayer == 0 ? player2Status : player1Status; } }
         private ParabolicShot shot;
 
+        private string music;
         private string tankMoveEffect;
+        private IAudioEffect musicEffectInstance;
         private IAudioEffect tankMoveEffectInstance;
         private string tankDestroyedEffect;
         private string tankShootingEffect;
@@ -643,12 +645,14 @@ namespace Tanks
             float nearRadius = 1000;
             ReverbPresets preset = ReverbPresets.Default;
 
+            music = "Music";
             tankMoveEffect = "TankMove";
             tankDestroyedEffect = "TankDestroyed";
             tankShootingEffect = "TankShooting";
             impactEffects = new[] { "Impact1", "Impact2", "Impact3", "Impact4" };
             damageEffects = new[] { "Damage1", "Damage2", "Damage3", "Damage4" };
 
+            AudioManager.LoadSound(music, "Resources/Audio", "elsasong.wav");
             AudioManager.LoadSound("Tank", "Resources/Audio", "tank_engine.wav");
             AudioManager.LoadSound("TankDestroyed", "Resources/Audio", "explosion_vehicle_small_close_01.wav");
             AudioManager.LoadSound("TankShooting", "Resources/Audio", "cannon-shooting.wav");
@@ -660,6 +664,15 @@ namespace Tanks
             AudioManager.LoadSound(damageEffects[1], "Resources/Audio", "metal_pipe_large_02.wav");
             AudioManager.LoadSound(damageEffects[2], "Resources/Audio", "metal_pipe_large_03.wav");
             AudioManager.LoadSound(damageEffects[3], "Resources/Audio", "metal_pipe_large_04.wav");
+
+            AudioManager.AddEffectParams(
+                music,
+                new GameAudioEffectParameters
+                {
+                    IsLooped = true,
+                    SoundName = music,
+                    UseAudio3D = false,
+                });
 
             AudioManager.AddEffectParams(
                 tankMoveEffect,
@@ -827,6 +840,8 @@ namespace Tanks
 
             AudioManager.MasterVolume = 1f;
             AudioManager.Start();
+
+            PlayMusic();
 
             loadingText.ClearTween();
             loadingText.Hide(1000);
@@ -1970,6 +1985,15 @@ You will lost all the game progress.",
             await Task.Delay(100);
         }
 
+        private void PlayMusic()
+        {
+            if (musicEffectInstance == null)
+            {
+                musicEffectInstance = AudioManager.CreateEffectInstance(music);
+                musicEffectInstance.Volume = 0.5f;
+                musicEffectInstance.Play();
+            }
+        }
         private void PlayEffectMove(ITransformable3D emitter)
         {
             if (tankMoveEffectInstance == null)

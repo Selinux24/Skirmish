@@ -12,10 +12,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\Audio\elsasong.wav" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="Resources\Arrow.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Audio\cannon-shooting.wav">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Audio\elsasong.wav">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="Resources\Audio\explosion_vehicle_small_close_01.wav">
