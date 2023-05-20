@@ -185,40 +185,48 @@ namespace Engine.Physics
             contactPairs.Clear();
 
             // Test physics bodies contacts
-            for (int i = 0; i < physicsObjects.Count; i++)
+            foreach (var obj1 in physicsObjects)
             {
                 if (!contactResolver.HasFreeContacts())
                 {
                     break;
                 }
 
-                var obj1 = physicsObjects[i];
-
-                var colliders = octree.Query(obj1.GetBroadPhaseBounds());
-
-                for (int j = 0; j < colliders.Count(); j++)
+                var collidersOfObj1 = octree.Query(obj1.GetBroadPhaseBounds());
+                if (!collidersOfObj1.Any())
                 {
-                    if (!contactResolver.HasFreeContacts())
-                    {
-                        break;
-                    }
+                    continue;
+                }
 
-                    var obj2 = colliders.ElementAt(j);
-                    if (obj1 == obj2)
-                    {
-                        continue;
-                    }
+                BroadPhaseTestColliders(obj1, collidersOfObj1);
+            }
+        }
+        /// <summary>
+        /// Detect potential contacts between objects
+        /// </summary>
+        /// <param name="obj1">Object to test against the collider list</param>
+        /// <param name="colliders">Collider list</param>
+        private void BroadPhaseTestColliders(IPhysicsObject obj1, IEnumerable<IPhysicsObject> collidersOfObj1)
+        {
+            foreach (var obj2 in collidersOfObj1)
+            {
+                if (!contactResolver.HasFreeContacts())
+                {
+                    break;
+                }
 
-                    if (!obj1.RigidBody.IsAwake && !obj2.RigidBody.IsAwake)
-                    {
-                        continue;
-                    }
+                if (obj1 == obj2)
+                {
+                    continue;
+                }
 
-                    if (!obj1.BroadPhaseTest(obj2))
-                    {
-                        continue;
-                    }
+                if (!obj1.RigidBody.IsAwake && !obj2.RigidBody.IsAwake)
+                {
+                    continue;
+                }
 
+                if (obj1.BroadPhaseTest(obj2))
+                {
                     AddPair(obj1, obj2);
                 }
             }

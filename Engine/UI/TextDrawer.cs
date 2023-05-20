@@ -32,21 +32,25 @@ namespace Engine.UI
         /// </summary>
         private int indexDrawCount = 0;
         /// <summary>
-        /// Vertices
-        /// </summary>
-        private VertexFont[] vertices = new VertexFont[MAXTEXTLENGTH * 4];
-
-        private int verticesCount = 0;
-        /// <summary>
-        /// Indices
-        /// </summary>
-        private uint[] indices = new uint[MAXTEXTLENGTH * 6];
-
-        private int indicesCount = 0;
-        /// <summary>
         /// Update buffers flag
         /// </summary>
         private bool updateBuffers = false;
+        /// <summary>
+        /// Vertex list
+        /// </summary>
+        private readonly VertexFont[] vertices = new VertexFont[MAXTEXTLENGTH * 4];
+        /// <summary>
+        /// Vertex count
+        /// </summary>
+        private int verticesCount = 0;
+        /// <summary>
+        /// Index list
+        /// </summary>
+        private readonly uint[] indices = new uint[MAXTEXTLENGTH * 6];
+        /// <summary>
+        /// Index count
+        /// </summary>
+        private int indicesCount = 0;
 
         /// <summary>
         /// Font map

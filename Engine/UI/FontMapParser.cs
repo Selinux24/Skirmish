@@ -169,8 +169,13 @@ namespace Engine.UI
             foreColor = null;
             shadowColor = null;
 
-            foreach (Group gr in match.Groups)
+            foreach (var group in match.Groups)
             {
+                if (group is not Group gr)
+                {
+                    continue;
+                }
+
                 if (gr.Name == "cA")
                 {
                     string vA = match.Groups["fA"].Value;
