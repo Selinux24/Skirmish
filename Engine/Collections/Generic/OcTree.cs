@@ -13,6 +13,10 @@ namespace Engine.Collections.Generic
         /// Root node
         /// </summary>
         private readonly OcTreeNode<T> root;
+        /// <summary>
+        /// Result list
+        /// </summary>
+        private readonly List<T> results;
 
         /// <summary>
         /// Constructor
@@ -22,6 +26,7 @@ namespace Engine.Collections.Generic
         public OcTree(BoundingBox boundary, int itemsPerNode)
         {
             root = new OcTreeNode<T>(boundary, itemsPerNode, true);
+            results = new();
         }
 
         /// <summary>
@@ -40,7 +45,11 @@ namespace Engine.Collections.Generic
         /// <returns>Returns a list of items</returns>
         public IEnumerable<T> Query(ICullingVolume queryBoundary)
         {
-            return root.Query(queryBoundary);
+            results.Clear();
+
+            root.Query(queryBoundary, results);
+
+            return results.AsReadOnly();
         }
         /// <summary>
         /// Clears the OcTree

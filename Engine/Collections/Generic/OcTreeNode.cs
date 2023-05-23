@@ -212,16 +212,54 @@ namespace Engine.Collections.Generic
         /// Returns all items intersecting with the specified boundary
         /// </summary>
         /// <param name="queryBoundary">Boundary to query</param>
-        /// <returns>Returns a list of items</returns>
-        public IEnumerable<T> Query(ICullingVolume queryBoundary)
+        /// <param name="results">Results list</param>
+        public void Query(ICullingVolume queryBoundary, List<T> results)
         {
-            if (queryBoundary.Contains(boundary) == ContainmentType.Disjoint)
+            if (results == null) throw new ArgumentNullException(nameof(results));
+
+            var containmentType = queryBoundary.Contains(boundary);
+
+            if (containmentType == ContainmentType.Disjoint)
             {
-                return Enumerable.Empty<T>();
+                // The query not contains the current node boundary. Exit
+                return;
             }
 
-            List<T> results = new List<T>();
+            if (containmentType == ContainmentType.Contains)
+            {
+                // The query contains the current node boundary. Return all items without any query
+                GetItems(results);
+            }
 
+            // Query items
+            QueryItems(queryBoundary, results);
+        }
+        /// <summary>
+        /// Fills the results list with all items
+        /// </summary>
+        /// <param name="results">Results list</param>
+        private void GetItems(List<T> results)
+        {
+            for (int i = 0; i < storedItems; i++)
+            {
+                if (!results.Contains(items[i].item))
+                {
+                    results.Add(items[i].item);
+                }
+            }
+
+            for (int i = 0; i < 8; i++)
+            {
+                GetNode(i)?.GetItems(results);
+            }
+        }
+        /// <summary>
+        /// Fills the results list with all items contained in the specified boundary
+        /// </summary>
+        /// <param name="queryBoundary">Query boundary</param>
+        /// <param name="results">Results list</param>
+        private void QueryItems(ICullingVolume queryBoundary, List<T> results)
+        {
             for (int i = 0; i < storedItems; i++)
             {
                 if (!IntersectionHelper.Intersects(queryBoundary, items[i].volume))
@@ -229,35 +267,16 @@ namespace Engine.Collections.Generic
                     continue;
                 }
 
-                results.Add(items[i].item);
+                if (!results.Contains(items[i].item))
+                {
+                    results.Add(items[i].item);
+                }
             }
 
             for (int i = 0; i < 8; i++)
             {
-                var child = GetNode(i);
-                if (child == null)
-                {
-                    continue;
-                }
-
-                var colliders = child.Query(queryBoundary);
-                if (!colliders.Any())
-                {
-                    continue;
-                }
-
-                foreach (var collider in colliders)
-                {
-                    if (results.Contains(collider))
-                    {
-                        continue;
-                    }
-
-                    results.Add(collider);
-                }
+                GetNode(i)?.Query(queryBoundary, results);
             }
-
-            return results.ToArray();
         }
 
         /// <summary>
