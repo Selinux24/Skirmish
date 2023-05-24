@@ -242,10 +242,13 @@ namespace Engine.Collections.Generic
         {
             for (int i = 0; i < storedItems; i++)
             {
-                if (!results.Contains(items[i].item))
+                if (results.Contains(items[i].item))
                 {
-                    results.Add(items[i].item);
+                    // Item already in the list
+                    continue;
                 }
+
+                results.Add(items[i].item);
             }
 
             for (int i = 0; i < 8; i++)
@@ -262,12 +265,13 @@ namespace Engine.Collections.Generic
         {
             for (int i = 0; i < storedItems; i++)
             {
-                if (!IntersectionHelper.Intersects(queryBoundary, items[i].volume))
+                if (results.Contains(items[i].item))
                 {
+                    // Item already in the list
                     continue;
                 }
 
-                if (!results.Contains(items[i].item))
+                if (IntersectionHelper.Intersects(queryBoundary, items[i].volume))
                 {
                     results.Add(items[i].item);
                 }
