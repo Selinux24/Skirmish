@@ -613,27 +613,5 @@ namespace Engine
                 Scene.UpdateMaterialPalette();
             }
         }
-
-        /// <summary>
-        /// Gets triangle list of mesh
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        /// <returns>Returns the triangle list</returns>
-        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
-        {
-            var desc = new DrawingDataDescription()
-            {
-                Instanced = false,
-                Instances = 0,
-                LoadAnimation = true,
-                LoadNormalMaps = true,
-                TextureCount = 0,
-                DynamicBuffers = false,
-            };
-
-            var drawingData = DrawingData.Build(Game, "drawingData", content, desc).GetAwaiter().GetResult();
-
-            return drawingData.GetTriangles(refresh);
-        }
     }
 }

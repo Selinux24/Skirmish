@@ -749,7 +749,7 @@ namespace Engine.Modular
                 def.Add(defaultPlan);
 
                 instance.AnimationController.ReplacePlan(new AnimationPlan(def));
-                instance.InvalidateCache();
+                instance.InvalidateCache(false);
             }
 
             List<ModularSceneryTrigger> instanceTriggers = new List<ModularSceneryTrigger>();
@@ -1084,9 +1084,9 @@ namespace Engine.Modular
             return res;
         }
         /// <inheritdoc/>
-        public override IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
+        public override IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
-            if (geometryType != GeometryTypes.Navigation)
+            if (geometryType != PickingHullTypes.Navigation)
             {
                 return Enumerable.Empty<Triangle>();
             }
@@ -1103,7 +1103,7 @@ namespace Engine.Modular
                 var instances = asset.GetInstances().Where(i => i.Visible);
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetGeometry(geometryType));
+                    triangles.AddRange(instance.GetPickingHull(geometryType));
                 }
             }
 
@@ -1117,7 +1117,7 @@ namespace Engine.Modular
                 var instances = obj.GetInstances().Where(i => i.Visible);
                 foreach (var instance in instances)
                 {
-                    triangles.AddRange(instance.GetGeometry(geometryType));
+                    triangles.AddRange(instance.GetPickingHull(geometryType));
                 }
             }
 
@@ -1474,7 +1474,7 @@ namespace Engine.Modular
             {
                 item.Item.AnimationController.ReplacePlan(plan);
                 item.Item.AnimationController.Start();
-                item.Item.InvalidateCache();
+                item.Item.InvalidateCache(true);
             }
 
             //Find the referenced items and execute actions recursively

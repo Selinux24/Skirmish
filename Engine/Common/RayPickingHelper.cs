@@ -31,8 +31,8 @@ namespace Engine.Common
             }
 
             // Next geometry
-            GeometryTypes geometryType = ray.RayPickingParams.HasFlag(RayPickingParams.Hull) ? GeometryTypes.Hull : GeometryTypes.Object;
-            triangles = obj.GetGeometry(geometryType);
+            PickingHullTypes geometryType = ray.RayPickingParams.HasFlag(RayPickingParams.Hull) ? PickingHullTypes.Hull : PickingHullTypes.Object;
+            triangles = obj.GetPickingHull(geometryType);
 
             return triangles.Any();
         }

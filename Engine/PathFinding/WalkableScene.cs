@@ -31,7 +31,7 @@ namespace Engine.PathFinding
                 var pickables = GetGeometryForNavigationGraph<T>(composed);
 
                 return pickables
-                    .SelectMany(p => p.GetGeometry(GeometryTypes.Navigation))
+                    .SelectMany(p => p.GetPickingHull(PickingHullTypes.Navigation))
                     .ToArray();
             }
 
@@ -42,7 +42,7 @@ namespace Engine.PathFinding
                     transformable.Manipulator.UpdateInternals(true);
                 }
 
-                return pickable.GetGeometry(GeometryTypes.Navigation);
+                return pickable.GetPickingHull(PickingHullTypes.Navigation);
             }
 
             return Enumerable.Empty<T>();

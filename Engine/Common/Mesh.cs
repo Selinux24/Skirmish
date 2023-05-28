@@ -242,23 +242,19 @@ namespace Engine.Common
         {
             if (refresh || positionCache == null)
             {
-                var positionList = new List<Vector3>();
-
                 if (Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position) &&
                     Vertices.FirstOrDefault().HasChannel(VertexDataChannels.BoneIndices) &&
                     Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Weights))
                 {
-                    Vertices.ToList().ForEach(v =>
+                    positionCache = Vertices.Select(v =>
                     {
                         Vector3 p = VertexData.ApplyWeight(v, boneTransforms);
 
                         if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
 
-                        positionList.Add(p);
+                        return p;
                     });
                 }
-
-                positionCache = positionList.ToArray();
             }
 
             return positionCache?.ToArray() ?? Array.Empty<Vector3>();

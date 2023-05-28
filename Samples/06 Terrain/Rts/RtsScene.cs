@@ -2490,8 +2490,8 @@ namespace Terrain.Rts
             boxes.AddRange(rocks.GetInstances().Select(i => i.GetBoundingBox()));
 
             List<Triangle> tris = new List<Triangle>();
-            tris.AddRange(tree1.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.Hull)));
-            tris.AddRange(tree2.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.Hull)));
+            tris.AddRange(tree1.GetInstances().SelectMany(i => i.GetPickingHull(PickingHullTypes.Hull)));
+            tris.AddRange(tree2.GetInstances().SelectMany(i => i.GetPickingHull(PickingHullTypes.Hull)));
 
             List<Line3D> lines = new List<Line3D>();
 

@@ -1,5 +1,4 @@
 ﻿using SharpDX;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
@@ -7,8 +6,14 @@ namespace Engine.Common
     /// <summary>
     /// Collider helper class
     /// </summary>
-    class BoundsHelper
+    class BoundsHelper<T> where T : IRayIntersectable
     {
+        private readonly IRayPickable<T> model;
+
+        /// <summary>
+        /// Complete caché rebuild flag
+        /// </summary>
+        private bool rebuild;
         /// <summary>
         /// Initial bounding sphere
         /// </summary>
@@ -47,11 +52,39 @@ namespace Engine.Common
         private bool updateOrientedBox;
 
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="model">Model</param>
+        public BoundsHelper(IRayPickable<T> model)
+        {
+            this.model = model;
+        }
+
+        /// <summary>
         /// Initializes internal volumes
         /// </summary>
         /// <param name="points">Point list</param>
-        public void Initialize(IEnumerable<Vector3> points)
+        public void Initialize()
         {
+            UpdateInitialBoundingVolumes();
+
+            boundingSphere = initialSphere;
+            boundingBox = initialAabb;
+            orientedBox = initialObb;
+
+            updateBoundingSphere = false;
+            updateBoundingBox = false;
+            updateOrientedBox = false;
+        }
+        /// <summary>
+        /// Updates initial bounding volume structures
+        /// </summary>
+        private void UpdateInitialBoundingVolumes()
+        {
+            rebuild = false;
+
+            var points = model.GetPoints();
+
             if (points.Any())
             {
                 var distinctPoints = points.Distinct().ToArray();
@@ -73,20 +106,14 @@ namespace Engine.Common
 
                 initialObb = new OrientedBoundingBox();
             }
-
-            boundingSphere = initialSphere;
-            boundingBox = initialAabb;
-            orientedBox = initialObb;
-
-            updateBoundingSphere = false;
-            updateBoundingBox = false;
-            updateOrientedBox = false;
         }
         /// <summary>
         /// Invalidates the internal state
         /// </summary>
-        public void Invalidate()
+        public void Invalidate(bool rebuild)
         {
+            this.rebuild = rebuild;
+
             updateBoundingBox = true;
             updateBoundingSphere = true;
             updateOrientedBox = true;
@@ -102,6 +129,11 @@ namespace Engine.Common
         {
             if (updateBoundingSphere || refresh)
             {
+                if (rebuild)
+                {
+                    UpdateInitialBoundingVolumes();
+                }
+
                 boundingSphere = initialSphere.SetTransform(manipulator.FinalTransform);
 
                 updateBoundingSphere = false;
@@ -119,7 +151,12 @@ namespace Engine.Common
         {
             if (updateBoundingBox || refresh)
             {
-                boundingBox = GetOrientedBoundingBox(manipulator, refresh).GetBoundingBox();
+                if (rebuild)
+                {
+                    UpdateInitialBoundingVolumes();
+                }
+
+                boundingBox = initialAabb.SetTransform(manipulator.FinalTransform);
 
                 updateBoundingBox = false;
             }
@@ -136,6 +173,11 @@ namespace Engine.Common
         {
             if (updateOrientedBox || refresh)
             {
+                if (rebuild)
+                {
+                    UpdateInitialBoundingVolumes();
+                }
+
                 orientedBox = initialObb.SetTransform(manipulator.FinalTransform);
 
                 updateOrientedBox = false;
@@ -156,22 +198,13 @@ namespace Engine.Common
         {
             distance = float.MaxValue;
 
-            if (volumeType == CullingVolumeTypes.None)
+            return volumeType switch
             {
-                return false;
-            }
-
-            if (volumeType == CullingVolumeTypes.SphericVolume)
-            {
-                return CullBoundingSphere(manipulator, volume, out distance);
-            }
-
-            if (volumeType == CullingVolumeTypes.BoxVolume)
-            {
-                return CullBoundingBox(manipulator, volume, out distance);
-            }
-
-            return false;
+                CullingVolumeTypes.None => false,
+                CullingVolumeTypes.SphericVolume => CullBoundingSphere(manipulator, volume, out distance),
+                CullingVolumeTypes.BoxVolume => CullBoundingBox(manipulator, volume, out distance),
+                _ => false,
+            };
         }
         /// <summary>
         /// Performs culling test against the spheric volume

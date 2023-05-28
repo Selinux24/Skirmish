@@ -1199,7 +1199,7 @@ namespace Engine
         /// <inheritdoc/>
         public virtual void SetState(IGameState state)
         {
-            if (!(state is SceneState sceneState))
+            if (state is not SceneState sceneState)
             {
                 return;
             }

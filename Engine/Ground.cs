@@ -84,6 +84,21 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        {
+            return GetTriangles(refresh)
+                .SelectMany(t => t.GetVertices())
+                .AsEnumerable();
+        }
+        /// <inheritdoc/>
+        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
+        {
+            return GroundPickingQuadtree
+                .GetLeafNodes()
+                .SelectMany(n => n.Items)
+                .AsEnumerable();
+        }
+        /// <inheritdoc/>
         public virtual BoundingSphere GetBoundingSphere(bool refresh = false)
         {
             return GroundPickingQuadtree != null ? BoundingSphere.FromBox(GroundPickingQuadtree.BoundingBox) : new BoundingSphere();
@@ -99,23 +114,17 @@ namespace Engine
             return new OrientedBoundingBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
+        public virtual IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
             if (GroundPickingQuadtree == null)
             {
                 return Enumerable.Empty<Triangle>();
             }
 
-            List<Triangle> res = new List<Triangle>();
-
-            var leafNodes = GroundPickingQuadtree.GetLeafNodes();
-
-            foreach (var node in leafNodes)
-            {
-                res.AddRange(node.Items);
-            }
-
-            return res.ToArray();
+            return GroundPickingQuadtree
+                .GetLeafNodes()
+                .SelectMany(n => n.Items)
+                .AsEnumerable();
         }
 
         /// <inheritdoc/>
@@ -124,7 +133,7 @@ namespace Engine
             if (GroundPickingQuadtree == null)
             {
                 // Brute force
-                var mesh = GetGeometry(GeometryTypes.Hull);
+                var mesh = GetPickingHull(PickingHullTypes.Hull);
 
                 return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
             }
@@ -183,7 +192,7 @@ namespace Engine
             }
             else
             {
-                return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Hull).ToArray();
+                return (IntersectionVolumeMesh)GetPickingHull(PickingHullTypes.Hull).ToArray();
             }
         }
 

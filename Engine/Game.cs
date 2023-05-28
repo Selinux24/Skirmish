@@ -27,10 +27,7 @@ namespace Engine
         {
             get
             {
-                if (images == null)
-                {
-                    images = EngineServiceFactory.Instance<IImages>();
-                }
+                images ??= EngineServiceFactory.Instance<IImages>();
 
                 return images;
             }
@@ -46,10 +43,7 @@ namespace Engine
         {
             get
             {
-                if (fonts == null)
-                {
-                    fonts = EngineServiceFactory.Instance<IFonts>();
-                }
+                fonts ??= EngineServiceFactory.Instance<IFonts>();
 
                 return fonts;
             }

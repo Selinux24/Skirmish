@@ -32,6 +32,18 @@ namespace Engine
         bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results);
 
         /// <summary>
+        /// Gets the point list of the object
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
+        /// <returns>Returns a list of points</returns>
+        IEnumerable<Vector3> GetPoints(bool refresh = false);
+        /// <summary>
+        /// Gets the triangle list of the object
+        /// </summary>
+        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
+        /// <returns>Returns a list of points triangles</returns>
+        IEnumerable<Triangle> GetTriangles(bool refresh = false);
+        /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
@@ -51,20 +63,20 @@ namespace Engine
         OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false);
 
         /// <summary>
-        /// Gets the geometry of the instance
+        /// Gets the picking hull of the instance
         /// </summary>
         /// <param name="geometryType">Geometry type</param>
         /// <returns>Returns the geometry of the instance</returns>
-        IEnumerable<T> GetGeometry(GeometryTypes geometryType);
+        IEnumerable<T> GetPickingHull(PickingHullTypes geometryType);
     }
 
     /// <summary>
     /// Geometry types
     /// </summary>
-    public enum GeometryTypes
+    public enum PickingHullTypes
     {
         /// <summary>
-        /// Object geometry
+        /// All object geometry
         /// </summary>
         Object,
         /// <summary>

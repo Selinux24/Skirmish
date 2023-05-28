@@ -448,7 +448,7 @@ namespace Engine.Common
         {
             var opaques = components.Where(c =>
             {
-                if (!(c is IDrawable)) return false;
+                if (c is not IDrawable) return false;
 
                 if (!c.BlendMode.HasFlag(BlendModes.Opaque)) return false;
 
@@ -1185,9 +1185,7 @@ namespace Engine.Common
         /// </summary>
         private void TogglePostProcessingTargets()
         {
-            var tmp = postProcessingTargetA;
-            postProcessingTargetA = postProcessingTargetB;
-            postProcessingTargetB = tmp;
+            (postProcessingTargetB, postProcessingTargetA) = (postProcessingTargetA, postProcessingTargetB);
         }
         /// <summary>
         /// Validates the post-processing render pass
@@ -1288,19 +1286,14 @@ namespace Engine.Common
         /// <returns>Returns the target texture list</returns>
         protected virtual IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
         {
-            switch (target)
+            return target switch
             {
-                case Targets.Screen:
-                    return Enumerable.Empty<EngineShaderResourceView>();
-                case Targets.Objects:
-                    return sceneObjectsTarget?.Textures;
-                case Targets.UI:
-                    return sceneUITarget?.Textures;
-                case Targets.Result:
-                    return sceneResultsTarget?.Textures;
-                default:
-                    return Enumerable.Empty<EngineShaderResourceView>();
-            }
+                Targets.Screen => Enumerable.Empty<EngineShaderResourceView>(),
+                Targets.Objects => sceneObjectsTarget?.Textures,
+                Targets.UI => sceneUITarget?.Textures,
+                Targets.Result => sceneResultsTarget?.Textures,
+                _ => Enumerable.Empty<EngineShaderResourceView>(),
+            };
         }
         /// <summary>
         /// Combine the specified targets into the result target

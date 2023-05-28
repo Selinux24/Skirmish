@@ -645,31 +645,41 @@ namespace Engine.Common
         /// <returns>Returns the weighted position</returns>
         public static Vector3 ApplyWeight(IVertexData vertex, IEnumerable<Matrix> boneTransforms)
         {
-            Vector3 position = vertex.HasChannel(VertexDataChannels.Position) ? vertex.GetChannelValue<Vector3>(VertexDataChannels.Position) : Vector3.Zero;
+            if (!vertex.HasChannel(VertexDataChannels.Position))
+            {
+                return Vector3.Zero;
+            }
 
-            if (!IsSkinned(vertex.VertexType))
+            var position = vertex.GetChannelValue<Vector3>(VertexDataChannels.Position);
+
+            if (!vertex.HasChannel(VertexDataChannels.BoneIndices) || !vertex.HasChannel(VertexDataChannels.Weights))
             {
                 return position;
             }
 
-            byte[] boneIndices = vertex.HasChannel(VertexDataChannels.BoneIndices) ? vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices) : Array.Empty<byte>();
-            float[] boneWeights = vertex.HasChannel(VertexDataChannels.Weights) ? vertex.GetChannelValue<float[]>(VertexDataChannels.Weights) : Array.Empty<float>();
-            Matrix[] transforms = boneTransforms.ToArray();
+            var boneIndices = vertex.GetChannelValue<byte[]>(VertexDataChannels.BoneIndices);
+            var boneWeights = vertex.GetChannelValue<float[]>(VertexDataChannels.Weights);
+            var transforms = boneTransforms.ToArray();
 
-            Vector3 t = Vector3.Zero;
+            var t = Vector3.Zero;
 
             for (int w = 0; w < boneIndices.Length; w++)
             {
-                float weight = boneWeights[w];
-                if (weight > 0)
+                var p = position;
+                var weight = boneWeights[w];
+                if (weight <= 0)
                 {
-                    byte index = boneIndices[w];
-                    var boneTransform = transforms != null ? transforms[index] : Matrix.Identity;
-
-                    Vector3.TransformCoordinate(ref position, ref boneTransform, out Vector3 p);
-
-                    t += (p * weight);
+                    continue;
                 }
+
+                var index = boneIndices[w];
+                var boneTransform = transforms[index];
+                if (!boneTransform.IsIdentity)
+                {
+                    Vector3.TransformCoordinate(ref position, ref boneTransform, out p);
+                }
+
+                t += p * weight;
             }
 
             return t;
@@ -693,14 +703,10 @@ namespace Engine.Common
                 return vertices.ToArray();
             }
 
-            VertexData[] result = new VertexData[vertices.Count()];
-
-            Parallel.For(0, vertices.Count(), (index) =>
-            {
-                result[index] = Transform(vertices.ElementAt(index), transform);
-            });
-
-            return result;
+            return vertices
+                .AsParallel()
+                .Select(r => Transform(r, transform))
+                .ToArray();
         }
         /// <summary>
         /// Transforms the specified vertex by the given transform matrix
@@ -775,7 +781,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="transform">Transformation matrix</param>
         /// <returns>Returns the transformed vertex</returns>
-        public VertexData Transform(Matrix transform)
+        public readonly VertexData Transform(Matrix transform)
         {
             return Transform(this, transform);
         }
@@ -783,7 +789,7 @@ namespace Engine.Common
         /// Gets the vertex list stride
         /// </summary>
         /// <returns>Returns the list stride</returns>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return 1;
         }
@@ -791,7 +797,7 @@ namespace Engine.Common
         /// Gets the vertex list
         /// </summary>
         /// <returns>Returns a vertex list</returns>
-        public IEnumerable<Vector3> GetVertices()
+        public readonly IEnumerable<Vector3> GetVertices()
         {
             return new Vector3[] { Position.Value };
         }
@@ -799,13 +805,13 @@ namespace Engine.Common
         /// Gets the vertex list topology
         /// </summary>
         /// <returns>Returns the list topology</returns>
-        public Topology GetTopology()
+        public readonly Topology GetTopology()
         {
             return Topology.PointList;
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             string text = null;
 
