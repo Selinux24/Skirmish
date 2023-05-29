@@ -143,6 +143,8 @@ namespace SceneTest.SceneStencilPass
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.SceneStart>();
@@ -168,8 +170,6 @@ namespace SceneTest.SceneStencilPass
 
             // Debug
             UpdateDebug();
-
-            base.Update(gameTime);
         }
 
         private void UpdateCamera(GameTime gameTime)

@@ -528,6 +528,8 @@ namespace Animation.SimpleAnimation
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<Start.SceneStart>();
@@ -551,8 +553,6 @@ namespace Animation.SimpleAnimation
             UpdateInputCamera(gameTime);
             UpdateInputAnimation();
             UpdateInputDebug();
-
-            base.Update(gameTime);
 
             UpdateDebugData();
 

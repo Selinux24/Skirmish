@@ -420,6 +420,8 @@ namespace SceneTest.SceneMaterials
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.SceneStart>();
@@ -440,8 +442,6 @@ namespace SceneTest.SceneMaterials
             UpdateCamera(gameTime);
             UpdateLight(gameTime);
             UpdateInput();
-
-            base.Update(gameTime);
 
             runtime.Text = Game.RuntimeText;
         }

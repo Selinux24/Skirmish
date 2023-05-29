@@ -226,6 +226,8 @@ namespace Animation.SmoothTransitions
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<Start.SceneStart>();
@@ -249,8 +251,6 @@ namespace Animation.SmoothTransitions
             UpdateInputCamera(gameTime);
             UpdateInputAnimation(gameTime);
             UpdateInputDebug();
-
-            base.Update(gameTime);
 
             UpdateSoldier(gameTime);
             UpdateDebug();

@@ -846,6 +846,8 @@ namespace SceneTest.SceneTest
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<SceneStart.SceneStart>();
@@ -857,8 +859,6 @@ namespace SceneTest.SceneTest
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
-
-            base.Update(gameTime);
 
             if (!gameReady)
             {

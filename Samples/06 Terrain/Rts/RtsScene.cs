@@ -1497,6 +1497,8 @@ namespace Terrain.Rts
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<StartScene>();
@@ -1508,8 +1510,6 @@ namespace Terrain.Rts
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
-
-            base.Update(gameTime);
 
             if (!gameReady)
             {

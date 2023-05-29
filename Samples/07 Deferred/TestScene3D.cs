@@ -430,6 +430,8 @@ namespace Deferred
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.Exit();
@@ -441,8 +443,6 @@ namespace Deferred
                     SceneModes.DeferredLightning :
                     SceneModes.ForwardLigthning);
             }
-
-            base.Update(gameTime);
 
             if (!gameReady)
             {

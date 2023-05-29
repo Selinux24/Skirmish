@@ -186,6 +186,8 @@ namespace Animation.Mixamo
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<Start.SceneStart>();
@@ -207,8 +209,6 @@ namespace Animation.Mixamo
             }
 
             UpdateInputCamera(gameTime);
-
-            base.Update(gameTime);
 
             runtime.Text = Game.RuntimeText;
         }

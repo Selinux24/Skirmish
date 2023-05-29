@@ -320,6 +320,8 @@ namespace Instancing
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.Exit();
@@ -354,8 +356,6 @@ namespace Instancing
                 help.Visible = helpVisible;
                 helpPanel.Visible = helpVisible;
             }
-
-            base.Update(gameTime);
 
             runtimeText.Text = $"{Game.RuntimeText}. Instances: {troops.MaximumCount}; Tone: {postProcessState.ToneMappingTone}.";
         }

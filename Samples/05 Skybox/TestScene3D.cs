@@ -442,6 +442,8 @@ namespace Skybox
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (!gameReady)
             {
                 return;
@@ -483,8 +485,6 @@ namespace Skybox
             DEBUGUpdateMovingVolumesDrawer();
 
             #endregion
-
-            base.Update(gameTime);
         }
         private void UpdateInput()
         {

@@ -187,6 +187,8 @@ namespace Animation.AnimationParts
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.SetScene<Start.SceneStart>();
@@ -212,8 +214,6 @@ namespace Animation.AnimationParts
             UpdateInputDebug();
 
             UpdateDebugData();
-
-            base.Update(gameTime);
         }
         private void UpdateInputCamera(GameTime gameTime)
         {

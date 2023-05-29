@@ -478,6 +478,8 @@ namespace Physics
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.Exit();
@@ -501,8 +503,6 @@ namespace Physics
             UpdateStateBodies(gameTime);
 
             UpdateText();
-
-            base.Update(gameTime);
         }
         private void UpdateInputCamera(GameTime gameTime)
         {
