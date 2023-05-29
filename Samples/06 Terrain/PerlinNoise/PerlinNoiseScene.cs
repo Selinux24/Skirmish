@@ -108,9 +108,9 @@ namespace Terrain.PerlinNoise
         {
             await base.Initialize();
 
-            await LoadResourcesAsync(InitializeUI());
+            await LoadResourcesAsync(InitializeUI(), (res) => { res.ThrowExceptions(); });
 
-            await LoadResourcesAsync(InitializeTextureRenderer());
+            await LoadResourcesAsync(InitializeTextureRenderer(), (res) => { res.ThrowExceptions(); });
 
             ResizeTextureRenderer();
             ResizeUI();

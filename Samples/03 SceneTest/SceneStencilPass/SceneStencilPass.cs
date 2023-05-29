@@ -54,7 +54,8 @@ namespace SceneTest.SceneStencilPass
                     InitializeEmitter(),
                     InitializeLights(),
                     InitializeLightsDrawer()
-                });
+                },
+                (res) => { res.ThrowExceptions(); });
         }
         private async Task InitializeFloorAsphalt()
         {

@@ -536,7 +536,7 @@ namespace SceneTest.SceneMaterials
 
                 var t = InitializeColorGroups($"Spheres {(SpecularAlgorithms)currentAlgorithm}");
 
-                LoadResourcesAsync(t);
+                LoadResourcesAsync(t, (res) => { res.ThrowExceptions(); });
             }
         }
 

@@ -449,7 +449,13 @@ namespace Physics
         {
             if (!res.Completed)
             {
-                res.ThrowExceptions();
+                var exList = res.GetExceptions();
+                foreach (var ex in exList)
+                {
+                    Logger.WriteError(this, ex);
+                }
+
+                Game.Exit();
             }
 
             UpdateLayout();

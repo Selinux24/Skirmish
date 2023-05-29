@@ -363,30 +363,6 @@ namespace Engine
         /// Executes a list of resource load tasks
         /// </summary>
         /// <param name="task">Task</param>
-        public Task LoadResourcesAsync(Task task)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(task));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="tasks">Task list</param>
-        public Task LoadResourcesAsync(IEnumerable<Task> tasks)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup.FromTasks(tasks));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        public Task LoadResourcesAsync(LoadResourceGroup taskGroup)
-        {
-            return Game.LoadResourcesAsync(taskGroup);
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="task">Task</param>
         /// <param name="callback">Callback</param>
         public Task LoadResourcesAsync(Task task, Action<LoadResourcesResult> callback)
         {
@@ -438,33 +414,6 @@ namespace Engine
             return Game.LoadResourcesAsync(taskGroup, callback);
         }
 
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="task">Task</param>
-        public Task LoadResourcesAsync<T>(Task<T> task)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(task));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="tasks">Task list</param>
-        public Task LoadResourcesAsync<T>(IEnumerable<Task<T>> tasks)
-        {
-            return Game.LoadResourcesAsync(LoadResourceGroup<T>.FromTasks(tasks));
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Result type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
-        public Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
-        {
-            return Game.LoadResourcesAsync(taskGroup);
-        }
         /// <summary>
         /// Executes a list of resource load tasks
         /// </summary>

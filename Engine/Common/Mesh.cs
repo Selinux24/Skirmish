@@ -211,26 +211,32 @@ namespace Engine.Common
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
-            if (refresh || positionCache == null)
+            if (!refresh && positionCache != null)
             {
-                var positionList = new List<Vector3>();
-
-                if (Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position))
-                {
-                    Vertices.ToList().ForEach(v =>
-                    {
-                        Vector3 p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
-
-                        if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
-
-                        positionList.Add(p);
-                    });
-                }
-
-                positionCache = positionList.ToArray();
+                return positionCache.ToArray();
             }
 
-            return positionCache?.ToArray() ?? Array.Empty<Vector3>();
+            if (Vertices?.Any() != true)
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
+            var first = Vertices.First();
+            if (!first.HasChannel(VertexDataChannels.Position))
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
+            positionCache = Vertices.Select(v =>
+            {
+                var p = v.GetChannelValue<Vector3>(VertexDataChannels.Position);
+
+                if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
+
+                return p;
+            });
+
+            return positionCache.ToArray();
         }
         /// <summary>
         /// Gets point list of mesh if the vertex type has position channel
@@ -240,24 +246,35 @@ namespace Engine.Common
         /// <returns>Returns null or position list</returns>
         public IEnumerable<Vector3> GetPoints(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
-            if (refresh || positionCache == null)
+            if (!refresh && positionCache != null)
             {
-                if (Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Position) &&
-                    Vertices.FirstOrDefault().HasChannel(VertexDataChannels.BoneIndices) &&
-                    Vertices.FirstOrDefault().HasChannel(VertexDataChannels.Weights))
-                {
-                    positionCache = Vertices.Select(v =>
-                    {
-                        Vector3 p = VertexData.ApplyWeight(v, boneTransforms);
-
-                        if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
-
-                        return p;
-                    });
-                }
+                return positionCache.ToArray();
             }
 
-            return positionCache?.ToArray() ?? Array.Empty<Vector3>();
+            if (Vertices?.Any() != true)
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
+            var first = Vertices.FirstOrDefault();
+
+            if (!first.HasChannel(VertexDataChannels.Position) ||
+                !first.HasChannel(VertexDataChannels.BoneIndices) ||
+                !first.HasChannel(VertexDataChannels.Weights))
+            {
+                return Enumerable.Empty<Vector3>();
+            }
+
+            positionCache = Vertices.Select(v =>
+            {
+                var p = VertexData.ApplyWeight(v, boneTransforms);
+
+                if (!Transform.IsIdentity) p = Vector3.TransformCoordinate(p, Transform);
+
+                return p;
+            });
+
+            return positionCache.ToArray();
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -266,27 +283,27 @@ namespace Engine.Common
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            if (refresh || triangleCache == null)
+            var positions = GetPoints(refresh);
+            if (!positions.Any())
             {
-                var positions = GetPoints(refresh);
-                if (positions.Any())
-                {
-                    if (Indices.Any())
-                    {
-                        triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
-                    }
-                    else
-                    {
-                        triangleCache = Triangle.ComputeTriangleList(Topology, positions);
-                    }
-                }
-                else
-                {
-                    triangleCache = Array.Empty<Triangle>();
-                }
+                return Enumerable.Empty<Triangle>();
             }
 
-            return triangleCache?.ToArray() ?? Array.Empty<Triangle>();
+            if (!refresh && triangleCache != null)
+            {
+                return triangleCache.ToArray();
+            }
+
+            if (Indices?.Any() != true)
+            {
+                triangleCache = Triangle.ComputeTriangleList(Topology, positions);
+            }
+            else
+            {
+                triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
+            }
+
+            return triangleCache.ToArray();
         }
         /// <summary>
         /// Gets triangle list of mesh if the vertex type has position channel
@@ -296,40 +313,35 @@ namespace Engine.Common
         /// <returns>Returns null or triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
-            if (refresh || triangleCache == null)
+            var positions = GetPoints(boneTransforms, refresh);
+            if (!positions.Any())
             {
-                var positions = GetPoints(boneTransforms, refresh);
-                if (positions.Any())
-                {
-                    if (Indices.Any())
-                    {
-                        triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
-                    }
-                    else
-                    {
-                        triangleCache = Triangle.ComputeTriangleList(Topology, positions);
-                    }
-                }
-                else
-                {
-                    triangleCache = Array.Empty<Triangle>();
-                }
+                return Enumerable.Empty<Triangle>();
             }
 
-            return triangleCache?.ToArray() ?? Array.Empty<Triangle>();
+            if (!refresh && triangleCache != null)
+            {
+                return triangleCache.ToArray();
+            }
+
+            if (Indices?.Any() != true)
+            {
+                triangleCache = Triangle.ComputeTriangleList(Topology, positions);
+            }
+            else
+            {
+                triangleCache = Triangle.ComputeTriangleList(Topology, positions, Indices);
+            }
+
+            return triangleCache.ToArray();
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            if (Indexed)
-            {
-                return $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}; Indices: {Indices?.Count() ?? 0}";
-            }
-            else
-            {
-                return $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}";
-            }
+            return Indexed ?
+                $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}; Indices: {Indices?.Count() ?? 0}" :
+                $"Id: {Id}; Vertices: {Vertices?.Count() ?? 0}";
         }
     }
 }

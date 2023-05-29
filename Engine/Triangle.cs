@@ -107,11 +107,13 @@ namespace Engine
         {
             get
             {
-                if (index == 0) return Point1;
-                if (index == 1) return Point2;
-                if (index == 2) return Point3;
-
-                return Vector3.Zero;
+                return index switch
+                {
+                    0 => Point1,
+                    1 => Point2,
+                    2 => Point3,
+                    _ => throw new ArgumentOutOfRangeException(nameof(index)),
+                };
             }
         }
 
@@ -123,7 +125,10 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, IEnumerable<Vector3> vertices)
         {
-            List<Triangle> triangleList = new List<Triangle>();
+            if (vertices?.Any() != true)
+            {
+                yield break;
+            }
 
             if (topology == Topology.TriangleList)
             {
@@ -131,20 +136,18 @@ namespace Engine
 
                 for (int i = 0; i < tmpVerts.Length; i += 3)
                 {
-                    Triangle tri = new Triangle(
+                    Triangle tri = new(
                         tmpVerts[i + 0],
                         tmpVerts[i + 1],
                         tmpVerts[i + 2]);
 
-                    triangleList.Add(tri);
+                    yield return tri;
                 }
             }
             else
             {
                 throw new NotImplementedException();
             }
-
-            return triangleList.ToArray();
         }
         /// <summary>
         /// Generate a triangle list from vertices and indices
@@ -155,7 +158,10 @@ namespace Engine
         /// <returns>Returns the triangle list</returns>
         public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, IEnumerable<Vector3> vertices, IEnumerable<uint> indices)
         {
-            List<Triangle> triangleList = new List<Triangle>();
+            if (vertices?.Any() != true || indices?.Any() != true)
+            {
+                yield break;
+            }
 
             if (topology == Topology.TriangleList)
             {
@@ -164,20 +170,18 @@ namespace Engine
 
                 for (int i = 0; i < tmpIndxs.Length; i += 3)
                 {
-                    Triangle tri = new Triangle(
+                    Triangle tri = new(
                         tmpVerts[tmpIndxs[i + 0]],
                         tmpVerts[tmpIndxs[i + 1]],
                         tmpVerts[tmpIndxs[i + 2]]);
 
-                    triangleList.Add(tri);
+                    yield return tri;
                 }
             }
             else
             {
                 throw new NotImplementedException();
             }
-
-            return triangleList.ToArray();
         }
         /// <summary>
         /// Generate a triangle list from AABB
@@ -269,6 +273,11 @@ namespace Engine
         /// <returns>Returns new triangle</returns>
         public static Triangle Transform(Triangle triangle, Matrix transform)
         {
+            if (transform.IsIdentity)
+            {
+                return triangle;
+            }
+
             return new Triangle(
                 Vector3.TransformCoordinate(triangle.Point1, transform),
                 Vector3.TransformCoordinate(triangle.Point2, transform),
@@ -284,17 +293,13 @@ namespace Engine
         {
             if (triangles?.Any() != true)
             {
-                return triangles;
+                yield break;
             }
-
-            List<Triangle> res = new List<Triangle>(triangles.Count());
 
             foreach (var tri in triangles)
             {
-                res.Add(Transform(tri, transform));
+                yield return Transform(tri, transform);
             }
-
-            return res;
         }
         /// <summary>
         /// Reverses the normal of all the triangles of the list
@@ -305,17 +310,13 @@ namespace Engine
         {
             if (triangles?.Any() != true)
             {
-                return Enumerable.Empty<Triangle>();
+                yield break;
             }
-
-            List<Triangle> res = new List<Triangle>(triangles.Count());
 
             foreach (var tri in triangles)
             {
-                res.Add(tri.ReverseNormal());
+                yield return tri.ReverseNormal();
             }
-
-            return res.ToArray();
         }
         /// <summary>
         /// Reverses the normal of all the triangles of the list
@@ -329,16 +330,12 @@ namespace Engine
                 throw new ArgumentException("The point list must be divisible by three.", nameof(vertices));
             }
 
-            List<Vector3> result = new List<Vector3>();
-
             for (int i = 0; i < vertices.Count(); i += 3)
             {
-                result.Add(vertices.ElementAt(i + 0));
-                result.Add(vertices.ElementAt(i + 2));
-                result.Add(vertices.ElementAt(i + 1));
+                yield return vertices.ElementAt(i + 0);
+                yield return vertices.ElementAt(i + 2);
+                yield return vertices.ElementAt(i + 1);
             }
-
-            return result;
         }
         /// <summary>
         /// Reverses the normal of all the triangles of the list
@@ -352,16 +349,12 @@ namespace Engine
                 throw new ArgumentException("The index list must be divisible by three.", nameof(indices));
             }
 
-            List<uint> result = new List<uint>();
-
             for (int i = 0; i < indices.Count(); i += 3)
             {
-                result.Add(indices.ElementAt(i + 0));
-                result.Add(indices.ElementAt(i + 2));
-                result.Add(indices.ElementAt(i + 1));
+                yield return indices.ElementAt(i + 0);
+                yield return indices.ElementAt(i + 2);
+                yield return indices.ElementAt(i + 1);
             }
-
-            return result;
         }
         /// <summary>
         /// Gets the barycentric coordinates of a triangle, given a reference point
@@ -422,7 +415,7 @@ namespace Engine
             float absY = Math.Abs(n.Y);
             float absZ = Math.Abs(n.Z);
 
-            Vector3 a = new Vector3(absX, absY, absZ);
+            Vector3 a = new(absX, absY, absZ);
             if (a.X > a.Y)
             {
                 if (a.X > a.Z)
@@ -547,12 +540,9 @@ namespace Engine
         /// <returns>An array of points representing the three vertices of the triangle.</returns>
         public IEnumerable<Vector3> GetVertices()
         {
-            return new[]
-            {
-                Point1,
-                Point2,
-                Point3,
-            };
+            yield return Point1;
+            yield return Point2;
+            yield return Point3;
         }
         /// <summary>
         /// Gets the vertex list stride
@@ -575,14 +565,11 @@ namespace Engine
         /// Retrieves the three edges of the triangle.
         /// </summary>
         /// <returns>An array of vectors representing the three edges of the triangle.</returns>
-        public IEnumerable<Segment> GetEdges()
+        public IEnumerable<Segment> GetEdgeSegments()
         {
-            return new[]
-            {
-                new Segment(Point2, Point1),
-                new Segment(Point3, Point2),
-                new Segment(Point1, Point2),
-            };
+            yield return new Segment(Point2, Point1);
+            yield return new Segment(Point3, Point2);
+            yield return new Segment(Point1, Point2);
         }
         /// <summary>
         /// Gets the edge direction vector between points 2 and 1

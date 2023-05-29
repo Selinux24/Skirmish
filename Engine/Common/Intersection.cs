@@ -1418,7 +1418,7 @@ namespace Engine.Common
             }
 
             // Test triangle segments
-            bool intersects = triangle.GetEdges().Any(edge => FrustumIntersectsSegment(frustum, edge.Point1, edge.Point2));
+            bool intersects = triangle.GetEdgeSegments().Any(edge => FrustumIntersectsSegment(frustum, edge.Point1, edge.Point2));
             if (intersects)
             {
                 return ContainmentType.Intersects;

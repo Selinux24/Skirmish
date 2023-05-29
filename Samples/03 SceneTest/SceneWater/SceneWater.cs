@@ -52,7 +52,8 @@ namespace SceneTest.SceneWater
                 InitializeSky(),
                 InitializeWater(),
                 InitializeSeaBottom(),
-            });
+            }, 
+            (res) => { res.ThrowExceptions(); });
         }
         private async Task InitializeLensFlare()
         {

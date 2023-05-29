@@ -584,43 +584,6 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Response type</typeparam>
         /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult<T> result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                result?.ThrowExceptions();
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <typeparam name="T">Response type</typeparam>
-        /// <param name="taskGroup">Resource load tasks</param>
         /// <param name="callback">Callback</param>
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         internal Task LoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup, Action<LoadResourcesResult<T>> callback)
@@ -651,12 +614,7 @@ namespace Engine
                     }
                 }
 
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    callback?.Invoke(result);
-                }
+                callback?.Invoke(result);
             });
         }
         /// <summary>
@@ -694,48 +652,7 @@ namespace Engine
                     }
                 }
 
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    await callback?.Invoke(result);
-                }
-            });
-        }
-        /// <summary>
-        /// Executes a list of resource load tasks
-        /// </summary>
-        /// <param name="taskGroup">Resource load tasks</param>
-        /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
-        internal Task LoadResourcesAsync(LoadResourceGroup taskGroup)
-        {
-            return Task.Run(async () =>
-            {
-                LoadResourcesResult result = null;
-
-                while (true)
-                {
-                    if (ResourceLoadRuning)
-                    {
-                        await Task.Delay(100);
-
-                        continue;
-                    }
-
-                    ResourceLoadRuning = true;
-                    try
-                    {
-                        result = await InternalLoadResourcesAsync(taskGroup);
-
-                        break;
-                    }
-                    finally
-                    {
-                        ResourceLoadRuning = false;
-                    }
-                }
-
-                result?.ThrowExceptions();
+                await callback?.Invoke(result);
             });
         }
         /// <summary>
@@ -772,12 +689,7 @@ namespace Engine
                     }
                 }
 
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    callback?.Invoke(result);
-                }
+                callback?.Invoke(result);
             });
         }
         /// <summary>
@@ -788,7 +700,7 @@ namespace Engine
         /// <returns>Returns true when the load executes. When another load task is running, returns false.</returns>
         internal Task LoadResourcesAsync(LoadResourceGroup taskGroup, Func<LoadResourcesResult, Task> callback)
         {
-            Task.Run(async () =>
+            return Task.Run(async () =>
             {
                 LoadResourcesResult result = null;
 
@@ -814,15 +726,8 @@ namespace Engine
                     }
                 }
 
-                if (result != null)
-                {
-                    result.ThrowExceptions();
-
-                    await callback?.Invoke(result);
-                }
+                await callback?.Invoke(result);
             });
-
-            return Task.CompletedTask;
         }
         /// <summary>
         /// Executes a list of resource load tasks
