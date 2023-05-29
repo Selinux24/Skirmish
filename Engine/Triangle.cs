@@ -306,30 +306,60 @@ namespace Engine
         /// </summary>
         /// <param name="triangles">Triangle list</param>
         /// <returns>Returns a new triangle list</returns>
-        public static IEnumerable<Triangle> Reverse(IEnumerable<Triangle> triangles)
+        public static IEnumerable<Triangle> ReverseNormal(IEnumerable<Triangle> triangles)
         {
             if (triangles?.Any() != true)
             {
-                yield break;
+                return Enumerable.Empty<Triangle>();
             }
 
-            foreach (var tri in triangles)
-            {
-                yield return tri.ReverseNormal();
-            }
+            return ReverseNormalIterator(triangles);
         }
         /// <summary>
         /// Reverses the normal of all the triangles of the list
         /// </summary>
         /// <param name="vertices">Point list</param>
         /// <returns>Returns a new point list</returns>
-        public static IEnumerable<Vector3> Reverse(IEnumerable<Vector3> vertices)
+        public static IEnumerable<Vector3> ReverseNormal(IEnumerable<Vector3> vertices)
         {
             if (vertices.Count() % 3 != 0)
             {
                 throw new ArgumentException("The point list must be divisible by three.", nameof(vertices));
             }
 
+            return ReverseNormalIterator(vertices);
+        }
+        /// <summary>
+        /// Reverses the normal of all the triangles of the list
+        /// </summary>
+        /// <param name="indices">Index list</param>
+        /// <returns>Returns a new index list</returns>
+        public static IEnumerable<uint> ReverseNormal(IEnumerable<uint> indices)
+        {
+            if (indices.Count() % 3 != 0)
+            {
+                throw new ArgumentException("The index list must be divisible by three.", nameof(indices));
+            }
+
+            return ReverseNormalIterator(indices);
+        }
+        /// <summary>
+        /// Triangles reverse lazy iterator
+        /// </summary>
+        /// <param name="triangles">Triangle list</param>
+        private static IEnumerable<Triangle> ReverseNormalIterator(IEnumerable<Triangle> triangles)
+        {
+            foreach (var tri in triangles)
+            {
+                yield return tri.ReverseNormal();
+            }
+        }
+        /// <summary>
+        /// Vertices reverse lazy iterator
+        /// </summary>
+        /// <param name="vertices">Vertices</param>
+        private static IEnumerable<Vector3> ReverseNormalIterator(IEnumerable<Vector3> vertices)
+        {
             for (int i = 0; i < vertices.Count(); i += 3)
             {
                 yield return vertices.ElementAt(i + 0);
@@ -338,17 +368,11 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Reverses the normal of all the triangles of the list
+        /// Indices reverse lazy iterator
         /// </summary>
-        /// <param name="indices">Index list</param>
-        /// <returns>Returns a new index list</returns>
-        public static IEnumerable<uint> Reverse(IEnumerable<uint> indices)
+        /// <param name="indices">Indices</param>
+        private static IEnumerable<uint> ReverseNormalIterator(IEnumerable<uint> indices)
         {
-            if (indices.Count() % 3 != 0)
-            {
-                throw new ArgumentException("The index list must be divisible by three.", nameof(indices));
-            }
-
             for (int i = 0; i < indices.Count(); i += 3)
             {
                 yield return indices.ElementAt(i + 0);

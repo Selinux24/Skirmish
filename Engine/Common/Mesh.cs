@@ -256,8 +256,7 @@ namespace Engine.Common
                 return Enumerable.Empty<Vector3>();
             }
 
-            var first = Vertices.FirstOrDefault();
-
+            var first = Vertices.First();
             if (!first.HasChannel(VertexDataChannels.Position) ||
                 !first.HasChannel(VertexDataChannels.BoneIndices) ||
                 !first.HasChannel(VertexDataChannels.Weights))

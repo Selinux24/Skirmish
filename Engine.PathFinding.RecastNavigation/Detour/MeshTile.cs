@@ -145,14 +145,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the vertex list</returns>
         public IEnumerable<Vector3> GetPolyVerts(Poly poly)
         {
-            Vector3[] verts = new Vector3[poly.VertCount];
-
             for (int j = 0; j < poly.VertCount; j++)
             {
-                verts[j] = Verts[poly.Verts[j]];
+                yield return Verts[poly.Verts[j]];
             }
-
-            return verts;
         }
         /// <summary>
         /// Calculates the bounds of the Polygon
@@ -199,7 +195,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         public IEnumerable<OffMeshConnection> GetOffMeshConnections()
         {
-            return OffMeshCons.Take(Header.OffMeshConCount).Where(o => o != null).ToArray();
+            return OffMeshCons
+                .Take(Header.OffMeshConCount)
+                .Where(o => o != null)
+                .ToArray();
         }
         /// <summary>
         /// Gets the off-mesh connection by off-mesh connection index
@@ -352,20 +351,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns a triangle array</returns>
         public IEnumerable<Triangle> GetDetailTris(Poly p)
         {
-            PolyDetail pd = GetDetailMesh(p);
-
-            List<Triangle> tris = new List<Triangle>();
+            var pd = GetDetailMesh(p);
 
             for (int k = 0; k < pd.TriCount; k++)
             {
-                PolyMeshTriangleIndices pmt = DetailTris[pd.TriBase + k];
+                var pmt = DetailTris[pd.TriBase + k];
 
-                Triangle t = GetDetailTri(p, pd.VertBase, pmt);
-
-                tris.Add(t);
+                yield return GetDetailTri(p, pd.VertBase, pmt);
             }
-
-            return tris;
         }
 
         /// <summary>
@@ -389,7 +382,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="data">Mesh data</param>
         public void SetData(MeshData data)
         {
-            this.Data = data;
+            Data = data;
 
             if (data.NavVerts.Count > 0) Verts = data.NavVerts.ToArray();
             if (data.NavPolys.Count > 0) Polys = data.NavPolys.ToArray();
@@ -398,10 +391,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             if (data.NavDVerts.Count > 0) DetailVerts = data.NavDVerts.ToArray();
             if (data.NavDTris.Count > 0) DetailTris = data.NavDTris.ToArray();
             if (data.NavBvtree.Count > 0) BvTree = data.NavBvtree.ToArray();
-            if (data.OffMeshCons.Count > 0)
-            {
-                OffMeshCons = data.OffMeshCons.ToArray();
-            }
+            if (data.OffMeshCons.Count > 0) OffMeshCons = data.OffMeshCons.ToArray();
         }
 
         /// <summary>

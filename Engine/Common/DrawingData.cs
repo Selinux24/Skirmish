@@ -662,12 +662,20 @@ namespace Engine.Common
                 foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(refresh);
-                    if (meshPoints.Any())
+                    if (!meshPoints.Any())
                     {
-                        var trnPoints = meshPoints.ToArray();
-                        Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
-                        points.AddRange(trnPoints);
+                        continue;
                     }
+
+                    var trnPoints = meshPoints.ToArray();
+                    if (transform.IsIdentity)
+                    {
+                        points.AddRange(trnPoints);
+                        continue;
+                    }
+
+                    Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
+                    points.AddRange(trnPoints);
                 }
             }
 
@@ -703,12 +711,20 @@ namespace Engine.Common
                 foreach (var mesh in meshList)
                 {
                     var meshPoints = mesh.GetPoints(boneTransforms, refresh);
-                    if (meshPoints.Any())
+                    if (!meshPoints.Any())
                     {
-                        var trnPoints = meshPoints.ToArray();
-                        Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
-                        points.AddRange(trnPoints);
+                        continue;
                     }
+
+                    var trnPoints = meshPoints.ToArray();
+                    if (transform.IsIdentity)
+                    {
+                        points.AddRange(trnPoints);
+                        continue;
+                    }
+
+                    Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
+                    points.AddRange(trnPoints);
                 }
             }
 
@@ -742,6 +758,17 @@ namespace Engine.Common
                 foreach (var mesh in meshList)
                 {
                     var meshTriangles = mesh.GetTriangles(refresh);
+                    if (!meshTriangles.Any())
+                    {
+                        continue;
+                    }
+
+                    if (transform.IsIdentity)
+                    {
+                        triangles.AddRange(meshTriangles);
+                        continue;
+                    }
+
                     triangles.AddRange(Triangle.Transform(meshTriangles, transform));
                 }
             }
@@ -778,6 +805,17 @@ namespace Engine.Common
                 foreach (var mesh in meshList)
                 {
                     var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
+                    if (!meshTriangles.Any())
+                    {
+                        continue;
+                    }
+
+                    if (transform.IsIdentity)
+                    {
+                        triangles.AddRange(meshTriangles);
+                        continue;
+                    }
+
                     triangles.AddRange(Triangle.Transform(meshTriangles, transform));
                 }
             }

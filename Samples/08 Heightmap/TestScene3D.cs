@@ -1109,10 +1109,10 @@ namespace Heightmap
 
             var tris1 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea.Value);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), tris1);
-            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), Triangle.Reverse(tris1));
+            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 1.0f, 0.0f, 0.35f), Triangle.ReverseNormal(tris1));
             var tris2 = Triangle.ComputeTriangleList(Topology.TriangleList, gardenerArea2.Value);
             bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), tris2);
-            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.Reverse(tris2));
+            bboxesTriDrawer.AddPrimitives(new Color4(0.0f, 0.0f, 1.0f, 0.35f), Triangle.ReverseNormal(tris2));
         }
         private async Task InitializeTerrainObjectsCompleted(LoadResourcesResult res)
         {
