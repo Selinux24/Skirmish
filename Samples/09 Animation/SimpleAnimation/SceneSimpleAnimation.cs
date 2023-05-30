@@ -490,10 +490,10 @@ namespace Animation.SimpleAnimation
         {
             if (!res.Completed)
             {
-                messages.Text = res.GetExceptions().FirstOrDefault()?.Message;
+                messages.Text = res.GetErrorMessage();
                 messages.Visible = true;
 
-                return;
+                res.ThrowExceptions();
             }
 
             InitializeEnvironment();

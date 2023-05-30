@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Engine
 {
@@ -51,6 +52,26 @@ namespace Engine
                 .ToArray();
 
             return exList ?? Array.Empty<Exception>();
+        }
+        /// <summary>
+        /// Gets a string with the listed exceptions
+        /// </summary>
+        public string GetErrorMessage()
+        {
+            var exList = GetExceptions();
+            if (!exList.Any())
+            {
+                return string.Empty;
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var ex in exList)
+            {
+                sb.Append(ex.ToString());
+            }
+
+            return sb.ToString();
         }
     }
 
