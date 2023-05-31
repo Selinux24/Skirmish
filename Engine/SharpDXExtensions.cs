@@ -366,26 +366,23 @@ namespace Engine
         /// <returns>Returns the edge list of the current box vertices</returns>
         public static IEnumerable<Segment> GetEdges(IEnumerable<Vector3> vertices)
         {
-            return new[]
-            {
-                //Top edges
-                new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop),    vertices.ElementAt((int)BoxVertices.BackRightTop)),
-                new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop),     vertices.ElementAt((int)BoxVertices.BackLeftTop)),
-                new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop),      vertices.ElementAt((int)BoxVertices.FrontLeftTop)),
-                new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop),     vertices.ElementAt((int)BoxVertices.FrontRightTop)),
+            //Top edges
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop), vertices.ElementAt((int)BoxVertices.BackRightTop));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop), vertices.ElementAt((int)BoxVertices.BackLeftTop));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop), vertices.ElementAt((int)BoxVertices.FrontLeftTop));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop), vertices.ElementAt((int)BoxVertices.FrontRightTop));
 
-                //Bottom edges
-                new Segment(vertices.ElementAt((int)BoxVertices.FrontRightBottom), vertices.ElementAt((int)BoxVertices.BackRightBottom)),
-                new Segment(vertices.ElementAt((int)BoxVertices.BackRightBottom),  vertices.ElementAt((int)BoxVertices.BackLeftBottom)),
-                new Segment(vertices.ElementAt((int)BoxVertices.BackLeftBottom),   vertices.ElementAt((int)BoxVertices.FrontLeftBottom)),
-                new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftBottom),  vertices.ElementAt((int)BoxVertices.FrontRightBottom)),
+            //Bottom edges
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightBottom), vertices.ElementAt((int)BoxVertices.BackRightBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightBottom), vertices.ElementAt((int)BoxVertices.BackLeftBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftBottom), vertices.ElementAt((int)BoxVertices.FrontLeftBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftBottom), vertices.ElementAt((int)BoxVertices.FrontRightBottom));
 
-                //Vertical edges
-                new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop),    vertices.ElementAt((int)BoxVertices.FrontRightBottom)),
-                new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop),     vertices.ElementAt((int)BoxVertices.BackRightBottom)),
-                new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop),      vertices.ElementAt((int)BoxVertices.BackLeftBottom)),
-                new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop),     vertices.ElementAt((int)BoxVertices.FrontLeftBottom))
-            };
+            //Vertical edges
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontRightTop), vertices.ElementAt((int)BoxVertices.FrontRightBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackRightTop), vertices.ElementAt((int)BoxVertices.BackRightBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.BackLeftTop), vertices.ElementAt((int)BoxVertices.BackLeftBottom));
+            yield return new Segment(vertices.ElementAt((int)BoxVertices.FrontLeftTop), vertices.ElementAt((int)BoxVertices.FrontLeftBottom));
         }
 
         /// <summary>
@@ -415,22 +412,22 @@ namespace Engine
 
             var edges = GetEdges(vertices);
 
-            Vector3 topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
+            var topNormal = Vector3.Cross(edges.ElementAt(0).Direction, edges.ElementAt(1).Direction);
             yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), topNormal);
 
-            Vector3 bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
+            var bottomNormal = Vector3.Cross(edges.ElementAt(5).Direction, edges.ElementAt(4).Direction);
             yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftBottom), bottomNormal);
 
-            Vector3 frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
+            var frontNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(3).Direction);
             yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), frontNormal);
 
-            Vector3 backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
+            var backNormal = Vector3.Cross(edges.ElementAt(9).Direction, edges.ElementAt(1).Direction);
             yield return new Plane(GetVertex(vertices, BoxVertices.BackLeftTop), backNormal);
 
-            Vector3 leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
+            var leftNormal = Vector3.Cross(edges.ElementAt(10).Direction, edges.ElementAt(2).Direction);
             yield return new Plane(GetVertex(vertices, BoxVertices.FrontLeftTop), leftNormal);
 
-            Vector3 rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
+            var rightNormal = Vector3.Cross(edges.ElementAt(8).Direction, edges.ElementAt(0).Direction);
             yield return new Plane(GetVertex(vertices, BoxVertices.FrontRightBottom), rightNormal);
         }
 
@@ -554,20 +551,17 @@ namespace Engine
         /// <param name="box">Bounding box</param>
         public static IEnumerable<Vector3> GetVertices(this BoundingBox box)
         {
-            var corners = box.GetCorners();
+            var min = box.Minimum;
+            var max = box.Maximum;
 
-            // Hack sharpDX BoundingBox vertex order, to make compatible with OrientedBoundingBox
-            return new[]
-            {
-                corners[1],
-                corners[5],
-                corners[4],
-                corners[0],
-                corners[2],
-                corners[6],
-                corners[7],
-                corners[3],
-            };
+            yield return new Vector3(max.X, max.Y, max.Z);
+            yield return new Vector3(max.X, max.Y, min.Z);
+            yield return new Vector3(min.X, max.Y, min.Z);
+            yield return new Vector3(min.X, max.Y, max.Z);
+            yield return new Vector3(max.X, min.Y, max.Z);
+            yield return new Vector3(max.X, min.Y, min.Z);
+            yield return new Vector3(min.X, min.Y, min.Z);
+            yield return new Vector3(min.X, min.Y, max.Z);
         }
         /// <summary>
         /// Gets the oriented bounding box vertices
@@ -575,7 +569,25 @@ namespace Engine
         /// <param name="obb">Oriented bounding box</param>
         public static IEnumerable<Vector3> GetVertices(this OrientedBoundingBox obb)
         {
-            return obb.GetCorners();
+            var extents = obb.Extents;
+            var trn = obb.Transformation;
+
+            var normal = new Vector3(extents.X, 0f, 0f);
+            var normal2 = new Vector3(0f, extents.Y, 0f);
+            var normal3 = new Vector3(0f, 0f, extents.Z);
+            Vector3.TransformNormal(ref normal, ref trn, out normal);
+            Vector3.TransformNormal(ref normal2, ref trn, out normal2);
+            Vector3.TransformNormal(ref normal3, ref trn, out normal3);
+            Vector3 translationVector = trn.TranslationVector;
+
+            yield return translationVector + normal + normal2 + normal3;
+            yield return translationVector + normal + normal2 - normal3;
+            yield return translationVector - normal + normal2 - normal3;
+            yield return translationVector - normal + normal2 + normal3;
+            yield return translationVector + normal - normal2 + normal3;
+            yield return translationVector + normal - normal2 - normal3;
+            yield return translationVector - normal - normal2 - normal3;
+            yield return translationVector - normal - normal2 + normal3;
         }
 
         /// <summary>
@@ -592,10 +604,10 @@ namespace Engine
             }
 
             //First, get item points
-            Vector3[] ptArray = points.ToArray();
+            var ptArray = points.ToArray();
 
             //Next, remove any point transform and set points to origin
-            Matrix inv = Matrix.Invert(transform);
+            var inv = Matrix.Invert(transform);
             Vector3.TransformCoordinate(ptArray, ref inv, ptArray);
 
             //Create the OBB from origin points
@@ -621,9 +633,9 @@ namespace Engine
         /// </remarks>
         public static IEnumerable<BoundingBox> QuadTree(this BoundingBox bbox)
         {
-            Vector3 M = bbox.Maximum;
-            Vector3 c = (bbox.Maximum + bbox.Minimum) * 0.5f;
-            Vector3 m = bbox.Minimum;
+            var M = bbox.Maximum;
+            var c = (bbox.Maximum + bbox.Minimum) * 0.5f;
+            var m = bbox.Minimum;
 
             //-1-1-1   +0+1+0 - Top Left
             yield return new BoundingBox(new Vector3(m.X, m.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
@@ -652,9 +664,9 @@ namespace Engine
         /// </remarks>
         public static IEnumerable<BoundingBox> Octree(this BoundingBox bbox)
         {
-            Vector3 m = bbox.Minimum;
-            Vector3 M = bbox.Maximum;
-            Vector3 c = bbox.Center;
+            var m = bbox.Minimum;
+            var M = bbox.Maximum;
+            var c = bbox.Center;
 
             //-1+0-1   +0+1+0 - Top Left Front
             yield return new BoundingBox(new Vector3(m.X, c.Y, m.Z), new Vector3(c.X, M.Y, c.Z));
