@@ -32,18 +32,6 @@ namespace Engine
         bool PickAll(PickingRay ray, out IEnumerable<PickingResult<T>> results);
 
         /// <summary>
-        /// Gets the point list of the object
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        /// <returns>Returns a list of points</returns>
-        IEnumerable<Vector3> GetPoints(bool refresh = false);
-        /// <summary>
-        /// Gets the triangle list of the object
-        /// </summary>
-        /// <param name="refresh">Sets if the cache must be refreshed or not</param>
-        /// <returns>Returns a list of points triangles</returns>
-        IEnumerable<Triangle> GetTriangles(bool refresh = false);
-        /// <summary>
         /// Gets bounding sphere
         /// </summary>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>

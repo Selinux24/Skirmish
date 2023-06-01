@@ -594,6 +594,15 @@ namespace Engine
         /// Creates an oriented bounding box from a transformed point list and it's transform matrix
         /// </summary>
         /// <param name="points">Point list</param>
+        /// <returns>Returns the new oriented bounding box</returns>
+        public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points)
+        {
+            return FromPoints(points, Matrix.Identity);
+        }
+        /// <summary>
+        /// Creates an oriented bounding box from a transformed point list and it's transform matrix
+        /// </summary>
+        /// <param name="points">Point list</param>
         /// <param name="transform">Transform matrix</param>
         /// <returns>Returns the new oriented bounding box</returns>
         public static OrientedBoundingBox FromPoints(IEnumerable<Vector3> points, Matrix transform)

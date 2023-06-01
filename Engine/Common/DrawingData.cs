@@ -679,7 +679,7 @@ namespace Engine.Common
                 }
             }
 
-            return points.ToArray();
+            return points.Distinct().ToArray();
         }
         /// <summary>
         /// Gets the drawing data's point list
@@ -728,8 +728,9 @@ namespace Engine.Common
                 }
             }
 
-            return points.ToArray();
+            return points.Distinct().ToArray();
         }
+ 
         /// <summary>
         /// Gets the drawing data's triangle list
         /// </summary>
@@ -773,7 +774,7 @@ namespace Engine.Common
                 }
             }
 
-            return triangles.ToArray();
+            return triangles.Distinct().ToArray();
         }
         /// <summary>
         /// Gets the drawing data's triangle list
@@ -820,7 +821,7 @@ namespace Engine.Common
                 }
             }
 
-            return triangles.ToArray();
+            return triangles.Distinct().ToArray();
         }
 
         /// <summary>

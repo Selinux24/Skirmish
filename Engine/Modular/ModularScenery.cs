@@ -749,7 +749,7 @@ namespace Engine.Modular
                 def.Add(defaultPlan);
 
                 instance.AnimationController.ReplacePlan(new AnimationPlan(def));
-                instance.InvalidateCache(false);
+                instance.InvalidateCache();
             }
 
             List<ModularSceneryTrigger> instanceTriggers = new List<ModularSceneryTrigger>();
@@ -1474,7 +1474,7 @@ namespace Engine.Modular
             {
                 item.Item.AnimationController.ReplacePlan(plan);
                 item.Item.AnimationController.Start();
-                item.Item.InvalidateCache(true);
+                item.Item.InvalidateCache();
             }
 
             //Find the referenced items and execute actions recursively

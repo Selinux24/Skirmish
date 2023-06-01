@@ -37,7 +37,7 @@ namespace Engine
         /// <summary>
         /// Volume helper
         /// </summary>
-        private readonly BoundsHelper<Triangle> boundsHelper;
+        private readonly BoundsHelper boundsHelper;
         /// <summary>
         /// Geometry helper
         /// </summary>
@@ -141,10 +141,9 @@ namespace Engine
             }
 
             AnimationController = new AnimationController(model);
-            AnimationController.AnimationOffsetChanged += (s, a) => { InvalidateCache(false); };
+            AnimationController.AnimationOffsetChanged += (s, a) => InvalidateCache();
 
-            boundsHelper = new(this);
-            boundsHelper.Initialize();
+            boundsHelper = new(GetPoints());
         }
         /// <summary>
         /// Add model parts
@@ -261,7 +260,7 @@ namespace Engine
             Manipulator = manipulator;
             Manipulator.Updated += ManipulatorUpdated;
 
-            boundsHelper.Invalidate(true);
+            InvalidateCache();
         }
         /// <summary>
         /// Occurs when manipulator transform updated
@@ -270,7 +269,7 @@ namespace Engine
         /// <param name="e">Event arguments</param>
         private void ManipulatorUpdated(object sender, EventArgs e)
         {
-            InvalidateCache(false);
+            InvalidateCache();
         }
 
         /// <inheritdoc/>
@@ -295,11 +294,11 @@ namespace Engine
         /// <summary>
         /// Invalidates the internal cache
         /// </summary>
-        public void InvalidateCache(bool animationChanged)
+        public void InvalidateCache()
         {
             Logger.WriteTrace(this, $"{nameof(ModelInstance)} {model.Name}.{Id} => LOD: {LevelOfDetail}; InvalidateCache");
 
-            boundsHelper.Invalidate(animationChanged);
+            boundsHelper.Invalidate();
             geometryHelper.Invalidate();
         }
 
@@ -319,24 +318,6 @@ namespace Engine
             return RayPickingHelper.PickAll(this, ray, out results);
         }
 
-        /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(bool refresh = false)
-        {
-            return geometryHelper.GetPoints(
-                model.GetDrawingData(model.GetLODMinimum()),
-                AnimationController,
-                Manipulator,
-                refresh);
-        }
-        /// <inheritdoc/>
-        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
-        {
-            return geometryHelper.GetTriangles(
-                model.GetDrawingData(model.GetLODMinimum()),
-                AnimationController,
-                Manipulator,
-                refresh);
-        }
         /// <inheritdoc/>
         public BoundingSphere GetBoundingSphere(bool refresh = false)
         {
@@ -432,6 +413,25 @@ namespace Engine
             {
                 return (IntersectionVolumeMesh)GetPickingHull(PickingHullTypes.Hull).ToArray();
             }
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        {
+            return geometryHelper.GetPoints(
+                model.GetDrawingData(model.GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
+        }
+        /// <inheritdoc/>
+        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
+        {
+            return geometryHelper.GetTriangles(
+                model.GetDrawingData(model.GetLODMinimum()),
+                AnimationController,
+                Manipulator,
+                refresh);
         }
 
         /// <inheritdoc/>

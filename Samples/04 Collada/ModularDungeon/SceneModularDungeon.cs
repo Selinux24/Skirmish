@@ -828,7 +828,7 @@ namespace Collada.ModularDungeon
                 return;
             }
 
-            var boxes = items.Select(i => i.GetBoundingBox());
+            var boxes = items.Select(i => SharpDX.BoundingBox.FromPoints(i.GetPoints().ToArray()));
             bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
         }
         private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)
@@ -838,21 +838,16 @@ namespace Collada.ModularDungeon
                 return;
             }
 
-            var obs = obstacles
-                .Where(o => e.Items.Select(i => i.Item).Contains(o.Item))
-                .ToList();
-
+            var obs = obstacles.Where(o => e.Items.Select(i => i.Item).Contains(o.Item));
             if (!obs.Any())
             {
                 return;
             }
 
             //Refresh affected obstacles (if any)
-            obs.ForEach(o =>
+            obs.ToList().ForEach(o =>
             {
-                var obb = SharpDXExtensions.FromPoints(
-                    o.Item.GetPoints(true),
-                    o.Item.Manipulator.FinalTransform);
+                var obb = SharpDXExtensions.FromPoints(o.Item.GetPoints(true));
 
                 RemoveObstacle(o.Index);
                 o.Index = AddObstacle(obb);
@@ -1656,9 +1651,7 @@ namespace Collada.ModularDungeon
 
             foreach (var item in sceneryObjects)
             {
-                var obb = SharpDXExtensions.FromPoints(
-                    item.GetPoints(),
-                    item.Manipulator.FinalTransform);
+                var obb = SharpDXExtensions.FromPoints(item.GetPoints());
 
                 int index = AddObstacle(obb);
                 if (index >= 0)

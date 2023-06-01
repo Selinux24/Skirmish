@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Common
@@ -6,14 +7,8 @@ namespace Engine.Common
     /// <summary>
     /// Collider helper class
     /// </summary>
-    class BoundsHelper<T> where T : IRayIntersectable
+    class BoundsHelper
     {
-        private readonly IRayPickable<T> model;
-
-        /// <summary>
-        /// Complete caché rebuild flag
-        /// </summary>
-        private bool rebuild;
         /// <summary>
         /// Initial bounding sphere
         /// </summary>
@@ -25,7 +20,8 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding sphere flag
         /// </summary>
-        private bool updateBoundingSphere;
+        private bool updateBoundingSphere = false;
+
         /// <summary>
         /// Initial bounding box
         /// </summary>
@@ -37,7 +33,8 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding box flag
         /// </summary>
-        private bool updateBoundingBox;
+        private bool updateBoundingBox = false;
+
         /// <summary>
         /// Initial oriented bounding box
         /// </summary>
@@ -49,71 +46,42 @@ namespace Engine.Common
         /// <summary>
         /// Update bounding box flag
         /// </summary>
-        private bool updateOrientedBox;
+        private bool updateOrientedBox = false;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="model">Model</param>
-        public BoundsHelper(IRayPickable<T> model)
-        {
-            this.model = model;
-        }
-
-        /// <summary>
-        /// Initializes internal volumes
-        /// </summary>
         /// <param name="points">Point list</param>
-        public void Initialize()
+        public BoundsHelper(IEnumerable<Vector3> points)
         {
-            UpdateInitialBoundingVolumes();
-
-            boundingSphere = initialSphere;
-            boundingBox = initialAabb;
-            orientedBox = initialObb;
-
-            updateBoundingSphere = false;
-            updateBoundingBox = false;
-            updateOrientedBox = false;
-        }
-        /// <summary>
-        /// Updates initial bounding volume structures
-        /// </summary>
-        private void UpdateInitialBoundingVolumes()
-        {
-            rebuild = false;
-
-            var points = model.GetPoints();
-
-            if (points.Any())
+            if (points?.Any() != true)
             {
-                var distinctPoints = points.Distinct().ToArray();
+                boundingSphere = initialSphere = new BoundingSphere();
 
-                //Initialize the identity sphere
-                initialSphere = BoundingSphere.FromPoints(distinctPoints);
+                boundingBox = initialAabb = new BoundingBox();
 
-                //Initialize the identity box
-                initialAabb = BoundingBox.FromPoints(distinctPoints);
-
-                //Initialize the identity obb
-                initialObb = new OrientedBoundingBox(initialAabb);
+                orientedBox = initialObb = new OrientedBoundingBox();
             }
             else
             {
-                initialSphere = new BoundingSphere();
+                var distinctPoints = points.ToArray();
 
-                initialAabb = new BoundingBox();
+                //Initialize the identity sphere
+                boundingSphere = initialSphere = BoundingSphere.FromPoints(distinctPoints);
 
-                initialObb = new OrientedBoundingBox();
+                //Initialize the identity box
+                boundingBox = initialAabb = BoundingBox.FromPoints(distinctPoints);
+
+                //Initialize the identity obb
+                orientedBox = initialObb = new OrientedBoundingBox(initialAabb);
             }
         }
+
         /// <summary>
         /// Invalidates the internal state
         /// </summary>
-        public void Invalidate(bool rebuild)
+        public void Invalidate()
         {
-            this.rebuild = rebuild;
-
             updateBoundingBox = true;
             updateBoundingSphere = true;
             updateOrientedBox = true;
@@ -129,11 +97,6 @@ namespace Engine.Common
         {
             if (updateBoundingSphere || refresh)
             {
-                if (rebuild)
-                {
-                    UpdateInitialBoundingVolumes();
-                }
-
                 boundingSphere = initialSphere.SetTransform(manipulator.FinalTransform);
 
                 updateBoundingSphere = false;
@@ -151,11 +114,6 @@ namespace Engine.Common
         {
             if (updateBoundingBox || refresh)
             {
-                if (rebuild)
-                {
-                    UpdateInitialBoundingVolumes();
-                }
-
                 boundingBox = initialAabb.SetTransform(manipulator.FinalTransform);
 
                 updateBoundingBox = false;
@@ -173,11 +131,6 @@ namespace Engine.Common
         {
             if (updateOrientedBox || refresh)
             {
-                if (rebuild)
-                {
-                    UpdateInitialBoundingVolumes();
-                }
-
                 orientedBox = initialObb.SetTransform(manipulator.FinalTransform);
 
                 updateOrientedBox = false;
