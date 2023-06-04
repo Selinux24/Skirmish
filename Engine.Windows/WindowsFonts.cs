@@ -219,7 +219,7 @@ namespace Engine.Windows
 
             var font = fonts.FirstOrDefault(fnt =>
             {
-                return FontFamily.Families.Any(f => string.Equals(f.Name, fnt, StringComparison.OrdinalIgnoreCase));
+                return Array.Exists(FontFamily.Families, f => string.Equals(f.Name, fnt, StringComparison.OrdinalIgnoreCase));
             });
 
             return font;

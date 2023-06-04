@@ -999,7 +999,7 @@ namespace Engine
                     {
                         plantTaskList.Add(fPatch.PlantAsync(Scene, node, foliageMap, foliageMapChannels[i], bbox));
                     }
-                    else if (fPatch.HasData && !foliageBuffers.Any(b => b.CurrentPatch == fPatch))
+                    else if (fPatch.HasData && !foliageBuffers.Exists(b => b.CurrentPatch == fPatch))
                     {
                         toAssignList.Add(fPatch);
                     }

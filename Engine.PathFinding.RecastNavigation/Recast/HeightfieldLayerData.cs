@@ -673,7 +673,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int j = 0; j < NRegions; ++j)
             {
-                var region = Regions.ElementAt(j);
+                var region = Regions[j];
 
                 if (region.IsBase && region.LayerId == curId)
                 {

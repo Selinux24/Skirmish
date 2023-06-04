@@ -310,8 +310,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             for (int i = 0; i < edges.Count; ++i)
             {
-                int s0 = edges.ElementAt(i).X;
-                int t0 = edges.ElementAt(i).Y;
+                var e = edges[i];
+                int s0 = e.X;
+                int t0 = e.Y;
                 // Same or connected edges do not overlap.
                 if (s0 == s || s0 == t || t0 == s || t0 == t)
                 {
@@ -328,7 +329,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         {
             for (int i = 0; i < edges.Count; i++)
             {
-                var e = edges.ElementAt(i);
+                var e = edges[i];
 
                 if ((e.X == s && e.Y == t) || (e.X == t && e.Y == s))
                 {

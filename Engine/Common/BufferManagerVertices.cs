@@ -110,7 +110,7 @@ namespace Engine.Common
         public void AddInputs(int slot)
         {
             //Get the input element list from the vertex data
-            var inputs = data.First().GetInput(slot);
+            var inputs = data[0].GetInput(slot);
 
             //Adds the input list
             input.AddRange(inputs);

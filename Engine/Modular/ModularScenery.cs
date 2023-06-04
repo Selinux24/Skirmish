@@ -1184,8 +1184,7 @@ namespace Engine.Modular
         /// <returns>Returns the specified object by id</returns>
         public ModularSceneryItem GetObjectById(string id)
         {
-            var obj = entities
-                .FirstOrDefault(o => string.Equals(o.Object.Id, id, StringComparison.OrdinalIgnoreCase));
+            var obj = entities.Find(o => string.Equals(o.Object.Id, id, StringComparison.OrdinalIgnoreCase));
 
             return obj;
         }
@@ -1494,7 +1493,7 @@ namespace Engine.Modular
                 }
 
                 //Find trigger
-                var refTrigger = triggers[refItem.Item].FirstOrDefault(t => string.Equals(t.Name, action.ItemAction, StringComparison.OrdinalIgnoreCase));
+                var refTrigger = triggers[refItem.Item].Find(t => string.Equals(t.Name, action.ItemAction, StringComparison.OrdinalIgnoreCase));
                 if (refTrigger == null)
                 {
                     continue;
@@ -1871,7 +1870,7 @@ namespace Engine.Modular
             {
                 get
                 {
-                    return Items.Any(i => i.Item.AnimationController?.Playing == true);
+                    return Items.Exists(i => i.Item.AnimationController?.Playing == true);
                 }
             }
 

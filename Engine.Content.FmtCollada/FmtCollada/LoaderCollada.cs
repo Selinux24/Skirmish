@@ -197,7 +197,7 @@ namespace Engine.Content.FmtCollada
         #region Dictionary loaders
 
         /// <summary>
-        /// Process lightd
+        /// Process lights
         /// </summary>
         /// <param name="dae">Dae object</param>
         /// <param name="modelContent">Model content</param>
@@ -210,44 +210,85 @@ namespace Engine.Content.FmtCollada
 
             foreach (var light in dae.LibraryLights)
             {
-                var dirTechnique = light.LightTechniqueCommon?.FirstOrDefault(l => l.Directional != null);
-                if (dirTechnique != null)
+                if (light.LightTechniqueCommon?.Any() != true)
                 {
-                    modelContent.Lights[light.Id] = new LightContent()
-                    {
-                        LightType = LightContentTypes.Directional,
-                        Color = dirTechnique.Directional.Color.ToColor3(),
-                    };
+                    continue;
                 }
 
-                var pointTechnique = light.LightTechniqueCommon?.FirstOrDefault(l => l.Point != null);
-                if (pointTechnique != null)
+                foreach (var lightTechnique in light.LightTechniqueCommon)
                 {
-                    modelContent.Lights[light.Id] = new LightContent()
-                    {
-                        LightType = LightContentTypes.Point,
-                        Color = pointTechnique.Point.Color.ToColor3(),
-                        ConstantAttenuation = pointTechnique.Point.ConstantAttenuation.Value,
-                        LinearAttenuation = pointTechnique.Point.LinearAttenuation.Value,
-                        QuadraticAttenuation = pointTechnique.Point.QuadraticAttenuation.Value,
-                    };
-                }
+                    ProcessLibraryLightDirectional(light.Id, lightTechnique.Directional, modelContent);
 
-                var spotTechnique = light.LightTechniqueCommon?.FirstOrDefault(l => l.Spot != null);
-                if (spotTechnique != null)
-                {
-                    modelContent.Lights[light.Id] = new LightContent()
-                    {
-                        LightType = LightContentTypes.Spot,
-                        Color = spotTechnique.Spot.Color.ToColor3(),
-                        ConstantAttenuation = spotTechnique.Spot.ConstantAttenuation.Value,
-                        LinearAttenuation = spotTechnique.Spot.LinearAttenuation.Value,
-                        QuadraticAttenuation = spotTechnique.Spot.QuadraticAttenuation.Value,
-                        FallOffAngle = spotTechnique.Spot.FalloffAngle.Value,
-                        FallOffExponent = spotTechnique.Spot.FalloffExponent.Value,
-                    };
+                    ProcessLibraryLightPoint(light.Id, lightTechnique.Point, modelContent);
+
+                    ProcessLibraryLightSpot(light.Id, lightTechnique.Spot, modelContent);
                 }
             }
+        }
+        /// <summary>
+        /// Process directional light
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="light">Light</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessLibraryLightDirectional(string id, AmbientDirectional light, ContentData modelContent)
+        {
+            if (light == null)
+            {
+                return;
+            }
+
+            modelContent.Lights[id] = new LightContent()
+            {
+                LightType = LightContentTypes.Directional,
+                Color = light.Color.ToColor3(),
+            };
+        }
+        /// <summary>
+        /// Process point light
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="light">Light</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessLibraryLightPoint(string id, Point light, ContentData modelContent)
+        {
+            if (light == null)
+            {
+                return;
+            }
+
+            modelContent.Lights[id] = new LightContent()
+            {
+                LightType = LightContentTypes.Point,
+                Color = light.Color.ToColor3(),
+                ConstantAttenuation = light.ConstantAttenuation.Value,
+                LinearAttenuation = light.LinearAttenuation.Value,
+                QuadraticAttenuation = light.QuadraticAttenuation.Value,
+            };
+        }
+        /// <summary>
+        /// Process spot light
+        /// </summary>
+        /// <param name="id">Id</param>
+        /// <param name="light">Light</param>
+        /// <param name="modelContent">Model content</param>
+        private static void ProcessLibraryLightSpot(string id, Spot light, ContentData modelContent)
+        {
+            if (light == null)
+            {
+                return;
+            }
+
+            modelContent.Lights[id] = new LightContent()
+            {
+                LightType = LightContentTypes.Spot,
+                Color = light.Color.ToColor3(),
+                ConstantAttenuation = light.ConstantAttenuation.Value,
+                LinearAttenuation = light.LinearAttenuation.Value,
+                QuadraticAttenuation = light.QuadraticAttenuation.Value,
+                FallOffAngle = light.FalloffAngle.Value,
+                FallOffExponent = light.FalloffExponent.Value,
+            };
         }
         /// <summary>
         /// Process images
@@ -289,7 +330,7 @@ namespace Engine.Content.FmtCollada
             foreach (var material in dae.LibraryMaterials)
             {
                 //Find effect
-                var effect = dae.LibraryEffects?.FirstOrDefault(e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
+                var effect = Array.Find(dae.LibraryEffects, e => e.Id == material.InstanceEffect.Url.Replace("#", ""));
                 if (effect == null)
                 {
                     continue;
@@ -299,15 +340,18 @@ namespace Engine.Content.FmtCollada
                 {
                     throw new NotImplementedException();
                 }
-                else if (effect.ProfileGles != null)
+
+                if (effect.ProfileGles != null)
                 {
                     throw new NotImplementedException();
                 }
-                else if (effect.ProfileGlsl != null)
+
+                if (effect.ProfileGlsl != null)
                 {
                     throw new NotImplementedException();
                 }
-                else if (effect.ProfileCommon != null)
+
+                if (effect.ProfileCommon != null)
                 {
                     modelContent.Materials[material.Id] = ProcessTechniqueFX(effect.ProfileCommon);
                 }
@@ -895,40 +939,74 @@ namespace Engine.Content.FmtCollada
 
         private static bool FindMaterialTarget(string material, IEnumerable<InstanceGeometry> instances, out string target)
         {
+            target = null;
+
             if (instances?.Any() != true)
             {
-                target = null;
-
                 return false;
             }
 
-            var instanceMaterial = instances
-                .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
-                .Select(g => g.BindMaterial.TechniqueCommon.First().InstanceMaterial.First())
-                .FirstOrDefault(i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+            foreach (var instance in instances)
+            {
+                if (instance.BindMaterial?.TechniqueCommon?.Any() != true)
+                {
+                    continue;
+                }
 
-            target = instanceMaterial?.Target?.Replace("#", "");
+                foreach (var technique in instance.BindMaterial.TechniqueCommon)
+                {
+                    if (technique.InstanceMaterial?.Any() != true)
+                    {
+                        continue;
+                    }
 
-            return target != null;
+                    var instanceMaterial = Array.Find(technique.InstanceMaterial, i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+                    if (instanceMaterial != null)
+                    {
+                        target = instanceMaterial.Target?.Replace("#", "");
+
+                        return target != null;
+                    }
+                }
+            }
+
+            return false;
         }
 
         private static bool FindMaterialTarget(string material, IEnumerable<InstanceController> instances, out string target)
         {
+            target = null;
+
             if (instances?.Any() != true)
             {
-                target = null;
-
                 return false;
             }
 
-            var instanceMaterial = instances
-                .Where(g => g.BindMaterial?.TechniqueCommon?.Any(t => t.InstanceMaterial?.Any() == true) == true)
-                .Select(g => g.BindMaterial.TechniqueCommon.First().InstanceMaterial.First())
-                .FirstOrDefault(i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+            foreach (var instance in instances)
+            {
+                if (instance.BindMaterial?.TechniqueCommon?.Any() != true)
+                {
+                    continue;
+                }
 
-            target = instanceMaterial?.Target?.Replace("#", "");
+                foreach (var technique in instance.BindMaterial.TechniqueCommon)
+                {
+                    if (technique.InstanceMaterial?.Any() != true)
+                    {
+                        continue;
+                    }
 
-            return target != null;
+                    var instanceMaterial = Array.Find(technique.InstanceMaterial, i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
+                    if (instanceMaterial != null)
+                    {
+                        target = instanceMaterial.Target?.Replace("#", "");
+
+                        return target != null;
+                    }
+                }
+            }
+
+            return false;
         }
 
         #endregion
@@ -1373,8 +1451,13 @@ namespace Engine.Content.FmtCollada
 
             string sceneUrl = dae.Scene.InstanceVisualScene.Url;
 
-            var vScene = dae.LibraryVisualScenes.FirstOrDefault(l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
-            if (vScene?.Nodes.Any() != true)
+            if (dae.LibraryVisualScenes?.Any() != true)
+            {
+                return;
+            }
+
+            var vScene = Array.Find(dae.LibraryVisualScenes, l => string.Equals("#" + l.Id, sceneUrl, StringComparison.OrdinalIgnoreCase));
+            if (vScene?.Nodes?.Any() != true)
             {
                 return;
             }
@@ -1658,7 +1741,7 @@ namespace Engine.Content.FmtCollada
                 return;
             }
 
-            instanceControllers = new[] { node.InstanceController.First() };
+            instanceControllers = new[] { node.InstanceController[0] };
         }
         /// <summary>
         /// Creates a skeleton from an armature node

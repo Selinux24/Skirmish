@@ -231,7 +231,7 @@ namespace Engine.Animation
 
             for (int i = 0; i < boneNames.Count; i++)
             {
-                var boneName = boneNames.ElementAt(i);
+                var boneName = boneNames[i];
                 var joint = FindJoint(Root, boneName);
 
                 transforms[i] = joint.Offset * joint.GlobalTransform;

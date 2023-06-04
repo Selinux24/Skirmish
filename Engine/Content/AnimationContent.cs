@@ -27,7 +27,7 @@ namespace Engine.Content
         {
             if (Keyframes?.Any() == true)
             {
-                return $"Start: {Keyframes.First()}; End: {Keyframes.Last()}; {JointName}";
+                return $"Start: {Keyframes[0]}; End: {Keyframes[^1]}; {JointName}";
             }
             else
             {

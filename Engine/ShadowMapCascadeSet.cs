@@ -114,7 +114,7 @@ namespace Engine
             ranges.Insert(0, nearClip);
             cascadeRanges = ranges.ToArray();
 
-            cascadeTotalRange = ranges.Last();
+            cascadeTotalRange = ranges[^1];
 
             cascadeBoundCenter = Helper.CreateArray(TotalCascades, Vector3.Zero);
             cascadeBoundRadius = Helper.CreateArray(TotalCascades, 0.0f);
@@ -137,8 +137,8 @@ namespace Engine
             // Get the bounds for the shadow space
             ExtractFrustumBoundSphere(
                 camera,
-                cascadeRanges.First(),
-                cascadeRanges.Last(),
+                cascadeRanges[0],
+                cascadeRanges[^1],
                 out BoundingSphere boundingSphere);
 
             // Expand the radius to compensate for numerical errors

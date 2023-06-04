@@ -52,7 +52,7 @@ namespace Engine
         /// <summary>
         /// Scene list
         /// </summary>
-        private List<Scene> scenes = new List<Scene>();
+        private readonly List<Scene> scenes = new List<Scene>();
         /// <summary>
         /// Next scene to load
         /// </summary>
@@ -422,7 +422,6 @@ namespace Engine
                     }
 
                     scenes.Clear();
-                    scenes = null;
                 }
 
                 BuiltIn.BuiltInShaders.DisposeResources();
@@ -566,7 +565,7 @@ namespace Engine
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
         public void ReportProgress(LoadResourceProgress value)
         {
-            var activeScene = scenes?.FirstOrDefault(s => s.Active);
+            var activeScene = scenes.Find(s => s.Active);
             activeScene?.OnReportProgress(value);
         }
         /// <summary>
@@ -575,7 +574,7 @@ namespace Engine
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
         public void ReportProgressBuffers(LoadResourceProgress value)
         {
-            var activeScene = scenes?.FirstOrDefault(s => s.Active);
+            var activeScene = scenes.Find(s => s.Active);
             activeScene?.OnReportProgressBuffers(value);
         }
 
@@ -871,7 +870,7 @@ namespace Engine
                 return;
             }
 
-            var activeScene = scenes.FirstOrDefault(s => s.Active);
+            var activeScene = scenes.Find(s => s.Active);
             if (activeScene == null)
             {
                 return;

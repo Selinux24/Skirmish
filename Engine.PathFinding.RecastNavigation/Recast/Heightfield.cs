@@ -68,8 +68,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the span count</returns>
         public int GetSpanCount()
         {
-            int w = this.Width;
-            int h = this.Height;
+            int w = Width;
+            int h = Height;
 
             int spanCount = 0;
 
@@ -77,7 +77,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 for (int x = 0; x < w; ++x)
                 {
-                    for (Span s = this.Spans[x + y * w]; s != null; s = s.next)
+                    for (Span s = Spans[x + y * w]; s != null; s = s.next)
                     {
                         if (s.area != AreaTypes.RC_NULL_AREA)
                         {
@@ -96,18 +96,18 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public Span AllocSpan()
         {
             // If running out of memory, allocate new page and update the freelist.
-            if (this.FreeList == null || this.FreeList.next == null)
+            if (FreeList == null || FreeList.next == null)
             {
                 // Create new page.
                 // Allocate memory for the new pool.
                 SpanPool pool = new SpanPool
                 {
                     // Add the pool into the list of pools.
-                    next = this.Pools.Count > 0 ? this.Pools.Last() : null
+                    next = Pools.Count > 0 ? Pools[^1] : null
                 };
-                this.Pools.Add(pool);
+                Pools.Add(pool);
                 // Add new items to the free list.
-                Span freelist = this.FreeList;
+                Span freelist = FreeList;
                 int itIndex = SpanPool.RC_SPANS_PER_POOL;
                 do
                 {
@@ -116,12 +116,12 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     freelist = it;
                 }
                 while (itIndex > 0);
-                this.FreeList = pool.items[itIndex];
+                FreeList = pool.items[itIndex];
             }
 
             // Pop item from in front of the free list.
-            Span s = this.FreeList;
-            this.FreeList = this.FreeList.next;
+            Span s = FreeList;
+            FreeList = FreeList.next;
             return s;
         }
         /// <summary>
@@ -133,8 +133,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             if (cur == null) return;
 
             // Add the node in front of the free list.
-            cur.next = this.FreeList;
-            this.FreeList = cur;
+            cur.next = FreeList;
+            FreeList = cur;
         }
         /// <summary>
         /// Adds a span to the heightfield
@@ -147,7 +147,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <param name="flagMergeThr">Merge threshold</param>
         public void AddSpan(int x, int y, int smin, int smax, AreaTypes area, int flagMergeThr)
         {
-            int idx = x + y * this.Width;
+            int idx = x + y * Width;
 
             Span s = AllocSpan();
             s.smin = smin;
@@ -156,13 +156,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             s.next = null;
 
             // Empty cell, add the first span.
-            if (this.Spans[idx] == null)
+            if (Spans[idx] == null)
             {
-                this.Spans[idx] = s;
+                Spans[idx] = s;
                 return;
             }
             Span prev = null;
-            Span cur = this.Spans[idx];
+            Span cur = Spans[idx];
 
             // Insert and merge spans.
             while (cur != null)
@@ -205,7 +205,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     }
                     else
                     {
-                        this.Spans[idx] = next;
+                        Spans[idx] = next;
                     }
 
                     cur = next;
@@ -220,8 +220,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
             else
             {
-                s.next = this.Spans[idx];
-                this.Spans[idx] = s;
+                s.next = Spans[idx];
+                Spans[idx] = s;
             }
         }
 

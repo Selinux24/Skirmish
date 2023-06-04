@@ -530,7 +530,7 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 NavMesh.GetTileAtPosition(position, Input, Settings, out var tx, out var ty, out var bbox);
 
-                if (!tiles.Any(t => t.X == tx && t.Y == ty))
+                if (!tiles.Exists(t => t.X == tx && t.Y == ty))
                 {
                     UpdateTileData v = new UpdateTileData()
                     {
@@ -1096,7 +1096,7 @@ namespace Engine.PathFinding.RecastNavigation
                 debugInfo.Add(crowd, new List<CrowdAgentDebugInfo>());
             }
 
-            if (!debugInfo[crowd].Any(l => l.Agent == crowdAgent))
+            if (!debugInfo[crowd].Exists(l => l.Agent == crowdAgent))
             {
                 debugInfo[crowd].Add(new CrowdAgentDebugInfo { Agent = crowdAgent });
             }

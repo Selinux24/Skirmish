@@ -146,7 +146,7 @@ namespace Engine.PathFinding.AStar
         /// <inheritdoc/>
         public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold)
         {
-            return nodes.Any(n => n.Contains(position));
+            return nodes.Exists(n => n.Contains(position));
         }
         /// <inheritdoc/>
         public bool IsWalkable(AgentType agent, Vector3 position, float distanceThreshold, out Vector3? nearest)

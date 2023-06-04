@@ -224,8 +224,8 @@ namespace Engine.Animation
             if (clipIndex1 >= 0 && clipIndex2 >= 0)
             {
                 skeleton.GetPoseAtTime(
-                    time + offset1, animations.ElementAt(clipIndex1).Animations,
-                    time + offset2, animations.ElementAt(clipIndex2).Animations,
+                    time + offset1, animations[clipIndex1].Animations,
+                    time + offset2, animations[clipIndex2].Animations,
                     factor,
                     ref res);
             }

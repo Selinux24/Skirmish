@@ -45,8 +45,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var iPoly = mesh.Polys.ElementAt(i);
-                var region = mesh.Regs.ElementAt(i);
+                var iPoly = mesh.Polys[i];
+                var region = mesh.Regs[i];
                 var b = bounds.ElementAt(i);
 
                 // Store polygon vertices for processing.
@@ -102,7 +102,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // Find max size for a polygon area.
             for (int i = 0; i < mesh.NPolys; ++i)
             {
-                var p = mesh.Polys.ElementAt(i);
+                var p = mesh.Polys[i];
 
                 var (XMin, XMax, YMin, YMax, PolyVerts) = FindMaxSizeArea(mesh, chf, p);
 

@@ -216,7 +216,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns true if the element is in the queue. False in all other cases</returns>
         public bool Contains(TValue item)
         {
-            return items.Any(qItem => qItem.Value.Equals(item));
+            return Array.Exists(items, qItem => qItem.Value.Equals(item));
         }
         /// <summary>
         /// Copies the elements in a queue, starting from the specified index

@@ -1179,7 +1179,7 @@ namespace Collada.ModularDungeon
                     return d1.CompareTo(d2);
                 });
 
-                SetSelectedItem(items.First());
+                SetSelectedItem(items[0]);
             }
             else
             {

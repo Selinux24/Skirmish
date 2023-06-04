@@ -72,8 +72,8 @@ namespace Engine.Animation
             }
 
             Keyframes = tmp;
-            StartTime = tmp.First().Time;
-            EndTime = tmp.Last().Time;
+            StartTime = tmp[0].Time;
+            EndTime = tmp[^1].Time;
         }
 
         /// <summary>

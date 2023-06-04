@@ -708,7 +708,7 @@ namespace Engine
                     return;
                 }
 
-                if (internalComponents.Any(c => component.Id == c.Id))
+                if (internalComponents.Exists(c => component.Id == c.Id))
                 {
                     throw new EngineException($"{nameof(Scene)} => The specified component id {component.Id} already exists.");
                 }

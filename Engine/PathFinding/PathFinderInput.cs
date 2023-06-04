@@ -104,7 +104,7 @@ namespace Engine.PathFinding
         /// <returns>Returns an area</returns>
         public IGraphArea GetArea(int id)
         {
-            return areas.FirstOrDefault(a => a.Id == id);
+            return areas.Find(a => a.Id == id);
         }
         /// <summary>
         /// Deletes area by id
@@ -173,7 +173,7 @@ namespace Engine.PathFinding
         /// <returns>Returns a connection</returns>
         public IGraphConnection GetConnection(int id)
         {
-            return connections.FirstOrDefault(c => c.Id == id);
+            return connections.Find(c => c.Id == id);
         }
         /// <summary>
         /// Deletes a connection by id

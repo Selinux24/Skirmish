@@ -91,7 +91,7 @@ namespace Engine.Content.FmtObj
                 while (!rd.EndOfStream)
                 {
                     string strLine = rd.ReadLine();
-                    if (!string.IsNullOrWhiteSpace(strLine) && !strLine.StartsWith("#"))
+                    if (!string.IsNullOrWhiteSpace(strLine) && !strLine.StartsWith('#'))
                     {
                         lines.Add(strLine);
                     }

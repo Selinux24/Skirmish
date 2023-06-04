@@ -650,7 +650,7 @@ namespace Engine.UI
 
             var keys = GetKeys();
 
-            if (!keys.Any(c => c == defChar))
+            if (!Array.Exists(keys, c => c == defChar))
             {
                 defChar = keys.FirstOrDefault();
             }

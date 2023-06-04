@@ -102,7 +102,7 @@ namespace Tanks
                 return;
             }
 
-            var freeLight = lights.FirstOrDefault(l => !l.Enabled);
+            var freeLight = lights.Find(l => !l.Enabled);
             if (freeLight == null)
             {
                 return;

@@ -26,7 +26,7 @@ namespace Tanks
         /// <param name="collision">Collision vector</param>
         public static void AddFallingTree(ModelInstance tree, Vector3 collision)
         {
-            if (brokenTrees.Any(t => t == tree))
+            if (brokenTrees.Exists(t => t == tree))
             {
                 return;
             }
@@ -71,7 +71,7 @@ namespace Tanks
         /// <param name="tree">Tree</param>
         public static bool IsBroken(ModelInstance tree)
         {
-            return brokenTrees.Any(t => t == tree);
+            return brokenTrees.Exists(t => t == tree);
         }
 
         /// <summary>

@@ -161,7 +161,7 @@ namespace Engine
                 throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
             }
 
-            if (dependences.Any(i => i < -1 || i > dependences.Length - 1))
+            if (Array.Exists(dependences, i => i < -1 || i > dependences.Length - 1))
             {
                 throw new EngineException("Bad transformation dependency indices.");
             }
@@ -468,18 +468,14 @@ namespace Engine
         /// <inheritdoc/>
         public Matrix GetTransformByName(string name)
         {
-            var part = modelParts.FirstOrDefault(p => p.Name == name);
-            if (part != null)
-            {
-                return part.Manipulator.FinalTransform;
-            }
+            var part = GetModelPartByName(name);
 
-            return Manipulator.FinalTransform;
+            return part?.Manipulator.FinalTransform ?? Manipulator.FinalTransform;
         }
         /// <inheritdoc/>
         public ModelPart GetModelPartByName(string name)
         {
-            return modelParts.FirstOrDefault(p => p.Name == name);
+            return modelParts.Find(p => p.Name == name);
         }
 
         /// <summary>
@@ -489,8 +485,8 @@ namespace Engine
         {
             Logger.WriteTrace(this, $"{nameof(Model)} {Name} => LOD: {LevelOfDetail}; InvalidateCache");
 
-            boundsHelper.Invalidate();
-            geometryHelper.Invalidate();
+            boundsHelper?.Invalidate();
+            geometryHelper?.Invalidate();
         }
 
         /// <inheritdoc/>

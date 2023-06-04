@@ -601,7 +601,7 @@ namespace Engine
 
             if (instancesTmp?.Length > 0)
             {
-                var item = instancesTmp.FirstOrDefault(i =>
+                var item = Array.Find(instancesTmp, i =>
                 {
                     return i.Visible && !i.Cull(volume, out float iDistance);
                 });

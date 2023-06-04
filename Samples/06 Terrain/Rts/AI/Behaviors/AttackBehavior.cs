@@ -1,6 +1,6 @@
 ﻿using Engine;
 using SharpDX;
-using System.Linq;
+using System;
 
 namespace Terrain.Rts.AI.Behaviors
 {
@@ -101,7 +101,7 @@ namespace Terrain.Rts.AI.Behaviors
 
             Logger.WriteDebug(this, $"Agent {Agent} looking for valid targets.");
 
-            var target = Agent.GetEnemiesOnSight().FirstOrDefault(e => e != attackTarget);
+            var target = Array.Find(Agent.GetEnemiesOnSight(), e => e != attackTarget);
             if (target != null)
             {
                 Logger.WriteDebug(this, $"Agent {Agent} selected target {target}.");

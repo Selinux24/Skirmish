@@ -307,9 +307,9 @@ namespace Collada.Start
                     Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, false, "basicdungeon", null), SceneModes.DeferredLightning);
                 }
             };
-            modularDungeonTabs.TabPanels.ElementAt(basicIndex).AddChild(buttonBasic);
+            modularDungeonTabs.TabPanels[basicIndex].AddChild(buttonBasic);
 
-            var backButton = modularDungeonTabs.TabButtons.ElementAt(backIndex);
+            var backButton = modularDungeonTabs.TabButtons[backIndex];
             backButton.MouseClick += (s, o) =>
             {
                 if (o.Buttons.HasFlag(MouseButtons.Left))

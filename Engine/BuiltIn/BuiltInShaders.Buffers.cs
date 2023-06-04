@@ -448,7 +448,7 @@ namespace Engine.BuiltIn
                     CastShadow = light?.CastShadowsMarked ?? false ? 1 : 0,
                     MapIndex = light?.ShadowMapIndex ?? -1,
                     MapCount = light?.ShadowMapCount ?? 0,
-                    FromLightVP = light?.FromLightVP?.Any() == true ? Matrix.Transpose(light.FromLightVP.First()) : Matrix.Zero,
+                    FromLightVP = light?.FromLightVP?.Any() == true ? Matrix.Transpose(light.FromLightVP[0]) : Matrix.Zero,
                 };
             }
 

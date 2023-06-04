@@ -59,7 +59,7 @@ namespace Physics
         /// <inheritdoc/>
         public void Update()
         {
-            return;
+            
         }
         /// <inheritdoc/>
         public bool BroadPhaseTest(IPhysicsObject obj)
