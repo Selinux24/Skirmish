@@ -943,8 +943,7 @@ namespace Engine.Content.FmtCollada
                 .Where(i => i.BindMaterial?.TechniqueCommon?.Any() == true)
                 .SelectMany(i => i.BindMaterial.TechniqueCommon)
                 .SelectMany(t => t.InstanceMaterial)
-                .Where(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase))
-                .FirstOrDefault();
+                .FirstOrDefault(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase));
 
             target = mat?.Target?.Replace("#", "");
 
@@ -957,8 +956,7 @@ namespace Engine.Content.FmtCollada
                 .Where(i => i.BindMaterial?.TechniqueCommon?.Any() == true)
                 .SelectMany(i => i.BindMaterial.TechniqueCommon)
                 .SelectMany(t => t.InstanceMaterial)
-                .Where(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase))
-                .FirstOrDefault();
+                .FirstOrDefault(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase));
 
             target = mat?.Target?.Replace("#", "");
 

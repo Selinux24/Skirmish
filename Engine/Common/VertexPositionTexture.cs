@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
@@ -48,6 +49,29 @@ namespace Engine.Common
             }
 
             return res.ToArray();
+        }
+        /// <summary>
+        /// Converts a vertex data list to a vertex array
+        /// </summary>
+        /// <param name="vertices">Vertices list</param>
+        public static async Task<IEnumerable<IVertexData>> Convert(IEnumerable<VertexData> vertices)
+        {
+            var vArray = vertices.ToArray();
+
+            var res = new IVertexData[vArray.Length];
+
+            Parallel.For(0, vArray.Length, (index) =>
+            {
+                var v = vArray[index];
+
+                res[index] = new VertexPositionTexture
+                {
+                    Position = v.Position ?? Vector3.Zero,
+                    Texture = v.Texture ?? Vector2.Zero
+                };
+            });
+
+            return await Task.FromResult(res);
         }
 
         /// <summary>
