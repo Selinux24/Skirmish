@@ -111,6 +111,26 @@ namespace Engine
                 return model.GetDrawingData(levelOfDetail)?.SkinningData;
             }
         }
+        /// <summary>
+        /// Culling volume for culling test
+        /// </summary>
+        public CullingVolumeTypes CullingVolumeType
+        {
+            get
+            {
+                return model.CullingVolumeType;
+            }
+        }
+        /// <summary>
+        /// Collider type for collision tests
+        /// </summary>
+        public ColliderTypes ColliderType
+        {
+            get
+            {
+                return model.ColliderType;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -345,7 +365,7 @@ namespace Engine
         /// <inheritdoc/>
         public virtual bool Cull(ICullingVolume volume, out float distance)
         {
-            return boundsHelper.Cull(Manipulator, model.CullingVolumeType, volume, out distance);
+            return boundsHelper.Cull(Manipulator, CullingVolumeType, volume, out distance);
         }
 
         /// <summary>

@@ -1058,6 +1058,7 @@ namespace SceneTest.SceneTest
             var cameraFrustum = Camera.Frustum;
 
             var cameraLines = Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, cameraFrustum));
+            volumeDrawer.AddPrimitives(Color.White, cameraLines);
 
             var models = GetComponents<Model>();
 
@@ -1085,7 +1086,31 @@ namespace SceneTest.SceneTest
                 }
             }
 
-            volumeDrawer.AddPrimitives(Color.White, cameraLines);
+            var instances = GetComponents<ModelInstanced>().SelectMany(m => m.GetInstances());
+
+            foreach (var model in instances)
+            {
+                if (model.CullingVolumeType == CullingVolumeTypes.BoxVolume)
+                {
+                    var box = model.GetBoundingBox();
+
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, box));
+
+                    var contains = cameraFrustum.Contains(box);
+
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
+                }
+                else if (model.CullingVolumeType == CullingVolumeTypes.SphericVolume)
+                {
+                    var sph = model.GetBoundingSphere();
+
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, sph, 16, 3));
+
+                    var contains = cameraFrustum.Contains(sph);
+
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
+                }
+            }
 
             volumeDrawer.Active = volumeDrawer.Visible = true;
 
