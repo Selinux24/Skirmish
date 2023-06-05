@@ -91,7 +91,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             foreach (var t in triangles)
             {
-                var bbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
+                var bbox = SharpDXExtensions.BoundingBoxFromPoints(t.GetVertices().ToArray());
 
                 items.Add(new BoundsItem
                 {

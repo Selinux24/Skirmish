@@ -50,7 +50,7 @@ namespace Engine.Collections.Generic
             var nodeItems = items
                 .Where(t =>
                 {
-                    var tbox = BoundingBox.FromPoints(t.GetVertices().ToArray());
+                    var tbox = SharpDXExtensions.BoundingBoxFromPoints(t.GetVertices());
 
                     return Intersection.BoxContainsBox(bbox, tbox) != ContainmentType.Disjoint;
                 })

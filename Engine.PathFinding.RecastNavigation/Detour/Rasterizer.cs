@@ -82,7 +82,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             // Calculate the bounding box of the triangle.
             var triverts = item.Triangle.GetVertices();
-            var t = BoundingBox.FromPoints(triverts.ToArray());
+            var t = SharpDXExtensions.BoundingBoxFromPoints(triverts.ToArray());
 
             // If the triangle does not touch the bbox of the heightfield, skip the triagle.
             if (b.Contains(t) == ContainmentType.Disjoint)

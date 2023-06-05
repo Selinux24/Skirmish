@@ -67,10 +67,10 @@ namespace Engine.Common
                 var distinctPoints = points.ToArray();
 
                 //Initialize the identity sphere
-                boundingSphere = initialSphere = BoundingSphere.FromPoints(distinctPoints);
+                boundingSphere = initialSphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
 
                 //Initialize the identity box
-                boundingBox = initialAabb = BoundingBox.FromPoints(distinctPoints);
+                boundingBox = initialAabb = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
 
                 //Initialize the identity obb
                 orientedBox = initialObb = new OrientedBoundingBox(initialAabb);
@@ -114,7 +114,7 @@ namespace Engine.Common
         {
             if (updateBoundingBox || refresh)
             {
-                boundingBox = initialAabb.SetTransform(manipulator.FinalTransform);
+                boundingBox = GetOrientedBoundingBox(manipulator, refresh).GetBoundingBox();
 
                 updateBoundingBox = false;
             }
@@ -131,7 +131,8 @@ namespace Engine.Common
         {
             if (updateOrientedBox || refresh)
             {
-                orientedBox = initialObb.SetTransform(manipulator.FinalTransform);
+                orientedBox = new OrientedBoundingBox(initialAabb);
+                orientedBox.Transform(manipulator.FinalTransform);
 
                 updateOrientedBox = false;
             }
@@ -170,7 +171,10 @@ namespace Engine.Common
         {
             distance = float.MaxValue;
 
-            bool cull = volume.Contains(GetBoundingSphere(manipulator)) == ContainmentType.Disjoint;
+            var sphere = GetBoundingSphere(manipulator);
+            var contains = volume.Contains(sphere);
+
+            bool cull = contains == ContainmentType.Disjoint;
             if (!cull)
             {
                 var eyePosition = volume.Position;
@@ -191,7 +195,10 @@ namespace Engine.Common
         {
             distance = float.MaxValue;
 
-            bool cull = volume.Contains(GetBoundingBox(manipulator)) == ContainmentType.Disjoint;
+            var box = GetBoundingBox(manipulator);
+            var contains = volume.Contains(box);
+
+            bool cull = contains == ContainmentType.Disjoint;
             if (!cull)
             {
                 var eyePosition = volume.Position;

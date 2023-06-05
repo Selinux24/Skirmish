@@ -1605,7 +1605,7 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsSphere(IEnumerable<Triangle> mesh, BoundingSphere sphere)
         {
-            BoundingBox mbox = BoundingBox.FromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+            var mbox = SharpDXExtensions.BoundingBoxFromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
 
             return mbox.Contains(ref sphere);
         }
@@ -1617,7 +1617,7 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsBox(IEnumerable<Triangle> mesh, BoundingBox box)
         {
-            BoundingBox mbox = BoundingBox.FromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+            var mbox = SharpDXExtensions.BoundingBoxFromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
 
             return mbox.Contains(ref box);
         }
@@ -1629,7 +1629,7 @@ namespace Engine.Common
         /// <returns>Returns the type of containment the two objects have between them</returns>
         public static ContainmentType MeshContainsFrustum(IEnumerable<Triangle> mesh, BoundingFrustum frustum)
         {
-            BoundingBox mbox = BoundingBox.FromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
+            var mbox = SharpDXExtensions.BoundingBoxFromPoints(mesh.SelectMany(t => t.GetVertices()).ToArray());
 
             return BoxContainsFrustum(mbox, frustum);
         }
@@ -1642,8 +1642,8 @@ namespace Engine.Common
         public static ContainmentType MeshContainsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2)
         {
             // A mesh is not a volume. Calculate the bounding volumes of the tow meshes
-            var bbox1 = BoundingBox.FromPoints(mesh1.SelectMany(t => t.GetVertices()).ToArray());
-            var bbox2 = BoundingBox.FromPoints(mesh2.SelectMany(t => t.GetVertices()).ToArray());
+            var bbox1 = SharpDXExtensions.BoundingBoxFromPoints(mesh1.SelectMany(t => t.GetVertices()).ToArray());
+            var bbox2 = SharpDXExtensions.BoundingBoxFromPoints(mesh2.SelectMany(t => t.GetVertices()).ToArray());
 
             if (bbox1.Contains(ref bbox2) == ContainmentType.Disjoint)
             {

@@ -75,7 +75,7 @@ namespace Engine.PhysicsTests
         {
             Vector3 extents = Vector3.Up;
             BoundingBox sourceBox = new BoundingBox(-extents, extents);
-            BoundingSphere sphere = BoundingSphere.FromPoints(sourceBox.GetVertices().ToArray());
+            BoundingSphere sphere = SharpDXExtensions.BoundingSphereFromPoints(sourceBox.GetVertices().ToArray());
             OrientedBoundingBox obb = new OrientedBoundingBox(sourceBox.GetVertices().ToArray());
 
             BoxCollider box = new BoxCollider(extents);
@@ -147,8 +147,8 @@ namespace Engine.PhysicsTests
             Triangle[] distinctTris = allTris.Distinct().ToArray();
             Vector3[] allPoints = allTris.SelectMany(t => t.GetVertices()).ToArray();
             Vector3[] distinctPoints = allPoints.Distinct().ToArray();
-            BoundingSphere sphere = BoundingSphere.FromPoints(distinctPoints);
-            BoundingBox box = BoundingBox.FromPoints(distinctPoints);
+            BoundingSphere sphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
+            BoundingBox box = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
             OrientedBoundingBox obb = new OrientedBoundingBox(distinctPoints);
 
             ConvexMeshCollider soup = new ConvexMeshCollider(allTris);

@@ -135,7 +135,7 @@ namespace Engine
                 return;
             }
 
-            boundingVolume = BoundingSphere.FromPoints(activeDecals.ToArray());
+            boundingVolume = SharpDXExtensions.BoundingSphereFromPoints(activeDecals.ToArray());
         }
 
         /// <inheritdoc/>

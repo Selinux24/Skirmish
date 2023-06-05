@@ -828,7 +828,7 @@ namespace Collada.ModularDungeon
                 return;
             }
 
-            var boxes = items.Select(i => SharpDX.BoundingBox.FromPoints(i.GetPoints().ToArray()));
+            var boxes = items.Select(i => SharpDXExtensions.BoundingBoxFromPoints(i.GetPoints().ToArray()));
             bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
         }
         private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)

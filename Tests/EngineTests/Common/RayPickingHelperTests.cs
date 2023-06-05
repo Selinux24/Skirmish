@@ -98,13 +98,13 @@ namespace Engine.Common.Tests
             var p2 = t2.SelectMany(t => t.GetVertices()).ToArray();
             var p3 = t3.SelectMany(t => t.GetVertices()).ToArray();
 
-            bsph1 = BoundingSphere.FromPoints(p1);
-            bsph2 = BoundingSphere.FromPoints(p2);
-            bsph3 = BoundingSphere.FromPoints(p3);
+            bsph1 = SharpDXExtensions.BoundingSphereFromPoints(p1);
+            bsph2 = SharpDXExtensions.BoundingSphereFromPoints(p2);
+            bsph3 = SharpDXExtensions.BoundingSphereFromPoints(p3);
 
-            bbox1 = BoundingBox.FromPoints(p1);
-            bbox2 = BoundingBox.FromPoints(p2);
-            bbox3 = BoundingBox.FromPoints(p3);
+            bbox1 = SharpDXExtensions.BoundingBoxFromPoints(p1);
+            bbox2 = SharpDXExtensions.BoundingBoxFromPoints(p2);
+            bbox3 = SharpDXExtensions.BoundingBoxFromPoints(p3);
 
             var bbox1Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox1);
             var bbox2Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox2);

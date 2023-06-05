@@ -223,6 +223,42 @@ namespace Engine
         }
 
         /// <summary>
+        /// Constructs a BoundingSphere that fully contains the given points.
+        /// </summary>
+        /// <param name="points">Point list</param>
+        public static BoundingSphere BoundingSphereFromPoints(IEnumerable<Vector3> points)
+        {
+            return BoundingSphere.FromPoints(points.ToArray());
+        }
+        /// <summary>
+        /// Constructs a BoundingBox that fully contains the given points.
+        /// </summary>
+        /// <param name="points">Point list</param>
+        public static BoundingBox BoundingBoxFromPoints(IEnumerable<Vector3> points)
+        {
+            var box = BoundingBox.FromPoints(points.ToArray());
+
+            return box.Normalize();
+        }
+
+        /// <summary>
+        /// Normalizes the minimum and maximum bounding box limits.
+        /// </summary>
+        /// <param name="box">Bounding box</param>
+        /// <returns>Returns a bounding box which assures that the minimum vector contains the minimum values, and the maximum vector contains the maximum values</returns>
+        public static BoundingBox Normalize(this BoundingBox box)
+        {
+            var newBox = box;
+
+            var min = newBox.Minimum;
+            var max = newBox.Maximum;
+            newBox.Minimum = new Vector3(Math.Min(max.X, min.X), Math.Min(max.Y, min.Y), Math.Min(max.Z, min.Z));
+            newBox.Maximum = new Vector3(Math.Max(max.X, min.X), Math.Max(max.Y, min.Y), Math.Max(max.Z, min.Z));
+
+            return newBox;
+        }
+
+        /// <summary>
         /// Gets a sphere transformed by the given matrix
         /// </summary>
         /// <param name="sphere">Sphere</param>
@@ -263,8 +299,9 @@ namespace Engine
             // Gets the new position
             var min = Vector3.TransformCoordinate(box.Minimum, transform);
             var max = Vector3.TransformCoordinate(box.Maximum, transform);
+            var trnBox = new BoundingBox(min, max);
 
-            return new BoundingBox(min, max);
+            return trnBox.Normalize();
         }
         /// <summary>
         /// Gets a oriented bounding box transformed by the given matrix

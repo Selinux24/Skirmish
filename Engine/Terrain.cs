@@ -151,8 +151,8 @@ namespace Engine
                     }
                 }
 
-                var bbox = BoundingBox.FromPoints(vertices.SelectMany(v => v.GetVertices()).Distinct().ToArray());
-                var items = vertices.Select(v => (BoundingBox.FromPoints(v.GetVertices().ToArray()), v));
+                var bbox = SharpDXExtensions.BoundingBoxFromPoints(vertices.SelectMany(v => v.GetVertices()).Distinct().ToArray());
+                var items = vertices.Select(v => (SharpDXExtensions.BoundingBoxFromPoints(v.GetVertices().ToArray()), v));
                 res.drawingQuadTree = new QuadTree<VertexData>(bbox, items, LODLevels);
 
                 //Populate nodes dictionary

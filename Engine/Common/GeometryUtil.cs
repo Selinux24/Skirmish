@@ -2172,7 +2172,7 @@ namespace Engine.Common
         {
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return BoundingBox.FromPoints(points);
+            return SharpDXExtensions.BoundingBoxFromPoints(points);
         }
         /// <summary>
         /// Generates a bounding sphere from a vertex item list
@@ -2183,7 +2183,7 @@ namespace Engine.Common
         {
             var points = vertexListItems.SelectMany(v => v.GetVertices()).Distinct().ToArray();
 
-            return BoundingSphere.FromPoints(points);
+            return SharpDXExtensions.BoundingSphereFromPoints(points);
         }
         /// <summary>
         /// Generates a bounding cylinder from a vertex item list

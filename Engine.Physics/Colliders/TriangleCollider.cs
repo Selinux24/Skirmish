@@ -28,8 +28,8 @@ namespace Engine.Physics.Colliders
 
             vertices = triangle.GetVertices().ToArray();
 
-            boundingBox = BoundingBox.FromPoints(vertices);
-            boundingSphere = BoundingSphere.FromPoints(vertices);
+            boundingBox = SharpDXExtensions.BoundingBoxFromPoints(vertices);
+            boundingSphere = SharpDXExtensions.BoundingSphereFromPoints(vertices);
             orientedBoundingBox = new OrientedBoundingBox(boundingBox);
         }
 

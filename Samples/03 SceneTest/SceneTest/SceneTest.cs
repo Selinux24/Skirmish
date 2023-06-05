@@ -57,9 +57,10 @@ namespace SceneTest.SceneTest
 
         private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
 
-        private PrimitiveListDrawer<Line3D> lightsVolumeDrawer = null;
-        private bool drawDrawVolumes = false;
-        private bool drawCullVolumes = false;
+        private PrimitiveListDrawer<Line3D> volumeDrawer = null;
+        private bool drawLightDrawVolumes = false;
+        private bool drawLightCullVolumes = false;
+        private bool drawModelCullVolumes = false;
 
         private bool gameReady = false;
 
@@ -798,7 +799,7 @@ namespace SceneTest.SceneTest
         private async Task InitializeDebug()
         {
             var desc = new PrimitiveListDrawerDescription<Line3D>() { Count = 20000 };
-            lightsVolumeDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
+            volumeDrawer = await AddComponentUI<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>(
                 "DebugVolumes",
                 "DebugLightsVolumeDrawer",
                 desc);
@@ -940,19 +941,28 @@ namespace SceneTest.SceneTest
         {
             if (Game.Input.KeyJustReleased(Keys.F1))
             {
-                drawDrawVolumes = !drawDrawVolumes;
-                drawCullVolumes = false;
+                drawLightDrawVolumes = !drawLightDrawVolumes;
+                drawLightCullVolumes = false;
+                drawModelCullVolumes = false;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F2))
             {
-                drawCullVolumes = !drawCullVolumes;
-                drawDrawVolumes = false;
+                drawLightCullVolumes = !drawLightCullVolumes;
+                drawLightDrawVolumes = false;
+                drawModelCullVolumes = false;
+            }
+
+            if (Game.Input.KeyJustReleased(Keys.F3))
+            {
+                drawModelCullVolumes = !drawModelCullVolumes;
+                drawLightDrawVolumes = false;
+                drawLightCullVolumes = false;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = false;
+                volumeDrawer.Active = volumeDrawer.Visible = false;
             }
 
             if (Game.Input.KeyJustReleased(Keys.F6))
@@ -1002,57 +1012,102 @@ namespace SceneTest.SceneTest
         }
         private void UpdateLightDrawingVolumes()
         {
-            lightsVolumeDrawer.Clear();
+            volumeDrawer.Clear();
 
             var spotLines = Lights.SpotLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(10) });
             foreach (var spot in spotLines)
             {
-                lightsVolumeDrawer.AddPrimitives(spot.Color, spot.Volume);
+                volumeDrawer.AddPrimitives(spot.Color, spot.Volume);
             }
 
             var pointLines = Lights.PointLights.Select(l => new { Color = new Color4(l.DiffuseColor, 0.15f), Volume = l.GetVolume(12, 5) });
             foreach (var point in pointLines)
             {
-                lightsVolumeDrawer.AddPrimitives(point.Color, point.Volume);
+                volumeDrawer.AddPrimitives(point.Color, point.Volume);
             }
 
             var pBoxes = pManager.ParticleSystems.Select(s => s.Emitter.GetBoundingBox());
             var pLines = Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, pBoxes));
-            lightsVolumeDrawer.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
-            lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
+            volumeDrawer.AddPrimitives(new Color4(0, 0, 1, 0.75f), pLines);
+            volumeDrawer.Active = volumeDrawer.Visible = true;
         }
         private void UpdateLightCullingVolumes()
         {
-            lightsVolumeDrawer.Clear();
+            volumeDrawer.Clear();
 
             foreach (var spot in Lights.SpotLights)
             {
                 var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, spot.BoundingSphere, 12, 5));
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
             foreach (var point in Lights.PointLights)
             {
                 var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, point.BoundingSphere, 12, 5));
 
-                lightsVolumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
+                volumeDrawer.AddPrimitives(new Color4(Color.Red.RGB(), 0.55f), lines);
             }
 
-            lightsVolumeDrawer.Active = lightsVolumeDrawer.Visible = true;
+            volumeDrawer.Active = volumeDrawer.Visible = true;
+        }
+        private void UpdateModelCullingVolumes()
+        {
+            volumeDrawer.Clear();
+
+            var cameraFrustum = Camera.Frustum;
+
+            var cameraLines = Line3D.CreateFromVertices(GeometryUtil.CreateFrustum(Topology.LineList, cameraFrustum));
+
+            var models = GetComponents<Model>();
+
+            foreach (var model in models)
+            {
+                if (model.CullingVolumeType == CullingVolumeTypes.BoxVolume)
+                {
+                    var box = model.GetBoundingBox();
+
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateBox(Topology.LineList, box));
+
+                    var contains = cameraFrustum.Contains(box);
+
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
+                }
+                else if (model.CullingVolumeType == CullingVolumeTypes.SphericVolume)
+                {
+                    var sph = model.GetBoundingSphere();
+
+                    var lines = Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, sph, 16, 3));
+
+                    var contains = cameraFrustum.Contains(sph);
+
+                    volumeDrawer.AddPrimitives(contains == ContainmentType.Disjoint ? Color.Gray : Color.Green, lines);
+                }
+            }
+
+            volumeDrawer.AddPrimitives(Color.White, cameraLines);
+
+            volumeDrawer.Active = volumeDrawer.Visible = true;
+
+            drawModelCullVolumes = false;
         }
         private void UpdateDebug()
         {
             runtime.Text = Game.RuntimeText;
 
-            if (drawDrawVolumes)
+            if (drawLightDrawVolumes)
             {
                 UpdateLightDrawingVolumes();
             }
 
-            if (drawCullVolumes)
+            if (drawLightCullVolumes)
             {
                 UpdateLightCullingVolumes();
+            }
+
+            if (drawModelCullVolumes)
+            {
+                UpdateModelCullingVolumes();
             }
         }
 
