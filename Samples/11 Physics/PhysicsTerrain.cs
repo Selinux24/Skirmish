@@ -59,7 +59,7 @@ namespace Physics
         /// <inheritdoc/>
         public void Update()
         {
-            
+            // Terrain is static, no update needed
         }
         /// <inheritdoc/>
         public bool BroadPhaseTest(IPhysicsObject obj)

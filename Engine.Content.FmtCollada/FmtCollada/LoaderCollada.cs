@@ -939,74 +939,30 @@ namespace Engine.Content.FmtCollada
 
         private static bool FindMaterialTarget(string material, IEnumerable<InstanceGeometry> instances, out string target)
         {
-            target = null;
+            var mat = instances?
+                .Where(i => i.BindMaterial?.TechniqueCommon?.Any() == true)
+                .SelectMany(i => i.BindMaterial.TechniqueCommon)
+                .SelectMany(t => t.InstanceMaterial)
+                .Where(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault();
 
-            if (instances?.Any() != true)
-            {
-                return false;
-            }
+            target = mat?.Target?.Replace("#", "");
 
-            foreach (var instance in instances)
-            {
-                if (instance.BindMaterial?.TechniqueCommon?.Any() != true)
-                {
-                    continue;
-                }
-
-                foreach (var technique in instance.BindMaterial.TechniqueCommon)
-                {
-                    if (technique.InstanceMaterial?.Any() != true)
-                    {
-                        continue;
-                    }
-
-                    var instanceMaterial = Array.Find(technique.InstanceMaterial, i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
-                    if (instanceMaterial != null)
-                    {
-                        target = instanceMaterial.Target?.Replace("#", "");
-
-                        return target != null;
-                    }
-                }
-            }
-
-            return false;
+            return target != null;
         }
 
         private static bool FindMaterialTarget(string material, IEnumerable<InstanceController> instances, out string target)
         {
-            target = null;
+            var mat = instances?
+                .Where(i => i.BindMaterial?.TechniqueCommon?.Any() == true)
+                .SelectMany(i => i.BindMaterial.TechniqueCommon)
+                .SelectMany(t => t.InstanceMaterial)
+                .Where(m => string.Equals(material, m.Symbol, StringComparison.OrdinalIgnoreCase))
+                .FirstOrDefault();
 
-            if (instances?.Any() != true)
-            {
-                return false;
-            }
+            target = mat?.Target?.Replace("#", "");
 
-            foreach (var instance in instances)
-            {
-                if (instance.BindMaterial?.TechniqueCommon?.Any() != true)
-                {
-                    continue;
-                }
-
-                foreach (var technique in instance.BindMaterial.TechniqueCommon)
-                {
-                    if (technique.InstanceMaterial?.Any() != true)
-                    {
-                        continue;
-                    }
-
-                    var instanceMaterial = Array.Find(technique.InstanceMaterial, i => string.Equals(material, i.Symbol, StringComparison.OrdinalIgnoreCase));
-                    if (instanceMaterial != null)
-                    {
-                        target = instanceMaterial.Target?.Replace("#", "");
-
-                        return target != null;
-                    }
-                }
-            }
-
-            return false;
+            return target != null;
         }
 
         #endregion
