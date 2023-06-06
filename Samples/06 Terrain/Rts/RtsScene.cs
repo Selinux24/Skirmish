@@ -1726,6 +1726,31 @@ namespace Terrain.Rts
                 walkMode = !walkMode;
             }
 
+            if (Game.Input.KeyJustReleased(Keys.D2))
+            {
+                terrain.Visible = !terrain.Visible;
+            }
+            if (Game.Input.KeyJustReleased(Keys.D3))
+            {
+                gardener.Visible = !gardener.Visible;
+            }
+            if (Game.Input.KeyJustReleased(Keys.D4))
+            {
+                tree1.Visible = !tree1.Visible;
+                tree2.Visible = !tree2.Visible;
+            }
+            if (Game.Input.KeyJustReleased(Keys.D5))
+            {
+                rocks.Visible = !rocks.Visible;
+            }
+            if (Game.Input.KeyJustReleased(Keys.D6))
+            {
+                garage.Visible = !garage.Visible;
+                heliport.Visible = !heliport.Visible;
+                building.Visible = !building.Visible;
+                obelisk.Visible = !obelisk.Visible;
+            }
+
             if (Game.Input.MouseButtonPressed(MouseButtons.Left))
             {
                 var visible = terrainGraphDrawer.Visible;

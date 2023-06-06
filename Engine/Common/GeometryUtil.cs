@@ -1641,15 +1641,16 @@ namespace Engine.Common
 
                 var count = vertList.Count / sliceCount;
 
-                for (uint r = 0; r < (uint)count; r++)
+                for (int r = 0; r < count; r++)
                 {
-                    for (uint i = 0; i < (uint)sliceCount; i++)
+                    for (int i = 0; i < sliceCount; i++)
                     {
-                        uint i0 = ((uint)sliceCount * r) + i;
-                        uint i1 = ((uint)sliceCount * r) + ((i + 1) % (uint)sliceCount);
+                        int index = sliceCount * r;
+                        int i0 = index + i;
+                        int i1 = index + ((i + 1) % sliceCount);
 
-                        indexList.Add(i0);
-                        indexList.Add(i1);
+                        indexList.Add((uint)i0);
+                        indexList.Add((uint)i1);
                     }
                 }
 

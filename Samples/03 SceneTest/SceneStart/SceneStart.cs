@@ -303,9 +303,33 @@ namespace SceneTest.SceneStart
         }
         private void UpdateInput()
         {
-            if (Game.Input.KeyJustReleased(Keys.Escape))
+            if (Game.Input.KeyJustReleased(Keys.Escape) || Game.Input.KeyJustReleased(Keys.E))
             {
                 ClosePanel();
+            }
+            else if (Game.Input.KeyJustReleased(Keys.M))
+            {
+                Game.SetScene<SceneMaterials.SceneMaterials>();
+            }
+            else if (Game.Input.KeyJustReleased(Keys.W))
+            {
+                Game.SetScene<SceneWater.SceneWater>();
+            }
+            else if (Game.Input.KeyJustReleased(Keys.S))
+            {
+                Game.SetScene<SceneStencilPass.SceneStencilPass>();
+            }
+            else if (Game.Input.KeyJustReleased(Keys.L))
+            {
+                Game.SetScene<SceneLights.SceneLights>();
+            }
+            else if (Game.Input.KeyJustReleased(Keys.C))
+            {
+                Game.SetScene<SceneCascadedShadows.SceneCascadedShadows>();
+            }
+            else if (Game.Input.KeyJustReleased(Keys.T))
+            {
+                Game.SetScene<SceneTest.SceneTest>();
             }
         }
 
