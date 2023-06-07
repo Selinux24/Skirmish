@@ -113,7 +113,7 @@ namespace Engine
             /// <summary>
             /// Draws the scenery patch shadows
             /// </summary>
-            /// <param name="sceneryEffect">Scenery effect</param>
+            /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
             public void DrawSceneryShadows(DrawContextShadows context, BufferManager bufferManager)
             {
@@ -144,7 +144,8 @@ namespace Engine
             /// </summary>
             /// <param name="context">Context</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawScenery(DrawContext context, BufferManager bufferManager)
+            /// <param name="blendMode">Blend mode</param>
+            public void DrawScenery(DrawContext context, BufferManager bufferManager, BlendModes blendMode)
             {
                 int count = 0;
 
@@ -162,7 +163,7 @@ namespace Engine
 
                         var material = DrawingData.Materials[materialName];
 
-                        bool draw = context.ValidateDraw(BlendModes.Default, material.Material.IsTransparent);
+                        bool draw = context.ValidateDraw(blendMode, material.Material.IsTransparent);
                         if (!draw)
                         {
                             continue;
@@ -529,7 +530,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
 
-                patchDictionary[nodeId]?.DrawScenery(context, BufferManager);
+                patchDictionary[nodeId]?.DrawScenery(context, BufferManager, BlendMode);
             }
         }
 

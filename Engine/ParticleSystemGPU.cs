@@ -234,7 +234,7 @@ namespace Engine
         public void Draw(DrawContext context)
         {
             bool isTransparent = parameters.BlendMode.HasFlag(BlendModes.Alpha) || parameters.BlendMode.HasFlag(BlendModes.Transparent);
-            bool draw = context.ValidateDraw(BlendModes.Default, isTransparent);
+            bool draw = context.ValidateDraw(parameters.BlendMode, isTransparent);
             if (!draw)
             {
                 return;

@@ -142,7 +142,7 @@ namespace Engine
         {
             CastShadow = ShadowCastingAlgorihtms.Directional;
             DeferredEnabled = false;
-            BlendMode = BlendModes.Transparent;
+            BlendMode = BlendModes.Alpha;
         }
     }
 
