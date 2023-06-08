@@ -206,6 +206,9 @@
     <Content Include="ModularDungeon\Resources\Characters\Rat\Rat_d.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\basicDungeon.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="ModularDungeon\Resources\OnePageDungeons\desert_catacombs_of_the_golden_witch.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

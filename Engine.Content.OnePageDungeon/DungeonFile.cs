@@ -1,29 +1,27 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System.IO;
-
+﻿
 namespace Engine.Content.OnePageDungeon
 {
+    /// <summary>
+    /// Dugeon file helper
+    /// </summary>
     public static class DungeonFile
     {
+        /// <summary>
+        /// Loads a dungeon from the specified file
+        /// </summary>
+        /// <param name="fileName">File name</param>
         public static Dungeon Load(string fileName)
         {
-            var obj = JsonConvert.DeserializeObject<Dungeon>(File.ReadAllText(fileName));
-
-            return obj;
+            return SerializationHelper.DeserializeJsonFromFile<Dungeon>(fileName);
         }
-
+        /// <summary>
+        /// Saves a dungeon to the specified file
+        /// </summary>
+        /// <param name="fileName">File name</param>
+        /// <param name="dungeon">Dungeon to save</param>
         public static void Save(string fileName, Dungeon dungeon)
         {
-            JsonSerializerSettings settings = new JsonSerializerSettings()
-            {
-                Formatting = Formatting.Indented,
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-            };
-
-            string json = JsonConvert.SerializeObject(dungeon, settings);
-
-            File.WriteAllText(fileName, json);
+            SerializationHelper.SerializeJsonToFile(dungeon, fileName);
         }
     }
 }

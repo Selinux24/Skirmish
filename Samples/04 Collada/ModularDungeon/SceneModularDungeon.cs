@@ -5,8 +5,8 @@ using Engine.BuiltIn.PostProcess;
 using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj;
+using Engine.Content.OnePageDungeon;
 using Engine.Modular;
-using Engine.Modular.Persistence;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
 using Engine.UI;
@@ -27,6 +27,7 @@ namespace Collada.ModularDungeon
         private readonly string resourcesFolder = "modulardungeon/resources";
         private readonly bool isOnePageDungeon;
         private readonly string dungeonDefFile;
+        private readonly string dungeonCnfFile;
         private readonly string dungeonMapFile;
 
         private Sprite dungeonMap = null;
@@ -105,11 +106,12 @@ namespace Collada.ModularDungeon
             }
         }
 
-        public SceneModularDungeon(Game game, bool isOnePageDungeon, string dungeonDefFile, string dungeonMapFile)
+        public SceneModularDungeon(Game game, bool isOnePageDungeon, string dungeonDefFile, string dungeonCnfFile, string dungeonMapFile)
             : base(game)
         {
             this.isOnePageDungeon = isOnePageDungeon;
             this.dungeonDefFile = dungeonDefFile;
+            this.dungeonCnfFile = dungeonCnfFile;
             this.dungeonMapFile = dungeonMapFile;
 
             Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(SceneModularDungeon); });
@@ -424,7 +426,7 @@ namespace Collada.ModularDungeon
             {
                 string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
 
-                desc = await LoadOnePageDungeon(Path.Combine(onePageResourcesFolder, dungeonDefFile));
+                desc = await LoadOnePageDungeon(Path.Combine(onePageResourcesFolder, dungeonDefFile), Path.Combine(onePageResourcesFolder, dungeonCnfFile));
             }
             else
             {
@@ -436,95 +438,24 @@ namespace Collada.ModularDungeon
 
             SetGround(scenery, true);
         }
-        private async Task<ModularSceneryDescription> LoadOnePageDungeon(string fileName)
+        private async Task<ModularSceneryDescription> LoadOnePageDungeon(string dungeonFileName, string dungeonConfigFile)
         {
-            var dn = Engine.Content.OnePageDungeon.DungeonFile.Load(fileName);
+            var dn = DungeonFile.Load(dungeonFileName);
 
-            ObjectStateTransition toOpen = new ObjectStateTransition
-            {
-                State = "open",
-            };
-            ObjectStateTransition toClose = new ObjectStateTransition
-            {
-                State = "close",
-            };
+            var config = DungeonAssetConfigurationFile.Load(dungeonConfigFile);
+            var content = ContentDescription.FromFile(resourcesFolder, config.AssetsFile);
 
-            ObjectState openState = new ObjectState
-            {
-                Name = "open",
-                Transitions = new[] { toClose },
-            };
-            ObjectState closeState = new ObjectState
-            {
-                Name = "close",
-                Transitions = new[] { toOpen },
-            };
-
-            ObjectAction openAction = new ObjectAction
-            {
-                Name = "open",
-                StateFrom = "close",
-                StateTo = "open",
-                AnimationPlan = "open",
-                Items = new[] { new ObjectActionItem { Action = "open" } },
-            };
-
-            ObjectAction closeAction = new ObjectAction
-            {
-                Name = "close",
-                StateFrom = "open",
-                StateTo = "close",
-                AnimationPlan = "close",
-                Items = new[] { new ObjectActionItem { Action = "close" } },
-            };
-
-            ObjectAnimationPlan openPlan = new ObjectAnimationPlan
-            {
-                Name = "open",
-                Paths = new[] { new ObjectAnimationPath { Name = "open" } }
-            };
-            ObjectAnimationPlan closePlan = new ObjectAnimationPlan
-            {
-                Name = "close",
-                Paths = new[] { new ObjectAnimationPath { Name = "close" } }
-            };
-
-            Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]> doors = new Dictionary<Engine.Content.OnePageDungeon.DoorTypes, string[]>
-            {
-                { Engine.Content.OnePageDungeon.DoorTypes.Normal, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
-                { Engine.Content.OnePageDungeon.DoorTypes.Archway, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
-                { Engine.Content.OnePageDungeon.DoorTypes.Stairs, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
-                { Engine.Content.OnePageDungeon.DoorTypes.Portcullis, new[] { "Dn_Jail_1", "Dn_Door_2" } },
-                { Engine.Content.OnePageDungeon.DoorTypes.Special, new[] { "Dn_WoodenDoor_1", "Dn_Door_1" } },
-                { Engine.Content.OnePageDungeon.DoorTypes.Secret, new[] { "Dn_Jail_1", "Dn_Door_2" } },
-                { Engine.Content.OnePageDungeon.DoorTypes.Barred, new[] { "Dn_Jail_1", "Dn_Door_2" } }
-            };
-
-            var config = new Engine.Content.OnePageDungeon.DungeonAssetConfiguration()
-            {
-                PositionDelta = 2,
-
-                Floors = new[] { "Dn_Floor_1" },
-                Ceilings = new[] { "Dn_Ceiling_1" },
-                Walls = new[] { "Dn_Wall_1", "Dn_Wall_1", "Dn_Wall_1", "Dn_Wall_2" },
-                Columns = new[] { "Dn_Column_1", "Dn_Column_1", "Dn_Column_2", "Dn_Column_2", "Dn_Column_1" },
-
-                Doors = doors,
-                DoorAnimationPlans = new[] { openPlan, closePlan },
-                DoorStates = new[] { closeState, openState },
-                DoorActions = new[] { closeAction, openAction },
-
-                RandomSeed = 1000,
-            };
+            var assetsMap = DungeonCreator.CreateAssets(dn, config);
+            var levelsMap = DungeonCreator.CreateLevels(dn, config);
 
             var res = new ModularSceneryDescription()
             {
                 UseAnisotropic = true,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile(resourcesFolder, "basicdungeon/assets.json"),
-                AssetsConfiguration = Engine.Content.OnePageDungeon.DungeonCreator.CreateAssets(dn, config),
-                Levels = Engine.Content.OnePageDungeon.DungeonCreator.CreateLevels(dn, config),
+                Content = content,
+                AssetsConfiguration = assetsMap,
+                Levels = levelsMap,
             };
 
             return await Task.FromResult(res);

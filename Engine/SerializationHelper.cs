@@ -235,16 +235,30 @@ namespace Engine
         }
 
         /// <summary>
-        /// Creates a new Json serializer
+        /// Creates a new Json serializer for readers
         /// </summary>
         /// <returns>Returns a Json serializer</returns>
-        private static JsonSerializer CreateJsonFormatter()
+        private static JsonSerializer CreateReaderJsonFormatter()
         {
             return new JsonSerializer()
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 Formatting = Formatting.Indented,
                 TypeNameHandling = TypeNameHandling.Auto,
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+            };
+        }
+        /// <summary>
+        /// Creates a new Json serializer for writers
+        /// </summary>
+        /// <returns>Returns a Json serializer</returns>
+        private static JsonSerializer CreateWriterJsonFormatter()
+        {
+            return new JsonSerializer()
+            {
+                NullValueHandling = NullValueHandling.Ignore,
+                Formatting = Formatting.Indented,
+                TypeNameHandling = TypeNameHandling.None,
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
         }
@@ -275,7 +289,7 @@ namespace Engine
 
             using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
             {
-                JsonSerializer sr = CreateJsonFormatter();
+                JsonSerializer sr = CreateWriterJsonFormatter();
 
                 sr.Serialize(wr, obj, typeof(T));
 
@@ -294,7 +308,7 @@ namespace Engine
         {
             using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
             {
-                JsonSerializer sr = CreateJsonFormatter();
+                JsonSerializer sr = CreateWriterJsonFormatter();
 
                 sr.Serialize(wr, obj, typeof(T));
             }
@@ -322,7 +336,7 @@ namespace Engine
         {
             using (StreamReader rd = new StreamReader(mso, Encoding.Default))
             {
-                JsonSerializer sr = CreateJsonFormatter();
+                JsonSerializer sr = CreateReaderJsonFormatter();
 
                 return (T)sr.Deserialize(rd, typeof(T));
             }
@@ -337,7 +351,7 @@ namespace Engine
         {
             using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
             {
-                JsonSerializer sr = CreateJsonFormatter();
+                JsonSerializer sr = CreateReaderJsonFormatter();
 
                 return (T)sr.Deserialize(rd, typeof(T));
             }

@@ -275,6 +275,7 @@ namespace Collada.Start
             for (int i = 0; i < mapFiles.Length; i++)
             {
                 string mapFile = mapFiles[i];
+                string mapCnf = "basicDungeon.config";
                 string mapTexture = Path.ChangeExtension(mapFile, ".png");
 
                 var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
@@ -287,7 +288,7 @@ namespace Collada.Start
                 {
                     if (o.Buttons.HasFlag(MouseButtons.Left))
                     {
-                        Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapTexture)), SceneModes.DeferredLightning);
+                        Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapCnf), Path.GetFileName(mapTexture)), SceneModes.DeferredLightning);
                     }
                 };
 
@@ -304,7 +305,7 @@ namespace Collada.Start
             {
                 if (o.Buttons.HasFlag(MouseButtons.Left))
                 {
-                    Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, false, "basicdungeon", null), SceneModes.DeferredLightning);
+                    Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, false, "basicdungeon", null, null), SceneModes.DeferredLightning);
                 }
             };
             modularDungeonTabs.TabPanels[basicIndex].AddChild(buttonBasic);
