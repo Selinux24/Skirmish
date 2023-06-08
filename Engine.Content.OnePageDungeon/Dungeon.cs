@@ -161,7 +161,7 @@ namespace Engine.Content.OnePageDungeon
         /// </summary>
         public float Y { get; set; }
     }
-    
+
     /// <summary>
     /// Water
     /// </summary>

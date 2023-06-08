@@ -97,10 +97,10 @@ namespace Engine
         }
 
         /// <summary>
-        /// Generates a new model content from an height map description
+        /// Generates a new content data from an height map description
         /// </summary>
         /// <returns>Returns a new model content</returns>
-        public async Task<ContentData> ReadModelContent()
+        public async Task<ContentData> ReadContentData()
         {
             HeightMap hm = HeightMap.FromDescription(this);
             var (Vertices, Indices) = await hm.BuildGeometry(

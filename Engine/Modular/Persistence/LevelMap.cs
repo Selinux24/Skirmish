@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Engine.Modular.Persistence
@@ -13,6 +14,16 @@ namespace Engine.Modular.Persistence
     /// </remarks>
     public class LevelMap
     {
+        /// <summary>
+        /// Reads the level from file
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="fileName">File name</param>
+        public static LevelMap FromFile(string contentFolder, string fileName)
+        {
+            return SerializationHelper.DeserializeFromFile<LevelMap>(Path.Combine(contentFolder, fileName));
+        }
+
         /// <summary>
         /// Hull meshes masks
         /// </summary>

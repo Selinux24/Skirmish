@@ -26,6 +26,10 @@ namespace Engine.Content
         public const string DefaultMaterial = "_base_material_default_";
 
         /// <summary>
+        /// Content name
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
         /// Light dictionary
         /// </summary>
         public Dictionary<string, LightContent> Lights { get; private set; } = new Dictionary<string, LightContent>();

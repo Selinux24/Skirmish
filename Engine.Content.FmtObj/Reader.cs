@@ -201,34 +201,34 @@ namespace Engine.Content.FmtObj
         }
         private static IEnumerable<Face[]> ReadFaces(string strLine)
         {
-            if (strLine.StartsWith("f ", StringComparison.OrdinalIgnoreCase))
+            if (!strLine.StartsWith("f ", StringComparison.OrdinalIgnoreCase))
             {
-                var numbers = strLine.Split(" ".ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
-                numbers.RemoveAt(0);
-
-                var face = numbers
-                    .Select(n =>
-                    {
-                        List<uint> res = new List<uint>();
-
-                        var nums = n.Split("/".ToArray(), StringSplitOptions.None);
-                        foreach (var index in nums)
-                        {
-                            uint value = string.IsNullOrWhiteSpace(index) ?
-                                0 :
-                                uint.Parse(index, NumberStyles.Integer, LoaderObj.Locale);
-
-                            res.Add(value);
-                        }
-
-                        return new Face(res.ToArray());
-                    })
-                    .ToArray();
-
-                return new[] { face };
+                return Array.Empty<Face[]>();
             }
 
-            return Array.Empty<Face[]>();
+            var numbers = strLine.Split(" ".ToArray(), StringSplitOptions.RemoveEmptyEntries).ToList();
+            numbers.RemoveAt(0);
+
+            var face = numbers
+                .Select(n =>
+                {
+                    List<uint> res = new List<uint>();
+
+                    var nums = n.Split("/".ToArray(), StringSplitOptions.None);
+                    foreach (var index in nums)
+                    {
+                        uint value = string.IsNullOrWhiteSpace(index) ?
+                            0 :
+                            uint.Parse(index, NumberStyles.Integer, LoaderObj.Locale);
+
+                        res.Add(value);
+                    }
+
+                    return new Face(res.ToArray());
+                })
+                .ToArray();
+
+            return new[] { face };
         }
 
         private static string ReadUseMaterial(string strLine)
@@ -327,8 +327,8 @@ namespace Engine.Content.FmtObj
                     VertexData v = new VertexData
                     {
                         Position = points.ElementAt(vIndex),
-                        Texture = uvIndex >= 0 ? (Vector2?)uvs.ElementAt(uvIndex.Value) : null,
-                        Normal = nmIndex >= 0 ? (Vector3?)normals.ElementAt(nmIndex.Value) : null,
+                        Texture = uvIndex >= 0 ? uvs.ElementAt(uvIndex.Value) : null,
+                        Normal = nmIndex >= 0 ? normals.ElementAt(nmIndex.Value) : null,
                         FaceIndex = faceIndex,
                         VertexIndex = vertexIndex++
                     };

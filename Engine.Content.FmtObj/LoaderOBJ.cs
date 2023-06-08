@@ -138,7 +138,10 @@ namespace Engine.Content.FmtObj
                 return Array.Empty<ContentData>();
             }
 
-            ContentData m = new ContentData();
+            ContentData m = new ContentData()
+            {
+                Name = Path.GetFileNameWithoutExtension(content.ModelFileName)
+            };
 
             await Task.Run(() =>
             {

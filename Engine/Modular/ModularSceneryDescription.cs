@@ -47,5 +47,40 @@ namespace Engine.Modular
         /// Levels
         /// </summary>
         public LevelMap Levels { get; set; } = null;
+
+        /// <summary>
+        /// Gets the assets map
+        /// </summary>
+        public AssetMap GetAssetMap()
+        {
+            if (AssetsConfiguration != null)
+            {
+                return AssetsConfiguration;
+            }
+
+            if (!string.IsNullOrWhiteSpace(AssetsConfigurationFile))
+            {
+                return AssetMap.FromFile(Content.ContentFolder ?? string.Empty, AssetsConfigurationFile);
+            }
+
+            return default;
+        }
+        /// <summary>
+        /// Gets the levels map
+        /// </summary>
+        public LevelMap GetLevelMap()
+        {
+            if (Levels != null)
+            {
+                return Levels;
+            }
+
+            if (!string.IsNullOrWhiteSpace(LevelsFile))
+            {
+                return LevelMap.FromFile(Content.ContentFolder ?? string.Empty, LevelsFile);
+            }
+
+            return default;
+        }
     }
 }

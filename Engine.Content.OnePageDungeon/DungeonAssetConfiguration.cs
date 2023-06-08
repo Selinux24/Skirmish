@@ -26,13 +26,17 @@ namespace Engine.Content.OnePageDungeon
         private int randomSeed = 0;
 
         /// <summary>
-        /// Asset definition file name
+        /// Asset definition file names
         /// </summary>
-        public string AssetsFile { get; set; }
+        public IEnumerable<string> Assets { get; set; } = Array.Empty<string>();
         /// <summary>
         /// Asset block size
         /// </summary>
         public float BlockSize { get; set; } = 1;
+        /// <summary>
+        /// Maintain texture direction for ceilings and floors, avoiding asset map rotations
+        /// </summary>
+        public bool MaintainTextureDirection { get; set; } = true;
         /// <summary>
         /// Hull names - geometry used for navigation mapping and coarse collision detection
         /// </summary>

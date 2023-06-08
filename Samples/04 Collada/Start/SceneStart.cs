@@ -275,8 +275,9 @@ namespace Collada.Start
             for (int i = 0; i < mapFiles.Length; i++)
             {
                 string mapFile = mapFiles[i];
-                string mapCnf = "basicDungeon.config";
                 string mapTexture = Path.ChangeExtension(mapFile, ".png");
+                string mapCnf = "OnePageDungeons/basicDungeon.config";
+                //string mapCnf = "OnePageDungeons/UMRP.config"
 
                 var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
                 buttonDesc.Text = "Click image to load...";
@@ -288,7 +289,7 @@ namespace Collada.Start
                 {
                     if (o.Buttons.HasFlag(MouseButtons.Left))
                     {
-                        Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapCnf), Path.GetFileName(mapTexture)), SceneModes.DeferredLightning);
+                        Game.SetScene(new ModularDungeon.SceneModularDungeon(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapTexture), mapCnf), SceneModes.DeferredLightning);
                     }
                 };
 

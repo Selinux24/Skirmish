@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -67,9 +66,9 @@ namespace Engine.Modular
         /// </summary>
         private AssetMap assetMap;
         /// <summary>
-        /// Gets the level list
+        /// Gets the levels map
         /// </summary>
-        private LevelMap levels;
+        private LevelMap levelMap;
 
         /// <summary>
         /// First level
@@ -78,7 +77,7 @@ namespace Engine.Modular
         {
             get
             {
-                return levels.Levels.FirstOrDefault();
+                return levelMap.Levels.FirstOrDefault();
             }
         }
         /// <summary>
@@ -133,23 +132,25 @@ namespace Engine.Modular
         {
             Dictionary<string, ModularSceneryAssetInstanceInfo> res = new Dictionary<string, ModularSceneryAssetInstanceInfo>();
 
+            var vAssets = assets.ToArray();
+
             foreach (var item in level.Map)
             {
-                var asset = assets
-                    .FirstOrDefault(a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
-
-                if (asset != null)
+                var asset = Array.Find(vAssets, a => string.Equals(a.Name, item.AssetName, StringComparison.OrdinalIgnoreCase));
+                if (asset == null)
                 {
-                    var assetInstances = GetInstanceCounters(asset);
-                    foreach (var key in assetInstances.Keys)
-                    {
-                        if (!res.ContainsKey(key))
-                        {
-                            res.Add(key, new ModularSceneryAssetInstanceInfo { Count = 0 });
-                        }
+                    continue;
+                }
 
-                        res[key].Count += assetInstances[key];
+                var assetInstances = GetInstanceCounters(asset);
+                foreach (var key in assetInstances.Keys)
+                {
+                    if (!res.ContainsKey(key))
+                    {
+                        res.Add(key, new ModularSceneryAssetInstanceInfo { Count = 0 });
                     }
+
+                    res[key].Count += assetInstances[key];
                 }
             }
 
@@ -343,25 +344,19 @@ namespace Engine.Modular
         {
             await base.InitializeAssets(description);
 
-            if (Description.AssetsConfiguration != null)
-            {
-                assetMap = Description.AssetsConfiguration;
-            }
-            else if (!string.IsNullOrWhiteSpace(Description.AssetsConfigurationFile))
-            {
-                assetMap = SerializationHelper.DeserializeFromFile<AssetMap>(Path.Combine(Description.Content.ContentFolder ?? "", Description.AssetsConfigurationFile));
-            }
+            assetMap = Description.GetAssetMap();
 
-            if (Description.Levels != null)
-            {
-                levels = Description.Levels;
-            }
-            else if (!string.IsNullOrWhiteSpace(Description.LevelsFile))
-            {
-                levels = SerializationHelper.DeserializeFromFile<LevelMap>(Path.Combine(Description.Content.ContentFolder ?? "", Description.LevelsFile));
-            }
+            levelMap = Description.GetLevelMap();
         }
 
+        /// <summary>
+        /// Loads the first level
+        /// </summary>
+        /// <param name="progress">Resource loading progress updater</param>
+        public async Task LoadFirstLevel(IProgress<LoadResourceProgress> progress = null)
+        {
+            await LoadLevel(levelMap.Levels.FirstOrDefault(), progress);
+        }
         /// <summary>
         /// Loads the level by name
         /// </summary>
@@ -371,25 +366,17 @@ namespace Engine.Modular
         {
             if (string.Equals(CurrentLevel.Name, levelName, StringComparison.OrdinalIgnoreCase))
             {
+                //Same level
                 return;
             }
 
             //Find the level
-            var levelList = levels.Levels
-                .Where(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
-            if (levelList.Any())
+            var level = levelMap.Levels.FirstOrDefault(l => string.Equals(l.Name, levelName, StringComparison.OrdinalIgnoreCase));
+            if (level != null)
             {
                 //Load the level
-                await LoadLevel(levelList.First(), progress);
+                await LoadLevel(level, progress);
             }
-        }
-        /// <summary>
-        /// Loads the first level
-        /// </summary>
-        /// <param name="progress">Resource loading progress updater</param>
-        public async Task LoadFirstLevel(IProgress<LoadResourceProgress> progress = null)
-        {
-            await LoadLevel(levels.Levels.FirstOrDefault(), progress);
         }
         /// <summary>
         /// Loads a level
@@ -412,11 +399,11 @@ namespace Engine.Modular
 
             CurrentLevel = level;
 
-            var content = await Description.ReadModelContent();
+            var contentLibrary = new ContentLibrary(await Description.ReadContentData());
 
             await InitializeParticles(progress);
-            await InitializeAssets(level, content, progress);
-            await InitializeObjects(level, content, progress);
+            await InitializeAssets(level, contentLibrary, progress);
+            await InitializeObjects(level, contentLibrary, progress);
 
             ParseAssetsMap(level, progress);
 
@@ -427,7 +414,7 @@ namespace Engine.Modular
         /// </summary>
         private async Task InitializeParticles(IProgress<LoadResourceProgress> progress = null)
         {
-            if (levels.ParticleSystems?.Any() != true)
+            if (levelMap.ParticleSystems?.Any() != true)
             {
                 progress?.Report(new LoadResourceProgress { Progress = 1 });
 
@@ -442,10 +429,10 @@ namespace Engine.Modular
                 ParticleManagerDescription.Default(),
                 98);
 
-            float total = levels.ParticleSystems.Count();
+            float total = levelMap.ParticleSystems.Count();
             int current = 0;
 
-            foreach (var item in levels.ParticleSystems)
+            foreach (var item in levelMap.ParticleSystems)
             {
                 try
                 {
@@ -467,9 +454,9 @@ namespace Engine.Modular
         /// Initialize all assets into asset dictionary 
         /// </summary>
         /// <param name="level">Level definition</param>
-        /// <param name="content">Assets model content</param>
+        /// <param name="contentLibrary">Assets model content</param>
         /// <param name="progress">Resource loading progress updater</param>
-        private async Task InitializeAssets(Level level, ContentData content, IProgress<LoadResourceProgress> progress = null)
+        private async Task InitializeAssets(Level level, ContentLibrary contentLibrary, IProgress<LoadResourceProgress> progress = null)
         {
             // Get instance count for all single geometries from Map
             var instances = GetMapInstanceCounters(level, assetMap.Assets);
@@ -483,10 +470,10 @@ namespace Engine.Modular
                 int count = instances[assetName].Count;
                 if (count <= 0)
                 {
-                    return;
+                    continue;
                 }
 
-                var modelContent = content.FilterMask(assetName);
+                var modelContent = contentLibrary.GetContentDataByName(assetName);
                 if (modelContent == null)
                 {
                     continue;
@@ -516,7 +503,7 @@ namespace Engine.Modular
 
             try
             {
-                var masks = GetMasksForAsset(levels, assetName);
+                var masks = GetMasksForAsset(levelMap, assetName);
                 var hasHulls = modelContent.SetHullMark(true, masks) > 0;
                 var usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
 
@@ -550,9 +537,9 @@ namespace Engine.Modular
         /// Initialize all objects into asset dictionary 
         /// </summary>
         /// <param name="level">Level definition</param>
-        /// <param name="content">Assets model content</param>
+        /// <param name="contentLibrary">Assets model content</param>
         /// <param name="progress">Resource loading progress updater</param>
-        private async Task InitializeObjects(Level level, ContentData content, IProgress<LoadResourceProgress> progress = null)
+        private async Task InitializeObjects(Level level, ContentLibrary contentLibrary, IProgress<LoadResourceProgress> progress = null)
         {
             // Set auto-identifiers
             PopulateObjectIds(level);
@@ -572,7 +559,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                var modelContent = content.FilterMask(assetName);
+                var modelContent = contentLibrary.GetContentDataByName(assetName);
                 if (modelContent == null)
                 {
                     continue;
@@ -603,7 +590,7 @@ namespace Engine.Modular
 
             try
             {
-                var masks = GetMasksForAsset(levels, assetName);
+                var masks = GetMasksForAsset(levelMap, assetName);
                 var hasHulls = modelContent.SetHullMark(true, masks) > 0;
                 SceneObjectUsages usage = SceneObjectUsages.None;
                 if (pathFinding)
@@ -860,10 +847,12 @@ namespace Engine.Modular
             float total = level.Map.Count() + transforms.Keys.Count;
             int current = 0;
 
+            var vAssets = assetMap.Assets.ToArray();
+
             // Paser map for instance positioning
             foreach (var item in level.Map)
             {
-                var assetIndex = Array.FindIndex(assetMap.Assets.ToArray(), a => a.Name == item.AssetName);
+                var assetIndex = Array.FindIndex(vAssets, a => a.Name == item.AssetName);
                 if (assetIndex < 0)
                 {
                     throw new EngineException($"Modular Scenery asset not found: {item.AssetName}");

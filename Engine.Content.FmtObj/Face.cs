@@ -35,7 +35,7 @@ namespace Engine.Content.FmtObj
         /// </summary>
         /// <param name="offset">Index offset</param>
         /// <returns>Returns the based 0 index</returns>
-        public int GetPositionIndex(int offset)
+        public readonly int GetPositionIndex(int offset)
         {
             return (int)Position - 1 - offset;
         }
@@ -44,7 +44,7 @@ namespace Engine.Content.FmtObj
         /// </summary>
         /// <param name="offset">Index offset</param>
         /// <returns>Returns the based 0 index</returns>
-        public int? GetUVIndex(int offset)
+        public readonly int? GetUVIndex(int offset)
         {
             return UV != 0 ? (int)UV - 1 - offset : (int?)null;
         }
@@ -53,7 +53,7 @@ namespace Engine.Content.FmtObj
         /// </summary>
         /// <param name="offset">Index offset</param>
         /// <returns>Returns the based 0 index</returns>
-        public int? GetNormalIndex(int offset)
+        public readonly int? GetNormalIndex(int offset)
         {
             return Normal != 0 ? (int)Normal - 1 - offset : (int?)null;
         }
@@ -61,7 +61,7 @@ namespace Engine.Content.FmtObj
         /// <summary>
         /// Gets the text representation of the face
         /// </summary>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"{Position}/{UV}/{Normal}";
         }

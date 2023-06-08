@@ -23,18 +23,11 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="configuration">Dungeon asset configuration</param>
         public static AssetMap CreateAssets(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            AssetMap assets = new AssetMap
+            return new AssetMap
             {
-                MaintainTextureDirection = true
+                MaintainTextureDirection = configuration.MaintainTextureDirection,
+                Assets = CreateRooms(dungeon, configuration).ToArray(),
             };
-
-            List<Asset> assetList = new List<Asset>();
-
-            assetList.AddRange(CreateRooms(dungeon, configuration));
-
-            assets.Assets = assetList.ToArray();
-
-            return assets;
         }
         /// <summary>
         /// Gets the chamber tile list
@@ -177,31 +170,35 @@ namespace Engine.Content.OnePageDungeon
                     float vx = (rect.X + x) * configuration.BlockSize;
                     float vz = (rect.Y + y) * configuration.BlockSize;
 
-                    AssetReference floor = new AssetReference()
+                    string floorAsset = configuration.GetRandonFloor();
+                    if (!string.IsNullOrWhiteSpace(floorAsset))
                     {
-                        AssetName = configuration.GetRandonFloor(),
-                        Type = ModularSceneryAssetTypes.Floor,
-                        Position = new Vector3(-vx, 0, vz),
-                    };
-
-                    references.Add(floor);
-
-                    AssetReference ceiling = new AssetReference()
-                    {
-                        AssetName = configuration.GetRandonCeiling(),
-                        Type = ModularSceneryAssetTypes.Ceiling,
-                        Position = new Vector3(-vx, 0, vz),
-                    };
-
-                    references.Add(ceiling);
-
-                    var cellWalls = walls.Where(w => w.Cell.X == ix && w.Cell.Y == iy);
-                    if (!cellWalls.Any())
-                    {
-                        continue;
+                        AssetReference floor = new AssetReference()
+                        {
+                            AssetName = floorAsset,
+                            Type = ModularSceneryAssetTypes.Floor,
+                            Position = new Vector3(-vx, 0, vz),
+                        };
+                        references.Add(floor);
                     }
 
-                    references.AddRange(cellWalls.SelectMany(cellWall => CreateWall(vx, vz, cellWall, configuration)));
+                    string ceilingAsset = configuration.GetRandonCeiling();
+                    if (!string.IsNullOrWhiteSpace(ceilingAsset))
+                    {
+                        AssetReference ceiling = new AssetReference()
+                        {
+                            AssetName = ceilingAsset,
+                            Type = ModularSceneryAssetTypes.Ceiling,
+                            Position = new Vector3(-vx, 0, vz),
+                        };
+                        references.Add(ceiling);
+                    }
+
+                    var cellWalls = walls.Where(w => w.Cell.X == ix && w.Cell.Y == iy);
+                    if (cellWalls.Any())
+                    {
+                        references.AddRange(cellWalls.SelectMany(cellWall => CreateWall(vx, vz, cellWall, configuration)));
+                    }
                 }
             }
 

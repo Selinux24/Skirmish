@@ -104,7 +104,7 @@ namespace Engine.Common
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         private async Task InitializeGeometryInternal(T description, BufferDescriptor instancingBuffer = null)
         {
-            var geo = await description.Content.ReadModelContent();
+            var geo = await description.Content.ReadContentData();
             if (!geo.Any())
             {
                 throw new EngineException("Bad content description file. The resource file does not generate any geometry.");

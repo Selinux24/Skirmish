@@ -27,8 +27,8 @@ namespace Collada.ModularDungeon
         private readonly string resourcesFolder = "modulardungeon/resources";
         private readonly bool isOnePageDungeon;
         private readonly string dungeonDefFile;
-        private readonly string dungeonCnfFile;
         private readonly string dungeonMapFile;
+        private readonly string dungeonCnfFile;
 
         private Sprite dungeonMap = null;
         private UIProgressBar pbLevels = null;
@@ -106,13 +106,13 @@ namespace Collada.ModularDungeon
             }
         }
 
-        public SceneModularDungeon(Game game, bool isOnePageDungeon, string dungeonDefFile, string dungeonCnfFile, string dungeonMapFile)
+        public SceneModularDungeon(Game game, bool isOnePageDungeon, string dungeonDefFile, string dungeonMapFile, string dungeonCnfFile)
             : base(game)
         {
             this.isOnePageDungeon = isOnePageDungeon;
             this.dungeonDefFile = dungeonDefFile;
-            this.dungeonCnfFile = dungeonCnfFile;
             this.dungeonMapFile = dungeonMapFile;
+            this.dungeonCnfFile = dungeonCnfFile;
 
             Logger.SetCustomFilter(l => { return l.CallerTypeName == nameof(SceneModularDungeon); });
 
@@ -426,7 +426,7 @@ namespace Collada.ModularDungeon
             {
                 string onePageResourcesFolder = Path.Combine(resourcesFolder, "onepagedungeons");
 
-                desc = await LoadOnePageDungeon(Path.Combine(onePageResourcesFolder, dungeonDefFile), Path.Combine(onePageResourcesFolder, dungeonCnfFile));
+                desc = await LoadOnePageDungeon(Path.Combine(onePageResourcesFolder, dungeonDefFile), dungeonCnfFile);
             }
             else
             {
@@ -440,11 +440,11 @@ namespace Collada.ModularDungeon
         }
         private async Task<ModularSceneryDescription> LoadOnePageDungeon(string dungeonFileName, string dungeonConfigFile)
         {
+            var config = DungeonAssetConfigurationFile.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
+
+            var content = config.Assets.Select(a => ContentDescription.FromFile(resourcesFolder, a));
+
             var dn = DungeonFile.Load(dungeonFileName);
-
-            var config = DungeonAssetConfigurationFile.Load(dungeonConfigFile);
-            var content = ContentDescription.FromFile(resourcesFolder, config.AssetsFile);
-
             var assetsMap = DungeonCreator.CreateAssets(dn, config);
             var levelsMap = DungeonCreator.CreateLevels(dn, config);
 
@@ -453,7 +453,7 @@ namespace Collada.ModularDungeon
                 UseAnisotropic = true,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = content,
+                ContentList = content,
                 AssetsConfiguration = assetsMap,
                 Levels = levelsMap,
             };

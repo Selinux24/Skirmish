@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 
 namespace Engine.Modular.Persistence
@@ -11,6 +12,17 @@ namespace Engine.Modular.Persistence
     /// </remarks>
     public class AssetMap
     {
+        /// <summary>
+        /// Reads asset map from file
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="fileName">File name</param>
+        /// <returns></returns>
+        public static AssetMap FromFile(string contentFolder, string fileName)
+        {
+            return SerializationHelper.DeserializeFromFile<AssetMap>(Path.Combine(contentFolder, fileName));
+        }
+
         /// <summary>
         /// Complex assets configuration
         /// </summary>

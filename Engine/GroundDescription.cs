@@ -66,6 +66,10 @@ namespace Engine
         /// </summary>
         public ContentDescription Content { get; set; }
         /// <summary>
+        /// Content list
+        /// </summary>
+        public IEnumerable<ContentDescription> ContentList { get; set; }
+        /// <summary>
         /// Quadtree
         /// </summary>
         public QuadtreeDescription Quadtree { get; set; }
@@ -84,20 +88,26 @@ namespace Engine
         }
 
         /// <summary>
-        /// Reads a model content from description
+        /// Reads the content data from description
         /// </summary>
-        public async Task<ContentData> ReadModelContent()
+        public async Task<IEnumerable<ContentData>> ReadContentData()
         {
             // Read model content
             if (Heightmap != null)
             {
-                return await Heightmap.ReadModelContent();
+                return new[] { await Heightmap.ReadContentData() };
             }
             else if (Content != null)
             {
-                var modelContent = await Content.ReadModelContent();
+                return await Content.ReadContentData();
+            }
+            else if (ContentList?.Any() == true)
+            {
+                var tasks = ContentList.Select(c => c.ReadContentData());
 
-                return modelContent.FirstOrDefault();
+                var res = await Task.WhenAll(tasks);
+
+                return res.SelectMany(r => r);
             }
             else
             {

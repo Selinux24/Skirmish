@@ -111,7 +111,7 @@ namespace Engine
         /// <inheritdoc/>
         public IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha)
         {
-            if (useTextureAlpha)
+            if (useTextureAlpha && VertexData.IsTextured(vertexType))
             {
                 return GetTransparentDrawer(vertexType, instanced);
             }

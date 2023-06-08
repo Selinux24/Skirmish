@@ -1,4 +1,7 @@
-﻿
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
 namespace Engine.Content.Persistence
 {
     /// <summary>
@@ -6,6 +9,32 @@ namespace Engine.Content.Persistence
     /// </summary>
     public class ContentDataFile
     {
+        /// <summary>
+        /// Reads the content data from disk
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="filename">File name</param>
+        public static async Task<IEnumerable<ContentData>> ReadContentData(string contentFolder, string filename)
+        {
+            ContentDataFile contentData;
+
+            if (Path.GetExtension(filename) != ".json")
+            {
+                contentData = new ContentDataFile()
+                {
+                    ModelFileName = filename,
+                };
+            }
+            else
+            {
+                contentData = SerializationHelper.DeserializeFromFile<ContentDataFile>(Path.Combine(contentFolder, filename));
+            }
+
+            var loader = GameResourceManager.GetLoaderForFile(contentData.ModelFileName);
+
+            return await loader.Load(contentFolder, contentData);
+        }
+
         /// <summary>
         /// Model file name
         /// </summary>
