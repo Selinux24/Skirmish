@@ -40,6 +40,16 @@ namespace Engine.Modular.Persistence
         /// </summary>
         public Scale3 Scale { get; set; } = Scale3.One;
 
+        /// <summary>
+        /// Gets the initial transform matrix
+        /// </summary>
+        public Matrix4X4 GetTransform()
+        {
+            return
+                Matrix4X4.Scaling(Scale) *
+                Matrix4X4.Rotation(Rotation) *
+                Matrix4X4.Translation(Position);
+        }
         /// <inheritdoc/>
         public override string ToString()
         {

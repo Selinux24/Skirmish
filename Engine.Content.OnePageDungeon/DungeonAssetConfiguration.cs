@@ -1,4 +1,5 @@
-﻿using Engine.Modular.Persistence;
+﻿using Engine.Content.Persistence;
+using Engine.Modular.Persistence;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,7 +29,11 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Asset definition file names
         /// </summary>
-        public IEnumerable<string> Assets { get; set; } = Array.Empty<string>();
+        public IEnumerable<string> AssetFiles { get; set; } = Array.Empty<string>();
+        /// <summary>
+        /// Asset definitions
+        /// </summary>
+        public IEnumerable<ContentDataFile> Assets { get; set; } = Array.Empty<ContentDataFile>();
         /// <summary>
         /// Asset block size
         /// </summary>
@@ -37,6 +42,16 @@ namespace Engine.Content.OnePageDungeon
         /// Maintain texture direction for ceilings and floors, avoiding asset map rotations
         /// </summary>
         public bool MaintainTextureDirection { get; set; } = true;
+        /// <summary>
+        /// Rotation delta
+        /// </summary>
+        /// <remarks>
+        /// 0 - No delta
+        /// 1 - 90 degrees delta
+        /// 2 - 180 degrees delta
+        /// 3 - 270 degrees delta
+        /// </remarks>
+        public int RotationDelta { get; set; } = 0;
         /// <summary>
         /// Hull names - geometry used for navigation mapping and coarse collision detection
         /// </summary>

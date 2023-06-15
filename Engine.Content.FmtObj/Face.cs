@@ -1,4 +1,8 @@
-﻿
+﻿using Engine.Common;
+using SharpDX;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace Engine.Content.FmtObj
 {
     /// <summary>
@@ -46,7 +50,7 @@ namespace Engine.Content.FmtObj
         /// <returns>Returns the based 0 index</returns>
         public readonly int? GetUVIndex(int offset)
         {
-            return UV != 0 ? (int)UV - 1 - offset : (int?)null;
+            return UV != 0 ? (int)UV - 1 - offset : null;
         }
         /// <summary>
         /// Gets the normal index
@@ -55,7 +59,32 @@ namespace Engine.Content.FmtObj
         /// <returns>Returns the based 0 index</returns>
         public readonly int? GetNormalIndex(int offset)
         {
-            return Normal != 0 ? (int)Normal - 1 - offset : (int?)null;
+            return Normal != 0 ? (int)Normal - 1 - offset : null;
+        }
+
+        /// <summary>
+        /// Creates a vertex
+        /// </summary>
+        /// <param name="faceIndex">Face index</param>
+        /// <param name="vertexIndex">Vertex index</param>
+        /// <param name="points">Point list</param>
+        /// <param name="uvs">Uvs</param>
+        /// <param name="normals">Normals</param>
+        /// <param name="offset">Offset index</param>
+        public VertexData CreateVertex(int faceIndex, int vertexIndex, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals, int offset)
+        {
+            int vIndex = GetPositionIndex(offset);
+            int? uvIndex = GetUVIndex(offset);
+            int? nmIndex = GetNormalIndex(offset);
+
+            return new VertexData
+            {
+                Position = points.ElementAt(vIndex),
+                Texture = uvIndex >= 0 ? uvs.ElementAt(uvIndex.Value) : null,
+                Normal = nmIndex >= 0 ? normals.ElementAt(nmIndex.Value) : null,
+                FaceIndex = faceIndex,
+                VertexIndex = vertexIndex++
+            };
         }
 
         /// <summary>

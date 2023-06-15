@@ -1,4 +1,8 @@
 {
   "modelFilename": "clif.dae",
-  "scale": 200
+  "scale": {
+    "x": 200.0,
+    "y": 200.0,
+    "z": 200.0
+  }
 }

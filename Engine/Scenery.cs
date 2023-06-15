@@ -375,7 +375,13 @@ namespace Engine
             await base.InitializeAssets(description);
 
             // Generate model content
-            content = (await Description.ReadContentData()).FirstOrDefault();
+            var contentList = await Description.ReadContentData();
+            if (!contentList.Any())
+            {
+                throw new ArgumentNullException(nameof(description));
+            }
+
+            content = contentList.First();
 
             // Generate quadtree
             GroundPickingQuadtree = Description.ReadQuadTree(content.GetTriangles());

@@ -17,6 +17,11 @@ namespace Engine.Content.OnePageDungeon
     public static class DungeonCreator
     {
         /// <summary>
+        /// Rotation string list
+        /// </summary>
+        private static readonly string[] rotationStrings = new[] { "", "Rot90", "Rot180", "Rot270" };
+
+        /// <summary>
         /// Creates an asset map
         /// </summary>
         /// <param name="dungeon">Dungeon file</param>
@@ -220,7 +225,7 @@ namespace Engine.Content.OnePageDungeon
                     AssetName = configuration.GetRandonWall(),
                     Type = ModularSceneryAssetTypes.Wall,
                     Position = new Vector3(-vx, 0, vz - (configuration.BlockSize * 0.5f)),
-                    Rotation = "Rot270",
+                    Rotation = EvaluateRotation(WallDirections.N, configuration.RotationDelta),
                 };
 
                 yield return wall;
@@ -233,7 +238,7 @@ namespace Engine.Content.OnePageDungeon
                     AssetName = configuration.GetRandonWall(),
                     Type = ModularSceneryAssetTypes.Wall,
                     Position = new Vector3(-vx, 0, vz + (configuration.BlockSize * 0.5f)),
-                    Rotation = "Rot90",
+                    Rotation = EvaluateRotation(WallDirections.S, configuration.RotationDelta),
                 };
 
                 yield return wall;
@@ -246,6 +251,7 @@ namespace Engine.Content.OnePageDungeon
                     AssetName = configuration.GetRandonWall(),
                     Type = ModularSceneryAssetTypes.Wall,
                     Position = new Vector3(-vx - (configuration.BlockSize * 0.5f), 0, vz),
+                    Rotation = EvaluateRotation(WallDirections.E, configuration.RotationDelta),
                 };
 
                 yield return wall;
@@ -258,7 +264,7 @@ namespace Engine.Content.OnePageDungeon
                     AssetName = configuration.GetRandonWall(),
                     Type = ModularSceneryAssetTypes.Wall,
                     Position = new Vector3(-vx + (configuration.BlockSize * 0.5f), 0, vz),
-                    Rotation = "Rot180",
+                    Rotation = EvaluateRotation(WallDirections.W, configuration.RotationDelta),
                 };
 
                 yield return wall;
@@ -474,6 +480,11 @@ namespace Engine.Content.OnePageDungeon
                     continue;
                 }
 
+                if (doorType == DoorTypes.Stairs)
+                {
+                    continue;
+                }
+
                 var doorAssets = configuration.GetDoorByType(doorType);
                 if (!doorAssets.Any())
                 {
@@ -483,7 +494,7 @@ namespace Engine.Content.OnePageDungeon
                 float vx = door.X * configuration.BlockSize;
                 float vz = door.Y * configuration.BlockSize;
                 Vector3 dir = new Vector3(door.Dir.X, 0, -door.Dir.Y);
-                string rot = EvaluateRotation(dir);
+                string rot = EvaluateRotation(dir, configuration.RotationDelta);
 
                 ObjectReference obj = new ObjectReference
                 {
@@ -513,30 +524,57 @@ namespace Engine.Content.OnePageDungeon
             }
         }
         /// <summary>
-        /// Evaluates door rotation
+        /// Evaluates rotation from direction
         /// </summary>
-        /// <param name="dir">Door direction</param>
-        private static string EvaluateRotation(Vector3 dir)
+        /// <param name="dir">Direction</param>
+        private static string EvaluateRotation(Vector3 dir, int index)
         {
-            if (dir == Vector3.ForwardLH)
+            if (dir == Vector3.Left)
             {
-                return "Rot90";
+                return rotationStrings[index % 4];
             }
-            else if (dir == Vector3.BackwardLH)
+            else if (dir == Vector3.ForwardLH)
             {
-                return "Rot270";
-            }
-            else if (dir == Vector3.Left)
-            {
-                return "";
+                return rotationStrings[(1 + index) % 4];
             }
             else if (dir == Vector3.Right)
             {
-                return "Rot180";
+                return rotationStrings[(2 + index) % 4];
+            }
+            else if (dir == Vector3.BackwardLH)
+            {
+                return rotationStrings[(3 + index) % 4];
             }
             else
             {
                 return null;
+            }
+        }
+        /// <summary>
+        /// Evaluates rotation from direction
+        /// </summary>
+        /// <param name="dir">Direction</param>
+        private static string EvaluateRotation(WallDirections dir, int index)
+        {
+            if (dir.HasFlag(WallDirections.E))
+            {
+                return rotationStrings[index % 4];
+            }
+            else if (dir.HasFlag(WallDirections.S))
+            {
+                return rotationStrings[(1 + index) % 4];
+            }
+            else if (dir.HasFlag(WallDirections.W))
+            {
+                return rotationStrings[(2 + index) % 4];
+            }
+            else if (dir.HasFlag(WallDirections.N))
+            {
+                return rotationStrings[(3 + index) % 4];
+            }
+            else
+            {
+                return "";
             }
         }
 

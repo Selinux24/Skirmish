@@ -330,7 +330,7 @@ namespace Engine.Content
         /// </summary>
         public void Optimize()
         {
-            if (Materials.Count <= 0)
+            if (Materials.Count < 1)
             {
                 return;
             }

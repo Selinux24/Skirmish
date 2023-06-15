@@ -84,19 +84,16 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Vector3> GetPoints(bool refresh = false)
+        public virtual IEnumerable<Vector3> GetPoints(bool refresh = false)
         {
             return GetTriangles(refresh)
                 .SelectMany(t => t.GetVertices())
                 .AsEnumerable();
         }
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetTriangles(bool refresh = false)
+        public virtual IEnumerable<Triangle> GetTriangles(bool refresh = false)
         {
-            return GroundPickingQuadtree
-                .GetLeafNodes()
-                .SelectMany(n => n.Items)
-                .AsEnumerable();
+            return GroundPickingQuadtree?.GetLeafNodes().SelectMany(n => n.Items).AsEnumerable() ?? Enumerable.Empty<Triangle>();
         }
         /// <inheritdoc/>
         public virtual BoundingSphere GetBoundingSphere(bool refresh = false)

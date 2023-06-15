@@ -31,29 +31,28 @@ namespace Engine.Content.FmtObj
         /// <returns>Returns a list of model contents</returns>
         private static IEnumerable<SubMeshContent> Load(string contentFolder, string fileName, Matrix transform, out IEnumerable<Material> materials)
         {
-            List<Material> matList = new List<Material>();
-
             var modelList = ContentManager.FindContent(contentFolder, fileName);
-            if (modelList.Any())
-            {
-                List<SubMeshContent> res = new List<SubMeshContent>();
-
-                foreach (var model in modelList)
-                {
-                    Reader.LoadObj(model, contentFolder, transform, out var contentList, out var mats);
-
-                    matList.AddRange(mats);
-                    res.AddRange(contentList);
-                }
-
-                materials = matList.ToArray();
-
-                return res.ToArray();
-            }
-            else
+            if (!modelList.Any())
             {
                 throw new EngineException(string.Format("Model not found: {0}", fileName));
             }
+
+            string materialsFolder = Path.Combine(contentFolder, Path.GetDirectoryName(fileName));
+
+            List<Material> matList = new List<Material>();
+            List<SubMeshContent> res = new List<SubMeshContent>();
+
+            foreach (var model in modelList)
+            {
+                Reader.LoadObj(model, materialsFolder, transform, out var contentList, out var mats);
+
+                matList.AddRange(mats);
+                res.AddRange(contentList);
+            }
+
+            materials = matList.ToArray();
+
+            return res.ToArray();
         }
         /// <summary>
         /// Saves a triangle list in a file
@@ -125,12 +124,7 @@ namespace Engine.Content.FmtObj
         /// <returns>Returns a list of model contents</returns>
         public async Task<IEnumerable<ContentData>> Load(string contentFolder, ContentDataFile content)
         {
-            Matrix transform = Matrix.Identity;
-
-            if (content.Scale != 1f)
-            {
-                transform = Matrix.Scaling(content.Scale);
-            }
+            var transform = content.GetTransform();
 
             var meshList = Load(contentFolder, content.ModelFileName, transform, out var materials);
             if (!meshList.Any())

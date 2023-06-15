@@ -6,6 +6,7 @@ using Engine.Common;
 using Engine.Content;
 using Engine.Content.FmtObj;
 using Engine.Content.OnePageDungeon;
+using Engine.Content.Persistence;
 using Engine.Modular;
 using Engine.PathFinding;
 using Engine.PathFinding.RecastNavigation;
@@ -442,13 +443,18 @@ namespace Collada.ModularDungeon
         {
             var config = DungeonAssetConfigurationFile.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
 
-            var content = config.Assets.Select(a => ContentDescription.FromFile(resourcesFolder, a));
+            List<ContentData> contentData = new List<ContentData>();
+
+            contentData.AddRange(await ReadAssetFiles(config.AssetFiles));
+            contentData.AddRange(await ReadAssets(config.Assets));
+
+            var content = contentData.Select(c => new ContentDescription { ContentData = c });
 
             var dn = DungeonFile.Load(dungeonFileName);
             var assetsMap = DungeonCreator.CreateAssets(dn, config);
             var levelsMap = DungeonCreator.CreateLevels(dn, config);
 
-            var res = new ModularSceneryDescription()
+            return new ModularSceneryDescription()
             {
                 UseAnisotropic = true,
                 CastShadow = ShadowCastingAlgorihtms.All,
@@ -457,8 +463,28 @@ namespace Collada.ModularDungeon
                 AssetsConfiguration = assetsMap,
                 Levels = levelsMap,
             };
+        }
+        private async Task<IEnumerable<ContentData>> ReadAssetFiles(IEnumerable<string> assets)
+        {
+            if (assets?.Any() != true)
+            {
+                return Enumerable.Empty<ContentData>();
+            }
 
-            return await Task.FromResult(res);
+            var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesFolder, a)));
+
+            return contentData.SelectMany(c => c);
+        }
+        private async Task<IEnumerable<ContentData>> ReadAssets(IEnumerable<ContentDataFile> assets)
+        {
+            if (assets?.Any() != true)
+            {
+                return Enumerable.Empty<ContentData>();
+            }
+
+            var contentData = await Task.WhenAll(assets.Select(a => ContentDataFile.ReadContentData(resourcesFolder, a)));
+
+            return contentData.SelectMany(c => c);
         }
         private async Task InitializePlayer()
         {

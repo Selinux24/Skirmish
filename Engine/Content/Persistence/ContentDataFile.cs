@@ -16,29 +16,59 @@ namespace Engine.Content.Persistence
         /// <param name="filename">File name</param>
         public static async Task<IEnumerable<ContentData>> ReadContentData(string contentFolder, string filename)
         {
+            string resourceFile = Path.GetFileName(filename);
+            string resourceFolder = Path.Combine(contentFolder ?? string.Empty, Path.GetDirectoryName(filename));
+            string resourceExt = Path.GetExtension(filename);
+
             ContentDataFile contentData;
 
-            if (Path.GetExtension(filename) != ".json")
+            if (resourceExt != ".json")
             {
                 contentData = new ContentDataFile()
                 {
-                    ModelFileName = filename,
+                    ModelFileName = resourceFile,
                 };
             }
             else
             {
-                contentData = SerializationHelper.DeserializeFromFile<ContentDataFile>(Path.Combine(contentFolder, filename));
+                contentData = SerializationHelper.DeserializeFromFile<ContentDataFile>(Path.Combine(resourceFolder, resourceFile));
             }
 
+            return await ReadContentData(resourceFolder, contentData);
+        }
+        /// <summary>
+        /// Reads the content data from a content data file descriptor
+        /// </summary>
+        /// <param name="contentFolder">Content folder</param>
+        /// <param name="contentData">Content data file descriptor</param>
+        public static async Task<IEnumerable<ContentData>> ReadContentData(string contentFolder, ContentDataFile contentData)
+        {
             var loader = GameResourceManager.GetLoaderForFile(contentData.ModelFileName);
 
-            return await loader.Load(contentFolder, contentData);
+            return await loader.Load(contentFolder ?? string.Empty, contentData);
         }
 
         /// <summary>
         /// Model file name
         /// </summary>
         public string ModelFileName { get; set; } = null;
+
+        /// <summary>
+        /// Position vector
+        /// </summary>
+        public Position3 Position { get; set; } = Position3.Zero;
+        /// <summary>
+        /// Rotation
+        /// </summary>
+        public RotationQ Rotation { get; set; } = RotationQ.Identity;
+        /// <summary>
+        /// Rotation quaternion
+        /// </summary>
+        /// <summary>
+        /// Scale
+        /// </summary>
+        public Scale3 Scale { get; set; } = Scale3.One;
+
         /// <summary>
         /// Meshes by level of detail in the file
         /// </summary>
@@ -48,14 +78,15 @@ namespace Engine.Content.Persistence
         /// Hull meshes collection
         /// </summary>
         public string[] HullMeshes { get; set; } = null;
+
+        /// <summary>
+        /// Read animations
+        /// </summary>
+        public bool ReadAnimations { get; set; } = true;
         /// <summary>
         /// Animation description
         /// </summary>
         public AnimationFile Animation { get; set; } = null;
-        /// <summary>
-        /// Model scale
-        /// </summary>
-        public float Scale { get; set; } = 1f;
         /// <summary>
         /// Armature name
         /// </summary>
@@ -68,9 +99,16 @@ namespace Engine.Content.Persistence
         /// Bake transforms
         /// </summary>
         public bool BakeTransforms { get; set; } = true;
+
         /// <summary>
-        /// Read animations
+        /// Gets the initial transform matrix
         /// </summary>
-        public bool ReadAnimations { get; set; } = true;
+        public Matrix4X4 GetTransform()
+        {
+            return
+                Matrix4X4.Scaling(Scale) *
+                Matrix4X4.Rotation(Rotation) *
+                Matrix4X4.Translation(Position);
+        }
     }
 }

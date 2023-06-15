@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
@@ -40,6 +41,15 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the new graph</returns>
         private Graph Create(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
+            if (!triangles.Any())
+            {
+                return new Graph
+                {
+                    Input = this,
+                    Settings = settings as BuildSettings,
+                };
+            }
+
             // Prepare input data
             ChunkyMesh = ChunkyTriMesh.Build(triangles);
 

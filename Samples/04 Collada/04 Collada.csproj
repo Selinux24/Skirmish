@@ -11,6 +11,87 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ModularDungeon\Resources\MDP\Barrel.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Barrel.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Bars.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Bars.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Bones.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Bones.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Bones2.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Bones2.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Book2.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Book2.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Book3.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Book3.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Book_Open.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Book_Open.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Candelabrum.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Candelabrum.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Candelabrum_tall.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Candelabrum_tall.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Candle.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Candle.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Carpet.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Carpet.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Chest.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Chest.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Chest_gold.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Chest_gold.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Column.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Column.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Column_Broken.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Column_Broken.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Column_Broken2.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Column_Broken2.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Entrance.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Entrance.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Entrance2.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Entrance2.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularColumn_bottom.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularColumn_bottom.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularColumn_middle.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularColumn_middle.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularColumn_top.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularColumn_top.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularFloor.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularFloor.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularStoneWall.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularStoneWall.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularStoneWall_top.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\ModularStoneWall_top.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion2.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion2.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion3.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion3.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion4.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion4.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion5.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion5.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion6.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Potion6.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock1.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock1.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock2.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock2.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock3.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock3.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock4.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock4.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock5.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Rock5.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Stairs.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Stairs.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Torch.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Torch.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Torch_wall.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Torch_wall.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\WallRocks.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\WallRocks.obj" />
+    <None Remove="ModularDungeon\Resources\MDP\Window.mtl" />
+    <None Remove="ModularDungeon\Resources\MDP\Window.obj" />
+    <None Remove="ModularDungeon\Resources\OnePageDungeons\MDP.config" />
     <None Remove="ModularDungeon\Resources\OnePageDungeons\UMRP.config" />
     <None Remove="ModularDungeon\Resources\UMRP\Arch_Gothic.mtl" />
     <None Remove="ModularDungeon\Resources\UMRP\Arch_Gothic.obj" />
@@ -394,6 +475,249 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\Characters\Rat\Rat_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Barrel.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Barrel.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Bars.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Bars.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Bones.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Bones.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Bones2.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Bones2.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Book2.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Book2.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Book3.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Book3.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Book_Open.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Book_Open.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Candelabrum.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Candelabrum.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Candelabrum_tall.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Candelabrum_tall.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Candle.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Candle.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Carpet.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Carpet.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Chest.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Chest.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Chest_gold.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Chest_gold.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Column.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Column.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Column_Broken.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Column_Broken.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Column_Broken2.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Column_Broken2.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Entrance.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Entrance.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Entrance2.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Entrance2.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularColumn_bottom.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularColumn_bottom.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularColumn_middle.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularColumn_middle.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularColumn_top.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularColumn_top.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularFloor.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularFloor.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularStoneWall.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularStoneWall.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularStoneWall_top.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\ModularStoneWall_top.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion2.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion2.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion3.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion3.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion4.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion4.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion5.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion5.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion6.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Potion6.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock1.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock1.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock2.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock2.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock3.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock3.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock4.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock4.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock5.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Rock5.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Stairs.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Stairs.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Torch.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Torch.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Torch_wall.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Torch_wall.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\WallRocks.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\WallRocks.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Window.mtl">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\MDP\Window.obj">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="ModularDungeon\Resources\OnePageDungeons\MDP.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="ModularDungeon\Resources\OnePageDungeons\UMRP.config">

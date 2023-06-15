@@ -122,7 +122,7 @@ namespace Engine.Content
         {
             if (!string.IsNullOrWhiteSpace(ContentFilename))
             {
-                string directory = Path.Combine(ContentFolder ?? "", Path.GetDirectoryName(ContentFilename));
+                string directory = Path.Combine(ContentFolder ?? string.Empty, Path.GetDirectoryName(ContentFilename));
                 string fileName = Path.GetFileName(ContentFilename);
 
                 return await ContentDataFile.ReadContentData(directory, fileName);

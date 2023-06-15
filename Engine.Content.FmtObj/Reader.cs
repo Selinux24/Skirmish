@@ -110,9 +110,7 @@ namespace Engine.Content.FmtObj
             string material = ReadUseMaterial(submeshLines.First());
 
             // Read model faces
-            List<Face[]> faces = new List<Face[]>();
-            submeshLines.ToList().ForEach(v => faces.AddRange(ReadFaces(v)));
-
+            var faces = submeshLines.SelectMany(ReadFaces);
             if (faces.Any())
             {
                 return CreateModel(material, points, uvs, normals, faces, 0);
@@ -310,100 +308,38 @@ namespace Engine.Content.FmtObj
             };
         }
 
-        private static IEnumerable<VertexData> CreateVertexData(IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals, IEnumerable<Face[]> faces, int offset)
+        private static SubMeshContent CreateModel(string material, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals, IEnumerable<Face[]> faces, int offset)
         {
             List<VertexData> vertexList = new List<VertexData>();
+            List<uint> indexList = new List<uint>();
 
             int faceIndex = 0;
-            foreach (var face in faces)
+            foreach (var faceVertices in faces)
             {
-                int vertexIndex = 0;
-                foreach (var faceVertex in face)
+                int vCount = vertexList.Count;
+
+                for (int i = 0; i < faceVertices.Length - 2; i++)
                 {
-                    int vIndex = faceVertex.GetPositionIndex(offset);
-                    int? uvIndex = faceVertex.GetUVIndex(offset);
-                    int? nmIndex = faceVertex.GetNormalIndex(offset);
+                    int i0 = offset + vCount;
+                    int i1 = offset + vCount + i + 1;
+                    int i2 = offset + vCount + i + 2;
 
-                    VertexData v = new VertexData
-                    {
-                        Position = points.ElementAt(vIndex),
-                        Texture = uvIndex >= 0 ? uvs.ElementAt(uvIndex.Value) : null,
-                        Normal = nmIndex >= 0 ? normals.ElementAt(nmIndex.Value) : null,
-                        FaceIndex = faceIndex,
-                        VertexIndex = vertexIndex++
-                    };
-
-                    vertexList.Add(v);
+                    var indices = new[] { (uint)i0, (uint)i2, (uint)i1 };
+                    indexList.AddRange(indices);
                 }
+
+                var vertices = faceVertices.Select((faceVertex, vertexIndex) => faceVertex.CreateVertex(faceIndex, vertexIndex, points, uvs, normals, offset));
+                vertexList.AddRange(vertices);
 
                 faceIndex++;
             }
 
-            return vertexList.ToArray();
-        }
-        private static SubMeshContent CreateModel(string material, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals, IEnumerable<Face[]> faces, int offset)
-        {
-            var vertexList = CreateVertexData(points, uvs, normals, faces, offset);
-
-            List<uint> mIndices = new List<uint>();
-
-            //Generate indices
-            for (int f = 0; f < faces.Count(); f++)
-            {
-                int nv = faces.ElementAt(f).Length;
-                for (int i = 2; i < nv; i++)
-                {
-                    int iDelta = offset + (f * 3);
-
-                    int a = i - 2 + iDelta;
-                    int b = i - 1 + iDelta;
-                    int c = i + iDelta;
-
-                    //Read From CW to CCW
-                    mIndices.Add((uint)a);
-                    mIndices.Add((uint)c);
-                    mIndices.Add((uint)b);
-                }
-            }
-
-            if (!normals.Any())
-            {
-                vertexList = ComputeNormals(vertexList, mIndices);
-            }
-
-            SubMeshContent content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false);
+            var content = new SubMeshContent(Topology.TriangleList, material ?? ContentData.NoMaterial, uvs.Any(), false);
 
             content.SetVertices(vertexList);
-            content.SetIndices(mIndices);
+            content.SetIndices(indexList);
 
             return content;
-        }
-        private static IEnumerable<VertexData> ComputeNormals(IEnumerable<VertexData> vertexList, IEnumerable<uint> mIndices)
-        {
-            VertexData[] data = vertexList.ToArray();
-
-            for (int i = 0; i < mIndices.Count(); i += 3)
-            {
-                int i1 = (int)mIndices.ElementAt(i + 0);
-                int i2 = (int)mIndices.ElementAt(i + 1);
-                int i3 = (int)mIndices.ElementAt(i + 2);
-
-                VertexData p1 = data[i1];
-                VertexData p2 = data[i2];
-                VertexData p3 = data[i3];
-
-                Triangle t = new Triangle(p1.Position.Value, p2.Position.Value, p3.Position.Value);
-
-                p1.Normal = t.Normal;
-                p2.Normal = t.Normal;
-                p3.Normal = t.Normal;
-
-                data[i1] = p1;
-                data[i2] = p2;
-                data[i3] = p3;
-            }
-
-            return data;
         }
     }
 }

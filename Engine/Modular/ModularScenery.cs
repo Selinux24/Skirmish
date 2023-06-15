@@ -499,7 +499,7 @@ namespace Engine.Modular
         /// <param name="modelContent">Model content</param>
         private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent)
         {
-            var assetId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
+            var assetId = $"{Name ?? nameof(ModularScenery)}.Asset.{assetName}.{level.Name}";
 
             try
             {

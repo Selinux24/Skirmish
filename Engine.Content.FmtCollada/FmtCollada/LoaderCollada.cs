@@ -111,12 +111,7 @@ namespace Engine.Content.FmtCollada
         {
             ContentData modelContent = new ContentData();
 
-            Matrix transform = Matrix.Identity;
-            if (content.Scale != 1f)
-            {
-                transform = Matrix.Scaling(content.Scale);
-            }
-
+            var transform = content.GetTransform();
             string armatureName = content.ArmatureName;
             var hulls = content.HullMeshes;
             var meshesByLOD = content.LODMeshes;
