@@ -11,15 +11,15 @@ namespace Engine
         /// <summary>
         /// A <see cref="RotationQ"/> with all of its components set to zero.
         /// </summary>
-        public static readonly RotationQ Zero = new RotationQ();
+        public static readonly RotationQ Zero = new();
         /// <summary>
         /// A <see cref="RotationQ"/> with all of its components set to one.
         /// </summary>
-        public static readonly RotationQ One = new RotationQ(1.0f, 1.0f, 1.0f, 1.0f);
+        public static readonly RotationQ One = new(1.0f, 1.0f, 1.0f, 1.0f);
         /// <summary>
         /// The identity <see cref="RotationQ"/> (0, 0, 0, 1).
         /// </summary>
-        public static readonly RotationQ Identity = new RotationQ(0.0f, 0.0f, 0.0f, 1.0f);
+        public static readonly RotationQ Identity = new(0.0f, 0.0f, 0.0f, 1.0f);
 
         /// <summary>
         /// The X component of the rotation.
@@ -86,28 +86,64 @@ namespace Engine
             W = values[3];
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(RotationQ left, RotationQ right)
         {
             return left.Equals(ref right);
         }
+        /// <inheritdoc/>
         public static bool operator !=(RotationQ left, RotationQ right)
         {
             return !left.Equals(ref right);
         }
+        /// <inheritdoc/>
+        public static RotationQ operator +(RotationQ left, RotationQ right)
+        {
+            return Add(left, right);
+        }
+        /// <inheritdoc/>
+        public static RotationQ operator -(RotationQ left, RotationQ right)
+        {
+            return Subtract(left, right);
+        }
+        /// <inheritdoc/>
+        public static RotationQ operator -(RotationQ value)
+        {
+            return Negate(value);
+        }
+        /// <inheritdoc/>
+        public static RotationQ operator *(float scale, RotationQ value)
+        {
+            return Multiply(value, scale);
+        }
+        /// <inheritdoc/>
+        public static RotationQ operator *(RotationQ value, float scale)
+        {
+            return Multiply(value, scale);
+        }
+        /// <inheritdoc/>
+        public static RotationQ operator *(RotationQ left, RotationQ right)
+        {
+            return Multiply(left, right);
+        }
 
+        /// <inheritdoc/>
         public static implicit operator Quaternion(RotationQ value)
         {
             return new Quaternion(value.X, value.Y, value.Z, value.W);
         }
+        /// <inheritdoc/>
         public static implicit operator RotationQ(Quaternion value)
         {
             return new RotationQ(value.X, value.Y, value.Z, value.W);
         }
 
+        /// <inheritdoc/>
         public static implicit operator string(RotationQ value)
         {
             return $"{value.X} {value.Y} {value.Z} {value.W}";
         }
+        /// <inheritdoc/>
         public static implicit operator RotationQ(string value)
         {
             var floats = value?.SplitFloats();
@@ -126,12 +162,12 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(RotationQ other)
+        public readonly bool Equals(RotationQ other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is not RotationQ)
                 return false;
@@ -140,18 +176,18 @@ namespace Engine
             return Equals(ref strongValue);
         }
 
-        public bool Equals(ref RotationQ other)
+        public readonly bool Equals(ref RotationQ other)
         {
             return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z) && MathUtil.NearEqual(other.W, W);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z, W);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"X:{X} Y:{Y} Z:{Z} W:{W}";
         }
@@ -185,6 +221,79 @@ namespace Engine
         public static RotationQ RotationAxis(Direction3 axis, float angle)
         {
             RotationAxis(ref axis, angle, out var result);
+            return result;
+        }
+
+        /// <summary>
+        /// Adds two rotation quaternions
+        /// </summary>
+        public static RotationQ Add(RotationQ left, RotationQ right)
+        {
+            RotationQ result = Identity;
+            result.X = left.X + right.X;
+            result.Y = left.Y + right.Y;
+            result.Z = left.Z + right.Z;
+            result.W = left.W + right.W;
+            return result;
+        }
+        /// <summary>
+        /// Subtracts two rotation quaternions
+        /// </summary>
+        public static RotationQ Subtract(RotationQ left, RotationQ right)
+        {
+            RotationQ result = Identity;
+            result.X = left.X - right.X;
+            result.Y = left.Y - right.Y;
+            result.Z = left.Z - right.Z;
+            result.W = left.W - right.W;
+            return result;
+        }
+        /// <summary>
+        /// Scales a rotation quaternion
+        /// </summary>
+        public static RotationQ Multiply(RotationQ value, float scale)
+        {
+            RotationQ result = Identity;
+            result.X = value.X * scale;
+            result.Y = value.Y * scale;
+            result.Z = value.Z * scale;
+            result.W = value.W * scale;
+            return result;
+        }
+        /// <summary>
+        /// Multiplies two rotation quaternions
+        /// </summary>
+        public static RotationQ Multiply(RotationQ left, RotationQ right)
+        {
+            float x = left.X;
+            float y = left.Y;
+            float z = left.Z;
+            float w = left.W;
+            float x2 = right.X;
+            float y2 = right.Y;
+            float z2 = right.Z;
+            float w2 = right.W;
+            float num = y * z2 - z * y2;
+            float num2 = z * x2 - x * z2;
+            float num3 = x * y2 - y * x2;
+            float num4 = x * x2 + y * y2 + z * z2;
+            RotationQ result = Identity;
+            result.X = x * w2 + x2 * w + num;
+            result.Y = y * w2 + y2 * w + num2;
+            result.Z = z * w2 + z2 * w + num3;
+            result.W = w * w2 - num4;
+            return result;
+        }
+        /// <summary>
+        /// Negates a rotation quaternion
+        /// </summary>
+        public static RotationQ Negate(RotationQ value)
+        {
+            RotationQ result = Identity;
+            result.X = 0f - value.X;
+            result.Y = 0f - value.Y;
+            result.Z = 0f - value.Z;
+            result.W = 0f - value.W;
             return result;
         }
     }

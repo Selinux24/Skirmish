@@ -54,16 +54,13 @@ namespace Engine.Content.Persistence
         public string ModelFileName { get; set; } = null;
 
         /// <summary>
-        /// Position vector
+        /// Position
         /// </summary>
         public Position3 Position { get; set; } = Position3.Zero;
         /// <summary>
         /// Rotation
         /// </summary>
         public RotationQ Rotation { get; set; } = RotationQ.Identity;
-        /// <summary>
-        /// Rotation quaternion
-        /// </summary>
         /// <summary>
         /// Scale
         /// </summary>

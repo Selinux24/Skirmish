@@ -276,9 +276,9 @@ namespace Collada.Start
             {
                 string mapFile = mapFiles[i];
                 string mapTexture = Path.ChangeExtension(mapFile, ".png");
-                string mapCnf = "OnePageDungeons/basicDungeon.config";
+                //string mapCnf = "OnePageDungeons/basicDungeon.config"
                 //string mapCnf = "OnePageDungeons/UMRP.config"
-                //string mapCnf = "OnePageDungeons/MDP.config"
+                string mapCnf = "OnePageDungeons/MDP.config";
 
                 var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
                 buttonDesc.Text = "Click image to load...";

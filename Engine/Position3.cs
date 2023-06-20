@@ -11,7 +11,7 @@ namespace Engine
         /// <summary>
         /// Position zero
         /// </summary>
-        public static readonly Position3 Zero = new Position3();
+        public static readonly Position3 Zero = new();
 
         /// <summary>
         /// The X component of the position.
@@ -70,28 +70,105 @@ namespace Engine
             Z = values[2];
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(Position3 left, Position3 right)
         {
             return left.Equals(ref right);
         }
+        /// <inheritdoc/>
         public static bool operator !=(Position3 left, Position3 right)
         {
             return !left.Equals(ref right);
         }
 
+        /// <inheritdoc/>
+        public static Position3 operator +(Position3 left, Position3 right)
+        {
+            return new Position3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator *(Position3 left, Position3 right)
+        {
+            return new Position3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator +(Position3 value)
+        {
+            return value;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator -(Position3 left, Position3 right)
+        {
+            return new Position3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator -(Position3 value)
+        {
+            return new Position3(0f - value.X, 0f - value.Y, 0f - value.Z);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator *(float scale, Position3 value)
+        {
+            return new Position3(value.X * scale, value.Y * scale, value.Z * scale);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator *(Position3 value, float scale)
+        {
+            return new Position3(value.X * scale, value.Y * scale, value.Z * scale);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator /(Position3 value, float scale)
+        {
+            return new Position3(value.X / scale, value.Y / scale, value.Z / scale);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator /(float scale, Position3 value)
+        {
+            return new Position3(scale / value.X, scale / value.Y, scale / value.Z);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator /(Position3 value, Position3 scale)
+        {
+            return new Position3(value.X / scale.X, value.Y / scale.Y, value.Z / scale.Z);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator +(Position3 value, float scalar)
+        {
+            return new Position3(value.X + scalar, value.Y + scalar, value.Z + scalar);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator +(float scalar, Position3 value)
+        {
+            return new Position3(scalar + value.X, scalar + value.Y, scalar + value.Z);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator -(Position3 value, float scalar)
+        {
+            return new Position3(value.X - scalar, value.Y - scalar, value.Z - scalar);
+        }
+        /// <inheritdoc/>
+        public static Position3 operator -(float scalar, Position3 value)
+        {
+            return new Position3(scalar - value.X, scalar - value.Y, scalar - value.Z);
+        }
+
+        /// <inheritdoc/>
         public static implicit operator Vector3(Position3 value)
         {
             return new Vector3(value.X, value.Y, value.Z);
         }
+        /// <inheritdoc/>
         public static implicit operator Position3(Vector3 value)
         {
             return new Position3(value.X, value.Y, value.Z);
         }
 
+        /// <inheritdoc/>
         public static implicit operator string(Position3 value)
         {
             return $"{value.X} {value.Y} {value.Z}";
         }
+        /// <inheritdoc/>
         public static implicit operator Position3(string value)
         {
             var floats = value?.SplitFloats();
@@ -110,12 +187,12 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(Position3 other)
+        public readonly bool Equals(Position3 other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is not Position3)
                 return false;
@@ -124,18 +201,18 @@ namespace Engine
             return Equals(ref strongValue);
         }
 
-        public bool Equals(ref Position3 other)
+        public readonly bool Equals(ref Position3 other)
         {
             return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"X:{X} Y:{Y} Z:{Z}";
         }
