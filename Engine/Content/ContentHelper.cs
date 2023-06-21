@@ -10,6 +10,49 @@ namespace Engine.Content
     static class ContentHelper
     {
         /// <summary>
+        /// Parse culture
+        /// </summary>
+        public static CultureInfo Local { get; set; } = CultureInfo.InvariantCulture;
+
+        /// <summary>
+        /// Splits the text into a float array
+        /// </summary>
+        /// <param name="text">Text</param>
+        /// <returns>Returns a float array</returns>
+        private static float[] SplitFloats(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                return Array.Empty<float>();
+            }
+
+            var bits = text.Split(" ".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
+
+            bool allOk = true;
+            float[] res = new float[bits.Length];
+
+            for (int i = 0; i < res.Length; i++)
+            {
+                if (float.TryParse(bits[i], NumberStyles.Float, Local, out float n))
+                {
+                    res[i] = n;
+                }
+                else
+                {
+                    allOk = false;
+                    break;
+                }
+            }
+
+            if (allOk)
+            {
+                return res;
+            }
+
+            return Array.Empty<float>();
+        }
+
+        /// <summary>
         /// Parse value for position reserved words
         /// </summary>
         /// <param name="value">String value</param>
@@ -70,7 +113,7 @@ namespace Engine.Content
                 {
                     var degrees = value[3..];
 
-                    if (float.TryParse(degrees, NumberStyles.Float, CultureInfo.InvariantCulture, out float d))
+                    if (float.TryParse(degrees, NumberStyles.Float, Local, out float d))
                     {
                         return RotationQ.RotationAxis(Direction3.Up, MathUtil.DegreesToRadians(d));
                     }
@@ -191,7 +234,7 @@ namespace Engine.Content
         /// </summary>
         public static Position3? ReadPosition3(string value)
         {
-            var floats = value?.SplitFloats();
+            var floats = SplitFloats(value);
             if (floats?.Length == 1)
             {
                 return new Position3(floats[0]);
@@ -210,7 +253,7 @@ namespace Engine.Content
         /// </summary>
         public static Position4? ReadPosition4(string value)
         {
-            var floats = value?.SplitFloats();
+            var floats = SplitFloats(value);
             if (floats?.Length == 1)
             {
                 return new Position4(floats[0]);
@@ -229,7 +272,7 @@ namespace Engine.Content
         /// </summary>
         public static RotationQ? ReadRotationQ(string value)
         {
-            var floats = value?.SplitFloats();
+            var floats = SplitFloats(value);
             if (floats?.Length == 1)
             {
                 return new RotationQ(floats[0]);
@@ -248,7 +291,7 @@ namespace Engine.Content
         /// </summary>
         public static Scale3? ReadScale3(string value)
         {
-            var floats = value?.SplitFloats();
+            var floats = SplitFloats(value);
             if (floats?.Length == 1)
             {
                 return new Scale3(floats[0]);
@@ -267,7 +310,7 @@ namespace Engine.Content
         /// </summary>
         public static Direction3? ReadDirection3(string value)
         {
-            var floats = value?.SplitFloats();
+            var floats = SplitFloats(value);
             if (floats?.Length == 3)
             {
                 return new Direction3(floats);
@@ -282,7 +325,7 @@ namespace Engine.Content
         /// </summary>
         public static ColorRgba? ReadColorRgba(string value)
         {
-            var floats = value?.SplitFloats();
+            var floats = SplitFloats(value);
             if (floats?.Length == 1)
             {
                 return new ColorRgba(floats[0]);
@@ -306,42 +349,42 @@ namespace Engine.Content
         /// </summary>
         public static string WritePosition3(Position3 value)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", value.X, value.Y, value.Z);
+            return string.Format(Local, "{0} {1} {2}", value.X, value.Y, value.Z);
         }
         /// <summary>
         /// Writes the specified value into a string
         /// </summary>
         public static string WritePosition4(Position4 value)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.X, value.Y, value.Z, value.W);
+            return string.Format(Local, "{0} {1} {2} {3}", value.X, value.Y, value.Z, value.W);
         }
         /// <summary>
         /// Writes the specified value into a string
         /// </summary>
         public static string WriteRotationQ(RotationQ value)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.X, value.Y, value.Z, value.W);
+            return string.Format(Local, "{0} {1} {2} {3}", value.X, value.Y, value.Z, value.W);
         }
         /// <summary>
         /// Writes the specified value into a string
         /// </summary>
         public static string WriteScale3(Scale3 value)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", value.X, value.Y, value.Z);
+            return string.Format(Local, "{0} {1} {2}", value.X, value.Y, value.Z);
         }
         /// <summary>
         /// Writes the specified value into a string
         /// </summary>
         public static string WriteDirection3(Direction3 value)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", value.X, value.Y, value.Z);
+            return string.Format(Local, "{0} {1} {2}", value.X, value.Y, value.Z);
         }
         /// <summary>
         /// Writes the specified value into a string
         /// </summary>
         public static string WriteColorRgba(ColorRgba value)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.R, value.G, value.B, value.A);
+            return string.Format(Local, "{0} {1} {2} {3}", value.R, value.G, value.B, value.A);
         }
     }
 }
