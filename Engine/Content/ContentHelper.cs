@@ -5,16 +5,16 @@ using System.Globalization;
 namespace Engine.Content
 {
     /// <summary>
-    /// Modular scenery extents helper class
+    /// Content helper class
     /// </summary>
-    static class PersistenceHelpers
+    static class ContentHelper
     {
         /// <summary>
         /// Parse value for position reserved words
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Position</returns>
-        public static Position3 ReadReservedWordsForPosition3(string value)
+        public static Position3? ReadReservedWordsForPosition3(string value)
         {
             if (string.Equals(value, "Zero", StringComparison.OrdinalIgnoreCase))
             {
@@ -28,17 +28,15 @@ namespace Engine.Content
             {
                 return new Position3(float.MinValue);
             }
-            else
-            {
-                return Position3.Zero;
-            }
+
+            return null;
         }
         /// <summary>
         /// Parse value for position reserved words
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Position</returns>
-        public static Position4 ReadReservedWordsForPosition4(string value)
+        public static Position4? ReadReservedWordsForPosition4(string value)
         {
             if (string.Equals(value, "Zero", StringComparison.OrdinalIgnoreCase))
             {
@@ -52,17 +50,15 @@ namespace Engine.Content
             {
                 return new Position4(float.MinValue);
             }
-            else
-            {
-                return Position4.Zero;
-            }
+
+            return null;
         }
         /// <summary>
         /// Parse value for rotation reserved words
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed rotation</returns>
-        public static RotationQ ReadReservedWordsForRotationQ(string value)
+        public static RotationQ? ReadReservedWordsForRotationQ(string value)
         {
             if (!string.IsNullOrEmpty(value))
             {
@@ -81,14 +77,14 @@ namespace Engine.Content
                 }
             }
 
-            return RotationQ.Identity;
+            return null;
         }
         /// <summary>
         /// Parse value for scale reserved words
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed scale</returns>
-        public static Scale3 ReadReservedWordsForScale3(string value)
+        public static Scale3? ReadReservedWordsForScale3(string value)
         {
             if (string.Equals(value, "One", StringComparison.OrdinalIgnoreCase))
             {
@@ -114,17 +110,15 @@ namespace Engine.Content
             {
                 return new Scale3(1f / 2f);
             }
-            else
-            {
-                return Scale3.One;
-            }
+
+            return null;
         }
         /// <summary>
         /// Parse value for direction reserved words
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Direction</returns>
-        public static Direction3 ReadReservedWordsForDirection3(string value)
+        public static Direction3? ReadReservedWordsForDirection3(string value)
         {
             if (string.Equals(value, "Up", StringComparison.OrdinalIgnoreCase))
             {
@@ -166,17 +160,15 @@ namespace Engine.Content
             {
                 return Direction3.Right;
             }
-            else
-            {
-                return Direction3.ForwardLH;
-            }
+
+            return null;
         }
         /// <summary>
         /// Parse value for color reserved words
         /// </summary>
         /// <param name="value">String value</param>
         /// <returns>Returns parsed Color</returns>
-        public static ColorRgba ReadReservedWordsForColorRgba(string value)
+        public static ColorRgba? ReadReservedWordsForColorRgba(string value)
         {
             if (string.Equals(value, "Transparent", StringComparison.OrdinalIgnoreCase))
             {
@@ -190,10 +182,166 @@ namespace Engine.Content
             {
                 return ColorRgba.Black;
             }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Reads the position from the specified string value
+        /// </summary>
+        public static Position3? ReadPosition3(string value)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 1)
+            {
+                return new Position3(floats[0]);
+            }
+            else if (floats?.Length == 3)
+            {
+                return new Position3(floats);
+            }
             else
             {
-                return ColorRgba.Black;
+                return ReadReservedWordsForPosition3(value);
             }
+        }
+        /// <summary>
+        /// Reads the position from the specified string value
+        /// </summary>
+        public static Position4? ReadPosition4(string value)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 1)
+            {
+                return new Position4(floats[0]);
+            }
+            else if (floats?.Length == 4)
+            {
+                return new Position4(floats);
+            }
+            else
+            {
+                return ReadReservedWordsForPosition4(value);
+            }
+        }
+        /// <summary>
+        /// Reads the rotation quaternion from the specified string value
+        /// </summary>
+        public static RotationQ? ReadRotationQ(string value)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 1)
+            {
+                return new RotationQ(floats[0]);
+            }
+            else if (floats?.Length == 4)
+            {
+                return new RotationQ(floats);
+            }
+            else
+            {
+                return ReadReservedWordsForRotationQ(value);
+            }
+        }
+        /// <summary>
+        /// Reads the scale from the specified string value
+        /// </summary>
+        public static Scale3? ReadScale3(string value)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 1)
+            {
+                return new Scale3(floats[0]);
+            }
+            else if (floats?.Length == 3)
+            {
+                return new Scale3(floats);
+            }
+            else
+            {
+                return ReadReservedWordsForScale3(value);
+            }
+        }
+        /// <summary>
+        /// Reads the direction from the specified string value
+        /// </summary>
+        public static Direction3? ReadDirection3(string value)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 3)
+            {
+                return new Direction3(floats);
+            }
+            else
+            {
+                return ReadReservedWordsForDirection3(value);
+            }
+        }
+        /// <summary>
+        /// Reads the color from the specified string value
+        /// </summary>
+        public static ColorRgba? ReadColorRgba(string value)
+        {
+            var floats = value?.SplitFloats();
+            if (floats?.Length == 1)
+            {
+                return new ColorRgba(floats[0]);
+            }
+            else if (floats?.Length == 3)
+            {
+                return new ColorRgba(floats[0], floats[1], floats[2], 1f);
+            }
+            else if (floats?.Length == 4)
+            {
+                return new ColorRgba(floats);
+            }
+            else
+            {
+                return ReadReservedWordsForColorRgba(value);
+            }
+        }
+
+        /// <summary>
+        /// Writes the specified value into a string
+        /// </summary>
+        public static string WritePosition3(Position3 value)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", value.X, value.Y, value.Z);
+        }
+        /// <summary>
+        /// Writes the specified value into a string
+        /// </summary>
+        public static string WritePosition4(Position4 value)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.X, value.Y, value.Z, value.W);
+        }
+        /// <summary>
+        /// Writes the specified value into a string
+        /// </summary>
+        public static string WriteRotationQ(RotationQ value)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.X, value.Y, value.Z, value.W);
+        }
+        /// <summary>
+        /// Writes the specified value into a string
+        /// </summary>
+        public static string WriteScale3(Scale3 value)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", value.X, value.Y, value.Z);
+        }
+        /// <summary>
+        /// Writes the specified value into a string
+        /// </summary>
+        public static string WriteDirection3(Direction3 value)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", value.X, value.Y, value.Z);
+        }
+        /// <summary>
+        /// Writes the specified value into a string
+        /// </summary>
+        public static string WriteColorRgba(ColorRgba value)
+        {
+            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.R, value.G, value.B, value.A);
         }
     }
 }

@@ -158,24 +158,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static implicit operator string(RotationQ value)
         {
-            return $"{value.X} {value.Y} {value.Z} {value.W}";
+            return ContentHelper.WriteRotationQ(value);
         }
         /// <inheritdoc/>
         public static implicit operator RotationQ(string value)
         {
-            var floats = value?.SplitFloats();
-            if (floats?.Length == 1)
-            {
-                return new RotationQ(floats[0]);
-            }
-            else if (floats?.Length == 4)
-            {
-                return new RotationQ(floats);
-            }
-            else
-            {
-                return PersistenceHelpers.ReadReservedWordsForRotationQ(value);
-            }
+            return ContentHelper.ReadRotationQ(value) ?? Identity;
         }
 
         /// <inheritdoc/>

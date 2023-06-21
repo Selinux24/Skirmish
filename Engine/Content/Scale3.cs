@@ -170,24 +170,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static implicit operator string(Scale3 value)
         {
-            return $"{value.X} {value.Y} {value.Z}";
+            return ContentHelper.WriteScale3(value);
         }
         /// <inheritdoc/>
         public static implicit operator Scale3(string value)
         {
-            var floats = value?.SplitFloats();
-            if (floats?.Length == 1)
-            {
-                return new Scale3(floats[0]);
-            }
-            else if (floats?.Length == 3)
-            {
-                return new Scale3(floats);
-            }
-            else
-            {
-                return PersistenceHelpers.ReadReservedWordsForScale3(value);
-            }
+            return ContentHelper.ReadScale3(value) ?? One;
         }
 
         /// <inheritdoc/>

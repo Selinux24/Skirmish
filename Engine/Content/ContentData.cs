@@ -623,10 +623,7 @@ namespace Engine.Content
 
             if (geo.Any())
             {
-                if (res == null)
-                {
-                    res = new ContentData();
-                }
+                res ??= new ContentData();
 
                 foreach (var g in geo)
                 {
@@ -654,10 +651,7 @@ namespace Engine.Content
 
             if (controllers.Any())
             {
-                if (res == null)
-                {
-                    res = new ContentData();
-                }
+                res ??= new ContentData();
 
                 foreach (var c in controllers)
                 {
@@ -743,10 +737,7 @@ namespace Engine.Content
 
             if (clips.Any())
             {
-                if (res.AnimationDefinition == null)
-                {
-                    res.AnimationDefinition = new AnimationFile();
-                }
+                res.AnimationDefinition ??= new AnimationFile();
 
                 res.AnimationDefinition.Clips.AddRange(clips);
             }

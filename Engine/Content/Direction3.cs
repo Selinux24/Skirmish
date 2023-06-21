@@ -194,20 +194,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static implicit operator string(Direction3 value)
         {
-            return $"{value.X} {value.Y} {value.Z}";
+            return ContentHelper.WriteDirection3(value);
         }
         /// <inheritdoc/>
         public static implicit operator Direction3(string value)
         {
-            var floats = value?.SplitFloats();
-            if (floats?.Length == 3)
-            {
-                return new Direction3(floats);
-            }
-            else
-            {
-                return PersistenceHelpers.ReadReservedWordsForDirection3(value);
-            }
+            return ContentHelper.ReadDirection3(value) ?? ForwardLH;
         }
 
         /// <inheritdoc/>

@@ -174,24 +174,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static implicit operator string(Position4 value)
         {
-            return $"{value.X} {value.Y} {value.Z} {value.W}";
+            return ContentHelper.WritePosition4(value);
         }
         /// <inheritdoc/>
         public static implicit operator Position4(string value)
         {
-            var floats = value?.SplitFloats();
-            if (floats?.Length == 1)
-            {
-                return new Position4(floats[0]);
-            }
-            else if (floats?.Length == 4)
-            {
-                return new Position4(floats);
-            }
-            else
-            {
-                return PersistenceHelpers.ReadReservedWordsForPosition4(value);
-            }
+            return ContentHelper.ReadPosition4(value) ?? Zero;
         }
 
         /// <inheritdoc/>

@@ -31,41 +31,41 @@ namespace Engine.Content.Tests
         {
             var res = ColorRgba.Transparent;
 
-            Assert.AreEqual(res, new ColorRgba(0, 0, 0, 0));
+            Assert.AreEqual(new ColorRgba(0, 0, 0, 0), res);
         }
         [TestMethod()]
         public void ColorWhiteTest()
         {
             var res = ColorRgba.White;
 
-            Assert.AreEqual(res, new ColorRgba(0, 0, 0, 1));
+            Assert.AreEqual(new ColorRgba(0, 0, 0, 1), res);
         }
         [TestMethod()]
         public void ColorBlackTest()
         {
             var res = ColorRgba.Black;
 
-            Assert.AreEqual(res, new ColorRgba(1, 1, 1, 1));
+            Assert.AreEqual(new ColorRgba(1, 1, 1, 1), res);
         }
         [TestMethod()]
         public void ColorValueTest()
         {
             var res = new ColorRgba(2);
 
-            Assert.AreEqual(res, new ColorRgba(2, 2, 2, 2));
+            Assert.AreEqual(new ColorRgba(2, 2, 2, 2), res);
         }
         [TestMethod()]
         public void ColorArrayTest()
         {
             var res = new ColorRgba(new float[] { 1, 2, 3, 4 });
 
-            Assert.AreEqual(res, new ColorRgba(1, 2, 3, 4));
+            Assert.AreEqual(new ColorRgba(1, 2, 3, 4), res);
         }
         [TestMethod()]
         public void ColorBadArrayTest()
         {
             Assert.ThrowsException<ArgumentNullException>(() => new ColorRgba(null));
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba(new float[] { }));
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba(Array.Empty<float>()));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba(new float[] { 1, 2, 3 }));
             Assert.ThrowsException<ArgumentOutOfRangeException>(() => new ColorRgba(new float[] { 1, 2, 3, 4, 5 }));
         }
@@ -74,7 +74,7 @@ namespace Engine.Content.Tests
         {
             var res = new ColorRgba(1, 2, 3, 4);
 
-            Assert.AreEqual(res, new ColorRgba(1, 2, 3, 4));
+            Assert.AreEqual(new ColorRgba(1, 2, 3, 4), res);
         }
         [TestMethod()]
         public void ColorSettesTest()
@@ -85,7 +85,7 @@ namespace Engine.Content.Tests
             res.B = 3;
             res.A = 4;
 
-            Assert.AreEqual(res, new ColorRgba(1, 2, 3, 4));
+            Assert.AreEqual(new ColorRgba(1, 2, 3, 4), res);
         }
 
         [TestMethod()]
@@ -118,41 +118,41 @@ namespace Engine.Content.Tests
         public void ColorToColor3Test()
         {
             Color3 res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
-            Assert.AreEqual(res1, new Color3(0.1f, 0.2f, 0.3f));
+            Assert.AreEqual(new Color3(0.1f, 0.2f, 0.3f), res1);
 
             ColorRgba res2 = new Color3(0.1f, 0.2f, 0.3f);
-            Assert.AreEqual(res2, new ColorRgba(0.1f, 0.2f, 0.3f, 1f));
+            Assert.AreEqual(new ColorRgba(0.1f, 0.2f, 0.3f, 1f), res2);
         }
         [TestMethod()]
         public void ColorToColor4Test()
         {
             Color4 res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
-            Assert.AreEqual(res1, new Color4(0.1f, 0.2f, 0.3f, 0.4f));
+            Assert.AreEqual(new Color4(0.1f, 0.2f, 0.3f, 0.4f), res1);
 
             ColorRgba res2 = new Color4(0.1f, 0.2f, 0.3f, 0.4f);
-            Assert.AreEqual(res2, new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f));
+            Assert.AreEqual(new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f), res2);
         }
         [TestMethod()]
         public void ColorToStringTest()
         {
             string res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
-            Assert.AreEqual(res1, colorString4);
+            Assert.AreEqual(colorString4, res1);
 
             ColorRgba res2 = colorString3;
-            Assert.AreEqual(res2, new ColorRgba(0.1f, 0.2f, 0.3f, 1f));
+            Assert.AreEqual(new ColorRgba(0.1f, 0.2f, 0.3f, 1f), res2);
 
             ColorRgba res3 = colorString4;
-            Assert.AreEqual(res3, new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f));
+            Assert.AreEqual(new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f), res3);
 
             ColorRgba res4 = "Transparent";
-            Assert.AreEqual(res4, ColorRgba.Transparent);
+            Assert.AreEqual(ColorRgba.Transparent, res4);
             res4 = "White";
-            Assert.AreEqual(res4, ColorRgba.White);
+            Assert.AreEqual(ColorRgba.White, res4);
             res4 = "Black";
-            Assert.AreEqual(res4, ColorRgba.Black);
+            Assert.AreEqual(ColorRgba.Black, res4);
 
             res4 = "Nothing parseable";
-            Assert.AreEqual(res4, ColorRgba.Black);
+            Assert.AreEqual(ColorRgba.Black, res4);
         }
     }
 }

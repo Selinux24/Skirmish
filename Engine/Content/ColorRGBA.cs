@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Globalization;
 
 namespace Engine.Content
 {
@@ -135,28 +134,12 @@ namespace Engine.Content
         /// <inheritdoc/>
         public static implicit operator string(ColorRgba value)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.R, value.G, value.B, value.A);
+            return ContentHelper.WriteColorRgba(value);
         }
         /// <inheritdoc/>
         public static implicit operator ColorRgba(string value)
         {
-            var floats = value?.SplitFloats();
-            if (floats?.Length == 1)
-            {
-                return new ColorRgba(floats[0]);
-            }
-            else if (floats?.Length == 3)
-            {
-                return new ColorRgba(floats[0], floats[1], floats[2], 1f);
-            }
-            else if (floats?.Length == 4)
-            {
-                return new ColorRgba(floats);
-            }
-            else
-            {
-                return PersistenceHelpers.ReadReservedWordsForColorRgba(value);
-            }
+            return ContentHelper.ReadColorRgba(value) ?? Black;
         }
 
         /// <inheritdoc/>
