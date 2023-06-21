@@ -1,13 +1,12 @@
-﻿using SharpDX;
+﻿using Engine.Modular;
+using Engine.Modular.Persistence;
+using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.Content.OnePageDungeon
 {
-    using Engine.Modular;
-    using Engine.Modular.Persistence;
-
     /// <summary>
     /// Dungeon creator helper
     /// </summary>
@@ -19,7 +18,7 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Rotation string list
         /// </summary>
-        private static readonly string[] rotationStrings = new[] { "", "Rot90", "Rot180", "Rot270" };
+        private static readonly string[] rotationStrings = new[] { RotationQ.Rotation0, RotationQ.Rotation90, RotationQ.Rotation180, RotationQ.Rotation270 };
 
         /// <summary>
         /// Creates an asset map
@@ -218,10 +217,12 @@ namespace Engine.Content.OnePageDungeon
         {
             List<AssetReference> references = new();
 
+            float blockDelta = configuration.BlockSize * 0.5f;
+
             if (cellWall.Dir.HasFlag(WallDirections.N))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx, 0, vz - (configuration.BlockSize * 0.5f));
+                var position = new Position3(-vx, 0, vz - blockDelta);
                 var rotation = EvaluateRotation(WallDirections.N, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
@@ -230,7 +231,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.S))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx, 0, vz + (configuration.BlockSize * 0.5f));
+                var position = new Position3(-vx, 0, vz + blockDelta);
                 var rotation = EvaluateRotation(WallDirections.S, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
@@ -239,7 +240,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.E))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx - (configuration.BlockSize * 0.5f), 0, vz);
+                var position = new Position3(-vx - blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.E, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
@@ -248,7 +249,7 @@ namespace Engine.Content.OnePageDungeon
             if (cellWall.Dir.HasFlag(WallDirections.W))
             {
                 var wall = configuration.GetRandonWall();
-                var position = new Position3(-vx + (configuration.BlockSize * 0.5f), 0, vz);
+                var position = new Position3(-vx + blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.W, configuration.RotationDelta);
 
                 references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
@@ -405,13 +406,11 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="configuration">Asset configuration</param>
         public static LevelMap CreateLevels(Dungeon dungeon, DungeonAssetConfiguration configuration)
         {
-            LevelMap levels = new LevelMap
+            return new LevelMap
             {
                 Hulls = configuration.Hulls.ToArray(),
                 Levels = new[] { CreateLevel(dungeon, configuration) }
             };
-
-            return levels;
         }
         /// <summary>
         /// Creates a level
@@ -427,7 +426,7 @@ namespace Engine.Content.OnePageDungeon
             var startWall = walls.First(w => w.Cell.X == 0 && w.Cell.Y == 0);
             var dir = startWall.GetFirstOpenDirection();
 
-            Level level = new Level()
+            return new Level()
             {
                 Name = dungeon.Title,
                 StartPosition = Vector3.Zero,
@@ -435,8 +434,6 @@ namespace Engine.Content.OnePageDungeon
                 Map = maps.ToArray(),
                 Objects = objs.ToArray(),
             };
-
-            return level;
         }
         /// <summary>
         /// Creates an asset reference of the map
@@ -447,12 +444,10 @@ namespace Engine.Content.OnePageDungeon
             int rectIndex = 0;
             foreach (var rect in dungeon.Rects)
             {
-                AssetReference assetRef = new AssetReference()
+                yield return new AssetReference()
                 {
                     AssetName = $"{rectIndex++}",
                 };
-
-                yield return assetRef;
             }
         }
         /// <summary>

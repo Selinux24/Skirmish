@@ -65,31 +65,17 @@ namespace Engine
         }
 
         /// <summary>
-        /// Gets a unique hash code for this instance.
-        /// </summary>
-        /// <returns>A hash code.</returns>
-        public override int GetHashCode()
-        {
-            return this.X.GetHashCode() ^ this.Y.GetHashCode();
-        }
-        /// <summary>
-        /// Turns the instance into a human-readable string.
-        /// </summary>
-        /// <returns>A string representing the instance.</returns>
-        public override string ToString()
-        {
-            return "{ X: " + X.ToString() + ", Y: " + Y.ToString() + " }";
-        }
-        /// <summary>
         /// Checks for equality between this instance and a specified object.
         /// </summary>
         /// <param name="obj">An object.</param>
         /// <returns>A value indicating whether this instance and the object are equal.</returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             Vector2Int? objV = obj as Vector2Int?;
             if (objV != null)
-                return this.Equals(objV);
+            {
+                return Equals(objV);
+            }
 
             return false;
         }
@@ -98,9 +84,25 @@ namespace Engine
         /// </summary>
         /// <param name="other">An instance of <see cref="Vector2Int"/>.</param>
         /// <returns>A value indicating whether this instance and the other instance are equal.</returns>
-        public bool Equals(Vector2Int other)
+        public readonly bool Equals(Vector2Int other)
         {
             return X == other.X && Y == other.Y;
+        }
+        /// <summary>
+        /// Gets a unique hash code for this instance.
+        /// </summary>
+        /// <returns>A hash code.</returns>
+        public override readonly int GetHashCode()
+        {
+            return HashCode.Combine(X, Y);
+        }
+        /// <summary>
+        /// Turns the instance into a human-readable string.
+        /// </summary>
+        /// <returns>A string representing the instance.</returns>
+        public override readonly string ToString()
+        {
+            return $"X: {X}; Y: {Y}";
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine
+namespace Engine.Content
 {
     /// <summary>
     /// 3D scale
@@ -11,11 +11,11 @@ namespace Engine
         /// <summary>
         /// Scale zero
         /// </summary>
-        public static readonly Scale3 Zero = new Scale3();
+        public static readonly Scale3 Zero = new();
         /// <summary>
         /// Scale one
         /// </summary>
-        public static readonly Scale3 One = new Scale3(1, 1, 1);
+        public static readonly Scale3 One = new(1, 1, 1);
 
         /// <summary>
         /// The X component of the scale.
@@ -74,28 +74,105 @@ namespace Engine
             Z = values[2];
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(Scale3 left, Scale3 right)
         {
             return left.Equals(ref right);
         }
+        /// <inheritdoc/>
         public static bool operator !=(Scale3 left, Scale3 right)
         {
             return !left.Equals(ref right);
         }
 
+        /// <inheritdoc/>
+        public static Scale3 operator +(Scale3 left, Scale3 right)
+        {
+            return (Vector3)left + (Vector3)right;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator +(Scale3 value)
+        {
+            return +(Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator +(Scale3 value, float scalar)
+        {
+            return (Vector3)value + scalar;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator +(float scalar, Scale3 value)
+        {
+            return scalar + (Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator -(Scale3 left, Scale3 right)
+        {
+            return (Vector3)left - (Vector3)right;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator -(Scale3 value)
+        {
+            return -(Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator -(Scale3 value, float scalar)
+        {
+            return (Vector3)value - scalar;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator -(float scalar, Scale3 value)
+        {
+            return scalar - (Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator *(Scale3 left, Scale3 right)
+        {
+            return (Vector3)left * (Vector3)right;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator *(float scale, Scale3 value)
+        {
+            return scale * (Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator *(Scale3 value, float scale)
+        {
+            return (Vector3)value * scale;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator /(Scale3 value, Scale3 scale)
+        {
+            return (Vector3)value / (Vector3)scale;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator /(Scale3 value, float scale)
+        {
+            return (Vector3)value / scale;
+        }
+        /// <inheritdoc/>
+        public static Scale3 operator /(float scale, Scale3 value)
+        {
+            return scale / (Vector3)value;
+        }
+
+        /// <inheritdoc/>
         public static implicit operator Vector3(Scale3 value)
         {
             return new Vector3(value.X, value.Y, value.Z);
         }
+        /// <inheritdoc/>
         public static implicit operator Scale3(Vector3 value)
         {
             return new Scale3(value.X, value.Y, value.Z);
         }
 
+        /// <inheritdoc/>
         public static implicit operator string(Scale3 value)
         {
             return $"{value.X} {value.Y} {value.Z}";
         }
+        /// <inheritdoc/>
         public static implicit operator Scale3(string value)
         {
             var floats = value?.SplitFloats();
@@ -114,12 +191,12 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(Scale3 other)
+        public readonly bool Equals(Scale3 other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is not Scale3)
                 return false;
@@ -128,18 +205,18 @@ namespace Engine
             return Equals(ref strongValue);
         }
 
-        public bool Equals(ref Scale3 other)
+        public readonly bool Equals(ref Scale3 other)
         {
             return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(X, Y, Z);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"X:{X} Y:{Y} Z:{Z}";
         }

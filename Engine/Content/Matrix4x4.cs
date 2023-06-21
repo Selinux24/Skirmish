@@ -1,64 +1,13 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine
+namespace Engine.Content
 {
     /// <summary>
     /// 4x4 matrix
     /// </summary>
     public struct Matrix4X4 : IEquatable<Matrix4X4>
     {
-        /// <inheritdoc/>
-        public static bool operator ==(Matrix4X4 left, Matrix4X4 right)
-        {
-            return left.Equals(right);
-        }
-        /// <inheritdoc/>
-        public static bool operator !=(Matrix4X4 left, Matrix4X4 right)
-        {
-            return !(left == right);
-        }
-        /// <inheritdoc/>
-        public static implicit operator Matrix(Matrix4X4 value)
-        {
-            return new Matrix(
-                value.M11, value.M12, value.M13, value.M14,
-                value.M21, value.M22, value.M23, value.M24,
-                value.M31, value.M32, value.M33, value.M34,
-                value.M41, value.M42, value.M43, value.M44);
-        }
-        /// <inheritdoc/>
-        public static implicit operator Matrix4X4(Matrix value)
-        {
-            return new Matrix4X4
-            {
-                M11 = value.M11,
-                M12 = value.M12,
-                M13 = value.M13,
-                M14 = value.M14,
-
-                M21 = value.M21,
-                M22 = value.M22,
-                M23 = value.M23,
-                M24 = value.M24,
-
-                M31 = value.M31,
-                M32 = value.M32,
-                M33 = value.M33,
-                M34 = value.M34,
-
-                M41 = value.M41,
-                M42 = value.M42,
-                M43 = value.M43,
-                M44 = value.M44,
-            };
-        }
-        /// <inheritdoc/>
-        public static Matrix4X4 operator *(Matrix4X4 left, Matrix4X4 right)
-        {
-            return (Matrix)left * (Matrix)right;
-        }
-
         /// <summary>
         /// A <see cref="Matrix"/> with all of its components set to zero.
         /// </summary>
@@ -200,6 +149,59 @@ namespace Engine
             M42 = values[13];
             M43 = values[14];
             M44 = values[15];
+        }
+
+        /// <inheritdoc/>
+        public static bool operator ==(Matrix4X4 left, Matrix4X4 right)
+        {
+            return left.Equals(right);
+        }
+        /// <inheritdoc/>
+        public static bool operator !=(Matrix4X4 left, Matrix4X4 right)
+        {
+            return !(left == right);
+        }
+
+        /// <inheritdoc/>
+        public static Matrix4X4 operator *(Matrix4X4 left, Matrix4X4 right)
+        {
+            return (Matrix)left * (Matrix)right;
+        }
+
+        /// <inheritdoc/>
+        public static implicit operator Matrix(Matrix4X4 value)
+        {
+            return new Matrix(
+                value.M11, value.M12, value.M13, value.M14,
+                value.M21, value.M22, value.M23, value.M24,
+                value.M31, value.M32, value.M33, value.M34,
+                value.M41, value.M42, value.M43, value.M44);
+        }
+        /// <inheritdoc/>
+        public static implicit operator Matrix4X4(Matrix value)
+        {
+            return new Matrix4X4
+            {
+                M11 = value.M11,
+                M12 = value.M12,
+                M13 = value.M13,
+                M14 = value.M14,
+
+                M21 = value.M21,
+                M22 = value.M22,
+                M23 = value.M23,
+                M24 = value.M24,
+
+                M31 = value.M31,
+                M32 = value.M32,
+                M33 = value.M33,
+                M34 = value.M34,
+
+                M41 = value.M41,
+                M42 = value.M42,
+                M43 = value.M43,
+                M44 = value.M44,
+            };
         }
 
         /// <inheritdoc/>

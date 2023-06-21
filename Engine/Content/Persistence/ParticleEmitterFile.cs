@@ -1,5 +1,4 @@
-﻿
-namespace Engine.Content.Persistence
+﻿namespace Engine.Content.Persistence
 {
     /// <summary>
     /// Particle emitter description

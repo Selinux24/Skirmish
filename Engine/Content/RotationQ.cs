@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine
+namespace Engine.Content
 {
     /// <summary>
     /// 3D rotation
@@ -20,6 +20,22 @@ namespace Engine
         /// The identity <see cref="RotationQ"/> (0, 0, 0, 1).
         /// </summary>
         public static readonly RotationQ Identity = new(0.0f, 0.0f, 0.0f, 1.0f);
+        /// <summary>
+        /// Zero rotation
+        /// </summary>
+        public static readonly string Rotation0 = "Rot0";
+        /// <summary>
+        /// 90º rotation
+        /// </summary>
+        public static readonly string Rotation90 = "Rot90";
+        /// <summary>
+        /// 180º rotation
+        /// </summary>
+        public static readonly string Rotation180 = "Rot180";
+        /// <summary>
+        /// 270º rotation
+        /// </summary>
+        public static readonly string Rotation270 = "Rot270";
 
         /// <summary>
         /// The X component of the rotation.
@@ -96,35 +112,36 @@ namespace Engine
         {
             return !left.Equals(ref right);
         }
+
         /// <inheritdoc/>
         public static RotationQ operator +(RotationQ left, RotationQ right)
         {
-            return Add(left, right);
+            return (Quaternion)left + (Quaternion)right;
         }
         /// <inheritdoc/>
         public static RotationQ operator -(RotationQ left, RotationQ right)
         {
-            return Subtract(left, right);
+            return (Quaternion)left - (Quaternion)right;
         }
         /// <inheritdoc/>
         public static RotationQ operator -(RotationQ value)
         {
-            return Negate(value);
+            return -(Quaternion)value;
         }
         /// <inheritdoc/>
         public static RotationQ operator *(float scale, RotationQ value)
         {
-            return Multiply(value, scale);
+            return scale * (Quaternion)value;
         }
         /// <inheritdoc/>
         public static RotationQ operator *(RotationQ value, float scale)
         {
-            return Multiply(value, scale);
+            return (Quaternion)value * scale;
         }
         /// <inheritdoc/>
         public static RotationQ operator *(RotationQ left, RotationQ right)
         {
-            return Multiply(left, right);
+            return (Quaternion)left * (Quaternion)right;
         }
 
         /// <inheritdoc/>
@@ -221,79 +238,6 @@ namespace Engine
         public static RotationQ RotationAxis(Direction3 axis, float angle)
         {
             RotationAxis(ref axis, angle, out var result);
-            return result;
-        }
-
-        /// <summary>
-        /// Adds two rotation quaternions
-        /// </summary>
-        public static RotationQ Add(RotationQ left, RotationQ right)
-        {
-            RotationQ result = Identity;
-            result.X = left.X + right.X;
-            result.Y = left.Y + right.Y;
-            result.Z = left.Z + right.Z;
-            result.W = left.W + right.W;
-            return result;
-        }
-        /// <summary>
-        /// Subtracts two rotation quaternions
-        /// </summary>
-        public static RotationQ Subtract(RotationQ left, RotationQ right)
-        {
-            RotationQ result = Identity;
-            result.X = left.X - right.X;
-            result.Y = left.Y - right.Y;
-            result.Z = left.Z - right.Z;
-            result.W = left.W - right.W;
-            return result;
-        }
-        /// <summary>
-        /// Scales a rotation quaternion
-        /// </summary>
-        public static RotationQ Multiply(RotationQ value, float scale)
-        {
-            RotationQ result = Identity;
-            result.X = value.X * scale;
-            result.Y = value.Y * scale;
-            result.Z = value.Z * scale;
-            result.W = value.W * scale;
-            return result;
-        }
-        /// <summary>
-        /// Multiplies two rotation quaternions
-        /// </summary>
-        public static RotationQ Multiply(RotationQ left, RotationQ right)
-        {
-            float x = left.X;
-            float y = left.Y;
-            float z = left.Z;
-            float w = left.W;
-            float x2 = right.X;
-            float y2 = right.Y;
-            float z2 = right.Z;
-            float w2 = right.W;
-            float num = y * z2 - z * y2;
-            float num2 = z * x2 - x * z2;
-            float num3 = x * y2 - y * x2;
-            float num4 = x * x2 + y * y2 + z * z2;
-            RotationQ result = Identity;
-            result.X = x * w2 + x2 * w + num;
-            result.Y = y * w2 + y2 * w + num2;
-            result.Z = z * w2 + z2 * w + num3;
-            result.W = w * w2 - num4;
-            return result;
-        }
-        /// <summary>
-        /// Negates a rotation quaternion
-        /// </summary>
-        public static RotationQ Negate(RotationQ value)
-        {
-            RotationQ result = Identity;
-            result.X = 0f - value.X;
-            result.Y = 0f - value.Y;
-            result.Z = 0f - value.Z;
-            result.W = 0f - value.W;
             return result;
         }
     }

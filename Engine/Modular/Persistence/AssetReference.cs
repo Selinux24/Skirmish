@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Engine.Content;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 namespace Engine.Modular.Persistence

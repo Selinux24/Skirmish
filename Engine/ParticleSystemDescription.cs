@@ -4,6 +4,7 @@ using SharpDX;
 
 namespace Engine
 {
+    using Engine.Content;
     using Engine.Content.Persistence;
 
     /// <summary>

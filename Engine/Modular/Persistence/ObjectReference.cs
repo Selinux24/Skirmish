@@ -5,6 +5,7 @@ using System.Linq;
 
 namespace Engine.Modular.Persistence
 {
+    using Engine.Content;
     using Engine.Content.Persistence;
 
     /// <summary>

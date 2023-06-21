@@ -6,6 +6,7 @@ using System.Linq;
 namespace Engine
 {
     using Engine.Common;
+    using Engine.Content;
 
     /// <summary>
     /// Spot light

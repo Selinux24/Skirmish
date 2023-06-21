@@ -4,8 +4,9 @@ using System.Runtime.InteropServices;
 namespace Engine
 {
     /// <summary>
-    /// A integer vertex
-    /// </summary>
+	/// A 3d vector represented by integers.
+	/// </summary>
+    [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     public struct Vector3Int : IEquatable<Vector3Int>
     {
@@ -80,9 +81,9 @@ namespace Engine
         /// <param name="z">The Z coordinate.</param>
         public Vector3Int(int x, int y, int z)
         {
-            this.X = x;
-            this.Y = y;
-            this.Z = z;
+            X = x;
+            Y = y;
+            Z = z;
         }
 
         /// <summary>
@@ -90,21 +91,21 @@ namespace Engine
         /// </summary>
         /// <param name="other">The other instance.</param>
         /// <returns>A value indicating whether the two vertices are equal.</returns>
-        public bool Equals(Vector3Int other)
+        public readonly bool Equals(Vector3Int other)
         {
-            return this.X == other.X && this.Y == other.Y && this.Z == other.Z;
+            return X == other.X && Y == other.Y && Z == other.Z;
         }
         /// <summary>
         /// Compares an object with this instance for equality.
         /// </summary>
         /// <param name="obj">An object.</param>
         /// <returns>A value indicating whether the object is equal to this instance.</returns>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             Vector3Int? p = obj as Vector3Int?;
             if (p.HasValue)
             {
-                return this.Equals(p.Value);
+                return Equals(p.Value);
             }
 
             return false;
@@ -113,17 +114,17 @@ namespace Engine
         /// Gets a hash code unique to the contents of this instance.
         /// </summary>
         /// <returns>A hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return this.X.GetHashCode() ^ this.Y.GetHashCode() ^ this.Z.GetHashCode();
+            return HashCode.Combine(X, Y, Z);
         }
         /// <summary>
         /// Gets a human-readable version of the vertex.
         /// </summary>
         /// <returns>A string.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return string.Format("X: {0}; Y: {1}; Z: {2}", this.X, this.Y, this.Z);
+            return $"X: {X}; Y: {Y}; Z: {Z}";
         }
     }
 }

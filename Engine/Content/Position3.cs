@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine
+namespace Engine.Content
 {
     /// <summary>
     /// 3D position
@@ -84,72 +84,72 @@ namespace Engine
         /// <inheritdoc/>
         public static Position3 operator +(Position3 left, Position3 right)
         {
-            return new Position3(left.X + right.X, left.Y + right.Y, left.Z + right.Z);
-        }
-        /// <inheritdoc/>
-        public static Position3 operator *(Position3 left, Position3 right)
-        {
-            return new Position3(left.X * right.X, left.Y * right.Y, left.Z * right.Z);
+            return (Vector3)left + (Vector3)right;
         }
         /// <inheritdoc/>
         public static Position3 operator +(Position3 value)
         {
-            return value;
-        }
-        /// <inheritdoc/>
-        public static Position3 operator -(Position3 left, Position3 right)
-        {
-            return new Position3(left.X - right.X, left.Y - right.Y, left.Z - right.Z);
-        }
-        /// <inheritdoc/>
-        public static Position3 operator -(Position3 value)
-        {
-            return new Position3(0f - value.X, 0f - value.Y, 0f - value.Z);
-        }
-        /// <inheritdoc/>
-        public static Position3 operator *(float scale, Position3 value)
-        {
-            return new Position3(value.X * scale, value.Y * scale, value.Z * scale);
-        }
-        /// <inheritdoc/>
-        public static Position3 operator *(Position3 value, float scale)
-        {
-            return new Position3(value.X * scale, value.Y * scale, value.Z * scale);
-        }
-        /// <inheritdoc/>
-        public static Position3 operator /(Position3 value, float scale)
-        {
-            return new Position3(value.X / scale, value.Y / scale, value.Z / scale);
-        }
-        /// <inheritdoc/>
-        public static Position3 operator /(float scale, Position3 value)
-        {
-            return new Position3(scale / value.X, scale / value.Y, scale / value.Z);
-        }
-        /// <inheritdoc/>
-        public static Position3 operator /(Position3 value, Position3 scale)
-        {
-            return new Position3(value.X / scale.X, value.Y / scale.Y, value.Z / scale.Z);
+            return +(Vector3)value;
         }
         /// <inheritdoc/>
         public static Position3 operator +(Position3 value, float scalar)
         {
-            return new Position3(value.X + scalar, value.Y + scalar, value.Z + scalar);
+            return (Vector3)value + scalar;
         }
         /// <inheritdoc/>
         public static Position3 operator +(float scalar, Position3 value)
         {
-            return new Position3(scalar + value.X, scalar + value.Y, scalar + value.Z);
+            return scalar + (Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator -(Position3 left, Position3 right)
+        {
+            return (Vector3)left - (Vector3)right;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator -(Position3 value)
+        {
+            return -(Vector3)value;
         }
         /// <inheritdoc/>
         public static Position3 operator -(Position3 value, float scalar)
         {
-            return new Position3(value.X - scalar, value.Y - scalar, value.Z - scalar);
+            return (Vector3)value - scalar;
         }
         /// <inheritdoc/>
         public static Position3 operator -(float scalar, Position3 value)
         {
-            return new Position3(scalar - value.X, scalar - value.Y, scalar - value.Z);
+            return scalar - (Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator *(Position3 left, Position3 right)
+        {
+            return (Vector3)left * (Vector3)right;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator *(float scale, Position3 value)
+        {
+            return scale * (Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator *(Position3 value, float scale)
+        {
+            return (Vector3)value * scale;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator /(Position3 value, float scale)
+        {
+            return (Vector3)value / scale;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator /(float scale, Position3 value)
+        {
+            return scale / (Vector3)value;
+        }
+        /// <inheritdoc/>
+        public static Position3 operator /(Position3 value, Position3 scale)
+        {
+            return (Vector3)value / (Vector3)scale;
         }
 
         /// <inheritdoc/>

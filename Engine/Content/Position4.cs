@@ -1,7 +1,7 @@
 ﻿using SharpDX;
 using System;
 
-namespace Engine
+namespace Engine.Content
 {
     /// <summary>
     /// 4D position
@@ -78,28 +78,105 @@ namespace Engine
             W = values[3];
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(Position4 left, Position4 right)
         {
             return left.Equals(ref right);
         }
+        /// <inheritdoc/>
         public static bool operator !=(Position4 left, Position4 right)
         {
             return !left.Equals(ref right);
         }
 
+        /// <inheritdoc/>
+        public static Position4 operator +(Position4 left, Position4 right)
+        {
+            return (Vector4)left + (Vector4)right;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator *(Position4 left, Position4 right)
+        {
+            return (Vector4)left * (Vector4)right;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator +(Position4 value)
+        {
+            return +(Vector4)value;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator -(Position4 left, Position4 right)
+        {
+            return (Vector4)left - (Vector4)right;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator -(Position4 value)
+        {
+            return -(Vector4)value;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator *(float scale, Position4 value)
+        {
+            return scale * (Vector4)value;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator *(Position4 value, float scale)
+        {
+            return (Vector4)value * scale;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator /(Position4 value, float scale)
+        {
+            return (Vector4)value / scale;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator /(float scale, Position4 value)
+        {
+            return scale / (Vector4)value;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator /(Position4 value, Position4 scale)
+        {
+            return (Vector4)value / (Vector4)scale;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator +(Position4 value, float scalar)
+        {
+            return (Vector4)value + scalar;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator +(float scalar, Position4 value)
+        {
+            return scalar + (Vector4)value;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator -(Position4 value, float scalar)
+        {
+            return (Vector4)value - scalar;
+        }
+        /// <inheritdoc/>
+        public static Position4 operator -(float scalar, Position4 value)
+        {
+            return scalar - (Vector4)value;
+        }
+
+        /// <inheritdoc/>
         public static implicit operator Vector4(Position4 value)
         {
             return new Vector4(value.X, value.Y, value.Z, value.W);
         }
+        /// <inheritdoc/>
         public static implicit operator Position4(Vector4 value)
         {
             return new Position4(value.X, value.Y, value.Z, value.W);
         }
 
+        /// <inheritdoc/>
         public static implicit operator string(Position4 value)
         {
             return $"{value.X} {value.Y} {value.Z} {value.W}";
         }
+        /// <inheritdoc/>
         public static implicit operator Position4(string value)
         {
             var floats = value?.SplitFloats();
@@ -118,12 +195,12 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(Position4 other)
+        public readonly bool Equals(Position4 other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is not Position4)
                 return false;
@@ -132,20 +209,24 @@ namespace Engine
             return Equals(ref strongValue);
         }
 
-        public bool Equals(ref Position4 other)
+        public readonly bool Equals(ref Position4 other)
         {
-            return MathUtil.NearEqual(other.X, X) && MathUtil.NearEqual(other.Y, Y) && MathUtil.NearEqual(other.Z, Z);
+            return
+                MathUtil.NearEqual(other.X, X) &&
+                MathUtil.NearEqual(other.Y, Y) &&
+                MathUtil.NearEqual(other.Z, Z) &&
+                MathUtil.NearEqual(other.W, W);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
-            return HashCode.Combine(X, Y, Z);
+            return HashCode.Combine(X, Y, Z, W);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"X:{X} Y:{Y} Z:{Z}";
+            return $"X:{X} Y:{Y} Z:{Z} W:{W}";
         }
     }
 }

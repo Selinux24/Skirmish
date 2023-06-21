@@ -1,7 +1,8 @@
 ﻿using SharpDX;
 using System;
+using System.Globalization;
 
-namespace Engine
+namespace Engine.Content
 {
     /// <summary>
     /// RGBA color
@@ -11,15 +12,15 @@ namespace Engine
         /// <summary>
         /// Transparent
         /// </summary>
-        public static readonly ColorRgba Transparent = new ColorRgba(0, 0, 0, 0);
+        public static readonly ColorRgba Transparent = new(0, 0, 0, 0);
         /// <summary>
         /// White
         /// </summary>
-        public static readonly ColorRgba White = new ColorRgba(0, 0, 0, 1);
+        public static readonly ColorRgba White = new(0, 0, 0, 1);
         /// <summary>
         /// Black
         /// </summary>
-        public static readonly ColorRgba Black = new ColorRgba(1, 1, 1, 1);
+        public static readonly ColorRgba Black = new(1, 1, 1, 1);
 
         /// <summary>
         /// The red component of the color.
@@ -86,46 +87,57 @@ namespace Engine
             A = values[3];
         }
 
+        /// <inheritdoc/>
         public static bool operator ==(ColorRgba left, ColorRgba right)
         {
             return left.Equals(ref right);
         }
+        /// <inheritdoc/>
         public static bool operator !=(ColorRgba left, ColorRgba right)
         {
             return !left.Equals(ref right);
         }
 
+        /// <inheritdoc/>
         public static implicit operator Color(ColorRgba value)
         {
             return new Color(value.R, value.G, value.B, value.A);
         }
+        /// <inheritdoc/>
         public static implicit operator ColorRgba(Color value)
         {
-            return new ColorRgba(value.R, value.G, value.B, value.A);
+            var color4 = value.ToColor4();
+            return new ColorRgba(color4.Red, color4.Green, color4.Blue, color4.Alpha);
         }
 
+        /// <inheritdoc/>
         public static implicit operator Color3(ColorRgba value)
         {
             return new Color3(value.R, value.G, value.B);
         }
+        /// <inheritdoc/>
         public static implicit operator ColorRgba(Color3 value)
         {
             return new ColorRgba(value.Red, value.Green, value.Blue, 1f);
         }
 
+        /// <inheritdoc/>
         public static implicit operator Color4(ColorRgba value)
         {
             return new Color4(value.R, value.G, value.B, value.A);
         }
+        /// <inheritdoc/>
         public static implicit operator ColorRgba(Color4 value)
         {
             return new ColorRgba(value.Red, value.Green, value.Blue, value.Alpha);
         }
 
+        /// <inheritdoc/>
         public static implicit operator string(ColorRgba value)
         {
-            return $"{value.R} {value.G} {value.B} {value.A}";
+            return string.Format(CultureInfo.InvariantCulture, "{0} {1} {2} {3}", value.R, value.G, value.B, value.A);
         }
+        /// <inheritdoc/>
         public static implicit operator ColorRgba(string value)
         {
             var floats = value?.SplitFloats();
@@ -148,12 +160,12 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(ColorRgba other)
+        public readonly bool Equals(ColorRgba other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is not ColorRgba)
                 return false;
@@ -162,18 +174,18 @@ namespace Engine
             return Equals(ref strongValue);
         }
 
-        public bool Equals(ref ColorRgba other)
+        public readonly bool Equals(ref ColorRgba other)
         {
             return MathUtil.NearEqual(other.R, R) && MathUtil.NearEqual(other.G, G) && MathUtil.NearEqual(other.B, B) && MathUtil.NearEqual(other.A, A);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(R, G, B, A);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"R:{R} G:{G} B:{B} A:{A}";
         }

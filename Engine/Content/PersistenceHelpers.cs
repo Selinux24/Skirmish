@@ -2,7 +2,7 @@
 using System;
 using System.Globalization;
 
-namespace Engine
+namespace Engine.Content
 {
     /// <summary>
     /// Modular scenery extents helper class
@@ -72,7 +72,7 @@ namespace Engine
                 }
                 else if (value.StartsWith("Rot", StringComparison.OrdinalIgnoreCase))
                 {
-                    var degrees = value.Substring(3);
+                    var degrees = value[3..];
 
                     if (float.TryParse(degrees, NumberStyles.Float, CultureInfo.InvariantCulture, out float d))
                     {
@@ -141,6 +141,22 @@ namespace Engine
             else if (string.Equals(value, "Backward", StringComparison.OrdinalIgnoreCase))
             {
                 return Direction3.BackwardLH;
+            }
+            else if (string.Equals(value, "ForwardLH", StringComparison.OrdinalIgnoreCase))
+            {
+                return Direction3.ForwardLH;
+            }
+            else if (string.Equals(value, "BackwardLH", StringComparison.OrdinalIgnoreCase))
+            {
+                return Direction3.BackwardLH;
+            }
+            else if (string.Equals(value, "ForwardRH", StringComparison.OrdinalIgnoreCase))
+            {
+                return Direction3.ForwardRH;
+            }
+            else if (string.Equals(value, "BackwardRH", StringComparison.OrdinalIgnoreCase))
+            {
+                return Direction3.BackwardRH;
             }
             else if (string.Equals(value, "Left", StringComparison.OrdinalIgnoreCase))
             {

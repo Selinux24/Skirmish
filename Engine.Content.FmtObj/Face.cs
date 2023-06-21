@@ -83,7 +83,7 @@ namespace Engine.Content.FmtObj
                 Texture = uvIndex >= 0 ? uvs.ElementAt(uvIndex.Value) : null,
                 Normal = nmIndex >= 0 ? normals.ElementAt(nmIndex.Value) : null,
                 FaceIndex = faceIndex,
-                VertexIndex = vertexIndex++
+                VertexIndex = vertexIndex
             };
         }
 

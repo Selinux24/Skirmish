@@ -1,18 +1,4 @@
-﻿using Engine;
-using Engine.Animation;
-using Engine.Audio;
-using Engine.BuiltIn.PostProcess;
-using Engine.Common;
-using Engine.Content;
-using Engine.Content.FmtObj;
-using Engine.Content.OnePageDungeon;
-using Engine.Content.Persistence;
-using Engine.Modular;
-using Engine.PathFinding;
-using Engine.PathFinding.RecastNavigation;
-using Engine.UI;
-using Engine.UI.Tween;
-using SharpDX;
+﻿using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,6 +7,21 @@ using System.Threading.Tasks;
 
 namespace Collada.ModularDungeon
 {
+    using Engine;
+    using Engine.Animation;
+    using Engine.Audio;
+    using Engine.BuiltIn.PostProcess;
+    using Engine.Common;
+    using Engine.Content;
+    using Engine.Content.FmtObj;
+    using Engine.Content.OnePageDungeon;
+    using Engine.Content.Persistence;
+    using Engine.Modular;
+    using Engine.PathFinding;
+    using Engine.PathFinding.RecastNavigation;
+    using Engine.UI;
+    using Engine.UI.Tween;
+
     public class SceneModularDungeon : WalkableScene
     {
         private const float maxDistance = 35;
@@ -441,7 +442,7 @@ namespace Collada.ModularDungeon
         }
         private async Task<ModularSceneryDescription> LoadOnePageDungeon(string dungeonFileName, string dungeonConfigFile)
         {
-            var config = DungeonAssetConfigurationFile.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
+            var config = DungeonAssetConfiguration.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
 
             List<ContentData> contentData = new List<ContentData>();
 
@@ -450,7 +451,7 @@ namespace Collada.ModularDungeon
 
             var content = contentData.Select(c => new ContentDescription { ContentData = c });
 
-            var dn = DungeonFile.Load(dungeonFileName);
+            var dn = Dungeon.Load(dungeonFileName);
             var assetsMap = DungeonCreator.CreateAssets(dn, config);
             var levelsMap = DungeonCreator.CreateLevels(dn, config);
 
