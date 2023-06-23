@@ -45,9 +45,10 @@ namespace Engine.Modular.Persistence
         [JsonConverter(typeof(StringEnumConverter))]
         public ModularSceneryObjectTypes Type { get; set; } = ModularSceneryObjectTypes.Default;
         /// <summary>
-        /// Include object in path finding
+        /// Path finding
         /// </summary>
-        public bool PathFinding { get; set; }
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ModularSceneryPathFindingModes PathFinding { get; set; } = ModularSceneryPathFindingModes.None;
         /// <summary>
         /// Animation plan list
         /// </summary>

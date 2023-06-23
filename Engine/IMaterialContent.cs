@@ -31,6 +31,11 @@ namespace Engine
         string NormalMapTexture { get; set; }
 
         /// <summary>
+        /// Gets whether the material is textured or not <see cref="DiffuseTexture"/>
+        /// </summary>
+        bool Textured { get => !string.IsNullOrWhiteSpace(DiffuseTexture); }
+
+        /// <summary>
         /// Creates a mesh material from material content
         /// </summary>
         /// <param name="textures">Texture dictionary</param>

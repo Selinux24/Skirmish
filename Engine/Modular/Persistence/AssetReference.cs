@@ -26,6 +26,11 @@ namespace Engine.Modular.Persistence
         [JsonConverter(typeof(StringEnumConverter))]
         public ModularSceneryAssetTypes Type { get; set; } = ModularSceneryAssetTypes.None;
         /// <summary>
+        /// Path finding
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public ModularSceneryPathFindingModes PathFinding { get; set; } = ModularSceneryPathFindingModes.None;
+        /// <summary>
         /// Position vector
         /// </summary>
         public Position3 Position { get; set; } = Position3.Zero;

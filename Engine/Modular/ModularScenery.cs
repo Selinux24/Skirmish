@@ -128,9 +128,9 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="assets">Asset list</param>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        private static Dictionary<string, ModularSceneryAssetInstanceInfo> GetMapInstanceCounters(Level level, IEnumerable<Asset> assets)
+        private static Dictionary<string, InstanceInfo> GetMapInstanceCounters(Level level, IEnumerable<Asset> assets)
         {
-            Dictionary<string, ModularSceneryAssetInstanceInfo> res = new Dictionary<string, ModularSceneryAssetInstanceInfo>();
+            Dictionary<string, InstanceInfo> res = new Dictionary<string, InstanceInfo>();
 
             var vAssets = assets.ToArray();
 
@@ -147,7 +147,7 @@ namespace Engine.Modular
                 {
                     if (!res.ContainsKey(key))
                     {
-                        res.Add(key, new ModularSceneryAssetInstanceInfo { Count = 0 });
+                        res.Add(key, new InstanceInfo { Count = 0 });
                     }
 
                     res[key].Count += assetInstances[key];
@@ -204,9 +204,9 @@ namespace Engine.Modular
         /// Gets the instance counter dictionary
         /// </summary>
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
-        private static Dictionary<string, ModularSceneryObjectInstanceInfo> GetObjectsInstanceCounters(Level level)
+        private static Dictionary<string, InstanceInfo> GetObjectsInstanceCounters(Level level)
         {
-            Dictionary<string, ModularSceneryObjectInstanceInfo> res = new Dictionary<string, ModularSceneryObjectInstanceInfo>();
+            Dictionary<string, InstanceInfo> res = new Dictionary<string, InstanceInfo>();
 
             foreach (var item in level.Objects)
             {
@@ -217,7 +217,7 @@ namespace Engine.Modular
 
                 if (!res.ContainsKey(item.AssetName))
                 {
-                    res.Add(item.AssetName, new ModularSceneryObjectInstanceInfo { Count = 0, PathFinding = item.PathFinding });
+                    res.Add(item.AssetName, new InstanceInfo { Count = 0, PathFinding = item.PathFinding });
                 }
 
                 res[item.AssetName].Count += 1;
@@ -479,7 +479,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                var model = await InitializeAsset(assetName, count, level, modelContent);
+                var model = await InitializeAsset(assetName, count, level, modelContent, instances[assetName].PathFinding);
                 if (model == null)
                 {
                     continue;
@@ -497,16 +497,34 @@ namespace Engine.Modular
         /// <param name="count">Instance count</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent)
+        /// <param name="pathFinding">Path finding</param>
+        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent, ModularSceneryPathFindingModes pathFinding)
         {
             var assetId = $"{Name ?? nameof(ModularScenery)}.Asset.{assetName}.{level.Name}";
 
             try
             {
                 var masks = GetMasksForAsset(levelMap, assetName);
-                var hasHulls = modelContent.SetHullMark(true, masks) > 0;
-                var usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
-
+                SceneObjectUsages usage;
+                switch (pathFinding)
+                {
+                    case ModularSceneryPathFindingModes.None:
+                        usage = SceneObjectUsages.None;
+                        break;
+                    case ModularSceneryPathFindingModes.Boundings:
+                        usage = SceneObjectUsages.BoundsPathFinding;
+                        break;
+                    case ModularSceneryPathFindingModes.Hull:
+                        var hasHulls = modelContent.SetHullMark(true, masks) > 0;
+                        usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                        break;
+                    case ModularSceneryPathFindingModes.Geometry:
+                        usage = SceneObjectUsages.FullPathFinding;
+                        break;
+                    default:
+                        usage = SceneObjectUsages.None;
+                        break;
+                }
 
                 var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
                     assetId,
@@ -565,7 +583,7 @@ namespace Engine.Modular
                     continue;
                 }
 
-                var model = await InitializeObject(assetName, count, instances[assetName].PathFinding, level, modelContent);
+                var model = await InitializeObject(assetName, count, level, modelContent, instances[assetName].PathFinding);
                 if (model == null)
                 {
                     continue;
@@ -581,21 +599,35 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="assetName">Asset name</param>
         /// <param name="count">Instance count</param>
-        /// <param name="pathFinding">Path finding enabled flag</param>
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
-        private async Task<ModelInstanced> InitializeObject(string assetName, int count, bool pathFinding, Level level, ContentData modelContent)
+        /// <param name="pathFinding">Path finding enabled flag</param>
+        private async Task<ModelInstanced> InitializeObject(string assetName, int count, Level level, ContentData modelContent, ModularSceneryPathFindingModes pathFinding)
         {
             var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
 
             try
             {
                 var masks = GetMasksForAsset(levelMap, assetName);
-                var hasHulls = modelContent.SetHullMark(true, masks) > 0;
-                SceneObjectUsages usage = SceneObjectUsages.None;
-                if (pathFinding)
+                SceneObjectUsages usage;
+                switch (pathFinding)
                 {
-                    usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                    case ModularSceneryPathFindingModes.None:
+                        usage = SceneObjectUsages.None;
+                        break;
+                    case ModularSceneryPathFindingModes.Boundings:
+                        usage = SceneObjectUsages.BoundsPathFinding;
+                        break;
+                    case ModularSceneryPathFindingModes.Hull:
+                        var hasHulls = modelContent.SetHullMark(true, masks) > 0;
+                        usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
+                        break;
+                    case ModularSceneryPathFindingModes.Geometry:
+                        usage = SceneObjectUsages.FullPathFinding;
+                        break;
+                    default:
+                        usage = SceneObjectUsages.None;
+                        break;
                 }
 
                 var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -1075,40 +1107,19 @@ namespace Engine.Modular
         /// <inheritdoc/>
         public override IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
-            if (geometryType != PickingHullTypes.Navigation)
-            {
-                return Enumerable.Empty<Triangle>();
-            }
+            List<Triangle> triangles = new();
 
-            List<Triangle> triangles = new List<Triangle>();
+            var assetTriangles = assets.Values
+                .SelectMany(asset => asset.GetInstances().Where(i => i.Visible))
+                .SelectMany(instance => instance.GetPickingHull(geometryType));
 
-            foreach (var asset in assets.Values)
-            {
-                if (!asset.Usage.HasFlag(SceneObjectUsages.FullPathFinding) && !asset.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding))
-                {
-                    continue;
-                }
+            triangles.AddRange(assetTriangles);
 
-                var instances = asset.GetInstances().Where(i => i.Visible);
-                foreach (var instance in instances)
-                {
-                    triangles.AddRange(instance.GetPickingHull(geometryType));
-                }
-            }
+            var objTriangles = objects.Values
+                .SelectMany(obj => obj.GetInstances().Where(i => i.Visible))
+                .SelectMany(instance => instance.GetPickingHull(geometryType));
 
-            foreach (var obj in objects.Values)
-            {
-                if (!obj.Usage.HasFlag(SceneObjectUsages.FullPathFinding) && !obj.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding))
-                {
-                    continue;
-                }
-
-                var instances = obj.GetInstances().Where(i => i.Visible);
-                foreach (var instance in instances)
-                {
-                    triangles.AddRange(instance.GetPickingHull(geometryType));
-                }
-            }
+            triangles.AddRange(objTriangles);
 
             return triangles.ToArray();
         }
@@ -1874,19 +1885,9 @@ namespace Engine.Modular
             }
         }
         /// <summary>
-        /// Asset instance info
+        /// Instance info
         /// </summary>
-        class ModularSceneryAssetInstanceInfo
-        {
-            /// <summary>
-            /// Instance count
-            /// </summary>
-            public int Count { get; set; }
-        }
-        /// <summary>
-        /// Object instance info
-        /// </summary>
-        class ModularSceneryObjectInstanceInfo
+        class InstanceInfo
         {
             /// <summary>
             /// Instance count
@@ -1895,7 +1896,7 @@ namespace Engine.Modular
             /// <summary>
             /// Use of path finding
             /// </summary>
-            public bool PathFinding { get; set; }
+            public ModularSceneryPathFindingModes PathFinding { get; set; }
         }
     }
 }

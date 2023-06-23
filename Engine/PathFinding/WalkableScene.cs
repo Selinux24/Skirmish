@@ -16,7 +16,7 @@ namespace Engine.PathFinding
         /// <summary>
         /// Ground usage enum for ground picking
         /// </summary>
-        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding;
+        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.BoundsPathFinding;
 
         /// <summary>
         /// Gets the current scene geometry for navigation
@@ -354,12 +354,17 @@ namespace Engine.PathFinding
             var tris = GetComponents<IDrawable>()
                 .Where(c =>
                 {
+                    if (c.HasOwner || !c.Visible)
+                    {
+                        return false;
+                    }
+
                     return
-                        !c.HasOwner &&
-                        c.Visible &&
-                        (c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) || c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding));
+                        c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) ||
+                        c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding) ||
+                        c.Usage.HasFlag(SceneObjectUsages.BoundsPathFinding);
                 })
-                .SelectMany(c => GetGeometryForNavigationGraph<Triangle>(c));
+                .SelectMany(GetGeometryForNavigationGraph<Triangle>);
 
             var bounds = PathFinderDescription.Settings.Bounds;
             if (bounds.HasValue)

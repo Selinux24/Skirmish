@@ -27,11 +27,11 @@ namespace Engine.Content
         {
             if (Keyframes?.Any() == true)
             {
-                return $"Start: {Keyframes[0]}; End: {Keyframes[^1]}; {JointName}";
+                return $"{JointName} - Start: {Keyframes[0]}; End: {Keyframes[^1]}; {TransformType}";
             }
             else
             {
-                return $"No animation; {JointName}";
+                return $"{JointName} - No animation";
             }
         }
     }

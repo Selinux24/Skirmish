@@ -1272,7 +1272,7 @@ namespace Terrain.Rts
         private void StartHelicopter()
         {
             // Set position
-            var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
+            var sceneryUsage = SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.BoundsPathFinding;
             var ray = GetTopDownRay(heliport.Manipulator.Position, RayPickingParams.Objects);
             if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {

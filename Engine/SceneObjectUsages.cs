@@ -21,16 +21,20 @@ namespace Engine
         /// </summary>
         CoarsePathFinding = 2,
         /// <summary>
+        /// Bounds path finding (OBB)
+        /// </summary>
+        BoundsPathFinding = 4,
+        /// <summary>
         /// Scene ground
         /// </summary>
-        Ground = 4,
+        Ground = 8,
         /// <summary>
         /// Scene agent
         /// </summary>
-        Agent = 8,
+        Agent = 16,
         /// <summary>
         /// User interface
         /// </summary>
-        UI = 16,
+        UI = 32,
     }
 }

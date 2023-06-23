@@ -81,7 +81,7 @@ namespace Engine.Content.FmtCollada
                 })
                 .ToList();
 
-            List<ContentData> res = new List<ContentData>();
+            List<ContentData> res = new();
 
             while (taskList.Any())
             {
@@ -109,7 +109,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns a collection of content data instances</returns>
         private static IEnumerable<ContentData> ReadContentData(Collada dae, string contentFolder, ContentDataFile content)
         {
-            ContentData modelContent = new ContentData();
+            ContentData modelContent = new();
 
             var transform = content.GetTransform();
             string armatureName = content.ArmatureName;
@@ -157,7 +157,7 @@ namespace Engine.Content.FmtCollada
                 return new[] { modelContent };
             }
 
-            List<ContentData> res = new List<ContentData>();
+            List<ContentData> res = new();
 
             //Filter by armature name
             if (filterByArmature &&
@@ -383,7 +383,7 @@ namespace Engine.Content.FmtCollada
                         var mat = value;
 
                         subMesh.Material = materialName;
-                        subMesh.SetTextured(mat.DiffuseTexture != null);
+                        subMesh.SetTextured(mat.Textured);
                     }
 
                     modelContent.ImportMaterial(geometry.Id, subMesh.Material, subMesh);
@@ -557,7 +557,7 @@ namespace Engine.Content.FmtCollada
                 return Enumerable.Empty<SubMeshContent>();
             }
 
-            List<SubMeshContent> res = new List<SubMeshContent>();
+            List<SubMeshContent> res = new();
 
             foreach (var triangle in triangles)
             {
@@ -576,7 +576,7 @@ namespace Engine.Content.FmtCollada
                     data[i + 2] = verts.ElementAt(i + 1);
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, triangle.Material, false, isHull);
+                SubMeshContent meshInfo = new(Topology.TriangleList, triangle.Material, false, isHull);
 
                 meshInfo.SetVertices(data);
 
@@ -593,7 +593,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns vertex data</returns>
         private static IEnumerable<VertexData> ProcessTriangle(Triangles triangle, IEnumerable<Source> meshSources)
         {
-            List<VertexData> verts = new List<VertexData>();
+            List<VertexData> verts = new();
 
             var vertexInput = triangle[EnumSemantics.Vertex];
             var normalInput = triangle[EnumSemantics.Normal];
@@ -611,7 +611,7 @@ namespace Engine.Content.FmtCollada
                 {
                     int index = (i * inputCount * 3) + (t * inputCount);
 
-                    VertexData vert = new VertexData()
+                    VertexData vert = new()
                     {
                         FaceIndex = i,
                     };
@@ -663,7 +663,7 @@ namespace Engine.Content.FmtCollada
                 return Enumerable.Empty<SubMeshContent>();
             }
 
-            List<SubMeshContent> res = new List<SubMeshContent>();
+            List<SubMeshContent> res = new();
 
             foreach (var polyList in polyLists)
             {
@@ -673,7 +673,7 @@ namespace Engine.Content.FmtCollada
                     continue;
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polyList.Material, false, isHull);
+                SubMeshContent meshInfo = new(Topology.TriangleList, polyList.Material, false, isHull);
 
                 meshInfo.SetVertices(verts);
                 meshInfo.SetIndices(indices);
@@ -691,8 +691,8 @@ namespace Engine.Content.FmtCollada
         /// <returns>Return vertext data</returns>
         private static void ProcessPolyList(PolyList polyList, IEnumerable<Source> meshSources, out IEnumerable<VertexData> vertices, out IEnumerable<uint> indices)
         {
-            List<VertexData> verts = new List<VertexData>();
-            List<uint> idx = new List<uint>();
+            List<VertexData> verts = new();
+            List<uint> idx = new();
 
             var vertexInput = polyList[EnumSemantics.Vertex];
             var normalInput = polyList[EnumSemantics.Normal];
@@ -715,7 +715,7 @@ namespace Engine.Content.FmtCollada
 
                 for (int v = 0; v < n; v++)
                 {
-                    VertexData vert = new VertexData()
+                    VertexData vert = new()
                     {
                         FaceIndex = i,
                     };
@@ -783,7 +783,7 @@ namespace Engine.Content.FmtCollada
                 return Enumerable.Empty<SubMeshContent>();
             }
 
-            List<SubMeshContent> res = new List<SubMeshContent>();
+            List<SubMeshContent> res = new();
 
             foreach (var polygon in polygons)
             {
@@ -802,7 +802,7 @@ namespace Engine.Content.FmtCollada
                     data[i + 2] = verts.ElementAt(i + 1);
                 }
 
-                SubMeshContent meshInfo = new SubMeshContent(Topology.TriangleList, polygon.Material, false, isHull);
+                SubMeshContent meshInfo = new(Topology.TriangleList, polygon.Material, false, isHull);
 
                 meshInfo.SetVertices(data);
 
@@ -819,7 +819,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns vertex data</returns>
         private static IEnumerable<VertexData> ProcessPolygon(Polygons polygon, IEnumerable<Source> meshSources)
         {
-            List<VertexData> verts = new List<VertexData>();
+            List<VertexData> verts = new();
 
             var vertexInput = polygon[EnumSemantics.Vertex];
             var normalInput = polygon[EnumSemantics.Normal];
@@ -838,9 +838,9 @@ namespace Engine.Content.FmtCollada
 
                 for (int v = 0; v < n; v++)
                 {
-                    int index = (v * inputCount);
+                    int index = v * inputCount;
 
-                    VertexData vert = new VertexData()
+                    VertexData vert = new()
                     {
                         FaceIndex = i,
                     };
@@ -987,7 +987,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessSkin(Skin skin)
         {
-            ControllerContent res = new ControllerContent
+            ControllerContent res = new()
             {
                 BindShapeMatrix = Matrix.Transpose(skin.BindShapeMatrix.ToMatrix()),
                 Skin = skin.SourceUri.Replace("#", ""),
@@ -1010,7 +1010,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns controller content</returns>
         private static ControllerContent ProcessMorph(Morph morph)
         {
-            ControllerContent res = new ControllerContent();
+            ControllerContent res = new();
 
             ProcessVertexWeights(morph, out var wgList);
 
@@ -1603,7 +1603,7 @@ namespace Engine.Content.FmtCollada
                 return;
             }
 
-            List<Skeleton> res = new List<Skeleton>();
+            List<Skeleton> res = new();
 
             foreach (var node in nodes)
             {
@@ -1625,7 +1625,7 @@ namespace Engine.Content.FmtCollada
         {
             if (!node.IsArmature)
             {
-                List<Skeleton> res = new List<Skeleton>();
+                List<Skeleton> res = new();
 
                 ProcessSceneNodesSkeleton(node.Nodes, out var childSkeletons);
                 if (childSkeletons.Any())
@@ -1655,7 +1655,7 @@ namespace Engine.Content.FmtCollada
                 return;
             }
 
-            List<InstanceController> res = new List<InstanceController>();
+            List<InstanceController> res = new();
 
             foreach (var node in nodes)
             {
@@ -1677,7 +1677,7 @@ namespace Engine.Content.FmtCollada
         {
             if (!node.HasController)
             {
-                List<InstanceController> res = new List<InstanceController>();
+                List<InstanceController> res = new();
 
                 ProcessSceneNodesInstanceController(node.Nodes, out var childInstanceControllers);
                 if (childInstanceControllers.Any())
@@ -1723,7 +1723,7 @@ namespace Engine.Content.FmtCollada
         {
             Matrix localTransform = node.ReadMatrix();
 
-            Joint jt = new Joint(node.Id, node.SId, parent, localTransform, Matrix.Identity);
+            Joint jt = new(node.Id, node.SId, parent, localTransform, Matrix.Identity);
 
             Skeleton.UpdateToWorldTransform(jt);
 
@@ -1732,7 +1732,7 @@ namespace Engine.Content.FmtCollada
                 return jt;
             }
 
-            List<Joint> childs = new List<Joint>();
+            List<Joint> childs = new();
 
             foreach (var child in node.Nodes)
             {

@@ -121,31 +121,39 @@ namespace Engine.Content
         /// <returns>Returns new model content</returns>
         private static ContentData Generate(Topology topology, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, IEnumerable<IMaterialContent> materials)
         {
-            ContentData modelContent = new ContentData();
-            string materialName = NoMaterial;
-            bool textured = false;
+            ContentData modelContent = new();
+            string materialName;
+            bool textured;
 
-            if (materials.Count() == 1)
+            int materialCount = materials.Count();
+            if (materialCount == 1)
             {
-                modelContent.AddMaterial(DefaultMaterial, materials.First());
-
+                var material = materials.First();
                 materialName = DefaultMaterial;
-                textured = materials.First().DiffuseTexture != null;
+                textured = material.Textured;
+
+                modelContent.AddMaterial(materialName, material);
             }
-            else if (materials.Count() > 1)
+            else if (materialCount > 1)
             {
-                for (int i = 0; i < materials.Count(); i++)
+                materialName = DefaultMaterial;
+                textured = materials.First().Textured;
+
+                for (int i = 0; i < materialCount; i++)
                 {
-                    string name = i == 0 ? DefaultMaterial : $"{DefaultMaterial}_{i}";
+                    string name = i == 0 ? materialName : $"{materialName}_{i}";
 
                     modelContent.AddMaterial(name, materials.ElementAt(i));
                 }
 
-                materialName = DefaultMaterial;
-                textured = materials.First().DiffuseTexture != null;
+            }
+            else
+            {
+                materialName = NoMaterial;
+                textured = false;
             }
 
-            SubMeshContent geo = new SubMeshContent(topology, materialName, textured, false);
+            SubMeshContent geo = new(topology, materialName, textured, false);
 
             geo.SetVertices(vertices);
             geo.SetIndices(indices);
@@ -163,7 +171,7 @@ namespace Engine.Content
         /// <returns>Returns the content dictionary by level of detail</returns>
         public static Dictionary<LevelOfDetail, ContentData> BuildLOD(IEnumerable<ContentData> geo, bool optimize)
         {
-            Dictionary<LevelOfDetail, ContentData> res = new Dictionary<LevelOfDetail, ContentData>();
+            Dictionary<LevelOfDetail, ContentData> res = new();
 
             int lastLod = 1;
             foreach (var iGeo in geo)
@@ -305,7 +313,7 @@ namespace Engine.Content
         /// <returns>Returns the list of animations for the specified skin content</returns>
         public IEnumerable<string> GetAnimationsForSkin(SkinningContent skInfo)
         {
-            List<string> result = new List<string>();
+            List<string> result = new();
 
             var jointNames = skInfo.Skeleton.GetJointNames();
 
@@ -380,7 +388,7 @@ namespace Engine.Content
         /// <param name="material">Material name</param>
         private void OptimizeStaticMesh(Dictionary<string, Dictionary<string, SubMeshContent>> geometry, string material)
         {
-            List<SubMeshContent> staticM = new List<SubMeshContent>();
+            List<SubMeshContent> staticM = new();
 
             foreach (string mesh in geometry.Keys)
             {
@@ -462,17 +470,7 @@ namespace Engine.Content
         /// <returns>Returns triangle list</returns>
         public IEnumerable<Triangle> GetTriangles()
         {
-            List<Triangle> triangles = new List<Triangle>();
-
-            foreach (var meshDict in Geometry.Values)
-            {
-                foreach (var mesh in meshDict.Values)
-                {
-                    triangles.AddRange(mesh.GetTriangles());
-                }
-            }
-
-            return triangles;
+            return Geometry.Values.SelectMany(m => m.Values.SelectMany(s => s.GetTriangles())).ToArray();
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry name
@@ -483,23 +481,23 @@ namespace Engine.Content
         {
             var geo = Geometry.Where(g => string.Equals(g.Key, geometryName + "-mesh", StringComparison.OrdinalIgnoreCase));
 
-            if (geo.Any())
+            if (!geo.Any())
             {
-                var res = new ContentData
-                {
-                    Images = Images,
-                    Materials = Materials,
-                };
-
-                foreach (var g in geo)
-                {
-                    res.Geometry.Add(g.Key, g.Value);
-                }
-
-                return res;
+                return null;
             }
 
-            return null;
+            var res = new ContentData
+            {
+                Images = Images,
+                Materials = Materials,
+            };
+
+            foreach (var g in geo)
+            {
+                res.Geometry.Add(g.Key, g.Value);
+            }
+
+            return res;
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry names
@@ -508,28 +506,30 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ContentData Filter(IEnumerable<string> geometryNames)
         {
-            if (geometryNames != null && geometryNames.Any())
+            if (geometryNames?.Any() != true)
             {
-                var geo = Geometry.Where(g => geometryNames.Any(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
-
-                if (geo.Any())
-                {
-                    var res = new ContentData
-                    {
-                        Images = Images,
-                        Materials = Materials,
-                    };
-
-                    foreach (var g in geo)
-                    {
-                        res.Geometry.Add(g.Key, g.Value);
-                    }
-
-                    return res;
-                }
+                return null;
             }
 
-            return null;
+            var geo = Geometry.Where(g => geometryNames.Any(i => string.Equals(g.Key, i + "-mesh", StringComparison.OrdinalIgnoreCase)));
+
+            if (!geo.Any())
+            {
+                return null;
+            }
+
+            var res = new ContentData
+            {
+                Images = Images,
+                Materials = Materials,
+            };
+
+            foreach (var g in geo)
+            {
+                res.Geometry.Add(g.Key, g.Value);
+            }
+
+            return res;
         }
         /// <summary>
         /// Creates a new content filtering with the specified geometry name mask
@@ -547,24 +547,26 @@ namespace Engine.Content
         /// <returns>Returns a new content instance with the referenced geometry, materials, images, ...</returns>
         public ContentData FilterMask(IEnumerable<string> masks)
         {
+            if (masks?.Any() != true)
+            {
+                return null;
+            }
+
             ContentData res = null;
 
-            if (masks?.Any() == true)
+            foreach (var mask in masks)
             {
-                foreach (var mask in masks)
+                if (string.IsNullOrWhiteSpace(mask))
                 {
-                    if (string.IsNullOrWhiteSpace(mask))
-                    {
-                        continue;
-                    }
-
-                    if (FilterMaskByController(mask, ref res))
-                    {
-                        continue;
-                    }
-
-                    FilterMaskByMesh(mask, ref res);
+                    continue;
                 }
+
+                if (FilterMaskByController(mask, ref res))
+                {
+                    continue;
+                }
+
+                FilterMaskByMesh(mask, ref res);
             }
 
             return res;
@@ -640,32 +642,27 @@ namespace Engine.Content
         /// <param name="res">Model content</param>
         private bool FilterMaskByController(string mask, ref ContentData res)
         {
-            if (string.IsNullOrWhiteSpace(mask))
-            {
-                return false;
-            }
-
             var controllers = Controllers.Where(g =>
                 g.Key.StartsWith(mask, StringComparison.OrdinalIgnoreCase) &&
                 g.Key.EndsWith("-skin", StringComparison.OrdinalIgnoreCase));
 
-            if (controllers.Any())
+            if (!controllers.Any())
             {
-                res ??= new ContentData();
-
-                foreach (var c in controllers)
-                {
-                    //Add controller
-                    TryAddController(c.Key, ref res);
-
-                    //Add lights
-                    TryAddLights(mask, ref res);
-                }
-
-                return true;
+                return false;
             }
 
-            return false;
+            res ??= new ContentData();
+
+            foreach (var c in controllers)
+            {
+                //Add controller
+                TryAddController(c.Key, ref res);
+
+                //Add lights
+                TryAddLights(mask, ref res);
+            }
+
+            return true;
         }
         /// <summary>
         /// Try to add the controller to the result content
@@ -933,23 +930,19 @@ namespace Engine.Content
         /// </summary>
         public IEnumerable<SceneLight> GetLights()
         {
-            List<SceneLight> lights = new List<SceneLight>();
-
             foreach (var key in Lights.Keys)
             {
                 var l = Lights[key];
 
                 if (l.LightType == LightContentTypes.Point)
                 {
-                    lights.Add(l.CreatePointLight());
+                    yield return l.CreatePointLight();
                 }
                 else if (l.LightType == LightContentTypes.Spot)
                 {
-                    lights.Add(l.CreateSpotLight());
+                    yield return l.CreateSpotLight();
                 }
             }
-
-            return lights.ToArray();
         }
 
         /// <summary>

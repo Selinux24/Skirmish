@@ -351,15 +351,44 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
-            var drawingData = model.GetDrawingData(model.GetLODMinimum());
-            if (geometryType != PickingHullTypes.Object && drawingData?.HullMesh?.Any() == true)
+            if (geometryType == PickingHullTypes.Object)
             {
-                //Transforms the volume mesh
-                return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
+                return GetTriangles();
             }
 
-            //Returns the actual triangles (yet transformed)
-            return GetTriangles();
+            if (geometryType == PickingHullTypes.Hull)
+            {
+                var drawingData = model.GetDrawingData(model.GetLODMinimum());
+                bool hull = drawingData?.HullMesh?.Any() ?? false;
+                return hull ? Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform) : Enumerable.Empty<Triangle>();
+            }
+
+            if (geometryType == PickingHullTypes.Navigation)
+            {
+                if (model.Usage == SceneObjectUsages.None)
+                {
+                    return Enumerable.Empty<Triangle>();
+                }
+
+                if (model.Usage == SceneObjectUsages.BoundsPathFinding)
+                {
+                    return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
+                }
+
+                if (model.Usage == SceneObjectUsages.CoarsePathFinding)
+                {
+                    var drawingData = model.GetDrawingData(model.GetLODMinimum());
+                    bool hull = drawingData?.HullMesh?.Any() ?? false;
+                    return hull ? Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform) : Enumerable.Empty<Triangle>();
+                }
+
+                if (model.Usage == SceneObjectUsages.FullPathFinding)
+                {
+                    return GetTriangles();
+                }
+            }
+
+            return Enumerable.Empty<Triangle>();
         }
 
         /// <inheritdoc/>

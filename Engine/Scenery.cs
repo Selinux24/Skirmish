@@ -40,10 +40,10 @@ namespace Engine
             /// <returns>Returns the new generated patch</returns>
             public static async Task<SceneryPatchTask> CreatePatch(Game game, string name, ContentData content, PickingQuadTreeNode<Triangle> node)
             {
-                Stopwatch watch = new Stopwatch();
+                Stopwatch watch = new();
                 watch.Start();
 
-                var desc = new DrawingDataDescription()
+                DrawingDataDescription desc = new()
                 {
                     Instanced = false,
                     Instances = 0,
@@ -314,7 +314,7 @@ namespace Engine
         /// <summary>
         /// Scenery patch list
         /// </summary>
-        private ConcurrentDictionary<int, SceneryPatch> patchDictionary = new ConcurrentDictionary<int, SceneryPatch>();
+        private ConcurrentDictionary<int, SceneryPatch> patchDictionary = new();
         /// <summary>
         /// Visible Nodes
         /// </summary>
@@ -397,7 +397,7 @@ namespace Engine
         /// <returns></returns>
         internal async Task IntializePatches()
         {
-            Stopwatch watch = new Stopwatch();
+            Stopwatch watch = new();
             watch.Start();
 
             // Generate initial patches
@@ -473,7 +473,7 @@ namespace Engine
             }
 
             // Detect nodes without assigned patch
-            List<Task<SceneryPatchTask>> taskList = new List<Task<SceneryPatchTask>>();
+            List<Task<SceneryPatchTask>> taskList = new();
 
             foreach (var node in visibleNodes)
             {
