@@ -351,41 +351,23 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
-            if (geometryType == PickingHullTypes.Object)
-            {
-                return GetTriangles();
-            }
-
-            if (geometryType == PickingHullTypes.Hull)
+            if (geometryType.HasFlag(PickingHullTypes.Hull))
             {
                 var drawingData = model.GetDrawingData(model.GetLODMinimum());
-                bool hull = drawingData?.HullMesh?.Any() ?? false;
-                return hull ? Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform) : Enumerable.Empty<Triangle>();
+                if (drawingData?.HullMesh?.Any() ?? false)
+                {
+                    return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
+                }
             }
 
-            if (geometryType == PickingHullTypes.Navigation)
+            if (geometryType.HasFlag(PickingHullTypes.Coarse))
             {
-                if (model.Usage == SceneObjectUsages.None)
-                {
-                    return Enumerable.Empty<Triangle>();
-                }
+                return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
+            }
 
-                if (model.Usage == SceneObjectUsages.BoundsPathFinding)
-                {
-                    return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
-                }
-
-                if (model.Usage == SceneObjectUsages.CoarsePathFinding)
-                {
-                    var drawingData = model.GetDrawingData(model.GetLODMinimum());
-                    bool hull = drawingData?.HullMesh?.Any() ?? false;
-                    return hull ? Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform) : Enumerable.Empty<Triangle>();
-                }
-
-                if (model.Usage == SceneObjectUsages.FullPathFinding)
-                {
-                    return GetTriangles();
-                }
+            if (geometryType.HasFlag(PickingHullTypes.Geometry))
+            {
+                return GetTriangles();
             }
 
             return Enumerable.Empty<Triangle>();

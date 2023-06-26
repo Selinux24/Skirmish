@@ -162,7 +162,7 @@ namespace Engine
             /// <returns>Returns true if an item has been planted</returns>
             private static bool Plant(Scene scene, Vector3 pos, Vector2 size, out VertexBillboard res)
             {
-                var ray = scene.GetTopDownRay(pos, RayPickingParams.FacingOnly | RayPickingParams.Objects);
+                var ray = scene.GetTopDownRay(pos, PickingHullTypes.FacingOnly | PickingHullTypes.Geometry);
 
                 bool found = scene.PickFirst<Triangle>(ray, SceneObjectUsages.Ground, out var r);
                 if (found && r.PickingResult.Primitive.Normal.Y > 0.5f)

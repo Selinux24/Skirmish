@@ -132,7 +132,7 @@ namespace Animation.Mixamo
                 }
             }
 
-            SetGround(floor, true);
+            SetGround(floor);
         }
         private async Task InitializeModel()
         {

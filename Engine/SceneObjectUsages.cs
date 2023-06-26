@@ -1,11 +1,9 @@
-﻿using System;
-
+﻿
 namespace Engine
 {
     /// <summary>
-    /// Scene object usajes enumeration
+    /// Scene object usages enumeration
     /// </summary>
-    [Flags]
     public enum SceneObjectUsages
     {
         /// <summary>
@@ -13,28 +11,20 @@ namespace Engine
         /// </summary>
         None = 0,
         /// <summary>
-        /// Full triangle list for path finding
+        /// Object
         /// </summary>
-        FullPathFinding = 1,
-        /// <summary>
-        /// Coarse list for path finding
-        /// </summary>
-        CoarsePathFinding = 2,
-        /// <summary>
-        /// Bounds path finding (OBB)
-        /// </summary>
-        BoundsPathFinding = 4,
+        Object = 1,
         /// <summary>
         /// Scene ground
         /// </summary>
-        Ground = 8,
+        Ground = 2,
         /// <summary>
         /// Scene agent
         /// </summary>
-        Agent = 16,
+        Agent = 3,
         /// <summary>
         /// User interface
         /// </summary>
-        UI = 32,
+        UI = 4,
     }
 }

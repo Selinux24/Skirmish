@@ -6,7 +6,7 @@ namespace Engine
     /// Ray-picking flags
     /// </summary>
     [Flags]
-    public enum RayPickingParams
+    public enum PickingHullTypes
     {
         /// <summary>
         /// No params
@@ -15,7 +15,7 @@ namespace Engine
         /// <summary>
         /// Default flags - Hull meshes when available & facing-only triangles
         /// </summary>
-        Default = Hull | FacingOnly,
+        Default = Coarse | Hull | Geometry | FacingOnly,
         /// <summary>
         /// Fast picking - Mesh bounding volumes & facing-only triangles
         /// </summary>
@@ -23,7 +23,7 @@ namespace Engine
         /// <summary>
         /// Perfect picking - Mesh geometry & facing-only triangles
         /// </summary>
-        Perfect = Objects | FacingOnly,
+        Perfect = Geometry | FacingOnly,
         /// <summary>
         /// Use bounding volumes instead of geometry
         /// </summary>
@@ -35,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Use mesh geometry
         /// </summary>
-        Objects = 4,
+        Geometry = 4,
         /// <summary>
         /// Select only facing triangles
         /// </summary>

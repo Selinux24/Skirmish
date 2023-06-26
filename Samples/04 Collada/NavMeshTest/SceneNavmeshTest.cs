@@ -145,7 +145,7 @@ Space: Finds random over navmesh";
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
-            SetGround(inputGeometry, true);
+            SetGround(inputGeometry);
 
             //Rasterization
             nmsettings.CellSize = 0.20f;
@@ -272,7 +272,7 @@ Space: Finds random over navmesh";
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Middle))
             {
-                var pRay = GetPickingRay(RayPickingParams.Perfect);
+                var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
                 if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {
@@ -308,7 +308,7 @@ Space: Finds random over navmesh";
 
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay(RayPickingParams.Perfect);
+                var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
                 if (this.PickNearest(pRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
                 {

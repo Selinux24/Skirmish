@@ -14,10 +14,10 @@ namespace Engine.Tests
         static Vector3 position;
         static Vector3 direction;
         static Ray testRay;
-        static RayPickingParams testRayParams;
+        static PickingHullTypes testRayParams;
         static float testRayLength;
-        static RayPickingParams facingOnlyParams;
-        static RayPickingParams allFacesParams;
+        static PickingHullTypes facingOnlyParams;
+        static PickingHullTypes allFacesParams;
         static float badRayLength;
 
         [ClassInitialize]
@@ -28,11 +28,11 @@ namespace Engine.Tests
             position = Vector3.One;
             direction = Vector3.Normalize(Vector3.One);
             testRay = new Ray(position, direction);
-            testRayParams = RayPickingParams.Objects;
+            testRayParams = PickingHullTypes.Geometry;
             testRayLength = 100f;
 
-            facingOnlyParams = RayPickingParams.FacingOnly;
-            allFacesParams = RayPickingParams.None;
+            facingOnlyParams = PickingHullTypes.FacingOnly;
+            allFacesParams = PickingHullTypes.None;
 
             badRayLength = -1;
         }
@@ -51,7 +51,7 @@ namespace Engine.Tests
             Assert.AreEqual(testRay.Position, p.Position);
             Assert.AreEqual(testRay.Direction, p.Direction);
             Assert.AreEqual(float.MaxValue, p.RayLength);
-            Assert.AreEqual(RayPickingParams.Default, p.RayPickingParams);
+            Assert.AreEqual(PickingHullTypes.Default, p.RayPickingParams);
         }
         [TestMethod()]
         public void RayConstructorTest2()
@@ -81,7 +81,7 @@ namespace Engine.Tests
             Assert.AreEqual(position, p.Position);
             Assert.AreEqual(direction, p.Direction);
             Assert.AreEqual(float.MaxValue, p.RayLength);
-            Assert.AreEqual(RayPickingParams.Default, p.RayPickingParams);
+            Assert.AreEqual(PickingHullTypes.Default, p.RayPickingParams);
         }
         [TestMethod()]
         public void RayConstructorTest5()
@@ -137,7 +137,7 @@ namespace Engine.Tests
             Assert.AreEqual(testRay.Position, p.Position);
             Assert.AreEqual(testRay.Direction, p.Direction);
             Assert.AreEqual(float.MaxValue, p.RayLength);
-            Assert.AreEqual(RayPickingParams.Default, p.RayPickingParams);
+            Assert.AreEqual(PickingHullTypes.Default, p.RayPickingParams);
         }
         [TestMethod()]
         public void ImplicitConversionTest2()

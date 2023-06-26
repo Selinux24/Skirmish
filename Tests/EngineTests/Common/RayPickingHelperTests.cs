@@ -69,17 +69,17 @@ namespace Engine.Common.Tests
             var rayReverse = new Ray(Vector3.ForwardLH * 4, Vector3.BackwardLH);
             var rayNoContact = new Ray(Vector3.Zero, Vector3.BackwardLH);
 
-            rayDefault = new PickingRay(ray, RayPickingParams.Default);
-            rayDefaultReverse = new PickingRay(rayReverse, RayPickingParams.Default);
-            rayDefaultNoContact = new PickingRay(rayNoContact, RayPickingParams.Default);
+            rayDefault = new PickingRay(ray, PickingHullTypes.Default);
+            rayDefaultReverse = new PickingRay(rayReverse, PickingHullTypes.Default);
+            rayDefaultNoContact = new PickingRay(rayNoContact, PickingHullTypes.Default);
 
-            rayAllDirections = new PickingRay(ray, RayPickingParams.Objects);
-            rayAllDirectionsReverse = new PickingRay(rayReverse, RayPickingParams.Objects);
-            rayAllDirectionsNoContact = new PickingRay(rayNoContact, RayPickingParams.Objects);
+            rayAllDirections = new PickingRay(ray, PickingHullTypes.Geometry);
+            rayAllDirectionsReverse = new PickingRay(rayReverse, PickingHullTypes.Geometry);
+            rayAllDirectionsNoContact = new PickingRay(rayNoContact, PickingHullTypes.Geometry);
 
-            rayCoarse = new PickingRay(ray, RayPickingParams.Coarse);
-            rayCoarseReverse = new PickingRay(rayReverse, RayPickingParams.Coarse);
-            rayCoarseNoContact = new PickingRay(rayNoContact, RayPickingParams.Coarse);
+            rayCoarse = new PickingRay(ray, PickingHullTypes.Coarse);
+            rayCoarseReverse = new PickingRay(rayReverse, PickingHullTypes.Coarse);
+            rayCoarseNoContact = new PickingRay(rayNoContact, PickingHullTypes.Coarse);
 
             t1_1 = new Triangle(new Vector3(-1, 1, 1), new Vector3(1, 1, 1), new Vector3(-1, -1, 1));
             t1_2 = new Triangle(new Vector3(1, 1, 1), new Vector3(1, -1, 1), new Vector3(-1, -1, 1));
@@ -141,7 +141,7 @@ namespace Engine.Common.Tests
         {
             pickableMock.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(sphere);
             pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Hull)).Returns(boxTris);
-            pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Object)).Returns(mesh);
+            pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Geometry)).Returns(mesh);
             pickableMock.As<ISceneObject>().SetupAllProperties();
         }
 

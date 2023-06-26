@@ -22,7 +22,7 @@ namespace Engine.Common
             var bsph = obj.GetBoundingSphere();
             Ray rRay = ray;
             bool coarseInt = bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance;
-            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
+            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 // Coarse exit
                 triangles = Enumerable.Empty<T>();
@@ -31,8 +31,7 @@ namespace Engine.Common
             }
 
             // Next geometry
-            PickingHullTypes geometryType = ray.RayPickingParams.HasFlag(RayPickingParams.Hull) ? PickingHullTypes.Hull : PickingHullTypes.Object;
-            triangles = obj.GetPickingHull(geometryType);
+            triangles = obj.GetPickingHull(ray.RayPickingParams);
 
             return triangles.Any();
         }
@@ -140,7 +139,7 @@ namespace Engine.Common
         public static bool PickNearest<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
             bool coarseInt = PickCoarse(obj, ray, out var triangles);
-            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
+            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 result = new PickingResult<T>
                 {
@@ -282,7 +281,7 @@ namespace Engine.Common
         public static bool PickFirst<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
             bool coarseInt = PickCoarse(obj, ray, out var triangles);
-            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
+            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 result = new PickingResult<T>
                 {
@@ -424,7 +423,7 @@ namespace Engine.Common
         public static bool PickAll<T>(IRayPickable<T> obj, PickingRay ray, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
             bool coarseInt = PickCoarse(obj, ray, out var triangles);
-            if (!coarseInt || ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
+            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 results = Enumerable.Empty<PickingResult<T>>();
 

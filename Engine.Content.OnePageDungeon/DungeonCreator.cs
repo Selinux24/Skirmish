@@ -203,6 +203,7 @@ namespace Engine.Content.OnePageDungeon
                     Position = position + asset.Position,
                     Rotation = rotation * asset.Rotation,
                     Scale = asset.Scale,
+                    PathFinding = (ModularSceneryPathFindingModes)asset.PathFinding,
                 };
             }
         }
@@ -395,6 +396,7 @@ namespace Engine.Content.OnePageDungeon
                         Position = position + asset.Position,
                         Rotation = asset.Rotation,
                         Scale = asset.Scale,
+                        PathFinding = (ModularSceneryPathFindingModes)asset.PathFinding,
                     };
                 }
             }
@@ -490,6 +492,7 @@ namespace Engine.Content.OnePageDungeon
                         Position = pos + dDoor.Door.Position,
                         Rotation = rot * dDoor.Door.Rotation,
                         Scale = dDoor.Door.Scale,
+                        PathFinding = (ModularSceneryPathFindingModes)dDoor.Door.PathFinding,
                         AnimationPlans = configuration.DoorAnimationPlans?.ToArray(),
                         Actions = configuration.DoorActions?.ToArray(),
                         States = configuration.DoorStates?.ToArray(),
@@ -510,6 +513,7 @@ namespace Engine.Content.OnePageDungeon
                         Position = pos + asset.Position,
                         Rotation = rot * asset.Rotation,
                         Scale = asset.Scale,
+                        PathFinding = (ModularSceneryPathFindingModes)asset.PathFinding,
                     };
                 }
             }

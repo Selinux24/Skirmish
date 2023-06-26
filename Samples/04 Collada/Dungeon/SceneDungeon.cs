@@ -128,7 +128,7 @@ namespace Collada.Dungeon
 
             InitializeCamera();
 
-            SetGround(dungeon, true);
+            SetGround(dungeon);
 
             var settings = new BuildSettings()
             {

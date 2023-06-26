@@ -222,7 +222,7 @@ namespace Skybox
 
             torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", torchDesc);
 
-            AttachToGround(torchs, true);
+            AttachToGround(torchs);
         }
         private async Task InitializeObelisks()
         {
@@ -245,7 +245,7 @@ namespace Skybox
 
             fountain = await AddComponentGround<Model, ModelDescription>("Fountain", "Fountain", fountainDesc);
 
-            AttachToGround(fountain, true);
+            AttachToGround(fountain);
         }
         private async Task InitializeRuins()
         {
@@ -254,7 +254,7 @@ namespace Skybox
 
             ruins = await AddComponentGround<Scenery, GroundDescription>("Ruins", "Ruins", ruinsDesc);
 
-            SetGround(ruins, true);
+            SetGround(ruins);
         }
         private async Task InitializeWater()
         {

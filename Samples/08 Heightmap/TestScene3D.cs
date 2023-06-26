@@ -233,7 +233,7 @@ namespace Heightmap
             };
             rocks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Rocks", "Rocks", rDesc);
             rocks.Visible = false;
-            AttachToGround(rocks, false);
+            AttachToGround(rocks);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -251,7 +251,7 @@ namespace Heightmap
             };
             trees = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees", "Trees", treeDesc);
             trees.Visible = false;
-            AttachToGround(trees, false);
+            AttachToGround(trees);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -269,7 +269,7 @@ namespace Heightmap
             };
             trees2 = await AddComponent<ModelInstanced, ModelInstancedDescription>("Trees2", "Trees2", tree2Desc);
             trees2.Visible = false;
-            AttachToGround(trees2, false);
+            AttachToGround(trees2);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -321,7 +321,7 @@ namespace Heightmap
             };
             helicopterI = await AddComponent<ModelInstanced, ModelInstancedDescription>("M24", "M24", mDesc);
             helicopterI.Visible = false;
-            AttachToGround(helicopterI, true);
+            AttachToGround(helicopterI);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -339,7 +339,7 @@ namespace Heightmap
             };
             bradleyI = await AddComponent<ModelInstanced, ModelInstancedDescription>("Bradley", "Bradley", mDesc);
             bradleyI.Visible = false;
-            AttachToGround(bradleyI, true);
+            AttachToGround(bradleyI);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -357,7 +357,7 @@ namespace Heightmap
             };
             buildings = await AddComponent<ModelInstanced, ModelInstancedDescription>("Affgan buildings", "Affgan buildings", mDesc);
             buildings.Visible = false;
-            AttachToGround(buildings, true);
+            AttachToGround(buildings);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -374,7 +374,7 @@ namespace Heightmap
             };
             watchTower = await AddComponent<Model, ModelDescription>("Watch Tower", "Watch Tower", mDesc);
             watchTower.Visible = false;
-            AttachToGround(watchTower, true);
+            AttachToGround(watchTower);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -393,7 +393,7 @@ namespace Heightmap
             };
             containers = await AddComponent<ModelInstanced, ModelInstancedDescription>("Container", "Container", desc);
             containers.Visible = false;
-            AttachToGround(containers, false);
+            AttachToGround(containers);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -410,7 +410,7 @@ namespace Heightmap
             };
             torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", tcDesc);
             torchs.Visible = false;
-            AttachToGround(torchs, false);
+            AttachToGround(torchs);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);
@@ -469,7 +469,7 @@ namespace Heightmap
             };
             var gDesc = GroundDescription.FromHeightmapDescription(hDesc, 5);
             terrain = await AddComponentGround<Terrain, GroundDescription>("Terrain", "Terrain", gDesc);
-            SetGround(terrain, true);
+            SetGround(terrain);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);

@@ -567,7 +567,7 @@ namespace Terrain.Rts
             };
             heliport = await AddComponent<Model, ModelDescription>("Heliport", "Heliport", hpDesc);
             heliport.Visible = false;
-            AttachToGround(heliport, true);
+            AttachToGround(heliport);
 
             PrepareLights(heliport.Lights);
 
@@ -590,7 +590,7 @@ namespace Terrain.Rts
             };
             garage = await AddComponent<Model, ModelDescription>("Garage", "Garage", gDesc);
             garage.Visible = false;
-            AttachToGround(garage, true);
+            AttachToGround(garage);
 
             PrepareLights(garage.Lights);
 
@@ -613,7 +613,7 @@ namespace Terrain.Rts
             };
             building = await AddComponent<Model, ModelDescription>("Buildings", "Buildings", gDesc);
             building.Visible = false;
-            AttachToGround(building, true);
+            AttachToGround(building);
 
             PrepareLights(building.Lights);
 
@@ -637,7 +637,7 @@ namespace Terrain.Rts
             };
             obelisk = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", oDesc);
             obelisk.Visible = false;
-            AttachToGround(obelisk, true);
+            AttachToGround(obelisk);
 
             sw.Stop();
             return new TaskResult()
@@ -659,7 +659,7 @@ namespace Terrain.Rts
             };
             rocks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Rocks", "Rocks", rDesc);
             rocks.Visible = false;
-            AttachToGround(rocks, false);
+            AttachToGround(rocks);
 
             sw.Stop();
             return new TaskResult()
@@ -692,8 +692,8 @@ namespace Terrain.Rts
             tree1.Visible = false;
             tree2.Visible = false;
 
-            AttachToGround(tree1, false);
-            AttachToGround(tree2, false);
+            AttachToGround(tree1);
+            AttachToGround(tree2);
 
             sw.Stop();
             return new TaskResult()
@@ -751,7 +751,7 @@ namespace Terrain.Rts
 
             var terrainDescription = GroundDescription.FromFile("Rts/resources/Terrain", "two_levels.json", 1);
             terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDescription);
-            SetGround(terrain, true);
+            SetGround(terrain);
 
             sw.Stop();
             return new TaskResult()
@@ -1272,8 +1272,8 @@ namespace Terrain.Rts
         private void StartHelicopter()
         {
             // Set position
-            var sceneryUsage = SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.BoundsPathFinding;
-            var ray = GetTopDownRay(heliport.Manipulator.Position, RayPickingParams.Objects);
+            var sceneryUsage = SceneObjectUsages.Object;
+            var ray = GetTopDownRay(heliport.Manipulator.Position, PickingHullTypes.Geometry);
             if (this.PickNearest(ray, sceneryUsage, out ScenePickingResult<Triangle> r))
             {
                 helicopter.Manipulator.SetPosition(r.PickingResult.Position);
@@ -1342,15 +1342,15 @@ namespace Terrain.Rts
         }
         private void StartTanks()
         {
-            var sceneryUsage = SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.FullPathFinding;
+            var sceneryUsage = SceneObjectUsages.Object;
 
-            if (this.PickNearest(GetTopDownRay(-60, -60, RayPickingParams.Objects), sceneryUsage, out ScenePickingResult<Triangle> r1))
+            if (this.PickNearest(GetTopDownRay(-60, -60, PickingHullTypes.Geometry), sceneryUsage, out ScenePickingResult<Triangle> r1))
             {
                 tankP1.Manipulator.SetPosition(r1.PickingResult.Position);
                 tankP1.Manipulator.SetNormal(r1.PickingResult.Primitive.Normal);
             }
 
-            if (this.PickNearest(GetTopDownRay(-70, 70, RayPickingParams.Objects), sceneryUsage, out ScenePickingResult<Triangle> r2))
+            if (this.PickNearest(GetTopDownRay(-70, 70, PickingHullTypes.Geometry), sceneryUsage, out ScenePickingResult<Triangle> r2))
             {
                 tankP2.Manipulator.SetPosition(r2.PickingResult.Position);
                 tankP2.Manipulator.SetNormal(r2.PickingResult.Primitive.Normal);

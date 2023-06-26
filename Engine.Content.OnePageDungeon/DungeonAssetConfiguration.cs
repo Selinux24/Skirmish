@@ -1,5 +1,7 @@
 ﻿using Engine.Content.Persistence;
 using Engine.Modular.Persistence;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -216,6 +218,11 @@ namespace Engine.Content.OnePageDungeon
         /// Rotation
         /// </summary>
         public RotationQ Rotation { get; set; } = RotationQ.Identity;
+        /// <summary>
+        /// Path finding
+        /// </summary>
+        [JsonConverter(typeof(StringEnumConverter))]
+        public PathFindingModes PathFinding { get; set; } = PathFindingModes.None;
 
         /// <summary>
         /// Gets the initial transform matrix
@@ -257,5 +264,28 @@ namespace Engine.Content.OnePageDungeon
         /// Prop
         /// </summary>
         public DungeonProp Prop { get; set; }
+    }
+
+    /// <summary>
+    /// Path finding
+    /// </summary>
+    public enum PathFindingModes
+    {
+        /// <summary>
+        /// Not used
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Use the object's OBB
+        /// </summary>
+        Coarse = 1,
+        /// <summary>
+        /// Use the object's linked hull
+        /// </summary>
+        Hull = 2,
+        /// <summary>
+        /// Use the object's triangle list
+        /// </summary>
+        Geometry = 3,
     }
 }

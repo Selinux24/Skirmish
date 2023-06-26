@@ -130,7 +130,7 @@ namespace Engine.Modular
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
         private static Dictionary<string, InstanceInfo> GetMapInstanceCounters(Level level, IEnumerable<Asset> assets)
         {
-            Dictionary<string, InstanceInfo> res = new Dictionary<string, InstanceInfo>();
+            Dictionary<string, InstanceInfo> res = new();
 
             var vAssets = assets.ToArray();
 
@@ -145,12 +145,16 @@ namespace Engine.Modular
                 var assetInstances = GetInstanceCounters(asset);
                 foreach (var key in assetInstances.Keys)
                 {
+                    var assetInstance = assetInstances[key];
+
                     if (!res.ContainsKey(key))
                     {
-                        res.Add(key, new InstanceInfo { Count = 0 });
+                        res.Add(key, new InstanceInfo { Count = assetInstance.Count, PathFinding = assetInstance.PathFinding });
+
+                        continue;
                     }
 
-                    res[key].Count += assetInstances[key];
+                    res[key].Count += assetInstance.Count;
                 }
             }
 
@@ -161,9 +165,9 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="asset">Asset</param>
         /// <returns>Returns a dictionary that contains the instance count by asset name</returns>
-        private static Dictionary<string, int> GetInstanceCounters(Asset asset)
+        private static Dictionary<string, (int Count, ModularSceneryPathFindingModes PathFinding)> GetInstanceCounters(Asset asset)
         {
-            Dictionary<string, int> res = new Dictionary<string, int>();
+            Dictionary<string, (int, ModularSceneryPathFindingModes)> res = new();
 
             var assetNames = asset.References.Select(a => a.AssetName).Distinct();
 
@@ -172,7 +176,9 @@ namespace Engine.Modular
                 var count = asset.References.Count(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase));
                 if (count > 0)
                 {
-                    res.Add(assetName, count);
+                    var pf = asset.References.First(a => string.Equals(a.AssetName, assetName, StringComparison.OrdinalIgnoreCase)).PathFinding;
+
+                    res.Add(assetName, (count, pf));
                 }
             }
 
@@ -504,27 +510,14 @@ namespace Engine.Modular
 
             try
             {
-                var masks = GetMasksForAsset(levelMap, assetName);
-                SceneObjectUsages usage;
-                switch (pathFinding)
+                var usage = pathFinding switch
                 {
-                    case ModularSceneryPathFindingModes.None:
-                        usage = SceneObjectUsages.None;
-                        break;
-                    case ModularSceneryPathFindingModes.Boundings:
-                        usage = SceneObjectUsages.BoundsPathFinding;
-                        break;
-                    case ModularSceneryPathFindingModes.Hull:
-                        var hasHulls = modelContent.SetHullMark(true, masks) > 0;
-                        usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
-                        break;
-                    case ModularSceneryPathFindingModes.Geometry:
-                        usage = SceneObjectUsages.FullPathFinding;
-                        break;
-                    default:
-                        usage = SceneObjectUsages.None;
-                        break;
-                }
+                    ModularSceneryPathFindingModes.None => SceneObjectUsages.None,
+                    ModularSceneryPathFindingModes.Coarse => SceneObjectUsages.Object,
+                    ModularSceneryPathFindingModes.Hull => SceneObjectUsages.Object,
+                    ModularSceneryPathFindingModes.Geometry => SceneObjectUsages.Object,
+                    _ => SceneObjectUsages.None,
+                };
 
                 var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
                     assetId,
@@ -608,27 +601,14 @@ namespace Engine.Modular
 
             try
             {
-                var masks = GetMasksForAsset(levelMap, assetName);
-                SceneObjectUsages usage;
-                switch (pathFinding)
+                var usage = pathFinding switch
                 {
-                    case ModularSceneryPathFindingModes.None:
-                        usage = SceneObjectUsages.None;
-                        break;
-                    case ModularSceneryPathFindingModes.Boundings:
-                        usage = SceneObjectUsages.BoundsPathFinding;
-                        break;
-                    case ModularSceneryPathFindingModes.Hull:
-                        var hasHulls = modelContent.SetHullMark(true, masks) > 0;
-                        usage = hasHulls ? SceneObjectUsages.CoarsePathFinding : SceneObjectUsages.FullPathFinding;
-                        break;
-                    case ModularSceneryPathFindingModes.Geometry:
-                        usage = SceneObjectUsages.FullPathFinding;
-                        break;
-                    default:
-                        usage = SceneObjectUsages.None;
-                        break;
-                }
+                    ModularSceneryPathFindingModes.None => SceneObjectUsages.None,
+                    ModularSceneryPathFindingModes.Coarse => SceneObjectUsages.Object,
+                    ModularSceneryPathFindingModes.Hull => SceneObjectUsages.Object,
+                    ModularSceneryPathFindingModes.Geometry => SceneObjectUsages.Object,
+                    _ => SceneObjectUsages.None,
+                };
 
                 var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
                     modelId,

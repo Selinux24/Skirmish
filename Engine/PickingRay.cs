@@ -22,21 +22,21 @@ namespace Engine
         /// <summary>
         /// Picking parameters
         /// </summary>
-        public RayPickingParams RayPickingParams { get; set; }
+        public PickingHullTypes RayPickingParams { get; set; }
         /// <summary>
         /// Detect facing only primitive normals
         /// </summary>
-        public bool FacingOnly
+        public readonly bool FacingOnly
         {
             get
             {
-                return RayPickingParams.HasFlag(RayPickingParams.FacingOnly);
+                return RayPickingParams.HasFlag(PickingHullTypes.FacingOnly);
             }
         }
         /// <summary>
         /// Maximum ray distance
         /// </summary>
-        public float MaxDistance
+        public readonly float MaxDistance
         {
             get
             {
@@ -47,42 +47,42 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Ray ray) : this(ray.Position, ray.Direction, RayPickingParams.Default, float.MaxValue)
+        public PickingRay(Ray ray) : this(ray.Position, ray.Direction, PickingHullTypes.Default, float.MaxValue)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Ray ray, RayPickingParams rayPickingParams) : this(ray.Position, ray.Direction, rayPickingParams, float.MaxValue)
+        public PickingRay(Ray ray, PickingHullTypes rayPickingParams) : this(ray.Position, ray.Direction, rayPickingParams, float.MaxValue)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Ray ray, RayPickingParams rayPickingParams, float length) : this(ray.Position, ray.Direction, rayPickingParams, length)
+        public PickingRay(Ray ray, PickingHullTypes rayPickingParams, float length) : this(ray.Position, ray.Direction, rayPickingParams, length)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Vector3 position, Vector3 direction) : this(position, direction, RayPickingParams.Default, float.MaxValue)
+        public PickingRay(Vector3 position, Vector3 direction) : this(position, direction, PickingHullTypes.Default, float.MaxValue)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Vector3 position, Vector3 direction, RayPickingParams rayPickingParams) : this(position, direction, rayPickingParams, float.MaxValue)
+        public PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams) : this(position, direction, rayPickingParams, float.MaxValue)
         {
 
         }
         /// <summary>
         /// Constructor
         /// </summary>
-        public PickingRay(Vector3 position, Vector3 direction, RayPickingParams rayPickingParams, float length)
+        public PickingRay(Vector3 position, Vector3 direction, PickingHullTypes rayPickingParams, float length)
         {
             Position = position;
             Direction = direction;

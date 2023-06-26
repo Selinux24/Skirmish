@@ -1045,7 +1045,7 @@ namespace Engine
         /// </summary>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns picking ray from current mouse position</returns>
-        public PickingRay GetPickingRay(RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetPickingRay(PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             int mouseX = Game.Input.MouseX;
             int mouseY = Game.Input.MouseY;
@@ -1068,7 +1068,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Point position, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(Point position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Y, pickingParams);
         }
@@ -1078,7 +1078,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Vector2 position, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(Vector2 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Y, pickingParams);
         }
@@ -1088,7 +1088,7 @@ namespace Engine
         /// <param name="position">Position</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(Vector3 position, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(Vector3 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             return GetTopDownRay(position.X, position.Z, pickingParams);
         }
@@ -1099,7 +1099,7 @@ namespace Engine
         /// <param name="z">Z coordinate</param>
         /// <param name="pickingParams">Picking parameters</param>
         /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
-        public PickingRay GetTopDownRay(float x, float z, RayPickingParams pickingParams = RayPickingParams.Default)
+        public PickingRay GetTopDownRay(float x, float z, PickingHullTypes pickingParams = PickingHullTypes.Default)
         {
             var bbox = GetGroundBoundingBox();
 

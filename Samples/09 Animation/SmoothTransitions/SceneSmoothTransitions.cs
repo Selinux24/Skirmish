@@ -151,7 +151,7 @@ namespace Animation.SmoothTransitions
                 }
             }
 
-            SetGround(floor, true);
+            SetGround(floor);
         }
         private async Task InitializeSoldier()
         {
@@ -291,7 +291,7 @@ namespace Animation.SmoothTransitions
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay(RayPickingParams.Perfect);
+                var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
                 if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
                 {

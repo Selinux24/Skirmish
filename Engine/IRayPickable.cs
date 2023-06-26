@@ -57,23 +57,4 @@ namespace Engine
         /// <returns>Returns the geometry of the instance</returns>
         IEnumerable<T> GetPickingHull(PickingHullTypes geometryType);
     }
-
-    /// <summary>
-    /// Geometry types
-    /// </summary>
-    public enum PickingHullTypes
-    {
-        /// <summary>
-        /// All object geometry
-        /// </summary>
-        Object,
-        /// <summary>
-        /// Hull geometry
-        /// </summary>
-        Hull,
-        /// <summary>
-        /// Navigation geometry
-        /// </summary>
-        Navigation,
-    }
 }

@@ -211,14 +211,14 @@ namespace Engine
                 Vector3 lightPosition = light.GetPosition(maxZ);
                 var ray = new Ray(lightPosition, -light.Direction);
 
-                var coarseRay = new PickingRay(ray, RayPickingParams.Coarse);
+                var coarseRay = new PickingRay(ray, PickingHullTypes.Coarse);
 
                 if (!Scene.PickNearest<Triangle>(coarseRay, SceneObjectUsages.None, out _))
                 {
                     return true;
                 }
 
-                var perfectRay = new PickingRay(ray, RayPickingParams.Objects);
+                var perfectRay = new PickingRay(ray, PickingHullTypes.Geometry);
 
                 if (Scene.PickNearest<Triangle>(perfectRay, SceneObjectUsages.None, out var result) &&
                     Vector3.Distance(lightPosition, eyePosition) > result.PickingResult.Distance)

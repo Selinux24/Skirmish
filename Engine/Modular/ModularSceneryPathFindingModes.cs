@@ -13,7 +13,7 @@ namespace Engine.Modular
         /// <summary>
         /// Use the object's OBB
         /// </summary>
-        Boundings = 1,
+        Coarse = 1,
         /// <summary>
         /// Use the object's linked hull
         /// </summary>

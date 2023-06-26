@@ -16,53 +16,48 @@ namespace Engine.PathFinding
         /// <summary>
         /// Ground usage enum for ground picking
         /// </summary>
-        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.FullPathFinding | SceneObjectUsages.CoarsePathFinding | SceneObjectUsages.BoundsPathFinding;
+        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.Object;
+        /// <summary>
+        /// Navigation picking hull enumeration
+        /// </summary>
+        private const PickingHullTypes NavigationPickingHull = PickingHullTypes.Coarse | PickingHullTypes.Hull | PickingHullTypes.Geometry;
 
         /// <summary>
         /// Gets the current scene geometry for navigation
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
         /// <param name="obj">Scene object</param>
-        /// <returns>Returns the triangle list</returns>
+        /// <returns>Returns the primitive list</returns>
         private static IEnumerable<T> GetGeometryForNavigationGraph<T>(IDrawable obj) where T : IRayIntersectable
         {
             if (obj is IComposed composed)
             {
-                var pickables = GetGeometryForNavigationGraph<T>(composed);
-
-                return pickables
-                    .SelectMany(p => p.GetPickingHull(PickingHullTypes.Navigation))
-                    .ToArray();
+                return composed
+                    .GetComponents<IRayPickable<T>>()
+                    .SelectMany(GetGeometryForNavigationGraph);
             }
 
             if (obj is IRayPickable<T> pickable)
             {
-                if (pickable is ITransformable3D transformable)
-                {
-                    transformable.Manipulator.UpdateInternals(true);
-                }
-
-                return pickable.GetPickingHull(PickingHullTypes.Navigation);
+                return GetGeometryForNavigationGraph(pickable);
             }
 
             return Enumerable.Empty<T>();
         }
         /// <summary>
-        /// Get geometry from composed object
+        /// Gets the current scene geometry for navigation
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="composed">Composed object</param>
-        /// <returns>Returns the composed object geometry</returns>
-        private static IEnumerable<IRayPickable<T>> GetGeometryForNavigationGraph<T>(IComposed composed) where T : IRayIntersectable
+        /// <param name="pickable">Pickable object</param>
+        /// <returns>Returns the primitive list</returns>
+        private static IEnumerable<T> GetGeometryForNavigationGraph<T>(IRayPickable<T> pickable) where T : IRayIntersectable
         {
-            var pickables = composed.GetComponents<IRayPickable<T>>();
-
-            foreach (var transformable in pickables.OfType<ITransformable3D>())
+            if (pickable is ITransformable3D transformable)
             {
                 transformable.Manipulator.UpdateInternals(true);
             }
 
-            return pickables.ToArray();
+            return pickable.GetPickingHull(NavigationPickingHull);
         }
         /// <summary>
         /// Gets the new agent position when target position is walkable
@@ -235,13 +230,11 @@ namespace Engine.PathFinding
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
-        /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or hulls for navigation graphs</param>
-        public void SetGround(IDrawable obj, bool fullGeometryPathFinding)
+        public void SetGround(IDrawable obj)
         {
             BoundingBox = null;
 
             obj.Usage |= SceneObjectUsages.Ground;
-            obj.Usage |= fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding;
         }
         /// <summary>
         /// Attach geometry to ground
@@ -251,12 +244,11 @@ namespace Engine.PathFinding
         /// <param name="x">X position</param>
         /// <param name="z">Z position</param>
         /// <param name="transform">Transform</param>
-        /// <param name="fullGeometryPathFinding">Sets whether use full triangle list or hulls for navigation graphs</param>
-        public void AttachToGround(IDrawable obj, bool fullGeometryPathFinding)
+        public void AttachToGround(IDrawable obj)
         {
             BoundingBox = null;
 
-            obj.Usage |= fullGeometryPathFinding ? SceneObjectUsages.FullPathFinding : SceneObjectUsages.CoarsePathFinding;
+            obj.Usage |= SceneObjectUsages.Object;
         }
 
         /// <summary>
@@ -352,18 +344,7 @@ namespace Engine.PathFinding
         public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
         {
             var tris = GetComponents<IDrawable>()
-                .Where(c =>
-                {
-                    if (c.HasOwner || !c.Visible)
-                    {
-                        return false;
-                    }
-
-                    return
-                        c.Usage.HasFlag(SceneObjectUsages.FullPathFinding) ||
-                        c.Usage.HasFlag(SceneObjectUsages.CoarsePathFinding) ||
-                        c.Usage.HasFlag(SceneObjectUsages.BoundsPathFinding);
-                })
+                .Where(c => !c.HasOwner && c.Visible)
                 .SelectMany(GetGeometryForNavigationGraph<Triangle>);
 
             var bounds = PathFinderDescription.Settings.Bounds;

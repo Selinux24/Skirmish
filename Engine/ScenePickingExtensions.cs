@@ -35,7 +35,7 @@ namespace Engine
                 return false;
             }
 
-            if (ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
+            if (ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 result = coarseInt
                     .OrderBy(c => c.Distance)
@@ -82,7 +82,7 @@ namespace Engine
                 return false;
             }
 
-            if (ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
+            if (ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 result = coarseInt
                     .Select(c => new ScenePickingResult<T>
@@ -126,7 +126,7 @@ namespace Engine
                 return false;
             }
 
-            if (ray.RayPickingParams.HasFlag(RayPickingParams.Coarse))
+            if (ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
             {
                 results = coarseInt
                     .Select(c => new ScenePickingResultMultiple<T>
@@ -184,7 +184,7 @@ namespace Engine
         /// <summary>
         /// Gets the first result
         /// </summary>
-        public PickingResult<T> First()
+        public readonly PickingResult<T> First()
         {
             return PickingResults.FirstOrDefault();
         }
@@ -192,14 +192,14 @@ namespace Engine
         /// Gets the las result
         /// </summary>
         /// <returns></returns>
-        public PickingResult<T> Last()
+        public readonly PickingResult<T> Last()
         {
             return PickingResults.LastOrDefault();
         }
         /// <summary>
         /// Gets the nearest result to the picking origin
         /// </summary>
-        public PickingResult<T> Nearest()
+        public readonly PickingResult<T> Nearest()
         {
             return PickingResults
                 .OrderBy(p => p.Distance)
@@ -208,7 +208,7 @@ namespace Engine
         /// <summary>
         /// Gets the fartest result to the picking origin
         /// </summary>
-        public PickingResult<T> Fartest()
+        public readonly PickingResult<T> Fartest()
         {
             return PickingResults
                 .OrderByDescending(p => p.Distance)
@@ -218,14 +218,14 @@ namespace Engine
         /// <summary>
         /// Gets the minimum distance valur to the picking origin
         /// </summary>
-        public float GetMinimumDistance()
+        public readonly float GetMinimumDistance()
         {
             return PickingResults.Min(p => p.Distance);
         }
         /// <summary>
         /// Gets the maximum distance valur to the picking origin
         /// </summary>
-        public float GetMaximumDistance()
+        public readonly float GetMaximumDistance()
         {
             return PickingResults.Max(p => p.Distance);
         }

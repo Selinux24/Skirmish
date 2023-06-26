@@ -438,7 +438,7 @@ namespace Collada.ModularDungeon
             scenery = await AddComponentGround<ModularScenery, ModularSceneryDescription>("Scenery", "Scenery", desc);
             scenery.TriggerEnd += TriggerEnds;
 
-            SetGround(scenery, true);
+            SetGround(scenery);
         }
         private async Task<ModularSceneryDescription> LoadOnePageDungeon(string dungeonFileName, string dungeonConfigFile)
         {

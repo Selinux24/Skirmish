@@ -561,7 +561,7 @@ namespace Tanks
 
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
 
-            SetGround(terrain, true);
+            SetGround(terrain);
         }
         private async Task InitializeModelsTrees()
         {

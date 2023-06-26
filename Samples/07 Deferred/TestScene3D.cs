@@ -119,9 +119,9 @@ namespace Deferred
                         res.ThrowExceptions();
                     }
 
-                    SetGround(terrain, true);
-                    AttachToGround(tree, false);
-                    AttachToGround(trees, false);
+                    SetGround(terrain);
+                    AttachToGround(tree);
+                    AttachToGround(trees);
 
                     StartNodes();
 
@@ -511,7 +511,7 @@ namespace Deferred
         {
             if (Game.Input.MouseButtonJustReleased(MouseButtons.Left))
             {
-                var pRay = GetPickingRay(RayPickingParams.Perfect);
+                var pRay = GetPickingRay(PickingHullTypes.Perfect);
 
                 if (this.PickNearest<Triangle>(pRay, SceneObjectUsages.None, out var r))
                 {
