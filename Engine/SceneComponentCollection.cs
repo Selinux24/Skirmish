@@ -8,6 +8,11 @@ namespace Engine
     public class SceneComponentCollection : IDisposable
     {
         /// <summary>
+        /// Collection updated event
+        /// </summary>
+        public event EventHandler Updated;
+
+        /// <summary>
         /// Scene component list
         /// </summary>
         private readonly List<ISceneObject> internalComponents = new();
@@ -116,6 +121,8 @@ namespace Engine
             finally
             {
                 Monitor.Exit(internalComponents);
+
+                Updated?.Invoke(this, new EventArgs());
             }
         }
         /// <summary>
@@ -137,6 +144,8 @@ namespace Engine
             finally
             {
                 Monitor.Exit(internalComponents);
+
+                Updated?.Invoke(this, new EventArgs());
             }
 
             if (component is IDisposable disposable)
@@ -169,6 +178,8 @@ namespace Engine
             finally
             {
                 Monitor.Exit(internalComponents);
+
+                Updated?.Invoke(this, new EventArgs());
             }
         }
 

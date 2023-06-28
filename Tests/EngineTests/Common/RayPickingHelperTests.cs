@@ -142,6 +142,7 @@ namespace Engine.Common.Tests
             pickableMock.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(sphere);
             pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Hull)).Returns(boxTris);
             pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Geometry)).Returns(mesh);
+            pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Default)).Returns(boxTris);
             pickableMock.As<ISceneObject>().SetupAllProperties();
         }
 

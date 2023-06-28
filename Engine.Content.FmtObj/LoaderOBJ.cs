@@ -132,7 +132,7 @@ namespace Engine.Content.FmtObj
                 return Array.Empty<ContentData>();
             }
 
-            ContentData m = new ContentData()
+            ContentData m = new()
             {
                 Name = Path.GetFileNameWithoutExtension(content.ModelFileName)
             };
@@ -207,7 +207,7 @@ namespace Engine.Content.FmtObj
             matContent.EmissiveColor = mat.Ke;
             matContent.Shininess = mat.Ni;
 
-            matContent.IsTransparent = mat.D != 0;
+            matContent.IsTransparent = mat.D != 1;
 
             matContent.NormalMapTexture = mat.MapBump;
 

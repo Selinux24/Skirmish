@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine.PathFinding.RecastNavigation
 {
     using Engine.PathFinding.RecastNavigation.Detour;
-    using System.Linq;
 
     /// <summary>
     /// Graph file
@@ -22,7 +22,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the hash string</returns>
         public static string GetHash(PathFinderSettings settings, IEnumerable<Triangle> triangles)
         {
-            List<byte> buffer = new List<byte>();
+            List<byte> buffer = new();
 
             var tris = triangles.ToList();
             tris.Sort((t1, t2) =>
@@ -56,21 +56,12 @@ namespace Engine.PathFinding.RecastNavigation
             var tris = await graph.Input.GetTriangles();
             string hash = GetHash(graph.Settings, tris);
 
-            var meshFileDict = new Dictionary<Agent, NavMeshFile>();
-
-            foreach (var agentQ in graph.AgentQueries)
-            {
-                var nm = agentQ.NavMesh;
-
-                var rcFile = NavMeshFile.FromNavmesh(nm);
-
-                meshFileDict.Add(agentQ.Agent, rcFile);
-            }
+            var meshFiles = graph.AgentQueries.Select(agentQ => (agentQ.Agent, NavMeshFile.FromNavmesh(agentQ.NavMesh))).ToList();
 
             return new GraphFile()
             {
                 Settings = graph.Settings,
-                Dictionary = meshFileDict,
+                GraphList = meshFiles,
                 Hash = hash,
             };
         }
@@ -86,15 +77,15 @@ namespace Engine.PathFinding.RecastNavigation
 
             await Task.Run(() =>
             {
-                foreach (var agent in file.Dictionary.Keys)
+                foreach (var agentData in file.GraphList)
                 {
-                    var rcFile = file.Dictionary[agent];
-                    var nm = NavMeshFile.FromNavmeshFile(rcFile);
+                    var agent = agentData.Agent;
+                    var navMesh = NavMeshFile.FromNavmeshFile(agentData.NavMesh);
 
                     agentQueries.Add(new GraphAgentQuery
                     {
                         Agent = agent,
-                        NavMesh = nm,
+                        NavMesh = navMesh,
                         MaxNodes = file.Settings.MaxNodes,
                     });
                 }
@@ -115,15 +106,17 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the graph file</returns>
         public static async Task<GraphFile> Load(string fileName)
         {
-            byte[] buffer = File.ReadAllBytes(fileName);
-
             try
             {
-                return await Task.FromResult(buffer.Decompress<GraphFile>());
+                var buffer = await File.ReadAllBytesAsync(fileName);
+
+                return buffer.Decompress<GraphFile>();
             }
             catch (Exception ex)
             {
-                throw new EngineException("Error loading the graph from a file.", ex);
+                Logger.WriteError(nameof(GraphFile), "Error loading the graph from a file.", ex);
+
+                throw;
             }
         }
         /// <summary>
@@ -133,17 +126,19 @@ namespace Engine.PathFinding.RecastNavigation
         /// <param name="graph">Graph</param>
         public static async Task Save(string fileName, Graph graph)
         {
-            var file = await FromGraph(graph);
-
             try
             {
-                byte[] buffer = file.Compress();
+                var graphFile = await FromGraph(graph);
 
-                File.WriteAllBytes(fileName, buffer);
+                var buffer = graphFile.Compress();
+
+                await File.WriteAllBytesAsync(fileName, buffer);
             }
             catch (Exception ex)
             {
-                throw new EngineException("Error saving the graph to a file.", ex);
+                Logger.WriteError(nameof(GraphFile), "Error saving the graph to a file.", ex);
+
+                throw;
             }
         }
 
@@ -152,9 +147,9 @@ namespace Engine.PathFinding.RecastNavigation
         /// </summary>
         public BuildSettings Settings { get; set; }
         /// <summary>
-        /// Graph dictionary
+        /// Graph list
         /// </summary>
-        public Dictionary<Agent, NavMeshFile> Dictionary { get; set; }
+        public List<(Agent Agent, NavMeshFile NavMesh)> GraphList { get; set; }
         /// <summary>
         /// File source hash
         /// </summary>

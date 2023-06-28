@@ -22,7 +22,7 @@ namespace Engine
         /// <returns>Returns a compressed memory stream</returns>
         private static MemoryStream CompressStream(Stream stream)
         {
-            var mso = new MemoryStream();
+            MemoryStream mso = new();
 
             using (var gs = new GZipStream(mso, CompressionMode.Compress))
             {
@@ -38,14 +38,14 @@ namespace Engine
         /// <returns>Returns a decompressed memory stream</returns>
         private static MemoryStream DecompressStream(Stream compressed)
         {
-            var mso = new MemoryStream();
+            MemoryStream mso = new();
 
             using (var gs = new GZipStream(compressed, CompressionMode.Decompress))
             {
                 gs.CopyTo(mso);
             }
 
-            mso.Position = 0;
+            mso.Seek(0, SeekOrigin.Begin);
 
             return mso;
         }
@@ -54,32 +54,32 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns a compressed byte array</returns>
-        public static byte[] Compress<T>(this T obj)
+        public static byte[] Compress<T>(this T obj, bool handleTypeNames = true)
         {
-            using (var tmp = obj.SerializeJsonToStream())
-            using (var cmp = CompressStream(tmp))
-            {
-                return cmp.ToArray();
-            }
+            using var tmp = obj.SerializeJsonToStream(handleTypeNames);
+            using var cmp = CompressStream(tmp);
+
+            return cmp.ToArray();
         }
         /// <summary>
         /// Decompress from a byte array
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="data">Byte array</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns the decompressed object</returns>
-        public static T Decompress<T>(this byte[] data)
+        public static T Decompress<T>(this byte[] data, bool handleTypeNames = true)
         {
-            using (var buffer = new MemoryStream(data))
-            using (var dec = DecompressStream(buffer))
-            using (var tmp = new MemoryStream())
-            {
-                dec.CopyTo(tmp);
-                tmp.Position = 0;
+            using MemoryStream buffer = new(data);
+            using var dec = DecompressStream(buffer);
+            using MemoryStream tmp = new();
 
-                return DeserializeJsonFromStream<T>(tmp);
-            }
+            dec.CopyTo(tmp);
+            tmp.Seek(0, SeekOrigin.Begin);
+
+            return DeserializeJsonFromStream<T>(tmp, handleTypeNames);
         }
 
         /// <summary>
@@ -89,7 +89,8 @@ namespace Engine
         /// <param name="obj">Object</param>
         /// <param name="fileName">File name</param>
         /// <param name="nameSpace">Name space</param>
-        public static void SerializeToFile<T>(this T obj, string fileName, string nameSpace = null)
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
+        public static void SerializeToFile<T>(this T obj, string fileName, string nameSpace = null, bool handleTypeNames = true)
         {
             string extension = Path.GetExtension(fileName);
             switch (extension)
@@ -98,7 +99,7 @@ namespace Engine
                     SerializeXmlToFile(obj, fileName, nameSpace);
                     break;
                 default:
-                    SerializeJsonToFile(obj, fileName);
+                    SerializeJsonToFile(obj, fileName, handleTypeNames);
                     break;
             }
         }
@@ -108,14 +109,15 @@ namespace Engine
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="fileName">File name</param>
         /// <param name="nameSpace">Name space</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeFromFile<T>(string fileName, string nameSpace = null)
+        public static T DeserializeFromFile<T>(string fileName, string nameSpace = null, bool handleTypeNames = true)
         {
             string extension = Path.GetExtension(fileName);
             var result = extension switch
             {
                 ".xml" => DeserializeXmlFromFile<T>(fileName, nameSpace),
-                _ => DeserializeJsonFromFile<T>(fileName),
+                _ => DeserializeJsonFromFile<T>(fileName, handleTypeNames),
             };
             return result;
         }
@@ -129,7 +131,6 @@ namespace Engine
         private static XmlSerializer CreateXmlFormatter(Type objectType, string nameSpace = null)
         {
             return new XmlSerializer(objectType, nameSpace);
-
         }
         /// <summary>
         /// Serialize into bytes
@@ -139,12 +140,9 @@ namespace Engine
         /// <returns>Returns a byte array</returns>
         public static byte[] SerializeXml<T>(this T obj)
         {
-            using (var mso = SerializeXmlToStream(obj))
-            {
-                mso.Position = 0;
+            using var mso = SerializeXmlToStream(obj);
 
-                return mso.ToArray();
-            }
+            return mso.ToArray();
         }
         /// <summary>
         /// Serialize into MemoryStream
@@ -155,16 +153,13 @@ namespace Engine
         /// <returns>Returns a MemoryStream</returns>
         public static MemoryStream SerializeXmlToStream<T>(this T obj, string nameSpace = null)
         {
-            MemoryStream mso = new MemoryStream();
+            MemoryStream mso = new();
 
-            using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
-            {
-                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
-
-                sr.Serialize(wr, obj);
-
-                mso.Position = 0;
-            }
+            using StreamWriter wr = new(mso, Encoding.Default, 4096, true);
+            var sr = CreateXmlFormatter(typeof(T), nameSpace);
+            sr.Serialize(wr, obj);
+            wr.Flush();
+            mso.Seek(0, SeekOrigin.Begin);
 
             return mso;
         }
@@ -177,12 +172,11 @@ namespace Engine
         /// <param name="nameSpace">Name space</param>
         public static void SerializeXmlToFile<T>(this T obj, string fileName, string nameSpace = null)
         {
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
+            using StreamWriter wr = new(fileName, false, Encoding.Default);
 
-                sr.Serialize(wr, obj);
-            }
+            var sr = CreateXmlFormatter(typeof(T), nameSpace);
+
+            sr.Serialize(wr, obj);
         }
         /// <summary>
         /// Deserialize from a byte array 
@@ -193,13 +187,12 @@ namespace Engine
         /// <returns>Returns the deserialized object</returns>
         public static T DeserializeXml<T>(this byte[] data, string nameSpace = null)
         {
-            using (MemoryStream mso = new MemoryStream(data))
-            using (StreamReader rd = new StreamReader(mso, Encoding.Default))
-            {
-                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
+            using MemoryStream mso = new(data);
+            using StreamReader rd = new(mso, Encoding.Default);
 
-                return (T)sr.Deserialize(rd);
-            }
+            var sr = CreateXmlFormatter(typeof(T), nameSpace);
+
+            return (T)sr.Deserialize(rd);
         }
         /// <summary>
         /// Deserialize from a Stream 
@@ -210,12 +203,11 @@ namespace Engine
         /// <returns>Returns the deserialized object</returns>
         public static T DeserializeXmlFromStream<T>(this Stream mso, string nameSpace = null)
         {
-            using (StreamReader rd = new StreamReader(mso, Encoding.Default))
-            {
-                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
+            using StreamReader rd = new(mso, Encoding.Default);
 
-                return (T)sr.Deserialize(rd);
-            }
+            var sr = CreateXmlFormatter(typeof(T), nameSpace);
+
+            return (T)sr.Deserialize(rd);
         }
         /// <summary>
         /// Deserialize from a file
@@ -226,40 +218,26 @@ namespace Engine
         /// <returns>Returns the deserialized object</returns>
         public static T DeserializeXmlFromFile<T>(string fileName, string nameSpace = null)
         {
-            using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
-            {
-                XmlSerializer sr = CreateXmlFormatter(typeof(T), nameSpace);
+            using StreamReader rd = new(fileName, Encoding.Default);
 
-                return (T)sr.Deserialize(rd);
-            }
+            var sr = CreateXmlFormatter(typeof(T), nameSpace);
+
+            return (T)sr.Deserialize(rd);
         }
 
         /// <summary>
         /// Creates a new Json serializer for readers
         /// </summary>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns a Json serializer</returns>
-        private static JsonSerializer CreateReaderJsonFormatter()
+        private static JsonSerializer CreateJsonFormatter(bool handleTypeNames)
         {
             return new JsonSerializer()
             {
                 NullValueHandling = NullValueHandling.Ignore,
                 Formatting = Formatting.Indented,
-                TypeNameHandling = TypeNameHandling.Auto,
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-            };
-        }
-        /// <summary>
-        /// Creates a new Json serializer for writers
-        /// </summary>
-        /// <returns>Returns a Json serializer</returns>
-        private static JsonSerializer CreateWriterJsonFormatter()
-        {
-            return new JsonSerializer()
-            {
-                NullValueHandling = NullValueHandling.Ignore,
-                Formatting = Formatting.Indented,
-                TypeNameHandling = TypeNameHandling.None,
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                TypeNameHandling = handleTypeNames ? TypeNameHandling.Auto : TypeNameHandling.None,
             };
         }
         /// <summary>
@@ -267,34 +245,30 @@ namespace Engine
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns a byte array</returns>
-        public static byte[] SerializeJson<T>(this T obj)
+        public static byte[] SerializeJson<T>(this T obj, bool handleTypeNames = true)
         {
-            using (var mso = SerializeJsonToStream(obj))
-            {
-                mso.Position = 0;
+            using var mso = SerializeJsonToStream(obj, handleTypeNames);
 
-                return mso.ToArray();
-            }
+            return mso.ToArray();
         }
         /// <summary>
         /// Serialize into MemoryStream
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns a MemoryStream</returns>
-        public static MemoryStream SerializeJsonToStream<T>(this T obj)
+        public static MemoryStream SerializeJsonToStream<T>(this T obj, bool handleTypeNames = true)
         {
-            MemoryStream mso = new MemoryStream();
+            MemoryStream mso = new();
 
-            using (StreamWriter wr = new StreamWriter(mso, Encoding.Default))
-            {
-                JsonSerializer sr = CreateWriterJsonFormatter();
-
-                sr.Serialize(wr, obj, typeof(T));
-
-                mso.Position = 0;
-            }
+            using StreamWriter wr = new(mso, Encoding.Default, 4096, true);
+            var sr = CreateJsonFormatter(handleTypeNames);
+            sr.Serialize(wr, obj);
+            wr.Flush();
+            mso.Seek(0, SeekOrigin.Begin);
 
             return mso;
         }
@@ -304,57 +278,57 @@ namespace Engine
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="obj">Object</param>
         /// <param name="fileName">File name</param>
-        public static void SerializeJsonToFile<T>(this T obj, string fileName)
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
+        public static void SerializeJsonToFile<T>(this T obj, string fileName, bool handleTypeNames = true)
         {
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                JsonSerializer sr = CreateWriterJsonFormatter();
+            using StreamWriter wr = new(fileName, false, Encoding.Default);
 
-                sr.Serialize(wr, obj, typeof(T));
-            }
+            var sr = CreateJsonFormatter(handleTypeNames);
+
+            sr.Serialize(wr, obj, typeof(T));
         }
         /// <summary>
         /// Deserialize from a byte array 
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="data">Byte array</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeJson<T>(this byte[] data)
+        public static T DeserializeJson<T>(this byte[] data, bool handleTypeNames = true)
         {
-            using (var mso = new MemoryStream(data))
-            {
-                return DeserializeJsonFromStream<T>(mso);
-            }
+            using MemoryStream mso = new(data);
+
+            return DeserializeJsonFromStream<T>(mso, handleTypeNames);
         }
         /// <summary>
         /// Deserialize from a Stream 
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="mso">Stream</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeJsonFromStream<T>(this Stream mso)
+        public static T DeserializeJsonFromStream<T>(this Stream mso, bool handleTypeNames = true)
         {
-            using (StreamReader rd = new StreamReader(mso, Encoding.Default))
-            {
-                JsonSerializer sr = CreateReaderJsonFormatter();
+            using StreamReader rd = new(mso, Encoding.Default);
 
-                return (T)sr.Deserialize(rd, typeof(T));
-            }
+            var sr = CreateJsonFormatter(handleTypeNames);
+
+            return (T)sr.Deserialize(rd, typeof(T));
         }
         /// <summary>
         /// Deserialize from a file
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
         /// <param name="fileName">File name</param>
+        /// <param name="handleTypeNames">Handle type names inheritance</param>
         /// <returns>Returns the deserialized object</returns>
-        public static T DeserializeJsonFromFile<T>(string fileName)
+        public static T DeserializeJsonFromFile<T>(string fileName, bool handleTypeNames = true)
         {
-            using (StreamReader rd = new StreamReader(fileName, Encoding.Default))
-            {
-                JsonSerializer sr = CreateReaderJsonFormatter();
+            using StreamReader rd = new(fileName, Encoding.Default);
 
-                return (T)sr.Deserialize(rd, typeof(T));
-            }
+            var sr = CreateJsonFormatter(handleTypeNames);
+
+            return (T)sr.Deserialize(rd, typeof(T));
         }
 
         /// <summary>

@@ -135,7 +135,7 @@ namespace Engine
         /// <summary>
         /// Scene component list
         /// </summary>
-        public SceneComponentCollection Components { get; private set; } = new();
+        public SceneComponentCollection Components { get; private set; }
         /// <summary>
         /// Scene lights
         /// </summary>
@@ -161,6 +161,9 @@ namespace Engine
         public Scene(Game game)
         {
             Game = game;
+
+            Components = new();
+            Components.Updated += ComponentsUpdated;
 
             Game.Graphics.Resized += FireGraphicsResized;
 
@@ -676,6 +679,15 @@ namespace Engine
             where TDescription : SceneObjectDescription
         {
             return await AddComponentInternal<TObj, TDescription>(id, name, description, usage, layer);
+        }
+
+        /// <summary>
+        /// Components updated event
+        /// </summary>
+        private void ComponentsUpdated(object sender, EventArgs e)
+        {
+            updateMaterialsPalette = true;
+            updateAnimationsPalette = true;
         }
 
         /// <summary>

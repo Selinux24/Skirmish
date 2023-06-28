@@ -38,14 +38,11 @@ namespace Engine.Content.OnePageDungeon
         /// <summary>
         /// Ramdon generator
         /// </summary>
-        private Random randomGenerator = Helper.RandomGenerator;
+        private Random randomGenerator = null;
         /// <summary>
-        /// Random seed value
+        /// Ramdon generator seed
         /// </summary>
-        /// <remarks>
-        /// Used for positioning props in the dungeon
-        /// </remarks>
-        private int randomSeed = 0;
+        private int randomGeneratorSeed = 0;
 
         /// <summary>
         /// Asset definition file names
@@ -109,27 +106,48 @@ namespace Engine.Content.OnePageDungeon
         /// Door states
         /// </summary>
         public IEnumerable<ObjectState> DoorStates { get; set; }
-
         /// <summary>
         /// Random seed
         /// </summary>
-        public int RandomSeed
+        public int RandomSeed { get; set; }
+
+        /// <summary>
+        /// Gets the random generator
+        /// </summary>
+        private Random GetGenerator()
         {
-            get
+            if (randomGenerator == null || randomGeneratorSeed != RandomSeed)
             {
-                return randomSeed;
+                randomGenerator = Helper.SetRandomGeneratorSeed(RandomSeed);
+                randomGeneratorSeed = RandomSeed;
+
+                return randomGenerator;
             }
-            set
+
+            return randomGenerator;
+        }
+        /// <summary>
+        /// Gets a ramdom value from a list
+        /// </summary>
+        /// <typeparam name="T">Type</typeparam>
+        /// <param name="list">List of values</param>
+        private DungeonProp GetRandom(IEnumerable<DungeonProp> list)
+        {
+            if (list?.Any() != true)
             {
-                if (randomSeed != value)
-                {
-                    return;
-                }
-
-                randomSeed = value;
-
-                randomGenerator = Helper.SetRandomGeneratorSeed(randomSeed);
+                return default;
             }
+
+            if (list.Count() == 1)
+            {
+                return list.First();
+            }
+
+            float weight = GetGenerator().NextFloat(0, 1);
+
+            var sortedList = list.OrderBy(i => i.Weight);
+
+            return sortedList.FirstOrDefault(i => weight <= i.Weight) ?? sortedList.Last();
         }
 
         /// <summary>
@@ -137,28 +155,28 @@ namespace Engine.Content.OnePageDungeon
         /// </summary>
         public DungeonProp GetRandonFloor()
         {
-            return GetRandon(Floors);
+            return GetRandom(Floors);
         }
         /// <summary>
         /// Gets a random wall name
         /// </summary>
         public DungeonProp GetRandonWall()
         {
-            return GetRandon(Walls);
+            return GetRandom(Walls);
         }
         /// <summary>
         /// Gets a random ceiling name
         /// </summary>
         public DungeonProp GetRandonCeiling()
         {
-            return GetRandon(Ceilings);
+            return GetRandom(Ceilings);
         }
         /// <summary>
         /// Gets a random column name
         /// </summary>
         public DungeonProp GetRandonColumn()
         {
-            return GetRandon(Columns);
+            return GetRandom(Columns);
         }
         /// <summary>
         /// Gets a random door name by type
@@ -171,29 +189,6 @@ namespace Engine.Content.OnePageDungeon
             }
 
             return null;
-        }
-        /// <summary>
-        /// Gets a ramdom value from a list
-        /// </summary>
-        /// <typeparam name="T">Type</typeparam>
-        /// <param name="list">List of values</param>
-        private DungeonProp GetRandon(IEnumerable<DungeonProp> list)
-        {
-            if (list?.Any() != true)
-            {
-                return default;
-            }
-
-            if (list.Count() == 1)
-            {
-                return list.First();
-            }
-
-            float weight = randomGenerator.NextFloat(0, 1);
-
-            var sortedList = list.OrderBy(i => i.Weight);
-
-            return sortedList.FirstOrDefault(i => weight <= i.Weight) ?? sortedList.Last();
         }
     }
 

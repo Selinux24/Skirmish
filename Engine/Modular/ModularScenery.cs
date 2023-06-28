@@ -519,19 +519,17 @@ namespace Engine.Modular
                     _ => SceneObjectUsages.None,
                 };
 
-                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
-                    assetId,
-                    Name,
-                    new ModelInstancedDescription()
-                    {
-                        CastShadow = Description.CastShadow,
-                        UseAnisotropicFiltering = Description.UseAnisotropic,
-                        Instances = count,
-                        LoadAnimation = false,
-                        BlendMode = Description.BlendMode,
-                        Content = ContentDescription.FromContentData(modelContent),
-                    },
-                    usage);
+                var desc = new ModelInstancedDescription()
+                {
+                    CastShadow = Description.CastShadow,
+                    UseAnisotropicFiltering = Description.UseAnisotropic,
+                    Instances = count,
+                    LoadAnimation = false,
+                    BlendMode = Description.BlendMode,
+                    Content = ContentDescription.FromContentData(modelContent),
+                };
+
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(assetId, Name, desc, usage);
 
                 model.Owner = this;
 
