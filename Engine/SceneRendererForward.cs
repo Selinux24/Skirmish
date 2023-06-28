@@ -15,7 +15,7 @@ namespace Engine
     public class SceneRendererForward : BaseSceneRenderer
     {
 #if DEBUG
-        private readonly FrameStatsForward frameStats = new FrameStatsForward();
+        private readonly FrameStatsForward frameStats = new();
 #endif
 
         /// <summary>
@@ -48,7 +48,7 @@ namespace Engine
             Updated = false;
 
             //Select visible components
-            var visibleComponents = Scene.GetComponents<IDrawable>().Where(c => c.Visible);
+            var visibleComponents = Scene.Components.Get<IDrawable>(c => c.Visible);
             if (!visibleComponents.Any())
             {
                 return;
@@ -185,8 +185,8 @@ namespace Engine
             //Save current drawer mode
             var mode = context.DrawerMode;
 #if DEBUG
-            Dictionary<string, double> dict = new Dictionary<string, double>();
-            Stopwatch stopwatch = new Stopwatch();
+            Dictionary<string, double> dict = new();
+            Stopwatch stopwatch = new();
 #endif
             //First opaques
 #if DEBUG
@@ -221,7 +221,7 @@ namespace Engine
                 opaques.ForEach((c) =>
                 {
 #if DEBUG
-                    Stopwatch stopwatch2 = new Stopwatch();
+                    Stopwatch stopwatch2 = new();
                     stopwatch2.Start();
 #endif
                     Draw(context, c);
@@ -269,7 +269,7 @@ namespace Engine
                 transparents.ForEach((c) =>
                 {
 #if DEBUG
-                    Stopwatch stopwatch2 = new Stopwatch();
+                    Stopwatch stopwatch2 = new();
                     stopwatch2.Start();
 #endif
                     Draw(context, c);

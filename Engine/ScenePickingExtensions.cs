@@ -23,7 +23,7 @@ namespace Engine
         {
             result = new ScenePickingResult<T>();
 
-            var cmpList = scene.GetComponentsByUsage(usage);
+            var cmpList = scene.Components.Get(usage);
             if (!cmpList.Any())
             {
                 return false;
@@ -69,7 +69,7 @@ namespace Engine
             result = new ScenePickingResult<T>();
 
             //Filter by usage
-            var cmpList = scene.GetComponentsByUsage(usage);
+            var cmpList = scene.Components.Get(usage);
             if (!cmpList.Any())
             {
                 return false;
@@ -114,7 +114,7 @@ namespace Engine
         {
             results = Enumerable.Empty<ScenePickingResultMultiple<T>>();
 
-            var cmpList = scene.GetComponentsByUsage(usage);
+            var cmpList = scene.Components.Get(usage);
             if (!cmpList.Any())
             {
                 return false;

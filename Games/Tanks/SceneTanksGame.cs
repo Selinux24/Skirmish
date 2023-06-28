@@ -73,7 +73,7 @@ namespace Tanks
         private UIProgressBar pbFire;
         private readonly Color4 pbFireBaseColor = Color.Yellow;
         private readonly Color4 pbFireHBaseColor = Color.Red;
-        private readonly Color4 pbFireProgressColor = new Color4(Color.Yellow.ToColor3(), 0.9f);
+        private readonly Color4 pbFireProgressColor = new(Color.Yellow.ToColor3(), 0.9f);
         private UITextArea fireKeyText;
 
         private Sprite miniMapBackground;
@@ -98,11 +98,11 @@ namespace Tanks
         private readonly float minBarrelPitch = MathUtil.DegreesToRadians(-5);
         private Model projectile;
 
-        private readonly List<ModelInstanced> treeModels = new List<ModelInstanced>();
+        private readonly List<ModelInstanced> treeModels = new();
 
         private Sprite[] trajectoryMarkerPool;
 
-        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptions = new Dictionary<string, ParticleSystemDescription>();
+        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptions = new();
         private ParticleManager particleManager = null;
         private readonly float explosionDurationSeconds = 0.5f;
         private readonly float shotDurationSeconds = 0.2f;
@@ -246,7 +246,7 @@ namespace Tanks
         {
             InitializePlayers();
 
-            List<Task> taskList = new List<Task>();
+            List<Task> taskList = new();
             taskList.AddRange(InitializeUI());
             taskList.AddRange(InitializeModels());
 
@@ -294,8 +294,8 @@ namespace Tanks
 
             var font = TextDrawerDescription.FromFile(fontFilename, 20, true);
 
-            Color4 releasedColor = new Color4((Color.DarkGray * 0.6666f).ToColor3(), 1f);
-            Color4 pressedColor = new Color4((Color.DarkGray * 0.7777f).ToColor3(), 1f);
+            Color4 releasedColor = new((Color.DarkGray * 0.6666f).ToColor3(), 1f);
+            Color4 pressedColor = new((Color.DarkGray * 0.7777f).ToColor3(), 1f);
             var descButton = UIButtonDescription.DefaultTwoStateButton(font, releasedColor, pressedColor);
             descButton.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButton.TextVerticalAlign = TextVerticalAlign.Middle;
@@ -526,7 +526,7 @@ namespace Tanks
         private async Task InitializeModelsTerrain()
         {
             // Generates a random terrain using perlin noise
-            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+            NoiseMapDescriptor nmDesc = new()
             {
                 MapWidth = mapSize,
                 MapHeight = mapSize,
@@ -539,14 +539,14 @@ namespace Tanks
             };
             var noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
 
-            Curve heightCurve = new Curve();
+            Curve heightCurve = new();
             heightCurve.Keys.Add(0, 0);
             heightCurve.Keys.Add(0.4f, 0f);
             heightCurve.Keys.Add(1f, 1f);
 
             float cellSize = terrainSize / mapSize;
 
-            var textures = new HeightmapTexturesDescription
+            HeightmapTexturesDescription textures = new()
             {
                 ContentPath = "Resources/terrain",
                 TexturesLR = new[] { "Diffuse.jpg" },
@@ -595,8 +595,8 @@ namespace Tanks
             var content = new ModelDescription
             {
                 Content = ContentDescription.FromContentData(sphereDesc, material),
+                DepthEnabled = false
             };
-            content.DepthEnabled = false;
 
             projectile = await AddComponent<Model, ModelDescription>("Projectile", "Projectile", content, SceneObjectUsages.None, LayerDefault + 1);
             projectile.Visible = false;
@@ -805,7 +805,7 @@ namespace Tanks
         }
         private async Task InitializeLights()
         {
-            List<SceneLightPoint> pointLights = new List<SceneLightPoint>();
+            List<SceneLightPoint> pointLights = new();
 
             var lightDesc = SceneLightPointDescription.Create(Vector3.One * float.MaxValue, 0, 0);
 
@@ -1042,10 +1042,10 @@ namespace Tanks
             terrain.Visible = true;
             treeModels.ForEach(t => t.Visible = true);
 
-            Vector3 p1 = new Vector3(-140, 100, 0);
-            Vector3 n1 = Vector3.Up;
-            Vector3 p2 = new Vector3(+140, 100, 0);
-            Vector3 n2 = Vector3.Up;
+            var p1 = new Vector3(-140, 100, 0);
+            var n1 = Vector3.Up;
+            var p2 = new Vector3(+140, 100, 0);
+            var n2 = Vector3.Up;
 
             if (FindTopGroundPosition<Triangle>(p1.X, p1.Z, out var r1))
             {
@@ -1086,7 +1086,7 @@ namespace Tanks
 
                 InitializePlayers();
 
-                RemoveComponent(terrain);
+                Components.RemoveComponent(terrain);
                 decalDrawer.Clear();
 
                 LoadResourcesAsync(
@@ -1617,7 +1617,7 @@ You will lost all the game progress.",
 
             // Get terrain minimap rectangle
             BoundingBox bbox = terrain.GetBoundingBox();
-            RectangleF terrainRect = new RectangleF(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
+            RectangleF terrainRect = new(bbox.Minimum.X, bbox.Minimum.Z, bbox.Width, bbox.Depth);
 
             // Get object space positions and transform to screen space
             Vector2 tank1 = tanks[0].Manipulator.Position.XZ() - terrainRect.TopLeft;
@@ -1627,8 +1627,8 @@ You will lost all the game progress.",
             RectangleF miniMapRect = miniMapBackground.GetRenderArea(false);
 
             // Get the marker sprite bounds
-            Vector2 markerBounds1 = new Vector2(miniMapTank1.Width, miniMapTank1.Height);
-            Vector2 markerBounds2 = new Vector2(miniMapTank2.Width, miniMapTank2.Height);
+            Vector2 markerBounds1 = new(miniMapTank1.Width, miniMapTank1.Height);
+            Vector2 markerBounds2 = new(miniMapTank2.Width, miniMapTank2.Height);
 
             // Calculate proportional 2D locations (tank to terrain)
             float tank1ToTerrainX = tank1.X / terrainRect.Width;
@@ -1637,8 +1637,8 @@ You will lost all the game progress.",
             float tank2ToTerrainY = tank2.Y / terrainRect.Height;
 
             // Marker to minimap inverting Y coordinates
-            Vector2 markerToMinimap1 = new Vector2(miniMapRect.Width * tank1ToTerrainX, miniMapRect.Height * (1f - tank1ToTerrainY));
-            Vector2 markerToMinimap2 = new Vector2(miniMapRect.Width * tank2ToTerrainX, miniMapRect.Height * (1f - tank2ToTerrainY));
+            Vector2 markerToMinimap1 = new(miniMapRect.Width * tank1ToTerrainX, miniMapRect.Height * (1f - tank1ToTerrainY));
+            Vector2 markerToMinimap2 = new(miniMapRect.Width * tank2ToTerrainX, miniMapRect.Height * (1f - tank2ToTerrainY));
 
             // Translate and center into the minimap
             Vector2 mt1Position = markerToMinimap1 + miniMapRect.TopLeft - (markerBounds1 * 0.5f);

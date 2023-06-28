@@ -18,9 +18,9 @@ namespace Engine
     public class SceneRendererDeferred : BaseSceneRenderer
     {
 #if DEBUG
-        private readonly FrameStatsDeferred frameStats = new FrameStatsDeferred();
+        private readonly FrameStatsDeferred frameStats = new();
 
-        private readonly FrameStatsLight lightStats = new FrameStatsLight();
+        private readonly FrameStatsLight lightStats = new();
 #endif
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace Engine
             Updated = false;
 
             //Select visible components
-            var visibleComponents = Scene.GetComponents<IDrawable>().Where(c => c.Visible);
+            var visibleComponents = Scene.Components.Get<IDrawable>(c => c.Visible);
             if (!visibleComponents.Any())
             {
                 return;

@@ -3,19 +3,19 @@
 namespace Engine
 {
     /// <summary>
-    /// Ray-picking flags
+    /// Ray-picking hull flags
     /// </summary>
     [Flags]
     public enum PickingHullTypes
     {
         /// <summary>
-        /// No params
+        /// None
         /// </summary>
         None = 0,
         /// <summary>
-        /// Default flags - Hull meshes when available & facing-only triangles
+        /// Default flags - Mesh geometry (hulls when available) & facing-only triangles
         /// </summary>
-        Default = Coarse | Hull | Geometry | FacingOnly,
+        Default = Hull | Geometry | FacingOnly,
         /// <summary>
         /// Fast picking - Mesh bounding volumes & facing-only triangles
         /// </summary>

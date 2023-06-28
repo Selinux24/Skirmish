@@ -640,12 +640,7 @@ namespace Engine
             Visible = modelState.Visible;
             Usage = modelState.Usage;
             Layer = modelState.Layer;
-
-            if (!string.IsNullOrEmpty(modelState.OwnerId))
-            {
-                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == modelState.OwnerId);
-            }
-
+            Owner = Scene.Components.ById(modelState.OwnerId);
             Manipulator?.SetState(modelState.Manipulator);
             AnimationController?.SetState(modelState.AnimationController);
             TextureIndex = modelState.TextureIndex;

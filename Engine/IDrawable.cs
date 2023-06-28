@@ -29,14 +29,6 @@ namespace Engine
         /// </summary>
         BlendModes BlendMode { get; }
         /// <summary>
-        /// Object usage
-        /// </summary>
-        SceneObjectUsages Usage { get; set; }
-        /// <summary>
-        /// Processing layer
-        /// </summary>
-        int Layer { get; set; }
-        /// <summary>
         /// Maximum instance count
         /// </summary>
         int InstanceCount { get; }

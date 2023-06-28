@@ -24,8 +24,8 @@ namespace SceneTest.SceneTest
         private readonly Color3 ambientUp = Color3.Black;
         private readonly Color3 ambientDown = new Color3(1f, 0.671f, 0.328f) * 0.2f;
 
-        private readonly Color3 waterBaseColor = new Color3(0.067f, 0.065f, 0.003f);
-        private readonly Color4 waterColor = new Color4(0.003f, 0.267f, 0.096f, 0.95f);
+        private readonly Color3 waterBaseColor = new(0.067f, 0.065f, 0.003f);
+        private readonly Color4 waterColor = new(0.003f, 0.267f, 0.096f, 0.95f);
         private readonly float waterHeight = -50f;
 
         private UICursor cursor = null;
@@ -45,17 +45,17 @@ namespace SceneTest.SceneTest
         private SkyScattering skydom = null;
         private SkyPlane skyPlane = null;
 
-        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new Dictionary<string, ParticleSystemDescription>();
+        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new();
         private ParticleManager pManager = null;
 
         private IParticleSystem[] particlePlumes = null;
-        private readonly Vector3 plumeGravity = new Vector3(0, 5, 0);
+        private readonly Vector3 plumeGravity = new(0, 5, 0);
         private readonly float plumeMaxHorizontalVelocity = 25f;
-        private Vector2 wind = new Vector2(0, 0);
-        private Vector2 nextWind = new Vector2();
+        private Vector2 wind = new(0, 0);
+        private Vector2 nextWind = new();
         private float nextWindChange = 0;
 
-        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new();
 
         private PrimitiveListDrawer<Line3D> volumeDrawer = null;
         private bool drawLightDrawVolumes = false;
@@ -429,7 +429,7 @@ namespace SceneTest.SceneTest
 
             float s = spaceSize / 2f;
 
-            AnimationPath p1 = new AnimationPath();
+            AnimationPath p1 = new();
             p1.AddLoop("idle1");
             animations.Add("default", new AnimationPlan(p1));
 
@@ -490,7 +490,7 @@ namespace SceneTest.SceneTest
             vehicleI[2].Manipulator.SetRotation(MathUtil.PiOverTwo * 2, 0, 0);
             vehicleI[3].Manipulator.SetRotation(MathUtil.PiOverTwo * 3, 0, 0);
 
-            List<ISceneLight> lights = new List<ISceneLight>();
+            List<ISceneLight> lights = new();
 
             lights.AddRange(vehicle.Lights);
 
@@ -540,7 +540,7 @@ namespace SceneTest.SceneTest
             lampI[2].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
             lampI[3].Manipulator.SetRotation(MathUtil.PiOverTwo, pitch, 0);
 
-            List<ISceneLight> lights = new List<ISceneLight>();
+            List<ISceneLight> lights = new();
 
             lights.AddRange(lamp.Lights);
 
@@ -593,7 +593,7 @@ namespace SceneTest.SceneTest
             streetlampI[7].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
             streetlampI[8].Manipulator.SetRotation(MathUtil.Pi, 0, 0);
 
-            List<ISceneLight> lights = new List<ISceneLight>();
+            List<ISceneLight> lights = new();
 
             lights.AddRange(streetlamp.Lights);
 
@@ -645,7 +645,7 @@ namespace SceneTest.SceneTest
             var bboxTmp = container.GetBoundingBox();
             float scaleX = areaSize * 2 / xSize / bboxTmp.Width;
             float scaleZ = areaSize * 2 / zSize / bboxTmp.Depth;
-            Vector3 scale = new Vector3(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
+            Vector3 scale = new(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
 
             container.Manipulator.SetScale(scale);
             container.Manipulator.UpdateInternals(true);
@@ -657,9 +657,9 @@ namespace SceneTest.SceneTest
             container.Manipulator.SetPosition(s + 12 + xDelta, baseHeight + yDelta, 30 + zDelta);
             container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
 
-            Random prnd = new Random(1000);
+            Random prnd = new(1000);
 
-            GridParams gridParams = new GridParams
+            GridParams gridParams = new()
             {
                 RowSize = rowSize,
                 AreaSize = areaSize,
@@ -769,7 +769,7 @@ namespace SceneTest.SceneTest
             var cubeTris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox);
 
             particlePlumes = new IParticleSystem[positions.Length];
-            List<Triangle> markers = new List<Triangle>();
+            List<Triangle> markers = new();
             for (int i = 0; i < positions.Length; i++)
             {
                 particlePlumes[i] = await pManager.AddParticleSystem(
@@ -1070,7 +1070,7 @@ namespace SceneTest.SceneTest
         }
         private void AddModelCullingVolumes(BoundingFrustum cameraFrustum)
         {
-            var models = GetComponents<Model>();
+            var models = Components.Get<Model>();
 
             foreach (var model in models)
             {
@@ -1098,7 +1098,7 @@ namespace SceneTest.SceneTest
         }
         private void AddInstancedModelCullingVolumes(BoundingFrustum cameraFrustum)
         {
-            var instances = GetComponents<ModelInstanced>().SelectMany(m => m.GetInstances());
+            var instances = Components.Get<ModelInstanced>().SelectMany(m => m.GetInstances());
 
             foreach (var model in instances)
             {

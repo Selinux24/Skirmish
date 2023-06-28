@@ -28,15 +28,15 @@ namespace Engine.Modular
         /// <summary>
         /// Asset models dictionary
         /// </summary>
-        private readonly Dictionary<string, ModelInstanced> assets = new Dictionary<string, ModelInstanced>();
+        private readonly Dictionary<string, ModelInstanced> assets = new();
         /// <summary>
         /// Object models dictionary
         /// </summary>
-        private readonly Dictionary<string, ModelInstanced> objects = new Dictionary<string, ModelInstanced>();
+        private readonly Dictionary<string, ModelInstanced> objects = new();
         /// <summary>
         /// Particle descriptors dictionary
         /// </summary>
-        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptors = new Dictionary<string, ParticleSystemDescription>();
+        private readonly Dictionary<string, ParticleSystemDescription> particleDescriptors = new();
         /// <summary>
         /// Particle manager
         /// </summary>
@@ -48,19 +48,19 @@ namespace Engine.Modular
         /// <summary>
         /// Scenery entities
         /// </summary>
-        private readonly List<ModularSceneryItem> entities = new List<ModularSceneryItem>();
+        private readonly List<ModularSceneryItem> entities = new();
         /// <summary>
         /// Triggers list by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new Dictionary<ModelInstance, List<ModularSceneryTrigger>>();
+        private readonly Dictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new();
         /// <summary>
         /// Animations plan dictionary by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new Dictionary<ModelInstance, Dictionary<string, AnimationPlan>>();
+        private readonly Dictionary<ModelInstance, Dictionary<string, AnimationPlan>> animations = new();
         /// <summary>
         /// Active trigger callbacks
         /// </summary>
-        private readonly List<TriggerCallback> activeCallbacks = new List<TriggerCallback>();
+        private readonly List<TriggerCallback> activeCallbacks = new();
         /// <summary>
         /// Gets the assets description
         /// </summary>
@@ -191,7 +191,7 @@ namespace Engine.Modular
         /// <returns>Returns a dictionary that contains the instance transform list by asset name</returns>
         private static Dictionary<string, Matrix[]> GetInstanceTransforms(Asset asset)
         {
-            Dictionary<string, Matrix[]> res = new Dictionary<string, Matrix[]>();
+            Dictionary<string, Matrix[]> res = new();
 
             var assetNames = asset.References.Select(a => a.AssetName).Distinct();
 
@@ -212,7 +212,7 @@ namespace Engine.Modular
         /// <returns>Returns a dictionary with the instance count by unique asset name</returns>
         private static Dictionary<string, InstanceInfo> GetObjectsInstanceCounters(Level level)
         {
-            Dictionary<string, InstanceInfo> res = new Dictionary<string, InstanceInfo>();
+            Dictionary<string, InstanceInfo> res = new();
 
             foreach (var item in level.Objects)
             {
@@ -392,8 +392,8 @@ namespace Engine.Modular
         private async Task LoadLevel(Level level, IProgress<LoadResourceProgress> progress = null)
         {
             //Removes previous level components from scene
-            Scene.RemoveComponents(assets.Select(a => a.Value));
-            Scene.RemoveComponents(objects.Select(o => o.Value));
+            Scene.Components.RemoveComponents(assets.Select(a => a.Value));
+            Scene.Components.RemoveComponents(objects.Select(o => o.Value));
 
             //Clear internal lists and data
             assets.Clear();
@@ -717,18 +717,18 @@ namespace Engine.Modular
         /// <param name="instance">Model instance</param>
         private void InitializeObjectAnimations(ObjectReference obj, ModelInstance instance)
         {
-            Dictionary<string, AnimationPlan> animationDict = new Dictionary<string, AnimationPlan>();
+            Dictionary<string, AnimationPlan> animationDict = new();
 
             //Plans
             if (obj.AnimationPlans?.Any() == true)
             {
                 foreach (var dPlan in obj.AnimationPlans)
                 {
-                    AnimationPlan plan = new AnimationPlan();
+                    AnimationPlan plan = new();
 
                     foreach (var dPath in dPlan.Paths)
                     {
-                        AnimationPath path = new AnimationPath();
+                        AnimationPath path = new();
                         path.Add(dPath.Name);
 
                         plan.AddItem(path);
@@ -744,21 +744,21 @@ namespace Engine.Modular
 
                 var defaultPlan = obj.AnimationPlans.FirstOrDefault(a => a.Default)?.Name ?? "default";
 
-                AnimationPath def = new AnimationPath();
+                AnimationPath def = new();
                 def.Add(defaultPlan);
 
                 instance.AnimationController.ReplacePlan(new AnimationPlan(def));
                 instance.InvalidateCache();
             }
 
-            List<ModularSceneryTrigger> instanceTriggers = new List<ModularSceneryTrigger>();
+            List<ModularSceneryTrigger> instanceTriggers = new();
 
             //Actions
             if (obj.Actions?.Any() == true)
             {
                 foreach (var action in obj.Actions)
                 {
-                    ModularSceneryTrigger trigger = new ModularSceneryTrigger()
+                    ModularSceneryTrigger trigger = new()
                     {
                         Name = action.Name,
                         StateFrom = action.StateFrom,
@@ -768,7 +768,7 @@ namespace Engine.Modular
 
                     foreach (var item in action.Items)
                     {
-                        ModularSceneryAction act = new ModularSceneryAction()
+                        ModularSceneryAction act = new()
                         {
                             ItemId = item.Id,
                             ItemAction = item.Action,
@@ -895,7 +895,7 @@ namespace Engine.Modular
             var complexAssetTransform = GeometryUtil.Transformation(item.Position, item.Rotation, item.Scale);
             var complexAssetRotation = item.Rotation;
 
-            AssetMapItem aMap = new AssetMapItem()
+            AssetMapItem aMap = new()
             {
                 Index = assetIndex,
                 Name = item.AssetName,
@@ -1497,11 +1497,11 @@ namespace Engine.Modular
             /// <summary>
             /// Asset map
             /// </summary>
-            private readonly List<AssetMapItem> assetMap = new List<AssetMapItem>();
+            private readonly List<AssetMapItem> assetMap = new();
             /// <summary>
             /// Visible bounding boxes
             /// </summary>
-            private readonly List<BoundingBox> visibleBoxes = new List<BoundingBox>();
+            private readonly List<BoundingBox> visibleBoxes = new();
 
             /// <inheritdoc/>
             public Vector3 Position
@@ -1605,7 +1605,7 @@ namespace Engine.Modular
                 {
                     var item = assetMap[i];
 
-                    BoundingBox bbox = new BoundingBox();
+                    BoundingBox bbox = new();
 
                     foreach (var assetName in item.Assets.Keys)
                     {
@@ -1713,7 +1713,7 @@ namespace Engine.Modular
                     visibleBoxes.Clear();
                     visibleBoxes.Add(assetMap[itemIndex].Volume);
 
-                    List<int> visited = new List<int>
+                    List<int> visited = new()
                     {
                         itemIndex
                     };
@@ -1812,11 +1812,11 @@ namespace Engine.Modular
             /// <summary>
             /// Individual asset indices
             /// </summary>
-            public Dictionary<string, List<int>> Assets = new Dictionary<string, List<int>>();
+            public Dictionary<string, List<int>> Assets = new();
             /// <summary>
             /// Connections with other complex assets
             /// </summary>
-            public List<int> Connections = new List<int>();
+            public List<int> Connections = new();
 
             /// <inheritdoc/>
             public override string ToString()

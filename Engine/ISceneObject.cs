@@ -23,6 +23,14 @@ namespace Engine
         /// </summary>
         Scene Scene { get; }
         /// <summary>
+        /// Object usage
+        /// </summary>
+        SceneObjectUsages Usage { get; set; }
+        /// <summary>
+        /// Processing layer
+        /// </summary>
+        int Layer { get; set; }
+        /// <summary>
         /// Gets whether the current object has owner or not
         /// </summary>
         bool HasOwner { get; }

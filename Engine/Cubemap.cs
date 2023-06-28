@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Engine
@@ -244,7 +243,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is CubemapState cubemapState))
+            if (state is not CubemapState cubemapState)
             {
                 return;
             }
@@ -254,12 +253,7 @@ namespace Engine
             Visible = cubemapState.Visible;
             Usage = cubemapState.Usage;
             Layer = cubemapState.Layer;
-
-            if (!string.IsNullOrEmpty(cubemapState.OwnerId))
-            {
-                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == cubemapState.OwnerId);
-            }
-
+            Owner = Scene.Components.ById(cubemapState.OwnerId);
             TextureIndex = cubemapState.TextureIndex;
         }
     }

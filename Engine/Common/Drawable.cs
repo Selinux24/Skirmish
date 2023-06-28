@@ -24,10 +24,6 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual BlendModes BlendMode { get; protected set; }
         /// <inheritdoc/>
-        public virtual SceneObjectUsages Usage { get; set; }
-        /// <inheritdoc/>
-        public virtual int Layer { get; set; }
-        /// <inheritdoc/>
         public virtual int InstanceCount { get; protected set; }
 
         /// <summary>
@@ -74,8 +70,6 @@ namespace Engine.Common
             DeferredEnabled = description.DeferredEnabled;
             DepthEnabled = description.DepthEnabled;
             BlendMode = description.BlendMode;
-            Usage = SceneObjectUsages.None;
-            Layer = 0;
             InstanceCount = 1;
         }
 

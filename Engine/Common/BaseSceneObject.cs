@@ -23,6 +23,10 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual Scene Scene { get; protected set; }
         /// <inheritdoc/>
+        public virtual SceneObjectUsages Usage { get; set; }
+        /// <inheritdoc/>
+        public virtual int Layer { get; set; }
+        /// <inheritdoc/>
         public virtual bool HasOwner { get { return Owner != null; } }
         /// <inheritdoc/>
         public virtual ISceneObject Owner { get; set; } = null;
@@ -48,6 +52,8 @@ namespace Engine.Common
             Id = id;
             Name = name ?? $"_noname_{id}";
             Scene = scene ?? throw new ArgumentNullException(nameof(scene), "The scene must be specified");
+            Usage = SceneObjectUsages.None;
+            Layer = 0;
             Game = scene.Game;
             Active = false;
         }

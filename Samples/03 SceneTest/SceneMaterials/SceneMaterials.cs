@@ -194,7 +194,7 @@ namespace SceneTest.SceneMaterials
         }
         private async Task InitializeBuiltInList()
         {
-            List<BuiltInMaterial> materials = new List<BuiltInMaterial>()
+            List<BuiltInMaterial> materials = new()
             {
                 BuiltInMaterials.Emerald,
                 BuiltInMaterials.Jade,
@@ -239,7 +239,7 @@ namespace SceneTest.SceneMaterials
         {
             int itemsPerRow = 10;
 
-            List<IMaterialContent> materials = new List<IMaterialContent>();
+            List<IMaterialContent> materials = new();
 
             float roughness = 0.1f;
             for (int i = 0; i < itemsPerRow; i++)
@@ -287,8 +287,6 @@ namespace SceneTest.SceneMaterials
         }
         private static IEnumerable<IMaterialContent> GenerateMaterials(int n, int colorCount, float specularFactor, MaterialParams matParams, bool nmap)
         {
-            List<IMaterialContent> materials = new List<IMaterialContent>();
-
             for (int r = 0; r < colorCount; r += n)
             {
                 for (int g = 0; g < colorCount; g += n)
@@ -299,12 +297,10 @@ namespace SceneTest.SceneMaterials
                         var specular = diffuse + new Color3(specularFactor);
                         specular = Color3.AdjustSaturation(specular, 1f);
 
-                        materials.Add(GenerateMaterial(diffuse, specular, matParams, nmap));
+                        yield return GenerateMaterial(diffuse, specular, matParams, nmap);
                     }
                 }
             }
-
-            return materials;
         }
         private static IMaterialContent GenerateMaterial(Color3 diffuse, Color3 specular, MaterialParams matParams, bool nmap)
         {
@@ -528,8 +524,8 @@ namespace SceneTest.SceneMaterials
                 spheres1.Active = false;
                 spheres2.Active = false;
 
-                RemoveComponent(spheres1);
-                RemoveComponent(spheres2);
+                Components.RemoveComponent(spheres1);
+                Components.RemoveComponent(spheres2);
 
                 currentAlgorithm++;
                 currentAlgorithm %= algorithmCount;

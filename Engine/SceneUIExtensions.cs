@@ -16,8 +16,7 @@ namespace Engine
             scene.TopMostControl = null;
 
             //Gets all UIControl order by processing order
-            var evaluableCtrls = scene.GetComponents<IUIControl>()
-                .Where(c => c.IsEvaluable())
+            var evaluableCtrls = scene.Components.Get<IUIControl>(c => c.IsEvaluable())
                 .OrderBy(c => c.GetUpdateOrder())
                 .ToList();
 

@@ -125,6 +125,52 @@ namespace Engine.PathFinding
         }
 
         /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(Point position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            return GetTopDownRay(position.X, position.Y, pickingParams);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(Vector2 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            return GetTopDownRay(position.X, position.Y, pickingParams);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(Vector3 position, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            return GetTopDownRay(position.X, position.Z, pickingParams);
+        }
+        /// <summary>
+        /// Gets vertical ray from scene's top and down vector with x and z coordinates
+        /// </summary>
+        /// <param name="x">X coordinate</param>
+        /// <param name="z">Z coordinate</param>
+        /// <param name="pickingParams">Picking parameters</param>
+        /// <returns>Returns vertical ray from scene's top and down vector with x and z coordinates</returns>
+        public PickingRay GetTopDownRay(float x, float z, PickingHullTypes pickingParams = PickingHullTypes.Default)
+        {
+            var bbox = GetBoundingBox(SceneObjectUsages.Ground);
+
+            float maxY = bbox.Maximum.Y + 1.0f;
+
+            return new PickingRay(new Vector3(x, maxY, z), Vector3.Down, pickingParams);
+        }
+
+        /// <summary>
         /// Gets ground position giving x, z coordinates
         /// </summary>
         /// <param name="x">X coordinate</param>
@@ -248,7 +294,7 @@ namespace Engine.PathFinding
         {
             BoundingBox = null;
 
-            obj.Usage |= SceneObjectUsages.Object;
+            obj.Usage |= SceneObjectUsages.Object | SceneObjectUsages.Ground;
         }
 
         /// <summary>
@@ -303,11 +349,11 @@ namespace Engine.PathFinding
         /// <param name="e">Event args</param>
         private void GraphUpdating(object sender, EventArgs e)
         {
-            Logger.WriteInformation(this, $"GraphUpdating - {sender}");
+            Logger.WriteInformation(this, $"{nameof(GraphUpdating)} - Triggered by {sender}");
 
-            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdating Call");
+            Logger.WriteInformation(this, $"{nameof(GraphUpdating)} - {nameof(NavigationGraphUpdating)} Call");
             NavigationGraphUpdating();
-            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdating End");
+            Logger.WriteInformation(this, $"{nameof(GraphUpdating)} - {nameof(NavigationGraphUpdating)} End");
         }
         /// <summary>
         /// Graph updated event
@@ -316,11 +362,11 @@ namespace Engine.PathFinding
         /// <param name="e">Event args</param>
         private void GraphUpdated(object sender, EventArgs e)
         {
-            Logger.WriteInformation(this, $"GraphUpdated - {sender}");
+            Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - Triggered by {sender}");
 
-            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdated Call");
+            Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - {nameof(NavigationGraphUpdated)} Call");
             NavigationGraphUpdated();
-            Logger.WriteInformation(this, $"GraphUpdating - NavigationGraphUpdated End");
+            Logger.WriteInformation(this, $"{nameof(GraphUpdated)} - {nameof(NavigationGraphUpdated)} End");
         }
         /// <summary>
         /// Fires when graph is updating
@@ -343,8 +389,7 @@ namespace Engine.PathFinding
         /// <returns>Returns a triangle list</returns>
         public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
         {
-            var tris = GetComponents<IDrawable>()
-                .Where(c => !c.HasOwner && c.Visible)
+            var tris = Components.Get<IDrawable>(c => !c.HasOwner && c.Visible)
                 .SelectMany(GetGeometryForNavigationGraph<Triangle>);
 
             var bounds = PathFinderDescription.Settings.Bounds;
@@ -455,8 +500,8 @@ namespace Engine.PathFinding
         /// <returns>Returns the path-finding path</returns>
         private PathFindingPath ComputeGroundPositions(IEnumerable<Vector3> path, bool useGround)
         {
-            List<Vector3> positions = new List<Vector3>(path);
-            List<Vector3> normals = new List<Vector3>(Helper.CreateArray(path.Count(), Vector3.Up));
+            List<Vector3> positions = new(path);
+            List<Vector3> normals = new(Helper.CreateArray(path.Count(), Vector3.Up));
 
             if (useGround)
             {
@@ -666,16 +711,9 @@ namespace Engine.PathFinding
         /// <returns>Returns a position over the ground</returns>
         public Vector3 GetRandomPoint(Random rnd, Vector3 offset)
         {
-            var bbox = GetGroundBoundingBox();
-            if (!bbox.HasValue)
-            {
-                Vector3 min = Vector3.One * float.MinValue;
-                Vector3 max = Vector3.One * float.MaxValue;
+            var bbox = GetBoundingBox(SceneObjectUsages.Ground);
 
-                return rnd.NextVector3(min, max);
-            }
-
-            return GetRandomPoint(rnd, offset, bbox.Value);
+            return GetRandomPoint(rnd, offset, bbox);
         }
         /// <summary>
         /// Gets a random point over the ground
@@ -709,7 +747,7 @@ namespace Engine.PathFinding
             {
                 float dist = rnd.NextFloat(0, bsph.Radius);
 
-                Vector3 dir = new Vector3(rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1));
+                Vector3 dir = new(rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1), rnd.NextFloat(-1, 1));
 
                 Vector3 v = bsph.Center + (dist * Vector3.Normalize(dir));
 

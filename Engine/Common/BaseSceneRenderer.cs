@@ -358,10 +358,7 @@ namespace Engine.Common
             Scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             //Update active components
-            var updatables = Scene
-                .GetComponents<IUpdatable>()
-                .Where(c => c.Active);
-
+            var updatables = Scene.Components.Get<IUpdatable>(c => c.Active);
             if (updatables.Any())
             {
                 updatables
@@ -448,7 +445,7 @@ namespace Engine.Common
         {
             var opaques = components.Where(c =>
             {
-                if (c is not IDrawable) return false;
+                if (c is null) return false;
 
                 if (!c.BlendMode.HasFlag(BlendModes.Opaque)) return false;
 
@@ -647,12 +644,12 @@ namespace Engine.Common
         protected virtual void DoDirectionalShadowMapping(GameTime gameTime, ref int cullIndex)
         {
 #if DEBUG
-            Dictionary<string, double> dict = new Dictionary<string, double>();
+            Dictionary<string, double> dict = new();
 
-            Stopwatch gStopwatch = new Stopwatch();
+            Stopwatch gStopwatch = new();
             gStopwatch.Start();
 
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new();
             stopwatch.Start();
 #endif
             var shadowCastingLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
@@ -670,8 +667,7 @@ namespace Engine.Common
 #if DEBUG
             stopwatch.Restart();
 #endif
-            var shadowObjs = Scene.GetComponents<IDrawable>()
-                .Where(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
+            var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
@@ -764,12 +760,12 @@ namespace Engine.Common
         protected virtual void DoPointShadowMapping(GameTime gameTime, ref int cullIndex)
         {
 #if DEBUG
-            Dictionary<string, double> dict = new Dictionary<string, double>();
+            Dictionary<string, double> dict = new();
 
-            Stopwatch gStopwatch = new Stopwatch();
+            Stopwatch gStopwatch = new();
             gStopwatch.Start();
 
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new();
 #endif
             var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
@@ -786,8 +782,7 @@ namespace Engine.Common
 #if DEBUG
             stopwatch.Restart();
 #endif
-            var shadowObjs = Scene.GetComponents<IDrawable>()
-                .Where(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
+            var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
@@ -875,12 +870,12 @@ namespace Engine.Common
         protected virtual void DoSpotShadowMapping(GameTime gameTime, ref int cullIndex)
         {
 #if DEBUG
-            Dictionary<string, double> dict = new Dictionary<string, double>();
+            Dictionary<string, double> dict = new();
 
-            Stopwatch gStopwatch = new Stopwatch();
+            Stopwatch gStopwatch = new();
             gStopwatch.Start();
 
-            Stopwatch stopwatch = new Stopwatch();
+            Stopwatch stopwatch = new();
             stopwatch.Start();
 #endif
             var shadowCastingLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
@@ -898,8 +893,7 @@ namespace Engine.Common
 #if DEBUG
             stopwatch.Restart();
 #endif
-            var shadowObjs = Scene.GetComponents<IDrawable>()
-                .Where(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
+            var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
 #if DEBUG
             stopwatch.Stop();
             dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);

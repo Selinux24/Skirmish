@@ -28,6 +28,10 @@ namespace Deferred
         /// <inheritdoc/>
         public Scene Scene { get; private set; }
         /// <inheritdoc/>
+        public SceneObjectUsages Usage { get; set; }
+        /// <inheritdoc/>
+        public int Layer { get; set; }
+        /// <inheritdoc/>
         public bool HasOwner { get { return Owner != null; } }
         /// <inheritdoc/>
         public ISceneObject Owner { get; set; }
@@ -125,6 +129,8 @@ namespace Deferred
             Id = id;
             Name = name;
             AgentType = agentType;
+            Usage = SceneObjectUsages.Agent;
+            Layer = 0;
             this.model = model;
             this.controller = controller;
         }

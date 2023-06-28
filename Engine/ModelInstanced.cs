@@ -635,7 +635,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is ModelInstancedState modelInstancedState))
+            if (state is not ModelInstancedState modelInstancedState)
             {
                 return;
             }
@@ -645,12 +645,7 @@ namespace Engine
             Visible = modelInstancedState.Visible;
             Usage = modelInstancedState.Usage;
             Layer = modelInstancedState.Layer;
-
-            if (!string.IsNullOrEmpty(modelInstancedState.OwnerId))
-            {
-                Owner = Scene.GetComponents().FirstOrDefault(c => c.Id == modelInstancedState.OwnerId);
-            }
-
+            Owner = Scene.Components.ById(modelInstancedState.OwnerId);
             MaximumCount = modelInstancedState.MaximumCount;
             for (int i = 0; i < modelInstancedState.Instances.Count(); i++)
             {
