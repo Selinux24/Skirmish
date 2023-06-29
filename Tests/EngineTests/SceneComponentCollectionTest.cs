@@ -399,7 +399,7 @@ namespace Engine.Tests
 
             var component = coll.First();
             Assert.IsNotNull(component);
-            Assert.AreEqual(objUsageNone.Object, component);
+            Assert.AreEqual(objUsageAgent.Object, component);
         }
         [TestMethod()]
         public void SceneComponentCollectionFirstUsageTest()
@@ -419,7 +419,7 @@ namespace Engine.Tests
 
             component = coll.First(SceneObjectUsages.None);
             Assert.IsNotNull(component);
-            Assert.AreEqual(objUsageNone.Object, component);
+            Assert.AreEqual(objUsageAgent.Object, component);
         }
         [TestMethod()]
         public void SceneComponentCollectionFirstPredicateTest()
@@ -435,7 +435,7 @@ namespace Engine.Tests
 
             var component = coll.First(c => c.Id != "objUsageNone");
             Assert.IsNotNull(component);
-            Assert.AreEqual(objUsageObject.Object, component);
+            Assert.AreEqual(objUsageAgent.Object, component);
 
             Assert.ThrowsException<ArgumentNullException>(() => coll.First(null));
         }
@@ -457,7 +457,7 @@ namespace Engine.Tests
 
             component = coll.First(SceneObjectUsages.None, c => c.Id != "objUsageNone");
             Assert.IsNotNull(component);
-            Assert.AreEqual(objUsageObject.Object, component);
+            Assert.AreEqual(objUsageAgent.Object, component);
 
             component = coll.First(SceneObjectUsages.Ground, c => c.Id == "objUsageAgent");
             Assert.IsNull(component);
@@ -562,7 +562,7 @@ namespace Engine.Tests
 
             var component = coll.First<IMockModel>();
             Assert.IsNotNull(component);
-            Assert.AreEqual(mdlUsageNone.Object, component);
+            Assert.AreEqual(mdlUsageAgent.Object, component);
         }
         [TestMethod()]
         public void SceneComponentCollectionFirstGenericUsageTest()
@@ -582,7 +582,7 @@ namespace Engine.Tests
 
             component = coll.First<IMockModel>(SceneObjectUsages.None);
             Assert.IsNotNull(component);
-            Assert.AreEqual(mdlUsageNone.Object, component);
+            Assert.AreEqual(mdlUsageAgent.Object, component);
         }
         [TestMethod()]
         public void SceneComponentCollectionFirstGenericPredicateTest()
@@ -598,7 +598,7 @@ namespace Engine.Tests
 
             var component = coll.First<IMockModel>(c => c.Id != "mdlUsageNone");
             Assert.IsNotNull(component);
-            Assert.AreEqual(mdlUsageObject.Object, component);
+            Assert.AreEqual(mdlUsageAgent.Object, component);
 
             Assert.ThrowsException<ArgumentNullException>(() => coll.First<IMockModel>(null));
         }
@@ -620,7 +620,7 @@ namespace Engine.Tests
 
             component = coll.First<IMockModel>(SceneObjectUsages.None, c => c.Id != "mdlUsageNone");
             Assert.IsNotNull(component);
-            Assert.AreEqual(mdlUsageObject.Object, component);
+            Assert.AreEqual(mdlUsageAgent.Object, component);
 
             component = coll.First<IMockModel>(SceneObjectUsages.Ground, c => c.Id == "mdlUsageAgent");
             Assert.IsNull(component);
@@ -719,26 +719,25 @@ namespace Engine.Tests
             
             Assert.AreEqual(mdlDrawableOpaqueDeph1a.Object, components[0]);
             Assert.AreEqual(mdlDrawableOpaqueDeph1b.Object, components[1]);
-            Assert.AreEqual(mdlDrawableOpaqueNoDeph1b.Object, components[2]);
-            Assert.AreEqual(mdlDrawableOpaqueNoDeph1a.Object, components[3]);
+            Assert.AreEqual(mdlDrawableOpaqueNoDeph1a.Object, components[2]);
+            Assert.AreEqual(mdlDrawableOpaqueNoDeph1b.Object, components[3]);
             Assert.AreEqual(mdlDrawableAlphaDeph1a.Object, components[4]);
             Assert.AreEqual(mdlDrawableAlphaDeph1b.Object, components[5]);
-            Assert.AreEqual(mdlDrawableAlphaNoDeph1b.Object, components[6]);
-            Assert.AreEqual(mdlDrawableAlphaNoDeph1a.Object, components[7]);
+            Assert.AreEqual(mdlDrawableAlphaNoDeph1a.Object, components[6]);
+            Assert.AreEqual(mdlDrawableAlphaNoDeph1b.Object, components[7]);
+            Assert.AreEqual(mdlUpdatable1a.Object, components[8]);
+            Assert.AreEqual(mdlUpdatable1b.Object, components[9]);
 
-            Assert.AreEqual(mdlDrawableOpaqueDeph2.Object, components[8]);
-            Assert.AreEqual(mdlDrawableOpaqueNoDeph2.Object, components[9]);
-            Assert.AreEqual(mdlDrawableAlphaDeph2.Object, components[10]);
-            Assert.AreEqual(mdlDrawableAlphaNoDeph2.Object, components[11]);
+            Assert.AreEqual(mdlDrawableOpaqueDeph2.Object, components[10]);
+            Assert.AreEqual(mdlDrawableOpaqueNoDeph2.Object, components[11]);
+            Assert.AreEqual(mdlDrawableAlphaDeph2.Object, components[12]);
+            Assert.AreEqual(mdlDrawableAlphaNoDeph2.Object, components[13]);
+            Assert.AreEqual(mdlUpdatable2.Object, components[14]);
 
-            Assert.AreEqual(mdlDrawableOpaqueDeph3.Object, components[12]);
-            Assert.AreEqual(mdlDrawableOpaqueNoDeph3.Object, components[13]);
-            Assert.AreEqual(mdlDrawableAlphaDeph3.Object, components[14]);
-            Assert.AreEqual(mdlDrawableAlphaNoDeph3.Object, components[15]);
-
-            Assert.AreEqual(mdlUpdatable2.Object, components[16]);
-            Assert.AreEqual(mdlUpdatable1b.Object, components[17]);
-            Assert.AreEqual(mdlUpdatable1a.Object, components[18]);
+            Assert.AreEqual(mdlDrawableOpaqueDeph3.Object, components[15]);
+            Assert.AreEqual(mdlDrawableOpaqueNoDeph3.Object, components[16]);
+            Assert.AreEqual(mdlDrawableAlphaDeph3.Object, components[17]);
+            Assert.AreEqual(mdlDrawableAlphaNoDeph3.Object, components[18]);
             Assert.AreEqual(mdlUpdatable3.Object, components[19]);
         }
     }

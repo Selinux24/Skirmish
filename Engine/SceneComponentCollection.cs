@@ -22,42 +22,42 @@ namespace Engine
         /// <param name="p2">Second component</param>
         /// <remarks>
         /// This sorting logic is used by the scene renderers:
-        /// - First drawables
-        /// - Then drawing layer
+        /// - First drawing layer
+        /// - Then by type (drawables first)
         /// - Then blend mode (opaques first)
         /// - Then z.buffer writers (writers first)
         /// </remarks>
         private static int SortComponents(ISceneObject p1, ISceneObject p2)
         {
-            //First by type
-            bool p1D = p1 is IDrawable;
-            bool p2D = p2 is IDrawable;
-            int i = p1D.CompareTo(p2D);
-            if (i != 0)
-            {
-                return -i;
-            }
-
-            if (!p1D || !p2D)
-            {
-                return 0;
-            }
-
-            IDrawable drawable1 = (IDrawable)p1;
-            IDrawable drawable2 = (IDrawable)p2;
-
-            //Then by layer
-            i = drawable1.Layer.CompareTo(drawable2.Layer);
+            //First by layer (numeric asc)
+            int i = p1.Layer.CompareTo(p2.Layer);
             if (i != 0) return i;
 
-            //Then by blend mode
-            i = drawable1.BlendMode.CompareTo(drawable2.BlendMode);
-            if (i != 0) return i;
+            var drawable1 = p1 as IDrawable;
+            var drawable2 = p2 as IDrawable;
 
-            //Then by z-buffer writers
-            i = -drawable1.DepthEnabled.CompareTo(drawable2.DepthEnabled);
+            //Then by type (drawables first)
+            bool p1D = drawable1 != null;
+            bool p2D = drawable2 != null;
+            i = p1D.CompareTo(p2D);
+            if (i != 0) return -i;
 
-            return i;
+            //For drawables
+            if (p1D && p2D)
+            {
+                //Then by blend mode (opaques first)
+                bool blendMode1 = drawable1.BlendMode.HasFlag(BlendModes.Opaque);
+                bool blendMode2 = drawable2.BlendMode.HasFlag(BlendModes.Opaque);
+                i = blendMode1.CompareTo(blendMode2);
+                if (i != 0) return -i;
+
+                //Then by z-buffer writers (writers first)
+                i = drawable1.DepthEnabled.CompareTo(drawable2.DepthEnabled);
+                if (i != 0) return -i;
+            }
+
+            //The by name
+            return p1.Id.CompareTo(p2.Id);
         }
 
         /// <summary>
@@ -148,10 +148,6 @@ namespace Engine
                     internalComponents.Sort(SortComponents);
                 }
             }
-            catch (EngineException)
-            {
-                throw;
-            }
             finally
             {
                 Monitor.Exit(internalComponents);
@@ -206,12 +202,9 @@ namespace Engine
             Monitor.Enter(internalComponents);
             try
             {
-                foreach (var component in components)
+                foreach (var component in components.Where(internalComponents.Contains))
                 {
-                    if (internalComponents.Contains(component))
-                    {
-                        internalComponents.Remove(component);
-                    }
+                    internalComponents.Remove(component);
                 }
             }
             finally
