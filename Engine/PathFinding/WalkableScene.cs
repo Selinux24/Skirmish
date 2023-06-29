@@ -14,10 +14,6 @@ namespace Engine.PathFinding
     public class WalkableScene : Scene
     {
         /// <summary>
-        /// Ground usage enum for ground picking
-        /// </summary>
-        private const SceneObjectUsages GroundUsage = SceneObjectUsages.Ground | SceneObjectUsages.Object;
-        /// <summary>
         /// Navigation picking hull enumeration
         /// </summary>
         private const PickingHullTypes NavigationPickingHull = PickingHullTypes.Coarse | PickingHullTypes.Hull | PickingHullTypes.Geometry;
@@ -181,7 +177,7 @@ namespace Engine.PathFinding
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickNearest<T>(ray, GroundUsage, out var res))
+            if (this.PickNearest<T>(ray, SceneObjectUsages.Ground, out var res))
             {
                 result = res.PickingResult;
 
@@ -206,7 +202,7 @@ namespace Engine.PathFinding
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickFirst<T>(ray, GroundUsage, out var res))
+            if (this.PickFirst<T>(ray, SceneObjectUsages.Ground, out var res))
             {
                 result = res.PickingResult;
 
@@ -231,7 +227,7 @@ namespace Engine.PathFinding
         {
             var ray = GetTopDownRay(x, z);
 
-            if (this.PickAll<T>(ray, GroundUsage, out var res))
+            if (this.PickAll<T>(ray, SceneObjectUsages.Ground, out var res))
             {
                 results = res.SelectMany(r => r.PickingResults);
 
@@ -252,7 +248,7 @@ namespace Engine.PathFinding
         {
             var ray = GetTopDownRay(from.X, from.Z);
 
-            bool picked = this.PickAll<T>(ray, GroundUsage, out var pResults);
+            bool picked = this.PickAll<T>(ray, SceneObjectUsages.Ground, out var pResults);
             if (picked)
             {
                 result = pResults
@@ -280,7 +276,7 @@ namespace Engine.PathFinding
         {
             BoundingBox = null;
 
-            obj.Usage |= SceneObjectUsages.Ground;
+            obj.Usage = SceneObjectUsages.Ground;
         }
         /// <summary>
         /// Attach geometry to ground
@@ -294,7 +290,7 @@ namespace Engine.PathFinding
         {
             BoundingBox = null;
 
-            obj.Usage |= SceneObjectUsages.Object | SceneObjectUsages.Ground;
+            obj.Usage = SceneObjectUsages.Object;
         }
 
         /// <summary>

@@ -322,16 +322,6 @@ namespace Engine.Modular
 
             return -1;
         }
-        /// <summary>
-        /// Gets a list of masks to find hull meshes for the specified asset name
-        /// </summary>
-        /// <param name="levels">Level list</param>
-        /// <param name="assetName">Asset name</param>
-        /// <returns>Returns a list of masks to find hull meshes for the specified asset name</returns>
-        private static IEnumerable<string> GetMasksForAsset(LevelMap levels, string assetName)
-        {
-            return levels.Hulls.Select(v => assetName + v).ToArray();
-        }
 
         /// <summary>
         /// Constructor
