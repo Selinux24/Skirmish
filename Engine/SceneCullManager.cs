@@ -40,7 +40,7 @@ namespace Engine
         /// <summary>
         /// Culled objects dictionary
         /// </summary>
-        protected Dictionary<ICullable, List<CullData>> Objects = new Dictionary<ICullable, List<CullData>>();
+        protected Dictionary<ICullable, List<CullData>> Objects = new();
 
         /// <summary>
         /// Performs cull test in the object list against the culling volume

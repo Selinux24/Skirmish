@@ -14,27 +14,36 @@ namespace Engine.Common
         /// </summary>
         /// <param name="obj">Object to test</param>
         /// <param name="ray">Ray</param>
-        /// <param name="triangles">Returns a triangle list to test</param>
         /// <returns>Returns true if the coarse test results in contact</returns>
-        public static bool PickCoarse<T>(IRayPickable<T> obj, PickingRay ray, out IEnumerable<T> triangles) where T : IRayIntersectable
+        public static bool PickCoarse<T>(IRayPickable<T> obj, PickingRay ray) where T : IRayIntersectable
         {
-            // Coarse first
             var bsph = obj.GetBoundingSphere();
             Ray rRay = ray;
-            bool coarseInt = bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance;
-            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
+            return bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance;
+        }
+        /// <summary>
+        /// Picking hull test
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="obj">Object to test</param>
+        /// <param name="ray">Ray</param>
+        /// <param name="hullFound">Hull found</param>
+        /// <returns>Returns true if the hull test results in contact</returns>
+        public static bool PickHull<T>(IRayPickable<T> obj, PickingRay ray, out bool hullFound) where T : IRayIntersectable
+        {
+            var triangles = obj.GetPickingHull(PickingHullTypes.Hull);
+            if (!triangles.Any())
             {
-                // Coarse exit
-                triangles = Enumerable.Empty<T>();
+                hullFound = false;
 
-                return coarseInt;
+                return false;
             }
 
-            // Next geometry
-            triangles = obj.GetPickingHull(ray.RayPickingParams);
+            hullFound = true;
 
-            return triangles.Any();
+            return PickNearest(triangles, ray, out _);
         }
+
         /// <summary>
         /// Performs coarse ray picking over the specified scene object collection
         /// </summary>
@@ -48,7 +57,7 @@ namespace Engine.Common
                 return Enumerable.Empty<CoarsePickingResult>();
             }
 
-            List<CoarsePickingResult> coarse = new List<CoarsePickingResult>();
+            List<CoarsePickingResult> coarse = new();
 
             foreach (var obj in collection)
             {
@@ -128,6 +137,38 @@ namespace Engine.Common
             return false;
         }
 
+
+
+        private static bool FastTest<T>(IRayPickable<T> obj, PickingRay ray) where T : IRayIntersectable
+        {
+            if (ray.RayPickingParams == PickingHullTypes.None)
+            {
+                //Halt here
+                return false;
+            }
+
+            bool testHull = ray.RayPickingParams.HasFlag(PickingHullTypes.Hull);
+            bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
+
+            bool coarseInt = PickCoarse(obj, ray);
+            if (!coarseInt || !(testHull || testGeom))
+            {
+                //Halt here
+                return coarseInt;
+            }
+
+            bool hullInt = PickHull(obj, ray, out var hullFound);
+            if (hullFound && (!hullInt || !testGeom))
+            {
+                //Halt here
+                return hullInt;
+            }
+
+            return true;
+        }
+
+
+
         /// <summary>
         /// Gets nearest picking position of the given ray
         /// </summary>
@@ -138,16 +179,20 @@ namespace Engine.Common
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickNearest<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
-            bool coarseInt = PickCoarse(obj, ray, out var triangles);
-            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
+            bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
+
+            bool intersects = FastTest(obj, ray);
+            if (!intersects || !testGeom)
             {
                 result = new PickingResult<T>
                 {
                     Distance = float.MaxValue,
                 };
 
-                return coarseInt;
+                return intersects;
             }
+
+            var triangles = obj.GetPickingHull(PickingHullTypes.Geometry);
 
             return PickNearest(triangles, ray, out result);
         }
@@ -280,16 +325,20 @@ namespace Engine.Common
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickFirst<T>(IRayPickable<T> obj, PickingRay ray, out PickingResult<T> result) where T : IRayIntersectable
         {
-            bool coarseInt = PickCoarse(obj, ray, out var triangles);
-            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
+            bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
+
+            bool intersects = FastTest(obj, ray);
+            if (!intersects || !testGeom)
             {
                 result = new PickingResult<T>
                 {
                     Distance = float.MaxValue,
                 };
 
-                return coarseInt;
+                return intersects;
             }
+
+            var triangles = obj.GetPickingHull(PickingHullTypes.Geometry);
 
             return PickFirst(triangles, ray, out result);
         }
@@ -422,13 +471,17 @@ namespace Engine.Common
         /// <returns>Returns true if intersection position found</returns>
         public static bool PickAll<T>(IRayPickable<T> obj, PickingRay ray, out IEnumerable<PickingResult<T>> results) where T : IRayIntersectable
         {
-            bool coarseInt = PickCoarse(obj, ray, out var triangles);
-            if (!coarseInt || ray.RayPickingParams.HasFlag(PickingHullTypes.Coarse))
+            bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
+
+            bool intersects = FastTest(obj, ray);
+            if (!intersects || !testGeom)
             {
                 results = Enumerable.Empty<PickingResult<T>>();
 
-                return coarseInt;
+                return intersects;
             }
+
+            var triangles = obj.GetPickingHull(PickingHullTypes.Geometry);
 
             return PickAll(triangles, ray, out results);
         }
@@ -450,7 +503,7 @@ namespace Engine.Common
             }
 
             //Create a sorted list to store the ray picks sorted by pick distance
-            SortedDictionary<float, PickingResult<T>> pickList = new SortedDictionary<float, PickingResult<T>>();
+            SortedDictionary<float, PickingResult<T>> pickList = new();
 
             foreach (var intersectable in collection)
             {
@@ -469,7 +522,7 @@ namespace Engine.Common
                     k += 0.0001f;
                 }
 
-                PickingResult<T> pick = new PickingResult<T>
+                PickingResult<T> pick = new()
                 {
                     Position = pos,
                     Primitive = intersectable,

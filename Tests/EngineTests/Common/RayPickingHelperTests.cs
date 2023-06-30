@@ -82,13 +82,13 @@ namespace Engine.Common.Tests
             rayCoarseNoContact = new PickingRay(rayNoContact, PickingHullTypes.Coarse);
 
             t1_1 = new Triangle(new Vector3(-1, 1, 1), new Vector3(1, 1, 1), new Vector3(-1, -1, 1));
-            t1_2 = new Triangle(new Vector3(1, 1, 1), new Vector3(1, -1, 1), new Vector3(-1, -1, 1));
+            t1_2 = new Triangle(new Vector3(-1, 1, 1), new Vector3(1, -1, 1), new Vector3(-1, -1, 1));
 
             t2_1 = new Triangle(new Vector3(-1, 1, 2), new Vector3(1, 1, 2), new Vector3(-1, -1, 2));
-            t2_2 = new Triangle(new Vector3(1, 1, 2), new Vector3(1, -1, 2), new Vector3(-1, -1, 2));
+            t2_2 = new Triangle(new Vector3(-1, 1, 2), new Vector3(1, -1, 2), new Vector3(-1, -1, 2));
 
             t3_1 = new Triangle(new Vector3(-1, 1, 3), new Vector3(1, 1, 3), new Vector3(-1, -1, 3));
-            t3_2 = new Triangle(new Vector3(1, 1, 3), new Vector3(1, -1, 3), new Vector3(-1, -1, 3));
+            t3_2 = new Triangle(new Vector3(-1, 1, 3), new Vector3(1, -1, 3), new Vector3(-1, -1, 3));
 
             var t1 = new[] { t1_1, t1_2, t2_1, t2_2, t3_1, t3_2 };
             var t2 = new[] { t3_1, t3_2, t2_1, t2_2, t1_1, t1_2 };
@@ -142,7 +142,6 @@ namespace Engine.Common.Tests
             pickableMock.Setup(o => o.GetBoundingSphere(It.IsAny<bool>())).Returns(sphere);
             pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Hull)).Returns(boxTris);
             pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Geometry)).Returns(mesh);
-            pickableMock.Setup(o => o.GetPickingHull(PickingHullTypes.Default)).Returns(boxTris);
             pickableMock.As<ISceneObject>().SetupAllProperties();
         }
 

@@ -52,7 +52,7 @@ namespace Engine
         /// <summary>
         /// Scene list
         /// </summary>
-        private readonly List<Scene> scenes = new List<Scene>();
+        private readonly List<Scene> scenes = new();
         /// <summary>
         /// Next scene to load
         /// </summary>
@@ -185,7 +185,7 @@ namespace Engine
         /// <summary>
         /// Game status
         /// </summary>
-        public readonly GameStatus GameStatus = new GameStatus();
+        public readonly GameStatus GameStatus = new();
 
         /// <summary>
         /// Game status collected event
@@ -198,19 +198,13 @@ namespace Engine
         /// <returns>Returns current desktop mode description</returns>
         private static OutputDescription1 GetDesktopMode()
         {
-            using (var factory = new Factory1())
-            using (var factory5 = factory.QueryInterface<Factory5>())
-            {
-                using (var adapter = factory5.GetAdapter1(0))
-                using (var adapter4 = adapter.QueryInterface<Adapter4>())
-                {
-                    using (var adapterOutput = adapter4.GetOutput(0))
-                    using (var adapterOutput6 = adapterOutput.QueryInterface<Output6>())
-                    {
-                        return adapterOutput6.Description1;
-                    }
-                }
-            }
+            using var factory = new Factory1();
+            using var factory5 = factory.QueryInterface<Factory5>();
+            using var adapter = factory5.GetAdapter1(0);
+            using var adapter4 = adapter.QueryInterface<Adapter4>();
+            using var adapterOutput = adapter4.GetOutput(0);
+            using var adapterOutput6 = adapterOutput.QueryInterface<Output6>();
+            return adapterOutput6.Description1;
         }
         /// <summary>
         /// Gets the log level base on frame time
@@ -511,7 +505,7 @@ namespace Engine
             scenes.ForEach(s => s.Active = false);
 
             //Copy collection for disposing
-            List<Scene> toDispose = new List<Scene>(scenes);
+            List<Scene> toDispose = new(scenes);
 
             //Clear scene collection
             scenes.Clear();
@@ -735,7 +729,7 @@ namespace Engine
         /// <returns>Returns a load resource result.</returns>
         private async Task<LoadResourcesResult<T>> InternalLoadResourcesAsync<T>(LoadResourceGroup<T> taskGroup)
         {
-            List<TaskResult<T>> loadResult = new List<TaskResult<T>>();
+            List<TaskResult<T>> loadResult = new();
 
             var taskList = taskGroup.Tasks.ToList();
 
@@ -749,7 +743,7 @@ namespace Engine
 
                 bool completedOk = t.Status == TaskStatus.RanToCompletion;
 
-                TaskResult<T> res = new TaskResult<T>
+                TaskResult<T> res = new()
                 {
                     Completed = completedOk,
                     Exception = t.Exception, // Store the excetion
@@ -775,7 +769,7 @@ namespace Engine
         /// <returns>Returns a load resource result.</returns>
         private async Task<LoadResourcesResult> InternalLoadResourcesAsync(LoadResourceGroup taskGroup)
         {
-            List<TaskResult> loadResult = new List<TaskResult>();
+            List<TaskResult> loadResult = new();
 
             var taskList = taskGroup.Tasks.ToList();
 
@@ -787,7 +781,7 @@ namespace Engine
 
                 taskList.Remove(t);
 
-                TaskResult res = new TaskResult
+                TaskResult res = new()
                 {
                     Completed = t.Status == TaskStatus.RanToCompletion,
                     Exception = t.Exception, // Store the excetion
@@ -880,7 +874,7 @@ namespace Engine
 
             Logger.WriteInformation(this, $"##### Frame {Counters.FrameCount} Start ####");
 
-            Stopwatch gSW = new Stopwatch();
+            Stopwatch gSW = new();
             gSW.Start();
 
             FrameInput();
@@ -933,7 +927,7 @@ namespace Engine
         {
             try
             {
-                Stopwatch pSW = new Stopwatch();
+                Stopwatch pSW = new();
                 pSW.Start();
                 Input.Update(GameTime);
                 pSW.Stop();
@@ -952,7 +946,7 @@ namespace Engine
         {
             try
             {
-                Stopwatch pSW = new Stopwatch();
+                Stopwatch pSW = new();
                 pSW.Start();
                 Graphics.Begin(scene);
                 pSW.Stop();
@@ -973,7 +967,7 @@ namespace Engine
         {
             try
             {
-                Stopwatch uSW = new Stopwatch();
+                Stopwatch uSW = new();
                 uSW.Start();
                 scene.Update(GameTime);
                 uSW.Stop();
@@ -992,7 +986,7 @@ namespace Engine
         {
             try
             {
-                Stopwatch dSW = new Stopwatch();
+                Stopwatch dSW = new();
                 dSW.Start();
                 scene.Draw(GameTime);
                 dSW.Stop();
@@ -1010,7 +1004,7 @@ namespace Engine
         {
             try
             {
-                Stopwatch pSW = new Stopwatch();
+                Stopwatch pSW = new();
                 pSW.Start();
                 Graphics.End();
                 pSW.Stop();
@@ -1061,7 +1055,7 @@ namespace Engine
         {
             try
             {
-                GameStatusCollectedEventArgs e = new GameStatusCollectedEventArgs()
+                GameStatusCollectedEventArgs e = new()
                 {
                     Trace = GameStatus.Copy(),
                 };
