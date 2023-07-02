@@ -115,6 +115,13 @@ namespace Engine
             }
         }
         /// <summary>
+        /// Reads the content library from description
+        /// </summary>
+        public async Task<ContentLibrary> ReadContentLibrary()
+        {
+            return new ContentLibrary(await ReadContentData());
+        }
+        /// <summary>
         /// Reads a quadtree from description
         /// </summary>
         /// <typeparam name="T">Quadtree item type</typeparam>

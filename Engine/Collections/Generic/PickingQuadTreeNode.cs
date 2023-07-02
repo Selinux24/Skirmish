@@ -106,7 +106,7 @@ namespace Engine.Collections.Generic
             var bottomLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(2), items, maxDepth, nextTreeDepth);
             var bottomRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(3), items, maxDepth, nextTreeDepth);
 
-            List<PickingQuadTreeNode<T>> childList = new List<PickingQuadTreeNode<T>>();
+            List<PickingQuadTreeNode<T>> childList = new();
 
             if (topLeftChild != null) childList.Add(topLeftChild);
             if (topRightChild != null) childList.Add(topRightChild);
@@ -126,7 +126,7 @@ namespace Engine.Collections.Generic
         /// <summary>
         /// Children list
         /// </summary>
-        private readonly List<PickingQuadTreeNode<T>> children = new List<PickingQuadTreeNode<T>>();
+        private readonly List<PickingQuadTreeNode<T>> children = new();
 
         /// <summary>
         /// Bounding box
@@ -446,7 +446,7 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            return RayPickingHelper.PickNearest(Items, ray, out result);
+            return RayPickingHelper.PickNearestFromList(Items, ray, out result);
         }
         /// <summary>
         /// Pick nearest position in the node collection
@@ -469,7 +469,7 @@ namespace Engine.Collections.Generic
 
             bool intersect = false;
 
-            PickingResult<T> bestHit = new PickingResult<T>
+            PickingResult<T> bestHit = new()
             {
                 Distance = float.MaxValue,
             };
@@ -503,7 +503,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns a sorted by distance node list</returns>
         private SortedDictionary<float, PickingQuadTreeNode<T>> FindContacts(PickingRay ray)
         {
-            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new SortedDictionary<float, PickingQuadTreeNode<T>>();
+            SortedDictionary<float, PickingQuadTreeNode<T>> boxHitsByDistance = new();
 
             foreach (var node in children)
             {
@@ -563,7 +563,7 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            return RayPickingHelper.PickFirst(Items, ray, out result);
+            return RayPickingHelper.PickFirstFromList(Items, ray, out result);
         }
         /// <summary>
         /// Pick first position in the node collection
@@ -638,7 +638,7 @@ namespace Engine.Collections.Generic
                 return false;
             }
 
-            return RayPickingHelper.PickAll(Items, ray, out results);
+            return RayPickingHelper.PickAllFromlist(Items, ray, out results);
         }
         /// <summary>
         /// Pick all position in the node collection
@@ -650,7 +650,7 @@ namespace Engine.Collections.Generic
         {
             bool intersect = false;
 
-            List<PickingResult<T>> hits = new List<PickingResult<T>>();
+            List<PickingResult<T>> hits = new();
 
             foreach (var node in children)
             {
@@ -689,7 +689,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            List<BoundingBox> bboxes = new List<BoundingBox>();
+            List<BoundingBox> bboxes = new();
 
             if (!children.Any())
             {
@@ -729,7 +729,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the volume</returns>
         public IEnumerable<PickingQuadTreeNode<T>> GetNodesInVolume(ICullingVolume volume)
         {
-            List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
+            List<PickingQuadTreeNode<T>> nodes = new();
 
             if (!children.Any())
             {
@@ -758,7 +758,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns all leaf nodes</returns>
         public IEnumerable<PickingQuadTreeNode<T>> GetLeafNodes()
         {
-            List<PickingQuadTreeNode<T>> nodes = new List<PickingQuadTreeNode<T>>();
+            List<PickingQuadTreeNode<T>> nodes = new();
 
             if (!children.Any())
             {

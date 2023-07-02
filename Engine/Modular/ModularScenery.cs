@@ -69,6 +69,18 @@ namespace Engine.Modular
         /// Gets the levels map
         /// </summary>
         private LevelMap levelMap;
+        /// <summary>
+        /// Scene bounding box
+        /// </summary>
+        private BoundingBox? sceneBoundingBox;
+        /// <summary>
+        /// Scene bounding sphere
+        /// </summary>
+        private BoundingSphere? sceneBoundingSphere;
+        /// <summary>
+        /// Scene triangle list
+        /// </summary>
+        private IEnumerable<Triangle> sceneTriangles;
 
         /// <summary>
         /// First level
@@ -381,6 +393,9 @@ namespace Engine.Modular
         /// <param name="progress">Resource loading progress updater</param>
         private async Task LoadLevel(Level level, IProgress<LoadResourceProgress> progress = null)
         {
+            //Crear cache
+            ClearCache();
+
             //Removes previous level components from scene
             Scene.Components.RemoveComponents(assets.Select(a => a.Value));
             Scene.Components.RemoveComponents(objects.Select(o => o.Value));
@@ -395,7 +410,7 @@ namespace Engine.Modular
 
             CurrentLevel = level;
 
-            var contentLibrary = new ContentLibrary(await Description.ReadContentData());
+            var contentLibrary = await Description.ReadContentLibrary();
 
             await InitializeParticles(progress);
             await InitializeAssets(level, contentLibrary, progress);
@@ -969,6 +984,15 @@ namespace Engine.Modular
 
             return null;
         }
+        /// <summary>
+        /// Clears the scene geometry caché
+        /// </summary>
+        private void ClearCache()
+        {
+            sceneBoundingBox = null;
+            sceneBoundingSphere = null;
+            sceneTriangles = null;
+        }
 
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
@@ -1011,6 +1035,16 @@ namespace Engine.Modular
         /// <inheritdoc/>
         public override BoundingSphere GetBoundingSphere(bool refresh = false)
         {
+            if (refresh)
+            {
+                sceneBoundingSphere = null;
+            }
+
+            if (sceneBoundingSphere.HasValue)
+            {
+                return sceneBoundingSphere.Value;
+            }
+
             var res = new BoundingSphere();
             bool initialized = false;
 
@@ -1038,11 +1072,23 @@ namespace Engine.Modular
                 }
             }
 
-            return res;
+            sceneBoundingSphere = res;
+
+            return sceneBoundingSphere.Value;
         }
         /// <inheritdoc/>
         public override BoundingBox GetBoundingBox(bool refresh = false)
         {
+            if (refresh)
+            {
+                sceneBoundingBox = null;
+            }
+
+            if (sceneBoundingBox.HasValue)
+            {
+                return sceneBoundingBox.Value;
+            }
+
             var res = new BoundingBox();
             bool initialized = false;
 
@@ -1070,26 +1116,35 @@ namespace Engine.Modular
                 }
             }
 
-            return res;
+            sceneBoundingBox = res;
+
+            return sceneBoundingBox.Value;
         }
         /// <inheritdoc/>
         public override IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
-            List<Triangle> triangles = new();
+            if (sceneTriangles != null)
+            {
+                return sceneTriangles;
+            }
+
+            List<Triangle> triangleLits = new();
 
             var assetTriangles = assets.Values
                 .SelectMany(asset => asset.GetInstances().Where(i => i.Visible))
                 .SelectMany(instance => instance.GetPickingHull(geometryType));
 
-            triangles.AddRange(assetTriangles);
+            triangleLits.AddRange(assetTriangles);
 
             var objTriangles = objects.Values
                 .SelectMany(obj => obj.GetInstances().Where(i => i.Visible))
                 .SelectMany(instance => instance.GetPickingHull(geometryType));
 
-            triangles.AddRange(objTriangles);
+            triangleLits.AddRange(objTriangles);
 
-            return triangles.ToArray();
+            sceneTriangles = triangleLits.ToArray();
+
+            return sceneTriangles;
         }
 
         /// <summary>

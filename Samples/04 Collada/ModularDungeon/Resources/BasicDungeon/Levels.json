@@ -864,7 +864,7 @@
           "mapAssetId": "door",
           "id": "start",
           "type": "Entrance",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.0,
             "y": 0.0,
@@ -889,7 +889,7 @@
           "mapAssetId": "door",
           "id": "end",
           "type": "Exit",
-          "pathFinding": false,
+          "pathFinding": "None",
           "nextLevel": "Lvl2",
           "position": {
             "x": 0.0,
@@ -916,7 +916,7 @@
           "name": "lever",
           "assetName": "Dn_Anim_Ladder",
           "type": "Trigger",
-          "pathFinding": false,
+          "pathFinding": "None",
           "animationPlans": [
             {
               "name": "pull",
@@ -1014,7 +1014,7 @@
           "name": "lever",
           "assetName": "Dn_Anim_Ladder",
           "type": "Trigger",
-          "pathFinding": false,
+          "pathFinding": "None",
           "animationPlans": [
             {
               "name": "pull",
@@ -1109,7 +1109,7 @@
         {
           "assetName": "Dn_Rug_2",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.0,
             "y": 0.0,
@@ -1132,7 +1132,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.0,
             "y": 2.0,
@@ -1174,7 +1174,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -2.9,
             "y": 2.0,
@@ -1216,7 +1216,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 2.9,
             "y": 2.0,
@@ -1258,7 +1258,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.9,
             "y": 2.0,
@@ -1300,7 +1300,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.9,
             "y": 2.0,
@@ -1342,7 +1342,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -5.0,
             "y": 2.0,
@@ -1384,7 +1384,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -12.0,
             "y": 2.0,
@@ -1426,7 +1426,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 5.0,
             "y": 2.0,
@@ -1468,7 +1468,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -0.9,
             "y": 6.0,
@@ -1510,7 +1510,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.9,
             "y": 6.0,
@@ -1552,7 +1552,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 2.0,
@@ -1594,7 +1594,7 @@
         {
           "assetName": "Dn_Lamp",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 12.0,
             "y": 3.25,
@@ -1636,7 +1636,7 @@
         {
           "assetName": "Dn_Lamp",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 31.2,
             "y": 0.5,
@@ -1678,7 +1678,7 @@
         {
           "assetName": "Dn_Lamp",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 34.0,
             "y": 0.02,
@@ -1701,7 +1701,7 @@
         {
           "assetName": "Dn_Lamp",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 38.0,
             "y": 3.3,
@@ -1743,7 +1743,7 @@
         {
           "assetName": "Dn_Rag",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -0.95,
             "y": 3.0,
@@ -1766,7 +1766,7 @@
         {
           "assetName": "Dn_Rag",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -0.95,
             "y": 3.0,
@@ -1789,7 +1789,7 @@
         {
           "assetName": "Dn_Rag",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.0,
             "y": 7.0,
@@ -1812,7 +1812,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -2.25,
             "y": 0.0,
@@ -1835,7 +1835,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -1.25,
             "y": 0.0,
@@ -1858,7 +1858,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -2.25,
             "y": 0.0,
@@ -1881,7 +1881,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -2.05,
             "y": 1.0,
@@ -1904,7 +1904,7 @@
         {
           "assetName": "Dn_Chest_2",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 2.1,
             "y": 0.0,
@@ -1927,7 +1927,7 @@
         {
           "assetName": "Dn_Chest_1",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 2.5,
             "y": 0.0,
@@ -1950,7 +1950,7 @@
         {
           "assetName": "Dn_Chest_1",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 2.0,
             "y": 0.0,
@@ -1973,7 +1973,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 13.9,
             "y": 0.0,
@@ -1996,7 +1996,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 13.25,
             "y": 1.0,
@@ -2019,7 +2019,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 12.8,
             "y": 0.0,
@@ -2042,7 +2042,7 @@
         {
           "assetName": "Dn_Crate",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 13.8,
             "y": 0.0,
@@ -2065,7 +2065,7 @@
         {
           "assetName": "Dn_Barrel",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 14.0,
             "y": 0.0,
@@ -2088,7 +2088,7 @@
         {
           "assetName": "Dn_Barrel",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 10.0,
             "y": 0.0,
@@ -2111,7 +2111,7 @@
         {
           "assetName": "Dn_Barrel",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 11.0,
             "y": 0.0,
@@ -2134,7 +2134,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.5,
             "y": 4.0,
@@ -2176,7 +2176,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -1.5,
             "y": 4.0,
@@ -2218,7 +2218,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -3.5,
             "y": 4.0,
@@ -2260,7 +2260,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -5.5,
             "y": 4.0,
@@ -2302,7 +2302,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -7.5,
             "y": 4.0,
@@ -2344,7 +2344,7 @@
         {
           "assetName": "Dn_Stone_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.8,
             "y": 4.0,
@@ -2367,7 +2367,7 @@
         {
           "assetName": "Dn_Stone_2",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 32.0,
             "y": 0.0,
@@ -2390,7 +2390,7 @@
         {
           "assetName": "Dn_Stone_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 33.0,
             "y": 0.0,
@@ -2413,7 +2413,7 @@
         {
           "assetName": "Dn_Stone_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 37.0,
             "y": 0.0,
@@ -2436,7 +2436,7 @@
         {
           "assetName": "Dn_Stone_3",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.9,
             "y": 0.0,
@@ -2459,7 +2459,7 @@
         {
           "assetName": "Dn_Table_1",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 0.0,
@@ -2482,7 +2482,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 1.0,
@@ -2524,7 +2524,7 @@
         {
           "assetName": "Dn_Floor_Gap_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 36.0,
             "y": 0.0,
@@ -2547,7 +2547,7 @@
         {
           "assetName": "Dn_Floor_Gap_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 18.0,
             "y": 0.0,
@@ -2570,7 +2570,7 @@
         {
           "assetName": "Dn_Chest_2",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 18.0,
             "y": 0.0,
@@ -2594,7 +2594,7 @@
           "id": "Treasure",
           "assetName": "Dn_Treasure_1",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 18.0,
             "y": 0.0,
@@ -2618,7 +2618,7 @@
           "id": "jail_door",
           "assetName": "Dn_Jail_1",
           "type": "Door",
-          "pathFinding": false,
+          "pathFinding": "None",
           "animationPlans": [
             {
               "name": "open",
@@ -2693,7 +2693,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -1.0,
             "y": 0.0,
@@ -2716,7 +2716,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 1.0,
             "y": 0.0,
@@ -2739,7 +2739,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 12.0,
             "y": 0.0,
@@ -2762,7 +2762,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 32.0,
             "y": 0.0,
@@ -2785,7 +2785,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 0.0,
@@ -2808,7 +2808,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": -3.0,
             "y": 0.0,
@@ -2831,7 +2831,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 17.0,
             "y": 0.0,
@@ -2854,7 +2854,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 16.0,
             "y": 0.0,
@@ -2877,7 +2877,7 @@
         {
           "assetName": "Dn_Rat_Hole_1",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 16.0,
             "y": 0.0,
@@ -2900,7 +2900,7 @@
         {
           "assetName": "Dn_Temple_Fire_1",
           "type": "Light",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 53.0,
             "y": 0.0,
@@ -2942,7 +2942,7 @@
         {
           "assetName": "Dn_Temple_Fire_1",
           "type": "Light",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 53.0,
             "y": 0.0,
@@ -2984,7 +2984,7 @@
         {
           "assetName": "Dn_Floor_Gap_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 34.0,
             "y": 0.0,
@@ -3007,7 +3007,7 @@
         {
           "assetName": "Dn_Big_Lamp_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 34.0,
             "y": 6.0,
@@ -3049,7 +3049,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 48.0,
             "y": 2.0,
@@ -3091,7 +3091,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 48.0,
             "y": 2.0,
@@ -3133,7 +3133,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 48.0,
             "y": 2.0,
@@ -3175,7 +3175,7 @@
         {
           "assetName": "Dn_Torch",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 48.0,
             "y": 2.0,
@@ -3217,7 +3217,7 @@
         {
           "assetName": "Dn_Rag",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 32.0,
             "y": 5.0,
@@ -3240,7 +3240,7 @@
         {
           "assetName": "Dn_Rag",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 5.0,
@@ -3263,7 +3263,7 @@
         {
           "assetName": "Dn_Rag",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 32.0,
             "y": 5.0,
@@ -3286,7 +3286,7 @@
         {
           "assetName": "Dn_Rag",
           "type": "Default",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 5.0,
@@ -3309,7 +3309,7 @@
         {
           "assetName": "Dn_Thomb_1",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 34.0,
             "y": 0.0,
@@ -3332,7 +3332,7 @@
         {
           "assetName": "Dn_Thomb_1",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 34.0,
             "y": 0.0,
@@ -3355,7 +3355,7 @@
         {
           "assetName": "Dn_Lab_1",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 0.0,
@@ -3379,7 +3379,7 @@
           "id": "Potions",
           "assetName": "Dn_Lab_1_Stuff",
           "type": "Furniture",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.0,
             "y": 0.0,
@@ -3402,7 +3402,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 35.5,
             "y": 1.15,
@@ -3444,7 +3444,7 @@
         {
           "assetName": "Dn_Candle_1",
           "type": "Light",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 36.5,
             "y": 1.15,
@@ -3486,7 +3486,7 @@
         {
           "assetName": "Dn_Jail_Wall_Base_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 32.0,
             "y": 0.0,
@@ -3509,7 +3509,7 @@
         {
           "assetName": "Dn_Jail_Wall_2",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 32.0,
             "y": 0.0,
@@ -3532,7 +3532,7 @@
         {
           "assetName": "Dn_Jail_Wall_Base_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 34.0,
             "y": 0.0,
@@ -3555,7 +3555,7 @@
         {
           "assetName": "Dn_Jail_Wall_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 34.0,
             "y": 0.0,
@@ -3578,7 +3578,7 @@
         {
           "assetName": "Dn_Jail_Wall_Base_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 36.0,
             "y": 0.0,
@@ -3601,7 +3601,7 @@
         {
           "assetName": "Dn_Jail_Wall_2",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 36.0,
             "y": 0.0,
@@ -3624,7 +3624,7 @@
         {
           "assetName": "Dn_Jail_Wall_Base_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 38.0,
             "y": 0.0,
@@ -3647,7 +3647,7 @@
         {
           "assetName": "Dn_Jail_Wall_3",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 38.0,
             "y": 0.0,
@@ -3670,7 +3670,7 @@
         {
           "assetName": "Dn_Bridge_Stairs_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 54.0,
             "y": 0.0,
@@ -3693,7 +3693,7 @@
         {
           "assetName": "Dn_Bridge_Stairs_Foundation_2",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 54.0,
             "y": 0.0,
@@ -3716,7 +3716,7 @@
         {
           "assetName": "Dn_Bridge_2",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 55.0,
             "y": 0.0,
@@ -3739,7 +3739,7 @@
         {
           "assetName": "Dn_Bridge_Arch_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 56.0,
             "y": 0.0,
@@ -3762,7 +3762,7 @@
         {
           "assetName": "Dn_Bridge_2",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 57.0,
             "y": 0.0,
@@ -3785,7 +3785,7 @@
         {
           "assetName": "Dn_Bridge_Stairs_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 58.0,
             "y": 0.0,
@@ -3808,7 +3808,7 @@
         {
           "assetName": "Dn_Bridge_Stairs_Foundation_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 58.0,
             "y": 0.0,
@@ -4212,7 +4212,7 @@
           "mapAssetId": "door",
           "id": "start",
           "type": "Entrance",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.0,
             "y": 0.0,
@@ -4237,7 +4237,7 @@
           "mapAssetId": "door",
           "id": "end",
           "type": "Exit",
-          "pathFinding": false,
+          "pathFinding": "None",
           "position": {
             "x": 0.0,
             "y": 0.0,
@@ -4260,7 +4260,7 @@
         {
           "assetName": "Dn_Floor_Gap_1",
           "type": "Default",
-          "pathFinding": true,
+          "pathFinding": "Coarse",
           "position": {
             "x": 0.0,
             "y": 0.0,

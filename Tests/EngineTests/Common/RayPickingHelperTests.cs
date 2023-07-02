@@ -91,8 +91,8 @@ namespace Engine.Common.Tests
             t3_2 = new Triangle(new Vector3(-1, 1, 3), new Vector3(1, -1, 3), new Vector3(-1, -1, 3));
 
             var t1 = new[] { t1_1, t1_2, t2_1, t2_2, t3_1, t3_2 };
-            var t2 = new[] { t3_1, t3_2, t2_1, t2_2, t1_1, t1_2 };
-            var t3 = new[] { t2_1, t2_2, t3_1, t3_2, t1_1, t1_2 };
+            var t3 = new[] { t3_1, t3_2, t2_1, t2_2, t1_1, t1_2 };
+            var t2 = new[] { t2_1, t2_2, t3_1, t3_2, t1_1, t1_2 };
 
             var p1 = t1.SelectMany(t => t.GetVertices()).ToArray();
             var p2 = t2.SelectMany(t => t.GetVertices()).ToArray();
@@ -160,7 +160,7 @@ namespace Engine.Common.Tests
 
             Assert.AreEqual(1, res.Distance);
             Assert.AreEqual(toQuad1Position, res.Position);
-            Assert.AreEqual(bbox1t1, res.Primitive);
+            Assert.AreEqual(t1_1, res.Primitive);
         }
         [TestMethod()]
         public void PickNearestTestDefault2()
@@ -171,7 +171,7 @@ namespace Engine.Common.Tests
 
             Assert.AreEqual(1, res.Distance);
             Assert.AreEqual(toQuad1Position, res.Position);
-            Assert.AreEqual(bbox2t1, res.Primitive);
+            Assert.AreEqual(t1_1, res.Primitive);
         }
         [TestMethod()]
         public void PickNearestTestDefault3()
@@ -182,40 +182,28 @@ namespace Engine.Common.Tests
 
             Assert.AreEqual(1, res.Distance);
             Assert.AreEqual(toQuad1Position, res.Position);
-            Assert.AreEqual(bbox3t1, res.Primitive);
+            Assert.AreEqual(t1_1, res.Primitive);
         }
         [TestMethod()]
         public void PickNearestTestDefaultReverse1()
         {
             bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
-
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(bbox1t3, res.Primitive);
+            Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultReverse2()
         {
             bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
-
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(bbox2t3, res.Primitive);
+            Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultReverse3()
         {
             bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
-
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(bbox3t3, res.Primitive);
+            Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultNoContact1()
@@ -460,7 +448,7 @@ namespace Engine.Common.Tests
 
             Assert.AreEqual(1, res.Distance);
             Assert.AreEqual(toQuad1Position, res.Position);
-            Assert.AreEqual(bbox1t1, res.Primitive);
+            Assert.AreEqual(t1_1, res.Primitive);
         }
         [TestMethod()]
         public void PickFirstTestDefault2()
@@ -469,9 +457,9 @@ namespace Engine.Common.Tests
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad1Position, res.Position);
-            Assert.AreEqual(bbox2t1, res.Primitive);
+            Assert.AreEqual(2, res.Distance);
+            Assert.AreEqual(toQuad2Position, res.Position);
+            Assert.AreEqual(t2_1, res.Primitive);
         }
         [TestMethod()]
         public void PickFirstTestDefault3()
@@ -480,42 +468,30 @@ namespace Engine.Common.Tests
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad1Position, res.Position);
-            Assert.AreEqual(bbox3t1, res.Primitive);
+            Assert.AreEqual(3, res.Distance);
+            Assert.AreEqual(toQuad3Position, res.Position);
+            Assert.AreEqual(t3_1, res.Primitive);
         }
         [TestMethod()]
         public void PickFirstTestDefaultReverse1()
         {
             bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
-
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(bbox1t3, res.Primitive);
+            Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultReverse2()
         {
             bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
-
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(bbox2t3, res.Primitive);
+            Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultReverse3()
         {
             bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
-
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(bbox3t3, res.Primitive);
+            Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultNoContact1()
@@ -568,9 +544,10 @@ namespace Engine.Common.Tests
             bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
-            Assert.AreEqual(3, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(t3_1, res.Primitive);
+
+            Assert.AreEqual(2, res.Distance);
+            Assert.AreEqual(toQuad2Position, res.Position);
+            Assert.AreEqual(t2_1, res.Primitive);
         }
         [TestMethod()]
         public void PickFirstTestPerfect3()
@@ -578,9 +555,10 @@ namespace Engine.Common.Tests
             bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayAllDirections, out var res);
 
             Assert.IsTrue(picked);
-            Assert.AreEqual(2, res.Distance);
-            Assert.AreEqual(toQuad2Position, res.Position);
-            Assert.AreEqual(t2_1, res.Primitive);
+
+            Assert.AreEqual(3, res.Distance);
+            Assert.AreEqual(toQuad3Position, res.Position);
+            Assert.AreEqual(t3_1, res.Primitive);
         }
         [TestMethod()]
         public void PickFirstTestPerfectReverse1()
@@ -598,9 +576,9 @@ namespace Engine.Common.Tests
             bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
-            Assert.AreEqual(1, res.Distance);
-            Assert.AreEqual(toQuad3Position, res.Position);
-            Assert.AreEqual(t3_1, res.Primitive);
+            Assert.AreEqual(2, res.Distance);
+            Assert.AreEqual(toQuad2Position, res.Position);
+            Assert.AreEqual(t2_1, res.Primitive);
         }
         [TestMethod()]
         public void PickFirstTestPerfectReverse3()
@@ -608,9 +586,9 @@ namespace Engine.Common.Tests
             bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayAllDirectionsReverse, out var res);
 
             Assert.IsTrue(picked);
-            Assert.AreEqual(2, res.Distance);
-            Assert.AreEqual(toQuad2Position, res.Position);
-            Assert.AreEqual(t2_1, res.Primitive);
+            Assert.AreEqual(1, res.Distance);
+            Assert.AreEqual(toQuad3Position, res.Position);
+            Assert.AreEqual(t3_1, res.Primitive);
         }
         [TestMethod()]
         public void PickFirstTestPerfectNoContact1()
@@ -753,14 +731,28 @@ namespace Engine.Common.Tests
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(2, res.Count());
+            Assert.AreEqual(6, res.Count());
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(bbox1t1, res.ElementAt(0).Primitive);
+            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
             Assert.AreEqual(1, res.ElementAt(1).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(bbox1t2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+
+            Assert.AreEqual(2, res.ElementAt(2).Distance);
+            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+            Assert.AreEqual(2, res.ElementAt(3).Distance);
+            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+
+            Assert.AreEqual(3, res.ElementAt(4).Distance);
+            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
+            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
+            Assert.AreEqual(3, res.ElementAt(5).Distance);
+            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
+            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
         }
         [TestMethod()]
         public void PickAllTestDefault2()
@@ -769,14 +761,28 @@ namespace Engine.Common.Tests
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(2, res.Count());
+            Assert.AreEqual(6, res.Count());
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(bbox2t1, res.ElementAt(0).Primitive);
+            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
             Assert.AreEqual(1, res.ElementAt(1).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(bbox2t2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+
+            Assert.AreEqual(2, res.ElementAt(2).Distance);
+            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+            Assert.AreEqual(2, res.ElementAt(3).Distance);
+            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+
+            Assert.AreEqual(3, res.ElementAt(4).Distance);
+            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
+            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
+            Assert.AreEqual(3, res.ElementAt(5).Distance);
+            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
+            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
         }
         [TestMethod()]
         public void PickAllTestDefault3()
@@ -785,62 +791,55 @@ namespace Engine.Common.Tests
 
             Assert.IsTrue(picked);
 
-            Assert.AreEqual(2, res.Count());
+            Assert.AreEqual(6, res.Count());
 
             Assert.AreEqual(1, res.ElementAt(0).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(0).Position);
-            Assert.AreEqual(bbox3t1, res.ElementAt(0).Primitive);
+            Assert.AreEqual(t1_1, res.ElementAt(0).Primitive);
             Assert.AreEqual(1, res.ElementAt(1).Distance);
             Assert.AreEqual(toQuad1Position, res.ElementAt(1).Position);
-            Assert.AreEqual(bbox3t2, res.ElementAt(1).Primitive);
+            Assert.AreEqual(t1_2, res.ElementAt(1).Primitive);
+
+            Assert.AreEqual(2, res.ElementAt(2).Distance);
+            Assert.AreEqual(toQuad2Position, res.ElementAt(2).Position);
+            Assert.AreEqual(t2_1, res.ElementAt(2).Primitive);
+            Assert.AreEqual(2, res.ElementAt(3).Distance);
+            Assert.AreEqual(toQuad2Position, res.ElementAt(3).Position);
+            Assert.AreEqual(t2_2, res.ElementAt(3).Primitive);
+
+            Assert.AreEqual(3, res.ElementAt(4).Distance);
+            Assert.AreEqual(toQuad3Position, res.ElementAt(4).Position);
+            Assert.AreEqual(t3_1, res.ElementAt(4).Primitive);
+            Assert.AreEqual(3, res.ElementAt(5).Distance);
+            Assert.AreEqual(toQuad3Position, res.ElementAt(5).Position);
+            Assert.AreEqual(t3_2, res.ElementAt(5).Primitive);
         }
         [TestMethod()]
         public void PickAllTestDefaultReverse1()
         {
             bool picked = RayPickingHelper.PickAll(mockQuad1.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
+            Assert.IsFalse(picked);
 
-            Assert.AreEqual(2, res.Count());
-
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
-            Assert.AreEqual(bbox1t3, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
-            Assert.AreEqual(bbox1t4, res.ElementAt(1).Primitive);
+            Assert.AreEqual(0, res.Count());
         }
         [TestMethod()]
         public void PickAllTestDefaultReverse2()
         {
             bool picked = RayPickingHelper.PickAll(mockQuad2.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
+            Assert.IsFalse(picked);
 
-            Assert.AreEqual(2, res.Count());
-
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
-            Assert.AreEqual(bbox2t3, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
-            Assert.AreEqual(bbox2t4, res.ElementAt(1).Primitive);
+            Assert.AreEqual(0, res.Count());
         }
         [TestMethod()]
         public void PickAllTestDefaultReverse3()
         {
             bool picked = RayPickingHelper.PickAll(mockQuad3.Object, rayDefaultReverse, out var res);
 
-            Assert.IsTrue(picked);
+            Assert.IsFalse(picked);
 
-            Assert.AreEqual(2, res.Count());
-
-            Assert.AreEqual(1, res.ElementAt(0).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(0).Position);
-            Assert.AreEqual(bbox3t3, res.ElementAt(0).Primitive);
-            Assert.AreEqual(1, res.ElementAt(1).Distance);
-            Assert.AreEqual(toQuad3Position, res.ElementAt(1).Position);
-            Assert.AreEqual(bbox3t4, res.ElementAt(1).Primitive);
+            Assert.AreEqual(0, res.Count());
         }
         [TestMethod()]
         public void PickAllTestDefaultNoContact1()

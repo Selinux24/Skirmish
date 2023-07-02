@@ -36,10 +36,6 @@ namespace Engine.Common
         private bool updateBoundingBox = false;
 
         /// <summary>
-        /// Initial oriented bounding box
-        /// </summary>
-        private OrientedBoundingBox initialObb;
-        /// <summary>
         /// Transformed bounding box
         /// </summary>
         private OrientedBoundingBox orientedBox;
@@ -60,7 +56,7 @@ namespace Engine.Common
 
                 boundingBox = initialAabb = new BoundingBox();
 
-                orientedBox = initialObb = new OrientedBoundingBox();
+                orientedBox = new OrientedBoundingBox();
             }
             else
             {
@@ -73,7 +69,7 @@ namespace Engine.Common
                 boundingBox = initialAabb = SharpDXExtensions.BoundingBoxFromPoints(distinctPoints);
 
                 //Initialize the identity obb
-                orientedBox = initialObb = new OrientedBoundingBox(initialAabb);
+                orientedBox = new OrientedBoundingBox(initialAabb);
             }
         }
 

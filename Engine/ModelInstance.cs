@@ -351,6 +351,11 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
+            if (geometryType.HasFlag(PickingHullTypes.Coarse))
+            {
+                return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
+            }
+
             if (geometryType.HasFlag(PickingHullTypes.Hull))
             {
                 var drawingData = model.GetDrawingData(model.GetLODMinimum());
@@ -358,11 +363,6 @@ namespace Engine
                 {
                     return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
                 }
-            }
-
-            if (geometryType.HasFlag(PickingHullTypes.Coarse))
-            {
-                return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
             }
 
             if (geometryType.HasFlag(PickingHullTypes.Geometry))

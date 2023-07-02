@@ -52,35 +52,17 @@ namespace Engine
         /// <inheritdoc/>
         public bool PickNearest(PickingRay ray, out PickingResult<Triangle> result)
         {
-            if (GroundPickingQuadtree != null)
-            {
-                // Use quadtree
-                return GroundPickingQuadtree.PickNearest(ray, out result);
-            }
-
-            return RayPickingHelper.PickNearest(this, ray, out result);
+            return GroundPickingQuadtree?.PickNearest(ray, out result) ?? RayPickingHelper.PickNearest(this, ray, out result);
         }
         /// <inheritdoc/>
         public bool PickFirst(PickingRay ray, out PickingResult<Triangle> result)
         {
-            if (GroundPickingQuadtree != null)
-            {
-                // Use quadtree
-                return GroundPickingQuadtree.PickFirst(ray, out result);
-            }
-
-            return RayPickingHelper.PickFirst(this, ray, out result);
+            return GroundPickingQuadtree?.PickFirst(ray, out result) ?? RayPickingHelper.PickFirst(this, ray, out result);
         }
         /// <inheritdoc/>
         public bool PickAll(PickingRay ray, out IEnumerable<PickingResult<Triangle>> results)
         {
-            if (GroundPickingQuadtree != null)
-            {
-                // Use quadtree
-                return GroundPickingQuadtree.PickAll(ray, out results);
-            }
-
-            return RayPickingHelper.PickAll(this, ray, out results);
+            return GroundPickingQuadtree?.PickAll(ray, out results) ?? RayPickingHelper.PickAll(this, ray, out results);
         }
 
         /// <inheritdoc/>
@@ -98,7 +80,7 @@ namespace Engine
         /// <inheritdoc/>
         public virtual BoundingSphere GetBoundingSphere(bool refresh = false)
         {
-            return GroundPickingQuadtree != null ? BoundingSphere.FromBox(GroundPickingQuadtree.BoundingBox) : new BoundingSphere();
+            return BoundingSphere.FromBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
         public virtual BoundingBox GetBoundingBox(bool refresh = false)
@@ -113,15 +95,12 @@ namespace Engine
         /// <inheritdoc/>
         public virtual IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
         {
-            if (GroundPickingQuadtree == null)
+            if (!geometryType.HasFlag(PickingHullTypes.Geometry))
             {
                 return Enumerable.Empty<Triangle>();
             }
 
-            return GroundPickingQuadtree
-                .GetLeafNodes()
-                .SelectMany(n => n.Items)
-                .AsEnumerable();
+            return GetTriangles();
         }
 
         /// <inheritdoc/>
@@ -201,12 +180,7 @@ namespace Engine
         /// <inheritdoc/>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int level = 0)
         {
-            if (GroundPickingQuadtree == null)
-            {
-                return Enumerable.Empty<BoundingBox>();
-            }
-
-            return GroundPickingQuadtree.GetBoundingBoxes(level);
+            return GroundPickingQuadtree?.GetBoundingBoxes(level) ?? Enumerable.Empty<BoundingBox>();
         }
     }
 }
