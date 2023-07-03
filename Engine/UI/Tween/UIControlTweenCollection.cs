@@ -14,7 +14,7 @@ namespace Engine.UI.Tween
         /// <summary>
         /// Task list
         /// </summary>
-        private readonly ConcurrentDictionary<IUIControl, List<Func<float, bool>>> tasks = new ConcurrentDictionary<IUIControl, List<Func<float, bool>>>();
+        private readonly ConcurrentDictionary<IUIControl, List<Func<float, bool>>> tasks = new();
 
         /// <summary>
         /// Updates the task list
@@ -44,7 +44,7 @@ namespace Engine.UI.Tween
                     continue;
                 }
 
-                List<Func<float, bool>> toDelete = new List<Func<float, bool>>();
+                List<Func<float, bool>> toDelete = new();
 
                 activeTasks.ForEach(t =>
                 {

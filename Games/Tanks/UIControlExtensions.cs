@@ -6,14 +6,14 @@ namespace Tanks
 {
     static class UIControlExtensions
     {
-        public static void Show(this IUIControl ctrl, long milliseconds)
+        public static void Show(this UIControlTweener tweener, IUIControl ctrl, long milliseconds)
         {
-            ctrl.TweenShow(milliseconds, ScaleFuncs.Linear);
+            tweener.TweenShow(ctrl, milliseconds, ScaleFuncs.Linear);
         }
 
-        public static void Hide(this IUIControl ctrl, long milliseconds)
+        public static void Hide(this UIControlTweener tweener, IUIControl ctrl, long milliseconds)
         {
-            ctrl.TweenHide(milliseconds, ScaleFuncs.Linear);
+            tweener.TweenHide(ctrl, milliseconds, ScaleFuncs.Linear);
         }
     }
 }

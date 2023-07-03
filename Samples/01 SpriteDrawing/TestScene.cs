@@ -18,6 +18,8 @@ namespace SpriteDrawing
 
         private bool gameReady = false;
 
+        private UIControlTweener uiTweener;
+
         private UITextArea textDebug = null;
         private UIProgressBar progressBar = null;
         private float progressValue = 0;
@@ -35,6 +37,7 @@ namespace SpriteDrawing
 
         private UIButton butTest1 = null;
         private UIButton butTest2 = null;
+
 
         private UITextArea scrollTextArea = null;
 
@@ -56,11 +59,18 @@ namespace SpriteDrawing
             LoadResourcesAsync(
                 new[]
                 {
+                    InitializeTweener(),
                     InitializeConsole(),
                     InitializeBackground(),
                     InitializeProgressbar()
                 },
                 LoadUserInterfaceCompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            uiTweener = this.AddUIControlTweener();
         }
         private async Task InitializeConsole()
         {
@@ -184,8 +194,8 @@ namespace SpriteDrawing
             float w1 = 0.324634656f;
             float w2 = 0.655532359f;
             float w3 = 0.98434238f;
-            Vector4 releasedRect = new Vector4(w0, 0, w1, 1f);
-            Vector4 pressedRect = new Vector4(w2, 0, w3, 1f);
+            var releasedRect = new Vector4(w0, 0, w1, 1f);
+            var pressedRect = new Vector4(w2, 0, w3, 1f);
 
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
 
@@ -276,7 +286,7 @@ namespace SpriteDrawing
 
             await Task.Delay(500);
 
-            staticPan.Show(1000);
+            uiTweener.Show(staticPan, 1000);
             progressBar.Visible = false;
 
             gameReady = true;
@@ -384,7 +394,7 @@ Progress: {(int)(progressValue * 100f)}%";
 
             if (Game.Input.KeyPressed(Keys.X))
             {
-                spriteSmiley.ClearTween();
+                uiTweener.ClearTween(spriteSmiley);
             }
         }
         private void UpdateLorem(GameTime gameTime)
@@ -422,9 +432,9 @@ Progress: {(int)(progressValue * 100f)}%";
                     progressBar.Visible = false;
 
                     staticPan.Visible = true;
-                    staticPan.Hide(1000);
+                    uiTweener.Hide(staticPan, 1000);
                     dynamicPan.Visible = true;
-                    dynamicPan.ShowRoll(2000);
+                    uiTweener.ShowRoll(dynamicPan, 2000);
                 }
 
                 textArea.Text = currentText;
@@ -438,47 +448,47 @@ Progress: {(int)(progressValue * 100f)}%";
                 return;
             }
 
-            dynamicPan.HideRoll(1000);
+            uiTweener.HideRoll(dynamicPan, 1000);
 
             spriteSmiley.Visible = true;
             spriteSmiley.Anchor = Anchors.Center;
-            spriteSmiley.Show(1000);
-            spriteSmiley.ScaleInScaleOut(0.85f, 1f, 250);
+            uiTweener.Show(spriteSmiley, 1000);
+            uiTweener.ScaleInScaleOut(spriteSmiley, 0.85f, 1f, 250);
 
             butTest2.Caption.Text = $"Press Me with the{Environment.NewLine}{Color.Black}Right Button";
             butTest2.Visible = true;
-            butTest2.Show(250);
-            butTest2.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
+            uiTweener.Show(butTest2, 250);
+            uiTweener.TweenBaseColorBounce(butTest2, Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
 
             butTest1.Caption.Text = $"Press Me with the{Environment.NewLine}{Color.Black}Middle Button";
             butTest1.Visible = true;
-            butTest1.Show(250);
-            butTest1.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
+            uiTweener.Show(butTest1, 250);
+            uiTweener.TweenBaseColorBounce(butTest1, Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
         }
 
         private void ButTest1_Click(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button && e.Buttons.HasFlag(MouseButtons.Middle))
             {
-                button.ClearTween();
+                uiTweener.ClearTween(button);
                 button.MouseClick -= ButTest1_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
-                button.Hide(500);
+                uiTweener.Hide(button, 500);
             }
         }
         private void ButTest2_Click(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button && e.Buttons.HasFlag(MouseButtons.Right))
             {
-                spriteSmiley.ClearTween();
-                spriteSmiley.Hide(500);
+                uiTweener.ClearTween(spriteSmiley);
+                uiTweener.Hide(spriteSmiley, 500);
 
-                button.ClearTween();
+                uiTweener.ClearTween(button);
                 button.MouseClick -= ButTest2_Click;
                 button.MouseLeave -= ButTest_MouseLeave;
                 button.MouseEnter -= ButTest_MouseEnter;
-                button.Hide(500);
+                uiTweener.Hide(button, 500);
 
                 Task.Run(async () =>
                 {
@@ -491,18 +501,18 @@ Progress: {(int)(progressValue * 100f)}%";
         {
             if (sender is UIButton button)
             {
-                button.ClearTween();
-                button.TweenScale(button.Scale, 1, 150, ScaleFuncs.QuadraticEaseOut);
-                button.TweenBaseColorBounce(Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
+                uiTweener.ClearTween(button);
+                uiTweener.TweenScale(button, button.Scale, 1, 150, ScaleFuncs.QuadraticEaseOut);
+                uiTweener.TweenBaseColorBounce(button, Color.Yellow, Color.Red, 2000, ScaleFuncs.Linear);
             }
         }
         private void ButTest_MouseEnter(IUIControl sender, MouseEventArgs e)
         {
             if (sender is UIButton button)
             {
-                button.ClearTween();
-                button.TweenScale(button.Scale, 2, 150, ScaleFuncs.QuadraticEaseIn);
-                button.TweenBaseColor(button.BaseColor, Color.Yellow, 500, ScaleFuncs.Linear);
+                uiTweener.ClearTween(button);
+                uiTweener.TweenScale(button, button.Scale, 2, 150, ScaleFuncs.QuadraticEaseIn);
+                uiTweener.TweenBaseColorBounce(button, button.BaseColor, Color.Yellow, 500, ScaleFuncs.Linear);
             }
         }
     }

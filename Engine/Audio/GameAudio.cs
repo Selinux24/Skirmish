@@ -122,7 +122,7 @@ namespace Engine.Audio
             device = new XAudio2(audio2Flags, ProcessorSpecifier.DefaultProcessor, version);
             device.StopEngine();
 #if DEBUG
-            DebugConfiguration debugConfiguration = new DebugConfiguration()
+            DebugConfiguration debugConfiguration = new()
             {
                 TraceMask = (int)(LogType.Errors | LogType.Warnings),
                 BreakMask = (int)LogType.Errors,
@@ -263,23 +263,22 @@ namespace Engine.Audio
         internal SubmixVoice CreateReverbVoice()
         {
             // Create reverb effect
-            using (var reverbEffect = CreateReverb())
+            using var reverbEffect = CreateReverb();
+
+            // Create a submix voice
+            var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
+
+            // Performance tip: you need not run global FX with the sample number
+            // of channels as the final mix.  For example, this sample runs
+            // the reverb in mono mode, thus reducing CPU overhead.
+            var desc = new EffectDescriptor(reverbEffect)
             {
-                // Create a submix voice
-                var submixVoice = CreatesSubmixVoice(InputChannelCount, InputSampleRate);
+                InitialState = true,
+                OutputChannelCount = InputChannelCount,
+            };
+            submixVoice.SetEffectChain(desc);
 
-                // Performance tip: you need not run global FX with the sample number
-                // of channels as the final mix.  For example, this sample runs
-                // the reverb in mono mode, thus reducing CPU overhead.
-                var desc = new EffectDescriptor(reverbEffect)
-                {
-                    InitialState = true,
-                    OutputChannelCount = InputChannelCount,
-                };
-                submixVoice.SetEffectChain(desc);
-
-                return submixVoice;
-            }
+            return submixVoice;
         }
 
         /// <summary>
@@ -340,10 +339,7 @@ namespace Engine.Audio
         /// <param name="dspSettings">DSP settings</param>
         internal void Calculate3D(Listener listener, Emitter emitter, CalculateFlags flags, DspSettings dspSettings)
         {
-            if (x3DInstance == null)
-            {
-                x3DInstance = new X3DAudio(this.Speakers, X3DAudio.SpeedOfSound);
-            }
+            x3DInstance ??= new X3DAudio(this.Speakers, X3DAudio.SpeedOfSound);
 
             x3DInstance.Calculate(listener, emitter, flags, dspSettings);
         }

@@ -33,10 +33,10 @@ namespace Engine.Audio
         private Listener listener;
         private Emitter emitter;
 
-        private readonly Stopwatch clock = new Stopwatch();
-        private readonly ManualResetEvent playEvent = new ManualResetEvent(false);
-        private readonly ManualResetEvent waitForPlayToOutput = new ManualResetEvent(false);
-        private readonly AutoResetEvent bufferEndEvent = new AutoResetEvent(false);
+        private readonly Stopwatch clock = new();
+        private readonly ManualResetEvent playEvent = new(false);
+        private readonly ManualResetEvent waitForPlayToOutput = new(false);
+        private readonly AutoResetEvent bufferEndEvent = new(false);
         private TimeSpan playPosition;
         private TimeSpan nextPlayPosition;
         private int playCounter;

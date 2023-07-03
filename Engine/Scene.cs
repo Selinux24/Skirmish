@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -9,8 +8,6 @@ namespace Engine
 {
     using Engine.BuiltIn;
     using Engine.Common;
-    using Engine.Coroutines;
-    using Engine.Tween;
 
     /// <summary>
     /// Render scene
@@ -95,11 +92,6 @@ namespace Engine
         private uint animationPaletteWidth;
 
         /// <summary>
-        /// Corotine manager
-        /// </summary>
-        private readonly Yielder coroutineManager = new();
-
-        /// <summary>
         /// Scene bounding box
         /// </summary>
         protected BoundingBox? BoundingBox;
@@ -161,11 +153,10 @@ namespace Engine
         public Scene(Game game)
         {
             Game = game;
+            Game.Graphics.Resized += FireGraphicsResized;
 
             Components = new();
             Components.Updated += ComponentsUpdated;
-
-            Game.Graphics.Resized += FireGraphicsResized;
 
             AudioManager = new GameAudioManager();
 
@@ -206,20 +197,26 @@ namespace Engine
         /// <param name="disposing">Free managed resources</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing)
             {
-                Game.Graphics.Resized -= FireGraphicsResized;
+                return;
+            }
 
-                Renderer?.Dispose();
-                Renderer = null;
+            Game.Graphics.Resized -= FireGraphicsResized;
 
-                AudioManager?.Dispose();
-                AudioManager = null;
+            Renderer?.Dispose();
+            Renderer = null;
 
-                Camera?.Dispose();
-                Camera = null;
+            AudioManager?.Dispose();
+            AudioManager = null;
 
-                Components?.Dispose();
+            Camera?.Dispose();
+            Camera = null;
+
+            if (Components != null)
+            {
+                Components.Updated -= ComponentsUpdated;
+                Components.Dispose();
                 Components = null;
             }
         }
@@ -251,11 +248,7 @@ namespace Engine
 
                 AudioManager?.Update(gameTime);
 
-                coroutineManager.ProcessCoroutines();
-
                 this.EvaluateInput();
-
-                FloatTweenManager.Update(gameTime);
 
                 // Action!
                 Renderer?.Update(gameTime);
@@ -339,15 +332,6 @@ namespace Engine
 
             Renderer?.Dispose();
             Renderer = renderer;
-        }
-
-        /// <summary>
-        /// Starts a new coroutine
-        /// </summary>
-        /// <param name="routine">Enumerator routine</param>
-        public Coroutine StartCoroutine(IEnumerator routine)
-        {
-            return coroutineManager.StartCoroutine(routine);
         }
 
         /// <summary>
@@ -679,6 +663,26 @@ namespace Engine
             where TDescription : SceneObjectDescription
         {
             return await AddComponentInternal<TObj, TDescription>(id, name, description, usage, layer);
+        }
+        /// <summary>
+        /// Adds a component to the scene
+        /// </summary>
+        /// <typeparam name="TObj">Component type</typeparam>
+        /// <param name="component">Component instance</param>
+        /// <param name="usage">Component usage</param>
+        /// <param name="layer">Processing layer</param>
+        /// <returns>Returns the created component</returns>
+        public async Task<TObj> AddComponent<TObj>(TObj component, SceneObjectUsages usage = SceneObjectUsages.None, int layer = LayerDefault)
+            where TObj : ISceneObject
+        {
+            if (component == null)
+            {
+                throw new ArgumentNullException(nameof(component));
+            }
+
+            Components.AddComponent(component, usage, layer);
+
+            return await Task.FromResult(component);
         }
 
         /// <summary>

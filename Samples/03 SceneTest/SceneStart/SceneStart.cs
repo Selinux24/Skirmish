@@ -1,7 +1,6 @@
 ﻿using Engine;
 using Engine.Audio;
 using Engine.Audio.Tween;
-using Engine.BuiltIn.PostProcess;
 using Engine.Content;
 using Engine.Tween;
 using Engine.UI;
@@ -15,6 +14,9 @@ namespace SceneTest.SceneStart
 {
     class SceneStart : Scene
     {
+        private AudioEffectTweener audioTweener;
+        private UIControlTweener uiTweener;
+
         private Model backGround = null;
         private UITextArea title = null;
         private UIButton sceneMaterialsButton = null;
@@ -56,6 +58,7 @@ namespace SceneTest.SceneStart
         {
             var assetTasks = new[]
             {
+                InitializeTweener(),
                 InitializeCursor(),
                 InitializeBackground(),
                 InitializeTitle(),
@@ -68,6 +71,13 @@ namespace SceneTest.SceneStart
             LoadResourcesAsync(
                 assetTasks,
                 InitializeComponentsCompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            audioTweener = this.AddAudioEffectTweener();
+            uiTweener = this.AddUIControlTweener();
         }
         private async Task InitializeCursor()
         {
@@ -177,7 +187,7 @@ namespace SceneTest.SceneStart
         private async Task InitializeTabPanel()
         {
             Color4 baseColor = Color.CornflowerBlue;
-            Color4 highLightColor = new Color4(baseColor.RGB() * 1.25f, 1f);
+            Color4 highLightColor = new(baseColor.RGB() * 1.25f, 1f);
             var tabDesc = UITabPanelDescription.Default(3, Color.Transparent, baseColor, highLightColor);
             tabDesc.TabCaptions = new[] { "But 1", "But 2", "But 3" };
             tabDesc.TabButtonsSpacing = new Spacing() { Horizontal = 5f };
@@ -257,7 +267,7 @@ namespace SceneTest.SceneStart
             AudioManager.Start();
 
             currentMusic?.Play();
-            currentMusic?.TweenVolumeUp((long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
+            audioTweener.TweenVolumeUp(currentMusic, (long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
 
             backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
@@ -379,8 +389,8 @@ namespace SceneTest.SceneStart
                 return;
             }
 
-            optsButton.Hide(100);
-            tabsPanel.Show(100);
+            uiTweener.Hide(optsButton, 100);
+            uiTweener.Show(tabsPanel, 100);
         }
         private void ClosePanel()
         {
@@ -389,8 +399,8 @@ namespace SceneTest.SceneStart
                 return;
             }
 
-            optsButton.Show(100);
-            tabsPanel.Hide(100);
+            uiTweener.Show(optsButton, 100);
+            uiTweener.Hide(tabsPanel, 100);
         }
 
         private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
@@ -433,12 +443,12 @@ namespace SceneTest.SceneStart
         private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)
         {
             sender.PivotAnchor = PivotAnchors.Center;
-            sender.ScaleInScaleOut(1.0f, 1.10f, 250);
+            uiTweener.ScaleInScaleOut(sender, 1.0f, 1.10f, 250);
         }
         private void SceneButtonMouseLeave(IUIControl sender, MouseEventArgs e)
         {
-            sender.ClearTween();
-            sender.TweenScale(sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
+            uiTweener.ClearTween(sender);
+            uiTweener.TweenScale(sender, sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
         }
         private void TabsPanelTabClick(object sender, UITabPanelEventArgs e)
         {

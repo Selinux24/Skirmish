@@ -14,6 +14,8 @@ namespace Instancing
 {
     class TestScene : Scene
     {
+        private BuiltInPostProcessStateTweener postProcessingTweener;
+
         private Sprite panel = null;
         private UITextArea title = null;
         private UITextArea runtimeText = null;
@@ -49,6 +51,7 @@ namespace Instancing
             LoadResourcesAsync(
                 new[]
                 {
+                    InitializeTweener(),
                     InitializeTexts(),
                     InitializeSky(),
                     InitializeFloor(),
@@ -57,6 +60,12 @@ namespace Instancing
                     InitializeWall()
                 },
                 InitializeComponentsCompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            postProcessingTweener = this.AddBuiltInPostProcessStateTweener();
         }
         private async Task InitializeTexts()
         {
@@ -216,7 +225,7 @@ namespace Instancing
             troops = await AddComponentAgent<ModelInstanced, ModelInstancedDescription>("Troops", "Troops", tDesc);
             troops.MaximumCount = -1;
 
-            Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+            Dictionary<string, AnimationPlan> animations = new();
 
             var sp1 = new AnimationPath();
             sp1.AddLoop("idle1");
@@ -228,12 +237,12 @@ namespace Instancing
 
             string[] anim = new[] { "soldier_idle1", "soldier_idle2" };
 
-            Random rnd = new Random(1);
+            var rnd = new Random(1);
             float l = 5;
             var vMax = new Vector3(l - 1, 0, l - 1);
             var vMin = -vMax;
             int side = 10;
-            Vector3 delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
+            var delta = new Vector3(l * side, 0, l * side) - new Vector3(l, 0, l);
 
             int x = 0;
             int y = 0;
@@ -312,8 +321,8 @@ namespace Instancing
 
             SetPostProcessingEffects();
 
-            postProcessState.Tween((s, value) => s.SepiaIntensity = value, 1, 0, 15000, ScaleFuncs.CubicEaseOut);
-            postProcessState.Tween((s, value) => s.BlurIntensity = value, 1, 0, 30000, ScaleFuncs.CubicEaseOut);
+            postProcessingTweener.Tween(postProcessState, (s, value) => s.SepiaIntensity = value, 1, 0, 15000, ScaleFuncs.CubicEaseOut);
+            postProcessingTweener.Tween(postProcessState, (s, value) => s.BlurIntensity = value, 1, 0, 30000, ScaleFuncs.CubicEaseOut);
 
             gameReady = true;
         }
@@ -388,14 +397,14 @@ namespace Instancing
 
             if (Game.Input.KeyPressed(Keys.W))
             {
-                Vector3 fwd = new Vector3(Camera.Forward.X, 0, Camera.Forward.Z);
+                var fwd = new Vector3(Camera.Forward.X, 0, Camera.Forward.Z);
                 fwd.Normalize();
                 Camera.Move(gameTime, fwd, Game.Input.ShiftPressed);
             }
 
             if (Game.Input.KeyPressed(Keys.S))
             {
-                Vector3 bwd = new Vector3(Camera.Backward.X, 0, Camera.Backward.Z);
+                var bwd = new Vector3(Camera.Backward.X, 0, Camera.Backward.Z);
                 bwd.Normalize();
                 Camera.Move(gameTime, bwd, Game.Input.ShiftPressed);
             }

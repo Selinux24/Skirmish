@@ -24,6 +24,9 @@ namespace Collada.Start
         private readonly string mediumControlsFont = "HelveticaNeueHv.ttf";
         private readonly string largeControlsFont = "HelveticaNeue Medium.ttf";
 
+        private UIControlTweener uiTweener;
+        private AudioEffectTweener audioTweener;
+
         private Model backGround = null;
         private UITextArea title = null;
         private UIButton sceneDungeonWallButton = null;
@@ -55,8 +58,8 @@ namespace Collada.Start
         private readonly int musicFadingMs = 10000;
         private readonly float musicVolume = 0.1f;
 
-        private readonly Manipulator3D emitterPosition = new Manipulator3D();
-        private readonly Manipulator3D listenerPosition = new Manipulator3D();
+        private readonly Manipulator3D emitterPosition = new();
+        private readonly Manipulator3D listenerPosition = new();
 
         private bool gameReady = false;
 
@@ -80,10 +83,18 @@ namespace Collada.Start
             LoadResourcesAsync(
                 new[]
                 {
+                    InitializeTweener(),
                     InitializeAudio(),
                     InitializeBackGround()
                 },
                 LoadUserIntefaceCompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            uiTweener = this.AddUIControlTweener();
+            audioTweener = this.AddAudioEffectTweener();
         }
         private async Task InitializeBackGround()
         {
@@ -235,7 +246,7 @@ namespace Collada.Start
         }
         private async Task InitializeModularDungeonTabs()
         {
-            List<string> tabButtons = new List<string>();
+            List<string> tabButtons = new();
             int basicIndex = -1;
             int backIndex = -1;
 
@@ -317,7 +328,7 @@ namespace Collada.Start
             {
                 if (o.Buttons.HasFlag(MouseButtons.Left))
                 {
-                    modularDungeonTabs.Hide(100);
+                    uiTweener.Hide(modularDungeonTabs, 100);
                     ShowAllButButton(100);
                 }
             };
@@ -339,42 +350,42 @@ namespace Collada.Start
             long tweenInc = 250;
 
             title.Text = $"Collada{Environment.NewLine}Loader Test";
-            title.Show(2000);
-            title.ScaleInScaleOut(1f, 1.05f, 10000);
+            uiTweener.Show(title, 2000);
+            uiTweener.ScaleInScaleOut(title, 1f, 1.05f, 10000);
 
             sceneDungeonWallButton.Caption.Text = "Dungeon Wall";
             sceneDungeonWallButton.TooltipText = "Shows a basic normal map scene demo.";
             sceneDungeonWallButton.MouseClick += SceneButtonClick;
             sceneDungeonWallButton.MouseOver += SceneButtonOver;
-            sceneDungeonWallButton.Show(tweenTime, tweenTime);
+            uiTweener.Show(sceneDungeonWallButton, tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneNavMeshTestButton.Caption.Text = "Navmesh Test";
             sceneNavMeshTestButton.TooltipText = "Shows a navigation mesh scene demo.";
             sceneNavMeshTestButton.MouseClick += SceneButtonClick;
             sceneNavMeshTestButton.MouseOver += SceneButtonOver;
-            sceneNavMeshTestButton.Show(tweenTime, tweenTime);
+            uiTweener.Show(sceneNavMeshTestButton, tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneDungeonButton.Caption.Text = "Dungeon";
             sceneDungeonButton.TooltipText = "Shows a basic dungeon from a unique mesh scene demo.";
             sceneDungeonButton.MouseClick += SceneButtonClick;
             sceneDungeonButton.MouseOver += SceneButtonOver;
-            sceneDungeonButton.Show(tweenTime, tweenTime);
+            uiTweener.Show(sceneDungeonButton, tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             sceneModularDungeonButton.Caption.Text = "Modular Dungeon";
             sceneModularDungeonButton.TooltipText = "Shows a modular dungeon scene demo.";
             sceneModularDungeonButton.MouseClick += SceneButtonClick;
             sceneModularDungeonButton.MouseOver += SceneButtonOver;
-            sceneModularDungeonButton.Show(tweenTime, tweenTime);
+            uiTweener.Show(sceneModularDungeonButton, tweenTime, tweenTime);
             tweenTime += tweenInc;
 
             exitButton.Caption.Text = "Exit";
             exitButton.TooltipText = "Closes the application.";
             exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseOver += SceneButtonOver;
-            exitButton.Show(tweenTime, tweenTime);
+            uiTweener.Show(exitButton, tweenTime, tweenTime);
 
             sceneButtons = new[]
             {
@@ -574,10 +585,10 @@ namespace Collada.Start
                     }
                     else if (sender == sceneModularDungeonButton)
                     {
-                        button.ClearTween();
-                        button.Hide(effectDuration);
+                        uiTweener.ClearTween(button);
+                        uiTweener.Hide(button, effectDuration);
                         modularDungeonTabs.SetSelectedTab(0);
-                        modularDungeonTabs.Show(100);
+                        uiTweener.Show(modularDungeonTabs, 100);
                     }
                 });
             }
@@ -606,8 +617,8 @@ namespace Collada.Start
         {
             foreach (var but in sceneButtons)
             {
-                but.ClearTween();
-                but.Show(milliseconds);
+                uiTweener.ClearTween(but);
+                uiTweener.Show(but, milliseconds);
             }
         }
         private void HideAllButButton(IUIControl button, long milliseconds)
@@ -619,8 +630,8 @@ namespace Collada.Start
                     continue;
                 }
 
-                but.ClearTween();
-                but.Hide(milliseconds);
+                uiTweener.ClearTween(but);
+                uiTweener.Hide(but, milliseconds);
             }
         }
 
@@ -630,8 +641,8 @@ namespace Collada.Start
             {
                 description.Text = button.TooltipText;
                 description.SetPosition(button.Left, button.Top + button.Height + 25);
-                description.ClearTween();
-                description.Hide(1000, 3f);
+                uiTweener.ClearTween(description);
+                uiTweener.Hide(description, 1000, 3f);
             }
         }
 
@@ -648,7 +659,7 @@ namespace Collada.Start
                 currentMusic.PlayProgress += AudioManager_PlayProgress;
                 currentMusic.Volume = 0;
                 currentMusic.Play();
-                currentMusic.TweenVolume(0, musicVolume, musicFadingMs, ScaleFuncs.Linear);
+                audioTweener.TweenVolume(currentMusic, 0, musicVolume, musicFadingMs, ScaleFuncs.Linear);
                 musicFadingOff = false;
             }
         }
@@ -676,7 +687,7 @@ namespace Collada.Start
 
                 if (e.TimeToEnd <= TimeSpan.FromMilliseconds(musicFadingMs))
                 {
-                    effect.TweenVolume(effect.Volume, 0, musicFadingMs, ScaleFuncs.Linear);
+                    audioTweener.TweenVolume(effect, effect.Volume, 0, musicFadingMs, ScaleFuncs.Linear);
                     musicFadingOff = true;
                 }
             }

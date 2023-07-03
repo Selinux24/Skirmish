@@ -12,6 +12,8 @@ namespace Animation.Start
 {
     class SceneStart : Scene
     {
+        private AudioEffectTweener audioTweener;
+
         private Model backGround = null;
         private UITextArea title = null;
         private UIPanel mainPanel = null;
@@ -39,6 +41,7 @@ namespace Animation.Start
         private void InitializeUI()
         {
             var assetTasks = new[] {
+                InitializeTweener(),
                 InitializeCursor(),
                 InitializeBackground(),
                 InitializeTitle(),
@@ -47,6 +50,12 @@ namespace Animation.Start
             };
 
             LoadResourcesAsync(assetTasks, PrepareAssets);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            audioTweener = this.AddAudioEffectTweener();
         }
         private async Task InitializeCursor()
         {
@@ -83,7 +92,7 @@ namespace Animation.Start
 
             var buttonFont = TextDrawerDescription.FromFamily(buttonFonts, 36, true);
 
-            Color4 highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
+            var highlightColor = new Color4(0.3333f, 0.3333f, 0.3333f, 0f);
             var buttonDesc = UIButtonDescription.DefaultTwoStateButton(buttonFont, Color.Red, Color.Red.ToColor4() + highlightColor);
             buttonDesc.TextForeColor = Color.Gold;
             buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
@@ -182,7 +191,7 @@ namespace Animation.Start
             AudioManager.Start();
 
             currentMusic?.Play();
-            currentMusic?.TweenVolumeUp((long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
+            audioTweener.TweenVolumeUp(currentMusic, (long)(currentMusic?.Duration.TotalMilliseconds * 0.2f), ScaleFuncs.Linear);
 
             backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 

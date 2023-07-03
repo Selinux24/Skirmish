@@ -19,6 +19,7 @@ namespace Collada.ModularDungeon
     using Engine.Modular;
     using Engine.PathFinding;
     using Engine.PathFinding.RecastNavigation;
+    using Engine.Tween;
     using Engine.UI;
     using Engine.UI.Tween;
 
@@ -32,18 +33,20 @@ namespace Collada.ModularDungeon
         private readonly string dungeonMapFile;
         private readonly string dungeonCnfFile;
 
+        private UIControlTweener uiTweener;
+
         private Sprite dungeonMap = null;
         private UIProgressBar pbLevels = null;
         private UIDialog dialog = null;
         private UIConsole console = null;
 
-        private readonly Color ambientUp = new Color(255, 224, 255, 255);
-        private readonly Color ambientDown = new Color(0, 31, 0, 255);
+        private readonly Color ambientUp = new(255, 224, 255, 255);
+        private readonly Color ambientDown = new(0, 31, 0, 255);
 
         private Player playerAgentType = null;
         private readonly Color3 agentTorchLight = new Color(255, 249, 224).RGB();
-        private readonly Vector3 cameraInitialPosition = new Vector3(1000, 1000, 1000);
-        private readonly Vector3 cameraInitialInterest = new Vector3(1001, 1000, 1000);
+        private readonly Vector3 cameraInitialPosition = new(1000, 1000, 1000);
+        private readonly Vector3 cameraInitialInterest = new(1001, 1000, 1000);
 
         private SceneLightPoint torch = null;
 
@@ -76,17 +79,17 @@ namespace Collada.ModularDungeon
         private readonly string ntFile = "nm.obj";
         private bool taskRunning = false;
 
-        private readonly List<ObstacleInfo> obstacles = new List<ObstacleInfo>();
-        private readonly Color obstacleColor = new Color(Color.Pink.ToColor3(), 0.5f);
+        private readonly List<ObstacleInfo> obstacles = new();
+        private readonly Color obstacleColor = new(Color.Pink.ToColor3(), 0.5f);
 
-        private readonly Color connectionColor = new Color(Color.LightBlue.ToColor3(), 1f);
+        private readonly Color connectionColor = new(Color.LightBlue.ToColor3(), 1f);
 
         private string soundDoor = null;
         private string soundLadder = null;
         private string soundTorch = null;
 
         private string[] soundWinds = null;
-        private Vector3 windPosition = new Vector3(60, 0, -20);
+        private Vector3 windPosition = new(60, 0, -20);
         private bool windCreated = false;
 
         private string ratSoundMove = null;
@@ -283,10 +286,17 @@ namespace Collada.ModularDungeon
             LoadResourcesAsync(
                 new[]
                 {
+                    InitializeTweener(),
                     InitializeUI(),
                     InitializeMapTexture()
                 },
                 LoadUICompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            uiTweener = this.AddUIControlTweener();
         }
         private async Task InitializeUI()
         {
@@ -312,7 +322,7 @@ namespace Collada.ModularDungeon
             {
                 dialog.CloseDialog(async () =>
                 {
-                    dialog.Hide(100);
+                    uiTweener.Hide(dialog, 100);
 
                     await Task.Delay(1000);
 
@@ -444,7 +454,7 @@ namespace Collada.ModularDungeon
         {
             var config = DungeonAssetConfiguration.Load(Path.Combine(resourcesFolder, dungeonConfigFile));
 
-            List<ContentData> contentData = new List<ContentData>();
+            List<ContentData> contentData = new();
 
             contentData.AddRange(await ReadAssetFiles(config.AssetFiles));
             contentData.AddRange(await ReadAssets(config.Assets));
@@ -539,7 +549,7 @@ namespace Collada.ModularDungeon
             var ratPaths = new Dictionary<string, AnimationPlan>();
             ratController = new BasicManipulatorController();
 
-            AnimationPath p0 = new AnimationPath();
+            AnimationPath p0 = new();
             p0.AddLoop("walk");
             ratPaths.Add("walk", new AnimationPlan(p0));
 
@@ -692,7 +702,7 @@ namespace Collada.ModularDungeon
                     .ToArray();
 
                 string msg = $"Error loading Assets: {ex.Message}{Environment.NewLine}{Environment.NewLine}{string.Join(Environment.NewLine, exceptions)}";
-                dialog.ShowDialog(msg, () => { dialog.Show(100); });
+                dialog.ShowDialog(msg, () => { uiTweener.Show(dialog, 100); });
             }
         }
         private void InitializeEnvironment()
@@ -760,7 +770,7 @@ namespace Collada.ModularDungeon
             bboxesDrawer.Clear();
 
             //Boxes
-            Random rndBoxes = new Random(1);
+            var rndBoxes = new Random(1);
 
             var dict = scenery.GetMapVolumes();
 
@@ -1231,13 +1241,13 @@ namespace Collada.ModularDungeon
                 messages.Text = text;
                 messages.Anchor = Anchors.Center;
                 messages.Visible = true;
-                messages.ClearTween();
-                messages.Show(1000);
+                uiTweener.ClearTween(messages);
+                uiTweener.Show(messages, 1000);
             }
             else
             {
-                messages.ClearTween();
-                messages.Hide(250);
+                uiTweener.ClearTween(messages);
+                uiTweener.Hide(messages, 250);
             }
         }
         private void UpdateEntityExit(ModularSceneryItem item)
@@ -1343,11 +1353,11 @@ namespace Collada.ModularDungeon
 
             if (dungeonMap.Visible)
             {
-                dungeonMap.Hide(1000);
+                uiTweener.Hide(dungeonMap, 1000);
             }
             else
             {
-                dungeonMap.Show(1000);
+                uiTweener.Show(dungeonMap, 1000);
             }
         }
 
@@ -1458,7 +1468,7 @@ namespace Collada.ModularDungeon
 
                 levelInitialized = true;
 
-                pbLevels.Hide(1000);
+                uiTweener.Hide(pbLevels, 1000);
 
                 gameReady = true;
             }
@@ -1514,7 +1524,7 @@ namespace Collada.ModularDungeon
         }
         private void StartNPCs()
         {
-            AnimationPath p0 = new AnimationPath();
+            AnimationPath p0 = new();
             p0.AddLoop("stand");
 
             if (scenery.CurrentLevel.Name != "Lvl1")
@@ -1573,7 +1583,7 @@ namespace Collada.ModularDungeon
         }
         private void StartEntitiesAudioBigFires()
         {
-            List<ModelInstance> fires = new List<ModelInstance>();
+            List<ModelInstance> fires = new();
             fires.AddRange(scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
             fires.AddRange(scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
 
@@ -1713,7 +1723,7 @@ namespace Collada.ModularDungeon
         }
         private Dictionary<Color4, IEnumerable<Triangle>> BuildGraphNodeDebugAreas(AgentType agent)
         {
-            Dictionary<Color4, IEnumerable<Triangle>> res = new Dictionary<Color4, IEnumerable<Triangle>>();
+            Dictionary<Color4, IEnumerable<Triangle>> res = new();
 
             var nodes = GetNodes(agent).OfType<GraphNode>();
             if (nodes.Any())
@@ -1741,7 +1751,7 @@ namespace Collada.ModularDungeon
         {
             int duration = 100;
 
-            Manipulator3D man = new Manipulator3D();
+            Manipulator3D man = new();
             man.SetPosition(windPosition, true);
 
             var soundEffect = soundWinds[index];

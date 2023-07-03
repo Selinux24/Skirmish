@@ -25,6 +25,8 @@ namespace Tanks
 
         private bool gameReady = false;
 
+        private UIControlTweener uiTweener;
+
         private UITextArea loadingText;
         private UIProgressBar loadingBar;
         private float progressValue = 0;
@@ -195,8 +197,18 @@ namespace Tanks
         private void LoadLoadingUI()
         {
             LoadResourcesAsync(
-                InitializeLoadingUI(),
+                new[]
+                {
+                    InitializeTweener(),
+                    InitializeLoadingUI()
+                },
                 LoadLoadingUICompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            uiTweener = this.AddUIControlTweener();
         }
         private async Task InitializeLoadingUI()
         {
@@ -235,7 +247,7 @@ namespace Tanks
 
             loadingText.Text = "Please wait...";
             loadingText.Visible = true;
-            loadingText.TweenAlphaBounce(1, 0, 1000, ScaleFuncs.CubicEaseInOut);
+            uiTweener.TweenAlphaBounce(loadingText, 1, 0, 1000, ScaleFuncs.CubicEaseInOut);
 
             await Task.Delay(2000);
 
@@ -374,12 +386,12 @@ namespace Tanks
             gameIcon = await AddComponentUI<Sprite, SpriteDescription>("GameIcon", "GameIcon", SpriteDescription.Default("Resources/GameIcon.png"));
             gameIcon.BaseColor = Color.Yellow;
             gameIcon.Visible = false;
-            gameIcon.TweenRotateBounce(-0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
+            uiTweener.TweenRotateBounce(gameIcon, -0.1f, 0.1f, 500, ScaleFuncs.CubicEaseInOut);
 
             playerTurnMarker = await AddComponentUI<Sprite, SpriteDescription>("PlayerTurnMarker", "PlayerTurnMarker", SpriteDescription.Default("Resources/Arrow.png"));
             playerTurnMarker.BaseColor = Color.Turquoise;
             playerTurnMarker.Visible = false;
-            playerTurnMarker.TweenScaleBounce(1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
+            uiTweener.TweenScaleBounce(playerTurnMarker, 1, 1.2f, 500, ScaleFuncs.CubicEaseInOut);
         }
         private async Task InitializeUIKeyPanel()
         {
@@ -488,7 +500,7 @@ namespace Tanks
                 trajectoryMarker.BaseColor = Color.Transparent;
                 trajectoryMarker.Active = false;
                 trajectoryMarker.Visible = false;
-                trajectoryMarker.TweenRotateRepeat(0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
+                uiTweener.TweenRotateRepeat(trajectoryMarker, 0, MathUtil.TwoPi, 1000, ScaleFuncs.Linear);
 
                 trajectoryMarkerPool[i] = trajectoryMarker;
             }
@@ -843,10 +855,10 @@ namespace Tanks
 
             PlayMusic();
 
-            loadingText.ClearTween();
-            loadingText.Hide(1000);
-            loadingBar.ClearTween();
-            loadingBar.Hide(500);
+            uiTweener.ClearTween(loadingText);
+            uiTweener.Hide(loadingText, 1000);
+            uiTweener.ClearTween(loadingBar);
+            uiTweener.Hide(loadingBar, 500);
 
             await Task.Delay(1500);
 
@@ -1081,8 +1093,8 @@ namespace Tanks
         {
             Task.Run(() =>
             {
-                gameMessage.Hide(1000);
-                gameKeyHelp.Hide(1000);
+                uiTweener.Hide(gameMessage, 1000);
+                uiTweener.Hide(gameKeyHelp, 1000);
 
                 InitializePlayers();
 
@@ -1116,8 +1128,8 @@ namespace Tanks
 
             SetOnGameEffects();
 
-            fadePanel.ClearTween();
-            fadePanel.Hide(2000);
+            uiTweener.ClearTween(fadePanel);
+            uiTweener.Hide(fadePanel, 2000);
 
             gameReady = true;
 
@@ -1179,7 +1191,7 @@ namespace Tanks
 
             pbFire.Visible = visible;
             fireKeyText.Visible = visible;
-            fireKeyText.TweenScaleBounce(1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
+            uiTweener.TweenScaleBounce(fireKeyText, 1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
 
             miniMapBackground.Visible = visible;
             miniMapTank1.Visible = visible;
@@ -1834,15 +1846,15 @@ You will lost all the game progress.",
                 gameMessage.Text = $"The winner is {shooter.Name}!";
                 gameMessage.TextForeColor = shooter.Color;
                 gameMessage.TextShadowColor = shooter.Color * 0.5f;
-                gameMessage.Show(1000);
-                gameMessage.TweenScale(0, 1, 1000, ScaleFuncs.CubicEaseIn);
+                uiTweener.Show(gameMessage, 1000);
+                uiTweener.TweenScale(gameMessage, 0, 1, 1000, ScaleFuncs.CubicEaseIn);
 
-                fadePanel.Show(3000);
+                uiTweener.Show(fadePanel, 3000);
 
                 await Task.Delay(3000);
 
-                gameKeyHelp.Show(1000);
-                gameKeyHelp.TweenScaleBounce(1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
+                uiTweener.Show(gameKeyHelp, 1000);
+                uiTweener.TweenScaleBounce(gameKeyHelp, 1, 1.01f, 500, ScaleFuncs.CubicEaseInOut);
 
                 return;
             }
@@ -1974,13 +1986,13 @@ You will lost all the game progress.",
             gameMessage.TextShadowColor = gameMessageShadowColor;
             gameMessage.TextHorizontalAlign = TextHorizontalAlign.Center;
             gameMessage.Text = text;
-            gameMessage.TweenScale(0, 1, 500, ScaleFuncs.CubicEaseIn);
-            gameMessage.Show(500);
+            uiTweener.TweenScale(gameMessage, 0, 1, 500, ScaleFuncs.CubicEaseIn);
+            uiTweener.Show(gameMessage, 500);
 
             await Task.Delay(delay);
 
-            gameMessage.ClearTween();
-            gameMessage.Hide(100);
+            uiTweener.ClearTween(gameMessage);
+            uiTweener.Hide(gameMessage, 100);
 
             await Task.Delay(100);
         }
@@ -2070,8 +2082,8 @@ You will lost all the game progress.",
 
             dialogText.Text = message;
 
-            dialog.Show(500);
-            fadePanel.TweenAlpha(0, 0.5f, 500, ScaleFuncs.Linear);
+            uiTweener.Show(dialog, 500);
+            uiTweener.TweenAlpha(fadePanel, 0, 0.5f, 500, ScaleFuncs.Linear);
 
             SetOnModalEffects();
 
@@ -2079,8 +2091,8 @@ You will lost all the game progress.",
         }
         private void CloseDialog()
         {
-            dialog.Hide(500);
-            fadePanel.TweenAlpha(0.5f, 0f, 500, ScaleFuncs.Linear);
+            uiTweener.Hide(dialog, 500);
+            uiTweener.TweenAlpha(fadePanel, 0.5f, 0f, 500, ScaleFuncs.Linear);
 
             SetOnGameEffects();
 

@@ -41,7 +41,7 @@ namespace Engine.UI
         /// <summary>
         /// Children collection
         /// </summary>
-        private readonly List<IUIControl> children = new List<IUIControl>();
+        private readonly List<IUIControl> children = new();
         /// <summary>
         /// Top position
         /// </summary>
@@ -615,9 +615,9 @@ namespace Engine.UI
                 UpdateAnchorPositions();
 
                 var rect = GetRenderArea(true);
-                Vector2 size = new Vector2(rect.Width, rect.Height);
-                Vector2 pos = new Vector2(rect.Left, rect.Top);
-                Vector2 sca = Vector2.One * AbsoluteScale;
+                var size = new Vector2(rect.Width, rect.Height);
+                var pos = new Vector2(rect.Left, rect.Top);
+                var sca = Vector2.One * AbsoluteScale;
                 float rot = AbsoluteRotation;
 
                 Manipulator.SetSize(size);
@@ -625,7 +625,7 @@ namespace Engine.UI
                 Manipulator.SetRotation(rot);
                 Manipulator.SetPosition(pos);
 
-                Vector2? parentPos = GetTransformationPivot();
+                var parentPos = GetTransformationPivot();
 
                 Manipulator.Update2D(parentPos);
             }
@@ -695,32 +695,17 @@ namespace Engine.UI
                 return null;
             }
 
-            RectangleF rect = AbsoluteRectangle;
+            var rect = AbsoluteRectangle;
             if (PivotAnchor.HasFlag(PivotAnchors.Root)) rect = Root.AbsoluteRectangle;
             if (PivotAnchor.HasFlag(PivotAnchors.Parent)) rect = Parent.AbsoluteRectangle;
-
-            Vector2 result;
-
-            switch (PivotAnchor)
+            return PivotAnchor switch
             {
-                case PivotAnchors.TopLeft:
-                    result = rect.TopLeft;
-                    break;
-                case PivotAnchors.TopRight:
-                    result = rect.TopRight;
-                    break;
-                case PivotAnchors.BottomLeft:
-                    result = rect.BottomLeft;
-                    break;
-                case PivotAnchors.BottomRight:
-                    result = rect.BottomRight;
-                    break;
-                default:
-                    result = rect.Center;
-                    break;
-            }
-
-            return result;
+                PivotAnchors.TopLeft => rect.TopLeft,
+                PivotAnchors.TopRight => rect.TopRight,
+                PivotAnchors.BottomLeft => rect.BottomLeft,
+                PivotAnchors.BottomRight => rect.BottomRight,
+                _ => rect.Center,
+            };
         }
 
         /// <inheritdoc/>

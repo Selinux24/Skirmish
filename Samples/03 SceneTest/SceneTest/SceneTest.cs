@@ -2,7 +2,9 @@
 using Engine.Animation;
 using Engine.Common;
 using Engine.Content;
+using Engine.Tween;
 using Engine.UI;
+using Engine.UI.Tween;
 using SharpDX;
 using System;
 using System.Collections.Generic;
@@ -27,6 +29,8 @@ namespace SceneTest.SceneTest
         private readonly Color3 waterBaseColor = new(0.067f, 0.065f, 0.003f);
         private readonly Color4 waterColor = new(0.003f, 0.267f, 0.096f, 0.95f);
         private readonly float waterHeight = -50f;
+
+        private UIControlTweener uiTweener;
 
         private UICursor cursor = null;
         private UIButton butClose = null;
@@ -93,8 +97,18 @@ namespace SceneTest.SceneTest
         private void InitializeComponents()
         {
             LoadResourcesAsync(
-                InitializeUI(),
+                new[]
+                {
+                    InitializeTweener(),
+                    InitializeUI()
+                },
                 InitializeComponentsCompleted);
+        }
+        private async Task InitializeTweener()
+        {
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            uiTweener = this.AddUIControlTweener();
         }
         private async Task InitializeUI()
         {
@@ -223,8 +237,8 @@ namespace SceneTest.SceneTest
                     Camera.Goto(-20 + xDelta, 10 + yDelta, -40f + zDelta);
                     Camera.LookTo(0 + xDelta, 0 + yDelta, 0 + zDelta);
 
-                    blackPan.Hide(4000);
-                    progressBar.Hide(2000);
+                    uiTweener.Hide(blackPan, 4000);
+                    uiTweener.Hide(progressBar, 2000);
 
                     await Task.Delay(1000);
 

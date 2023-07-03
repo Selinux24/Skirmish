@@ -33,19 +33,6 @@ namespace Engine.Common.Tests
         static BoundingBox bbox2;
         static BoundingBox bbox3;
 
-        static Triangle bbox1t1;
-        static Triangle bbox1t2;
-        static Triangle bbox1t3;
-        static Triangle bbox1t4;
-        static Triangle bbox2t1;
-        static Triangle bbox2t2;
-        static Triangle bbox2t3;
-        static Triangle bbox2t4;
-        static Triangle bbox3t1;
-        static Triangle bbox3t2;
-        static Triangle bbox3t3;
-        static Triangle bbox3t4;
-
         static PickingRay rayDefault;
         static PickingRay rayDefaultReverse;
         static PickingRay rayDefaultNoContact;
@@ -110,21 +97,6 @@ namespace Engine.Common.Tests
             var bbox2Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox2);
             var bbox3Tris = Triangle.ComputeTriangleList(Topology.TriangleList, bbox3);
 
-            bbox1t1 = bbox1Tris.ElementAt(0);
-            bbox1t2 = bbox1Tris.ElementAt(1);
-            bbox1t3 = bbox1Tris.ElementAt(2);
-            bbox1t4 = bbox1Tris.ElementAt(3);
-
-            bbox2t1 = bbox2Tris.ElementAt(0);
-            bbox2t2 = bbox2Tris.ElementAt(1);
-            bbox2t3 = bbox2Tris.ElementAt(2);
-            bbox2t4 = bbox2Tris.ElementAt(3);
-
-            bbox3t1 = bbox3Tris.ElementAt(0);
-            bbox3t2 = bbox3Tris.ElementAt(1);
-            bbox3t3 = bbox3Tris.ElementAt(2);
-            bbox3t4 = bbox3Tris.ElementAt(3);
-
             toQuad1Position = new Vector3(0, 0, 1);
             toQuad2Position = new Vector3(0, 0, 2);
             toQuad3Position = new Vector3(0, 0, 3);
@@ -187,21 +159,21 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void PickNearestTestDefaultReverse1()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad1.Object, rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultReverse2()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad2.Object, rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickNearestTestDefaultReverse3()
         {
-            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickNearest(mockQuad3.Object, rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
@@ -475,21 +447,21 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void PickFirstTestDefaultReverse1()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad1.Object, rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultReverse2()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad2.Object, rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }
         [TestMethod()]
         public void PickFirstTestDefaultReverse3()
         {
-            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayDefaultReverse, out var res);
+            bool picked = RayPickingHelper.PickFirst(mockQuad3.Object, rayDefaultReverse, out _);
 
             Assert.IsFalse(picked);
         }

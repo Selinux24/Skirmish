@@ -6,27 +6,33 @@ namespace Engine.BuiltIn.PostProcess
     /// <summary>
     /// Post processing parameters tween extensions
     /// </summary>
-    public static class BuiltInPostProcessStateTweenExtensions
+    public class BuiltInPostProcessStateTweener
     {
+        /// <summary>
+        /// Tweener
+        /// </summary>
+        private readonly Tweener tweener;
         /// <summary>
         /// Tween collection
         /// </summary>
-        private static readonly BuiltInPostProcessStateTweenCollection collection = new BuiltInPostProcessStateTweenCollection();
+        private readonly BuiltInPostProcessStateTweenCollection collection = new();
 
         /// <summary>
-        /// Static constructor
+        /// constructor
         /// </summary>
-        static BuiltInPostProcessStateTweenExtensions()
+        public BuiltInPostProcessStateTweener(Tweener tweener)
         {
+            this.tweener = tweener;
+
             // Register the collection into the tween manager
-            FloatTweenManager.AddTweenCollection(collection);
+            this.tweener.AddTweenCollection(collection);
         }
 
         /// <summary>
         /// Clears all tweens
         /// </summary>
         /// <param name="control">Control</param>
-        public static void ClearTween(this BuiltInPostProcessState control)
+        public void ClearTween(BuiltInPostProcessState control)
         {
             collection.ClearTween(control);
         }
@@ -39,9 +45,9 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void Tween(this BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, float from, float to, long duration, ScaleFunc fnc)
+        public void Tween(BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, float from, float to, long duration, ScaleFunc fnc)
         {
-            FloatTween ft = new FloatTween();
+            FloatTween ft = new();
 
             ft.Start(from, to, duration, fnc);
 
@@ -55,9 +61,9 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="to">End value</param>
         /// <param name="duration">Duration in milliseconds</param>
         /// <param name="fnc">Scale function</param>
-        public static void TweenBounce(this BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, float from, float to, long duration, ScaleFunc fnc)
+        public void TweenBounce(BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, float from, float to, long duration, ScaleFunc fnc)
         {
-            FloatTween ft = new FloatTween();
+            FloatTween ft = new();
 
             ft.Start(from, to, duration, fnc);
 
@@ -68,7 +74,7 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ft">Tween</param>
-        public static void AddTween(this BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, FloatTween ft)
+        public void AddTween(BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, FloatTween ft)
         {
             propertyUpdater(control, ft.StartValue);
 
@@ -91,7 +97,7 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         /// <param name="control">Control</param>
         /// <param name="ft">Tween</param>
-        public static void AddBounce(this BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, FloatTween ft)
+        public void AddBounce(BuiltInPostProcessState control, Func<BuiltInPostProcessState, float, float> propertyUpdater, FloatTween ft)
         {
             propertyUpdater(control, ft.StartValue);
 
@@ -111,6 +117,23 @@ namespace Engine.BuiltIn.PostProcess
 
                 return false;
             });
+        }
+    }
+
+    /// <summary>
+    /// Tweener extensions
+    /// </summary>
+    public static class BuiltInPostProcessStateTweenerExtensions
+    {
+        /// <summary>
+        /// Creates a new tweener component
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        public static BuiltInPostProcessStateTweener AddBuiltInPostProcessStateTweener(this Scene scene)
+        {
+            var tweener = scene.Components.First<Tweener>() ?? throw new EngineException($"{nameof(Tweener)} scene component not present.");
+
+            return new BuiltInPostProcessStateTweener(tweener);
         }
     }
 }

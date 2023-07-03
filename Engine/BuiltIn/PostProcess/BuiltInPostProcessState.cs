@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Effect list
         /// </summary>
-        private readonly List<BuiltInPostProcessEffects> effects = new List<BuiltInPostProcessEffects>();
+        private readonly List<BuiltInPostProcessEffects> effects = new();
 
         /// <summary>
         /// Gets the effect list

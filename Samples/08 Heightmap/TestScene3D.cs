@@ -25,6 +25,8 @@ namespace Heightmap
 
         private float time = 0.23f;
 
+        private UIControlTweener uiTweener;
+
         private bool playerFlying = true;
         private SceneLightSpot lantern = null;
         private bool lanternFixed = false;
@@ -89,13 +91,13 @@ namespace Heightmap
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
         private bool updatingNodes = false;
 
-        private readonly Agent agent = new Agent()
+        private readonly Agent agent = new()
         {
             Name = "Soldier",
             MaxSlope = 45,
         };
 
-        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new();
 
         private UITextureRenderer bufferDrawer = null;
 
@@ -123,8 +125,24 @@ namespace Heightmap
         private void InitializeUI()
         {
             LoadResourcesAsync(
-                InitializeUIAssets(),
+                new[]
+                {
+                    InitializeTweener(),
+                    InitializeUIAssets()
+                },
                 InitializeUICompleted);
+        }
+        private async Task<double> InitializeTweener()
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            sw.Restart();
+
+            await AddComponent(new Tweener(this, "Tweener", "Tweener"), SceneObjectUsages.None, 0);
+
+            uiTweener = this.AddUIControlTweener();
+
+            sw.Stop();
+            return sw.Elapsed.TotalSeconds;
         }
         private async Task<double> InitializeUIAssets()
         {
@@ -756,7 +774,7 @@ namespace Heightmap
         }
         private async Task SetPositionOverTerrain()
         {
-            Random posRnd = new Random(1024);
+            var posRnd = new Random(1024);
 
             var bbox = terrain.GetBoundingBox();
 
@@ -822,7 +840,7 @@ namespace Heightmap
         }
         private async Task SetForestPosition(Random posRnd)
         {
-            BoundingBox bbox = new BoundingBox(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
+            BoundingBox bbox = new(new Vector3(-400, 0, -400), new Vector3(-1000, 1000, -1000));
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
@@ -936,12 +954,12 @@ namespace Heightmap
             SceneLightPoint[] torchLights = new SceneLightPoint[torchs.InstanceCount - 1];
             for (int i = 1; i < torchs.InstanceCount; i++)
             {
-                Color3 color = new Color3(
+                var color = new Color3(
                     posRnd.NextFloat(0, 1),
                     posRnd.NextFloat(0, 1),
                     posRnd.NextFloat(0, 1));
 
-                Vector3 position = new Vector3(
+                var position = new Vector3(
                     posRnd.NextFloat(bbox.Minimum.X, bbox.Maximum.X),
                     0f,
                     posRnd.NextFloat(bbox.Minimum.Z, bbox.Maximum.Z));
@@ -951,7 +969,7 @@ namespace Heightmap
                 var pos = res.Position;
                 torchs[i].Manipulator.SetScale(0.20f, true);
                 torchs[i].Manipulator.SetPosition(pos, true);
-                BoundingBox tbbox = torchs[i].GetBoundingBox();
+                var tbbox = torchs[i].GetBoundingBox();
 
                 pos.Y += (tbbox.Maximum.Y - tbbox.Minimum.Y) * 0.95f;
 
@@ -1166,8 +1184,8 @@ namespace Heightmap
 
             gameReady = true;
 
-            fadePanel.ClearTween();
-            fadePanel.TweenAlpha(fadePanel.Alpha, 0, 2000, ScaleFuncs.CubicEaseOut);
+            uiTweener.ClearTween(fadePanel);
+            uiTweener.TweenAlpha(fadePanel, fadePanel.Alpha, 0, 2000, ScaleFuncs.CubicEaseOut);
 
             UpdateGraphNodes(agent);
         }
@@ -1377,7 +1395,7 @@ namespace Heightmap
                 {
                     var bbox = t.GetBoundingBox();
                     var center = t.Manipulator.Position + (Vector3.Up * bbox.Height * 0.5f);
-                    BoundingCylinder bc = new BoundingCylinder(center, 1.5f, bbox.Height);
+                    var bc = new BoundingCylinder(center, 1.5f, bbox.Height);
 
                     NavigationGraph.AddObstacle(bc);
                 }
@@ -1617,7 +1635,7 @@ namespace Heightmap
         }
         private void UpdateSoldierTris()
         {
-            Color color = new Color(Color.Red.ToColor3(), 0.6f);
+            var color = new Color(Color.Red.ToColor3(), 0.6f);
 
             var tris = soldier.GetTriangles();
 
