@@ -240,6 +240,8 @@ namespace Engine
 
                 UpdateGlobals(updateEnvironment);
 
+                this.EvaluateInput();
+
                 // Lights
                 Lights?.Update();
 
@@ -247,8 +249,6 @@ namespace Engine
                 Camera?.Update(gameTime);
 
                 AudioManager?.Update(gameTime);
-
-                this.EvaluateInput();
 
                 // Action!
                 Renderer?.Update(gameTime);

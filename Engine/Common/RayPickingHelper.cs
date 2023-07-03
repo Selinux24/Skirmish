@@ -24,21 +24,13 @@ namespace Engine.Common
                 return false;
             }
 
-            bool testHull = ray.RayPickingParams.HasFlag(PickingHullTypes.Hull);
             bool testGeom = ray.RayPickingParams.HasFlag(PickingHullTypes.Geometry);
 
             bool coarseInt = TestCoarse(obj, ray);
-            if (!coarseInt || !(testHull || testGeom))
+            if (!coarseInt || !testGeom)
             {
                 //Halt here
                 return coarseInt;
-            }
-
-            bool hullInt = TestHull(obj, ray, out var hullFound);
-            if (hullFound && (!hullInt || !testGeom))
-            {
-                //Halt here
-                return hullInt;
             }
 
             return true;
@@ -55,28 +47,6 @@ namespace Engine.Common
             var bsph = obj.GetBoundingSphere();
             Ray rRay = ray;
             return bsph.Intersects(ref rRay, out float sDist) || sDist > ray.MaxDistance;
-        }
-        /// <summary>
-        /// Picking hull test
-        /// </summary>
-        /// <typeparam name="T">Primitive type</typeparam>
-        /// <param name="obj">Object to test</param>
-        /// <param name="ray">Ray</param>
-        /// <param name="hullFound">Hull found</param>
-        /// <returns>Returns true if the hull test results in contact</returns>
-        private static bool TestHull<T>(IRayPickable<T> obj, PickingRay ray, out bool hullFound) where T : IRayIntersectable
-        {
-            var triangles = obj.GetPickingHull(PickingHullTypes.Hull);
-            if (!triangles.Any())
-            {
-                hullFound = false;
-
-                return false;
-            }
-
-            hullFound = true;
-
-            return PickNearestFromList(triangles, ray, out _);
         }
 
         /// <summary>
@@ -102,7 +72,7 @@ namespace Engine.Common
                 return intersects;
             }
 
-            var triangles = obj.GetPickingHull(PickingHullTypes.Geometry);
+            var triangles = obj.GetGeometry(GeometryTypes.Picking);
 
             return PickFirstFromList(triangles, ray, out result);
         }
@@ -127,7 +97,7 @@ namespace Engine.Common
                 return intersects;
             }
 
-            var triangles = obj.GetPickingHull(PickingHullTypes.Geometry);
+            var triangles = obj.GetGeometry(GeometryTypes.Picking);
 
             return PickAllFromlist(triangles, ray, out results);
         }

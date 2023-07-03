@@ -41,7 +41,7 @@ namespace Collada.ModularDungeon
         private UIConsole console = null;
 
         private readonly Color ambientUp = new(255, 224, 255, 255);
-        private readonly Color ambientDown = new(0, 31, 0, 255);
+        private readonly Color ambientDown = new(72, 72, 255, 255);
 
         private Player playerAgentType = null;
         private readonly Color3 agentTorchLight = new Color(255, 249, 224).RGB();

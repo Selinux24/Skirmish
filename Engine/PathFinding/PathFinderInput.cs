@@ -29,11 +29,11 @@ namespace Engine.PathFinding
         /// <summary>
         /// Area list
         /// </summary>
-        private readonly List<IGraphArea> areas = new List<IGraphArea>(MaxAreas);
+        private readonly List<IGraphArea> areas = new(MaxAreas);
         /// <summary>
         /// Connection list
         /// </summary>
-        private readonly List<IGraphConnection> connections = new List<IGraphConnection>(MaxConnections);
+        private readonly List<IGraphConnection> connections = new(MaxConnections);
         /// <summary>
         /// Bounding box
         /// </summary>

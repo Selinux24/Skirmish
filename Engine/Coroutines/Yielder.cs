@@ -94,17 +94,17 @@ namespace Engine.Coroutines
         /// <inheritdoc/>
         public void EarlyUpdate(UpdateContext context)
         {
-
+            ProcessCoroutines();
         }
         /// <inheritdoc/>
         public void Update(UpdateContext context)
         {
-            ProcessCoroutines();
+            //Not applicable
         }
         /// <inheritdoc/>
         public void LateUpdate(UpdateContext context)
         {
-
+            //Not applicable
         }
     }
 }

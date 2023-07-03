@@ -9,10 +9,6 @@ namespace Engine.UI.Tween
     public class UIControlTweener
     {
         /// <summary>
-        /// Tweener
-        /// </summary>
-        private readonly Tweener tweener;
-        /// <summary>
         /// Tween collection
         /// </summary>
         private readonly UIControlTweenCollection collection = new();
@@ -22,10 +18,8 @@ namespace Engine.UI.Tween
         /// </summary>
         public UIControlTweener(Tweener tweener)
         {
-            this.tweener = tweener;
-
             // Register the collection into the tween manager
-            this.tweener.AddTweenCollection(collection);
+            tweener.AddTweenCollection(collection);
         }
 
         /// <summary>

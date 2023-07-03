@@ -64,8 +64,8 @@ namespace Terrain.Rts
         private GroundGardener gardener = null;
         private readonly Vector3 windDirection = Vector3.UnitX;
         private readonly float windStrength = 1f;
-        private readonly List<Line3D> oks = new List<Line3D>();
-        private readonly List<Line3D> errs = new List<Line3D>();
+        private readonly List<Line3D> oks = new();
+        private readonly List<Line3D> errs = new();
 
         private Model heliport = null;
         private Model garage = null;
@@ -79,10 +79,10 @@ namespace Terrain.Rts
 
         private Model helicopter = null;
         private readonly HeliManipulatorController helicopterController = null;
-        private readonly Vector3 helicopterHeightOffset = (Vector3.Up * 15f);
+        private readonly Vector3 helicopterHeightOffset = Vector3.Up * 15f;
         private readonly Color4 curvesColor = Color.Red;
         private readonly Color4 pointsColor = Color.Blue;
-        private readonly Color4 segmentsColor = new Color4(Color.Cyan.ToColor3(), 0.8f);
+        private readonly Color4 segmentsColor = new(Color.Cyan.ToColor3(), 0.8f);
         private readonly Color4 hAxisColor = Color.YellowGreen;
         private readonly Color4 wAxisColor = Color.White;
 
@@ -110,7 +110,7 @@ namespace Terrain.Rts
         private ParticleSystemDescription pSmokeExplosion = null;
         private ParticleManager pManager = null;
 
-        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new();
 
         private string heliEffect;
         private IAudioEffect heliEffectInstance;
@@ -249,7 +249,7 @@ namespace Terrain.Rts
 
         private void InitializeModels()
         {
-            List<Task> loadTasks = new List<Task>()
+            List<Task> loadTasks = new()
             {
                 InitializeWalker(),
                 InitializeDebug(),
@@ -1055,10 +1055,10 @@ namespace Terrain.Rts
         }
         private async Task<TaskResult> InitializePathFinding()
         {
-            Stopwatch sw = Stopwatch.StartNew();
+            var sw = Stopwatch.StartNew();
             sw.Restart();
 
-            Random posRnd = new Random(1);
+            var posRnd = new Random(1);
 
             await InitializePositionRocks(posRnd);
             await InitializePositionTrees(posRnd);
@@ -1285,7 +1285,7 @@ namespace Terrain.Rts
             animations.Add("heli_default", new AnimationPlan(hp));
 
             // Register animation paths
-            AnimationPath ap = new AnimationPath();
+            var ap = new AnimationPath();
             ap.AddLoop("default");
             animations.Add("default", new AnimationPlan(ap));
 
@@ -2026,7 +2026,7 @@ namespace Terrain.Rts
 
         private Curve3D GenerateHelicopterPath()
         {
-            Curve3D curve = new Curve3D
+            var curve = new Curve3D
             {
                 PreLoop = CurveLoopType.Constant,
                 PostLoop = CurveLoopType.Constant
@@ -2350,7 +2350,7 @@ namespace Terrain.Rts
                 return;
             }
 
-            List<Vector3> path = new List<Vector3>();
+            List<Vector3> path = new();
 
             float pass = curve.Length / 500f;
 
@@ -2514,11 +2514,11 @@ namespace Terrain.Rts
             boxes.AddRange(obelisk.GetInstances().Select(i => i.GetBoundingBox()));
             boxes.AddRange(rocks.GetInstances().Select(i => i.GetBoundingBox()));
 
-            List<Triangle> tris = new List<Triangle>();
-            tris.AddRange(tree1.GetInstances().SelectMany(i => i.GetPickingHull(PickingHullTypes.Hull)));
-            tris.AddRange(tree2.GetInstances().SelectMany(i => i.GetPickingHull(PickingHullTypes.Hull)));
+            List<Triangle> tris = new();
+            tris.AddRange(tree1.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)));
+            tris.AddRange(tree2.GetInstances().SelectMany(i => i.GetGeometry(GeometryTypes.PathFinding)));
 
-            List<Line3D> lines = new List<Line3D>();
+            List<Line3D> lines = new();
 
             lines.AddRange(Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
             lines.AddRange(Line3D.CreateWiredTriangle(tris));

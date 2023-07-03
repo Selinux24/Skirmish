@@ -131,6 +131,34 @@ namespace Engine
                 return model.ColliderType;
             }
         }
+        /// <summary>
+        /// Gets or sets the parent path finding hull
+        /// </summary>
+        public PickingHullTypes PathFindingHull
+        {
+            get
+            {
+                return model.PathFindingHull;
+            }
+            set
+            {
+                model.PathFindingHull = value;
+            }
+        }
+        /// <summary>
+        /// Gets or sets the parent picking hull
+        /// </summary>
+        public PickingHullTypes PickingHull
+        {
+            get
+            {
+                return model.PickingHull;
+            }
+            set
+            {
+                model.PickingHull = value;
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -259,6 +287,24 @@ namespace Engine
             }
         }
 
+        /// <inheritdoc/>
+        public virtual bool Cull(ICullingVolume volume, out float distance)
+        {
+            return boundsHelper.Cull(Manipulator, CullingVolumeType, volume, out distance);
+        }
+
+        /// <summary>
+        /// Set level of detail values
+        /// </summary>
+        /// <param name="origin">Origin point</param>
+        public void SetLOD(Vector3 origin)
+        {
+            LevelOfDetail = model.Scene.GameEnvironment.GetLOD(
+                origin,
+                GetBoundingSphere(),
+                Manipulator.FinalTransform);
+        }
+
         /// <summary>
         /// Sets a new manipulator to this instance
         /// </summary>
@@ -349,23 +395,32 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
+        public IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
         {
-            if (geometryType.HasFlag(PickingHullTypes.Coarse))
+            var hull = geometryType switch
+            {
+                GeometryTypes.Picking => PickingHull,
+                GeometryTypes.PathFinding => PathFindingHull,
+                _ => PickingHullTypes.None,
+            };
+
+            if (hull.HasFlag(PickingHullTypes.Coarse))
             {
                 return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
             }
 
-            if (geometryType.HasFlag(PickingHullTypes.Hull))
+            if (hull.HasFlag(PickingHullTypes.Hull))
             {
                 var drawingData = model.GetDrawingData(model.GetLODMinimum());
                 if (drawingData?.HullMesh?.Any() ?? false)
                 {
                     return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
                 }
+
+                return GetTriangles();
             }
 
-            if (geometryType.HasFlag(PickingHullTypes.Geometry))
+            if (hull.HasFlag(PickingHullTypes.Geometry))
             {
                 return GetTriangles();
             }
@@ -374,30 +429,12 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public virtual bool Cull(ICullingVolume volume, out float distance)
-        {
-            return boundsHelper.Cull(Manipulator, CullingVolumeType, volume, out distance);
-        }
-
-        /// <summary>
-        /// Set level of detail values
-        /// </summary>
-        /// <param name="origin">Origin point</param>
-        public void SetLOD(Vector3 origin)
-        {
-            LevelOfDetail = model.Scene.GameEnvironment.GetLOD(
-                origin,
-                GetBoundingSphere(),
-                Manipulator.FinalTransform);
-        }
-
-        /// <inheritdoc/>
         public bool Intersects(IntersectionVolumeSphere sphere, out PickingResult<Triangle> result)
         {
             var bsph = GetBoundingSphere();
             if (bsph.Intersects(sphere))
             {
-                var mesh = GetPickingHull(PickingHullTypes.Hull);
+                var mesh = GetGeometry(GeometryTypes.Picking);
                 if (Intersection.SphereIntersectsMesh(sphere, mesh, out var res))
                 {
                     result = res;
@@ -430,14 +467,13 @@ namespace Engine
             {
                 return (IntersectionVolumeAxisAlignedBox)GetBoundingBox();
             }
-            else if (detectionMode == IntersectDetectionMode.Sphere)
+
+            if (detectionMode == IntersectDetectionMode.Sphere)
             {
                 return (IntersectionVolumeSphere)GetBoundingSphere();
             }
-            else
-            {
-                return (IntersectionVolumeMesh)GetPickingHull(PickingHullTypes.Hull).ToArray();
-            }
+
+            return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Picking).ToArray();
         }
 
         /// <inheritdoc/>

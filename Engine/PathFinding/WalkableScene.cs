@@ -14,11 +14,6 @@ namespace Engine.PathFinding
     public class WalkableScene : Scene
     {
         /// <summary>
-        /// Navigation picking hull enumeration
-        /// </summary>
-        private const PickingHullTypes NavigationPickingHull = PickingHullTypes.Coarse | PickingHullTypes.Hull | PickingHullTypes.Geometry;
-
-        /// <summary>
         /// Gets the current scene geometry for navigation
         /// </summary>
         /// <typeparam name="T">Primitive type</typeparam>
@@ -53,7 +48,7 @@ namespace Engine.PathFinding
                 transformable.Manipulator.UpdateInternals(true);
             }
 
-            return pickable.GetPickingHull(NavigationPickingHull);
+            return pickable.GetGeometry(GeometryTypes.PathFinding);
         }
         /// <summary>
         /// Gets the new agent position when target position is walkable
@@ -385,19 +380,22 @@ namespace Engine.PathFinding
         /// <returns>Returns a triangle list</returns>
         public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
         {
-            var tris = Components.Get<IDrawable>(c => !c.HasOwner && c.Visible)
-                .SelectMany(GetGeometryForNavigationGraph<Triangle>);
+            var navComponents = Components.Get<IDrawable>(c => !c.HasOwner && c.Visible);
+
+            var allTris = navComponents.SelectMany(GetGeometryForNavigationGraph<Triangle>).ToArray();
+
+            var navTris = allTris.Distinct();
 
             var bounds = PathFinderDescription.Settings.Bounds;
             if (bounds.HasValue)
             {
-                tris = tris.Where(t =>
+                navTris = navTris.Where(t =>
                 {
                     return Intersection.BoxContainsTriangle(bounds.Value, t) != ContainmentType.Disjoint;
                 });
             }
 
-            return tris.ToArray();
+            return navTris.ToArray();
         }
 
         /// <summary>
@@ -555,13 +553,11 @@ namespace Engine.PathFinding
                 return false;
             }
 
-            bool isInGround = FindFirstGroundPosition<Triangle>(newPosition.X, newPosition.Z, out _);
-            if (!isInGround)
+            bool found = FindAllGroundPosition<Triangle>(newPosition.X, newPosition.Z, out var results);
+            if (!found)
             {
                 return false;
             }
-
-            FindAllGroundPosition<Triangle>(newPosition.X, newPosition.Z, out var results);
 
             Vector3 newFeetPosition = newPosition;
 

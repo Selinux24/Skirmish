@@ -134,7 +134,7 @@ namespace Engine.Content.OnePageDungeon
             int rectIndex = 0;
             foreach (var rect in dungeon.Rects)
             {
-                List<AssetReference> roomAssets = new List<AssetReference>();
+                List<AssetReference> roomAssets = new();
 
                 roomAssets.AddRange(CreateRoom(rect, walls, configuration));
                 roomAssets.AddRange(CreateColumns(rect, dungeon, configuration));
@@ -155,7 +155,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="configuration">Asset configuration</param>
         private static IEnumerable<AssetReference> CreateRoom(Rect rect, IEnumerable<Wall> walls, DungeonAssetConfiguration configuration)
         {
-            List<AssetReference> references = new List<AssetReference>();
+            List<AssetReference> references = new();
 
             for (int x = 0; x < rect.W; x++)
             {
@@ -297,7 +297,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="configuration">Asset configuration</param>
         private static IEnumerable<AssetConnection> CreateConnection(Rect one, Rect two, DungeonAssetConfiguration configuration)
         {
-            List<AssetConnection> connections = new List<AssetConnection>();
+            List<AssetConnection> connections = new();
 
             for (int x = 0; x < one.W; x++)
             {
@@ -322,7 +322,7 @@ namespace Engine.Content.OnePageDungeon
         {
             float tvx = two.X * configuration.BlockSize;
             float tvz = two.Y * configuration.BlockSize;
-            Vector3 tposition = new Vector3(-tvx, 0, tvz);
+            var tposition = new Vector3(-tvx, 0, tvz);
 
             for (int x = 0; x < rect.W; x++)
             {
@@ -332,10 +332,10 @@ namespace Engine.Content.OnePageDungeon
                     int iy = (int)rect.Y + y;
                     float vx = (rect.X + x) * configuration.BlockSize;
                     float vz = (rect.Y + y) * configuration.BlockSize;
-                    Vector3 position = new Vector3(-vx, 0, vz);
+                    var position = new Vector3(-vx, 0, vz);
 
-                    RectangleF r1 = new RectangleF(ix, iy, 1, 1);
-                    RectangleF r2 = new RectangleF(ix, iy, 1, 1);
+                    var r1 = new RectangleF(ix, iy, 1, 1);
+                    var r2 = new RectangleF(ix, iy, 1, 1);
                     r1.Inflate(1, 0);
                     r2.Inflate(0, 1);
 

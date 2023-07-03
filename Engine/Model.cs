@@ -148,73 +148,6 @@ namespace Engine
 
             boundsHelper = new(GetPoints());
         }
-        /// <summary>
-        /// Add model parts
-        /// </summary>
-        /// <param name="names">Part names</param>
-        /// <param name="dependences">Part dependences</param>
-        private void AddModelParts(string[] names, int[] dependences)
-        {
-            int parents = dependences.Count(i => i == -1);
-            if (parents != 1)
-            {
-                throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
-            }
-
-            if (Array.Exists(dependences, i => i < -1 || i > dependences.Length - 1))
-            {
-                throw new EngineException("Bad transformation dependency indices.");
-            }
-
-            for (int i = 0; i < names.Length; i++)
-            {
-                modelParts.Add(new ModelPart(names[i]));
-            }
-
-            for (int i = 0; i < names.Length; i++)
-            {
-                var thisPart = GetModelPartByName(names[i]);
-                if (thisPart == null)
-                {
-                    continue;
-                }
-
-                var thisMan = thisPart.Manipulator;
-                thisMan.Updated += ManipulatorUpdated;
-
-                var parentIndex = dependences[i];
-                if (parentIndex >= 0)
-                {
-                    var parentPart = GetModelPartByName(names[parentIndex]);
-
-                    thisMan.Parent = parentPart?.Manipulator;
-                }
-                else
-                {
-                    Manipulator = thisMan;
-                }
-            }
-        }
-        /// <summary>
-        /// Sets model part transforms from original meshes
-        /// </summary>
-        /// <param name="drawData">Drawing data</param>
-        private void SetModelPartsTransforms(DrawingData drawData)
-        {
-            for (int i = 0; i < modelParts.Count; i++)
-            {
-                var thisName = modelParts[i].Name;
-
-                var mesh = drawData?.GetMeshByName(thisName);
-                if (mesh == null)
-                {
-                    continue;
-                }
-
-                var part = modelParts.First(p => p.Name == thisName);
-                part.Manipulator.SetTransform(mesh.Transform);
-            }
-        }
 
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
@@ -413,6 +346,73 @@ namespace Engine
 
             return count;
         }
+        /// <summary>
+        /// Add model parts
+        /// </summary>
+        /// <param name="names">Part names</param>
+        /// <param name="dependences">Part dependences</param>
+        private void AddModelParts(string[] names, int[] dependences)
+        {
+            int parents = dependences.Count(i => i == -1);
+            if (parents != 1)
+            {
+                throw new EngineException("Model with transform dependences must have one (and only one) parent mesh identified by -1");
+            }
+
+            if (Array.Exists(dependences, i => i < -1 || i > dependences.Length - 1))
+            {
+                throw new EngineException("Bad transformation dependency indices.");
+            }
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                modelParts.Add(new ModelPart(names[i]));
+            }
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                var thisPart = GetModelPartByName(names[i]);
+                if (thisPart == null)
+                {
+                    continue;
+                }
+
+                var thisMan = thisPart.Manipulator;
+                thisMan.Updated += ManipulatorUpdated;
+
+                var parentIndex = dependences[i];
+                if (parentIndex >= 0)
+                {
+                    var parentPart = GetModelPartByName(names[parentIndex]);
+
+                    thisMan.Parent = parentPart?.Manipulator;
+                }
+                else
+                {
+                    Manipulator = thisMan;
+                }
+            }
+        }
+        /// <summary>
+        /// Sets model part transforms from original meshes
+        /// </summary>
+        /// <param name="drawData">Drawing data</param>
+        private void SetModelPartsTransforms(DrawingData drawData)
+        {
+            for (int i = 0; i < modelParts.Count; i++)
+            {
+                var thisName = modelParts[i].Name;
+
+                var mesh = drawData?.GetMeshByName(thisName);
+                if (mesh == null)
+                {
+                    continue;
+                }
+
+                var part = modelParts.First(p => p.Name == thisName);
+                part.Manipulator.SetTransform(mesh.Transform);
+            }
+        }
 
         /// <inheritdoc/>
         public override bool Cull(ICullingVolume volume, out float distance)
@@ -481,7 +481,7 @@ namespace Engine
         /// <summary>
         /// Invalidates the internal cache
         /// </summary>
-        private void InvalidateCache()
+        public void InvalidateCache()
         {
             Logger.WriteTrace(this, $"{nameof(Model)} {Name} => LOD: {LevelOfDetail}; InvalidateCache");
 
@@ -522,23 +522,32 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
+        public IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
         {
-            if (geometryType.HasFlag(PickingHullTypes.Hull))
+            var hull = geometryType switch
+            {
+                GeometryTypes.Picking => PickingHull,
+                GeometryTypes.PathFinding => PathFindingHull,
+                _ => PickingHullTypes.None,
+            };
+
+            if (hull.HasFlag(PickingHullTypes.Coarse))
+            {
+                return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
+            }
+
+            if (hull.HasFlag(PickingHullTypes.Hull))
             {
                 var drawingData = GetDrawingData(GetLODMinimum());
                 if (drawingData?.HullMesh?.Any() ?? false)
                 {
                     return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
                 }
+       
+                return GetTriangles();
             }
 
-            if (geometryType.HasFlag(PickingHullTypes.Coarse))
-            {
-                return Triangle.ComputeTriangleList(Topology.TriangleList, boundsHelper.GetOrientedBoundingBox(Manipulator));
-            }
-
-            if (geometryType.HasFlag(PickingHullTypes.Geometry))
+            if (hull.HasFlag(PickingHullTypes.Geometry))
             {
                 return GetTriangles();
             }
@@ -560,7 +569,7 @@ namespace Engine
                 return false;
             }
 
-            var mesh = GetPickingHull(PickingHullTypes.Hull);
+            var mesh = GetGeometry(GeometryTypes.Picking);
 
             return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
         }
@@ -581,14 +590,13 @@ namespace Engine
             {
                 return (IntersectionVolumeAxisAlignedBox)GetBoundingBox();
             }
-            else if (detectionMode == IntersectDetectionMode.Sphere)
+
+            if (detectionMode == IntersectDetectionMode.Sphere)
             {
                 return (IntersectionVolumeSphere)GetBoundingSphere();
             }
-            else
-            {
-                return (IntersectionVolumeMesh)GetPickingHull(PickingHullTypes.Hull).ToArray();
-            }
+
+            return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Picking).ToArray();
         }
 
         /// <inheritdoc/>
@@ -644,6 +652,12 @@ namespace Engine
             Manipulator?.SetState(modelState.Manipulator);
             AnimationController?.SetState(modelState.AnimationController);
             TextureIndex = modelState.TextureIndex;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"Id: {Id}; LOD: {LevelOfDetail}; Active: {Active}; Visible: {Visible}";
         }
     }
 }

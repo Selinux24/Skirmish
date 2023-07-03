@@ -72,7 +72,7 @@ namespace Engine
         /// <summary>
         /// Quadtree
         /// </summary>
-        public QuadtreeDescription Quadtree { get; set; }
+        public QuadtreeDescription Quadtree { get; set; } = QuadtreeDescription.Default(4);
         /// <summary>
         /// Use anisotropic filtering
         /// </summary>

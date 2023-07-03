@@ -9,10 +9,6 @@ namespace Engine.BuiltIn.PostProcess
     public class BuiltInPostProcessStateTweener
     {
         /// <summary>
-        /// Tweener
-        /// </summary>
-        private readonly Tweener tweener;
-        /// <summary>
         /// Tween collection
         /// </summary>
         private readonly BuiltInPostProcessStateTweenCollection collection = new();
@@ -22,10 +18,8 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         public BuiltInPostProcessStateTweener(Tweener tweener)
         {
-            this.tweener = tweener;
-
             // Register the collection into the tween manager
-            this.tweener.AddTweenCollection(collection);
+            tweener.AddTweenCollection(collection);
         }
 
         /// <summary>

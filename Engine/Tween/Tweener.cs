@@ -67,11 +67,6 @@ namespace Engine.Tween
         /// <inheritdoc/>
         public void EarlyUpdate(UpdateContext context)
         {
-
-        }
-        /// <inheritdoc/>
-        public void Update(UpdateContext context)
-        {
             if (!tweens.Any())
             {
                 return;
@@ -83,9 +78,14 @@ namespace Engine.Tween
             });
         }
         /// <inheritdoc/>
+        public void Update(UpdateContext context)
+        {
+            //Not applicable
+        }
+        /// <inheritdoc/>
         public void LateUpdate(UpdateContext context)
         {
-
+            //Not applicable
         }
     }
 }

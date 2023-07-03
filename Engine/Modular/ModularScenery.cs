@@ -334,6 +334,48 @@ namespace Engine.Modular
 
             return -1;
         }
+        /// <summary>
+        /// Gets the bounding sphere list of all items in the specified dictionary
+        /// </summary>
+        /// <param name="instances">Instances dictionary</param>
+        /// <param name="refresh">Refresh internal item cache</param>
+        private static IEnumerable<BoundingSphere> GetSceneAssetSpheres(Dictionary<string, ModelInstanced> instances, bool refresh)
+        {
+            foreach (var item in instances.Keys)
+            {
+                var model = instances[item];
+                if (model == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < model.InstanceCount; i++)
+                {
+                    yield return model[i].GetBoundingSphere(refresh);
+                }
+            }
+        }
+        /// <summary>
+        /// Gets the bounding box list of all items in the specified dictionary
+        /// </summary>
+        /// <param name="instances">Instances dictionary</param>
+        /// <param name="refresh">Refresh internal item cache</param>
+        private static IEnumerable<BoundingBox> GetSceneAssetBoxes(Dictionary<string, ModelInstanced> instances, bool refresh)
+        {
+            foreach (var item in instances.Keys)
+            {
+                var model = instances[item];
+                if (model == null)
+                {
+                    continue;
+                }
+
+                for (int i = 0; i < model.InstanceCount; i++)
+                {
+                    yield return model[i].GetBoundingBox(refresh);
+                }
+            }
+        }
 
         /// <summary>
         /// Constructor
@@ -419,6 +461,9 @@ namespace Engine.Modular
             ParseAssetsMap(level, progress);
 
             InitializeEntities(level, progress);
+
+            // Initialize quad-tree for ray picking
+            GroundPickingQuadtree = Description.ReadQuadTree(GetGeometry(GeometryTypes.Picking));
         }
         /// <summary>
         /// Initialize the particle system and the particle descriptions
@@ -515,13 +560,13 @@ namespace Engine.Modular
 
             try
             {
-                var usage = pathFinding switch
+                var pf = pathFinding switch
                 {
-                    ModularSceneryPathFindingModes.None => SceneObjectUsages.None,
-                    ModularSceneryPathFindingModes.Coarse => SceneObjectUsages.Object,
-                    ModularSceneryPathFindingModes.Hull => SceneObjectUsages.Object,
-                    ModularSceneryPathFindingModes.Geometry => SceneObjectUsages.Object,
-                    _ => SceneObjectUsages.None,
+                    ModularSceneryPathFindingModes.None => PickingHullTypes.None,
+                    ModularSceneryPathFindingModes.Coarse => PickingHullTypes.Coarse,
+                    ModularSceneryPathFindingModes.Hull => PickingHullTypes.Hull,
+                    ModularSceneryPathFindingModes.Geometry => PickingHullTypes.Geometry,
+                    _ => PickingHullTypes.None,
                 };
 
                 var desc = new ModelInstancedDescription()
@@ -534,9 +579,11 @@ namespace Engine.Modular
                     Content = ContentDescription.FromContentData(modelContent),
                 };
 
-                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(assetId, Name, desc, usage);
+                var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(assetId, Name, desc, SceneObjectUsages.Object);
 
                 model.Owner = this;
+                model.PathFindingHull = pf;
+                model.PickingHull = pf;
 
                 return model;
             }
@@ -604,13 +651,13 @@ namespace Engine.Modular
 
             try
             {
-                var usage = pathFinding switch
+                var pf = pathFinding switch
                 {
-                    ModularSceneryPathFindingModes.None => SceneObjectUsages.None,
-                    ModularSceneryPathFindingModes.Coarse => SceneObjectUsages.Object,
-                    ModularSceneryPathFindingModes.Hull => SceneObjectUsages.Object,
-                    ModularSceneryPathFindingModes.Geometry => SceneObjectUsages.Object,
-                    _ => SceneObjectUsages.None,
+                    ModularSceneryPathFindingModes.None => PickingHullTypes.None,
+                    ModularSceneryPathFindingModes.Coarse => PickingHullTypes.Coarse,
+                    ModularSceneryPathFindingModes.Hull => PickingHullTypes.Hull,
+                    ModularSceneryPathFindingModes.Geometry => PickingHullTypes.Geometry,
+                    _ => PickingHullTypes.None,
                 };
 
                 var model = await Scene.AddComponent<ModelInstanced, ModelInstancedDescription>(
@@ -624,9 +671,11 @@ namespace Engine.Modular
                         BlendMode = Description.BlendMode,
                         Content = ContentDescription.FromContentData(modelContent),
                     },
-                    usage);
+                    SceneObjectUsages.Object);
 
                 model.Owner = this;
+                model.PathFindingHull = pf;
+                model.PickingHull = pf;
 
                 //Get the object list to process
                 var objList = level.Objects
@@ -1045,31 +1094,21 @@ namespace Engine.Modular
                 return sceneBoundingSphere.Value;
             }
 
-            var res = new BoundingSphere();
-            bool initialized = false;
+            var assetsSph = GetSceneAssetSpheres(assets, refresh);
+            var objectsSph = GetSceneAssetSpheres(objects, refresh);
 
-            foreach (var item in objects.Keys)
+            BoundingSphere res = new();
+            bool initialized = false;
+            foreach (var sph in assetsSph.Concat(objectsSph))
             {
-                var model = objects[item];
-                if (model == null)
+                if (!initialized)
                 {
+                    res = sph;
+                    initialized = true;
                     continue;
                 }
 
-                for (int i = 0; i < model.InstanceCount; i++)
-                {
-                    var bsph = model[i].GetBoundingSphere(refresh);
-
-                    if (!initialized)
-                    {
-                        res = bsph;
-                        initialized = true;
-                    }
-                    else
-                    {
-                        res = BoundingSphere.Merge(res, bsph);
-                    }
-                }
+                res = BoundingSphere.Merge(res, sph);
             }
 
             sceneBoundingSphere = res;
@@ -1089,31 +1128,21 @@ namespace Engine.Modular
                 return sceneBoundingBox.Value;
             }
 
-            var res = new BoundingBox();
-            bool initialized = false;
+            var assetsBoxes = GetSceneAssetBoxes(assets, refresh);
+            var objectsBoxes = GetSceneAssetBoxes(objects, refresh);
 
-            foreach (var item in objects.Keys)
+            BoundingBox res = new();
+            bool initialized = false;
+            foreach (var box in assetsBoxes.Concat(objectsBoxes))
             {
-                var model = objects[item];
-                if (model == null)
+                if (!initialized)
                 {
+                    res = box;
+                    initialized = true;
                     continue;
                 }
 
-                for (int i = 0; i < model.InstanceCount; i++)
-                {
-                    var bbox = model[i].GetBoundingBox(refresh);
-
-                    if (!initialized)
-                    {
-                        res = bbox;
-                        initialized = true;
-                    }
-                    else
-                    {
-                        res = BoundingBox.Merge(res, bbox);
-                    }
-                }
+                res = BoundingBox.Merge(res, box);
             }
 
             sceneBoundingBox = res;
@@ -1121,7 +1150,7 @@ namespace Engine.Modular
             return sceneBoundingBox.Value;
         }
         /// <inheritdoc/>
-        public override IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
+        public override IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
         {
             if (sceneTriangles != null)
             {
@@ -1132,13 +1161,13 @@ namespace Engine.Modular
 
             var assetTriangles = assets.Values
                 .SelectMany(asset => asset.GetInstances().Where(i => i.Visible))
-                .SelectMany(instance => instance.GetPickingHull(geometryType));
+                .SelectMany(instance => instance.GetGeometry(geometryType));
 
             triangleLits.AddRange(assetTriangles);
 
             var objTriangles = objects.Values
                 .SelectMany(obj => obj.GetInstances().Where(i => i.Visible))
-                .SelectMany(instance => instance.GetPickingHull(geometryType));
+                .SelectMany(instance => instance.GetGeometry(geometryType));
 
             triangleLits.AddRange(objTriangles);
 

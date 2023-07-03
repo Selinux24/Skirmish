@@ -13,6 +13,11 @@ namespace Engine
     /// <remarks>Used for picking tests and navigation over surfaces</remarks>
     public abstract class Ground<T> : Drawable<T>, IGround, IRayPickable<Triangle>, IIntersectable where T : GroundDescription
     {
+        /// <inheritdoc/>
+        public PickingHullTypes PathFindingHull { get; set; } = PickingHullTypes.Hull;
+        /// <inheritdoc/>
+        public PickingHullTypes PickingHull { get; set; } = PickingHullTypes.Hull;
+
         /// <summary>
         /// Quadtree for base ground picking
         /// </summary>
@@ -93,14 +98,26 @@ namespace Engine
             return new OrientedBoundingBox(GetBoundingBox(refresh));
         }
         /// <inheritdoc/>
-        public virtual IEnumerable<Triangle> GetPickingHull(PickingHullTypes geometryType)
+        public virtual IEnumerable<Triangle> GetGeometry(GeometryTypes geometryType)
         {
-            if (!geometryType.HasFlag(PickingHullTypes.Geometry))
+            var hull = geometryType switch
             {
-                return Enumerable.Empty<Triangle>();
+                GeometryTypes.Picking => PickingHull,
+                GeometryTypes.PathFinding => PathFindingHull,
+                _ => PickingHullTypes.None,
+            };
+
+            if (hull.HasFlag(PickingHullTypes.Hull))
+            {
+                return GetTriangles();
             }
 
-            return GetTriangles();
+            if (hull.HasFlag(PickingHullTypes.Geometry))
+            {
+                return GetTriangles();
+            }
+
+            return Enumerable.Empty<Triangle>();
         }
 
         /// <inheritdoc/>
@@ -109,7 +126,7 @@ namespace Engine
             if (GroundPickingQuadtree == null)
             {
                 // Brute force
-                var mesh = GetPickingHull(PickingHullTypes.Hull);
+                var mesh = GetGeometry(GeometryTypes.Picking);
 
                 return Intersection.SphereIntersectsMesh(sphere, mesh, out result);
             }
@@ -162,14 +179,13 @@ namespace Engine
             {
                 return (IntersectionVolumeAxisAlignedBox)GetBoundingBox();
             }
-            else if (detectionMode == IntersectDetectionMode.Sphere)
+
+            if (detectionMode == IntersectDetectionMode.Sphere)
             {
                 return (IntersectionVolumeSphere)GetBoundingSphere();
             }
-            else
-            {
-                return (IntersectionVolumeMesh)GetPickingHull(PickingHullTypes.Hull).ToArray();
-            }
+
+            return (IntersectionVolumeMesh)GetGeometry(GeometryTypes.Picking).ToArray();
         }
 
         /// <inheritdoc/>

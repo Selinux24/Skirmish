@@ -8,10 +8,6 @@ namespace Engine.Audio.Tween
     public class AudioEffectTweener
     {
         /// <summary>
-        /// Tweener
-        /// </summary>
-        private readonly Tweener tweener;
-        /// <summary>
         /// Tween collection
         /// </summary>
         private readonly AudioEffectTweenCollection collection = new();
@@ -21,10 +17,8 @@ namespace Engine.Audio.Tween
         /// </summary>
         public AudioEffectTweener(Tweener tweener)
         {
-            this.tweener = tweener;
-
             // Register the collection into the tween manager
-            this.tweener.AddTweenCollection(collection);
+            tweener.AddTweenCollection(collection);
         }
 
         /// <summary>

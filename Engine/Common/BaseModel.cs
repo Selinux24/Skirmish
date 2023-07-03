@@ -42,6 +42,10 @@ namespace Engine.Common
         /// Collider type for collision tests
         /// </summary>
         public ColliderTypes ColliderType { get; private set; }
+        /// <inheritdoc/>
+        public PickingHullTypes PathFindingHull { get; set; }
+        /// <inheritdoc/>
+        public PickingHullTypes PickingHull { get; set; }
 
         /// <summary>
         /// Base model

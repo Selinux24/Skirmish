@@ -51,10 +51,37 @@ namespace Engine
         OrientedBoundingBox GetOrientedBoundingBox(bool refresh = false);
 
         /// <summary>
+        /// Picking hull
+        /// </summary>
+        PickingHullTypes PickingHull { get; set; }
+        /// <summary>
+        /// Path finding hull
+        /// </summary>
+        PickingHullTypes PathFindingHull { get; set; }
+        /// <summary>
         /// Gets the picking hull of the instance
         /// </summary>
         /// <param name="geometryType">Geometry type</param>
         /// <returns>Returns the geometry of the instance</returns>
-        IEnumerable<T> GetPickingHull(PickingHullTypes geometryType);
+        IEnumerable<T> GetGeometry(GeometryTypes geometryType);
+    }
+
+    /// <summary>
+    /// Geometry types
+    /// </summary>
+    public enum GeometryTypes
+    {
+        /// <summary>
+        /// None
+        /// </summary>
+        None = 0,
+        /// <summary>
+        /// Picking
+        /// </summary>
+        Picking = 1,
+        /// <summary>
+        /// Path finding
+        /// </summary>
+        PathFinding = 2,
     }
 }
