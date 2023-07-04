@@ -32,7 +32,7 @@ namespace Engine
         /// <param name="contentPath">Content path</param>
         /// <param name="scale">Scale</param>
         /// <returns>Returns the new generated particle system description</returns>
-        internal static ParticleSystemDescription Initialize(ParticleSystemFile particleDesc, string contentPath, float scale = 1f)
+        public static ParticleSystemDescription Initialize(ParticleSystemFile particleDesc, string contentPath, float scale = 1f)
         {
             return Initialize(particleDesc.ParticleType, contentPath, particleDesc.TextureName, scale);
         }
@@ -64,7 +64,7 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeDust(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription
+            ParticleSystemDescription settings = new()
             {
                 Name = "Dust",
 
@@ -111,7 +111,7 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeFire(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription
+            ParticleSystemDescription settings = new()
             {
                 Name = "Fire",
 
@@ -156,7 +156,7 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeSmokePlume(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription
+            ParticleSystemDescription settings = new()
             {
                 Name = "SmokePlume",
 
@@ -204,7 +204,7 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeProjectileTrail(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription
+            ParticleSystemDescription settings = new()
             {
                 Name = "ProjectileTrail",
 
@@ -250,7 +250,7 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeExplosion(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription
+            ParticleSystemDescription settings = new()
             {
                 Name = "Explosion",
 
@@ -296,7 +296,7 @@ namespace Engine
         /// <returns>Returns the new generated particle system description</returns>
         public static ParticleSystemDescription InitializeSmokeExplosion(string contentPath, string texture, float scale = 1f)
         {
-            ParticleSystemDescription settings = new ParticleSystemDescription
+            ParticleSystemDescription settings = new()
             {
                 Name = "SmokeExplosion",
 

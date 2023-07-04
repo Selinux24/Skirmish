@@ -16,7 +16,7 @@ namespace Engine.Modular.Persistence
         /// Connection type
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public ModularSceneryAssetConnectionTypes Type { get; set; } = ModularSceneryAssetConnectionTypes.None;
+        public AssetConnectionTypes Type { get; set; } = AssetConnectionTypes.None;
         /// <summary>
         /// Position
         /// </summary>

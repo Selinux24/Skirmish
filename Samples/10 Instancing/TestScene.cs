@@ -237,7 +237,7 @@ namespace Instancing
 
             string[] anim = new[] { "soldier_idle1", "soldier_idle2" };
 
-            var rnd = new Random(1);
+            var rnd = Helper.SetRandomGeneratorSeed(1);
             float l = 5;
             var vMax = new Vector3(l - 1, 0, l - 1);
             var vMin = -vMax;

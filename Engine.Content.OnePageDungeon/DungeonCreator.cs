@@ -167,9 +167,9 @@ namespace Engine.Content.OnePageDungeon
                     float vz = (rect.Y + y) * configuration.BlockSize;
                     var position = new Vector3(-vx, 0, vz);
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), ModularSceneryAssetTypes.Floor, position, RotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonFloor(), AssetTypes.Floor, position, RotationQ.Identity));
 
-                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), ModularSceneryAssetTypes.Ceiling, position, RotationQ.Identity));
+                    references.AddRange(CreateReferencesFromProp(configuration.GetRandonCeiling(), AssetTypes.Ceiling, position, RotationQ.Identity));
 
                     var cellWalls = walls
                         .Where(w => w.Cell.X == ix && w.Cell.Y == iy)
@@ -187,7 +187,7 @@ namespace Engine.Content.OnePageDungeon
         /// <param name="assetType"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, ModularSceneryAssetTypes assetType, Position3 position, RotationQ rotation)
+        private static IEnumerable<AssetReference> CreateReferencesFromProp(DungeonProp prop, AssetTypes assetType, Position3 position, RotationQ rotation)
         {
             if (prop?.Assets?.Any() != true)
             {
@@ -203,7 +203,7 @@ namespace Engine.Content.OnePageDungeon
                     Position = position + asset.Position,
                     Rotation = rotation * asset.Rotation,
                     Scale = asset.Scale,
-                    PathFinding = (ModularSceneryPathFindingModes)asset.PathFinding,
+                    PathFinding = (Modular.PathFindingModes)asset.PathFinding,
                 };
             }
         }
@@ -226,7 +226,7 @@ namespace Engine.Content.OnePageDungeon
                 var position = new Position3(-vx, 0, vz - blockDelta);
                 var rotation = EvaluateRotation(WallDirections.N, configuration.RotationDelta);
 
-                references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
             if (cellWall.Dir.HasFlag(WallDirections.S))
@@ -235,7 +235,7 @@ namespace Engine.Content.OnePageDungeon
                 var position = new Position3(-vx, 0, vz + blockDelta);
                 var rotation = EvaluateRotation(WallDirections.S, configuration.RotationDelta);
 
-                references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
             if (cellWall.Dir.HasFlag(WallDirections.E))
@@ -244,7 +244,7 @@ namespace Engine.Content.OnePageDungeon
                 var position = new Position3(-vx - blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.E, configuration.RotationDelta);
 
-                references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
             if (cellWall.Dir.HasFlag(WallDirections.W))
@@ -253,7 +253,7 @@ namespace Engine.Content.OnePageDungeon
                 var position = new Position3(-vx + blockDelta, 0, vz);
                 var rotation = EvaluateRotation(WallDirections.W, configuration.RotationDelta);
 
-                references.AddRange(CreateReferencesFromProp(wall, ModularSceneryAssetTypes.Wall, position, rotation));
+                references.AddRange(CreateReferencesFromProp(wall, AssetTypes.Wall, position, rotation));
             }
 
             return references;
@@ -346,7 +346,7 @@ namespace Engine.Content.OnePageDungeon
                         {
                             Position = tposition,
                             Direction = -Vector3.Normalize(position - tposition),
-                            Type = ModularSceneryAssetConnectionTypes.Open,
+                            Type = AssetConnectionTypes.Open,
                         };
                     }
 
@@ -357,7 +357,7 @@ namespace Engine.Content.OnePageDungeon
                         {
                             Position = tposition,
                             Direction = Vector3.Normalize(position - tposition),
-                            Type = ModularSceneryAssetConnectionTypes.Open,
+                            Type = AssetConnectionTypes.Open,
                         };
                     }
                 }
@@ -392,11 +392,11 @@ namespace Engine.Content.OnePageDungeon
                     yield return new AssetReference()
                     {
                         AssetName = asset.Name,
-                        Type = ModularSceneryAssetTypes.None,
+                        Type = AssetTypes.None,
                         Position = position + asset.Position,
                         Rotation = asset.Rotation,
                         Scale = asset.Scale,
-                        PathFinding = (ModularSceneryPathFindingModes)asset.PathFinding,
+                        PathFinding = (Modular.PathFindingModes)asset.PathFinding,
                     };
                 }
             }
@@ -488,11 +488,11 @@ namespace Engine.Content.OnePageDungeon
                         AssetName = dDoor.Door.Name,
                         Id = $"door_{index++}",
                         Name = "door",
-                        Type = ModularSceneryObjectTypes.Door,
+                        Type = ObjectTypes.Door,
                         Position = pos + dDoor.Door.Position,
                         Rotation = rot * dDoor.Door.Rotation,
                         Scale = dDoor.Door.Scale,
-                        PathFinding = (ModularSceneryPathFindingModes)dDoor.Door.PathFinding,
+                        PathFinding = (Modular.PathFindingModes)dDoor.Door.PathFinding,
                         AnimationPlans = configuration.DoorAnimationPlans?.ToArray(),
                         Actions = configuration.DoorActions?.ToArray(),
                         States = configuration.DoorStates?.ToArray(),
@@ -509,11 +509,11 @@ namespace Engine.Content.OnePageDungeon
                     yield return new ObjectReference
                     {
                         AssetName = asset.Name,
-                        Type = ModularSceneryObjectTypes.Default,
+                        Type = ObjectTypes.Default,
                         Position = pos + asset.Position,
                         Rotation = rot * asset.Rotation,
                         Scale = asset.Scale,
-                        PathFinding = (ModularSceneryPathFindingModes)asset.PathFinding,
+                        PathFinding = (Modular.PathFindingModes)asset.PathFinding,
                     };
                 }
             }

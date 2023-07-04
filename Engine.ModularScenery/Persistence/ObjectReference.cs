@@ -43,12 +43,12 @@ namespace Engine.Modular.Persistence
         /// Item type
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public ModularSceneryObjectTypes Type { get; set; } = ModularSceneryObjectTypes.Default;
+        public ObjectTypes Type { get; set; } = ObjectTypes.Default;
         /// <summary>
         /// Path finding
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public ModularSceneryPathFindingModes PathFinding { get; set; } = ModularSceneryPathFindingModes.None;
+        public PathFindingModes PathFinding { get; set; } = PathFindingModes.None;
         /// <summary>
         /// Animation plan list
         /// </summary>

@@ -6,7 +6,7 @@ namespace Engine.Modular
     /// Modular scenery object type enum
     /// </summary>
     [Flags]
-    public enum ModularSceneryObjectTypes
+    public enum ObjectTypes
     {
         /// <summary>
         /// Default type

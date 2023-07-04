@@ -24,12 +24,12 @@ namespace Engine.Modular.Persistence
         /// Type
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public ModularSceneryAssetTypes Type { get; set; } = ModularSceneryAssetTypes.None;
+        public AssetTypes Type { get; set; } = AssetTypes.None;
         /// <summary>
         /// Path finding
         /// </summary>
         [JsonConverter(typeof(StringEnumConverter))]
-        public ModularSceneryPathFindingModes PathFinding { get; set; } = ModularSceneryPathFindingModes.None;
+        public PathFindingModes PathFinding { get; set; } = PathFindingModes.None;
         /// <summary>
         /// Position vector
         /// </summary>

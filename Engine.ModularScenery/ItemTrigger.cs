@@ -5,7 +5,7 @@ namespace Engine.Modular
     /// <summary>
     /// Modular scenery trigger
     /// </summary>
-    public class ModularSceneryTrigger
+    public class ItemTrigger
     {
         /// <summary>
         /// Trigger name
@@ -26,6 +26,6 @@ namespace Engine.Modular
         /// <summary>
         /// List of actions referenced by the trigger
         /// </summary>
-        public List<ModularSceneryAction> Actions { get; set; } = new List<ModularSceneryAction>();
+        public List<ItemAction> Actions { get; set; } = new List<ItemAction>();
     }
 }

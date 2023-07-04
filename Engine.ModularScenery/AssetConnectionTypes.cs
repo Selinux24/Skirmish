@@ -4,7 +4,7 @@ namespace Engine.Modular
     /// <summary>
     /// Connection types
     /// </summary>
-    public enum ModularSceneryAssetConnectionTypes
+    public enum AssetConnectionTypes
     {
         /// <summary>
         /// None

@@ -6,19 +6,19 @@ namespace Engine.Modular
     /// <summary>
     /// Modular scenery trigger event arguments
     /// </summary>
-    public class ModularSceneryTriggerEventArgs : EventArgs
+    public class TriggerEventArgs : EventArgs
     {
         /// <summary>
         /// Starting trigger
         /// </summary>
-        public ModularSceneryTrigger StarterTrigger { get; set; }
+        public ItemTrigger StarterTrigger { get; set; }
         /// <summary>
         /// Starting item
         /// </summary>
-        public ModularSceneryItem StarterItem { get; set; }
+        public Item StarterItem { get; set; }
         /// <summary>
         /// Affected items by the trigger
         /// </summary>
-        public IEnumerable<ModularSceneryItem> Items { get; set; }
+        public IEnumerable<Item> Items { get; set; }
     }
 }

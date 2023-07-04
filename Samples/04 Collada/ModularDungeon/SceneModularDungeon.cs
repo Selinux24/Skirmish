@@ -64,7 +64,7 @@ namespace Collada.ModularDungeon
         private Vector3[] ratHoles = Array.Empty<Vector3>();
 
         private PrimitiveListDrawer<Triangle> selectedItemDrawer = null;
-        private ModularSceneryItem selectedItem = null;
+        private Item selectedItem = null;
 
         private ModelInstanced human = null;
 
@@ -770,7 +770,7 @@ namespace Collada.ModularDungeon
             bboxesDrawer.Clear();
 
             //Boxes
-            var rndBoxes = new Random(1);
+            var rndBoxes = Helper.SetRandomGeneratorSeed(1);
 
             var dict = scenery.GetMapVolumes();
 
@@ -783,11 +783,11 @@ namespace Collada.ModularDungeon
             }
 
             //Objects
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ModularSceneryObjectTypes.Entrance).Select(o => o.Item), Color.PaleVioletRed);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ModularSceneryObjectTypes.Exit).Select(o => o.Item), Color.ForestGreen);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ModularSceneryObjectTypes.Trigger).Select(o => o.Item), Color.Cyan);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ModularSceneryObjectTypes.Door).Select(o => o.Item), Color.LightYellow);
-            UpdateBoundingBoxes(scenery.GetObjectsByType(ModularSceneryObjectTypes.Light).Select(o => o.Item), Color.MediumPurple);
+            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Entrance).Select(o => o.Instance), Color.PaleVioletRed);
+            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Exit).Select(o => o.Instance), Color.ForestGreen);
+            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Trigger).Select(o => o.Instance), Color.Cyan);
+            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Door).Select(o => o.Instance), Color.LightYellow);
+            UpdateBoundingBoxes(scenery.GetObjectsByType(ObjectTypes.Light).Select(o => o.Instance), Color.MediumPurple);
         }
         private void UpdateBoundingBoxes(IEnumerable<ModelInstance> items, Color color)
         {
@@ -799,14 +799,14 @@ namespace Collada.ModularDungeon
             var boxes = items.Select(i => SharpDXExtensions.BoundingBoxFromPoints(i.GetPoints().ToArray()));
             bboxesDrawer.SetPrimitives(color, Line3D.CreateFromVertices(GeometryUtil.CreateBoxes(Topology.LineList, boxes)));
         }
-        private void TriggerEnds(object sender, ModularSceneryTriggerEventArgs e)
+        private void TriggerEnds(object sender, TriggerEventArgs e)
         {
             if (!e.Items.Any())
             {
                 return;
             }
 
-            var obs = obstacles.Where(o => e.Items.Select(i => i.Item).Contains(o.Item));
+            var obs = obstacles.Where(o => e.Items.Select(i => i.Instance).Contains(o.Item));
             if (!obs.Any())
             {
                 return;
@@ -970,18 +970,18 @@ namespace Collada.ModularDungeon
                 return;
             }
 
-            if (selectedItem.Object.Type == ModularSceneryObjectTypes.Exit)
+            if (selectedItem.Object.Type == ObjectTypes.Exit)
             {
                 UpdateEntityExit(selectedItem);
             }
 
-            if (selectedItem.Object.Type == ModularSceneryObjectTypes.Trigger ||
-                selectedItem.Object.Type == ModularSceneryObjectTypes.Door)
+            if (selectedItem.Object.Type == ObjectTypes.Trigger ||
+                selectedItem.Object.Type == ObjectTypes.Door)
             {
                 UpdateEntityTrigger(selectedItem);
             }
 
-            if (selectedItem.Object.Type == ModularSceneryObjectTypes.Light)
+            if (selectedItem.Object.Type == ObjectTypes.Light)
             {
                 UpdateEntityLight(selectedItem);
             }
@@ -1008,7 +1008,7 @@ namespace Collada.ModularDungeon
                 return;
             }
 
-            var tris = selectedItem.Item.GetTriangles();
+            var tris = selectedItem.Instance.GetTriangles();
             if (tris.Any())
             {
                 Color4 sItemColor = Color.LightYellow;
@@ -1103,11 +1103,11 @@ namespace Collada.ModularDungeon
             var sphere = new BoundingSphere(Camera.Position, doorDistance);
 
             var objTypes =
-                ModularSceneryObjectTypes.Entrance |
-                ModularSceneryObjectTypes.Exit |
-                ModularSceneryObjectTypes.Door |
-                ModularSceneryObjectTypes.Trigger |
-                ModularSceneryObjectTypes.Light;
+                ObjectTypes.Entrance |
+                ObjectTypes.Exit |
+                ObjectTypes.Door |
+                ObjectTypes.Trigger |
+                ObjectTypes.Light;
 
             var ray = GetPickingRay();
             float minDist = 1.2f;
@@ -1115,16 +1115,16 @@ namespace Collada.ModularDungeon
             //Test items into the camera frustum and nearest to the player
             var items =
                 scenery.GetObjectsInVolume(sphere, objTypes, false, true)
-                .Where(i => Camera.Frustum.Contains(i.Item.GetBoundingBox()) != ContainmentType.Disjoint)
+                .Where(i => Camera.Frustum.Contains(i.Instance.GetBoundingBox()) != ContainmentType.Disjoint)
                 .Where(i =>
                 {
-                    if (i.Item.PickNearest(ray, out var res))
+                    if (i.Instance.PickNearest(ray, out var res))
                     {
                         return true;
                     }
                     else
                     {
-                        var bbox = i.Item.GetBoundingBox();
+                        var bbox = i.Instance.GetBoundingBox();
                         var center = bbox.GetCenter();
                         var extents = bbox.GetExtents();
                         extents *= minDist;
@@ -1154,21 +1154,21 @@ namespace Collada.ModularDungeon
                 SetSelectedItem(null);
             }
         }
-        private static float CalcItemPickingDistance(PickingRay ray, ModularSceneryItem item)
+        private static float CalcItemPickingDistance(PickingRay ray, Item item)
         {
-            if (item.Item.PickNearest(ray, out var res))
+            if (item.Instance.PickNearest(ray, out var res))
             {
                 return res.Distance;
             }
             else
             {
-                var sph = item.Item.GetBoundingSphere();
+                var sph = item.Instance.GetBoundingSphere();
                 Intersection.ClosestPointInRay(ray, sph.Center, out float distance);
                 return distance;
             }
         }
 
-        private void SetSelectedItem(ModularSceneryItem item)
+        private void SetSelectedItem(Item item)
         {
             if (item == selectedItem)
             {
@@ -1186,30 +1186,30 @@ namespace Collada.ModularDungeon
                 return;
             }
 
-            if (item.Object.Type == ModularSceneryObjectTypes.Entrance)
+            if (item.Object.Type == ObjectTypes.Entrance)
             {
                 var msg = "The door locked when you closed it.\r\nYou must find an exit...";
 
                 PrepareMessage(true, msg);
             }
-            else if (item.Object.Type == ModularSceneryObjectTypes.Exit)
+            else if (item.Object.Type == ObjectTypes.Exit)
             {
                 var msg = "Press space to exit...";
 
                 PrepareMessage(true, msg);
             }
             else if (
-                item.Object.Type == ModularSceneryObjectTypes.Door ||
-                item.Object.Type == ModularSceneryObjectTypes.Trigger)
+                item.Object.Type == ObjectTypes.Door ||
+                item.Object.Type == ObjectTypes.Trigger)
             {
                 SetSelectedItemTrigger(item);
             }
-            else if (item.Object.Type == ModularSceneryObjectTypes.Light)
+            else if (item.Object.Type == ObjectTypes.Light)
             {
                 SetSelectedItemLight(item);
             }
         }
-        private void SetSelectedItemTrigger(ModularSceneryItem item)
+        private void SetSelectedItemTrigger(Item item)
         {
             var triggers = scenery
                 .GetTriggersByObject(item)
@@ -1224,9 +1224,9 @@ namespace Collada.ModularDungeon
                 PrepareMessage(true, msg);
             }
         }
-        private void SetSelectedItemLight(ModularSceneryItem item)
+        private void SetSelectedItemLight(Item item)
         {
-            var lights = item.Item.Lights;
+            var lights = item.Instance.Lights;
             if (lights.Any())
             {
                 var msg = string.Format("Press space to {0} the light...", lights.First().Enabled ? "turn off" : "turn on");
@@ -1250,13 +1250,13 @@ namespace Collada.ModularDungeon
                 uiTweener.Hide(messages, 250);
             }
         }
-        private void UpdateEntityExit(ModularSceneryItem item)
+        private void UpdateEntityExit(Item item)
         {
             if (Game.Input.KeyJustReleased(Keys.Space))
             {
                 Task.Run(async () =>
                 {
-                    var effect = AudioManager.CreateEffectInstance(soundDoor, item.Item, Camera);
+                    var effect = AudioManager.CreateEffectInstance(soundDoor, item.Instance, Camera);
                     if (effect != null)
                     {
                         effect.Play();
@@ -1276,7 +1276,7 @@ namespace Collada.ModularDungeon
                 });
             }
         }
-        private void UpdateEntityTrigger(ModularSceneryItem item)
+        private void UpdateEntityTrigger(Item item)
         {
             var triggers = scenery
                 .GetTriggersByObject(item)
@@ -1293,13 +1293,13 @@ namespace Collada.ModularDungeon
                 }
             }
         }
-        private void UpdateEntityLight(ModularSceneryItem item)
+        private void UpdateEntityLight(Item item)
         {
             if (Game.Input.KeyJustReleased(Keys.Space))
             {
                 bool enabled = false;
 
-                var lights = item.Item.Lights;
+                var lights = item.Instance.Lights;
                 if (lights.Any())
                 {
                     enabled = !lights.First().Enabled;
@@ -1510,7 +1510,7 @@ namespace Collada.ModularDungeon
             //Rat holes
             ratHoles = scenery
                 .GetObjectsByName("Dn_Rat_Hole_1")
-                .Select(o => o.Item.Manipulator.Position)
+                .Select(o => o.Instance.Manipulator.Position)
                 .ToArray();
 
             //NPCs
@@ -1558,7 +1558,7 @@ namespace Collada.ModularDungeon
         {
             var torchs = scenery
                 .GetObjectsByName("Dn_Torch")
-                .Select(o => o.Item);
+                .Select(o => o.Instance);
 
             int index = 0;
             foreach (var item in torchs)
@@ -1584,8 +1584,8 @@ namespace Collada.ModularDungeon
         private void StartEntitiesAudioBigFires()
         {
             List<ModelInstance> fires = new();
-            fires.AddRange(scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Item));
-            fires.AddRange(scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Item));
+            fires.AddRange(scenery.GetObjectsByName("Dn_Temple_Fire_1").Select(o => o.Instance));
+            fires.AddRange(scenery.GetObjectsByName("Dn_Big_Lamp_1").Select(o => o.Instance));
 
             int index = 0;
             foreach (var item in fires)
@@ -1614,8 +1614,8 @@ namespace Collada.ModularDungeon
 
             //Object obstacles
             var sceneryObjects = scenery
-                .GetObjectsByType(ModularSceneryObjectTypes.Furniture | ModularSceneryObjectTypes.Door)
-                .Select(o => o.Item);
+                .GetObjectsByType(ObjectTypes.Furniture | ObjectTypes.Door)
+                .Select(o => o.Instance);
 
             foreach (var item in sceneryObjects)
             {

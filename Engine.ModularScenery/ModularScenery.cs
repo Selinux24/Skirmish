@@ -48,11 +48,11 @@ namespace Engine.Modular
         /// <summary>
         /// Scenery entities
         /// </summary>
-        private readonly List<ModularSceneryItem> entities = new();
+        private readonly List<Item> entities = new();
         /// <summary>
         /// Triggers list by instance
         /// </summary>
-        private readonly Dictionary<ModelInstance, List<ModularSceneryTrigger>> triggers = new();
+        private readonly Dictionary<ModelInstance, List<ItemTrigger>> triggers = new();
         /// <summary>
         /// Animations plan dictionary by instance
         /// </summary>
@@ -100,11 +100,11 @@ namespace Engine.Modular
         /// <summary>
         /// Trigger starts it's execution event
         /// </summary>
-        public event ModularSceneryTriggerStartHandler TriggerStart;
+        public event TriggerStartHandler TriggerStart;
         /// <summary>
         /// Trigger ends it's execution event
         /// </summary>
-        public event ModularSceneryTriggerEndHandler TriggerEnd;
+        public event TriggerEndHandler TriggerEnd;
 
         /// <summary>
         /// Populate objects empty ids
@@ -177,9 +177,9 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="asset">Asset</param>
         /// <returns>Returns a dictionary that contains the instance count by asset name</returns>
-        private static Dictionary<string, (int Count, ModularSceneryPathFindingModes PathFinding)> GetInstanceCounters(Asset asset)
+        private static Dictionary<string, (int Count, PathFindingModes PathFinding)> GetInstanceCounters(Asset asset)
         {
-            Dictionary<string, (int, ModularSceneryPathFindingModes)> res = new();
+            Dictionary<string, (int, PathFindingModes)> res = new();
 
             var assetNames = asset.References.Select(a => a.AssetName).Distinct();
 
@@ -554,7 +554,7 @@ namespace Engine.Modular
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="pathFinding">Path finding</param>
-        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent, ModularSceneryPathFindingModes pathFinding)
+        private async Task<ModelInstanced> InitializeAsset(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
         {
             var assetId = $"{Name ?? nameof(ModularScenery)}.Asset.{assetName}.{level.Name}";
 
@@ -562,10 +562,10 @@ namespace Engine.Modular
             {
                 var pf = pathFinding switch
                 {
-                    ModularSceneryPathFindingModes.None => PickingHullTypes.None,
-                    ModularSceneryPathFindingModes.Coarse => PickingHullTypes.Coarse,
-                    ModularSceneryPathFindingModes.Hull => PickingHullTypes.Hull,
-                    ModularSceneryPathFindingModes.Geometry => PickingHullTypes.Geometry,
+                    PathFindingModes.None => PickingHullTypes.None,
+                    PathFindingModes.Coarse => PickingHullTypes.Coarse,
+                    PathFindingModes.Hull => PickingHullTypes.Hull,
+                    PathFindingModes.Geometry => PickingHullTypes.Geometry,
                     _ => PickingHullTypes.None,
                 };
 
@@ -645,7 +645,7 @@ namespace Engine.Modular
         /// <param name="level">Level</param>
         /// <param name="modelContent">Model content</param>
         /// <param name="pathFinding">Path finding enabled flag</param>
-        private async Task<ModelInstanced> InitializeObject(string assetName, int count, Level level, ContentData modelContent, ModularSceneryPathFindingModes pathFinding)
+        private async Task<ModelInstanced> InitializeObject(string assetName, int count, Level level, ContentData modelContent, PathFindingModes pathFinding)
         {
             var modelId = $"{Name ?? nameof(ModularScenery)}.{assetName}.{level.Name}";
 
@@ -653,10 +653,10 @@ namespace Engine.Modular
             {
                 var pf = pathFinding switch
                 {
-                    ModularSceneryPathFindingModes.None => PickingHullTypes.None,
-                    ModularSceneryPathFindingModes.Coarse => PickingHullTypes.Coarse,
-                    ModularSceneryPathFindingModes.Hull => PickingHullTypes.Hull,
-                    ModularSceneryPathFindingModes.Geometry => PickingHullTypes.Geometry,
+                    PathFindingModes.None => PickingHullTypes.None,
+                    PathFindingModes.Coarse => PickingHullTypes.Coarse,
+                    PathFindingModes.Hull => PickingHullTypes.Hull,
+                    PathFindingModes.Geometry => PickingHullTypes.Geometry,
                     _ => PickingHullTypes.None,
                 };
 
@@ -803,14 +803,14 @@ namespace Engine.Modular
                 instance.InvalidateCache();
             }
 
-            List<ModularSceneryTrigger> instanceTriggers = new();
+            List<ItemTrigger> instanceTriggers = new();
 
             //Actions
             if (obj.Actions?.Any() == true)
             {
                 foreach (var action in obj.Actions)
                 {
-                    ModularSceneryTrigger trigger = new()
+                    ItemTrigger trigger = new()
                     {
                         Name = action.Name,
                         StateFrom = action.StateFrom,
@@ -820,10 +820,10 @@ namespace Engine.Modular
 
                     foreach (var item in action.Items)
                     {
-                        ModularSceneryAction act = new()
+                        ItemAction act = new()
                         {
-                            ItemId = item.Id,
-                            ItemAction = item.Action,
+                            Id = item.Id,
+                            Action = item.Action,
                         };
 
                         trigger.Actions.Add(act);
@@ -883,7 +883,7 @@ namespace Engine.Modular
                         //Find first state
                         var defaultState = obj.States?.FirstOrDefault()?.Name;
 
-                        entities.Add(new ModularSceneryItem(obj, instance, emitters, defaultState));
+                        entities.Add(new Item(obj, instance, emitters, defaultState));
                     }
 
                     progress?.Report(new LoadResourceProgress { Progress = ++current / total });
@@ -981,8 +981,8 @@ namespace Engine.Modular
                     if (assetMap.MaintainTextureDirection)
                     {
                         var maintain =
-                            basicAssetType == ModularSceneryAssetTypes.Floor ||
-                            basicAssetType == ModularSceneryAssetTypes.Ceiling;
+                            basicAssetType == AssetTypes.Floor ||
+                            basicAssetType == AssetTypes.Ceiling;
                         if (maintain)
                         {
                             //Invert complex asset rotation
@@ -1070,7 +1070,7 @@ namespace Engine.Modular
                     return;
                 }
 
-                TriggerEnd?.Invoke(this, new ModularSceneryTriggerEventArgs()
+                TriggerEnd?.Invoke(this, new TriggerEventArgs()
                 {
                     StarterTrigger = c.Trigger,
                     StarterItem = c.Item,
@@ -1234,7 +1234,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="id">Object id</param>
         /// <returns>Returns the specified object by id</returns>
-        public ModularSceneryItem GetObjectById(string id)
+        public Item GetObjectById(string id)
         {
             var obj = entities.Find(o => string.Equals(o.Object.Id, id, StringComparison.OrdinalIgnoreCase));
 
@@ -1246,7 +1246,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="name">Object name</param>
         /// <returns>Returns a list of objects by name</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsByName(string name)
+        public IEnumerable<Item> GetObjectsByName(string name)
         {
             var res = entities
                 .Where(o => string.Equals(o.Object.AssetName, name, StringComparison.OrdinalIgnoreCase));
@@ -1258,7 +1258,7 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="objectType">Object type</param>
         /// <returns>Returns a list of objects of the specified type</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsByType(ModularSceneryObjectTypes objectType)
+        public IEnumerable<Item> GetObjectsByType(ObjectTypes objectType)
         {
             var res = entities
                 .Where(o => objectType.HasFlag(o.Object.Type));
@@ -1273,7 +1273,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
+        public IEnumerable<Item> GetObjectsInVolume(BoundingBox bbox, bool useSphere, bool sortByDistance)
         {
             return GetObjects(bbox, null, useSphere, sortByDistance);
         }
@@ -1285,7 +1285,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingBox bbox, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        public IEnumerable<Item> GetObjectsInVolume(BoundingBox bbox, ObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(bbox, filter, useSphere, sortByDistance);
         }
@@ -1296,7 +1296,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
+        public IEnumerable<Item> GetObjectsInVolume(BoundingSphere sphere, bool useSphere, bool sortByDistance)
         {
             return GetObjects(sphere, null, useSphere, sortByDistance);
         }
@@ -1308,7 +1308,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingSphere sphere, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        public IEnumerable<Item> GetObjectsInVolume(BoundingSphere sphere, ObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(sphere, filter, useSphere, sortByDistance);
         }
@@ -1319,7 +1319,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
+        public IEnumerable<Item> GetObjectsInVolume(BoundingFrustum frustum, bool useSphere, bool sortByDistance)
         {
             return GetObjects(frustum, null, useSphere, sortByDistance);
         }
@@ -1331,7 +1331,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        public IEnumerable<ModularSceneryItem> GetObjectsInVolume(BoundingFrustum frustum, ModularSceneryObjectTypes filter, bool useSphere, bool sortByDistance)
+        public IEnumerable<Item> GetObjectsInVolume(BoundingFrustum frustum, ObjectTypes filter, bool useSphere, bool sortByDistance)
         {
             return GetObjects(frustum, filter, useSphere, sortByDistance);
         }
@@ -1343,7 +1343,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private IEnumerable<ModularSceneryItem> GetObjects(BoundingBox bbox, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private IEnumerable<Item> GetObjects(BoundingBox bbox, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -1351,11 +1351,11 @@ namespace Engine.Modular
                 {
                     if (useSphere)
                     {
-                        return bbox.Contains(e.Item.GetBoundingSphere()) != ContainmentType.Disjoint;
+                        return bbox.Contains(e.Instance.GetBoundingSphere()) != ContainmentType.Disjoint;
                     }
                     else
                     {
-                        return bbox.Contains(e.Item.GetBoundingBox()) != ContainmentType.Disjoint;
+                        return bbox.Contains(e.Instance.GetBoundingBox()) != ContainmentType.Disjoint;
                     }
                 })
                 .ToList();
@@ -1366,8 +1366,8 @@ namespace Engine.Modular
 
                 res.Sort((a, b) =>
                 {
-                    var aPos = Vector3.DistanceSquared(a.Item.Manipulator.Position, center);
-                    var bPos = Vector3.DistanceSquared(b.Item.Manipulator.Position, center);
+                    var aPos = Vector3.DistanceSquared(a.Instance.Manipulator.Position, center);
+                    var bPos = Vector3.DistanceSquared(b.Instance.Manipulator.Position, center);
 
                     return aPos.CompareTo(bPos);
                 });
@@ -1383,7 +1383,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private IEnumerable<ModularSceneryItem> GetObjects(BoundingSphere sphere, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private IEnumerable<Item> GetObjects(BoundingSphere sphere, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -1391,13 +1391,13 @@ namespace Engine.Modular
                 {
                     if (useSphere)
                     {
-                        var sph = e.Item.GetBoundingSphere();
+                        var sph = e.Instance.GetBoundingSphere();
 
                         return sphere.Contains(ref sph) != ContainmentType.Disjoint;
                     }
                     else
                     {
-                        var bbox = e.Item.GetBoundingBox();
+                        var bbox = e.Instance.GetBoundingBox();
 
                         return sphere.Contains(ref bbox) != ContainmentType.Disjoint;
                     }
@@ -1410,8 +1410,8 @@ namespace Engine.Modular
 
                 res.Sort((a, b) =>
                 {
-                    var aPos = Vector3.DistanceSquared(a.Item.Manipulator.Position, center);
-                    var bPos = Vector3.DistanceSquared(b.Item.Manipulator.Position, center);
+                    var aPos = Vector3.DistanceSquared(a.Instance.Manipulator.Position, center);
+                    var bPos = Vector3.DistanceSquared(b.Instance.Manipulator.Position, center);
 
                     return aPos.CompareTo(bPos);
                 });
@@ -1427,7 +1427,7 @@ namespace Engine.Modular
         /// <param name="useSphere">Sets wether use item bounding sphere or bounding box</param>
         /// <param name="sortByDistance">Sorts the resulting array by distance</param>
         /// <returns>Gets an array of objects into the specified volume</returns>
-        private IEnumerable<ModularSceneryItem> GetObjects(BoundingFrustum frustum, ModularSceneryObjectTypes? filter, bool useSphere, bool sortByDistance)
+        private IEnumerable<Item> GetObjects(BoundingFrustum frustum, ObjectTypes? filter, bool useSphere, bool sortByDistance)
         {
             var res = entities
                 .Where(e => !filter.HasValue || filter.Value.HasFlag(e.Object.Type))
@@ -1435,13 +1435,13 @@ namespace Engine.Modular
                 {
                     if (useSphere)
                     {
-                        var sph = e.Item.GetBoundingSphere();
+                        var sph = e.Instance.GetBoundingSphere();
 
                         return frustum.Contains(ref sph) != ContainmentType.Disjoint;
                     }
                     else
                     {
-                        var bbox = e.Item.GetBoundingBox();
+                        var bbox = e.Instance.GetBoundingBox();
 
                         return frustum.Contains(ref bbox) != ContainmentType.Disjoint;
                     }
@@ -1454,8 +1454,8 @@ namespace Engine.Modular
 
                 res.Sort((a, b) =>
                 {
-                    var aPos = Vector3.DistanceSquared(a.Item.Manipulator.Position, center);
-                    var bPos = Vector3.DistanceSquared(b.Item.Manipulator.Position, center);
+                    var aPos = Vector3.DistanceSquared(a.Instance.Manipulator.Position, center);
+                    var bPos = Vector3.DistanceSquared(b.Instance.Manipulator.Position, center);
 
                     return aPos.CompareTo(bPos);
                 });
@@ -1469,14 +1469,14 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="item">Scenery item</param>
         /// <returns>Returns a list of triggers</returns>
-        public IEnumerable<ModularSceneryTrigger> GetTriggersByObject(ModularSceneryItem item)
+        public IEnumerable<ItemTrigger> GetTriggersByObject(Item item)
         {
-            if (!triggers.ContainsKey(item.Item))
+            if (!triggers.ContainsKey(item.Instance))
             {
-                return Array.Empty<ModularSceneryTrigger>();
+                return Array.Empty<ItemTrigger>();
             }
 
-            return triggers[item.Item]
+            return triggers[item.Instance]
                 .Where(t => string.Equals(t.StateFrom, item.CurrentState, StringComparison.OrdinalIgnoreCase))
                 .ToArray();
         }
@@ -1486,13 +1486,13 @@ namespace Engine.Modular
         /// </summary>
         /// <param name="staterItem">Starter item</param>
         /// <param name="starterTrigger">Starter trigger</param>
-        public void ExecuteTrigger(ModularSceneryItem staterItem, ModularSceneryTrigger starterTrigger)
+        public void ExecuteTrigger(Item staterItem, ItemTrigger starterTrigger)
         {
             var callback = new TriggerCallback(starterTrigger, staterItem);
 
             ExecuteTriggerInternal(callback, staterItem, starterTrigger);
 
-            TriggerStart?.Invoke(this, new ModularSceneryTriggerEventArgs()
+            TriggerStart?.Invoke(this, new TriggerEventArgs()
             {
                 StarterTrigger = starterTrigger,
                 StarterItem = staterItem,
@@ -1508,7 +1508,7 @@ namespace Engine.Modular
         /// <param name="item">Triggered item</param>
         /// <param name="trigger">Trigger</param>
         /// <returns>Returns the affected items</returns>
-        private void ExecuteTriggerInternal(TriggerCallback callback, ModularSceneryItem item, ModularSceneryTrigger trigger)
+        private void ExecuteTriggerInternal(TriggerCallback callback, Item item, ItemTrigger trigger)
         {
             //Validate item state
             if (item.CurrentState != trigger.StateFrom)
@@ -1521,31 +1521,31 @@ namespace Engine.Modular
             item.CurrentState = trigger.StateTo;
 
             //Execute the action in the item first
-            if (animations.TryGetValue(item.Item, out var anim) && anim.TryGetValue(trigger.AnimationPlan, out var plan))
+            if (animations.TryGetValue(item.Instance, out var anim) && anim.TryGetValue(trigger.AnimationPlan, out var plan))
             {
-                item.Item.AnimationController.ReplacePlan(plan);
-                item.Item.AnimationController.Start();
-                item.Item.InvalidateCache();
+                item.Instance.AnimationController.ReplacePlan(plan);
+                item.Instance.AnimationController.Start();
+                item.Instance.InvalidateCache();
             }
 
             //Find the referenced items and execute actions recursively
             foreach (var action in trigger.Actions)
             {
                 //Find item
-                var refItem = GetObjectById(action.ItemId);
+                var refItem = GetObjectById(action.Id);
                 if (refItem == null)
                 {
                     continue;
                 }
 
                 //Find trigger collection
-                if (!triggers.ContainsKey(refItem.Item))
+                if (!triggers.ContainsKey(refItem.Instance))
                 {
                     continue;
                 }
 
                 //Find trigger
-                var refTrigger = triggers[refItem.Item].Find(t => string.Equals(t.Name, action.ItemAction, StringComparison.OrdinalIgnoreCase));
+                var refTrigger = triggers[refItem.Instance].Find(t => string.Equals(t.Name, action.Action, StringComparison.OrdinalIgnoreCase));
                 if (refTrigger == null)
                 {
                     continue;
@@ -1743,7 +1743,7 @@ namespace Engine.Modular
             {
                 return new ConnectorInfo
                 {
-                    OpenConection = connection.Type == ModularSceneryAssetConnectionTypes.Open,
+                    OpenConection = connection.Type == AssetConnectionTypes.Open,
                     Position = Vector3.TransformCoordinate(connection.Position, transform),
                     Direction = Vector3.TransformNormal(connection.Direction, transform),
                 };
@@ -1905,16 +1905,16 @@ namespace Engine.Modular
             /// <summary>
             /// Starter trigger
             /// </summary>
-            public ModularSceneryTrigger Trigger { get; set; }
+            public ItemTrigger Trigger { get; set; }
             /// <summary>
             /// Starter item
             /// </summary>
-            public ModularSceneryItem Item { get; set; }
+            public Item Item { get; set; }
 
             /// <summary>
             /// Affected items
             /// </summary>
-            public List<ModularSceneryItem> Items { get; set; } = new List<ModularSceneryItem>();
+            public List<Item> Items { get; set; } = new List<Item>();
             /// <summary>
             /// Returns true if any item is performing actions
             /// </summary>
@@ -1922,7 +1922,7 @@ namespace Engine.Modular
             {
                 get
                 {
-                    return Items.Exists(i => i.Item.AnimationController?.Playing == true);
+                    return Items.Exists(i => i.Instance.AnimationController?.Playing == true);
                 }
             }
 
@@ -1930,7 +1930,7 @@ namespace Engine.Modular
             /// Constructor
             /// </summary>
             /// <param name="trigger">Trigger</param>
-            public TriggerCallback(ModularSceneryTrigger trigger, ModularSceneryItem item)
+            public TriggerCallback(ItemTrigger trigger, Item item)
             {
                 Trigger = trigger;
                 Item = item;
@@ -1948,7 +1948,7 @@ namespace Engine.Modular
             /// <summary>
             /// Use of path finding
             /// </summary>
-            public ModularSceneryPathFindingModes PathFinding { get; set; }
+            public PathFindingModes PathFinding { get; set; }
         }
     }
 }

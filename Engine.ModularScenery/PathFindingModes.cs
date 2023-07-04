@@ -4,7 +4,7 @@ namespace Engine.Modular
     /// <summary>
     /// Object path finding configuration
     /// </summary>
-    public enum ModularSceneryPathFindingModes
+    public enum PathFindingModes
     {
         /// <summary>
         /// Not used

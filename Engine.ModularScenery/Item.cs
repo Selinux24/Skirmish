@@ -6,16 +6,16 @@ namespace Engine.Modular
     /// <summary>
     /// Modular scenery item
     /// </summary>
-    public class ModularSceneryItem
+    public class Item
     {
         /// <summary>
         /// Object
         /// </summary>
         public ObjectReference Object { get; private set; }
         /// <summary>
-        /// Item
+        /// Instance
         /// </summary>
-        public ModelInstance Item { get; private set; }
+        public ModelInstance Instance { get; private set; }
         /// <summary>
         /// Particle emitters
         /// </summary>
@@ -29,13 +29,13 @@ namespace Engine.Modular
         /// Constructor
         /// </summary>
         /// <param name="obj">Object</param>
-        /// <param name="item">Scene object</param>
+        /// <param name="instance">Scene object</param>
         /// <param name="emitters">Particle emitters list</param>
         /// <param name="state">Initial state</param>
-        public ModularSceneryItem(ObjectReference obj, ModelInstance item, ParticleEmitter[] emitters, string state)
+        public Item(ObjectReference obj, ModelInstance instance, ParticleEmitter[] emitters, string state)
         {
             Object = obj;
-            Item = item;
+            Instance = instance;
             Emitters = emitters;
             CurrentState = state;
         }
