@@ -29,21 +29,13 @@ namespace Engine
         /// </summary>
         public Vector3 Center { get; set; }
         /// <summary>
-        /// First index
-        /// </summary>
-        public int I1 { get; set; }
-        /// <summary>
-        /// Second index
-        /// </summary>
-        public int I2 { get; set; }
-        /// <summary>
         /// Plane
         /// </summary>
         public Plane Plane { get; set; }
         /// <summary>
         /// Normal
         /// </summary>
-        public Vector3 Normal
+        public readonly Vector3 Normal
         {
             get
             {
@@ -53,7 +45,7 @@ namespace Engine
         /// <summary>
         /// Min
         /// </summary>
-        public Vector3 Min
+        public readonly Vector3 Min
         {
             get
             {
@@ -63,7 +55,7 @@ namespace Engine
         /// <summary>
         /// Max
         /// </summary>
-        public Vector3 Max
+        public readonly Vector3 Max
         {
             get
             {
@@ -74,7 +66,7 @@ namespace Engine
         /// Triangle area
         /// </summary>
         /// <remarks>Heron</remarks>
-        public float Area
+        public readonly float Area
         {
             get
             {
@@ -91,7 +83,7 @@ namespace Engine
         /// <summary>
         /// Inclination angle
         /// </summary>
-        public float Inclination
+        public readonly float Inclination
         {
             get
             {
@@ -103,7 +95,7 @@ namespace Engine
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns a triangle vertex</returns>
-        public Vector3 this[int index]
+        public readonly Vector3 this[int index]
         {
             get
             {
@@ -247,23 +239,6 @@ namespace Engine
             var geom = GeometryUtil.CreateCapsule(topology, capsule, sliceCount, stackCount);
 
             return ComputeTriangleList(topology, geom.Vertices, geom.Indices);
-        }
-        /// <summary>
-        /// Generate a triangle list from polygon
-        /// </summary>
-        /// <param name="topology">Topology</param>
-        /// <param name="poly">Polygon</param>
-        /// <returns>Returns the triangle list</returns>
-        public static IEnumerable<Triangle> ComputeTriangleList(Topology topology, Polygon poly)
-        {
-            if (topology == Topology.TriangleList)
-            {
-                return poly.Triangulate();
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
         }
         /// <summary>
         /// Transform triangle coordinates
@@ -433,39 +408,6 @@ namespace Engine
             Point3 = point3;
             Center = Vector3.Multiply(point1 + point2 + point3, 1.0f / 3.0f);
             Plane = new Plane(Point1, Point2, Point3);
-
-            Vector3 n = Plane.Normal;
-            float absX = Math.Abs(n.X);
-            float absY = Math.Abs(n.Y);
-            float absZ = Math.Abs(n.Z);
-
-            Vector3 a = new(absX, absY, absZ);
-            if (a.X > a.Y)
-            {
-                if (a.X > a.Z)
-                {
-                    I1 = 1;
-                    I2 = 2;
-                }
-                else
-                {
-                    I1 = 0;
-                    I2 = 1;
-                }
-            }
-            else
-            {
-                if (a.Y > a.Z)
-                {
-                    I1 = 0;
-                    I2 = 2;
-                }
-                else
-                {
-                    I1 = 0;
-                    I2 = 1;
-                }
-            }
         }
         /// <summary>
         /// Constructor
@@ -498,7 +440,7 @@ namespace Engine
         /// </summary>
         /// <param name="ray">Ray</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(PickingRay ray)
+        public readonly bool Intersects(PickingRay ray)
         {
             return Intersects(ray, out _, out _);
         }
@@ -508,7 +450,7 @@ namespace Engine
         /// <param name="ray">Ray</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(PickingRay ray, out float distance)
+        public readonly bool Intersects(PickingRay ray, out float distance)
         {
             return Intersects(ray, out _, out distance);
         }
@@ -519,7 +461,7 @@ namespace Engine
         /// <param name="point">Intersection point, if any</param>
         /// <param name="distance">Distance from ray origin and intersection point, if any</param>
         /// <returns>Returns true if ray intersects with this triangle</returns>
-        public bool Intersects(PickingRay ray, out Vector3 point, out float distance)
+        public readonly bool Intersects(PickingRay ray, out Vector3 point, out float distance)
         {
             if (ray.FacingOnly)
             {
@@ -540,7 +482,7 @@ namespace Engine
         /// Projects the triangle into the given vector
         /// </summary>
         /// <param name="vector">Direction vector</param>
-        public float ProjectToVector(Vector3 vector)
+        public readonly float ProjectToVector(Vector3 vector)
         {
             var p1 = Point1;
             var p2 = Point2;
@@ -562,7 +504,7 @@ namespace Engine
         /// Retrieves the three vertices of the triangle.
         /// </summary>
         /// <returns>An array of points representing the three vertices of the triangle.</returns>
-        public IEnumerable<Vector3> GetVertices()
+        public readonly IEnumerable<Vector3> GetVertices()
         {
             yield return Point1;
             yield return Point2;
@@ -572,7 +514,7 @@ namespace Engine
         /// Gets the vertex list stride
         /// </summary>
         /// <returns>Returns the list stride</returns>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return 3;
         }
@@ -580,7 +522,7 @@ namespace Engine
         /// Gets the vertex list topology
         /// </summary>
         /// <returns>Returns the list topology</returns>
-        public Topology GetTopology()
+        public readonly Topology GetTopology()
         {
             return Topology.TriangleList;
         }
@@ -589,7 +531,7 @@ namespace Engine
         /// Retrieves the three edges of the triangle.
         /// </summary>
         /// <returns>An array of vectors representing the three edges of the triangle.</returns>
-        public IEnumerable<Segment> GetEdgeSegments()
+        public readonly IEnumerable<Segment> GetEdgeSegments()
         {
             yield return new Segment(Point2, Point1);
             yield return new Segment(Point3, Point2);
@@ -598,28 +540,28 @@ namespace Engine
         /// <summary>
         /// Gets the edge direction vector between points 2 and 1
         /// </summary>
-        public Vector3 GetEdge1()
+        public readonly Vector3 GetEdge1()
         {
             return Vector3.Subtract(Point2, Point1);
         }
         /// <summary>
         /// Gets the edge direction vector between points 3 and 2
         /// </summary>
-        public Vector3 GetEdge2()
+        public readonly Vector3 GetEdge2()
         {
             return Vector3.Subtract(Point3, Point2);
         }
         /// <summary>
         /// Gets the edge direction vector between points 1 and 3
         /// </summary>
-        public Vector3 GetEdge3()
+        public readonly Vector3 GetEdge3()
         {
             return Vector3.Subtract(Point1, Point3);
         }
         /// <summary>
         /// Gets the triangle radius
         /// </summary>
-        public float GetRadius()
+        public readonly float GetRadius()
         {
             Vector3 center = Center;
 
@@ -627,10 +569,55 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the first and the last triangle index
+        /// </summary>
+        /// <returns></returns>
+        public readonly (int FirstIndex, int LastIndex) GetTriangleIndexes()
+        {
+            Vector3 n = Plane.Normal;
+            float absX = Math.Abs(n.X);
+            float absY = Math.Abs(n.Y);
+            float absZ = Math.Abs(n.Z);
+
+            int i1;
+            int i2;
+
+            Vector3 a = new(absX, absY, absZ);
+            if (a.X > a.Y)
+            {
+                if (a.X > a.Z)
+                {
+                    i1 = 1;
+                    i2 = 2;
+                }
+                else
+                {
+                    i1 = 0;
+                    i2 = 1;
+                }
+            }
+            else
+            {
+                if (a.Y > a.Z)
+                {
+                    i1 = 0;
+                    i2 = 2;
+                }
+                else
+                {
+                    i1 = 0;
+                    i2 = 1;
+                }
+            }
+
+            return (i1, i2);
+        }
+
+        /// <summary>
         /// Gets a new triangle with reversed normal vector
         /// </summary>
         /// <returns>Returns a new revered normal triangle</returns>
-        public Triangle ReverseNormal()
+        public readonly Triangle ReverseNormal()
         {
             return new Triangle(Point1, Point3, Point2);
         }
@@ -639,7 +626,7 @@ namespace Engine
         /// Gets the barycenter
         /// </summary>
         /// <param name="p">Reference point</param>
-        public Vector3 GetBarycenter(Vector3 p)
+        public readonly Vector3 GetBarycenter(Vector3 p)
         {
             return CalculateBarycenter(this, p);
         }
@@ -655,12 +642,12 @@ namespace Engine
             return !left.Equals(ref right);
         }
         /// <inheritdoc/>
-        public bool Equals(Triangle other)
+        public readonly bool Equals(Triangle other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is not Triangle)
             {
@@ -672,7 +659,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(ref Triangle other)
+        public readonly bool Equals(ref Triangle other)
         {
             return
                 other.Point1.Equals(Point1) &&
@@ -680,13 +667,13 @@ namespace Engine
                 other.Point3.Equals(Point3);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Point1, Point2, Point3);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Vertex 1 {Point1}; Vertex 2 {Point2}; Vertex 3 {Point3};";
         }

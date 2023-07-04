@@ -1705,11 +1705,31 @@ namespace Terrain.Rts
         }
         private void UpdateInputDebug(PickingRay pickingRay)
         {
+            UpdateInputDebugShadows();
+
+            UpdateInputDebugObjectsVisibility();
+
+            if (!terrainGraphDrawer.Visible)
+            {
+                return;
+            }
+
+            if (Game.Input.MouseButtonPressed(MouseButtons.Left))
+            {
+                terrainPointDrawer.Clear();
+
+                if (this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
+                {
+                    DEBUGPickingPosition(r.PickingResult.Position);
+                }
+            }
+        }
+        private void UpdateInputDebugShadows()
+        {
             if (Game.Input.KeyJustReleased(Keys.C))
             {
                 Lights.KeyLight.CastShadow = !Lights.KeyLight.CastShadow;
             }
-
             if (Game.Input.KeyJustReleased(Keys.Up) && !Game.Input.ShiftPressed)
             {
                 shadowResult = SceneRendererResults.ShadowMapDirectional;
@@ -1718,14 +1738,15 @@ namespace Terrain.Rts
             {
                 shadowResult = SceneRendererResults.ShadowMapDirectional;
             }
-
+        }
+        private void UpdateInputDebugObjectsVisibility()
+        {
             if (Game.Input.KeyJustReleased(Keys.D1))
             {
                 walkMode = !walkMode;
                 DEBUGUpdateGraphDrawer();
                 walkMode = !walkMode;
             }
-
             if (Game.Input.KeyJustReleased(Keys.D2))
             {
                 terrain.Visible = !terrain.Visible;
@@ -1749,20 +1770,6 @@ namespace Terrain.Rts
                 heliport.Visible = !heliport.Visible;
                 building.Visible = !building.Visible;
                 obelisk.Visible = !obelisk.Visible;
-            }
-
-            if (Game.Input.MouseButtonPressed(MouseButtons.Left))
-            {
-                var visible = terrainGraphDrawer.Visible;
-                if (visible)
-                {
-                    terrainPointDrawer.Clear();
-
-                    if (this.PickNearest(pickingRay, SceneObjectUsages.None, out ScenePickingResult<Triangle> r))
-                    {
-                        DEBUGPickingPosition(r.PickingResult.Position);
-                    }
-                }
             }
         }
         private void UpdateInputDrawers()

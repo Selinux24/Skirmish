@@ -11,7 +11,7 @@ namespace Engine.Audio.Tween
     /// </summary>
     class AudioEffectTweenCollection : ITweenCollection<IAudioEffect>
     {
-        private readonly ConcurrentDictionary<IAudioEffect, List<Func<float, bool>>> tasks = new ConcurrentDictionary<IAudioEffect, List<Func<float, bool>>>();
+        private readonly ConcurrentDictionary<IAudioEffect, List<Func<float, bool>>> tasks = new();
 
         /// <summary>
         /// Updates the task list
@@ -41,7 +41,7 @@ namespace Engine.Audio.Tween
                     continue;
                 }
 
-                List<Func<float, bool>> toDelete = new List<Func<float, bool>>();
+                List<Func<float, bool>> toDelete = new();
 
                 activeTasks.ForEach(t =>
                 {
