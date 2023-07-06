@@ -35,7 +35,7 @@ namespace Engine
             Vector3 center = Vector3.Zero;
             for (int i = 0; i < mesh.Count(); i++)
             {
-                center += mesh.ElementAt(i).Center;
+                center += mesh.ElementAt(i).GetCenter();
             }
 
             Position = center / mesh.Count();

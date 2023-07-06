@@ -21,7 +21,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns graph node</returns>
         public static IEnumerable<GraphNode> Build(NavMesh mesh)
         {
-            List<GraphNode> nodes = new List<GraphNode>();
+            List<GraphNode> nodes = new();
 
             if (mesh.TileCache != null)
             {
@@ -66,7 +66,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a list of graph nodes</returns>
         private static IEnumerable<GraphNode> BuildNodes(NavMesh mesh, MeshTile tile)
         {
-            List<GraphNode> nodes = new List<GraphNode>();
+            List<GraphNode> nodes = new();
 
             var polys = tile.GetPolys();
             foreach (var p in polys)
@@ -135,9 +135,9 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 Vector3 center = Vector3.Zero;
 
-                foreach (var tri in Triangles)
+                foreach (var pos in Triangles.Select(tri => tri.GetCenter()))
                 {
-                    center += tri.Center;
+                    center += pos;
                 }
 
                 return center / Math.Max(1, Triangles.Count());
@@ -167,7 +167,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the node point list</returns>
         public IEnumerable<Vector3> GetPoints()
         {
-            List<Vector3> vList = new List<Vector3>();
+            List<Vector3> vList = new();
 
             foreach (var tri in Triangles)
             {

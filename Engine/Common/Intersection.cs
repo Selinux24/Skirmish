@@ -132,7 +132,7 @@ namespace Engine.Common
         /// <returns>Returns true if the sphere intersects the triangle mesh</returns>
         public static bool SphereIntersectsMeshAll(BoundingSphere sphere, IEnumerable<Triangle> mesh, out IEnumerable<PickingResult<Triangle>> results)
         {
-            List<PickingResult<Triangle>> picks = new List<PickingResult<Triangle>>();
+            List<PickingResult<Triangle>> picks = new();
 
             foreach (var t in mesh)
             {
@@ -203,7 +203,7 @@ namespace Engine.Common
             // Translate the triangle to origin, and use only the box extents to refer to the box
             var boxCenter = box.GetCenter();
             var boxExtents = box.GetExtents();
-            Triangle origTri = new Triangle(triangle.Point1 - boxCenter, triangle.Point2 - boxCenter, triangle.Point3 - boxCenter);
+            var origTri = new Triangle(triangle.Point1 - boxCenter, triangle.Point2 - boxCenter, triangle.Point3 - boxCenter);
 
             // Test first 3 edges
             var edge1 = triangle.GetEdge1();
@@ -254,8 +254,8 @@ namespace Engine.Common
             }
 
             // Test the box extents vs the triangle plane
-            BoundingBox aabb = new BoundingBox(-boxExtents, boxExtents);
-            return triangle.Plane.Intersects(ref aabb) == PlaneIntersectionType.Intersecting;
+            BoundingBox aabb = new(-boxExtents, boxExtents);
+            return triangle.GetPlane().Intersects(ref aabb) == PlaneIntersectionType.Intersecting;
         }
         /// <summary>
         /// Determines whether a box intersects with a mesh
@@ -480,8 +480,8 @@ namespace Engine.Common
         /// <returns>Returns true if the mesh one intersects the mesh two</returns>
         public static bool MeshIntersectsMesh(IEnumerable<Triangle> mesh1, IEnumerable<Triangle> mesh2, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
-            List<Triangle> tris = new List<Triangle>();
-            List<Line3D> segs = new List<Line3D>();
+            List<Triangle> tris = new();
+            List<Line3D> segs = new();
 
             foreach (var t in mesh1)
             {
@@ -578,7 +578,7 @@ namespace Engine.Common
         /// <returns>Whether the two objects intersected</returns>
         public static bool SegmentIntersectsBox(Segment segment, BoundingBox box, out float distance)
         {
-            Ray ray = new Ray(segment.Point1, segment.Direction);
+            var ray = new Ray(segment.Point1, segment.Direction);
             if (Collision.RayIntersectsBox(ref ray, ref box, out distance) && distance <= segment.Length)
             {
                 return true;
@@ -601,7 +601,7 @@ namespace Engine.Common
             point = Vector3.Zero;
             distance = float.MaxValue;
 
-            Ray ray = new Ray(segment.Point1, segment.Direction);
+            var ray = new Ray(segment.Point1, segment.Direction);
             if (!Collision.RayIntersectsBox(ref ray, ref box, out Vector3 pos))
             {
                 return false;
@@ -637,10 +637,10 @@ namespace Engine.Common
         /// <returns>Whether the two objects intersected.</returns>
         public static bool SegmentIntersectsTriangle(Segment segment, Triangle tri, out float distance)
         {
-            Ray ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
-            Vector3 vertex1 = tri.Point1;
-            Vector3 vertex2 = tri.Point2;
-            Vector3 vertex3 = tri.Point3;
+            var ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
+            var vertex1 = tri.Point1;
+            var vertex2 = tri.Point2;
+            var vertex3 = tri.Point3;
             if (Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out Vector3 collisionPoint))
             {
                 distance = Vector3.Distance(collisionPoint, segment.Point1);
@@ -662,10 +662,10 @@ namespace Engine.Common
         /// <returns>Whether the two objects intersected.</returns>
         public static bool SegmentIntersectsTriangle(Segment segment, Triangle tri, out Vector3 point, out float distance)
         {
-            Ray ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
-            Vector3 vertex1 = tri.Point1;
-            Vector3 vertex2 = tri.Point2;
-            Vector3 vertex3 = tri.Point3;
+            var ray = new Ray(segment.Point1, Vector3.Normalize(segment.Point2 - segment.Point1));
+            var vertex1 = tri.Point1;
+            var vertex2 = tri.Point2;
+            var vertex3 = tri.Point3;
             if (Collision.RayIntersectsTriangle(ref ray, ref vertex1, ref vertex2, ref vertex3, out Vector3 collisionPoint))
             {
                 point = collisionPoint;
@@ -727,8 +727,8 @@ namespace Engine.Common
         /// <returns>Returns true if the triangle intersects the mesh</returns>
         public static bool TriangleIntersectsMesh(Triangle triangle, IEnumerable<Triangle> mesh, out IEnumerable<Triangle> triangles, out IEnumerable<Line3D> segments)
         {
-            List<Triangle> tris = new List<Triangle>();
-            List<Line3D> segs = new List<Line3D>();
+            List<Triangle> tris = new();
+            List<Line3D> segs = new();
 
             bool intersected = false;
             foreach (var t in mesh)
@@ -1500,7 +1500,7 @@ namespace Engine.Common
         /// <returns>Returns true if the frustum is intersected with the specified segment</returns>
         public static bool FrustumIntersectsSegment(BoundingFrustum frustum, Vector3 p1, Vector3 p2)
         {
-            Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+            var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
 
             if (!frustum.Intersects(ref ray, out var inDistance, out _))
             {
@@ -1534,7 +1534,7 @@ namespace Engine.Common
             distance = float.MaxValue;
             point = Vector3.Zero;
 
-            Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+            var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
 
             if (!frustum.Intersects(ref ray, out var inDistance, out _))
             {
@@ -1571,7 +1571,7 @@ namespace Engine.Common
             enteringPoint = null;
             exitingPoint = null;
 
-            Ray ray = new Ray(p1, Vector3.Normalize(p2 - p1));
+            var ray = new Ray(p1, Vector3.Normalize(p2 - p1));
 
             if (!frustum.Intersects(ref ray, out var inDistance, out var outDistance))
             {

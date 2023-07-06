@@ -25,71 +25,9 @@ namespace Engine
         /// </summary>
         public Vector3 Point3 { get; set; }
         /// <summary>
-        /// Center
+        /// Gets the triangle normal
         /// </summary>
-        public Vector3 Center { get; set; }
-        /// <summary>
-        /// Plane
-        /// </summary>
-        public Plane Plane { get; set; }
-        /// <summary>
-        /// Normal
-        /// </summary>
-        public readonly Vector3 Normal
-        {
-            get
-            {
-                return Plane.Normal;
-            }
-        }
-        /// <summary>
-        /// Min
-        /// </summary>
-        public readonly Vector3 Min
-        {
-            get
-            {
-                return Vector3.Min(Point1, Vector3.Min(Point2, Point3));
-            }
-        }
-        /// <summary>
-        /// Max
-        /// </summary>
-        public readonly Vector3 Max
-        {
-            get
-            {
-                return Vector3.Max(Point1, Vector3.Max(Point2, Point3));
-            }
-        }
-        /// <summary>
-        /// Triangle area
-        /// </summary>
-        /// <remarks>Heron</remarks>
-        public readonly float Area
-        {
-            get
-            {
-                float a = (Point1 - Point2).Length();
-                float b = (Point1 - Point3).Length();
-                float c = (Point2 - Point3).Length();
-
-                float p = (a + b + c) * 0.5f;
-                float z = p * (p - a) * (p - b) * (p - c);
-
-                return (float)Math.Sqrt(z);
-            }
-        }
-        /// <summary>
-        /// Inclination angle
-        /// </summary>
-        public readonly float Inclination
-        {
-            get
-            {
-                return Helper.Angle(Normal, Vector3.Down);
-            }
-        }
+        public Vector3 Normal { get; private set; }
         /// <summary>
         /// Returns the triangle vertex by index
         /// </summary>
@@ -406,8 +344,7 @@ namespace Engine
             Point1 = point1;
             Point2 = point2;
             Point3 = point3;
-            Center = Vector3.Multiply(point1 + point2 + point3, 1.0f / 3.0f);
-            Plane = new Plane(Point1, Point2, Point3);
+            Normal = GetPlane().Normal;
         }
         /// <summary>
         /// Constructor
@@ -528,6 +465,35 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the triangle plane
+        /// </summary>
+        public readonly Plane GetPlane()
+        {
+            return new Plane(Point1, Point2, Point3);
+        }
+        /// <summary>
+        /// Gets the triangle minimal point
+        /// </summary>
+        public readonly Vector3 GetMinPoint()
+        {
+            return Vector3.Min(Point1, Vector3.Min(Point2, Point3));
+        }
+        /// <summary>
+        /// Gets the triangle maximal point
+        /// </summary>
+        public readonly Vector3 GetMaxPoint()
+        {
+            return Vector3.Max(Point1, Vector3.Max(Point2, Point3));
+        }
+        /// <summary>
+        /// Gets the triangle inclination angle
+        /// </summary>
+        public readonly float GetInclination()
+        {
+            return Helper.Angle(Normal, Vector3.Down);
+        }
+
+        /// <summary>
         /// Retrieves the three edges of the triangle.
         /// </summary>
         /// <returns>An array of vectors representing the three edges of the triangle.</returns>
@@ -558,14 +524,46 @@ namespace Engine
         {
             return Vector3.Subtract(Point1, Point3);
         }
+
         /// <summary>
         /// Gets the triangle radius
         /// </summary>
+        /// <remarks>From the center to the farthest vertex</remarks>
         public readonly float GetRadius()
         {
-            Vector3 center = Center;
+            Vector3 center = GetCenter();
 
             return Math.Max(Vector3.Distance(center, Point1), Math.Max(Vector3.Distance(center, Point2), Vector3.Distance(center, Point3)));
+        }
+        /// <summary>
+        /// Gets the triangle area
+        /// </summary>
+        /// <remarks>Heron</remarks>
+        public readonly float GetArea()
+        {
+            float a = GetEdge1().Length();
+            float b = GetEdge2().Length();
+            float c = GetEdge3().Length();
+
+            float p = (a + b + c) * 0.5f;
+            float z = p * (p - a) * (p - b) * (p - c);
+
+            return (float)Math.Sqrt(z);
+        }
+        /// <summary>
+        /// Gets the triangle geometric center
+        /// </summary>
+        public readonly Vector3 GetCenter()
+        {
+            return Vector3.Multiply(Point1 + Point2 + Point3, 1.0f / 3.0f);
+        }
+        /// <summary>
+        /// Gets the barycenter
+        /// </summary>
+        /// <param name="p">Reference point</param>
+        public readonly Vector3 GetBarycenter(Vector3 p)
+        {
+            return CalculateBarycenter(this, p);
         }
 
         /// <summary>
@@ -574,7 +572,7 @@ namespace Engine
         /// <returns></returns>
         public readonly (int FirstIndex, int LastIndex) GetTriangleIndexes()
         {
-            Vector3 n = Plane.Normal;
+            Vector3 n = Normal;
             float absX = Math.Abs(n.X);
             float absY = Math.Abs(n.Y);
             float absZ = Math.Abs(n.Z);
@@ -621,14 +619,13 @@ namespace Engine
         {
             return new Triangle(Point1, Point3, Point2);
         }
-
         /// <summary>
-        /// Gets the barycenter
+        /// Reverses the current triangle
         /// </summary>
-        /// <param name="p">Reference point</param>
-        public readonly Vector3 GetBarycenter(Vector3 p)
+        public void Reverse()
         {
-            return CalculateBarycenter(this, p);
+            (Point2, Point3) = (Point3, Point2);
+            Normal = -Normal;
         }
 
         /// <inheritdoc/>
