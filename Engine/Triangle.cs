@@ -273,11 +273,13 @@ namespace Engine
         /// <param name="vertices">Vertices</param>
         private static IEnumerable<Vector3> ReverseNormalIterator(IEnumerable<Vector3> vertices)
         {
-            for (int i = 0; i < vertices.Count(); i += 3)
+            var vArray = vertices.ToArray();
+
+            for (int i = 0; i < vArray.Length; i += 3)
             {
-                yield return vertices.ElementAt(i + 0);
-                yield return vertices.ElementAt(i + 2);
-                yield return vertices.ElementAt(i + 1);
+                yield return vArray[i + 0];
+                yield return vArray[i + 2];
+                yield return vArray[i + 1];
             }
         }
         /// <summary>
@@ -286,11 +288,13 @@ namespace Engine
         /// <param name="indices">Indices</param>
         private static IEnumerable<uint> ReverseNormalIterator(IEnumerable<uint> indices)
         {
-            for (int i = 0; i < indices.Count(); i += 3)
+            var iArray = indices.ToArray();
+
+            for (int i = 0; i < iArray.Length; i += 3)
             {
-                yield return indices.ElementAt(i + 0);
-                yield return indices.ElementAt(i + 2);
-                yield return indices.ElementAt(i + 1);
+                yield return iArray[i + 0];
+                yield return iArray[i + 2];
+                yield return iArray[i + 1];
             }
         }
         /// <summary>
@@ -419,22 +423,24 @@ namespace Engine
         /// Projects the triangle into the given vector
         /// </summary>
         /// <param name="vector">Direction vector</param>
-        public readonly float ProjectToVector(Vector3 vector)
+        /// <returns>Returns the projection vector</returns>
+        public readonly Vector3 ProjectToVector(Vector3 vector)
         {
-            var p1 = Point1;
-            var p2 = Point2;
-            var p3 = Point3;
-            var d = Vector3.Normalize(vector);
+            if (!vector.IsNormalized)
+            {
+                vector = Vector3.Normalize(vector);
+            }
 
-            var p1_proj = p1 - Vector3.Dot(p1 - Vector3.Zero, d) * d;
-            var p2_proj = p2 - Vector3.Dot(p2 - Vector3.Zero, d) * d;
-            var p3_proj = p3 - Vector3.Dot(p3 - Vector3.Zero, d) * d;
+            // Calculate the projection of each vertex
+            var projectedVertex1 = vector.ProjectPoint(Point1);
+            var projectedVertex2 = vector.ProjectPoint(Point2);
+            var projectedVertex3 = vector.ProjectPoint(Point3);
 
-            var v1 = p2_proj - p1_proj;
-            var v2 = p3_proj - p1_proj;
-            var area = Vector3.Cross(v1, v2).Length() * 0.5f;
+            // Calculate the minimum and maximum projected points
+            var minPoint = Vector3.Min(Vector3.Min(projectedVertex1, projectedVertex2), projectedVertex3);
+            var maxPoint = Vector3.Max(Vector3.Max(projectedVertex1, projectedVertex2), projectedVertex3);
 
-            return area * Math.Abs(Vector3.Dot(d, Vector3.Normalize(v1 + v2)));
+            return maxPoint - minPoint;
         }
 
         /// <summary>
@@ -564,51 +570,6 @@ namespace Engine
         public readonly Vector3 GetBarycenter(Vector3 p)
         {
             return CalculateBarycenter(this, p);
-        }
-
-        /// <summary>
-        /// Gets the first and the last triangle index
-        /// </summary>
-        /// <returns></returns>
-        public readonly (int FirstIndex, int LastIndex) GetTriangleIndexes()
-        {
-            Vector3 n = Normal;
-            float absX = Math.Abs(n.X);
-            float absY = Math.Abs(n.Y);
-            float absZ = Math.Abs(n.Z);
-
-            int i1;
-            int i2;
-
-            Vector3 a = new(absX, absY, absZ);
-            if (a.X > a.Y)
-            {
-                if (a.X > a.Z)
-                {
-                    i1 = 1;
-                    i2 = 2;
-                }
-                else
-                {
-                    i1 = 0;
-                    i2 = 1;
-                }
-            }
-            else
-            {
-                if (a.Y > a.Z)
-                {
-                    i1 = 0;
-                    i2 = 2;
-                }
-                else
-                {
-                    i1 = 0;
-                    i2 = 1;
-                }
-            }
-
-            return (i1, i2);
         }
 
         /// <summary>

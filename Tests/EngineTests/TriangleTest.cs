@@ -2,6 +2,7 @@
 using SharpDX;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Engine.Tests
 {
@@ -182,6 +183,81 @@ namespace Engine.Tests
             Assert.AreEqual(inc0, t1.GetInclination());
             Assert.AreEqual(inc45, t45.GetInclination());
             Assert.AreEqual(inc90, t90.GetInclination());
+        }
+
+        [TestMethod()]
+        public void PointsTest()
+        {
+            Triangle t1 = new(p1, p2, p3);
+
+            Assert.AreEqual(p1, t1[0]);
+            Assert.AreEqual(p2, t1[1]);
+            Assert.AreEqual(p3, t1[2]);
+
+            var points = t1.GetVertices();
+
+            Assert.AreEqual(p1, points.ElementAt(0));
+            Assert.AreEqual(p2, points.ElementAt(1));
+            Assert.AreEqual(p3, points.ElementAt(2));
+        }
+        [TestMethod()]
+        public void EdgesTest()
+        {
+            Triangle t1 = new(p1, p2, p3);
+
+            Assert.AreEqual(p2 - p1, t1.GetEdge1());
+            Assert.AreEqual(p3 - p2, t1.GetEdge2());
+            Assert.AreEqual(p1 - p3, t1.GetEdge3());
+        }
+
+        [TestMethod()]
+        public void ProjectToVectorTest()
+        {
+            Triangle t1 = new(p1, p2, p3);
+            Vector3 vx = new(1, 0, 0);
+            Vector3 vy = new(0, 1, 0);
+            Vector3 vz = new(0, 0, 1);
+            Vector3 vOne = Vector3.One;
+            float prOne = 2.3094f;
+
+            var dx = t1.ProjectToVector(vx);
+            var dy = t1.ProjectToVector(vy);
+            var dz = t1.ProjectToVector(vz);
+            var dOne = t1.ProjectToVector(vOne);
+
+            Assert.AreEqual(new Vector3(2, 0, 0), dx);
+            Assert.AreEqual(2, dx.Length());
+          
+            Assert.AreEqual(new Vector3(0, 0, 0), dy);
+            Assert.AreEqual(0, dy.Length());
+         
+            Assert.AreEqual(new Vector3(0, 0, 2), dz);
+            Assert.AreEqual(2, dz.Length());
+         
+            Assert.AreEqual(1.3333f, dOne.X, delta);
+            Assert.AreEqual(1.3333f, dOne.Y, delta);
+            Assert.AreEqual(1.3333f, dOne.Z, delta);
+            Assert.AreEqual(prOne, dOne.Length(), delta);
+
+
+            dx = t1.ProjectToVector(-vx);
+            dy = t1.ProjectToVector(-vy);
+            dz = t1.ProjectToVector(-vz);
+            dOne = t1.ProjectToVector(-vOne);
+
+            Assert.AreEqual(new Vector3(2, 0, 0), dx);
+            Assert.AreEqual(2, dx.Length());
+
+            Assert.AreEqual(new Vector3(0, 0, 0), dy);
+            Assert.AreEqual(0, dy.Length());
+
+            Assert.AreEqual(new Vector3(0, 0, 2), dz);
+            Assert.AreEqual(2, dz.Length());
+
+            Assert.AreEqual(1.3333f, dOne.X, delta);
+            Assert.AreEqual(1.3333f, dOne.Y, delta);
+            Assert.AreEqual(1.3333f, dOne.Z, delta);
+            Assert.AreEqual(prOne, dOne.Length(), delta);
         }
     }
 }

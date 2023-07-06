@@ -11,6 +11,26 @@ namespace Engine
     public static class SharpDXExtensions
     {
         /// <summary>
+        /// Project the point in the vector
+        /// </summary>
+        /// <param name="vector">Vector</param>
+        /// <param name="point">Point</param>
+        public static Vector3 ProjectPoint(this Vector3 vector, Vector3 point)
+        {
+            // Normalize the projection vector
+            if (!vector.IsNormalized)
+            {
+                vector = Vector3.Normalize(vector);
+            }
+
+            // Calculate the dot product between the point and the projection vector
+            float dotProduct = Vector3.Dot(point, vector);
+
+            // Calculate the projection of the point onto the projection vector
+            return dotProduct * vector;
+        }
+
+        /// <summary>
         /// Limits the vector length to specified magnitude
         /// </summary>
         /// <param name="vector">Vector to limit</param>
