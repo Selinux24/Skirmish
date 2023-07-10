@@ -212,10 +212,7 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilWRZEnabled()
         {
-            if (depthStencilWRzBufferEnabled == null)
-            {
-                depthStencilWRzBufferEnabled = EngineDepthStencilState.WRzBufferEnabled(this, nameof(Graphics));
-            }
+            depthStencilWRzBufferEnabled ??= EngineDepthStencilState.WRzBufferEnabled(this, nameof(Graphics));
 
             SetDepthStencilState(depthStencilWRzBufferEnabled);
         }
@@ -224,10 +221,7 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilWRZDisabled()
         {
-            if (depthStencilWRzBufferDisabled == null)
-            {
-                depthStencilWRzBufferDisabled = EngineDepthStencilState.WRzBufferDisabled(this, nameof(Graphics));
-            }
+            depthStencilWRzBufferDisabled ??= EngineDepthStencilState.WRzBufferDisabled(this, nameof(Graphics));
 
             SetDepthStencilState(depthStencilWRzBufferDisabled);
         }
@@ -236,10 +230,7 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilRDZEnabled()
         {
-            if (depthStencilRDzBufferEnabled == null)
-            {
-                depthStencilRDzBufferEnabled = EngineDepthStencilState.RDzBufferEnabled(this, nameof(Graphics));
-            }
+            depthStencilRDzBufferEnabled ??= EngineDepthStencilState.RDzBufferEnabled(this, nameof(Graphics));
 
             SetDepthStencilState(depthStencilRDzBufferEnabled);
         }
@@ -248,10 +239,7 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilRDZDisabled()
         {
-            if (depthStencilRDzBufferDisabled == null)
-            {
-                depthStencilRDzBufferDisabled = EngineDepthStencilState.RDzBufferDisabled(this, nameof(Graphics));
-            }
+            depthStencilRDzBufferDisabled ??= EngineDepthStencilState.RDzBufferDisabled(this, nameof(Graphics));
 
             SetDepthStencilState(depthStencilRDzBufferDisabled);
         }
@@ -260,10 +248,7 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilNone()
         {
-            if (depthStencilNone == null)
-            {
-                depthStencilNone = EngineDepthStencilState.None(this, nameof(Graphics));
-            }
+            depthStencilNone ??= EngineDepthStencilState.None(this, nameof(Graphics));
 
             SetDepthStencilState(depthStencilNone);
         }
@@ -272,10 +257,7 @@ namespace Engine
         /// </summary>
         public void SetDepthStencilShadowMapping()
         {
-            if (depthStencilShadowMapping == null)
-            {
-                depthStencilShadowMapping = EngineDepthStencilState.ShadowMapping(this, nameof(Graphics));
-            }
+            depthStencilShadowMapping ??= EngineDepthStencilState.ShadowMapping(this, nameof(Graphics));
 
             SetDepthStencilState(depthStencilShadowMapping);
         }
@@ -304,10 +286,7 @@ namespace Engine
         /// </summary>
         public void SetBlendDefault()
         {
-            if (blendDefault == null)
-            {
-                blendDefault = EngineBlendState.Default(this);
-            }
+            blendDefault ??= EngineBlendState.Default(this);
 
             SetBlendState(blendDefault);
         }
@@ -318,19 +297,13 @@ namespace Engine
         {
             if (alphaConservative)
             {
-                if (blendAlphaConservativeBlend == null)
-                {
-                    blendAlphaConservativeBlend = EngineBlendState.AlphaConservativeBlend(this);
-                }
+                blendAlphaConservativeBlend ??= EngineBlendState.AlphaConservativeBlend(this);
 
                 SetBlendState(blendAlphaConservativeBlend);
             }
             else
             {
-                if (blendAlphaBlend == null)
-                {
-                    blendAlphaBlend = EngineBlendState.AlphaBlend(this);
-                }
+                blendAlphaBlend ??= EngineBlendState.AlphaBlend(this);
 
                 SetBlendState(blendAlphaBlend);
             }
@@ -342,19 +315,13 @@ namespace Engine
         {
             if (alphaConservative)
             {
-                if (blendTransparentConservative == null)
-                {
-                    blendTransparentConservative = EngineBlendState.TransparentConservative(this);
-                }
+                blendTransparentConservative ??= EngineBlendState.TransparentConservative(this);
 
                 SetBlendState(blendTransparentConservative);
             }
             else
             {
-                if (blendTransparent == null)
-                {
-                    blendTransparent = EngineBlendState.Transparent(this);
-                }
+                blendTransparent ??= EngineBlendState.Transparent(this);
 
                 SetBlendState(blendTransparent);
             }
@@ -364,10 +331,7 @@ namespace Engine
         /// </summary>
         public void SetBlendAdditive()
         {
-            if (blendAdditive == null)
-            {
-                blendAdditive = EngineBlendState.Additive(this);
-            }
+            blendAdditive ??= EngineBlendState.Additive(this);
 
             SetBlendState(blendAdditive);
         }
@@ -417,10 +381,7 @@ namespace Engine
         /// </summary>
         public void SetRasterizerDefault()
         {
-            if (rasterizerDefault == null)
-            {
-                rasterizerDefault = EngineRasterizerState.Default(this, nameof(Graphics));
-            }
+            rasterizerDefault ??= EngineRasterizerState.Default(this, nameof(Graphics));
 
             SetRasterizerState(rasterizerDefault);
         }
@@ -429,10 +390,7 @@ namespace Engine
         /// </summary>
         public void SetRasterizerWireframe()
         {
-            if (rasterizerWireframe == null)
-            {
-                rasterizerWireframe = EngineRasterizerState.Wireframe(this, nameof(Graphics));
-            }
+            rasterizerWireframe ??= EngineRasterizerState.Wireframe(this, nameof(Graphics));
 
             SetRasterizerState(rasterizerWireframe);
         }
@@ -441,10 +399,7 @@ namespace Engine
         /// </summary>
         public void SetRasterizerCullNone()
         {
-            if (rasterizerNoCull == null)
-            {
-                rasterizerNoCull = EngineRasterizerState.NoCull(this, nameof(Graphics));
-            }
+            rasterizerNoCull ??= EngineRasterizerState.NoCull(this, nameof(Graphics));
 
             SetRasterizerState(rasterizerNoCull);
         }
@@ -453,10 +408,7 @@ namespace Engine
         /// </summary>
         public void SetRasterizerCullFrontFace()
         {
-            if (rasterizerCullFrontFace == null)
-            {
-                rasterizerCullFrontFace = EngineRasterizerState.CullFrontFace(this, nameof(Graphics));
-            }
+            rasterizerCullFrontFace ??= EngineRasterizerState.CullFrontFace(this, nameof(Graphics));
 
             SetRasterizerState(rasterizerCullFrontFace);
         }
@@ -465,10 +417,7 @@ namespace Engine
         /// </summary>
         public void SetRasterizerShadowMapping()
         {
-            if (rasterizerShadowMapping == null)
-            {
-                rasterizerShadowMapping = EngineRasterizerState.ShadowMapping(this, nameof(Graphics));
-            }
+            rasterizerShadowMapping ??= EngineRasterizerState.ShadowMapping(this, nameof(Graphics));
 
             SetRasterizerState(rasterizerShadowMapping);
         }

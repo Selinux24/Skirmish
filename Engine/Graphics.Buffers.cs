@@ -1,6 +1,5 @@
 ﻿using SharpDX;
 using SharpDX.DXGI;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -82,47 +81,28 @@ namespace Engine
         {
             var vertexType = data.First().VertexType;
 
-            switch (vertexType)
+            return vertexType switch
             {
-                case VertexTypes.Billboard:
-                    return CreateVertexBuffer(name, data.OfType<VertexBillboard>(), dynamic);
-                case VertexTypes.Decal:
-                    return CreateVertexBuffer(name, data.OfType<VertexDecal>(), dynamic);
-                case VertexTypes.CPUParticle:
-                    return CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic);
-                case VertexTypes.GPUParticle:
-                    return CreateVertexBuffer(name, data.OfType<VertexGpuParticle>(), dynamic);
-                case VertexTypes.Font:
-                    return CreateVertexBuffer(name, data.OfType<VertexFont>(), dynamic);
-                case VertexTypes.Terrain:
-                    return CreateVertexBuffer(name, data.OfType<VertexTerrain>(), dynamic);
-                case VertexTypes.Position:
-                    return CreateVertexBuffer(name, data.OfType<VertexPosition>(), dynamic);
-                case VertexTypes.PositionColor:
-                    return CreateVertexBuffer(name, data.OfType<VertexPositionColor>(), dynamic);
-                case VertexTypes.PositionTexture:
-                    return CreateVertexBuffer(name, data.OfType<VertexPositionTexture>(), dynamic);
-                case VertexTypes.PositionNormalColor:
-                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalColor>(), dynamic);
-                case VertexTypes.PositionNormalTexture:
-                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalTexture>(), dynamic);
-                case VertexTypes.PositionNormalTextureTangent:
-                    return CreateVertexBuffer(name, data.OfType<VertexPositionNormalTextureTangent>(), dynamic);
-                case VertexTypes.PositionSkinned:
-                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPosition>(), dynamic);
-                case VertexTypes.PositionColorSkinned:
-                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionColor>(), dynamic);
-                case VertexTypes.PositionTextureSkinned:
-                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionTexture>(), dynamic);
-                case VertexTypes.PositionNormalColorSkinned:
-                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalColor>(), dynamic);
-                case VertexTypes.PositionNormalTextureSkinned:
-                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTexture>(), dynamic);
-                case VertexTypes.PositionNormalTextureTangentSkinned:
-                    return CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTextureTangent>(), dynamic);
-                default:
-                    throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType));
-            }
+                VertexTypes.Billboard => CreateVertexBuffer(name, data.OfType<VertexBillboard>(), dynamic),
+                VertexTypes.Decal => CreateVertexBuffer(name, data.OfType<VertexDecal>(), dynamic),
+                VertexTypes.CPUParticle => CreateVertexBuffer(name, data.OfType<VertexCpuParticle>(), dynamic),
+                VertexTypes.GPUParticle => CreateVertexBuffer(name, data.OfType<VertexGpuParticle>(), dynamic),
+                VertexTypes.Font => CreateVertexBuffer(name, data.OfType<VertexFont>(), dynamic),
+                VertexTypes.Terrain => CreateVertexBuffer(name, data.OfType<VertexTerrain>(), dynamic),
+                VertexTypes.Position => CreateVertexBuffer(name, data.OfType<VertexPosition>(), dynamic),
+                VertexTypes.PositionColor => CreateVertexBuffer(name, data.OfType<VertexPositionColor>(), dynamic),
+                VertexTypes.PositionTexture => CreateVertexBuffer(name, data.OfType<VertexPositionTexture>(), dynamic),
+                VertexTypes.PositionNormalColor => CreateVertexBuffer(name, data.OfType<VertexPositionNormalColor>(), dynamic),
+                VertexTypes.PositionNormalTexture => CreateVertexBuffer(name, data.OfType<VertexPositionNormalTexture>(), dynamic),
+                VertexTypes.PositionNormalTextureTangent => CreateVertexBuffer(name, data.OfType<VertexPositionNormalTextureTangent>(), dynamic),
+                VertexTypes.PositionSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPosition>(), dynamic),
+                VertexTypes.PositionColorSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionColor>(), dynamic),
+                VertexTypes.PositionTextureSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionTexture>(), dynamic),
+                VertexTypes.PositionNormalColorSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalColor>(), dynamic),
+                VertexTypes.PositionNormalTextureSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTexture>(), dynamic),
+                VertexTypes.PositionNormalTextureTangentSkinned => CreateVertexBuffer(name, data.OfType<VertexSkinnedPositionNormalTextureTangent>(), dynamic),
+                _ => throw new EngineException(string.Format("Unknown vertex type: {0}", vertexType)),
+            };
         }
         /// <summary>
         /// Creates a vertex buffer
@@ -342,26 +322,24 @@ namespace Engine
 
             Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Count());
 
-            using (var dstr = new DataStream(sizeInBytes, true, true))
+            using var dstr = new DataStream(sizeInBytes, true, true);
+            dstr.WriteRange(data.ToArray());
+            dstr.Position = 0;
+
+            var description = new BufferDescription()
             {
-                dstr.WriteRange(data.ToArray());
-                dstr.Position = 0;
+                Usage = usage,
+                SizeInBytes = sizeInBytes,
+                BindFlags = binding,
+                CpuAccessFlags = access,
+                OptionFlags = ResourceOptionFlags.None,
+                StructureByteStride = 0,
+            };
 
-                var description = new BufferDescription()
-                {
-                    Usage = usage,
-                    SizeInBytes = sizeInBytes,
-                    BindFlags = binding,
-                    CpuAccessFlags = access,
-                    OptionFlags = ResourceOptionFlags.None,
-                    StructureByteStride = 0,
-                };
-
-                return new Buffer(device, dstr, description)
-                {
-                    DebugName = name,
-                };
-            }
+            return new Buffer(device, dstr, description)
+            {
+                DebugName = name,
+            };
         }
 
         /// <summary>

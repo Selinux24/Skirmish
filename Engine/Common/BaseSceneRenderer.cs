@@ -70,6 +70,19 @@ namespace Engine.Common
         private RenderTarget postProcessingTargetB = null;
 
         /// <summary>
+        /// Directional shadow mapping stats dictionary
+        /// </summary>
+        private readonly Dictionary<string, double> directionalShadowMappingDict = new();
+        /// <summary>
+        /// Point shadow mapping stats dictionary
+        /// </summary>
+        private readonly Dictionary<string, double> pointShadowMappingDict = new();
+        /// <summary>
+        /// Spot shadow mapping stats dictionary
+        /// </summary>
+        private readonly Dictionary<string, double> spotShadowMappingDict = new();
+
+        /// <summary>
         /// Shadow map size
         /// </summary>
         protected const int DirectionalShadowMapSize = 1024 * 4;
@@ -510,6 +523,8 @@ namespace Engine.Common
         {
             var transparents = components.Where(c =>
             {
+                if (c is null) return false;
+
                 if (!c.BlendMode.HasFlag(BlendModes.Alpha) && !c.BlendMode.HasFlag(BlendModes.Transparent))
                 {
                     return false;
@@ -644,7 +659,7 @@ namespace Engine.Common
         protected virtual void DoDirectionalShadowMapping(GameTime gameTime, ref int cullIndex)
         {
 #if DEBUG
-            Dictionary<string, double> dict = new();
+            directionalShadowMappingDict.Clear();
 
             Stopwatch gStopwatch = new();
             gStopwatch.Start();
@@ -655,7 +670,7 @@ namespace Engine.Common
             var shadowCastingLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
-            dict.Add($"DoDirectionalShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+            directionalShadowMappingDict.Add($"DoDirectionalShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowCastingLights.Any())
@@ -670,7 +685,7 @@ namespace Engine.Common
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
 #if DEBUG
             stopwatch.Stop();
-            dict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+            directionalShadowMappingDict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowObjs.Any())
@@ -693,7 +708,7 @@ namespace Engine.Common
                 var doShadows = cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                dict.Add($"DoDirectionalShadowMapping - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                directionalShadowMappingDict.Add($"DoDirectionalShadowMapping - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 if (allCullingObjects && !doShadows)
@@ -728,7 +743,7 @@ namespace Engine.Common
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                dict.Add($"DoDirectionalShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                directionalShadowMappingDict.Add($"DoDirectionalShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 //Assign light parameters
@@ -744,11 +759,11 @@ namespace Engine.Common
 
 #if DEBUG
             gStopwatch.Stop();
-            dict.Add($"DoDirectionalShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
+            directionalShadowMappingDict.Add($"DoDirectionalShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
             if (Scene.Game.CollectGameStatus)
             {
-                Scene.Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(directionalShadowMappingDict);
             }
 #endif
         }
@@ -760,7 +775,7 @@ namespace Engine.Common
         protected virtual void DoPointShadowMapping(GameTime gameTime, ref int cullIndex)
         {
 #if DEBUG
-            Dictionary<string, double> dict = new();
+            pointShadowMappingDict.Clear();
 
             Stopwatch gStopwatch = new();
             gStopwatch.Start();
@@ -770,7 +785,7 @@ namespace Engine.Common
             var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
-            dict.Add($"DoPointShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+            pointShadowMappingDict.Add($"DoPointShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowCastingLights.Any())
@@ -785,7 +800,7 @@ namespace Engine.Common
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
 #if DEBUG
             stopwatch.Stop();
-            dict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+            pointShadowMappingDict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowObjs.Any())
@@ -822,7 +837,7 @@ namespace Engine.Common
                 var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                dict.Add($"DoPointShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                pointShadowMappingDict.Add($"DoPointShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 if (allCullingObjects && !doShadows)
@@ -843,7 +858,7 @@ namespace Engine.Common
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                dict.Add($"DoPointShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                pointShadowMappingDict.Add($"DoPointShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 //Assign light parameters
@@ -854,11 +869,11 @@ namespace Engine.Common
 
 #if DEBUG
             gStopwatch.Stop();
-            dict.Add($"DoPointShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
+            pointShadowMappingDict.Add($"DoPointShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
             if (Scene.Game.CollectGameStatus)
             {
-                Scene.Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(pointShadowMappingDict);
             }
 #endif
         }
@@ -870,7 +885,7 @@ namespace Engine.Common
         protected virtual void DoSpotShadowMapping(GameTime gameTime, ref int cullIndex)
         {
 #if DEBUG
-            Dictionary<string, double> dict = new();
+            spotShadowMappingDict.Clear();
 
             Stopwatch gStopwatch = new();
             gStopwatch.Start();
@@ -881,7 +896,7 @@ namespace Engine.Common
             var shadowCastingLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
-            dict.Add($"DoSpotShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+            spotShadowMappingDict.Add($"DoSpotShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowCastingLights.Any())
@@ -896,7 +911,7 @@ namespace Engine.Common
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
 #if DEBUG
             stopwatch.Stop();
-            dict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+            spotShadowMappingDict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowObjs.Any())
@@ -930,7 +945,7 @@ namespace Engine.Common
                 var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                dict.Add($"DoSpotShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                spotShadowMappingDict.Add($"DoSpotShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 if (allCullingObjects && !doShadows)
@@ -951,7 +966,7 @@ namespace Engine.Common
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                dict.Add($"DoSpotShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                spotShadowMappingDict.Add($"DoSpotShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 //Assign light parameters
@@ -968,11 +983,11 @@ namespace Engine.Common
 
 #if DEBUG
             gStopwatch.Stop();
-            dict.Add($"DoSpotShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
+            spotShadowMappingDict.Add($"DoSpotShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 
             if (Scene.Game.CollectGameStatus)
             {
-                Scene.Game.GameStatus.Add(dict);
+                Scene.Game.GameStatus.Add(spotShadowMappingDict);
             }
 #endif
         }

@@ -168,71 +168,67 @@ namespace Engine
 #endif
             using (var factory = tmpFactory.QueryInterface<Factory5>())
             {
-                using (var tmpAdapter = factory.GetAdapter1(0))
-                using (var adapter = tmpAdapter.QueryInterface<Adapter4>())
+                using var tmpAdapter = factory.GetAdapter1(0);
+                using var adapter = tmpAdapter.QueryInterface<Adapter4>();
+                using var tmpOutput = adapter.GetOutput(0);
+                using var output = tmpOutput.QueryInterface<Output6>();
+                try
                 {
-                    using (var tmpOutput = adapter.GetOutput(0))
-                    using (var output = tmpOutput.QueryInterface<Output6>())
+                    var displayModeList = output.GetDisplayModeList1(
+                        format,
+                        DisplayModeEnumerationFlags.Interlaced);
+
+                    displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
+                    if (displayModeList.Length > 0)
                     {
-                        try
+                        if (refreshRate > 0)
                         {
-                            var displayModeList = output.GetDisplayModeList1(
-                                format,
-                                DisplayModeEnumerationFlags.Interlaced);
-
-                            displayModeList = Array.FindAll(displayModeList, d => d.Width == width && d.Height == height);
-                            if (displayModeList.Length > 0)
+                            Array.Sort(displayModeList, (d1, d2) =>
                             {
-                                if (refreshRate > 0)
-                                {
-                                    Array.Sort(displayModeList, (d1, d2) =>
-                                    {
-                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+                                float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
 
-                                        f1 = Math.Abs(refreshRate - f1);
-                                        f2 = Math.Abs(refreshRate - f2);
+                                f1 = Math.Abs(refreshRate - f1);
+                                f2 = Math.Abs(refreshRate - f2);
 
-                                        return f1.CompareTo(f2);
-                                    });
-                                }
-                                else
-                                {
-                                    Array.Sort(displayModeList, (d1, d2) =>
-                                    {
-                                        float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
-                                        float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
-
-                                        return f2.CompareTo(f1);
-                                    });
-                                }
-
-                                mode = displayModeList[0];
-
-                                return;
-                            }
-
-                            ModeDescription1 desc = new ModeDescription1()
-                            {
-                                Width = width,
-                                Height = height,
-                                Format = format,
-                            };
-                            output.FindClosestMatchingMode1(
-                                ref desc,
-                                out mode,
-                                device);
-
-                            mode.Width = width;
-                            mode.Height = height;
-
-                            return;
+                                return f1.CompareTo(f2);
+                            });
                         }
-                        catch
+                        else
                         {
-                            // Display mode not found
+                            Array.Sort(displayModeList, (d1, d2) =>
+                            {
+                                float f1 = (float)d1.RefreshRate.Numerator / (float)d1.RefreshRate.Denominator;
+                                float f2 = (float)d2.RefreshRate.Numerator / (float)d2.RefreshRate.Denominator;
+
+                                return f2.CompareTo(f1);
+                            });
                         }
+
+                        mode = displayModeList[0];
+
+                        return;
                     }
+
+                    var desc = new ModeDescription1()
+                    {
+                        Width = width,
+                        Height = height,
+                        Format = format,
+                    };
+                    output.FindClosestMatchingMode1(
+                        ref desc,
+                        out mode,
+                        device);
+
+                    mode.Width = width;
+                    mode.Height = height;
+
+                    return;
+                }
+                catch
+                {
+                    // Display mode not found
                 }
             }
 
@@ -309,11 +305,10 @@ namespace Engine
 #if DEBUG
                     creationFlags |= DeviceCreationFlags.Debug;
 #endif
-                    using (var tmpDevice = new Device(adapter, creationFlags, FeatureLevel.Level_11_1, FeatureLevel.Level_11_0))
-                    {
-                        device = tmpDevice.QueryInterface<Device3>();
-                        device.DebugName = "GraphicsDevice";
-                    }
+                    using var tmpDevice = new Device(adapter, creationFlags, FeatureLevel.Level_11_1, FeatureLevel.Level_11_0);
+
+                    device = tmpDevice.QueryInterface<Device3>();
+                    device.DebugName = "GraphicsDevice";
                 }
 
                 if (multiSampling != 0 && !CheckMultisample(device, bufferFormat, multiSampling, out msCount, out msQuality))
@@ -343,11 +338,10 @@ namespace Engine
                     Windowed = !form.IsFullscreen,
                 };
 
-                using (var tmpSwapChain = new SwapChain1(factory, device, form.Handle, ref desc, fsdesc))
-                {
-                    swapChain = tmpSwapChain.QueryInterface<SwapChain4>();
-                    swapChain.DebugName = "GraphicsSwapChain";
-                }
+                using var tmpSwapChain = new SwapChain1(factory, device, form.Handle, ref desc, fsdesc);
+
+                swapChain = tmpSwapChain.QueryInterface<SwapChain4>();
+                swapChain.DebugName = "GraphicsSwapChain";
             }
 
             deviceContext = device.ImmediateContext3;
@@ -382,14 +376,12 @@ namespace Engine
             long bestSize = 0;
             for (int i = 0; i < adapterCount; i++)
             {
-                using (var adapter = factory.GetAdapter1(i))
+                using var adapter = factory.GetAdapter1(i);
+                long size = adapter.Description1.DedicatedVideoMemory;
+                if (size > bestSize)
                 {
-                    long size = adapter.Description1.DedicatedVideoMemory;
-                    if (size > bestSize)
-                    {
-                        bestSize = size;
-                        bestIndex = i;
-                    }
+                    bestSize = size;
+                    bestIndex = i;
                 }
             }
 
@@ -429,6 +421,9 @@ namespace Engine
                 swapChain = null;
 
                 DisposeResources();
+
+                deferredContextList?.ForEach(c => c.Dispose());
+                deferredContextList.Clear();
 
                 device?.Dispose();
                 device = null;
@@ -780,14 +775,14 @@ namespace Engine
         public EngineDepthStencilView CreateDepthStencilBuffer(string name, Format format, int width, int height, bool useSamples)
         {
             bool multiSampled = false;
-            SampleDescription sampleDescription = new SampleDescription(1, 0);
+            var sampleDescription = new SampleDescription(1, 0);
             if (useSamples)
             {
                 multiSampled = MultiSampled;
                 sampleDescription = CurrentSampleDescription;
             }
 
-            using (var texture = new Texture2D1(
+            using var texture = new Texture2D1(
                 device,
                 new Texture2DDescription1()
                 {
@@ -801,24 +796,23 @@ namespace Engine
                     BindFlags = BindFlags.DepthStencil,
                     CpuAccessFlags = CpuAccessFlags.None,
                     OptionFlags = ResourceOptionFlags.None,
-                }))
+                });
+
+            var description = new DepthStencilViewDescription()
             {
-                var description = new DepthStencilViewDescription()
+                Format = format,
+                Dimension = multiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
+                Texture2D = new DepthStencilViewDescription.Texture2DResource()
                 {
-                    Format = format,
-                    Dimension = multiSampled ? DepthStencilViewDimension.Texture2DMultisampled : DepthStencilViewDimension.Texture2D,
-                    Texture2D = new DepthStencilViewDescription.Texture2DResource()
-                    {
 
-                    },
-                    Texture2DMS = new DepthStencilViewDescription.Texture2DMultisampledResource()
-                    {
+                },
+                Texture2DMS = new DepthStencilViewDescription.Texture2DMultisampledResource()
+                {
 
-                    },
-                };
+                },
+            };
 
-                return new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, texture, description));
-            }
+            return new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, texture, description));
         }
         /// <summary>
         /// Clear depth / stencil buffer
@@ -857,7 +851,7 @@ namespace Engine
                 Counters.Textures++;
 
                 bool multiSampled = false;
-                SampleDescription sampleDescription = new SampleDescription(1, 0);
+                var sampleDescription = new SampleDescription(1, 0);
                 if (useSamples)
                 {
                     multiSampled = MultiSampled;
@@ -893,7 +887,7 @@ namespace Engine
                 Counters.Textures++;
 
                 bool multiSampled = false;
-                SampleDescription sampleDescription = new SampleDescription(1, 0);
+                var sampleDescription = new SampleDescription(1, 0);
                 if (useSamples)
                 {
                     multiSampled = MultiSampled;
