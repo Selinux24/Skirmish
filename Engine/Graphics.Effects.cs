@@ -67,7 +67,7 @@ namespace Engine
         /// <param name="flags"></param>
         public void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
-            technique.GetPass(index).Apply(deviceContext, flags);
+            technique.GetPass(index).Apply(immediateContext, flags);
         }
     }
 }

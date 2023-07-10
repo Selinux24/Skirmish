@@ -4,7 +4,6 @@ using SharpDX.DXGI;
 using SharpDX.Mathematics.Interop;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -50,9 +49,9 @@ namespace Engine
         /// </summary>
         private Device3 device = null;
         /// <summary>
-        /// Graphics inmmediate context
+        /// Graphics immmediate context
         /// </summary>
-        private readonly DeviceContext3 deviceContext = null;
+        private readonly DeviceContext3 immediateContext = null;
         /// <summary>
         /// Swap chain
         /// </summary>
@@ -122,7 +121,7 @@ namespace Engine
             {
                 if (currentIAPrimitiveTopology != value)
                 {
-                    deviceContext.InputAssembler.PrimitiveTopology = (PrimitiveTopology)value;
+                    immediateContext.InputAssembler.PrimitiveTopology = (PrimitiveTopology)value;
                     Counters.IAPrimitiveTopologySets++;
 
                     currentIAPrimitiveTopology = value;
@@ -142,7 +141,7 @@ namespace Engine
             {
                 if (currentIAInputLayout != value)
                 {
-                    deviceContext.InputAssembler.InputLayout = value;
+                    immediateContext.InputAssembler.InputLayout = value;
                     Counters.IAInputLayoutSets++;
 
                     currentIAInputLayout = value;
@@ -344,8 +343,8 @@ namespace Engine
                 swapChain.DebugName = "GraphicsSwapChain";
             }
 
-            deviceContext = device.ImmediateContext3;
-            deviceContext.DebugName = "Immediate";
+            immediateContext = device.ImmediateContext3;
+            immediateContext.DebugName = "Immediate";
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -422,7 +421,7 @@ namespace Engine
 
                 DisposeResources();
 
-                deferredContextList?.ForEach(c => c.Dispose());
+                deferredContextList.ForEach(c => c?.Dispose());
                 deferredContextList.Clear();
 
                 device?.Dispose();
@@ -551,13 +550,13 @@ namespace Engine
         /// </summary>
         public void Begin(Scene scene)
         {
-            deviceContext.ClearDepthStencilView(
+            immediateContext.ClearDepthStencilView(
                 depthStencilView.GetDepthStencil(),
                 DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
                 1.0f,
                 0);
 
-            deviceContext.ClearRenderTargetView(
+            immediateContext.ClearRenderTargetView(
                 renderTargetView.GetRenderTarget(),
                 scene.GameEnvironment.Background);
         }
@@ -573,149 +572,6 @@ namespace Engine
             {
                 Logger.WriteError(this, $"Error presenting Graphics: Code {res.Code}");
             }
-        }
-
-        /// <summary>
-        /// Sets the default viewport
-        /// </summary>
-        public void SetDefaultViewport()
-        {
-            SetViewport(Viewport);
-        }
-        /// <summary>
-        /// Sets viewport
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        public void SetViewport(Viewport viewport)
-        {
-            SetViewPorts(new[] { (RawViewportF)viewport });
-        }
-        /// <summary>
-        /// Sets viewport
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
-        public void SetViewport(ViewportF viewport)
-        {
-            SetViewPorts(new[] { (RawViewportF)viewport });
-        }
-        /// <summary>
-        /// Sets viewports
-        /// </summary>
-        /// <param name="viewports">Viewports</param>
-        public void SetViewports(IEnumerable<Viewport> viewports)
-        {
-            SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
-        }
-        /// <summary>
-        /// Sets viewports
-        /// </summary>
-        /// <param name="viewports">Viewports</param>
-        public void SetViewports(IEnumerable<ViewportF> viewports)
-        {
-            SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
-        }
-        /// <summary>
-        /// Sets viewports
-        /// </summary>
-        /// <param name="viewports">Viewports</param>
-        private void SetViewPorts(IEnumerable<RawViewportF> viewports)
-        {
-            if (Helper.CompareEnumerables(currentViewports, viewports))
-            {
-                return;
-            }
-
-            deviceContext.Rasterizer.SetViewports(viewports.ToArray());
-
-            currentViewports = viewports;
-        }
-
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the target must be cleared</param>
-        /// <param name="clearRTColor">Render target clear color</param>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor)
-        {
-            SetRenderTargets(
-                renderTargets, clearRT, clearRTColor,
-                false);
-        }
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the target must be cleared</param>
-        /// <param name="clearRTColor">Render target clear color</param>
-        /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool freeOMResources)
-        {
-            if (freeOMResources)
-            {
-                ClearShaderResources();
-            }
-
-            var rtv = renderTargets?.GetRenderTargets() ?? Enumerable.Empty<RenderTargetView1>();
-            var rtvCount = rtv.Count();
-
-            deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv.ToArray());
-
-            if (clearRT && rtvCount > 0)
-            {
-                for (int i = 0; i < rtvCount; i++)
-                {
-                    deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
-                }
-            }
-        }
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the target must be cleared</param>
-        /// <param name="clearRTColor">Render target clear color</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
-        {
-            SetRenderTargets(
-                renderTargets, clearRT, clearRTColor,
-                DefaultDepthStencil, clearDepth, clearStencil,
-                false);
-        }
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
-        /// <param name="clearRTColor">Target clear color</param>
-        /// <param name="depthMap">Depth map</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
-        public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources)
-        {
-            if (freeOMResources)
-            {
-                ClearShaderResources();
-            }
-
-            var dsv = depthMap?.GetDepthStencil();
-            var rtv = renderTargets?.GetRenderTargets() ?? Enumerable.Empty<RenderTargetView1>();
-            var rtvCount = rtv.Count();
-
-            deviceContext.OutputMerger.SetTargets(dsv, 0, Array.Empty<UnorderedAccessView>(), Array.Empty<int>(), rtv.ToArray());
-
-            if (clearRT && rtvCount > 0)
-            {
-                for (int i = 0; i < rtvCount; i++)
-                {
-                    deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
-                }
-            }
-
-            ClearDepthStencilBuffer(depthMap, clearDepth, clearStencil);
         }
 
         /// <summary>
@@ -813,26 +669,6 @@ namespace Engine
             };
 
             return new EngineDepthStencilView($"{name}.DSV", new DepthStencilView(device, texture, description));
-        }
-        /// <summary>
-        /// Clear depth / stencil buffer
-        /// </summary>
-        /// <param name="depthMap">Depth buffer</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        public void ClearDepthStencilBuffer(EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil)
-        {
-            if ((clearDepth || clearStencil) && depthMap != null)
-            {
-                DepthStencilClearFlags clearDSFlags = 0;
-                if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
-                if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
-
-                deviceContext.ClearDepthStencilView(
-                    depthMap.GetDepthStencil(),
-                    clearDSFlags,
-                    1.0f, 0);
-            }
         }
 
         /// <summary>
@@ -1288,66 +1124,6 @@ namespace Engine
 
                 return (dsv, srv);
             }
-        }
-
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="vertexCount">Vertex count</param>
-        /// <param name="startVertexLocation">Start vertex location</param>
-        public void Draw(int vertexCount, int startVertexLocation)
-        {
-            deviceContext.Draw(vertexCount, startVertexLocation);
-
-            Counters.DrawCallsPerFrame++;
-        }
-        /// <summary>
-        /// Draw indexed
-        /// </summary>
-        /// <param name="indexCount">Index count</param>
-        /// <param name="startIndexLocation">Start vertex location</param>
-        /// <param name="baseVertexLocation">Base vertex location</param>
-        public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
-        {
-            deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
-
-            Counters.DrawCallsPerFrame++;
-        }
-        /// <summary>
-        /// Draw instanced
-        /// </summary>
-        /// <param name="vertexCountPerInstance">Vertex count per instance</param>
-        /// <param name="instanceCount">Instance count</param>
-        /// <param name="startVertexLocation">Start vertex location</param>
-        /// <param name="startInstanceLocation">Start instance count</param>
-        public void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
-        {
-            deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
-
-            Counters.DrawCallsPerFrame++;
-        }
-        /// <summary>
-        /// Draw indexed instanced
-        /// </summary>
-        /// <param name="indexCountPerInstance">Index count per instance</param>
-        /// <param name="instanceCount">Instance count</param>
-        /// <param name="startIndexLocation">Start index location</param>
-        /// <param name="baseVertexLocation">Base vertex location</param>
-        /// <param name="startInstanceLocation">Start instance location</param>
-        public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
-        {
-            deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
-
-            Counters.DrawCallsPerFrame++;
-        }
-        /// <summary>
-        /// Draw auto
-        /// </summary>
-        public void DrawAuto()
-        {
-            deviceContext.DrawAuto();
-
-            Counters.DrawCallsPerFrame++;
         }
     }
 }

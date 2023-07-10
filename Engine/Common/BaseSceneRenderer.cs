@@ -69,6 +69,7 @@ namespace Engine.Common
         /// </summary>
         private RenderTarget postProcessingTargetB = null;
 
+#if DEBUG
         /// <summary>
         /// Directional shadow mapping stats dictionary
         /// </summary>
@@ -81,6 +82,7 @@ namespace Engine.Common
         /// Spot shadow mapping stats dictionary
         /// </summary>
         private readonly Dictionary<string, double> spotShadowMappingDict = new();
+#endif
 
         /// <summary>
         /// Shadow map size

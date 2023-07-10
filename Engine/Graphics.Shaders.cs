@@ -274,29 +274,29 @@ namespace Engine
         /// </summary>
         private void ClearShaderResources()
         {
-            currentVertexShaderConstantBufferState.Clear(deviceContext.VertexShader);
-            currentVertexShaderResourceViewState.Clear(deviceContext.VertexShader);
-            currentVertexShaderSamplerState.Clear(deviceContext.VertexShader);
+            currentVertexShaderConstantBufferState.Clear(immediateContext.VertexShader);
+            currentVertexShaderResourceViewState.Clear(immediateContext.VertexShader);
+            currentVertexShaderSamplerState.Clear(immediateContext.VertexShader);
 
-            currentHullShaderConstantBufferState.Clear(deviceContext.HullShader);
-            currentHullShaderResourceViewState.Clear(deviceContext.HullShader);
-            currentHullShaderSamplerState.Clear(deviceContext.HullShader);
+            currentHullShaderConstantBufferState.Clear(immediateContext.HullShader);
+            currentHullShaderResourceViewState.Clear(immediateContext.HullShader);
+            currentHullShaderSamplerState.Clear(immediateContext.HullShader);
 
-            currentDomainShaderConstantBufferState.Clear(deviceContext.DomainShader);
-            currentDomainShaderResourceViewState.Clear(deviceContext.DomainShader);
-            currentDomainShaderSamplerState.Clear(deviceContext.DomainShader);
+            currentDomainShaderConstantBufferState.Clear(immediateContext.DomainShader);
+            currentDomainShaderResourceViewState.Clear(immediateContext.DomainShader);
+            currentDomainShaderSamplerState.Clear(immediateContext.DomainShader);
 
-            currentGeometryShaderConstantBufferState.Clear(deviceContext.GeometryShader);
-            currentGeometryShaderResourceViewState.Clear(deviceContext.GeometryShader);
-            currentGeometryShaderSamplerState.Clear(deviceContext.GeometryShader);
+            currentGeometryShaderConstantBufferState.Clear(immediateContext.GeometryShader);
+            currentGeometryShaderResourceViewState.Clear(immediateContext.GeometryShader);
+            currentGeometryShaderSamplerState.Clear(immediateContext.GeometryShader);
 
-            currentPixelShaderConstantBufferState.Clear(deviceContext.PixelShader);
-            currentPixelShaderResourceViewState.Clear(deviceContext.PixelShader);
-            currentPixelShaderSamplerState.Clear(deviceContext.PixelShader);
+            currentPixelShaderConstantBufferState.Clear(immediateContext.PixelShader);
+            currentPixelShaderResourceViewState.Clear(immediateContext.PixelShader);
+            currentPixelShaderSamplerState.Clear(immediateContext.PixelShader);
 
-            currentComputeShaderConstantBufferState.Clear(deviceContext.ComputeShader);
-            currentComputeShaderResourceViewState.Clear(deviceContext.ComputeShader);
-            currentComputeShaderSamplerState.Clear(deviceContext.ComputeShader);
+            currentComputeShaderConstantBufferState.Clear(immediateContext.ComputeShader);
+            currentComputeShaderResourceViewState.Clear(immediateContext.ComputeShader);
+            currentComputeShaderSamplerState.Clear(immediateContext.ComputeShader);
         }
 
         /// <summary>
@@ -431,7 +431,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.VertexShader.Set(vertexShader?.GetShader());
+            immediateContext.VertexShader.Set(vertexShader?.GetShader());
 
             currentVertexShader = vertexShader;
         }
@@ -445,7 +445,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.VertexShader.Set(null);
+            immediateContext.VertexShader.Set(null);
 
             currentVertexShader = null;
         }
@@ -457,7 +457,7 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         public void SetVertexShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
-            currentVertexShaderConstantBufferState.SetConstantBuffer(deviceContext.VertexShader, slot, buffer);
+            currentVertexShaderConstantBufferState.SetConstantBuffer(immediateContext.VertexShader, slot, buffer);
         }
         /// <summary>
         /// Sets the constant buffer list to the current vertex shader
@@ -467,7 +467,7 @@ namespace Engine
         /// <param name="bufferList">Buffer list</param>
         public void SetVertexShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
-            currentVertexShaderConstantBufferState.SetConstantBuffers(deviceContext.VertexShader, startSlot, bufferList);
+            currentVertexShaderConstantBufferState.SetConstantBuffers(immediateContext.VertexShader, startSlot, bufferList);
         }
         /// <summary>
         /// Sets the specified resource in the current vertex shader
@@ -476,7 +476,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetVertexShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentVertexShaderResourceViewState.SetShaderResource(deviceContext.VertexShader, slot, resourceView);
+            currentVertexShaderResourceViewState.SetShaderResource(immediateContext.VertexShader, slot, resourceView);
         }
         /// <summary>
         /// Sets the specified resource in the current vertex shader shader
@@ -485,7 +485,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetVertexShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentVertexShaderResourceViewState.SetShaderResources(deviceContext.VertexShader, startSlot, resourceViews);
+            currentVertexShaderResourceViewState.SetShaderResources(immediateContext.VertexShader, startSlot, resourceViews);
         }
         /// <summary>
         /// Sets the specified sampler state in the current vertex shader
@@ -494,7 +494,7 @@ namespace Engine
         /// <param name="samplerState">Sampler</param>
         public void SetVertexShaderSampler(int slot, EngineSamplerState samplerState)
         {
-            currentVertexShaderSamplerState.SetSampler(deviceContext.VertexShader, slot, samplerState);
+            currentVertexShaderSamplerState.SetSampler(immediateContext.VertexShader, slot, samplerState);
         }
         /// <summary>
         /// Sets the specified sampler state in the current vertex shader
@@ -503,7 +503,7 @@ namespace Engine
         /// <param name="samplerStates">Samplers</param>
         public void SetVertexShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
-            currentVertexShaderSamplerState.SetSamplers(deviceContext.VertexShader, startSlot, samplerStates);
+            currentVertexShaderSamplerState.SetSamplers(immediateContext.VertexShader, startSlot, samplerStates);
         }
 
         /// <summary>
@@ -634,7 +634,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.HullShader.Set(hullShader?.GetShader());
+            immediateContext.HullShader.Set(hullShader?.GetShader());
 
             currentHullShader = hullShader;
         }
@@ -648,7 +648,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.HullShader.Set(null);
+            immediateContext.HullShader.Set(null);
 
             currentHullShader = null;
         }
@@ -660,7 +660,7 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         public void SetHullShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
-            currentHullShaderConstantBufferState.SetConstantBuffer(deviceContext.HullShader, slot, buffer);
+            currentHullShaderConstantBufferState.SetConstantBuffer(immediateContext.HullShader, slot, buffer);
         }
         /// <summary>
         /// Sets the constant buffer list to the current hull shader
@@ -670,7 +670,7 @@ namespace Engine
         /// <param name="bufferList">Buffer list</param>
         public void SetHullShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
-            currentHullShaderConstantBufferState.SetConstantBuffers(deviceContext.HullShader, startSlot, bufferList);
+            currentHullShaderConstantBufferState.SetConstantBuffers(immediateContext.HullShader, startSlot, bufferList);
         }
         /// <summary>
         /// Sets the specified resource in the current hull shader
@@ -679,7 +679,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetHullShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentHullShaderResourceViewState.SetShaderResource(deviceContext.HullShader, slot, resourceView);
+            currentHullShaderResourceViewState.SetShaderResource(immediateContext.HullShader, slot, resourceView);
         }
         /// <summary>
         /// Sets the specified resource in the current hull shader shader
@@ -688,7 +688,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetHullShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentHullShaderResourceViewState.SetShaderResources(deviceContext.HullShader, startSlot, resourceViews);
+            currentHullShaderResourceViewState.SetShaderResources(immediateContext.HullShader, startSlot, resourceViews);
         }
         /// <summary>
         /// Sets the specified sampler state in the current hull shader
@@ -697,7 +697,7 @@ namespace Engine
         /// <param name="samplerState">Sampler</param>
         public void SetHullShaderSampler(int slot, EngineSamplerState samplerState)
         {
-            currentHullShaderSamplerState.SetSampler(deviceContext.HullShader, slot, samplerState);
+            currentHullShaderSamplerState.SetSampler(immediateContext.HullShader, slot, samplerState);
         }
         /// <summary>
         /// Sets the specified sampler state in the current hull shader
@@ -706,7 +706,7 @@ namespace Engine
         /// <param name="samplerStates">Samplers</param>
         public void SetHullShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
-            currentHullShaderSamplerState.SetSamplers(deviceContext.HullShader, startSlot, samplerStates);
+            currentHullShaderSamplerState.SetSamplers(immediateContext.HullShader, startSlot, samplerStates);
         }
 
         /// <summary>
@@ -837,7 +837,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.DomainShader.Set(domainShader?.GetShader());
+            immediateContext.DomainShader.Set(domainShader?.GetShader());
 
             currentDomainShader = domainShader;
         }
@@ -851,7 +851,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.DomainShader.Set(null);
+            immediateContext.DomainShader.Set(null);
 
             currentDomainShader = null;
         }
@@ -863,7 +863,7 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         public void SetDomainShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
-            currentDomainShaderConstantBufferState.SetConstantBuffer(deviceContext.DomainShader, slot, buffer);
+            currentDomainShaderConstantBufferState.SetConstantBuffer(immediateContext.DomainShader, slot, buffer);
         }
         /// <summary>
         /// Sets the constant buffer list to the current domain shader
@@ -873,7 +873,7 @@ namespace Engine
         /// <param name="bufferList">Buffer list</param>
         public void SetDomainShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
-            currentDomainShaderConstantBufferState.SetConstantBuffers(deviceContext.DomainShader, startSlot, bufferList);
+            currentDomainShaderConstantBufferState.SetConstantBuffers(immediateContext.DomainShader, startSlot, bufferList);
         }
         /// <summary>
         /// Sets the specified resource in the current domain shader
@@ -882,7 +882,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetDomainShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentDomainShaderResourceViewState.SetShaderResource(deviceContext.DomainShader, slot, resourceView);
+            currentDomainShaderResourceViewState.SetShaderResource(immediateContext.DomainShader, slot, resourceView);
         }
         /// <summary>
         /// Sets the specified resource in the current domain shader shader
@@ -891,7 +891,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetDomainShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentDomainShaderResourceViewState.SetShaderResources(deviceContext.DomainShader, startSlot, resourceViews);
+            currentDomainShaderResourceViewState.SetShaderResources(immediateContext.DomainShader, startSlot, resourceViews);
         }
         /// <summary>
         /// Sets the specified sampler state in the current domain shader
@@ -900,7 +900,7 @@ namespace Engine
         /// <param name="samplerState">Sampler</param>
         public void SetDomainShaderSampler(int slot, EngineSamplerState samplerState)
         {
-            currentDomainShaderSamplerState.SetSampler(deviceContext.DomainShader, slot, samplerState);
+            currentDomainShaderSamplerState.SetSampler(immediateContext.DomainShader, slot, samplerState);
         }
         /// <summary>
         /// Sets the specified sampler state in the current domain shader
@@ -909,7 +909,7 @@ namespace Engine
         /// <param name="samplerStates">Samplers</param>
         public void SetDomainShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
-            currentDomainShaderSamplerState.SetSamplers(deviceContext.DomainShader, startSlot, samplerStates);
+            currentDomainShaderSamplerState.SetSamplers(immediateContext.DomainShader, startSlot, samplerStates);
         }
 
         /// <summary>
@@ -1169,7 +1169,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.GeometryShader.Set(geometryShader?.GetShader());
+            immediateContext.GeometryShader.Set(geometryShader?.GetShader());
 
             currentGeomeryShader = geometryShader;
         }
@@ -1183,7 +1183,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.GeometryShader.Set(null);
+            immediateContext.GeometryShader.Set(null);
 
             currentGeomeryShader = null;
         }
@@ -1195,7 +1195,7 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         public void SetGeometryShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
-            currentGeometryShaderConstantBufferState.SetConstantBuffer(deviceContext.GeometryShader, slot, buffer);
+            currentGeometryShaderConstantBufferState.SetConstantBuffer(immediateContext.GeometryShader, slot, buffer);
         }
         /// <summary>
         /// Sets the constant buffer list to the current geometry shader
@@ -1205,7 +1205,7 @@ namespace Engine
         /// <param name="bufferList">Buffer list</param>
         public void SetGeometryShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
-            currentGeometryShaderConstantBufferState.SetConstantBuffers(deviceContext.GeometryShader, startSlot, bufferList);
+            currentGeometryShaderConstantBufferState.SetConstantBuffers(immediateContext.GeometryShader, startSlot, bufferList);
         }
         /// <summary>
         /// Sets the specified resource in the current geometry shader
@@ -1214,7 +1214,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetGeometryShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentGeometryShaderResourceViewState.SetShaderResource(deviceContext.GeometryShader, slot, resourceView);
+            currentGeometryShaderResourceViewState.SetShaderResource(immediateContext.GeometryShader, slot, resourceView);
         }
         /// <summary>
         /// Sets the specified resource in the current geometry shader
@@ -1223,7 +1223,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetGeometryShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentGeometryShaderResourceViewState.SetShaderResources(deviceContext.GeometryShader, startSlot, resourceViews);
+            currentGeometryShaderResourceViewState.SetShaderResources(immediateContext.GeometryShader, startSlot, resourceViews);
         }
         /// <summary>
         /// Sets the specified sampler state in the current geometry shader
@@ -1232,7 +1232,7 @@ namespace Engine
         /// <param name="samplerState">Sampler</param>
         public void SetGeometryShaderSampler(int slot, EngineSamplerState samplerState)
         {
-            currentGeometryShaderSamplerState.SetSampler(deviceContext.GeometryShader, slot, samplerState);
+            currentGeometryShaderSamplerState.SetSampler(immediateContext.GeometryShader, slot, samplerState);
         }
         /// <summary>
         /// Sets the specified sampler state in the current geometry shader
@@ -1241,7 +1241,7 @@ namespace Engine
         /// <param name="samplerStates">Samplers</param>
         public void SetGeometryShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
-            currentGeometryShaderSamplerState.SetSamplers(deviceContext.GeometryShader, startSlot, samplerStates);
+            currentGeometryShaderSamplerState.SetSamplers(immediateContext.GeometryShader, startSlot, samplerStates);
         }
 
         /// <summary>
@@ -1255,7 +1255,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.StreamOutput.SetTargets(streamOutBinding?.ToArray());
+            immediateContext.StreamOutput.SetTargets(streamOutBinding?.ToArray());
             Counters.SOTargetsSet++;
 
             currentStreamOutputBindings = streamOutBinding;
@@ -1389,7 +1389,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.PixelShader.Set(pixelShader?.GetShader());
+            immediateContext.PixelShader.Set(pixelShader?.GetShader());
 
             currentPixelShader = pixelShader;
         }
@@ -1403,7 +1403,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.PixelShader.Set(null);
+            immediateContext.PixelShader.Set(null);
 
             currentPixelShader = null;
         }
@@ -1415,7 +1415,7 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         public void SetPixelShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
-            currentPixelShaderConstantBufferState.SetConstantBuffer(deviceContext.PixelShader, slot, buffer);
+            currentPixelShaderConstantBufferState.SetConstantBuffer(immediateContext.PixelShader, slot, buffer);
         }
         /// <summary>
         /// Sets the constant buffer list to the current pixel shader
@@ -1425,7 +1425,7 @@ namespace Engine
         /// <param name="bufferList">Buffer list</param>
         public void SetPixelShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
-            currentPixelShaderConstantBufferState.SetConstantBuffers(deviceContext.PixelShader, startSlot, bufferList);
+            currentPixelShaderConstantBufferState.SetConstantBuffers(immediateContext.PixelShader, startSlot, bufferList);
         }
         /// <summary>
         /// Sets the specified resource in the current pixel shader
@@ -1434,7 +1434,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetPixelShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentPixelShaderResourceViewState.SetShaderResource(deviceContext.PixelShader, slot, resourceView);
+            currentPixelShaderResourceViewState.SetShaderResource(immediateContext.PixelShader, slot, resourceView);
         }
         /// <summary>
         /// Sets the specified resource in the current pixel shader
@@ -1443,7 +1443,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetPixelShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentPixelShaderResourceViewState.SetShaderResources(deviceContext.PixelShader, startSlot, resourceViews);
+            currentPixelShaderResourceViewState.SetShaderResources(immediateContext.PixelShader, startSlot, resourceViews);
         }
         /// <summary>
         /// Sets the specified sampler state in the current pixel shader
@@ -1452,7 +1452,7 @@ namespace Engine
         /// <param name="samplerState">Sampler</param>
         public void SetPixelShaderSampler(int slot, EngineSamplerState samplerState)
         {
-            currentPixelShaderSamplerState.SetSampler(deviceContext.PixelShader, slot, samplerState);
+            currentPixelShaderSamplerState.SetSampler(immediateContext.PixelShader, slot, samplerState);
         }
         /// <summary>
         /// Sets the specified sampler state in the current pixel shader
@@ -1461,7 +1461,7 @@ namespace Engine
         /// <param name="samplerStates">Samplers</param>
         public void SetPixelShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
-            currentPixelShaderSamplerState.SetSamplers(deviceContext.PixelShader, startSlot, samplerStates);
+            currentPixelShaderSamplerState.SetSamplers(immediateContext.PixelShader, startSlot, samplerStates);
         }
 
         /// <summary>
@@ -1592,7 +1592,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.ComputeShader.Set(computeShader?.GetShader());
+            immediateContext.ComputeShader.Set(computeShader?.GetShader());
 
             currentComputeShader = computeShader;
         }
@@ -1606,7 +1606,7 @@ namespace Engine
                 return;
             }
 
-            deviceContext.ComputeShader.Set(null);
+            immediateContext.ComputeShader.Set(null);
 
             currentComputeShader = null;
         }
@@ -1618,7 +1618,7 @@ namespace Engine
         /// <param name="buffer">Buffer</param>
         public void SetComputeShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
-            currentComputeShaderConstantBufferState.SetConstantBuffer(deviceContext.ComputeShader, slot, buffer);
+            currentComputeShaderConstantBufferState.SetConstantBuffer(immediateContext.ComputeShader, slot, buffer);
         }
         /// <summary>
         /// Sets the constant buffer list to the current compute shader
@@ -1628,7 +1628,7 @@ namespace Engine
         /// <param name="bufferList">Buffer list</param>
         public void SetComputeShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
-            currentComputeShaderConstantBufferState.SetConstantBuffers(deviceContext.ComputeShader, startSlot, bufferList);
+            currentComputeShaderConstantBufferState.SetConstantBuffers(immediateContext.ComputeShader, startSlot, bufferList);
         }
         /// <summary>
         /// Sets the specified resource in the current compute shader
@@ -1637,7 +1637,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetComputeShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentComputeShaderResourceViewState.SetShaderResource(deviceContext.ComputeShader, slot, resourceView);
+            currentComputeShaderResourceViewState.SetShaderResource(immediateContext.ComputeShader, slot, resourceView);
         }
         /// <summary>
         /// Sets the specified resource in the current compute shader shader
@@ -1646,7 +1646,7 @@ namespace Engine
         /// <param name="resourceView">Resource</param>
         public void SetComputeShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentComputeShaderResourceViewState.SetShaderResources(deviceContext.ComputeShader, startSlot, resourceViews);
+            currentComputeShaderResourceViewState.SetShaderResources(immediateContext.ComputeShader, startSlot, resourceViews);
         }
         /// <summary>
         /// Sets the specified sampler state in the current compute shader
@@ -1655,7 +1655,7 @@ namespace Engine
         /// <param name="samplerState">Sampler</param>
         public void SetComputeShaderSampler(int slot, EngineSamplerState samplerState)
         {
-            currentComputeShaderSamplerState.SetSampler(deviceContext.ComputeShader, slot, samplerState);
+            currentComputeShaderSamplerState.SetSampler(immediateContext.ComputeShader, slot, samplerState);
         }
         /// <summary>
         /// Sets the specified sampler state in the current compute shader
@@ -1664,7 +1664,7 @@ namespace Engine
         /// <param name="samplerStates">Samplers</param>
         public void SetComputeShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
-            currentComputeShaderSamplerState.SetSamplers(deviceContext.ComputeShader, startSlot, samplerStates);
+            currentComputeShaderSamplerState.SetSamplers(immediateContext.ComputeShader, startSlot, samplerStates);
         }
     }
 }

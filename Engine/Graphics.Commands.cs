@@ -27,12 +27,12 @@ namespace Engine
                 return dc;
             }
 
-            var deviceContext = new DeviceContext3(device)
+            var deferredContext = new DeviceContext3(device)
             {
                 DebugName = name,
             };
 
-            dc = new EngineDeferredContext(deviceContext, name);
+            dc = new EngineDeferredContext(deferredContext, name);
 
             deferredContextList.Add(dc);
 
@@ -46,7 +46,7 @@ namespace Engine
         /// <param name="restoreState">Resore state</param>
         public void ExecuteCommandList(IEngineCommandList commandList, bool restoreState = false)
         {
-            deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
+            immediateContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
         }
     }
 }

@@ -55,9 +55,9 @@ namespace Engine
                         DebugName = name,
                     };
 
-                    deviceContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+                    immediateContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
 
-                    deviceContext.GenerateMips(result);
+                    immediateContext.GenerateMips(result);
 
                     return result;
                 }
@@ -138,10 +138,10 @@ namespace Engine
                     {
                         var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        deviceContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                        immediateContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
-                    deviceContext.GenerateMips(result);
+                    immediateContext.GenerateMips(result);
 
                     return result;
                 }
@@ -219,9 +219,9 @@ namespace Engine
                         DebugName = name,
                     };
 
-                    deviceContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+                    immediateContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
 
-                    deviceContext.GenerateMips(result);
+                    immediateContext.GenerateMips(result);
 
                     return result;
                 }
@@ -301,10 +301,10 @@ namespace Engine
                     {
                         var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        deviceContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                        immediateContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
-                    deviceContext.GenerateMips(result);
+                    immediateContext.GenerateMips(result);
 
                     return result;
                 }
@@ -936,13 +936,13 @@ namespace Engine
             {
                 using (var resource = texture.GetResource().Resource.QueryInterface<Texture1D>())
                 {
-                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    immediateContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
                     using (stream)
                     {
                         stream.Position = 0;
                         stream.WriteRange(data.ToArray());
                     }
-                    deviceContext.UnmapSubresource(resource, 0);
+                    immediateContext.UnmapSubresource(resource, 0);
                 }
 
                 Counters.BufferWrites++;
@@ -960,13 +960,13 @@ namespace Engine
             {
                 using (var resource = texture.GetResource().Resource.QueryInterface<Texture2D1>())
                 {
-                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    immediateContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
                     using (stream)
                     {
                         stream.Position = 0;
                         stream.WriteRange(data.ToArray());
                     }
-                    deviceContext.UnmapSubresource(resource, 0);
+                    immediateContext.UnmapSubresource(resource, 0);
                 }
 
                 Counters.BufferWrites++;
