@@ -83,7 +83,7 @@ namespace Engine.BuiltIn.Shadows
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -91,7 +91,7 @@ namespace Engine.BuiltIn.Shadows
                 cbPerMaterial,
             };
 
-            Graphics.SetVertexShaderConstantBuffers(0, cb);
+            context.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

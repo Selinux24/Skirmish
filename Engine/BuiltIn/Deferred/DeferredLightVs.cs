@@ -73,7 +73,7 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -81,7 +81,7 @@ namespace Engine.BuiltIn.Deferred
                 perLightBuffer,
             };
 
-            Graphics.SetVertexShaderConstantBuffers(0, cb);
+            context.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

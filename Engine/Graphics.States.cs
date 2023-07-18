@@ -1,6 +1,4 @@
-﻿using SharpDX;
-
-namespace Engine
+﻿namespace Engine
 {
     using Engine.Common;
 
@@ -17,23 +15,6 @@ namespace Engine
         /// Depth stencil view
         /// </summary>
         private EngineDepthStencilView depthStencilView = null;
-
-        /// <summary>
-        /// Current depth-stencil state
-        /// </summary>
-        private EngineDepthStencilState currentDepthStencilState = null;
-        /// <summary>
-        /// Current depth-stencil reference
-        /// </summary>
-        private int currentDepthStencilRef = 0;
-        /// <summary>
-        /// Current blend state
-        /// </summary>
-        private EngineBlendState currentBlendState = null;
-        /// <summary>
-        /// Current rasterizer state
-        /// </summary>
-        private EngineRasterizerState currentRasterizerState = null;
 
         /// <summary>
         /// Depth stencil state with z-buffer enabled for write
@@ -182,261 +163,185 @@ namespace Engine
         }
 
         /// <summary>
-        /// Sets default render target
+        /// Gets the enabled z-buffer for write
         /// </summary>
-        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
-        /// <param name="clearRTColor">Render target clear color</param>
-        public void SetDefaultRenderTarget(bool clearRT, Color4 clearRTColor)
-        {
-            SetRenderTargets(
-                renderTargetView, clearRT, clearRTColor,
-                false);
-        }
-        /// <summary>
-        /// Sets default render target
-        /// </summary>
-        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
-        /// <param name="clearRTColor">Render target clear color</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        public void SetDefaultRenderTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
-        {
-            SetRenderTargets(
-                renderTargetView, clearRT, clearRTColor,
-                depthStencilView, clearDepth, clearStencil,
-                false);
-        }
-
-        /// <summary>
-        /// Enables z-buffer for write
-        /// </summary>
-        public void SetDepthStencilWRZEnabled()
+        public EngineDepthStencilState GetDepthStencilWRZEnabled()
         {
             depthStencilWRzBufferEnabled ??= EngineDepthStencilState.WRzBufferEnabled(this, nameof(Graphics));
 
-            SetDepthStencilState(depthStencilWRzBufferEnabled);
+            return depthStencilWRzBufferEnabled;
         }
         /// <summary>
-        /// Disables z-buffer for write
+        /// Gets the disabled z-buffer for write
         /// </summary>
-        public void SetDepthStencilWRZDisabled()
+        public EngineDepthStencilState GetDepthStencilWRZDisabled()
         {
             depthStencilWRzBufferDisabled ??= EngineDepthStencilState.WRzBufferDisabled(this, nameof(Graphics));
 
-            SetDepthStencilState(depthStencilWRzBufferDisabled);
+            return depthStencilWRzBufferDisabled;
         }
         /// <summary>
-        /// Enables z-buffer for read
+        /// Gets the enabled z-buffer for read
         /// </summary>
-        public void SetDepthStencilRDZEnabled()
+        /// <param name="context">Device context</param>
+        public EngineDepthStencilState GetDepthStencilRDZEnabled()
         {
             depthStencilRDzBufferEnabled ??= EngineDepthStencilState.RDzBufferEnabled(this, nameof(Graphics));
 
-            SetDepthStencilState(depthStencilRDzBufferEnabled);
+            return depthStencilRDzBufferEnabled;
         }
         /// <summary>
-        /// Disables z-buffer for read
+        /// Gets the disabled z-buffer for read
         /// </summary>
-        public void SetDepthStencilRDZDisabled()
+        public EngineDepthStencilState GetDepthStencilRDZDisabled()
         {
             depthStencilRDzBufferDisabled ??= EngineDepthStencilState.RDzBufferDisabled(this, nameof(Graphics));
 
-            SetDepthStencilState(depthStencilRDzBufferDisabled);
+            return depthStencilRDzBufferDisabled;
         }
         /// <summary>
-        /// Disables depth stencil
+        /// Gets the disabled depth stencil
         /// </summary>
-        public void SetDepthStencilNone()
+        public EngineDepthStencilState GetDepthStencilNone()
         {
             depthStencilNone ??= EngineDepthStencilState.None(this, nameof(Graphics));
 
-            SetDepthStencilState(depthStencilNone);
+            return depthStencilNone;
         }
         /// <summary>
-        /// Sets the depth state for shadow mapping
+        /// Gets the depth state for shadow mapping
         /// </summary>
-        public void SetDepthStencilShadowMapping()
+        public EngineDepthStencilState GetDepthStencilShadowMapping()
         {
             depthStencilShadowMapping ??= EngineDepthStencilState.ShadowMapping(this, nameof(Graphics));
 
-            SetDepthStencilState(depthStencilShadowMapping);
-        }
-        /// <summary>
-        /// Sets depth stencil state
-        /// </summary>
-        /// <param name="state">Depth stencil state</param>
-        /// <param name="stencilRef">Stencil reference</param>
-        public void SetDepthStencilState(EngineDepthStencilState state, int stencilRef = 0)
-        {
-            if (currentDepthStencilState == state && currentDepthStencilRef == stencilRef)
-            {
-                return;
-            }
-
-            device.ImmediateContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), stencilRef);
-
-            Counters.DepthStencilStateChanges++;
-
-            currentDepthStencilState = state;
-            currentDepthStencilRef = stencilRef;
+            return depthStencilShadowMapping;
         }
 
         /// <summary>
-        /// Sets default blend state
+        /// Gets default blend state
         /// </summary>
-        public void SetBlendDefault()
+        public EngineBlendState GetBlendDefault()
         {
             blendDefault ??= EngineBlendState.Default(this);
 
-            SetBlendState(blendDefault);
+            return blendDefault;
         }
         /// <summary>
-        /// Sets default alpha blend state
+        /// Gets default alpha blend state
         /// </summary>
-        public void SetBlendAlpha(bool alphaConservative = false)
+        /// <param name="alphaConservative">Alpha conservative</param>
+        public EngineBlendState GetBlendAlpha(bool alphaConservative = false)
         {
             if (alphaConservative)
             {
                 blendAlphaConservativeBlend ??= EngineBlendState.AlphaConservativeBlend(this);
 
-                SetBlendState(blendAlphaConservativeBlend);
+                return blendAlphaConservativeBlend;
             }
             else
             {
                 blendAlphaBlend ??= EngineBlendState.AlphaBlend(this);
 
-                SetBlendState(blendAlphaBlend);
+                return blendAlphaBlend;
             }
         }
         /// <summary>
-        /// Sets transparent blend state
+        /// Gets transparent blend state
         /// </summary>
-        public void SetBlendTransparent(bool alphaConservative = false)
+        /// <param name="alphaConservative">Alpha conservative</param>
+        public EngineBlendState GetBlendTransparent(bool alphaConservative = false)
         {
             if (alphaConservative)
             {
                 blendTransparentConservative ??= EngineBlendState.TransparentConservative(this);
 
-                SetBlendState(blendTransparentConservative);
+                return blendTransparentConservative;
             }
             else
             {
                 blendTransparent ??= EngineBlendState.Transparent(this);
 
-                SetBlendState(blendTransparent);
+                return blendTransparent;
             }
         }
         /// <summary>
-        /// Sets additive blend state
+        /// Gets additive blend state
         /// </summary>
-        public void SetBlendAdditive()
+        public EngineBlendState GetBlendAdditive()
         {
             blendAdditive ??= EngineBlendState.Additive(this);
 
-            SetBlendState(blendAdditive);
+            return blendAdditive;
         }
         /// <summary>
-        /// Sets blend state
-        /// </summary>
-        /// <param name="state">Blend state</param>
-        public void SetBlendState(EngineBlendState state)
-        {
-            if (currentBlendState == state)
-            {
-                return;
-            }
-
-            device.ImmediateContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
-
-            currentBlendState = state;
-
-            Counters.BlendStateChanges++;
-        }
-        /// <summary>
-        /// Sets blend state
+        /// Gets blend state
         /// </summary>
         /// <param name="blendMode">Blend mode</param>
-        public void SetBlendState(BlendModes blendMode)
+        public EngineBlendState GetBlendState(BlendModes blendMode)
         {
             if (blendMode.HasFlag(BlendModes.Additive))
             {
-                SetBlendAdditive();
+                return GetBlendAdditive();
             }
             else if (blendMode.HasFlag(BlendModes.Transparent))
             {
-                SetBlendTransparent(blendMode.HasFlag(BlendModes.PostProcess));
+                return GetBlendTransparent(blendMode.HasFlag(BlendModes.PostProcess));
             }
             else if (blendMode.HasFlag(BlendModes.Alpha))
             {
-                SetBlendAlpha(blendMode.HasFlag(BlendModes.PostProcess));
+                return GetBlendAlpha(blendMode.HasFlag(BlendModes.PostProcess));
             }
             else
             {
-                SetBlendDefault();
+                return GetBlendDefault();
             }
         }
 
         /// <summary>
-        /// Sets default rasterizer
+        /// Gets default rasterizer
         /// </summary>
-        public void SetRasterizerDefault()
+        public EngineRasterizerState GetRasterizerDefault()
         {
             rasterizerDefault ??= EngineRasterizerState.Default(this, nameof(Graphics));
 
-            SetRasterizerState(rasterizerDefault);
+            return rasterizerDefault;
         }
         /// <summary>
-        /// Sets wireframe rasterizer
+        /// Gets wireframe rasterizer
         /// </summary>
-        public void SetRasterizerWireframe()
+        public EngineRasterizerState GetRasterizerWireframe()
         {
             rasterizerWireframe ??= EngineRasterizerState.Wireframe(this, nameof(Graphics));
 
-            SetRasterizerState(rasterizerWireframe);
+            return rasterizerWireframe;
         }
         /// <summary>
-        /// Sets no-cull rasterizer
+        /// Gets no-cull rasterizer
         /// </summary>
-        public void SetRasterizerCullNone()
+        public EngineRasterizerState GetRasterizerCullNone()
         {
             rasterizerNoCull ??= EngineRasterizerState.NoCull(this, nameof(Graphics));
 
-            SetRasterizerState(rasterizerNoCull);
+            return rasterizerNoCull;
         }
         /// <summary>
-        /// Sets cull counter-clockwise face rasterizer
+        /// Gets cull counter-clockwise face rasterizer
         /// </summary>
-        public void SetRasterizerCullFrontFace()
+        public EngineRasterizerState GetRasterizerCullFrontFace()
         {
             rasterizerCullFrontFace ??= EngineRasterizerState.CullFrontFace(this, nameof(Graphics));
 
-            SetRasterizerState(rasterizerCullFrontFace);
+            return rasterizerCullFrontFace;
         }
         /// <summary>
-        /// Sets shadow mapping rasterizer state
+        /// Gets shadow mapping rasterizer state
         /// </summary>
-        public void SetRasterizerShadowMapping()
+        public EngineRasterizerState GetRasterizerShadowMapping()
         {
             rasterizerShadowMapping ??= EngineRasterizerState.ShadowMapping(this, nameof(Graphics));
 
-            SetRasterizerState(rasterizerShadowMapping);
-        }
-        /// <summary>
-        /// Sets rasterizer state
-        /// </summary>
-        /// <param name="state">Rasterizer state</param>
-        public void SetRasterizerState(EngineRasterizerState state)
-        {
-            if (currentRasterizerState == state)
-            {
-                return;
-            }
-
-            device.ImmediateContext.Rasterizer.State = state.GetRasterizerState();
-
-            currentRasterizerState = state;
-
-            Counters.RasterizerStateChanges++;
+            return rasterizerShadowMapping;
         }
     }
 }

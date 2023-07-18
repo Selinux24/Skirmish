@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.Fonts
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -78,7 +78,7 @@ namespace Engine.BuiltIn.Fonts
                 cbPerText,
             };
 
-            Graphics.SetVertexShaderConstantBuffers(0, cb);
+            context.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

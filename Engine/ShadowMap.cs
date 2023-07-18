@@ -97,13 +97,13 @@ namespace Engine
         /// <inheritdoc/>
         public abstract void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
         /// <inheritdoc/>
-        public void Bind(Graphics graphics, int index)
+        public void Bind(EngineDeviceContext context, int index)
         {
             //Set shadow mapper viewport
-            graphics.SetViewports(Viewports);
+            context.SetViewports(Viewports);
 
             //Set shadow map depth map without render target
-            graphics.SetRenderTargets(
+            context.SetRenderTargets(
                 null, false, Color.Transparent,
                 DepthMap.ElementAtOrDefault(index), true, false,
                 true);

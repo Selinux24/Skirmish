@@ -470,7 +470,7 @@ namespace Engine.UI
                     Topology = Topology.TriangleList,
                     VertexBuffer = vertexBuffer,
                 };
-                drawn = fontDrawer.Draw(bufferManager, shOptions);
+                drawn = fontDrawer.Draw(context.DeviceContext, bufferManager, shOptions);
             }
 
             fontDrawer.UpdateText(Manipulator.LocalTransform);
@@ -483,7 +483,7 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,
             };
-            return fontDrawer.Draw(bufferManager, opOptions) || drawn;
+            return fontDrawer.Draw(context.DeviceContext, bufferManager, opOptions) || drawn;
         }
         /// <summary>
         /// Writes text data into buffers

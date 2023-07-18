@@ -57,7 +57,7 @@ namespace Engine.BuiltIn.Shadows
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             // No shader resources
         }

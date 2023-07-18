@@ -171,29 +171,29 @@ namespace Engine.Common
             InputLayout = layout;
         }
         /// <inheritdoc/>
-        public void SetVertexBuffers()
+        public void SetVertexBuffers(EngineDeviceContext context)
         {
-            Graphics.IASetVertexBuffers(BufferSlot, VertexBufferBinding);
+            context.IASetVertexBuffers(BufferSlot, VertexBufferBinding);
         }
         /// <inheritdoc/>
-        public void SetInputLayout()
+        public void SetInputLayout(EngineDeviceContext context)
         {
-            Graphics.IAInputLayout = InputLayout;
+            context.IAInputLayout = InputLayout;
         }
         /// <inheritdoc/>
-        public void SetStreamOutputTargets()
+        public void SetStreamOutputTargets(EngineDeviceContext context)
         {
-            Graphics.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
+            context.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
         }
         /// <inheritdoc/>
-        public void Draw(int drawCount)
+        public void Draw(EngineDeviceContext context, int drawCount)
         {
-            Graphics.Draw(drawCount, 0);
+            context.Draw(drawCount, 0);
         }
         /// <inheritdoc/>
-        public void DrawAuto()
+        public void DrawAuto(EngineDeviceContext context)
         {
-            Graphics.DrawAuto();
+            context.DrawAuto();
         }
     }
 

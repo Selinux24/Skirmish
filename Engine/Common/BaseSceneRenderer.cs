@@ -281,11 +281,13 @@ namespace Engine.Common
                 Name = "Primary",
                 DrawerMode = DrawerModes.Forward,
                 Form = scene.Game.Form,
+                DeviceContext = Scene.Game.Graphics.ImmediateContext,
             };
 
             DrawShadowsContext = new DrawContextShadows()
             {
                 Name = "Shadow mapping",
+                DeviceContext = Scene.Game.Graphics.ImmediateContext,
             };
 
             var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
@@ -599,66 +601,69 @@ namespace Engine.Common
                 blend |= BlendModes.PostProcess;
             }
 
-            SetRasterizer();
+            var dc = context.DeviceContext;
 
-            SetBlendState(context.DrawerMode, blend);
-
-            SetDepthStencil(drawable.DepthEnabled);
+            SetRasterizer(dc);
+            SetBlendState(dc, context.DrawerMode, blend);
+            SetDepthStencil(dc, drawable.DepthEnabled);
 
             return drawable.Draw(context);
         }
         /// <summary>
         /// Sets the rasterizer state
         /// </summary>
-        protected virtual void SetRasterizer()
+        /// <param name="context">Device context</param>
+        protected virtual void SetRasterizer(EngineDeviceContext context)
         {
-            Scene.Game.Graphics.SetRasterizerDefault();
+            context.SetRasterizerState(Scene.Game.Graphics.GetRasterizerDefault());
         }
         /// <summary>
         /// Sets the blend state
         /// </summary>
-        /// <param name="drawMode">Draw mode</param>
+        /// <param name="context">Device context</param>
+        /// <param name="drawerMode">Draw mode</param>
         /// <param name="blendMode">Blend mode</param>
-        protected virtual void SetBlendState(DrawerModes drawMode, BlendModes blendMode)
+        protected virtual void SetBlendState(EngineDeviceContext context, DrawerModes drawerMode, BlendModes blendMode)
         {
-            Scene.Game.Graphics.SetBlendState(blendMode);
+            context.SetBlendState(Scene.Game.Graphics.GetBlendState(blendMode));
         }
         /// <summary>
         /// Sets the depth-stencil buffer state
         /// </summary>
+        /// <param name="context">Device context</param>
         /// <param name="enableWrite">Enables the z-buffer writing</param>
-        protected virtual void SetDepthStencil(bool enableWrite)
+        protected virtual void SetDepthStencil(EngineDeviceContext context, bool enableWrite)
         {
             if (enableWrite)
             {
-                Scene.Game.Graphics.SetDepthStencilWRZEnabled();
+                context.SetDepthStencilState(Scene.Game.Graphics.GetDepthStencilWRZEnabled());
             }
             else
             {
-                Scene.Game.Graphics.SetDepthStencilWRZDisabled();
+                context.SetDepthStencilState(Scene.Game.Graphics.GetDepthStencilWRZDisabled());
             }
         }
 
         /// <summary>
         /// Draw shadow maps
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        protected virtual void DoShadowMapping(GameTime gameTime)
+        /// <param name="context">Drawing context</param>
+        protected virtual void DoShadowMapping(DrawContext context)
         {
             int cullIndex = CullIndexShadowMaps;
 
-            DoDirectionalShadowMapping(gameTime, ref cullIndex);
+            DoDirectionalShadowMapping(context, ref cullIndex);
 
-            DoPointShadowMapping(gameTime, ref cullIndex);
+            DoPointShadowMapping(context, ref cullIndex);
 
-            DoSpotShadowMapping(gameTime, ref cullIndex);
+            DoSpotShadowMapping(context, ref cullIndex);
         }
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Drawing context</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoDirectionalShadowMapping(GameTime gameTime, ref int cullIndex)
+        protected virtual void DoDirectionalShadowMapping(DrawContext context, ref int cullIndex)
         {
 #if DEBUG
             directionalShadowMappingDict.Clear();
@@ -739,7 +744,7 @@ namespace Engine.Common
 #endif
                 var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperDirectional;
                 shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
-                shadowMapper.Bind(graphics, assigned * MaxDirectionalCascadeShadowMaps);
+                shadowMapper.Bind(context.DeviceContext, assigned * MaxDirectionalCascadeShadowMaps);
                 DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
@@ -772,9 +777,9 @@ namespace Engine.Common
         /// <summary>
         /// Draw point light shadow maps
         /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Drawing context</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoPointShadowMapping(GameTime gameTime, ref int cullIndex)
+        protected virtual void DoPointShadowMapping(DrawContext context, ref int cullIndex)
         {
 #if DEBUG
             pointShadowMappingDict.Clear();
@@ -854,7 +859,7 @@ namespace Engine.Common
 #endif
                 var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperPoint;
                 shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
-                shadowMapper.Bind(graphics, assigned);
+                shadowMapper.Bind(context.DeviceContext, assigned);
                 DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
@@ -882,9 +887,9 @@ namespace Engine.Common
         /// <summary>
         /// Draw spot light shadow maps
         /// </summary>
-        /// <param name="gameTime">Game time</param>
+        /// <param name="context">Drawing context</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoSpotShadowMapping(GameTime gameTime, ref int cullIndex)
+        protected virtual void DoSpotShadowMapping(DrawContext context, ref int cullIndex)
         {
 #if DEBUG
             spotShadowMappingDict.Clear();
@@ -962,7 +967,7 @@ namespace Engine.Common
 #endif
                 var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperSpot;
                 shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
-                shadowMapper.Bind(graphics, assigned);
+                shadowMapper.Bind(context.DeviceContext, assigned);
                 DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
                 DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
                 DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
@@ -1072,17 +1077,18 @@ namespace Engine.Common
         private void DrawShadows(DrawContextShadows context, IDrawable drawable)
         {
             var graphics = Scene.Game.Graphics;
+            var dc = context.DeviceContext;
 
-            graphics.SetRasterizerShadowMapping();
-            graphics.SetDepthStencilShadowMapping();
+            dc.SetRasterizerState(graphics.GetRasterizerShadowMapping());
+            dc.SetDepthStencilState(graphics.GetDepthStencilShadowMapping());
 
             if (drawable.BlendMode.HasFlag(BlendModes.Alpha) || drawable.BlendMode.HasFlag(BlendModes.Transparent))
             {
-                graphics.SetBlendAlpha();
+                dc.SetBlendState(graphics.GetBlendAlpha());
             }
             else
             {
-                graphics.SetBlendDefault();
+                dc.SetBlendState(graphics.GetBlendDefault());
             }
 
             drawable.DrawShadows(context);
@@ -1091,105 +1097,97 @@ namespace Engine.Common
         /// <summary>
         /// Binds graphics for results pass
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="target">Target type</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        protected virtual void SetTarget(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth = false, bool clearStencil = false)
+        protected virtual void SetTarget(EngineDeviceContext context, Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth = false, bool clearStencil = false)
         {
             switch (target)
             {
                 case Targets.Screen:
-                    BindDefaultTarget(clearRT, clearRTColor);
+                    BindDefaultTarget(context, clearRT, clearRTColor);
                     break;
                 case Targets.Objects:
-                    BindObjectsTarget(clearRT, clearRTColor, clearDepth, clearStencil);
+                    BindObjectsTarget(context, clearRT, clearRTColor, clearDepth, clearStencil);
                     break;
                 case Targets.UI:
-                    BindUITarget(clearRT, clearRTColor);
+                    BindUITarget(context, clearRT, clearRTColor);
                     break;
                 case Targets.Result:
-                    BindResultsTarget(clearRT, clearRTColor);
+                    BindResultsTarget(context, clearRT, clearRTColor);
                     break;
                 default:
-                    BindDefaultTarget(clearRT, clearRTColor);
+                    BindDefaultTarget(context, clearRT, clearRTColor);
                     break;
             }
         }
         /// <summary>
         /// Binds the default render target
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindDefaultTarget(bool clearRT, Color4 clearRTColor)
+        private void BindDefaultTarget(EngineDeviceContext context, bool clearRT, Color4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
             //Restore back buffer as render target and clear it
-            graphics.SetDefaultRenderTarget(clearRT, clearRTColor);
-            graphics.SetDefaultViewport();
+            context.SetRenderTargets(graphics.DefaultRenderTarget, clearRT, clearRTColor);
+            context.SetViewport(graphics.Viewport);
         }
         /// <summary>
         /// Binds the objects render target
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindObjectsTarget(bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindObjectsTarget(EngineDeviceContext context, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
-            graphics.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, clearRTColor, clearDepth, clearStencil);
-            graphics.SetDefaultViewport();
+            context.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, clearRTColor, graphics.DefaultDepthStencil, clearDepth, clearStencil, false);
+            context.SetViewport(graphics.Viewport);
         }
         /// <summary>
         /// Binds the UI render target
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindUITarget(bool clearRT, Color4 clearRTColor)
+        private void BindUITarget(EngineDeviceContext context, bool clearRT, Color4 clearRTColor)
         {
-            var graphics = Scene.Game.Graphics;
-
-            graphics.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
-            graphics.SetDefaultViewport();
+            context.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
+            context.SetViewport(Scene.Game.Graphics.Viewport);
         }
         /// <summary>
         /// Binds the results render target
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindResultsTarget(bool clearRT, Color4 clearRTColor)
+        private void BindResultsTarget(EngineDeviceContext context, bool clearRT, Color4 clearRTColor)
         {
-            var graphics = Scene.Game.Graphics;
-
-            graphics.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
-            graphics.SetDefaultViewport();
+            context.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
+            context.SetViewport(Scene.Game.Graphics.Viewport);
         }
         /// <summary>
         /// Binds graphics for post-processing pass
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindPostProcessingTarget(bool clearRT, Color4 clearRTColor)
+        private void BindPostProcessingTarget(EngineDeviceContext context, bool clearRT, Color4 clearRTColor)
         {
-            var graphics = Scene.Game.Graphics;
-
-            graphics.SetRenderTargets(postProcessingTargetA.Targets, clearRT, clearRTColor);
+            context.SetRenderTargets(postProcessingTargetA.Targets, clearRT, clearRTColor);
 
             //Set local viewport
             var viewport = Scene.Game.Form.GetViewport();
-            graphics.SetViewport(viewport);
+            context.SetViewport(viewport);
         }
         /// <summary>
         /// Toggles post-processing render targets
@@ -1233,10 +1231,11 @@ namespace Engine.Common
         /// <summary>
         /// Does the post-processing draw
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="target">Target to set result</param>
         /// <param name="renderPass">Render pass</param>
         /// <param name="gameTime">Game time</param>
-        protected virtual bool DoPostProcessing(Targets target, RenderPass renderPass, GameTime gameTime)
+        protected virtual bool DoPostProcessing(DrawContext context, Targets target, RenderPass renderPass)
         {
             if (!ValidateRenderPass(renderPass, out var state))
             {
@@ -1247,10 +1246,11 @@ namespace Engine.Common
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
+            var dc = context.DeviceContext;
 
-            graphics.SetRasterizerCullNone();
-            graphics.SetDepthStencilNone();
-            graphics.SetBlendDefault();
+            dc.SetRasterizerState(graphics.GetRasterizerCullNone());
+            dc.SetDepthStencilState(graphics.GetDepthStencilNone());
+            dc.SetBlendState(graphics.GetBlendDefault());
 
             var drawer = processingDrawer.UpdateEffectParameters(state);
             if (drawer == null)
@@ -1272,21 +1272,21 @@ namespace Engine.Common
                 TogglePostProcessingTargets();
 
                 //Use the next buffer as render target
-                BindPostProcessingTarget(false, Color.Transparent);
+                BindPostProcessingTarget(dc, false, Color.Transparent);
 
                 processingDrawer.UpdateEffect(texture, effect);
-                processingDrawer.Draw(drawer);
+                processingDrawer.Draw(dc, drawer);
 
                 //Gets the source texture
                 texture = postProcessingTargetA.Textures?.FirstOrDefault();
             }
 
             //Set the result render target
-            SetTarget(target, false, Color.Transparent);
+            SetTarget(dc, target, false, Color.Transparent);
 
             //Draw the result
             var resultDrawer = processingDrawer.UpdateEffect(texture, BuiltInPostProcessEffects.None);
-            processingDrawer.Draw(resultDrawer);
+            processingDrawer.Draw(dc, resultDrawer);
 
             return true;
         }
@@ -1309,43 +1309,47 @@ namespace Engine.Common
         /// <summary>
         /// Combine the specified targets into the result target
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="target1">Target 1</param>
         /// <param name="target2">Target 2</param>
         /// <param name="resultTarget">Result target</param>
-        protected virtual void CombineTargets(Targets target1, Targets target2, Targets resultTarget)
+        protected virtual void CombineTargets(DrawContext context, Targets target1, Targets target2, Targets resultTarget)
         {
-            SetTarget(resultTarget, false, Color.Transparent);
-
             var graphics = Scene.Game.Graphics;
+            var dc = context.DeviceContext;
 
-            graphics.SetDepthStencilNone();
-            graphics.SetRasterizerDefault();
-            graphics.SetBlendDefault();
+            SetTarget(dc, resultTarget, false, Color.Transparent);
+
+            dc.SetDepthStencilState(graphics.GetDepthStencilNone());
+            dc.SetRasterizerState(graphics.GetRasterizerDefault());
+            dc.SetBlendState(graphics.GetBlendDefault());
 
             var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
             var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
 
             var drawer = processingDrawer.UpdateEffectCombine(texture1, texture2);
-            processingDrawer.Draw(drawer);
+            processingDrawer.Draw(dc, drawer);
         }
         /// <summary>
         /// Draws the specified target to screen
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="target">Target</param>
-        protected virtual void DrawToScreen(Targets target)
+        protected virtual void DrawToScreen(DrawContext context, Targets target)
         {
-            SetTarget(Targets.Screen, false, Color.Transparent);
-
             var graphics = Scene.Game.Graphics;
+            var dc = context.DeviceContext;
 
-            graphics.SetDepthStencilNone();
-            graphics.SetRasterizerDefault();
-            graphics.SetBlendDefault();
+            SetTarget(dc, Targets.Screen, false, Color.Transparent);
+
+            dc.SetDepthStencilState(graphics.GetDepthStencilNone());
+            dc.SetRasterizerState(graphics.GetRasterizerDefault());
+            dc.SetBlendState(graphics.GetBlendDefault());
 
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
             var drawer = processingDrawer.UpdateEffect(texture, BuiltInPostProcessEffects.None);
-            processingDrawer.Draw(drawer);
+            processingDrawer.Draw(dc, drawer);
         }
 
         /// <inheritdoc/>

@@ -85,11 +85,11 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
-            Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
+            context.SetPixelShaderResourceView(0, diffuseMapArray);
 
-            Graphics.SetPixelShaderSampler(0, samplerDiffuse);
+            context.SetPixelShaderSampler(0, samplerDiffuse);
         }
     }
 }

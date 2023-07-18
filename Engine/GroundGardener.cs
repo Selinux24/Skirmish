@@ -489,15 +489,16 @@ namespace Engine
             /// <summary>
             /// Draws the foliage data
             /// </summary>
+            /// <param name="context">Device context</param>
             /// <param name="drawer">Drawer</param>
-            public bool DrawFoliage(BuiltInDrawer drawer)
+            public bool DrawFoliage(EngineDeviceContext context, BuiltInDrawer drawer)
             {
                 if (vertexDrawCount <= 0)
                 {
                     return false;
                 }
 
-                return drawer.Draw(BufferManager, new DrawOptions
+                return drawer.Draw(context, BufferManager, new DrawOptions
                 {
                     VertexBuffer = VertexBuffer,
                     VertexDrawCount = vertexDrawCount,
@@ -784,10 +785,7 @@ namespace Engine
             bool drawn = false;
             foreach (var item in visibleNodes)
             {
-                if (DrawNode(item))
-                {
-                    drawn = true;
-                }
+                drawn = DrawNode(context.DeviceContext, item) || drawn;
             }
 
             return drawn;
@@ -795,8 +793,9 @@ namespace Engine
         /// <summary>
         /// Draws the node
         /// </summary>
+        /// <param name="context">Device context</param>
         /// <param name="item">Node</param>
-        private bool DrawNode(QuadTreeNode item)
+        private bool DrawNode(EngineDeviceContext context, QuadTreeNode item)
         {
             var buffers = foliageBuffers.Where(b => b.CurrentPatch?.CurrentNode == item);
             if (!buffers.Any())
@@ -829,7 +828,7 @@ namespace Engine
 
                 foliageDrawer.UpdateFoliage(state);
 
-                if (buffer.DrawFoliage(foliageDrawer))
+                if (buffer.DrawFoliage(context, foliageDrawer))
                 {
                     drawn = true;
                 }

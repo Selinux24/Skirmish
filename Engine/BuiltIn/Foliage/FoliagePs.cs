@@ -100,7 +100,7 @@ namespace Engine.BuiltIn.Foliage
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -112,7 +112,7 @@ namespace Engine.BuiltIn.Foliage
                 cbPerMaterial,
             };
 
-            Graphics.SetPixelShaderConstantBuffers(0, cb);
+            context.SetPixelShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
@@ -123,9 +123,9 @@ namespace Engine.BuiltIn.Foliage
                 normalMapArray,
             };
 
-            Graphics.SetPixelShaderResourceViews(0, rv);
+            context.SetPixelShaderResourceViews(0, rv);
 
-            Graphics.SetPixelShaderSampler(0, samplerFoliage);
+            context.SetPixelShaderSampler(0, samplerFoliage);
         }
     }
 }

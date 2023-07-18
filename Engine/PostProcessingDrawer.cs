@@ -78,11 +78,11 @@ namespace Engine
             return drawer;
         }
         /// <inheritdoc/>
-        public void Draw(IBuiltInDrawer drawer)
+        public void Draw(EngineDeviceContext context, IBuiltInDrawer drawer)
         {
             var bufferManager = game.BufferManager;
 
-            drawer.Draw(bufferManager, new DrawOptions
+            drawer.Draw(context, bufferManager, new DrawOptions
             {
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,

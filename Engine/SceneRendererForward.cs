@@ -75,10 +75,10 @@ namespace Engine
             UpdateDrawContext(gameTime, DrawerModes.Forward);
 
             //Shadow mapping
-            DoShadowMapping(gameTime);
+            DoShadowMapping(DrawContext);
 
             //Binds the result target
-            SetTarget(Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+            SetTarget(DrawContext.DeviceContext, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
             if (objectComponents.Any())
@@ -86,11 +86,11 @@ namespace Engine
                 //Render objects
                 DoRender(Scene, objectComponents);
                 //Post-processing
-                DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
+                DoPostProcessing(DrawContext, Targets.Objects, RenderPass.Objects);
             }
 
             //Binds the UI target
-            SetTarget(Targets.UI, true, Color.Transparent);
+            SetTarget(DrawContext.DeviceContext, Targets.UI, true, Color.Transparent);
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
@@ -98,17 +98,17 @@ namespace Engine
                 //Render UI
                 DoRender(Scene, uiComponents);
                 //UI post-processing
-                DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
+                DoPostProcessing(DrawContext, Targets.UI, RenderPass.UI);
             }
 
             //Combine to result
-            CombineTargets(Targets.Objects, Targets.UI, Targets.Result);
+            CombineTargets(DrawContext, Targets.Objects, Targets.UI, Targets.Result);
 
             //Final post-processing
-            DoPostProcessing(Targets.Result, RenderPass.Final, gameTime);
+            DoPostProcessing(DrawContext, Targets.Result, RenderPass.Final);
 
             //Draw to screen
-            DrawToScreen(Targets.Result);
+            DrawToScreen(DrawContext, Targets.Result);
 
 #if DEBUG
             swTotal.Stop();
@@ -231,7 +231,7 @@ namespace Engine
         /// <param name="components">Component list</param>
         /// <param name="get">Function to get the drawable component list</param>
         /// <param name="sort">Function to sort the drawable component list</param>
-        private bool DrawComponents(DrawContext context, DrawerModes mode, int cullIndex, IEnumerable<IDrawable> components, Func<int, IEnumerable<IDrawable>, List<IDrawable>> get, Func<int, IDrawable, IDrawable, int> sort)
+        private void DrawComponents(DrawContext context, DrawerModes mode, int cullIndex, IEnumerable<IDrawable> components, Func<int, IEnumerable<IDrawable>, List<IDrawable>> get, Func<int, IDrawable, IDrawable, int> sort)
         {
 #if DEBUG
             var sw = Stopwatch.StartNew();
@@ -245,7 +245,7 @@ namespace Engine
 
             if (!toDrawComponents.Any())
             {
-                return false;
+                return;
             }
 
             //Set drawer mode
@@ -269,32 +269,30 @@ namespace Engine
 #if DEBUG
             sw.Restart();
             var swd = Stopwatch.StartNew();
+            int count = 0;
 #endif
             //Draw items
-            bool drawn = false;
-            int count = 0;
             for (int i = 0; i < toDrawComponents.Count; i++)
             {
 #if DEBUG
                 swd.Restart();
 #endif
                 var c = toDrawComponents[i];
+#if DEBUG
                 if (Draw(context, c))
                 {
-                    drawn = true;
                     count++;
-#if DEBUG
                     swd.Stop();
                     WriteTrace($"Mode[{mode}]     Draw[{i}.{c.Name}]=>{c.GetType()}", swd.Elapsed.TotalMilliseconds);
-#endif
                 }
-            };
+#else
+                Draw(context, c);
+#endif
+            }
 #if DEBUG
             sw.Stop();
             WriteTrace($"Mode[{mode}] *Draw[{count} drawn]", sw.Elapsed.TotalMilliseconds);
 #endif
-
-            return drawn;
         }
     }
 }

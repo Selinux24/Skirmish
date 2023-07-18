@@ -70,14 +70,14 @@ namespace Engine.BuiltIn.Particles
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
                 cbPerEmitter,
             };
 
-            Graphics.SetVertexShaderConstantBuffers(0, cb);
+            context.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

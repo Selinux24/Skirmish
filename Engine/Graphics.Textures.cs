@@ -55,9 +55,9 @@ namespace Engine
                         DebugName = name,
                     };
 
-                    immediateContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+                    ImmediateContext.GetDeviceContext().UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
 
-                    immediateContext.GenerateMips(result);
+                    ImmediateContext.GetDeviceContext().GenerateMips(result);
 
                     return result;
                 }
@@ -138,10 +138,10 @@ namespace Engine
                     {
                         var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        immediateContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                        ImmediateContext.GetDeviceContext().UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
-                    immediateContext.GenerateMips(result);
+                    ImmediateContext.GetDeviceContext().GenerateMips(result);
 
                     return result;
                 }
@@ -219,9 +219,9 @@ namespace Engine
                         DebugName = name,
                     };
 
-                    immediateContext.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+                    ImmediateContext.GetDeviceContext().UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
 
-                    immediateContext.GenerateMips(result);
+                    ImmediateContext.GetDeviceContext().GenerateMips(result);
 
                     return result;
                 }
@@ -301,10 +301,10 @@ namespace Engine
                     {
                         var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        immediateContext.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                        ImmediateContext.GetDeviceContext().UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
-                    immediateContext.GenerateMips(result);
+                    ImmediateContext.GetDeviceContext().GenerateMips(result);
 
                     return result;
                 }
@@ -359,31 +359,27 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var str = DataStream.Create(values.ToArray(), false, false))
-                {
-                    using (var randTex = new Texture1D(
-                        device,
-                        new Texture1DDescription()
-                        {
-                            Format = Format.R32G32B32A32_Float,
-                            Width = size,
-                            ArraySize = 1,
-                            MipLevels = 1,
-                            Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                            BindFlags = BindFlags.ShaderResource,
-                            CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
-                            OptionFlags = ResourceOptionFlags.None,
-                        },
-                        str))
+                using var str = DataStream.Create(values.ToArray(), false, false);
+                using var randTex = new Texture1D(
+                    device,
+                    new Texture1DDescription()
                     {
-                        randTex.DebugName = name;
+                        Format = Format.R32G32B32A32_Float,
+                        Width = size,
+                        ArraySize = 1,
+                        MipLevels = 1,
+                        Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                        BindFlags = BindFlags.ShaderResource,
+                        CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
+                        OptionFlags = ResourceOptionFlags.None,
+                    },
+                    str);
+                randTex.DebugName = name;
 
-                        return new ShaderResourceView1(device, randTex)
-                        {
-                            DebugName = name,
-                        };
-                    }
-                }
+                return new ShaderResourceView1(device, randTex)
+                {
+                    DebugName = name,
+                };
             }
             catch (Exception ex)
             {
@@ -422,35 +418,31 @@ namespace Engine
                 T[] tmp = new T[width * height];
                 Array.Copy(values.ToArray(), tmp, values.Count());
 
-                using (var str = DataStream.Create(tmp, false, false))
-                {
-                    var dBox = new DataBox(str.DataPointer, width * FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
+                using var str = DataStream.Create(tmp, false, false);
+                var dBox = new DataBox(str.DataPointer, width * FormatHelper.SizeOfInBytes(Format.R32G32B32A32_Float), 0);
 
-                    using (var texture = new Texture2D1(
-                        device,
-                        new Texture2DDescription1()
-                        {
-                            Format = Format.R32G32B32A32_Float,
-                            Width = width,
-                            Height = height,
-                            ArraySize = 1,
-                            MipLevels = 1,
-                            SampleDescription = new SampleDescription(1, 0),
-                            Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                            BindFlags = BindFlags.ShaderResource,
-                            CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
-                            OptionFlags = ResourceOptionFlags.None,
-                        },
-                        new[] { dBox }))
+                using var texture = new Texture2D1(
+                    device,
+                    new Texture2DDescription1()
                     {
-                        texture.DebugName = name;
+                        Format = Format.R32G32B32A32_Float,
+                        Width = width,
+                        Height = height,
+                        ArraySize = 1,
+                        MipLevels = 1,
+                        SampleDescription = new SampleDescription(1, 0),
+                        Usage = dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
+                        BindFlags = BindFlags.ShaderResource,
+                        CpuAccessFlags = dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None,
+                        OptionFlags = ResourceOptionFlags.None,
+                    },
+                    new[] { dBox });
+                texture.DebugName = name;
 
-                        return new ShaderResourceView1(device, texture)
-                        {
-                            DebugName = name,
-                        };
-                    }
-                }
+                return new ShaderResourceView1(device, texture)
+                {
+                    DebugName = name,
+                };
             }
             catch (Exception ex)
             {
@@ -590,10 +582,8 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(filename))
-                {
-                    return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
-                }
+                using var resource = TextureData.ReadTexture(filename);
+                return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -614,10 +604,8 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(stream))
-                {
-                    return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
-                }
+                using var resource = TextureData.ReadTexture(stream);
+                return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -639,10 +627,8 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(filename, rectangle))
-                {
-                    return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
-                }
+                using var resource = TextureData.ReadTexture(filename, rectangle);
+                return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -664,10 +650,8 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                using (var resource = TextureData.ReadTexture(stream, rectangle))
-                {
-                    return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
-                }
+                using var resource = TextureData.ReadTexture(stream, rectangle);
+                return new EngineShaderResourceView(name, CreateResource(name, resource, mipAutogen, dynamic));
             }
             catch (Exception ex)
             {
@@ -886,7 +870,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                Random rnd = new Random(seed);
+                var rnd = new Random(seed);
 
                 var randomValues = new List<Vector4>();
                 for (int i = 0; i < size; i++)
@@ -936,13 +920,13 @@ namespace Engine
             {
                 using (var resource = texture.GetResource().Resource.QueryInterface<Texture1D>())
                 {
-                    immediateContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    ImmediateContext.GetDeviceContext().MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
                     using (stream)
                     {
                         stream.Position = 0;
                         stream.WriteRange(data.ToArray());
                     }
-                    immediateContext.UnmapSubresource(resource, 0);
+                    ImmediateContext.GetDeviceContext().UnmapSubresource(resource, 0);
                 }
 
                 Counters.BufferWrites++;
@@ -960,13 +944,13 @@ namespace Engine
             {
                 using (var resource = texture.GetResource().Resource.QueryInterface<Texture2D1>())
                 {
-                    immediateContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    ImmediateContext.GetDeviceContext().MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
                     using (stream)
                     {
                         stream.Position = 0;
                         stream.WriteRange(data.ToArray());
                     }
-                    immediateContext.UnmapSubresource(resource, 0);
+                    ImmediateContext.GetDeviceContext().UnmapSubresource(resource, 0);
                 }
 
                 Counters.BufferWrites++;

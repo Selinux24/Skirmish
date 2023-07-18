@@ -169,7 +169,7 @@ namespace Engine
                 IndexBuffer = indexBuffer,
                 Topology = Topology.TriangleList,
             };
-            if (!waterDrawer.Draw(BufferManager, drawOptions))
+            if (!waterDrawer.Draw(context.DeviceContext, BufferManager, drawOptions))
             {
                 return false;
             }

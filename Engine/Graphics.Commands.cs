@@ -46,7 +46,7 @@ namespace Engine
         /// <param name="restoreState">Resore state</param>
         public void ExecuteCommandList(IEngineCommandList commandList, bool restoreState = false)
         {
-            immediateContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
+            ImmediateContext.GetDeviceContext().ExecuteCommandList(commandList.GetCommandList(), restoreState);
         }
     }
 }

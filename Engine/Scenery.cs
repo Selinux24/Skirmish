@@ -144,7 +144,7 @@ namespace Engine
                             continue;
                         }
 
-                        if (DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material))
+                        if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
                         {
                             drawn = true;
                         }
@@ -189,7 +189,7 @@ namespace Engine
                             continue;
                         }
 
-                        if (DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material))
+                        if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
                         {
                             count += mesh.Count;
                         }
@@ -204,11 +204,12 @@ namespace Engine
             /// <summary>
             /// Draws the patch using shaders
             /// </summary>
+            /// <param name="context">Device context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private static bool DrawWithDrawer(BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static bool DrawWithDrawer(EngineDeviceContext context, BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
                 sceneryDrawer.UpdateMesh(BuiltInDrawerMeshState.Default());
 
@@ -221,7 +222,7 @@ namespace Engine
                 };
                 sceneryDrawer.UpdateMaterial(materialState);
 
-                return sceneryDrawer.Draw(bufferManager, new[] { mesh });
+                return sceneryDrawer.Draw(context, bufferManager, new[] { mesh });
             }
 
             /// <summary>

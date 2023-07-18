@@ -95,13 +95,13 @@ namespace Engine.BuiltIn.Cubemap
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerSky);
+            context.SetPixelShaderConstantBuffer(0, cbPerSky);
 
-            Graphics.SetPixelShaderResourceView(0, texture);
+            context.SetPixelShaderResourceView(0, texture);
 
-            Graphics.SetPixelShaderSampler(0, sampler);
+            context.SetPixelShaderSampler(0, sampler);
         }
     }
 }

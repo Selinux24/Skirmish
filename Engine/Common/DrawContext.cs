@@ -63,6 +63,11 @@ namespace Engine.Common
         public IShadowMap ShadowMapSpot { get; set; }
 
         /// <summary>
+        /// Device context
+        /// </summary>
+        public EngineDeviceContext DeviceContext { get; set; }
+
+        /// <summary>
         /// Validates the drawing stage
         /// </summary>
         /// <param name="blendMode">Blend mode</param>

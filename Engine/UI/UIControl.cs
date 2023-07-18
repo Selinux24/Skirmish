@@ -727,10 +727,7 @@ namespace Engine.UI
             bool drawn = false;
             foreach (var item in drawables)
             {
-                if (item.Draw(context))
-                {
-                    drawn = true;
-                }
+                drawn = item.Draw(context) || drawn;
             }
 
             return drawn;

@@ -276,7 +276,7 @@ namespace Engine
             drawer.UpdateMesh(BuiltInDrawerMeshState.Default());
             drawer.UpdateMaterial(BuiltInDrawerMaterialState.Default());
 
-            bool drawn = drawer.Draw(BufferManager, new DrawOptions
+            bool drawn = drawer.Draw(context.DeviceContext, BufferManager, new DrawOptions
             {
                 VertexBuffer = vertexBuffer,
                 VertexDrawCount = drawCount,

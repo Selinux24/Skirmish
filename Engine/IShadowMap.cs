@@ -39,9 +39,9 @@ namespace Engine
         /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>
-        /// <param name="graphics">Graphics</param>
+        /// <param name="context">Device context</param>
         /// <param name="index">Array index</param>
-        void Bind(Graphics graphics, int index);
+        void Bind(EngineDeviceContext context, int index);
         /// <summary>
         /// Gets the drawer to draw this shadow map
         /// </summary>

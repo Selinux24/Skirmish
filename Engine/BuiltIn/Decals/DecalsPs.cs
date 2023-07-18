@@ -95,13 +95,13 @@ namespace Engine.BuiltIn.Decals
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerDecal);
+            context.SetPixelShaderConstantBuffer(0, cbPerDecal);
 
-            Graphics.SetPixelShaderResourceView(0, textureArray);
+            context.SetPixelShaderResourceView(0, textureArray);
 
-            Graphics.SetPixelShaderSampler(0, samplerDecals);
+            context.SetPixelShaderSampler(0, samplerDecals);
         }
     }
 }

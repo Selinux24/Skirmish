@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.Water
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -79,7 +79,7 @@ namespace Engine.BuiltIn.Water
                 cbPerWater,
             };
 
-            Graphics.SetPixelShaderConstantBuffers(0, cb);
+            context.SetPixelShaderConstantBuffers(0, cb);
         }
     }
 }

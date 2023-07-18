@@ -237,11 +237,11 @@ namespace Engine
                 return false;
             }
 
-            StreamOut();
+            StreamOut(context.DeviceContext);
 
             ToggleBuffers();
 
-            return Draw(context.DrawerMode);
+            return DrawInternal(context);
         }
 
         /// <summary>
@@ -266,10 +266,10 @@ namespace Engine
         /// <summary>
         /// Stream output
         /// </summary>
-        /// <param name="effect">Effect for stream out</param>
-        private void StreamOut()
+        /// <param name="context">Device context</param>
+        private void StreamOut(EngineDeviceContext context)
         {
-            Game.Graphics.SetDepthStencilNone();
+            context.SetDepthStencilState(Game.Graphics.GetDepthStencilNone());
 
             var soState = new BuiltInStreamOutState
             {
@@ -284,6 +284,7 @@ namespace Engine
             particleStreamOut.Update(soState);
 
             particleStreamOut.StreamOut(
+                context,
                 firstRun,
                 firstRun ? emittersBuffer : drawingBuffer,
                 streamOutBuffer,
@@ -304,13 +305,15 @@ namespace Engine
         /// <summary>
         /// Drawing
         /// </summary>
-        /// <param name="effect">Effect for drawing</param>
+        /// <param name="context">Drawing context</param>
         /// <param name="drawerMode">Drawe mode</param>
-        private bool Draw(DrawerModes drawerMode)
+        private bool DrawInternal(DrawContext context)
         {
             var graphics = Game.Graphics;
-            graphics.SetDepthStencilRDZEnabled();
-            graphics.SetBlendState(parameters.BlendMode);
+            var dc = context.DeviceContext;
+
+            dc.SetDepthStencilState(Game.Graphics.GetDepthStencilRDZEnabled());
+            dc.SetBlendState(graphics.GetBlendState(parameters.BlendMode));
 
             var useRotation = parameters.RotateSpeed != Vector2.Zero;
             var state = new BuiltInParticlesState
@@ -335,12 +338,12 @@ namespace Engine
             };
             particleDrawer.Update(state, TextureCount, Texture);
 
-            if (!particleDrawer.DrawAuto(drawingBuffer, Topology.PointList))
+            if (!particleDrawer.DrawAuto(context.DeviceContext, drawingBuffer, Topology.PointList))
             {
                 return false;
             }
 
-            if (!drawerMode.HasFlag(DrawerModes.ShadowMap))
+            if (!context.DrawerMode.HasFlag(DrawerModes.ShadowMap))
             {
                 Counters.InstancesPerFrame++;
             }

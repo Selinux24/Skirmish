@@ -57,9 +57,9 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
-            Graphics.SetVertexShaderConstantBuffer(0, BuiltInShaders.GetPerFrameConstantBuffer());
+            context.SetVertexShaderConstantBuffer(0, BuiltInShaders.GetPerFrameConstantBuffer());
         }
     }
 }

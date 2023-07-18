@@ -251,7 +251,7 @@ namespace Engine
                 drawer.UpdateMaterial(materialState);
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName}.");
-                if (drawer.Draw(BufferManager, new[] { mesh }))
+                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }))
                 {
                     count += mesh.Count;
                 }
@@ -342,7 +342,7 @@ namespace Engine
                 drawer.UpdateMaterial(materialState);
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName}.");
-                if (drawer.Draw(BufferManager, new[] { mesh }))
+                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }))
                 {
                     count += mesh.Count;
                 }

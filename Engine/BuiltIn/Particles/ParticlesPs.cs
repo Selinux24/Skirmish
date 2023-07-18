@@ -95,13 +95,13 @@ namespace Engine.BuiltIn.Particles
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
-            Graphics.SetPixelShaderConstantBuffer(0, cbPerEmitter);
+            context.SetPixelShaderConstantBuffer(0, cbPerEmitter);
 
-            Graphics.SetPixelShaderResourceView(0, textureArray);
+            context.SetPixelShaderResourceView(0, textureArray);
 
-            Graphics.SetPixelShaderSampler(0, samplerParticles);
+            context.SetPixelShaderSampler(0, samplerParticles);
         }
     }
 }

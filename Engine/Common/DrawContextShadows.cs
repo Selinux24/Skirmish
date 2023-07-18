@@ -27,5 +27,10 @@ namespace Engine.Common
         /// Shadow map to fill
         /// </summary>
         public IShadowMap ShadowMap { get; set; }
+
+        /// <summary>
+        /// Device context
+        /// </summary>
+        public EngineDeviceContext DeviceContext { get; set; }
     }
 }

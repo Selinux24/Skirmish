@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.Sprites
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -78,7 +78,7 @@ namespace Engine.BuiltIn.Sprites
                 cbPerSprite,
             };
 
-            Graphics.SetPixelShaderConstantBuffers(0, cb);
+            context.SetPixelShaderConstantBuffers(0, cb);
         }
     }
 }

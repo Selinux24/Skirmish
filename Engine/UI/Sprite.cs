@@ -206,14 +206,15 @@ namespace Engine.UI
                 return false;
             }
 
-            bool drawn = Draw();
+            bool drawn = Draw(context.DeviceContext);
 
             return base.Draw(context) || drawn;
         }
         /// <summary>
         /// Default sprite draw
         /// </summary>
-        private bool Draw()
+        /// <param name="context">Device context</param>
+        private bool Draw(EngineDeviceContext context)
         {
             BuiltInSpriteState state;
 
@@ -261,12 +262,12 @@ namespace Engine.UI
             if (Textured)
             {
                 spriteTextureDrawer.UpdateSprite(state);
-                drawn = spriteTextureDrawer.Draw(BufferManager, drawOptions);
+                drawn = spriteTextureDrawer.Draw(context, BufferManager, drawOptions);
             }
             else
             {
                 spriteColorDrawer.UpdateSprite(state);
-                drawn = spriteColorDrawer.Draw(BufferManager, drawOptions);
+                drawn = spriteColorDrawer.Draw(context, BufferManager, drawOptions);
             }
 
             Counters.InstancesPerFrame++;

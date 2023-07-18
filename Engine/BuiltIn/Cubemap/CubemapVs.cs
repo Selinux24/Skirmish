@@ -57,14 +57,14 @@ namespace Engine.BuiltIn.Cubemap
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
                 BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
-            Graphics.SetVertexShaderConstantBuffers(0, cb);
+            context.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

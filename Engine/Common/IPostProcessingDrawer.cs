@@ -26,8 +26,9 @@ namespace Engine.Common
         /// <summary>
         /// Draws the resulting light composition
         /// </summary>
+        /// <param name="context">Device context</param>
         /// <param name="drawer">Drawer</param>
-        void Draw(IBuiltInDrawer drawer);
+        void Draw(EngineDeviceContext context, IBuiltInDrawer drawer);
         /// <summary>
         /// Updates the internal buffers according to the new render dimension
         /// </summary>

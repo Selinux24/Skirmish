@@ -166,8 +166,10 @@ namespace Engine
             }
 
             var graphics = Scene.Game.Graphics;
-            graphics.SetDepthStencilRDZEnabled();
-            graphics.SetBlendState(BlendMode);
+            var dc = context.DeviceContext;
+
+            dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
+            dc.SetBlendState(graphics.GetBlendState(BlendMode));
 
             decalDrawer.Update(
                 RotateDecals,
@@ -175,7 +177,7 @@ namespace Engine
                 TintColor,
                 Texture);
 
-            return decalDrawer.Draw(buffer, Topology.PointList, currentDecals);
+            return decalDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, currentDecals);
         }
 
         /// <inheritdoc/>

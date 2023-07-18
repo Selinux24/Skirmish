@@ -92,35 +92,35 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffers
         /// </summary>
-        private readonly List<Buffer> vertexBuffers = new List<Buffer>();
+        private readonly List<Buffer> vertexBuffers = new();
         /// <summary>
         /// Vertex buffer bindings
         /// </summary>
-        private readonly List<VertexBufferBinding> vertexBufferBindings = new List<VertexBufferBinding>();
+        private readonly List<VertexBufferBinding> vertexBufferBindings = new();
         /// <summary>
         /// Index buffer
         /// </summary>
-        private readonly List<Buffer> indexBuffers = new List<Buffer>();
+        private readonly List<Buffer> indexBuffers = new();
         /// <summary>
         /// Vertex buffer descriptors
         /// </summary>
-        private readonly List<BufferManagerVertices> vertexBufferDescriptors = new List<BufferManagerVertices>();
+        private readonly List<BufferManagerVertices> vertexBufferDescriptors = new();
         /// <summary>
         /// Instancing buffer descriptors
         /// </summary>
-        private readonly List<BufferManagerInstances> instancingBufferDescriptors = new List<BufferManagerInstances>();
+        private readonly List<BufferManagerInstances> instancingBufferDescriptors = new();
         /// <summary>
         /// Index buffer descriptors
         /// </summary>
-        private readonly List<BufferManagerIndices> indexBufferDescriptors = new List<BufferManagerIndices>();
+        private readonly List<BufferManagerIndices> indexBufferDescriptors = new();
         /// <summary>
         /// Input layouts by technique
         /// </summary>
-        private readonly Dictionary<EngineEffectTechnique, InputLayout> techniqueInputLayouts = new Dictionary<EngineEffectTechnique, InputLayout>();
+        private readonly Dictionary<EngineEffectTechnique, InputLayout> techniqueInputLayouts = new();
         /// <summary>
         /// Input layouts by vertex shaders
         /// </summary>
-        private readonly Dictionary<InputAssemblerKey, InputLayout> vertexShadersInputLayouts = new Dictionary<InputAssemblerKey, InputLayout>();
+        private readonly Dictionary<InputAssemblerKey, InputLayout> vertexShadersInputLayouts = new();
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -128,7 +128,7 @@ namespace Engine.Common
         /// <summary>
         /// Descriptor request list
         /// </summary>
-        private ConcurrentBag<IBufferDescriptorRequest> requestedDescriptors = new ConcurrentBag<IBufferDescriptorRequest>();
+        private ConcurrentBag<IBufferDescriptorRequest> requestedDescriptors = new();
 
         /// <summary>
         /// Gets whether the manager is initialized or not
@@ -595,7 +595,7 @@ namespace Engine.Common
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         public BufferDescriptor AddVertexData(string id, bool dynamic, IEnumerable<IVertexData> data, BufferDescriptor instancingBuffer = null)
         {
-            BufferDescriptorRequestVertices request = new BufferDescriptorRequestVertices
+            var request = new BufferDescriptorRequestVertices
             {
                 Id = id,
                 Data = data,
@@ -618,7 +618,7 @@ namespace Engine.Common
         /// <param name="instances">Number of instances</param>
         public BufferDescriptor AddInstancingData(string id, bool dynamic, int instances)
         {
-            BufferDescriptorRequestInstancing request = new BufferDescriptorRequestInstancing
+            var request = new BufferDescriptorRequestInstancing
             {
                 Id = id,
                 Dynamic = dynamic,
@@ -640,7 +640,7 @@ namespace Engine.Common
         /// <param name="data">Index list</param>
         public BufferDescriptor AddIndexData(string id, bool dynamic, IEnumerable<uint> data)
         {
-            BufferDescriptorRequestIndices request = new BufferDescriptorRequestIndices
+            var request = new BufferDescriptorRequestIndices
             {
                 Id = id,
                 Data = data,
@@ -666,7 +666,7 @@ namespace Engine.Common
                 return;
             }
 
-            BufferDescriptorRequestVertices request = new BufferDescriptorRequestVertices
+            var request = new BufferDescriptorRequestVertices
             {
                 Id = descriptor.Id,
                 VertexDescriptor = descriptor,
@@ -686,7 +686,7 @@ namespace Engine.Common
                 return;
             }
 
-            BufferDescriptorRequestInstancing request = new BufferDescriptorRequestInstancing
+            var request = new BufferDescriptorRequestInstancing
             {
                 Id = descriptor.Id,
                 Descriptor = descriptor,
@@ -706,7 +706,7 @@ namespace Engine.Common
                 return;
             }
 
-            BufferDescriptorRequestIndices request = new BufferDescriptorRequestIndices
+            var request = new BufferDescriptorRequestIndices
             {
                 Id = descriptor.Id,
                 Descriptor = descriptor,
@@ -816,7 +816,8 @@ namespace Engine.Common
         /// <summary>
         /// Sets vertex buffers to device context
         /// </summary>
-        public bool SetVertexBuffers()
+        /// <param name="context">Device context</param>
+        public bool SetVertexBuffers(EngineDeviceContext context)
         {
             if (!Initilialized)
             {
@@ -830,19 +831,20 @@ namespace Engine.Common
                 return false;
             }
 
-            game.Graphics.IASetVertexBuffers(0, vertexBufferBindings.ToArray());
+            context.IASetVertexBuffers(0, vertexBufferBindings.ToArray());
 
             return true;
         }
         /// <summary>
         /// Sets index buffers to device context
         /// </summary>
+        /// <param name="context">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
-        public bool SetIndexBuffer(BufferDescriptor descriptor)
+        public bool SetIndexBuffer(EngineDeviceContext context, BufferDescriptor descriptor)
         {
             if (descriptor == null)
             {
-                game.Graphics.IASetIndexBuffer(null, Format.R32_UInt, 0);
+                context.IASetIndexBuffer(null, Format.R32_UInt, 0);
                 return true;
             }
 
@@ -864,17 +866,19 @@ namespace Engine.Common
                 return false;
             }
 
-            game.Graphics.IASetIndexBuffer(indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
+            context.IASetIndexBuffer(indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
+
             return true;
         }
         /// <summary>
         /// Sets input layout to device context
         /// </summary>
+        /// <param name="context">Device context</param>
         /// <param name="vertexShader">Vertex shader</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="topology">Topology</param>
         /// <param name="instanced">Use instancig data</param>
-        public bool SetInputAssembler(IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
+        public bool SetInputAssembler(EngineDeviceContext context, IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
         {
             if (descriptor == null)
             {
@@ -899,7 +903,7 @@ namespace Engine.Common
                 return false;
             }
 
-            InputAssemblerKey key = new InputAssemblerKey
+            var key = new InputAssemblerKey
             {
                 Shader = vertexShader,
                 Vertices = vertexBufferDescriptor,
@@ -918,8 +922,8 @@ namespace Engine.Common
                     game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
             }
 
-            game.Graphics.IAInputLayout = vertexShadersInputLayouts[key];
-            game.Graphics.IAPrimitiveTopology = topology;
+            context.IAInputLayout = vertexShadersInputLayouts[key];
+            context.IAPrimitiveTopology = topology;
             return true;
         }
 

@@ -8,6 +8,7 @@ namespace Engine
     using Engine.BuiltIn.Particles;
     using Engine.Common;
     using Engine.Content;
+    using SharpDX.Direct2D1;
 
     /// <summary>
     /// CPU particle system
@@ -214,8 +215,10 @@ namespace Engine
             }
 
             var graphics = Game.Graphics;
-            graphics.SetDepthStencilRDZEnabled();
-            graphics.SetBlendState(parameters.BlendMode);
+            var dc = context.DeviceContext;
+
+            dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
+            dc.SetBlendState(graphics.GetBlendState(parameters.BlendMode));
 
             var useRotation = parameters.RotateSpeed != Vector2.Zero;
             var state = new BuiltInParticlesState
@@ -235,7 +238,7 @@ namespace Engine
 
             particleDrawer.Update(state, TextureCount, Texture);
 
-            return particleDrawer.Draw(buffer, Topology.PointList, ActiveParticles);
+            return particleDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, ActiveParticles);
         }
 
         /// <summary>

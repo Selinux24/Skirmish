@@ -376,10 +376,11 @@ namespace Engine
             {
                 var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Frustum);
 
-                var r0 = DrawNodeList(bufferManager, drawer, visibleNodesHigh);
-                var r1 = DrawNodeList(bufferManager, drawer, visibleNodesMedium);
-                var r2 = DrawNodeList(bufferManager, drawer, visibleNodesLow);
-                var r3 = DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+                var dc = context.DeviceContext;
+                var r0 = DrawNodeList(dc, bufferManager, drawer, visibleNodesHigh);
+                var r1 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMedium);
+                var r2 = DrawNodeList(dc, bufferManager, drawer, visibleNodesLow);
+                var r3 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMinimum);
 
                 return r0 || r1 || r2 || r3;
             }
@@ -393,20 +394,22 @@ namespace Engine
             {
                 var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull(context.CameraVolume);
 
-                var r0 = DrawNodeList(bufferManager, drawer, visibleNodesHigh);
-                var r1 = DrawNodeList(bufferManager, drawer, visibleNodesMedium);
-                var r2 = DrawNodeList(bufferManager, drawer, visibleNodesLow);
-                var r3 = DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+                var dc = context.DeviceContext;
+                var r0 = DrawNodeList(dc, bufferManager, drawer, visibleNodesHigh);
+                var r1 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMedium);
+                var r2 = DrawNodeList(dc, bufferManager, drawer, visibleNodesLow);
+                var r3 = DrawNodeList(dc, bufferManager, drawer, visibleNodesMinimum);
 
                 return r0 || r1 || r2 || r3;
             }
             /// <summary>
             /// Draws the visible node list
             /// </summary>
+            /// <param name="context">Device context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="drawer">Drawer</param>
             /// <param name="nodeList">Node list</param>
-            private static bool DrawNodeList(BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
+            private static bool DrawNodeList(EngineDeviceContext context, BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
             {
                 int instanceCount = 0;
                 int primitiveCount = 0;
@@ -425,7 +428,7 @@ namespace Engine
                         VertexBuffer = gNode.VBDesc,
                         Topology = Topology.TriangleList,
                     };
-                    if (!drawer.Draw(bufferManager, options))
+                    if (!drawer.Draw(context, bufferManager, options))
                     {
                         continue;
                     }

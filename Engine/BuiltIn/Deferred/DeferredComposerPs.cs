@@ -97,7 +97,7 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             if (deferredBuffer?.Any() != true)
             {
@@ -110,12 +110,12 @@ namespace Engine.BuiltIn.Deferred
                 BuiltInShaders.GetHemisphericConstantBuffer(),
             };
 
-            Graphics.SetPixelShaderConstantBuffers(0, cb);
+            context.SetPixelShaderConstantBuffers(0, cb);
 
-            Graphics.SetPixelShaderResourceViews(0, deferredBuffer);
-            Graphics.SetPixelShaderResourceView(deferredBuffer.Count(), lightMap);
+            context.SetPixelShaderResourceViews(0, deferredBuffer);
+            context.SetPixelShaderResourceView(deferredBuffer.Count(), lightMap);
 
-            Graphics.SetPixelShaderSampler(0, samplerPoint);
+            context.SetPixelShaderSampler(0, samplerPoint);
         }
     }
 }

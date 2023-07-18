@@ -110,7 +110,7 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var rv = new[]
             {
@@ -118,7 +118,7 @@ namespace Engine.BuiltIn.Deferred
                 normalMapArray,
             };
 
-            Graphics.SetPixelShaderResourceViews(0, rv);
+            context.SetPixelShaderResourceViews(0, rv);
 
             var ss = new[]
             {
@@ -126,7 +126,7 @@ namespace Engine.BuiltIn.Deferred
                 samplerNormal,
             };
 
-            Graphics.SetPixelShaderSamplers(0, ss);
+            context.SetPixelShaderSamplers(0, ss);
         }
     }
 }

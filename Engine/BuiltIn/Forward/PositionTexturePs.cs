@@ -97,7 +97,7 @@ namespace Engine.BuiltIn.Forward
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -105,11 +105,11 @@ namespace Engine.BuiltIn.Forward
                 cbPerFrame,
             };
 
-            Graphics.SetPixelShaderConstantBuffers(0, cb);
+            context.SetPixelShaderConstantBuffers(0, cb);
 
-            Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
+            context.SetPixelShaderResourceView(0, diffuseMapArray);
 
-            Graphics.SetPixelShaderSampler(0, samplerDiffuse);
+            context.SetPixelShaderSampler(0, samplerDiffuse);
         }
     }
 }

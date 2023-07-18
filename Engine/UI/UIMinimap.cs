@@ -175,10 +175,11 @@ namespace Engine.UI
             drawContext.GameTime = context.GameTime;
 
             var graphics = Game.Graphics;
+            var dc = context.DeviceContext;
 
-            graphics.SetViewport(viewport);
+            dc.SetViewport(viewport);
 
-            graphics.SetRenderTargets(
+            dc.SetRenderTargets(
                 renderTarget, true, BackColor,
                 false);
 
@@ -187,8 +188,8 @@ namespace Engine.UI
                 item.Draw(drawContext);
             }
 
-            graphics.SetDefaultViewport();
-            graphics.SetDefaultRenderTarget(false, Color.Transparent);
+            dc.SetViewport(graphics.Viewport);
+            dc.SetRenderTargets(graphics.DefaultRenderTarget, false, Color.Transparent);
 
             minimapBox.Texture = renderTexture;
             bool drawn = minimapBox.Draw(context);

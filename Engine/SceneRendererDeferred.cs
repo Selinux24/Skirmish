@@ -228,10 +228,10 @@ namespace Engine
             UpdateDrawContext(gameTime, DrawerModes.Deferred);
 
             //Shadow mapping
-            DoShadowMapping(gameTime);
+            DoShadowMapping(DrawContext);
 
             //Binds the result target
-            SetTarget(Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+            SetTarget(DrawContext.DeviceContext, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
             var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
             bool anyDeferred = deferredEnabledComponents.Any();
@@ -243,17 +243,17 @@ namespace Engine
                 if (anyDeferred)
                 {
                     //Render to G-Buffer deferred enabled components
-                    DoDeferred(deferredEnabledComponents);
+                    DoDeferred(DrawContext, deferredEnabledComponents);
 
                     //Binds the result target
-                    SetTarget(Targets.Objects, false, Color.Transparent);
+                    SetTarget(DrawContext.DeviceContext, Targets.Objects, false, Color.Transparent);
 
                     #region Final composition
 #if DEBUG
                     Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
                     //Draw scene result on screen using g-buffer and light buffer
-                    DrawResult();
+                    DrawResult(DrawContext);
 
 #if DEBUG
                     swComponsition.Stop();
@@ -270,11 +270,11 @@ namespace Engine
                 }
 
                 //Post-processing
-                DoPostProcessing(Targets.Objects, RenderPass.Objects, gameTime);
+                DoPostProcessing(DrawContext, Targets.Objects, RenderPass.Objects);
             }
 
             //Binds the result target
-            SetTarget(Targets.UI, true, Color.Transparent);
+            SetTarget(DrawContext.DeviceContext, Targets.UI, true, Color.Transparent);
 
             //Render to screen deferred disabled components
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
@@ -283,17 +283,17 @@ namespace Engine
                 //UI render
                 DoForward(uiComponents);
                 //UI post-processing
-                DoPostProcessing(Targets.UI, RenderPass.UI, gameTime);
+                DoPostProcessing(DrawContext, Targets.UI, RenderPass.UI);
             }
 
             //Combine to screen
-            CombineTargets(Targets.Objects, Targets.UI, Targets.Result);
+            CombineTargets(DrawContext, Targets.Objects, Targets.UI, Targets.Result);
 
             //Final post-processing
-            DoPostProcessing(Targets.Result, RenderPass.Final, gameTime);
+            DoPostProcessing(DrawContext, Targets.Result, RenderPass.Final);
 
             //Draw to screen
-            DrawToScreen(Targets.Result);
+            DrawToScreen(DrawContext, Targets.Result);
 
 #if DEBUG
             swTotal.Stop();
@@ -304,9 +304,11 @@ namespace Engine
         /// <summary>
         /// Do deferred rendering
         /// </summary>
+        /// <param name="context">Drawing context</param>
         /// <param name="deferredEnabledComponents">Components</param>
-        private void DoDeferred(IEnumerable<IDrawable> deferredEnabledComponents)
+        private void DoDeferred(DrawContext context, IEnumerable<IDrawable> deferredEnabledComponents)
         {
+            var dc = context.DeviceContext;
 #if DEBUG
             Stopwatch swCull = Stopwatch.StartNew();
 #endif
@@ -347,7 +349,7 @@ namespace Engine
 
             Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
 #endif
-            BindGBuffer();
+            BindGBuffer(dc);
 #if DEBUG
             swGeometryBufferInit.Stop();
 
@@ -368,7 +370,7 @@ namespace Engine
 #if DEBUG
             Stopwatch swLightBuffer = Stopwatch.StartNew();
 #endif
-            BindLights();
+            BindLights(dc);
 
             //Draw scene lights on light buffer using g-buffer output
             DrawLights(DrawContext);
@@ -451,31 +453,29 @@ namespace Engine
         /// <summary>
         /// Binds graphics for g-buffer pass
         /// </summary>
-        private void BindGBuffer()
+        /// <param name="context">Device context</param>
+        private void BindGBuffer(EngineDeviceContext context)
         {
-            var graphics = Scene.Game.Graphics;
-
             //Set local viewport
-            graphics.SetViewport(Viewport);
+            context.SetViewport(Viewport);
 
             //Set g-buffer render targets
-            graphics.SetRenderTargets(
+            context.SetRenderTargets(
                 geometryBuffer.Targets, true, Color.Transparent,
-                graphics.DefaultDepthStencil, true, true,
+                Scene.Game.Graphics.DefaultDepthStencil, true, true,
                 true);
         }
         /// <summary>
         /// Binds graphics for light acummulation pass
         /// </summary>
-        private void BindLights()
+        /// <param name="context">Device context</param>
+        private void BindLights(EngineDeviceContext context)
         {
-            var graphics = Scene.Game.Graphics;
-
             //Set local viewport
-            graphics.SetViewport(Viewport);
+            context.SetViewport(Viewport);
 
             //Set light buffer to draw lights
-            graphics.SetRenderTargets(
+            context.SetRenderTargets(
                 lightBuffer.Targets, true, Color.Transparent,
                 false);
         }
@@ -486,6 +486,8 @@ namespace Engine
         /// <param name="context">Drawing context</param>
         private void DrawLights(DrawContext context)
         {
+            var dc = context.DeviceContext;
+
 #if DEBUG
             lightStats.Clear();
 
@@ -505,8 +507,8 @@ namespace Engine
             var spotLights = context.Lights.GetVisibleSpotLights();
             var pointLights = context.Lights.GetVisiblePointLights();
 
-            graphics.SetDepthStencilRDZDisabled();
-            SetBlendDeferredLighting();
+            dc.SetDepthStencilState(graphics.GetDepthStencilRDZDisabled());
+            SetBlendDeferredLighting(dc);
 
 #if DEBUG
             swPrepare.Stop();
@@ -519,7 +521,7 @@ namespace Engine
 #endif
             if (directionalLights.Any())
             {
-                lightDrawer.BindGlobalLight(graphics);
+                lightDrawer.BindGlobalLight(dc);
 
                 lightDirectionalDrawer.UpdateGeometryMap(GeometryMap);
 
@@ -527,7 +529,7 @@ namespace Engine
                 {
                     lightDirectionalDrawer.UpdatePerLight(light);
 
-                    lightDrawer.DrawDirectional(lightDirectionalDrawer);
+                    lightDrawer.DrawDirectional(dc, lightDirectionalDrawer);
                 }
             }
 #if DEBUG
@@ -541,7 +543,7 @@ namespace Engine
 #endif
             if (pointLights.Any())
             {
-                lightDrawer.BindPoint(graphics);
+                lightDrawer.BindPoint(dc);
 
                 lightPointDrawer.UpdateGeometryMap(GeometryMap);
 
@@ -550,7 +552,7 @@ namespace Engine
                     //Draw Pass
                     lightPointDrawer.UpdatePerLight(light);
 
-                    lightDrawer.DrawPoint(graphics, stencilDrawer, lightPointDrawer);
+                    lightDrawer.DrawPoint(graphics, dc, stencilDrawer, lightPointDrawer);
                 }
             }
 #if DEBUG
@@ -564,7 +566,7 @@ namespace Engine
 #endif
             if (spotLights.Any())
             {
-                lightDrawer.BindSpot(graphics);
+                lightDrawer.BindSpot(dc);
 
                 lightSpotDrawer.UpdateGeometryMap(GeometryMap);
 
@@ -573,7 +575,7 @@ namespace Engine
                     //Draw Pass
                     lightSpotDrawer.UpdatePerLight(light);
 
-                    lightDrawer.DrawSpot(graphics, stencilDrawer, lightSpotDrawer);
+                    lightDrawer.DrawSpot(graphics, dc, stencilDrawer, lightSpotDrawer);
                 }
             }
 #if DEBUG
@@ -598,9 +600,11 @@ namespace Engine
         /// <summary>
         /// Draw result
         /// </summary>
-        private void DrawResult()
+        /// <param name="context">Device context</param>
+        private void DrawResult(DrawContext context)
         {
             var graphics = Scene.Game.Graphics;
+            var dc = context.DeviceContext;
 
 #if DEBUG
             long init = 0;
@@ -615,20 +619,20 @@ namespace Engine
 #endif
                 composer.UpdateGeometryMap(GeometryMap, LightMap.ElementAtOrDefault(0));
 
-                lightDrawer.BindResult(graphics);
+                lightDrawer.BindResult(dc);
 
-                graphics.SetDepthStencilNone();
-                graphics.SetRasterizerDefault();
-                graphics.SetBlendDefault();
+                dc.SetDepthStencilState(graphics.GetDepthStencilNone());
+                dc.SetRasterizerState(graphics.GetRasterizerDefault());
+                dc.SetBlendState(graphics.GetBlendDefault());
 #if DEBUG
                 swInit.Stop();
 
                 init = swInit.ElapsedTicks;
 #endif
 #if DEBUG
-                Stopwatch swDraw = Stopwatch.StartNew();
+                var swDraw = Stopwatch.StartNew();
 #endif
-                lightDrawer.DrawResult(composer);
+                lightDrawer.DrawResult(dc, composer);
 #if DEBUG
                 swDraw.Stop();
 
@@ -691,55 +695,59 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        protected override void SetBlendState(DrawerModes drawMode, BlendModes blendMode)
+        protected override void SetBlendState(EngineDeviceContext context, DrawerModes drawerMode, BlendModes blendMode)
         {
-            if (drawMode.HasFlag(DrawerModes.Deferred))
+            if (drawerMode.HasFlag(DrawerModes.Deferred))
             {
                 if (blendMode.HasFlag(BlendModes.Additive))
                 {
-                    SetBlendDeferredComposerAdditive();
+                    SetBlendDeferredComposerAdditive(context);
                 }
                 else if (blendMode.HasFlag(BlendModes.Transparent) || blendMode.HasFlag(BlendModes.Alpha))
                 {
-                    SetBlendDeferredComposerTransparent();
+                    SetBlendDeferredComposerTransparent(context);
                 }
                 else
                 {
-                    SetBlendDeferredComposer();
+                    SetBlendDeferredComposer(context);
                 }
             }
             else
             {
-                base.SetBlendState(drawMode, blendMode);
+                base.SetBlendState(context, drawerMode, blendMode);
             }
         }
         /// <summary>
         /// Sets deferred composer blend state
         /// </summary>
-        private void SetBlendDeferredComposer()
+        /// <param name="context">Device context</param>
+        private void SetBlendDeferredComposer(EngineDeviceContext context)
         {
-            Scene.Game.Graphics.SetBlendState(blendDeferredComposer);
+            context.SetBlendState(blendDeferredComposer);
         }
         /// <summary>
         /// Sets transparent deferred composer blend state
         /// </summary>
-        private void SetBlendDeferredComposerTransparent()
+        /// <param name="context">Device context</param>
+        private void SetBlendDeferredComposerTransparent(EngineDeviceContext context)
         {
-            Scene.Game.Graphics.SetBlendState(blendDeferredComposerTransparent);
+            context.SetBlendState(blendDeferredComposerTransparent);
         }
         /// <summary>
         /// Sets additive deferred composer blend state
         /// </summary>
-        private void SetBlendDeferredComposerAdditive()
+        /// <param name="context">Device context</param>
+        private void SetBlendDeferredComposerAdditive(EngineDeviceContext context)
         {
-            Scene.Game.Graphics.SetBlendState(blendDeferredComposerAdditive);
+            context.SetBlendState(blendDeferredComposerAdditive);
         }
         /// <summary>
         /// Sets deferred lighting blend state
         /// </summary>
-        private void SetBlendDeferredLighting()
+        /// <param name="context">Device context</param>
+        private void SetBlendDeferredLighting(EngineDeviceContext context)
         {
-            Scene.Game.Graphics.SetBlendState(blendDeferredLighting);
+            context.SetBlendState(blendDeferredLighting);
         }
     }
 }

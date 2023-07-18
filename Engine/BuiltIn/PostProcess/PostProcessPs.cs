@@ -109,7 +109,7 @@ namespace Engine.BuiltIn.PostProcess
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -118,11 +118,11 @@ namespace Engine.BuiltIn.PostProcess
                 cbPerEffect,
             };
 
-            Graphics.SetPixelShaderConstantBuffers(0, cb);
+            context.SetPixelShaderConstantBuffers(0, cb);
 
-            Graphics.SetPixelShaderResourceView(0, diffuseMapArray);
+            context.SetPixelShaderResourceView(0, diffuseMapArray);
 
-            Graphics.SetPixelShaderSampler(0, samplerDiffuse);
+            context.SetPixelShaderSampler(0, samplerDiffuse);
         }
     }
 }

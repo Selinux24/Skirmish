@@ -384,7 +384,7 @@ namespace Engine
                 drawer.UpdateMaterial(materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
-                if (drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }
@@ -523,7 +523,7 @@ namespace Engine
                 drawer.UpdateMaterial(materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
-                if (drawer.Draw(BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }

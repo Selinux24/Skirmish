@@ -881,7 +881,7 @@ namespace Engine
 
             FrameSceneUpdate(activeScene);
 
-            if (BufferManager.SetVertexBuffers())
+            if (BufferManager.SetVertexBuffers(Graphics.ImmediateContext))
             {
                 FrameBegin(activeScene);
 

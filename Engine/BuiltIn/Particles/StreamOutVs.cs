@@ -57,7 +57,7 @@ namespace Engine.BuiltIn.Particles
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             //No resources
         }

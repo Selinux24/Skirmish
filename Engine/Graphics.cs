@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using SharpDX.Direct3D;
 using SharpDX.DXGI;
-using SharpDX.Mathematics.Interop;
 using System;
 using System.Collections.Generic;
 
@@ -49,26 +48,9 @@ namespace Engine
         /// </summary>
         private Device3 device = null;
         /// <summary>
-        /// Graphics immmediate context
-        /// </summary>
-        private readonly DeviceContext3 immediateContext = null;
-        /// <summary>
         /// Swap chain
         /// </summary>
         private SwapChain4 swapChain = null;
-
-        /// <summary>
-        /// Current primitive topology set in input assembler
-        /// </summary>
-        private Topology currentIAPrimitiveTopology = Topology.Undefined;
-        /// <summary>
-        /// Current input layout set in input assembler
-        /// </summary>
-        private InputLayout currentIAInputLayout = null;
-        /// <summary>
-        /// Current viewport
-        /// </summary>
-        private IEnumerable<RawViewportF> currentViewports;
 
         /// <summary>
         /// Back buffer format
@@ -83,6 +65,10 @@ namespace Engine
         /// Device description
         /// </summary>
         public string DeviceDescription { get; private set; }
+        /// <summary>
+        /// Graphics immmediate context
+        /// </summary>
+        public EngineDeviceContext ImmediateContext { get; private set; }
 
         /// <summary>
         /// Screen viewport
@@ -106,46 +92,6 @@ namespace Engine
             get
             {
                 return new SampleDescription(msCount, msQuality);
-            }
-        }
-        /// <summary>
-        /// Gets or sets the input assembler's primitive topology
-        /// </summary>
-        public Topology IAPrimitiveTopology
-        {
-            get
-            {
-                return currentIAPrimitiveTopology;
-            }
-            set
-            {
-                if (currentIAPrimitiveTopology != value)
-                {
-                    immediateContext.InputAssembler.PrimitiveTopology = (PrimitiveTopology)value;
-                    Counters.IAPrimitiveTopologySets++;
-
-                    currentIAPrimitiveTopology = value;
-                }
-            }
-        }
-        /// <summary>
-        /// Gets or sets the input assembler's input layout
-        /// </summary>
-        public InputLayout IAInputLayout
-        {
-            get
-            {
-                return currentIAInputLayout;
-            }
-            set
-            {
-                if (currentIAInputLayout != value)
-                {
-                    immediateContext.InputAssembler.InputLayout = value;
-                    Counters.IAInputLayoutSets++;
-
-                    currentIAInputLayout = value;
-                }
             }
         }
 
@@ -343,8 +289,7 @@ namespace Engine
                 swapChain.DebugName = "GraphicsSwapChain";
             }
 
-            immediateContext = device.ImmediateContext3;
-            immediateContext.DebugName = "Immediate";
+            ImmediateContext = new EngineDeviceContext("Immediate", device.ImmediateContext3);
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -484,12 +429,12 @@ namespace Engine
 
             #region Set Defaults
 
-            SetDefaultViewport();
-            SetDefaultRenderTarget(true, Color.Transparent, true, true);
+            ImmediateContext.SetViewport(Viewport);
+            ImmediateContext.SetRenderTargets(DefaultRenderTarget, true, Color.Transparent, DefaultDepthStencil, true, true, false);
 
-            SetDepthStencilWRZEnabled();
-            SetRasterizerDefault();
-            SetBlendDefault();
+            ImmediateContext.SetRasterizerState(GetRasterizerDefault());
+            ImmediateContext.SetBlendState(GetBlendDefault());
+            ImmediateContext.SetDepthStencilState(GetDepthStencilWRZEnabled());
 
             #endregion
 
@@ -550,13 +495,13 @@ namespace Engine
         /// </summary>
         public void Begin(Scene scene)
         {
-            immediateContext.ClearDepthStencilView(
+            ImmediateContext.GetDeviceContext().ClearDepthStencilView(
                 depthStencilView.GetDepthStencil(),
                 DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
                 1.0f,
                 0);
 
-            immediateContext.ClearRenderTargetView(
+            ImmediateContext.GetDeviceContext().ClearRenderTargetView(
                 renderTargetView.GetRenderTarget(),
                 scene.GameEnvironment.Background);
         }

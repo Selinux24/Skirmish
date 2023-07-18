@@ -57,14 +57,14 @@ namespace Engine.BuiltIn.Decals
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
                 BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
-            Graphics.SetGeometryShaderConstantBuffers(0, cb);
+            context.SetGeometryShaderConstantBuffers(0, cb);
         }
     }
 }

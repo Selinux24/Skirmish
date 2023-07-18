@@ -157,7 +157,7 @@ namespace Engine.BuiltIn.Forward
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -169,7 +169,7 @@ namespace Engine.BuiltIn.Forward
                 cbPerTerrain,
             };
 
-            Graphics.SetPixelShaderConstantBuffers(0, cb);
+            context.SetPixelShaderConstantBuffers(0, cb);
 
             var vr = new[]
             {
@@ -183,7 +183,7 @@ namespace Engine.BuiltIn.Forward
                 highResolutionTexture,
             };
 
-            Graphics.SetPixelShaderResourceViews(0, vr);
+            context.SetPixelShaderResourceViews(0, vr);
 
             var ss = new[]
             {
@@ -191,7 +191,7 @@ namespace Engine.BuiltIn.Forward
                 samplerNormal,
             };
 
-            Graphics.SetPixelShaderSamplers(0, ss);
+            context.SetPixelShaderSamplers(0, ss);
         }
     }
 }

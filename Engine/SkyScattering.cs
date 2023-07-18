@@ -363,7 +363,7 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            if (!skyDrawer.Draw(BufferManager, drawOptions))
+            if (!skyDrawer.Draw(context.DeviceContext, BufferManager, drawOptions))
             {
                 return false;
             }

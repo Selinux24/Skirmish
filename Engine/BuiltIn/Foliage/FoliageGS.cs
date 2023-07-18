@@ -88,7 +88,7 @@ namespace Engine.BuiltIn.Foliage
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources()
+        public void SetShaderResources(EngineDeviceContext context)
         {
             var cb = new[]
             {
@@ -96,11 +96,11 @@ namespace Engine.BuiltIn.Foliage
                 cbPerPatch,
             };
 
-            Graphics.SetGeometryShaderConstantBuffers(0, cb);
+            context.SetGeometryShaderConstantBuffers(0, cb);
 
-            Graphics.SetGeometryShaderResourceView(0, randomTexture);
+            context.SetGeometryShaderResourceView(0, randomTexture);
 
-            Graphics.SetGeometryShaderSampler(0, samplerPoint);
+            context.SetGeometryShaderSampler(0, samplerPoint);
         }
     }
 }
