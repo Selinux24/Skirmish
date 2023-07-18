@@ -257,7 +257,7 @@ namespace Engine
             {
                 for (int i = 0; i < flares.Length; i++)
                 {
-                    drawn = drawn || flares[i].FlareSprite.Draw(context);
+                    drawn = flares[i].FlareSprite.Draw(context) || drawn;
                 }
             }
 

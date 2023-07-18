@@ -2,13 +2,13 @@
 using System.Diagnostics;
 #endif
 using SharpDX;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine
 {
     using Engine.Common;
-    using System;
 
     /// <summary>
     /// Forward renderer class
@@ -18,6 +18,16 @@ namespace Engine
 #if DEBUG
         private readonly FrameStatsForward frameStats = new();
         private readonly Dictionary<string, double> dict = new();
+
+        /// <summary>
+        /// Writes a trace in the trace dictionary
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="milliseconds">Milliseconds</param>
+        private void WriteTrace(string key, double milliseconds)
+        {
+            dict[key] = milliseconds;
+        }
 #endif
 
         /// <summary>
@@ -212,21 +222,6 @@ namespace Engine
             }
 #endif
         }
-
-        /// <summary>
-        /// Writes a trace in the trace dictionary
-        /// </summary>
-        /// <param name="key">Key</param>
-        /// <param name="milliseconds">Milliseconds</param>
-        private void WriteTrace(string key, double milliseconds)
-        {
-            if (!Scene.Game.CollectGameStatus)
-            {
-                return;
-            }
-
-            dict[key] = milliseconds;
-        }
         /// <summary>
         /// Draws scene components
         /// </summary>
@@ -290,7 +285,7 @@ namespace Engine
                     count++;
 #if DEBUG
                     swd.Stop();
-                    WriteTrace($"Mode[{mode}]     Draw[{i}.{c.Name}]", swd.Elapsed.TotalMilliseconds);
+                    WriteTrace($"Mode[{mode}]     Draw[{i}.{c.Name}]=>{c.GetType()}", swd.Elapsed.TotalMilliseconds);
 #endif
                 }
             };

@@ -157,7 +157,7 @@ namespace Engine
             bool drawn = false;
             foreach (var p in particles)
             {
-                drawn = drawn || p.Draw(context);
+                drawn = p.Draw(context) || drawn;
             }
 
             return drawn;

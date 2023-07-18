@@ -208,9 +208,7 @@ namespace Engine.UI
 
             bool drawn = Draw();
 
-            drawn = drawn || base.Draw(context);
-
-            return drawn;
+            return base.Draw(context) || drawn;
         }
         /// <summary>
         /// Default sprite draw

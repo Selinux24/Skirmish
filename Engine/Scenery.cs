@@ -532,7 +532,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
 
-                drawn = drawn || (patchDictionary[nodeId]?.DrawSceneryShadows(context, BufferManager) ?? false);
+                drawn = (patchDictionary[nodeId]?.DrawSceneryShadows(context, BufferManager) ?? false) || drawn;
             }
 
             return drawn;
@@ -559,7 +559,7 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
 
-                drawn = drawn || (patchDictionary[nodeId]?.DrawScenery(context, BufferManager, BlendMode) ?? false);
+                drawn = (patchDictionary[nodeId]?.DrawScenery(context, BufferManager, BlendMode) ?? false) || drawn;
             }
 
             return drawn;

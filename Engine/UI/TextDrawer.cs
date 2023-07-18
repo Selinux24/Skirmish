@@ -483,7 +483,7 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,
             };
-            return drawn || fontDrawer.Draw(bufferManager, opOptions);
+            return fontDrawer.Draw(bufferManager, opOptions) || drawn;
         }
         /// <summary>
         /// Writes text data into buffers

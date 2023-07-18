@@ -193,7 +193,7 @@ namespace Engine.UI
             minimapBox.Texture = renderTexture;
             bool drawn = minimapBox.Draw(context);
 
-            return drawn || base.Draw(context);
+            return base.Draw(context) || drawn;
         }
 
         /// <summary>
