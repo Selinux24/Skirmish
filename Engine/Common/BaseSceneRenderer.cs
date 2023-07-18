@@ -725,7 +725,6 @@ namespace Engine.Common
                 }
             }
 
-            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -820,7 +819,6 @@ namespace Engine.Common
             //All objects suitable for culling
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;
@@ -931,7 +929,6 @@ namespace Engine.Common
             //All objects suitable for culling
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var graphics = Scene.Game.Graphics;
             int assigned = 0;
 
             int l = 0;

@@ -870,7 +870,7 @@ namespace Engine
             {
                 Counters.Textures++;
 
-                var rnd = new Random(seed);
+                var rnd = Helper.SetRandomGeneratorSeed(seed);
 
                 var randomValues = new List<Vector4>();
                 for (int i = 0; i < size; i++)
