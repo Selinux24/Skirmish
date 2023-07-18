@@ -26,7 +26,7 @@ namespace Engine.Common
         /// <summary>
         /// Use indices
         /// </summary>
-        public bool Indexed
+        public readonly bool Indexed
         {
             get
             {
@@ -63,7 +63,7 @@ namespace Engine.Common
         /// Draw
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public void Draw(Graphics graphics)
+        public readonly void Draw(Graphics graphics)
         {
             if (Instanced)
             {
@@ -78,7 +78,7 @@ namespace Engine.Common
         /// Draw single
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        private void DrawSingle(Graphics graphics)
+        private readonly void DrawSingle(Graphics graphics)
         {
             if (Indexed)
             {
@@ -102,7 +102,7 @@ namespace Engine.Common
         /// Draw instanced
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        private void DrawInstanced(Graphics graphics)
+        private readonly void DrawInstanced(Graphics graphics)
         {
             if (Indexed)
             {

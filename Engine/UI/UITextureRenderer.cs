@@ -108,22 +108,22 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             spriteDrawer.UpdateSprite(new BuiltInSpriteState
@@ -135,7 +135,7 @@ namespace Engine.UI
                 Channel = Channel,
             });
 
-            spriteDrawer.Draw(BufferManager, new DrawOptions
+            bool drawn = spriteDrawer.Draw(BufferManager, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
@@ -145,7 +145,7 @@ namespace Engine.UI
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
 
-            base.Draw(context);
+            return drawn || base.Draw(context);
         }
     }
 }

@@ -188,32 +188,34 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
-            Draw();
+            bool drawn = Draw();
 
-            base.Draw(context);
+            drawn = drawn || base.Draw(context);
+
+            return drawn;
         }
         /// <summary>
         /// Default sprite draw
         /// </summary>
-        private void Draw()
+        private bool Draw()
         {
             BuiltInSpriteState state;
 
@@ -257,19 +259,22 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
             };
 
+            bool drawn;
             if (Textured)
             {
                 spriteTextureDrawer.UpdateSprite(state);
-                spriteTextureDrawer.Draw(BufferManager, drawOptions);
+                drawn = spriteTextureDrawer.Draw(BufferManager, drawOptions);
             }
             else
             {
                 spriteColorDrawer.UpdateSprite(state);
-                spriteColorDrawer.Draw(BufferManager, drawOptions);
+                drawn = spriteColorDrawer.Draw(BufferManager, drawOptions);
             }
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+
+            return drawn;
         }
 
         /// <summary>

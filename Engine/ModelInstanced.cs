@@ -263,16 +263,16 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void DrawShadows(DrawContextShadows context)
+        public override bool DrawShadows(DrawContextShadows context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!InstancingBuffer.Ready)
             {
-                return;
+                return false;
             }
 
             if (hasDataToWrite)
@@ -281,13 +281,13 @@ namespace Engine
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
-            DrawShadowsInstances(context);
+            return DrawShadowsInstances(context);
         }
         /// <summary>
         /// Shadow drawing
         /// </summary>
         /// <param name="context">Context</param>
-        private void DrawShadowsInstances(DrawContextShadows context)
+        private bool DrawShadowsInstances(DrawContextShadows context)
         {
             int count = 0;
             int instanceCount = 0;
@@ -335,6 +335,8 @@ namespace Engine
                     count *= instanceCount;
                 }
             }
+
+            return count > 0;
         }
         /// <summary>
         /// Draws a mesh with a shadow map drawer
@@ -392,16 +394,16 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!InstancingBuffer.Ready)
             {
-                return;
+                return false;
             }
 
             if (hasDataToWrite)
@@ -410,13 +412,13 @@ namespace Engine
                 BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
             }
 
-            DrawInstances(context);
+            return DrawInstances(context);
         }
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
-        private void DrawInstances(DrawContext context)
+        private bool DrawInstances(DrawContext context)
         {
             int count = 0;
             int instanceCount = 0;
@@ -467,6 +469,8 @@ namespace Engine
 
             Counters.InstancesPerFrame += instanceCount;
             Counters.PrimitivesPerFrame += count;
+
+            return count > 0;
         }
         /// <summary>
         /// Draws a mesh with a geometry drawer

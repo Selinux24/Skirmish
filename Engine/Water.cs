@@ -126,27 +126,27 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             if (waterDrawer == null)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             var waterState = new BuiltInWaterState
@@ -169,10 +169,15 @@ namespace Engine
                 IndexBuffer = indexBuffer,
                 Topology = Topology.TriangleList,
             };
-            waterDrawer.Draw(BufferManager, drawOptions);
+            if (!waterDrawer.Draw(BufferManager, drawOptions))
+            {
+                return false;
+            }
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+
+            return true;
         }
     }
 }

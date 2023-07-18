@@ -90,14 +90,14 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public virtual void DrawShadows(DrawContextShadows context)
+        public virtual bool DrawShadows(DrawContextShadows context)
         {
-
+            return false;
         }
         /// <inheritdoc/>
-        public virtual void Draw(DrawContext context)
+        public virtual bool Draw(DrawContext context)
         {
-
+            return false;
         }
 
         /// <inheritdoc/>

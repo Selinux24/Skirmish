@@ -589,7 +589,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="drawable">Drawable component</param>
-        protected virtual void Draw(DrawContext context, IDrawable drawable)
+        protected virtual bool Draw(DrawContext context, IDrawable drawable)
         {
             Counters.MaxInstancesPerFrame += drawable.InstanceCount;
 
@@ -605,7 +605,7 @@ namespace Engine.Common
 
             SetDepthStencil(drawable.DepthEnabled);
 
-            drawable.Draw(context);
+            return drawable.Draw(context);
         }
         /// <summary>
         /// Sets the rasterizer state

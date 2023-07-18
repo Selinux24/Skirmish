@@ -35,7 +35,8 @@ namespace Engine
         /// Draws particles
         /// </summary>
         /// <param name="context">Drawing context</param>
-        void Draw(DrawContext context);
+        /// <returns>Returns true if the draw calls the device</returns>
+        bool Draw(DrawContext context);
 
         /// <summary>
         /// Gets current particle system parameters

@@ -35,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Decal volume
         /// </summary>
-        private BoundingSphere boundingVolume = new BoundingSphere();
+        private BoundingSphere boundingVolume = new();
         /// <summary>
         /// Current decal count
         /// </summary>
@@ -139,23 +139,23 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (currentDecals <= 0)
             {
-                return;
+                return false;
             }
 
             bool isTransparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
             bool draw = context.ValidateDraw(BlendMode, isTransparent);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             var mode = context.DrawerMode;
@@ -175,7 +175,7 @@ namespace Engine
                 TintColor,
                 Texture);
 
-            decalDrawer.Draw(buffer, Topology.PointList, currentDecals);
+            return decalDrawer.Draw(buffer, Topology.PointList, currentDecals);
         }
 
         /// <inheritdoc/>

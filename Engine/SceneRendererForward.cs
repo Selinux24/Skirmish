@@ -1,13 +1,14 @@
 ﻿#if DEBUG
 using System.Diagnostics;
 #endif
+using SharpDX;
 using System.Collections.Generic;
 using System.Linq;
-using SharpDX;
 
 namespace Engine
 {
     using Engine.Common;
+    using System;
 
     /// <summary>
     /// Forward renderer class
@@ -16,6 +17,7 @@ namespace Engine
     {
 #if DEBUG
         private readonly FrameStatsForward frameStats = new();
+        private readonly Dictionary<string, double> dict = new();
 #endif
 
         /// <summary>
@@ -57,7 +59,7 @@ namespace Engine
 #if DEBUG
             frameStats.Clear();
 
-            Stopwatch swTotal = Stopwatch.StartNew();
+            var swTotal = Stopwatch.StartNew();
 #endif
             //Updates the draw context
             UpdateDrawContext(gameTime, DrawerModes.Forward);
@@ -176,113 +178,29 @@ namespace Engine
         /// Draw components
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="index">Cull results index</param>
+        /// <param name="cullIndex">Cull results index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<IDrawable> components)
+        private void DrawResultComponents(DrawContext context, int cullIndex, IEnumerable<IDrawable> components)
         {
+#if DEBUG
+            dict.Clear();
+            var sw = Stopwatch.StartNew();
+#endif
+            //Update shaders state
             BuiltIn.BuiltInShaders.UpdatePerFrame(context);
+#if DEBUG
+            sw.Stop();
+            WriteTrace("Built-In shaders Update Per Frame", sw.Elapsed.TotalMilliseconds);
+#endif
 
             //Save current drawer mode
             var mode = context.DrawerMode;
-#if DEBUG
-            Dictionary<string, double> dict = new();
-            Stopwatch stopwatch = new();
-#endif
+
             //First opaques
-#if DEBUG
-            stopwatch.Start();
-#endif
-            var opaques = GetOpaques(index, components);
-#if DEBUG
-            stopwatch.Stop();
-            dict.Add("Opaques Selection", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            if (opaques.Any())
-            {
-                //Set mode to opaque only
-                context.DrawerMode = mode | DrawerModes.OpaqueOnly;
-
-                //Sort items nearest first
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                opaques.Sort((c1, c2) => SortOpaques(index, c1, c2));
-#if DEBUG
-                stopwatch.Stop();
-                dict.Add("Opaques Sort", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                //Draw items
-#if DEBUG
-                stopwatch.Restart();
-                int oDIndex = 0;
-#endif
-                opaques.ForEach((c) =>
-                {
-#if DEBUG
-                    Stopwatch stopwatch2 = new();
-                    stopwatch2.Start();
-#endif
-                    Draw(context, c);
-#if DEBUG
-                    stopwatch2.Stop();
-                    dict.Add($"Opaque Draw {oDIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
-#endif
-                });
-#if DEBUG
-                stopwatch.Stop();
-                dict.Add("Opaques Draw", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-            }
+            DrawComponents(context, mode | DrawerModes.OpaqueOnly, cullIndex, components, GetOpaques, SortOpaques);
 
             //Then transparents
-#if DEBUG
-            stopwatch.Restart();
-#endif
-            var transparents = GetTransparents(index, components);
-#if DEBUG
-            stopwatch.Stop();
-            dict.Add("Transparents Selection", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            if (transparents.Any())
-            {
-                //Set drawer mode to transparent
-                context.DrawerMode = mode | DrawerModes.TransparentOnly;
-
-                //Sort items far first
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                transparents.Sort((c1, c2) => SortTransparents(index, c1, c2));
-#if DEBUG
-                stopwatch.Stop();
-                dict.Add("Transparents Sort", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                //Draw items
-#if DEBUG
-                stopwatch.Restart();
-                int oTIndex = 0;
-#endif
-                transparents.ForEach((c) =>
-                {
-#if DEBUG
-                    Stopwatch stopwatch2 = new();
-                    stopwatch2.Start();
-#endif
-                    Draw(context, c);
-#if DEBUG
-                    stopwatch2.Stop();
-                    dict.Add($"Transparent Draw {oTIndex++} {c.Name}", stopwatch2.Elapsed.TotalMilliseconds);
-#endif
-                });
-#if DEBUG
-                stopwatch.Stop();
-                dict.Add("Transparents Draw", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-            }
+            DrawComponents(context, mode | DrawerModes.TransparentOnly, cullIndex, components, GetTransparents, SortTransparents);
 
             //Reset drawer mode
             context.DrawerMode = mode;
@@ -293,6 +211,95 @@ namespace Engine
                 Scene.Game.GameStatus.Add(dict);
             }
 #endif
+        }
+
+        /// <summary>
+        /// Writes a trace in the trace dictionary
+        /// </summary>
+        /// <param name="key">Key</param>
+        /// <param name="milliseconds">Milliseconds</param>
+        private void WriteTrace(string key, double milliseconds)
+        {
+            if (!Scene.Game.CollectGameStatus)
+            {
+                return;
+            }
+
+            dict[key] = milliseconds;
+        }
+        /// <summary>
+        /// Draws scene components
+        /// </summary>
+        /// <param name="context">Drawing context</param>
+        /// <param name="mode">Draw mode to apply</param>
+        /// <param name="cullIndex">Cull results index</param>
+        /// <param name="components">Component list</param>
+        /// <param name="get">Function to get the drawable component list</param>
+        /// <param name="sort">Function to sort the drawable component list</param>
+        private bool DrawComponents(DrawContext context, DrawerModes mode, int cullIndex, IEnumerable<IDrawable> components, Func<int, IEnumerable<IDrawable>, List<IDrawable>> get, Func<int, IDrawable, IDrawable, int> sort)
+        {
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
+            var toDrawComponents = get(cullIndex, components);
+#if DEBUG
+            sw.Stop();
+            WriteTrace($"Mode[{mode}] *Get[{toDrawComponents.Count}]", sw.Elapsed.TotalMilliseconds);
+#endif
+
+
+            if (!toDrawComponents.Any())
+            {
+                return false;
+            }
+
+            //Set drawer mode
+            context.DrawerMode = mode;
+
+
+            if (toDrawComponents.Count > 1)
+            {
+#if DEBUG
+                sw.Restart();
+#endif
+                //Sort items
+                toDrawComponents.Sort((c1, c2) => sort(cullIndex, c1, c2));
+#if DEBUG
+                sw.Stop();
+                WriteTrace($"Mode[{mode}] *Sort[{toDrawComponents.Count}]", sw.Elapsed.TotalMilliseconds);
+#endif
+            }
+
+
+#if DEBUG
+            sw.Restart();
+            var swd = Stopwatch.StartNew();
+#endif
+            //Draw items
+            bool drawn = false;
+            int count = 0;
+            for (int i = 0; i < toDrawComponents.Count; i++)
+            {
+#if DEBUG
+                swd.Restart();
+#endif
+                var c = toDrawComponents[i];
+                if (Draw(context, c))
+                {
+                    drawn = true;
+                    count++;
+#if DEBUG
+                    swd.Stop();
+                    WriteTrace($"Mode[{mode}]     Draw[{i}.{c.Name}]", swd.Elapsed.TotalMilliseconds);
+#endif
+                }
+            };
+#if DEBUG
+            sw.Stop();
+            WriteTrace($"Mode[{mode}] *Draw[{count} drawn]", sw.Elapsed.TotalMilliseconds);
+#endif
+
+            return drawn;
         }
     }
 }

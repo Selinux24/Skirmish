@@ -178,16 +178,16 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void DrawShadows(DrawContextShadows context)
+        public override bool DrawShadows(DrawContextShadows context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (DrawingData == null)
             {
-                return;
+                return false;
             }
 
             int count = 0;
@@ -195,6 +195,8 @@ namespace Engine
             {
                 count += DrawShadowMesh(context, mesh.Key, mesh.Value);
             }
+
+            return count > 0;
         }
         /// <summary>
         /// Draws a mesh shadow
@@ -259,16 +261,16 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (DrawingData == null)
             {
-                return;
+                return false;
             }
 
             int count = 0;
@@ -279,6 +281,8 @@ namespace Engine
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += count;
+
+            return count > 0;
         }
         /// <summary>
         /// Draws a mesh
@@ -543,7 +547,7 @@ namespace Engine
                 {
                     return Triangle.Transform(drawingData.HullMesh, Manipulator.LocalTransform);
                 }
-       
+
                 return GetTriangles();
             }
 

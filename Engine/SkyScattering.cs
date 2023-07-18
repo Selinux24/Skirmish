@@ -308,33 +308,33 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             var keyLight = context.Lights.KeyLight;
             if (keyLight == null)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             if (skyDrawer == null)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             var skyState = new BuiltInSkyScatteringState
@@ -363,11 +363,15 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            if (skyDrawer.Draw(BufferManager, drawOptions))
+            if (!skyDrawer.Draw(BufferManager, drawOptions))
             {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+                return false;
             }
+
+            Counters.InstancesPerFrame++;
+            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+
+            return true;
         }
 
         /// <summary>
@@ -385,7 +389,7 @@ namespace Engine
         /// <returns>Returns the fog color</returns>
         public Color4 GetFogColor(Vector3 lightDirection)
         {
-            Color4 outColor = new Color4(0f, 0f, 0f, 0f);
+            var outColor = new Color4(0f, 0f, 0f, 0f);
 
             Helper.GetAnglesFromVector(Vector3.ForwardLH, out float yaw, out _);
             float originalYaw = yaw;
@@ -435,29 +439,29 @@ namespace Engine
         private void GetColor(Vector3 scatterPosition, Vector3 lightDirection, out Color4 outColor)
         {
             float viewerHeight = 1f;
-            Vector3 eyePosition = new Vector3(0, viewerHeight, 0);
+            var eyePosition = new Vector3(0, viewerHeight, 0);
 
             float scale = 1.0f / (SphereOuterRadius - SphereInnerRadius);
             float scaleOverScaleDepth = scale / RayleighScaleDepth;
             float rayleighBrightness = RayleighScattering * Brightness * 0.25f;
             float mieBrightness = MieScattering * Brightness * 0.25f;
 
-            Vector3 position = scatterPosition / PlanetRadius;
+            var position = scatterPosition / PlanetRadius;
             position.Y += SphereInnerRadius;
 
-            Vector3 eyeDirection = position - eyePosition;
+            var eyeDirection = position - eyePosition;
             float sampleLength = eyeDirection.Length() * 0.5f;
             float scaledLength = sampleLength * MieScaleDepth;
             eyeDirection.Normalize();
-            Vector3 sampleRay = eyeDirection * sampleLength;
+            var sampleRay = eyeDirection * sampleLength;
             float startAngle = Vector3.Dot(eyeDirection, eyePosition);
 
             float scaleDepth = (float)Math.Exp(scaleOverScaleDepth * (SphereInnerRadius - viewerHeight));
             float startOffset = scaleDepth * VernierScale(startAngle);
 
-            Vector3 samplePoint = eyePosition + sampleRay * 0.5f;
+            var samplePoint = eyePosition + sampleRay * 0.5f;
 
-            Color3 frontColor = Color3.Black;
+            var frontColor = Color3.Black;
 
             for (uint i = 0; i < 2; i++)
             {
@@ -469,7 +473,7 @@ namespace Engine
 
                 float scatter = (startOffset + depth * (VernierScale(lightAngle) - VernierScale(cameraAngle)));
 
-                Color3 attenuate = Color3.Black;
+                var attenuate = Color3.Black;
                 attenuate[0] = (float)Math.Exp(-scatter * (InvWaveLength4[0] * RayleighScattering4PI + MieScattering4PI));
                 attenuate[1] = (float)Math.Exp(-scatter * (InvWaveLength4[1] * RayleighScattering4PI + MieScattering4PI));
                 attenuate[2] = (float)Math.Exp(-scatter * (InvWaveLength4[2] * RayleighScattering4PI + MieScattering4PI));
@@ -479,15 +483,15 @@ namespace Engine
                 samplePoint += sampleRay;
             }
 
-            Color3 rayleighColor = frontColor * (InvWaveLength4 * rayleighBrightness);
+            var rayleighColor = frontColor * (InvWaveLength4 * rayleighBrightness);
 
-            Vector3 direction = Vector3.Normalize(eyePosition - position);
+            var direction = Vector3.Normalize(eyePosition - position);
             float miePhase = GetMiePhase(Vector3.Dot(-lightDirection, direction));
-            Color3 mieColor = frontColor * mieBrightness;
+            var mieColor = frontColor * mieBrightness;
 
-            Color3 color = rayleighColor + (miePhase * mieColor);
+            var color = rayleighColor + (miePhase * mieColor);
 
-            Vector3 expColor = Vector3.Zero;
+            var expColor = Vector3.Zero;
             expColor.X = 1.0f - (float)Math.Exp(-HDRExposure * color.Red);
             expColor.Y = 1.0f - (float)Math.Exp(-HDRExposure * color.Green);
             expColor.Z = 1.0f - (float)Math.Exp(-HDRExposure * color.Blue);

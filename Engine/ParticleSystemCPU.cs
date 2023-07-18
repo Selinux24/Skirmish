@@ -191,22 +191,19 @@ namespace Engine
             timeToNextParticle -= Emitter.ElapsedTime;
             TimeToEnd -= Emitter.ElapsedTime;
         }
-        /// <summary>
-        /// Draw particles
-        /// </summary>
-        /// <param name="context">Context</param>
-        public void Draw(DrawContext context)
+        /// <inheritdoc/>
+        public bool Draw(DrawContext context)
         {
             if (ActiveParticles <= 0)
             {
-                return;
+                return false;
             }
 
             bool isTransparent = parameters.BlendMode.HasFlag(BlendModes.Alpha) || parameters.BlendMode.HasFlag(BlendModes.Transparent);
             bool draw = context.ValidateDraw(parameters.BlendMode, isTransparent);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             var mode = context.DrawerMode;
@@ -238,7 +235,7 @@ namespace Engine
 
             particleDrawer.Update(state, TextureCount, Texture);
 
-            particleDrawer.Draw(buffer, Topology.PointList, ActiveParticles);
+            return particleDrawer.Draw(buffer, Topology.PointList, ActiveParticles);
         }
 
         /// <summary>

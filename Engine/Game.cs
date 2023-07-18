@@ -1066,7 +1066,7 @@ namespace Engine
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Frame: Collecto Game Status error: {ex.Message}", ex);
+                Logger.WriteError(this, $"Frame: Collect Game Status error: {ex.Message}", ex);
             }
         }
     }

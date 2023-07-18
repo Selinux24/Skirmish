@@ -155,47 +155,47 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             if (textureCubic)
             {
-                DrawCubic();
+                return DrawCubic();
             }
             else
             {
-                DrawPlain();
+                return DrawPlain();
             }
         }
         /// <summary>
         /// Draws the cubic texture
         /// </summary>
-        private void DrawCubic()
+        private bool DrawCubic()
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInCubemap>();
             if (drawer == null)
             {
-                return;
+                return false;
             }
 
             drawer.Update(texture);
 
-            drawer.Draw(BufferManager, new DrawOptions
+            return drawer.Draw(BufferManager, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
@@ -205,19 +205,19 @@ namespace Engine
         /// <summary>
         /// Draws the plain texture
         /// </summary>
-        private void DrawPlain()
+        private bool DrawPlain()
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInSkymap>();
             if (drawer == null)
             {
-                return;
+                return false;
             }
 
             drawer.Update(texture, TextureIndex);
 
             Game.Graphics.SetRasterizerCullNone();
 
-            drawer.Draw(BufferManager, new DrawOptions
+            return drawer.Draw(BufferManager, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,

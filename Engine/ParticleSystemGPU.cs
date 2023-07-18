@@ -113,7 +113,7 @@ namespace Engine
             int maxConcurrentParticles = emitter.GetMaximumConcurrentParticles(description.MaxDuration);
             float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
-            ParticleSystemGpu res = new ParticleSystemGpu
+            var res = new ParticleSystemGpu
             {
                 Game = game,
                 Name = name,
@@ -227,24 +227,21 @@ namespace Engine
 
             TimeToEnd -= Emitter.ElapsedTime;
         }
-        /// <summary>
-        /// Drawing
-        /// </summary>
-        /// <param name="context">Context</param>
-        public void Draw(DrawContext context)
+        /// <inheritdoc/>
+        public bool Draw(DrawContext context)
         {
             bool isTransparent = parameters.BlendMode.HasFlag(BlendModes.Alpha) || parameters.BlendMode.HasFlag(BlendModes.Transparent);
             bool draw = context.ValidateDraw(parameters.BlendMode, isTransparent);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             StreamOut();
 
             ToggleBuffers();
 
-            Draw(context.DrawerMode);
+            return Draw(context.DrawerMode);
         }
 
         /// <summary>
@@ -302,16 +299,14 @@ namespace Engine
         /// </summary>
         private void ToggleBuffers()
         {
-            var temp = drawingBuffer;
-            drawingBuffer = streamOutBuffer;
-            streamOutBuffer = temp;
+            (streamOutBuffer, drawingBuffer) = (drawingBuffer, streamOutBuffer);
         }
         /// <summary>
         /// Drawing
         /// </summary>
         /// <param name="effect">Effect for drawing</param>
         /// <param name="drawerMode">Drawe mode</param>
-        private void Draw(DrawerModes drawerMode)
+        private bool Draw(DrawerModes drawerMode)
         {
             var graphics = Game.Graphics;
             graphics.SetDepthStencilRDZEnabled();
@@ -340,12 +335,17 @@ namespace Engine
             };
             particleDrawer.Update(state, TextureCount, Texture);
 
-            particleDrawer.DrawAuto(drawingBuffer, Topology.PointList);
+            if (!particleDrawer.DrawAuto(drawingBuffer, Topology.PointList))
+            {
+                return false;
+            }
 
             if (!drawerMode.HasFlag(DrawerModes.ShadowMap))
             {
                 Counters.InstancesPerFrame++;
             }
+
+            return true;
         }
 
         /// <inheritdoc/>

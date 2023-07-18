@@ -115,8 +115,15 @@ namespace Engine
             /// </summary>
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void DrawSceneryShadows(DrawContextShadows context, BufferManager bufferManager)
+            public bool DrawSceneryShadows(DrawContextShadows context, BufferManager bufferManager)
             {
+                if (context.ShadowMap == null)
+                {
+                    return false;
+                }
+
+                bool drawn = false;
+
                 foreach (string meshName in DrawingData.Meshes.Keys)
                 {
                     var meshDict = DrawingData.Meshes[meshName];
@@ -131,13 +138,20 @@ namespace Engine
 
                         var material = DrawingData.Materials[materialName];
 
-                        var sceneryDrawer = context.ShadowMap?.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
-                        if (sceneryDrawer != null)
+                        var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
+                        if (sceneryDrawer == null)
                         {
-                            DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material);
+                            continue;
+                        }
+
+                        if (DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material))
+                        {
+                            drawn = true;
                         }
                     }
                 }
+
+                return drawn;
             }
             /// <summary>
             /// Draws the scenery patch
@@ -145,7 +159,7 @@ namespace Engine
             /// <param name="context">Context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="blendMode">Blend mode</param>
-            public void DrawScenery(DrawContext context, BufferManager bufferManager, BlendModes blendMode)
+            public bool DrawScenery(DrawContext context, BufferManager bufferManager, BlendModes blendMode)
             {
                 int count = 0;
 
@@ -170,19 +184,22 @@ namespace Engine
                         }
 
                         var sceneryDrawer = GetDrawer(context.DrawerMode, mesh.VertextType);
-                        if (sceneryDrawer != null)
+                        if (sceneryDrawer == null)
                         {
-                            DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material);
-
                             continue;
                         }
 
-                        count += mesh.Count;
+                        if (DrawWithDrawer(bufferManager, sceneryDrawer, mesh, material))
+                        {
+                            count += mesh.Count;
+                        }
                     }
                 }
 
                 Counters.InstancesPerFrame++;
                 Counters.PrimitivesPerFrame += count;
+
+                return count > 0;
             }
             /// <summary>
             /// Draws the patch using shaders
@@ -191,7 +208,7 @@ namespace Engine
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private static void DrawWithDrawer(BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static bool DrawWithDrawer(BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
                 sceneryDrawer.UpdateMesh(BuiltInDrawerMeshState.Default());
 
@@ -204,7 +221,7 @@ namespace Engine
                 };
                 sceneryDrawer.UpdateMaterial(materialState);
 
-                sceneryDrawer.Draw(bufferManager, new[] { mesh });
+                return sceneryDrawer.Draw(bufferManager, new[] { mesh });
             }
 
             /// <summary>
@@ -496,12 +513,14 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void DrawShadows(DrawContextShadows context)
+        public override bool DrawShadows(DrawContextShadows context)
         {
             if (visibleNodes?.Any() != true)
             {
-                return;
+                return false;
             }
+
+            bool drawn = false;
 
             var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
             foreach (var nodeId in nodeIds)
@@ -513,16 +532,20 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Scenery DrawShadows {context.ShadowMap} {nodeId} patch.");
 
-                patchDictionary[nodeId]?.DrawSceneryShadows(context, BufferManager);
+                drawn = drawn || (patchDictionary[nodeId]?.DrawSceneryShadows(context, BufferManager) ?? false);
             }
+
+            return drawn;
         }
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (visibleNodes?.Any() != true)
             {
-                return;
+                return false;
             }
+
+            bool drawn = false;
 
             var nodeIds = visibleNodes.Select(n => n.Id).ToArray();
             foreach (var nodeId in nodeIds)
@@ -536,8 +559,10 @@ namespace Engine
 
                 Logger.WriteTrace(this, $"Scenery Draw {nodeId} patch.");
 
-                patchDictionary[nodeId]?.DrawScenery(context, BufferManager, BlendMode);
+                drawn = drawn || (patchDictionary[nodeId]?.DrawScenery(context, BufferManager, BlendMode) ?? false);
             }
+
+            return drawn;
         }
 
         /// <summary>

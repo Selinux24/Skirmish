@@ -709,20 +709,31 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             base.Draw(context);
 
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             var drawables = children.OfType<IDrawable>().ToList();
-            if (drawables.Any())
+            if (!drawables.Any())
             {
-                drawables.ForEach(c => c.Draw(context));
+                return false;
             }
+
+            bool drawn = false;
+            foreach (var item in drawables)
+            {
+                if (item.Draw(context))
+                {
+                    drawn = true;
+                }
+            }
+
+            return drawn;
         }
 
         /// <inheritdoc/>

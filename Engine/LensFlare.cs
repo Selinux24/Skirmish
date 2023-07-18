@@ -91,7 +91,7 @@ namespace Engine
                 {
                     var flareDesc = Description.Flares[i];
 
-                    SpriteDescription sprDesc = new SpriteDescription()
+                    var sprDesc = new SpriteDescription()
                     {
                         ContentPath = Description.ContentPath,
                         Height = 100,
@@ -231,35 +231,37 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!drawFlares)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode, true);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             // Draw glow
-            glowSprite?.Draw(context);
+            bool drawn = glowSprite?.Draw(context) ?? false;
 
             //Draw flares if any
             if (flares?.Length > 0)
             {
                 for (int i = 0; i < flares.Length; i++)
                 {
-                    flares[i].FlareSprite.Draw(context);
+                    drawn = drawn || flares[i].FlareSprite.Draw(context);
                 }
             }
+
+            return drawn;
         }
     }
 }

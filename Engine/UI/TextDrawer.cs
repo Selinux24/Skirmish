@@ -123,7 +123,7 @@ namespace Engine.UI
 
                 if (text?.Length > MAXTEXTLENGTH)
                 {
-                    text = text.Substring(0, MAXTEXTLENGTH);
+                    text = text[..MAXTEXTLENGTH];
                 }
 
                 updateInternals = true;
@@ -407,32 +407,32 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (string.IsNullOrWhiteSpace(text))
             {
-                return;
+                return false;
             }
 
             if (fontMap == null)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode, true);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             WriteBuffers();
@@ -452,6 +452,8 @@ namespace Engine.UI
 
             int count = indexDrawCount;
 
+            bool drawn = false;
+
             if (ShadowColor != Color.Transparent)
             {
                 //Draw with shadows
@@ -468,7 +470,7 @@ namespace Engine.UI
                     Topology = Topology.TriangleList,
                     VertexBuffer = vertexBuffer,
                 };
-                fontDrawer.Draw(bufferManager, shOptions);
+                drawn = fontDrawer.Draw(bufferManager, shOptions);
             }
 
             fontDrawer.UpdateText(Manipulator.LocalTransform);
@@ -481,7 +483,7 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,
             };
-            fontDrawer.Draw(bufferManager, opOptions);
+            return drawn || fontDrawer.Draw(bufferManager, opOptions);
         }
         /// <summary>
         /// Writes text data into buffers

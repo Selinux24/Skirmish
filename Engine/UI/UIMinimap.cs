@@ -127,15 +127,15 @@ namespace Engine.UI
             float aspect = minimapBox.Height / minimapBox.Width;
             float near = 0.1f;
 
-            Vector3 eyePosition = new Vector3(0, y + near, 0);
-            Vector3 eyeDirection = Vector3.Zero;
+            var eyePosition = new Vector3(0, y + near, 0);
+            var eyeDirection = Vector3.Zero;
 
-            Matrix view = Matrix.LookAtLH(
+            var view = Matrix.LookAtLH(
                 eyePosition,
                 eyeDirection,
                 Vector3.UnitZ);
 
-            Matrix proj = Matrix.OrthoLH(
+            var proj = Matrix.OrthoLH(
                 x / aspect,
                 z,
                 near,
@@ -160,16 +160,16 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (Drawables?.Any() != true)
             {
-                return;
+                return false;
             }
 
             drawContext.GameTime = context.GameTime;
@@ -191,9 +191,9 @@ namespace Engine.UI
             graphics.SetDefaultRenderTarget(false, Color.Transparent);
 
             minimapBox.Texture = renderTexture;
-            minimapBox.Draw(context);
+            bool drawn = minimapBox.Draw(context);
 
-            base.Draw(context);
+            return drawn || base.Draw(context);
         }
 
         /// <summary>

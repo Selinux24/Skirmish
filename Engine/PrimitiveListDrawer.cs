@@ -27,7 +27,7 @@ namespace Engine
         /// <summary>
         /// Triangle dictionary by color
         /// </summary>
-        private readonly ConcurrentDictionary<Color4, List<T>> dictionary = new ConcurrentDictionary<Color4, List<T>>();
+        private readonly ConcurrentDictionary<Color4, List<T>> dictionary = new();
         /// <summary>
         /// Dictionary changes flag
         /// </summary>
@@ -43,7 +43,7 @@ namespace Engine
         /// <summary>
         /// Buffer exchange data list
         /// </summary>
-        private List<VertexPositionColor> bufferData = new List<VertexPositionColor>();
+        private List<VertexPositionColor> bufferData = new();
 
         /// <summary>
         /// Returns true if the buffers were ready
@@ -242,41 +242,41 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             WriteDataInBuffer();
 
             if (drawCount <= 0)
             {
-                return;
+                return false;
             }
 
             var drawer = BuiltInShaders.GetDrawer<BuiltInPositionColor>();
             if (drawer == null)
             {
-                return;
+                return false;
             }
 
             drawer.UpdateMesh(BuiltInDrawerMeshState.Default());
             drawer.UpdateMaterial(BuiltInDrawerMaterialState.Default());
 
-            drawer.Draw(BufferManager, new DrawOptions
+            bool drawn = drawer.Draw(BufferManager, new DrawOptions
             {
                 VertexBuffer = vertexBuffer,
                 VertexDrawCount = drawCount,
@@ -285,6 +285,8 @@ namespace Engine
 
             Counters.InstancesPerFrame += dictionary.Count;
             Counters.PrimitivesPerFrame += drawCount / stride;
+
+            return drawn;
         }
         /// <summary>
         /// Writes dictionary data in buffer

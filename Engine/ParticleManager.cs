@@ -16,7 +16,7 @@ namespace Engine
         /// <summary>
         /// Concurrent particle list
         /// </summary>
-        private readonly ConcurrentBag<IParticleSystem> particleSystems = new ConcurrentBag<IParticleSystem>();
+        private readonly ConcurrentBag<IParticleSystem> particleSystems = new();
 
         /// <summary>
         /// Particle systems list
@@ -111,7 +111,7 @@ namespace Engine
                 return;
             }
 
-            List<IParticleSystem> toRestore = new List<IParticleSystem>();
+            var toRestore = new List<IParticleSystem>();
             while (!particleSystems.IsEmpty)
             {
                 if (!particleSystems.TryTake(out var p))
@@ -144,23 +144,23 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!particleSystems.Any())
             {
-                return;
+                return false;
             }
 
             // Copy collection
-            var particles = particleSystems.ToList();
+            var particles = particleSystems.Where(p => p.Emitter.IsDrawable).ToList();
 
-            particles.ForEach(p =>
+            bool drawn = false;
+            foreach (var p in particles)
             {
-                if (p.Emitter.IsDrawable)
-                {
-                    p.Draw(context);
-                }
-            });
+                drawn = drawn || p.Draw(context);
+            }
+
+            return drawn;
         }
 
         /// <inheritdoc/>

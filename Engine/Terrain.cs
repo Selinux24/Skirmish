@@ -72,11 +72,11 @@ namespace Engine
             /// <summary>
             /// Vertex buffer description dictionary
             /// </summary>
-            private Dictionary<int, BufferDescriptor> dictVB = new Dictionary<int, BufferDescriptor>();
+            private Dictionary<int, BufferDescriptor> dictVB = new();
             /// <summary>
             /// Index buffer description dictionary
             /// </summary>
-            private Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new Dictionary<MapGridShapeId, BufferDescriptor>();
+            private Dictionary<MapGridShapeId, BufferDescriptor> dictIB = new();
             /// <summary>
             /// Tree
             /// </summary>
@@ -95,7 +95,7 @@ namespace Engine
             /// <param name="trianglesPerNode">Triangles per terrain node</param>
             public static async Task<MapGrid> Create(Game game, string mapName, IEnumerable<VertexData> vertices, int trianglesPerNode)
             {
-                MapGrid res = new MapGrid
+                var res = new MapGrid
                 {
                     Game = game,
                 };
@@ -372,14 +372,16 @@ namespace Engine
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="drawer">Drawer</param>
-            public void DrawShadows(DrawContextShadows context, BufferManager bufferManager, IBuiltInDrawer drawer)
+            public bool DrawShadows(DrawContextShadows context, BufferManager bufferManager, IBuiltInDrawer drawer)
             {
                 var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Frustum);
 
-                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
-                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
-                DrawNodeList(bufferManager, drawer, visibleNodesLow);
-                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+                var r0 = DrawNodeList(bufferManager, drawer, visibleNodesHigh);
+                var r1 = DrawNodeList(bufferManager, drawer, visibleNodesMedium);
+                var r2 = DrawNodeList(bufferManager, drawer, visibleNodesLow);
+                var r3 = DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+
+                return r0 || r1 || r2 || r3;
             }
             /// <summary>
             /// Draws
@@ -387,14 +389,16 @@ namespace Engine
             /// <param name="context">Draw context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="drawer">Drawer</param>
-            public void Draw(DrawContext context, BufferManager bufferManager, IBuiltInDrawer drawer)
+            public bool Draw(DrawContext context, BufferManager bufferManager, IBuiltInDrawer drawer)
             {
                 var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull(context.CameraVolume);
 
-                DrawNodeList(bufferManager, drawer, visibleNodesHigh);
-                DrawNodeList(bufferManager, drawer, visibleNodesMedium);
-                DrawNodeList(bufferManager, drawer, visibleNodesLow);
-                DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+                var r0 = DrawNodeList(bufferManager, drawer, visibleNodesHigh);
+                var r1 = DrawNodeList(bufferManager, drawer, visibleNodesMedium);
+                var r2 = DrawNodeList(bufferManager, drawer, visibleNodesLow);
+                var r3 = DrawNodeList(bufferManager, drawer, visibleNodesMinimum);
+
+                return r0 || r1 || r2 || r3;
             }
             /// <summary>
             /// Draws the visible node list
@@ -402,8 +406,11 @@ namespace Engine
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="drawer">Drawer</param>
             /// <param name="nodeList">Node list</param>
-            private static void DrawNodeList(BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
+            private static bool DrawNodeList(BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
             {
+                int instanceCount = 0;
+                int primitiveCount = 0;
+
                 for (int i = 0; i < nodeList.Length; i++)
                 {
                     var gNode = nodeList[i];
@@ -412,16 +419,25 @@ namespace Engine
                         continue;
                     }
 
-                    drawer.Draw(bufferManager, new DrawOptions
+                    var options = new DrawOptions
                     {
                         IndexBuffer = gNode.IBDesc,
                         VertexBuffer = gNode.VBDesc,
                         Topology = Topology.TriangleList,
-                    });
+                    };
+                    if (!drawer.Draw(bufferManager, options))
+                    {
+                        continue;
+                    }
 
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += gNode.IBDesc.Count / 3;
+                    instanceCount++;
+                    primitiveCount += gNode.IBDesc.Count / 3;
                 }
+
+                Counters.InstancesPerFrame += instanceCount;
+                Counters.PrimitivesPerFrame += primitiveCount;
+
+                return primitiveCount > 0;
             }
         }
         /// <summary>
@@ -581,7 +597,7 @@ namespace Engine
             /// </summary>
             /// <param name="other">An object to compare with this object</param>
             /// <returns>true if the current object is equal to the other parameter; otherwise, false</returns>
-            public bool Equals(MapGridShapeId other)
+            public readonly bool Equals(MapGridShapeId other)
             {
                 if (LevelOfDetail == other.LevelOfDetail && Shape == other.Shape)
                 {
@@ -597,7 +613,7 @@ namespace Engine
             /// </summary>
             /// <param name="other">An object to compare with this object</param>
             /// <returns>true if the current object is equal to the other parameter; otherwise, false</returns>
-            public override bool Equals(object obj)
+            public override readonly bool Equals(object obj)
             {
                 if (obj == null)
                 {
@@ -615,9 +631,9 @@ namespace Engine
             /// Serves as the default hash function
             /// </summary>
             /// <returns>A hash code for the current object</returns>
-            public override int GetHashCode()
+            public override readonly int GetHashCode()
             {
-                return LevelOfDetail.GetHashCode() ^ Shape.GetHashCode();
+                return HashCode.Combine(LevelOfDetail, Shape);
             }
         }
 
@@ -794,17 +810,22 @@ namespace Engine
             mapGrid?.Update(context.EyePosition);
         }
         /// <inheritdoc/>
-        public override void DrawShadows(DrawContextShadows context)
+        public override bool DrawShadows(DrawContextShadows context)
         {
             if (!Visible)
             {
-                return;
+                return false;
+            }
+
+            if (mapGrid == null)
+            {
+                return false;
             }
 
             var shadowDrawer = context.ShadowMap?.GetDrawer(VertexTypes.Terrain, false, false);
             if (shadowDrawer == null)
             {
-                return;
+                return false;
             }
 
             shadowDrawer.UpdateCastingLight(context);
@@ -815,23 +836,28 @@ namespace Engine
             };
             shadowDrawer.UpdateMesh(meshState);
 
-            mapGrid?.DrawShadows(context, BufferManager, shadowDrawer);
+            return mapGrid.DrawShadows(context, BufferManager, shadowDrawer);
         }
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
+            }
+
+            if (mapGrid == null)
+            {
+                return false;
             }
 
             var terrainDrawer = GetDrawer(context);
             if (terrainDrawer == null)
             {
-                return;
+                return false;
             }
 
-            mapGrid?.Draw(context, BufferManager, terrainDrawer);
+            return mapGrid.Draw(context, BufferManager, terrainDrawer);
         }
         /// <summary>
         /// Gets the terrain drawer, based on the drawing context

@@ -437,16 +437,16 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             base.Draw(context);
 
             if (!Visible)
             {
-                return;
+                return false;
             }
 
-            textDrawer.Draw(context);
+            return textDrawer.Draw(context);
         }
 
         /// <inheritdoc/>

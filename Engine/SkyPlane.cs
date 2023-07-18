@@ -203,22 +203,22 @@ namespace Engine
             color = (CloudsBaseColor + context.Lights.SunColor) * 0.5f;
         }
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!BuffersReady)
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             var state = new BuiltInCloudsState
@@ -242,10 +242,12 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            cloudsDrawer.Draw(BufferManager, drawOptions);
+            bool drawn = cloudsDrawer.Draw(BufferManager, drawOptions);
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+
+            return drawn;
         }
     }
 }

@@ -490,14 +490,14 @@ namespace Engine
             /// Draws the foliage data
             /// </summary>
             /// <param name="drawer">Drawer</param>
-            public void DrawFoliage(BuiltInDrawer drawer)
+            public bool DrawFoliage(BuiltInDrawer drawer)
             {
                 if (vertexDrawCount <= 0)
                 {
-                    return;
+                    return false;
                 }
 
-                drawer.Draw(BufferManager, new DrawOptions
+                return drawer.Draw(BufferManager, new DrawOptions
                 {
                     VertexBuffer = VertexBuffer,
                     VertexDrawCount = vertexDrawCount,
@@ -511,7 +511,7 @@ namespace Engine
             /// <returns>Returns the text representation of the buffer</returns>
             public override string ToString()
             {
-                return string.Format("{0} => Attached: {1}; HasPatch: {2}", Id, Attached, CurrentPatch != null);
+                return $"{Id} => Attached: {Attached}; HasPatch: {CurrentPatch != null}";
             }
         }
 
@@ -756,48 +756,55 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void Draw(DrawContext context)
+        public override bool Draw(DrawContext context)
         {
             if (!initialized)
             {
-                return;
+                return false;
             }
 
             if (!Visible)
             {
-                return;
+                return false;
             }
 
             if (!visibleNodes.Any())
             {
-                return;
+                return false;
             }
 
             bool draw = context.ValidateDraw(BlendMode);
             if (!draw)
             {
-                return;
+                return false;
             }
 
             WritePatches(context.EyePosition);
 
+            bool drawn = false;
             foreach (var item in visibleNodes)
             {
-                DrawNode(item);
+                if (DrawNode(item))
+                {
+                    drawn = true;
+                }
             }
+
+            return drawn;
         }
         /// <summary>
         /// Draws the node
         /// </summary>
         /// <param name="item">Node</param>
-        private void DrawNode(QuadTreeNode item)
+        private bool DrawNode(QuadTreeNode item)
         {
             var buffers = foliageBuffers.Where(b => b.CurrentPatch?.CurrentNode == item);
             if (!buffers.Any())
             {
-                return;
+                return false;
             }
 
+            bool drawn = false;
             foreach (var buffer in buffers)
             {
                 var channelData = foliageMapChannels[buffer.CurrentPatch.Channel];
@@ -822,8 +829,13 @@ namespace Engine
 
                 foliageDrawer.UpdateFoliage(state);
 
-                buffer.DrawFoliage(foliageDrawer);
+                if (buffer.DrawFoliage(foliageDrawer))
+                {
+                    drawn = true;
+                }
             }
+
+            return drawn;
         }
 
         /// <inheritdoc/>
