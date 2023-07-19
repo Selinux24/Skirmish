@@ -124,7 +124,8 @@ namespace Engine.BuiltIn.SkyScattering
         /// <param name="state">State</param>
         public void Update(EngineDeviceContext dc, Vector3 lightDirection, BuiltInSkyScatteringState state)
         {
-            cbPerObject.WriteData(dc, PerObject.Build(lightDirection, state));
+            cbPerObject.WriteData(PerObject.Build(lightDirection, state));
+            dc.UpdateConstantBuffer(cbPerObject);
 
             var vertexShader = GetVertexShader<SkyScatteringVs>();
             vertexShader?.SetPerObjectConstantBuffer(cbPerObject);

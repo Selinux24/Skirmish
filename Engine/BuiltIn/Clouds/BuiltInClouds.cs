@@ -109,7 +109,8 @@ namespace Engine.BuiltIn.Clouds
         /// <param name="state">Drawer state</param>
         public void UpdateClouds(EngineDeviceContext dc, BuiltInCloudsState state)
         {
-            cbPerCloud.WriteData(dc, PerCloud.Build(state));
+            cbPerCloud.WriteData(PerCloud.Build(state));
+            dc.UpdateConstantBuffer(cbPerCloud);
 
             var pixelShader = GetPixelShader<CloudsPs>();
             pixelShader?.SetPerCloudConstantBuffer(cbPerCloud);

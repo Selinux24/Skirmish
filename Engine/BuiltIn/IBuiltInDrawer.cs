@@ -13,8 +13,8 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Updates drawer casting light
         /// </summary>
-        /// <param name="dc">Context</param>
-        void UpdateCastingLight(DrawContextShadows dc);
+        /// <param name="context">Context</param>
+        void UpdateCastingLight(DrawContextShadows context);
 
         /// <summary>
         /// Updates drawer mesh state

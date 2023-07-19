@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Water
 {
+    using Engine.BuiltIn.Sprites;
     using Engine.Common;
 
     /// <summary>
@@ -119,7 +120,8 @@ namespace Engine.BuiltIn.Water
         /// <param name="state">Drawer state</param>
         public void UpdateWater(EngineDeviceContext dc, BuiltInWaterState state)
         {
-            cbPerWater.WriteData(dc, PerWater.Build(state));
+            cbPerWater.WriteData(PerWater.Build(state));
+            dc.UpdateConstantBuffer(cbPerWater);
 
             var pixelShader = GetPixelShader<WaterPs>();
             pixelShader?.SetPerWaterConstantBuffer(cbPerWater);

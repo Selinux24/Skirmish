@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
@@ -8,7 +9,6 @@ namespace Engine.Common
     using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
     using SharpDX.Mathematics.Interop;
-    using System.Runtime.InteropServices;
     using Format = SharpDX.DXGI.Format;
 
     /// <summary>
@@ -35,7 +35,7 @@ namespace Engine.Common
                     return;
                 }
 
-                var buffers = Resources.Select(r => r?.GetBuffer()).ToArray();
+                var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
             }
 
@@ -46,7 +46,7 @@ namespace Engine.Common
                     return;
                 }
 
-                var buffers = Resources.Select(r => r?.GetBuffer()).ToArray();
+                var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
             }
 
@@ -1230,14 +1230,20 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Updates a constant buffer value in the device
+        /// Updates a constant buffer in the device context
         /// </summary>
-        /// <typeparam name="T">Type of data</typeparam>
-        /// <param name="dataStream">Data stream</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="value">Value</param>
-        internal bool UpdateConstantBuffer<T>(DataStream dataStream, Buffer buffer, T value) where T : struct, IBufferData
+        /// <param name="constantBuffer">Constant buffer</param>
+        public bool UpdateConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
+            if (constantBuffer == null)
+            {
+                return false;
+            }
+
+            var value = constantBuffer.GetData();
+            var dataStream = constantBuffer.DataStream.GetDataStream();
+            var buffer = constantBuffer.Buffer.GetBuffer();
+
             Marshal.StructureToPtr(value, dataStream.DataPointer, false);
 
             var dataBox = new DataBox(dataStream.DataPointer, 0, 0);

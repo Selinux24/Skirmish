@@ -29,7 +29,8 @@ namespace Engine.BuiltIn.Deferred
         /// <inheritdoc/>
         public override void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
-            cbPerMaterial.WriteData(dc, PerMaterialColor.Build(state));
+            cbPerMaterial.WriteData(PerMaterialColor.Build(state));
+            dc.UpdateConstantBuffer(cbPerMaterial);
 
             var vertexShader = GetVertexShader<PositionColorVsI>();
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);

@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Particles
 {
+    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -103,7 +104,8 @@ namespace Engine.BuiltIn.Particles
         /// <param name="state">Particle state</param>
         public void Update(EngineDeviceContext dc, BuiltInStreamOutState state)
         {
-            cbPerStreamOut.WriteData(dc, PerStreamOut.Build(state));
+            cbPerStreamOut.WriteData(PerStreamOut.Build(state));
+            dc.UpdateConstantBuffer(cbPerStreamOut);
 
             var geometryShader = GetGeometryShader<StreamOutGS>();
             geometryShader?.SetPerStreamOutConstantBuffer(cbPerStreamOut);

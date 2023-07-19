@@ -38,8 +38,11 @@ namespace Engine.BuiltIn.Foliage
         /// <param name="state">Billboard state</param>
         public void UpdateFoliage(EngineDeviceContext dc, BuiltInFoliageState state)
         {
-            cbPerMaterial.WriteData(dc, PerMaterial.Build(state));
-            cbPerPatch.WriteData(dc, PerPatch.Build(state));
+            cbPerMaterial.WriteData(PerMaterial.Build(state));
+            cbPerPatch.WriteData(PerPatch.Build(state));
+
+            dc.UpdateConstantBuffer(cbPerMaterial);
+            dc.UpdateConstantBuffer(cbPerPatch);
 
             var vertexShader = GetVertexShader<FoliageVs>();
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);

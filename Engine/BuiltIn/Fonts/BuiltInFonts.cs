@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Fonts
 {
+    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -123,7 +124,8 @@ namespace Engine.BuiltIn.Fonts
         /// <param name="state">Drawer state</param>
         public void UpdateFont(EngineDeviceContext dc, BuiltInFontState state)
         {
-            cbPerFont.WriteData(dc, PerFont.Build(state));
+            cbPerFont.WriteData(PerFont.Build(state));
+            dc.UpdateConstantBuffer(cbPerFont);
 
             var pixelShader = GetPixelShader<FontsPs>();
             pixelShader?.SetPerFontConstantBuffer(cbPerFont);
@@ -136,7 +138,8 @@ namespace Engine.BuiltIn.Fonts
         /// <param name="local">Local transform</param>
         public void UpdateText(EngineDeviceContext dc, Matrix local)
         {
-            cbPerText.WriteData(dc, PerText.Build(local));
+            cbPerText.WriteData(PerText.Build(local));
+            dc.UpdateConstantBuffer(cbPerText);
 
             var vertexShader = GetVertexShader<FontsVs>();
             vertexShader?.SetPerTextConstantBuffer(cbPerText);

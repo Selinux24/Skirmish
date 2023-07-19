@@ -1,6 +1,7 @@
 ﻿
 namespace Engine.BuiltIn.PostProcess
 {
+    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -33,7 +34,8 @@ namespace Engine.BuiltIn.PostProcess
         public void UpdatePass(EngineDeviceContext dc, BuiltInPostProcessState state)
         {
             var cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>();
-            cbPerPass.WriteData(dc, PerPass.Build(state));
+            cbPerPass.WriteData(PerPass.Build(state));
+            dc.UpdateConstantBuffer(cbPerPass);
 
             var pixelShader = GetPixelShader<PostProcessPs>();
             pixelShader?.SetPerPassConstantBuffer(cbPerPass);
@@ -47,7 +49,8 @@ namespace Engine.BuiltIn.PostProcess
         public void UpdateEffect(EngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
         {
             var cbPerEffect = BuiltInShaders.GetConstantBuffer<PerEffect>();
-            cbPerEffect.WriteData(dc, PerEffect.Build(effect));
+            cbPerEffect.WriteData(PerEffect.Build(effect));
+            dc.UpdateConstantBuffer(cbPerEffect);
 
             var pixelShader = GetPixelShader<PostProcessPs>();
             pixelShader?.SetPerEffectConstantBuffer(cbPerEffect);

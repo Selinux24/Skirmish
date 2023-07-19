@@ -100,7 +100,8 @@ namespace Engine.BuiltIn.Billboard
         /// <param name="state">Billboard state</param>
         public void UpdateBillboard(EngineDeviceContext dc, BuiltInBillboardState state)
         {
-            cbPerBillboard.WriteData(dc, PerBillboard.Build(state));
+            cbPerBillboard.WriteData(PerBillboard.Build(state));
+            dc.UpdateConstantBuffer(cbPerBillboard);
 
             var vertexShader = GetVertexShader<BillboardVs>();
             vertexShader?.SetPerBillboardConstantBuffer(cbPerBillboard);

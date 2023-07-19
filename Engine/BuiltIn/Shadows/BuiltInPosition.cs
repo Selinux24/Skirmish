@@ -1,6 +1,7 @@
 ﻿
 namespace Engine.BuiltIn.Shadows
 {
+    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -33,7 +34,8 @@ namespace Engine.BuiltIn.Shadows
         /// <inheritdoc/>
         public override void UpdateCastingLight(DrawContextShadows context)
         {
-            cbPerLight.WriteData(context.DeviceContext, PerCastingLight.Build(context));
+            cbPerLight.WriteData(PerCastingLight.Build(context));
+            context.DeviceContext.UpdateConstantBuffer(cbPerLight);
 
             var geometryShader = GetGeometryShader<ShadowsGs>();
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
@@ -41,7 +43,8 @@ namespace Engine.BuiltIn.Shadows
         /// <inheritdoc/>
         public override void UpdateMesh(EngineDeviceContext dc, BuiltInDrawerMeshState state)
         {
-            cbPerMesh.WriteData(dc, PerMeshSingle.Build(state));
+            cbPerMesh.WriteData(PerMeshSingle.Build(state));
+            dc.UpdateConstantBuffer(cbPerMesh);
 
             var vertexShader = GetVertexShader<PositionVs>();
             vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);

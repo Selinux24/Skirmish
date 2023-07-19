@@ -44,7 +44,8 @@ namespace Engine.BuiltIn.Deferred
         public void UpdatePerLight(EngineDeviceContext dc, ISceneLightDirectional light)
         {
             var cbDirectional = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightDirectional>();
-            cbDirectional?.WriteData(dc, BuiltInShaders.BufferLightDirectional.Build(light));
+            cbDirectional?.WriteData(BuiltInShaders.BufferLightDirectional.Build(light));
+            dc.UpdateConstantBuffer(cbDirectional);
 
             var pixelShader = GetPixelShader<DeferredLightDirectionalPs>();
             pixelShader?.SetPerLightConstantBuffer(cbDirectional);

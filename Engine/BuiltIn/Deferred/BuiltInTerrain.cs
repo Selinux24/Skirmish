@@ -2,6 +2,7 @@
 namespace Engine.BuiltIn.Deferred
 {
     using Engine.BuiltIn.Common;
+    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -44,7 +45,8 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="state">Terrain state</param>
         public void Update(EngineDeviceContext dc, BuiltInTerrainState state)
         {
-            cbPerTerrain.WriteData(dc, PerTerrain.Build(state));
+            cbPerTerrain.WriteData(PerTerrain.Build(state));
+            dc.UpdateConstantBuffer(cbPerTerrain);
 
             var vertexShader = GetVertexShader<TerrainVs>();
             vertexShader?.SetPerTerrainConstantBuffer(cbPerTerrain);

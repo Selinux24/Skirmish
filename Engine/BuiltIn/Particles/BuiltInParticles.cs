@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Particles
 {
+    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -149,7 +150,8 @@ namespace Engine.BuiltIn.Particles
         /// <param name="textures">Texture array</param>
         public void Update(EngineDeviceContext dc, BuiltInParticlesState state, uint textureCount, EngineShaderResourceView textures)
         {
-            cbPerEmitter.WriteData(dc, PerEmitter.Build(state, textureCount));
+            cbPerEmitter.WriteData(PerEmitter.Build(state, textureCount));
+            dc.UpdateConstantBuffer(cbPerEmitter);
 
             var vertexShader = GetVertexShader<ParticlesVs>();
             vertexShader?.SetPerEmitterConstantBuffer(cbPerEmitter);

@@ -73,13 +73,15 @@ namespace Engine.BuiltIn.Deferred
         public void UpdatePerLight(EngineDeviceContext dc, ISceneLightPoint light)
         {
             var cbLight = BuiltInShaders.GetConstantBuffer<PerLight>();
-            cbLight?.WriteData(dc, PerLight.Build(light.Local));
+            cbLight?.WriteData(PerLight.Build(light.Local));
+            dc.UpdateConstantBuffer(cbLight);
 
             var vertexShader = GetVertexShader<DeferredLightVs>();
             vertexShader?.SetPerLightConstantBuffer(cbLight);
 
             var cbPoint = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightPoint>();
-            cbPoint?.WriteData(dc, BuiltInShaders.BufferLightPoint.Build(light));
+            cbPoint?.WriteData(BuiltInShaders.BufferLightPoint.Build(light));
+            dc.UpdateConstantBuffer(cbPoint);
 
             var pixelShader = GetPixelShader<DeferredLightPointPs>();
             pixelShader?.SetPerLightConstantBuffer(cbPoint);
