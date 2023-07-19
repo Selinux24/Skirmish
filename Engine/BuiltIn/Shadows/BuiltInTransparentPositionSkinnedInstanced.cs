@@ -35,13 +35,13 @@ namespace Engine.BuiltIn.Shadows
         /// <inheritdoc/>
         public override void UpdateCastingLight(DrawContextShadows context)
         {
-            cbPerLight.WriteData(PerCastingLight.Build(context));
+            cbPerLight.WriteData(context.DeviceContext, PerCastingLight.Build(context));
 
             var geometryShader = GetGeometryShader<ShadowsTransparentGs>();
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
         }
         /// <inheritdoc/>
-        public override void UpdateMaterial(BuiltInDrawerMaterialState state)
+        public override void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
             var pixelShader = GetPixelShader<TransparentPs>();
             pixelShader?.SetDiffuseMap(state.Material?.DiffuseTexture);

@@ -46,7 +46,7 @@ namespace Engine.BuiltIn.Decals
             public Color4 TintColor;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerDecal));
             }
@@ -75,12 +75,14 @@ namespace Engine.BuiltIn.Decals
         /// <summary>
         /// Updates the particle drawer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="rotation">Rotation</param>
+        /// <param name="textureCount">Texture count</param>
         /// <param name="tintColor">Tint color</param>
         /// <param name="textures">Texture array</param>
-        public void Update(bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
+        public void Update(EngineDeviceContext dc, bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
         {
-            cbPerDecal.WriteData(PerDecal.Build(rotation, textureCount, tintColor));
+            cbPerDecal.WriteData(dc, PerDecal.Build(rotation, textureCount, tintColor));
 
             var vertexShader = GetVertexShader<DecalsVs>();
             vertexShader?.SetPerDecalConstantBuffer(cbPerDecal);

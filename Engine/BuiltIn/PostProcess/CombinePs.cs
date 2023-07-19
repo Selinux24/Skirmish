@@ -91,7 +91,7 @@ namespace Engine.BuiltIn.PostProcess
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var rv = new[]
             {
@@ -99,9 +99,9 @@ namespace Engine.BuiltIn.PostProcess
                 texture2,
             };
 
-            context.SetPixelShaderResourceViews(0, rv);
+            dc.SetPixelShaderResourceViews(0, rv);
 
-            context.SetPixelShaderSampler(0, samplerDiffuse);
+            dc.SetPixelShaderSampler(0, samplerDiffuse);
         }
     }
 }

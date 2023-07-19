@@ -185,8 +185,8 @@ namespace Engine
         /// <summary>
         /// Draws the cubic texture
         /// </summary>
-        /// <param name="context">Device context</param>
-        private bool DrawCubic(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private bool DrawCubic(EngineDeviceContext dc)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInCubemap>();
             if (drawer == null)
@@ -196,7 +196,7 @@ namespace Engine
 
             drawer.Update(texture);
 
-            return drawer.Draw(context, BufferManager, new DrawOptions
+            return drawer.Draw(dc, BufferManager, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,
@@ -206,8 +206,8 @@ namespace Engine
         /// <summary>
         /// Draws the plain texture
         /// </summary>
-        /// <param name="context">Device context</param>
-        private bool DrawPlain(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private bool DrawPlain(EngineDeviceContext dc)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInSkymap>();
             if (drawer == null)
@@ -215,11 +215,11 @@ namespace Engine
                 return false;
             }
 
-            drawer.Update(texture, TextureIndex);
+            drawer.Update(dc, texture, TextureIndex);
 
-            context.SetRasterizerState(Game.Graphics.GetRasterizerCullNone());
+            dc.SetRasterizerState(Game.Graphics.GetRasterizerCullNone());
 
-            return drawer.Draw(context, BufferManager, new DrawOptions
+            return drawer.Draw(dc, BufferManager, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,

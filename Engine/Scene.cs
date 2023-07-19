@@ -66,6 +66,10 @@ namespace Engine
         private SceneModes sceneMode = SceneModes.Unknown;
 
         /// <summary>
+        /// Update globals
+        /// </summary>
+        private bool updateGlobals = true;
+        /// <summary>
         /// Update materials palette flag
         /// </summary>
         private bool updateMaterialsPalette;
@@ -268,6 +272,17 @@ namespace Engine
         {
             try
             {
+                if (updateGlobals)
+                {
+                    Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Scene Globals.");
+
+                    Renderer?.UpdateGlobals();
+
+                    BuiltInShaders.UpdateGlobals(Game.Graphics.ImmediateContext, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+
+                    updateGlobals = false;
+                }
+
                 Renderer?.Draw(gameTime);
             }
             catch (EngineException ex)
@@ -697,9 +712,10 @@ namespace Engine
         /// <summary>
         /// Update global resources
         /// </summary>
+        /// <param name="updateEnvironment">Update environment</param>
         protected virtual void UpdateGlobals(bool updateEnvironment)
         {
-            bool updateGlobals = updateEnvironment;
+            updateGlobals = updateGlobals || updateEnvironment;
 
             if (updateMaterialsPalette)
             {
@@ -722,19 +738,11 @@ namespace Engine
 
                 updateAnimationsPalette = false;
             }
-
-            if (updateGlobals)
-            {
-                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Scene Globals.");
-
-                Renderer?.UpdateGlobals();
-
-                BuiltInShaders.UpdateGlobals(materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-            }
         }
         /// <summary>
         /// Updates the materials palette
         /// </summary>
+        /// <param name="dc">Device context</param>
         public virtual void UpdateMaterialPalette()
         {
             updateMaterialsPalette = true;

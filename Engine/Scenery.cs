@@ -204,14 +204,14 @@ namespace Engine
             /// <summary>
             /// Draws the patch using shaders
             /// </summary>
-            /// <param name="context">Device context</param>
+            /// <param name="dc">Device context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private static bool DrawWithDrawer(EngineDeviceContext context, BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static bool DrawWithDrawer(EngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
-                sceneryDrawer.UpdateMesh(BuiltInDrawerMeshState.Default());
+                sceneryDrawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
@@ -220,9 +220,9 @@ namespace Engine
                     TextureIndex = 0,
                     UseAnisotropic = true,
                 };
-                sceneryDrawer.UpdateMaterial(materialState);
+                sceneryDrawer.UpdateMaterial(dc, materialState);
 
-                return sceneryDrawer.Draw(context, bufferManager, new[] { mesh });
+                return sceneryDrawer.Draw(dc, bufferManager, new[] { mesh });
             }
 
             /// <summary>
@@ -629,7 +629,7 @@ namespace Engine
             return null;
         }
         /// <inheritdoc/>
-        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
             bool updated = false;
 
@@ -641,10 +641,7 @@ namespace Engine
                 }
             }
 
-            if (updated)
-            {
-                Scene.UpdateMaterialPalette();
-            }
+            return updated;
         }
     }
 }

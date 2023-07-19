@@ -260,7 +260,9 @@ namespace Engine
                 return false;
             }
 
-            WriteDataInBuffer();
+            var dc = context.DeviceContext;
+          
+            WriteDataInBuffer(dc);
 
             if (drawCount <= 0)
             {
@@ -273,10 +275,10 @@ namespace Engine
                 return false;
             }
 
-            drawer.UpdateMesh(BuiltInDrawerMeshState.Default());
-            drawer.UpdateMaterial(BuiltInDrawerMaterialState.Default());
+            drawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
+            drawer.UpdateMaterial(dc, BuiltInDrawerMaterialState.Default());
 
-            bool drawn = drawer.Draw(context.DeviceContext, BufferManager, new DrawOptions
+            bool drawn = drawer.Draw(dc, BufferManager, new DrawOptions
             {
                 VertexBuffer = vertexBuffer,
                 VertexDrawCount = drawCount,
@@ -291,7 +293,8 @@ namespace Engine
         /// <summary>
         /// Writes dictionary data in buffer
         /// </summary>
-        public void WriteDataInBuffer()
+        /// <param name="dc">Device context</param>
+        public void WriteDataInBuffer(EngineDeviceContext dc)
         {
             if (!dictionaryChanged)
             {
@@ -321,7 +324,7 @@ namespace Engine
                 }
             }
 
-            if (!BufferManager.WriteVertexBuffer(vertexBuffer, bufferData))
+            if (!BufferManager.WriteVertexBuffer(dc, vertexBuffer, bufferData))
             {
                 return;
             }

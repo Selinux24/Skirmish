@@ -34,11 +34,12 @@ namespace Engine.BuiltIn.Foliage
         /// <summary>
         /// Updates the foliage drawer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Billboard state</param>
-        public void UpdateFoliage(BuiltInFoliageState state)
+        public void UpdateFoliage(EngineDeviceContext dc, BuiltInFoliageState state)
         {
-            cbPerMaterial.WriteData(PerMaterial.Build(state));
-            cbPerPatch.WriteData(PerPatch.Build(state));
+            cbPerMaterial.WriteData(dc, PerMaterial.Build(state));
+            cbPerPatch.WriteData(dc, PerPatch.Build(state));
 
             var vertexShader = GetVertexShader<FoliageVs>();
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);

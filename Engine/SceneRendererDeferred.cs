@@ -448,19 +448,19 @@ namespace Engine
 
             Viewport = Scene.Game.Form.GetViewport();
 
-            lightDrawer.Update(Scene.Game.Graphics, Width, Height);
+            lightDrawer.Update(Scene.Game.Graphics.ImmediateContext, Width, Height);
         }
         /// <summary>
         /// Binds graphics for g-buffer pass
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void BindGBuffer(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void BindGBuffer(EngineDeviceContext dc)
         {
             //Set local viewport
-            context.SetViewport(Viewport);
+            dc.SetViewport(Viewport);
 
             //Set g-buffer render targets
-            context.SetRenderTargets(
+            dc.SetRenderTargets(
                 geometryBuffer.Targets, true, Color.Transparent,
                 Scene.Game.Graphics.DefaultDepthStencil, true, true,
                 true);
@@ -468,14 +468,14 @@ namespace Engine
         /// <summary>
         /// Binds graphics for light acummulation pass
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void BindLights(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void BindLights(EngineDeviceContext dc)
         {
             //Set local viewport
-            context.SetViewport(Viewport);
+            dc.SetViewport(Viewport);
 
             //Set light buffer to draw lights
-            context.SetRenderTargets(
+            dc.SetRenderTargets(
                 lightBuffer.Targets, true, Color.Transparent,
                 false);
         }
@@ -527,7 +527,7 @@ namespace Engine
 
                 foreach (var light in directionalLights)
                 {
-                    lightDirectionalDrawer.UpdatePerLight(light);
+                    lightDirectionalDrawer.UpdatePerLight(dc, light);
 
                     lightDrawer.DrawDirectional(dc, lightDirectionalDrawer);
                 }
@@ -550,9 +550,9 @@ namespace Engine
                 foreach (var light in pointLights)
                 {
                     //Draw Pass
-                    lightPointDrawer.UpdatePerLight(light);
+                    lightPointDrawer.UpdatePerLight(dc, light);
 
-                    lightDrawer.DrawPoint(graphics, dc, stencilDrawer, lightPointDrawer);
+                    lightDrawer.DrawPoint(dc, stencilDrawer, lightPointDrawer);
                 }
             }
 #if DEBUG
@@ -573,9 +573,9 @@ namespace Engine
                 foreach (var light in spotLights)
                 {
                     //Draw Pass
-                    lightSpotDrawer.UpdatePerLight(light);
+                    lightSpotDrawer.UpdatePerLight(dc, light);
 
-                    lightDrawer.DrawSpot(graphics, dc, stencilDrawer, lightSpotDrawer);
+                    lightDrawer.DrawSpot(dc, stencilDrawer, lightSpotDrawer);
                 }
             }
 #if DEBUG
@@ -600,7 +600,7 @@ namespace Engine
         /// <summary>
         /// Draw result
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="context">Drawing context</param>
         private void DrawResult(DrawContext context)
         {
             var graphics = Scene.Game.Graphics;
@@ -695,59 +695,59 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        protected override void SetBlendState(EngineDeviceContext context, DrawerModes drawerMode, BlendModes blendMode)
+        protected override void SetBlendState(EngineDeviceContext dc, DrawerModes drawerMode, BlendModes blendMode)
         {
             if (drawerMode.HasFlag(DrawerModes.Deferred))
             {
                 if (blendMode.HasFlag(BlendModes.Additive))
                 {
-                    SetBlendDeferredComposerAdditive(context);
+                    SetBlendDeferredComposerAdditive(dc);
                 }
                 else if (blendMode.HasFlag(BlendModes.Transparent) || blendMode.HasFlag(BlendModes.Alpha))
                 {
-                    SetBlendDeferredComposerTransparent(context);
+                    SetBlendDeferredComposerTransparent(dc);
                 }
                 else
                 {
-                    SetBlendDeferredComposer(context);
+                    SetBlendDeferredComposer(dc);
                 }
             }
             else
             {
-                base.SetBlendState(context, drawerMode, blendMode);
+                base.SetBlendState(dc, drawerMode, blendMode);
             }
         }
         /// <summary>
         /// Sets deferred composer blend state
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void SetBlendDeferredComposer(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void SetBlendDeferredComposer(EngineDeviceContext dc)
         {
-            context.SetBlendState(blendDeferredComposer);
+            dc.SetBlendState(blendDeferredComposer);
         }
         /// <summary>
         /// Sets transparent deferred composer blend state
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void SetBlendDeferredComposerTransparent(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void SetBlendDeferredComposerTransparent(EngineDeviceContext dc)
         {
-            context.SetBlendState(blendDeferredComposerTransparent);
+            dc.SetBlendState(blendDeferredComposerTransparent);
         }
         /// <summary>
         /// Sets additive deferred composer blend state
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void SetBlendDeferredComposerAdditive(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void SetBlendDeferredComposerAdditive(EngineDeviceContext dc)
         {
-            context.SetBlendState(blendDeferredComposerAdditive);
+            dc.SetBlendState(blendDeferredComposerAdditive);
         }
         /// <summary>
         /// Sets deferred lighting blend state
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void SetBlendDeferredLighting(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void SetBlendDeferredLighting(EngineDeviceContext dc)
         {
-            context.SetBlendState(blendDeferredLighting);
+            dc.SetBlendState(blendDeferredLighting);
         }
     }
 }

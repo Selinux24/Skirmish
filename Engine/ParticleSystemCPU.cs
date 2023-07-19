@@ -8,7 +8,6 @@ namespace Engine
     using Engine.BuiltIn.Particles;
     using Engine.Common;
     using Engine.Content;
-    using SharpDX.Direct2D1;
 
     /// <summary>
     /// CPU particle system
@@ -236,7 +235,7 @@ namespace Engine
                 RotateSpeed = parameters.RotateSpeed,
             };
 
-            particleDrawer.Update(state, TextureCount, Texture);
+            particleDrawer.Update(dc, state, TextureCount, Texture);
 
             return particleDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, ActiveParticles);
         }
@@ -291,7 +290,7 @@ namespace Engine
             particles[currentParticleIndex].MaxAge = Emitter.TotalTime;
 
             Logger.WriteTrace(this, $"{Name} - AddParticle WriteDiscardBuffer");
-            buffer.Write(particles);
+            buffer.Write(Game.Graphics.ImmediateContext, particles);
 
             currentParticleIndex = nextFreeParticle;
         }

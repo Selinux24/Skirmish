@@ -57,9 +57,9 @@ namespace Engine.BuiltIn.PostProcess
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
-            context.SetVertexShaderConstantBuffer(0, BuiltInShaders.GetPerFrameConstantBuffer());
+            dc.SetVertexShaderConstantBuffer(0, BuiltInShaders.GetPerFrameConstantBuffer());
         }
     }
 }

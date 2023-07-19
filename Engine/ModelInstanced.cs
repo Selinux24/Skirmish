@@ -192,8 +192,9 @@ namespace Engine
         /// <summary>
         /// Updates independent transforms
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="meshName">Mesh name</param>
-        private void UpdateIndependentTransforms(string meshName)
+        private void UpdateIndependentTransforms(EngineDeviceContext dc, string meshName)
         {
             if (!hasIndependentTransforms)
             {
@@ -224,7 +225,7 @@ namespace Engine
 
             if (hasDataToWrite)
             {
-                BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
+                BufferManager.WriteInstancingData(dc, InstancingBuffer, instancingData);
             }
         }
         /// <summary>
@@ -278,7 +279,7 @@ namespace Engine
             if (hasDataToWrite)
             {
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
-                BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
+                BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, instancingData);
             }
 
             return DrawShadowsInstances(context);
@@ -329,7 +330,7 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    UpdateIndependentTransforms(meshName);
+                    UpdateIndependentTransforms(context.DeviceContext, meshName);
 
                     count += DrawShadowMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;
@@ -352,6 +353,8 @@ namespace Engine
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
             int count = 0;
+
+            var dc = context.DeviceContext;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -381,10 +384,10 @@ namespace Engine
                     TextureIndex = 0,
                     TintColor = Color4.White,
                 };
-                drawer.UpdateMaterial(materialState);
+                drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}.");
-                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(dc, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }
@@ -409,7 +412,7 @@ namespace Engine
             if (hasDataToWrite)
             {
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
-                BufferManager.WriteInstancingData(InstancingBuffer, instancingData);
+                BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, instancingData);
             }
 
             return DrawInstances(context);
@@ -422,6 +425,8 @@ namespace Engine
         {
             int count = 0;
             int instanceCount = 0;
+
+            var dc = context.DeviceContext;
 
             int maxCount = GetMaxCount();
 
@@ -460,7 +465,7 @@ namespace Engine
 
                 foreach (string meshName in drawingData.Meshes.Keys)
                 {
-                    UpdateIndependentTransforms(meshName);
+                    UpdateIndependentTransforms(dc, meshName);
 
                     count += DrawMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
                     count *= instanceCount;
@@ -486,6 +491,8 @@ namespace Engine
             Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
             int count = 0;
+
+            var dc = context.DeviceContext;
 
             var meshDict = drawingData.Meshes[meshName];
 
@@ -520,10 +527,10 @@ namespace Engine
                     TextureIndex = 0,
                     TintColor = Color4.White,
                 };
-                drawer.UpdateMaterial(materialState);
+                drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} Index {startInstanceLocation} Length {instancesToDraw}");
-                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
+                if (drawer.Draw(dc, BufferManager, new[] { mesh }, instancesToDraw, startInstanceLocation))
                 {
                     count += mesh.Count;
                 }

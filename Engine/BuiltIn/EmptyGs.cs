@@ -54,7 +54,7 @@ namespace Engine.BuiltIn
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             // Empty shader
         }

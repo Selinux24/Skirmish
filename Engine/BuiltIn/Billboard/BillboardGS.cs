@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.Billboard
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
@@ -78,7 +78,7 @@ namespace Engine.BuiltIn.Billboard
                 cbPerBillboard,
             };
 
-            context.SetGeometryShaderConstantBuffers(0, cb);
+            dc.SetGeometryShaderConstantBuffers(0, cb);
         }
     }
 }

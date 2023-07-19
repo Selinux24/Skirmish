@@ -57,14 +57,14 @@ namespace Engine.BuiltIn.Clouds
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
                 BuiltInShaders.GetPerFrameConstantBuffer(),
             };
 
-            context.SetVertexShaderConstantBuffers(0, cb);
+            dc.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

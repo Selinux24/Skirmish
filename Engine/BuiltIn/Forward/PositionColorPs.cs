@@ -57,9 +57,9 @@ namespace Engine.BuiltIn.Forward
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
-            context.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPerFrameConstantBuffer());
+            dc.SetPixelShaderConstantBuffer(0, BuiltInShaders.GetPerFrameConstantBuffer());
         }
     }
 }

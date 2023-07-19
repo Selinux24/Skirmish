@@ -114,7 +114,7 @@ namespace Engine.BuiltIn.Particles
             public Vector4 MaxColor;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerEmitter));
             }
@@ -143,12 +143,13 @@ namespace Engine.BuiltIn.Particles
         /// <summary>
         /// Updates the particle drawer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Particle state</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture array</param>
-        public void Update(BuiltInParticlesState state, uint textureCount, EngineShaderResourceView textures)
+        public void Update(EngineDeviceContext dc, BuiltInParticlesState state, uint textureCount, EngineShaderResourceView textures)
         {
-            cbPerEmitter.WriteData(PerEmitter.Build(state, textureCount));
+            cbPerEmitter.WriteData(dc, PerEmitter.Build(state, textureCount));
 
             var vertexShader = GetVertexShader<ParticlesVs>();
             vertexShader?.SetPerEmitterConstantBuffer(cbPerEmitter);

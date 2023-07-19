@@ -405,11 +405,11 @@ namespace Engine
             /// <summary>
             /// Draws the visible node list
             /// </summary>
-            /// <param name="context">Device context</param>
+            /// <param name="dc">Device context</param>
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="drawer">Drawer</param>
             /// <param name="nodeList">Node list</param>
-            private static bool DrawNodeList(EngineDeviceContext context, BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
+            private static bool DrawNodeList(EngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
             {
                 int instanceCount = 0;
                 int primitiveCount = 0;
@@ -428,7 +428,7 @@ namespace Engine
                         VertexBuffer = gNode.VBDesc,
                         Topology = Topology.TriangleList,
                     };
-                    if (!drawer.Draw(context, bufferManager, options))
+                    if (!drawer.Draw(dc, bufferManager, options))
                     {
                         continue;
                     }
@@ -837,7 +837,7 @@ namespace Engine
             {
                 Local = Matrix.Identity,
             };
-            shadowDrawer.UpdateMesh(meshState);
+            shadowDrawer.UpdateMesh(context.DeviceContext, meshState);
 
             return mapGrid.DrawShadows(context, BufferManager, shadowDrawer);
         }
@@ -871,14 +871,14 @@ namespace Engine
             if (context.DrawerMode.HasFlag(DrawerModes.Forward))
             {
                 var dr = BuiltInShaders.GetDrawer<BuiltIn.Forward.BuiltInTerrain>();
-                dr.Update(GetTerrainState());
+                dr.Update(context.DeviceContext, GetTerrainState());
                 return dr;
             }
 
             if (context.DrawerMode.HasFlag(DrawerModes.Deferred))
             {
                 var dr = BuiltInShaders.GetDrawer<BuiltIn.Deferred.BuiltInTerrain>();
-                dr.Update(GetTerrainState());
+                dr.Update(context.DeviceContext, GetTerrainState());
                 return dr;
             }
 
@@ -948,16 +948,16 @@ namespace Engine
             return terrainMaterial;
         }
         /// <inheritdoc/>
-        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
             if (terrainMaterial == material)
             {
-                return;
+                return false;
             }
 
             terrainMaterial = material;
 
-            Scene.UpdateMaterialPalette();
+            return true;
         }
     }
 }

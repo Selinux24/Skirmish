@@ -183,7 +183,6 @@
         /// <summary>
         /// Gets the enabled z-buffer for read
         /// </summary>
-        /// <param name="context">Device context</param>
         public EngineDepthStencilState GetDepthStencilRDZEnabled()
         {
             depthStencilRDzBufferEnabled ??= EngineDepthStencilState.RDzBufferEnabled(this, nameof(Graphics));

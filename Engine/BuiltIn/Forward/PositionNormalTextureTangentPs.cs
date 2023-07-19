@@ -110,7 +110,7 @@ namespace Engine.BuiltIn.Forward
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
@@ -121,7 +121,7 @@ namespace Engine.BuiltIn.Forward
                 BuiltInShaders.GetPointsConstantBuffer(),
             };
 
-            context.SetPixelShaderConstantBuffers(0, cb);
+            dc.SetPixelShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
@@ -132,7 +132,7 @@ namespace Engine.BuiltIn.Forward
                 normalMapArray,
             };
 
-            context.SetPixelShaderResourceViews(0, rv);
+            dc.SetPixelShaderResourceViews(0, rv);
 
             var ss = new[]
             {
@@ -140,7 +140,7 @@ namespace Engine.BuiltIn.Forward
                 samplerNormal,
             };
 
-            context.SetPixelShaderSamplers(0, ss);
+            dc.SetPixelShaderSamplers(0, ss);
 
             ss = new[]
             {
@@ -148,7 +148,7 @@ namespace Engine.BuiltIn.Forward
                 BuiltInShaders.GetSamplerComparisonLessEqualClamp(),
             };
 
-            context.SetPixelShaderSamplers(10, ss);
+            dc.SetPixelShaderSamplers(10, ss);
         }
     }
 }

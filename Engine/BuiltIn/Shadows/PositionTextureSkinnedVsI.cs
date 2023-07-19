@@ -57,21 +57,21 @@ namespace Engine.BuiltIn.Shadows
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
                 BuiltInShaders.GetGlobalConstantBuffer(),
             };
 
-            context.SetVertexShaderConstantBuffers(0, cb);
+            dc.SetVertexShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
                 BuiltInShaders.GetAnimationPaletteResourceView(),
             };
 
-            context.SetVertexShaderResourceViews(0, rv);
+            dc.SetVertexShaderResourceViews(0, rv);
         }
     }
 }

@@ -60,7 +60,7 @@ namespace Engine.BuiltIn.Fonts
             public Vector4 Rectangle;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerFont));
             }
@@ -86,7 +86,7 @@ namespace Engine.BuiltIn.Fonts
             public Matrix Local;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerText));
             }
@@ -119,10 +119,11 @@ namespace Engine.BuiltIn.Fonts
         /// <summary>
         /// Updates the font drawer state
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateFont(BuiltInFontState state)
+        public void UpdateFont(EngineDeviceContext dc, BuiltInFontState state)
         {
-            cbPerFont.WriteData(PerFont.Build(state));
+            cbPerFont.WriteData(dc, PerFont.Build(state));
 
             var pixelShader = GetPixelShader<FontsPs>();
             pixelShader?.SetPerFontConstantBuffer(cbPerFont);
@@ -131,10 +132,11 @@ namespace Engine.BuiltIn.Fonts
         /// <summary>
         /// Updates the font drawer state
         /// </summary>
-        /// <param name="state">Drawer state</param>
-        public void UpdateText(Matrix local)
+        /// <param name="dc">Device context</param>
+        /// <param name="local">Local transform</param>
+        public void UpdateText(EngineDeviceContext dc, Matrix local)
         {
-            cbPerText.WriteData(PerText.Build(local));
+            cbPerText.WriteData(dc, PerText.Build(local));
 
             var vertexShader = GetVertexShader<FontsVs>();
             vertexShader?.SetPerTextConstantBuffer(cbPerText);

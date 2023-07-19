@@ -40,10 +40,11 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Updates the terrain
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Terrain state</param>
-        public void Update(BuiltInTerrainState state)
+        public void Update(EngineDeviceContext dc, BuiltInTerrainState state)
         {
-            cbPerTerrain.WriteData(PerTerrain.Build(state));
+            cbPerTerrain.WriteData(dc, PerTerrain.Build(state));
 
             var vertexShader = GetVertexShader<TerrainVs>();
             vertexShader?.SetPerTerrainConstantBuffer(cbPerTerrain);

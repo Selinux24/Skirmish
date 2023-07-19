@@ -18,23 +18,23 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Constant buffer list
         /// </summary>
-        private static readonly List<IEngineConstantBuffer> constantBuffers = new List<IEngineConstantBuffer>();
+        private static readonly List<IEngineConstantBuffer> constantBuffers = new();
         /// <summary>
         /// Vertex shader list
         /// </summary>
-        private static readonly List<IBuiltInVertexShader> vertexShaders = new List<IBuiltInVertexShader>();
+        private static readonly List<IBuiltInVertexShader> vertexShaders = new();
         /// <summary>
         /// Geometry shader list
         /// </summary>
-        private static readonly List<IBuiltInGeometryShader> geometryShaders = new List<IBuiltInGeometryShader>();
+        private static readonly List<IBuiltInGeometryShader> geometryShaders = new();
         /// <summary>
         /// Pixel shader list
         /// </summary>
-        private static readonly List<IBuiltInPixelShader> pixelShaders = new List<IBuiltInPixelShader>();
+        private static readonly List<IBuiltInPixelShader> pixelShaders = new();
         /// <summary>
         /// Drawer list
         /// </summary>
-        private static readonly List<IBuiltInDrawer> drawers = new List<IBuiltInDrawer>();
+        private static readonly List<IBuiltInDrawer> drawers = new();
 
         /// <summary>
         /// Sampler point
@@ -274,14 +274,15 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Updates global data
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="materialPalette">Material palette resource view</param>
         /// <param name="materialPaletteWidth">Material palette width</param>
         /// <param name="animationPalette">Animation palette resource view</param>
         /// <param name="animationPaletteWidth">Animation palette width</param>
-        public static void UpdateGlobals(EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
+        public static void UpdateGlobals(EngineDeviceContext dc, EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             var cbGlobal = GetConstantBuffer<Global>();
-            cbGlobal?.WriteData(Global.Build(materialPaletteWidth, animationPaletteWidth));
+            cbGlobal?.WriteData(dc, Global.Build(materialPaletteWidth, animationPaletteWidth));
 
             rvMaterialPalette = materialPalette;
             rvAnimationPalette = animationPalette;
@@ -319,16 +320,18 @@ namespace Engine.BuiltIn
                 return;
             }
 
+            var dc = context.DeviceContext;
+
             var cbPerFrame = GetConstantBuffer<PerFrame>();
-            cbPerFrame?.WriteData(PerFrame.Build(context));
+            cbPerFrame?.WriteData(dc, PerFrame.Build(context));
             var cbHemispheric = GetConstantBuffer<PSHemispheric>();
-            cbHemispheric?.WriteData(PSHemispheric.Build(context));
+            cbHemispheric?.WriteData(dc, PSHemispheric.Build(context));
             var cbDirectionals = GetConstantBuffer<PSDirectional>();
-            cbDirectionals?.WriteData(PSDirectional.Build(context));
+            cbDirectionals?.WriteData(dc, PSDirectional.Build(context));
             var cbSpots = GetConstantBuffer<PSSpots>();
-            cbSpots?.WriteData(PSSpots.Build(context));
+            cbSpots?.WriteData(dc, PSSpots.Build(context));
             var cbPoints = GetConstantBuffer<PSPoints>();
-            cbPoints?.WriteData(PSPoints.Build(context));
+            cbPoints?.WriteData(dc, PSPoints.Build(context));
 
             rvShadowMapDir = context.ShadowMapDirectional?.Texture;
             rvShadowMapSpot = context.ShadowMapSpot?.Texture;

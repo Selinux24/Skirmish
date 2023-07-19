@@ -816,8 +816,8 @@ namespace Engine.Common
         /// <summary>
         /// Sets vertex buffers to device context
         /// </summary>
-        /// <param name="context">Device context</param>
-        public bool SetVertexBuffers(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public bool SetVertexBuffers(EngineDeviceContext dc)
         {
             if (!Initilialized)
             {
@@ -831,20 +831,20 @@ namespace Engine.Common
                 return false;
             }
 
-            context.IASetVertexBuffers(0, vertexBufferBindings.ToArray());
+            dc.IASetVertexBuffers(0, vertexBufferBindings.ToArray());
 
             return true;
         }
         /// <summary>
         /// Sets index buffers to device context
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
-        public bool SetIndexBuffer(EngineDeviceContext context, BufferDescriptor descriptor)
+        public bool SetIndexBuffer(EngineDeviceContext dc, BufferDescriptor descriptor)
         {
             if (descriptor == null)
             {
-                context.IASetIndexBuffer(null, Format.R32_UInt, 0);
+                dc.IASetIndexBuffer(null, Format.R32_UInt, 0);
                 return true;
             }
 
@@ -866,19 +866,19 @@ namespace Engine.Common
                 return false;
             }
 
-            context.IASetIndexBuffer(indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
+            dc.IASetIndexBuffer(indexBuffers[descriptor.BufferDescriptionIndex], Format.R32_UInt, 0);
 
             return true;
         }
         /// <summary>
         /// Sets input layout to device context
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="vertexShader">Vertex shader</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="topology">Topology</param>
         /// <param name="instanced">Use instancig data</param>
-        public bool SetInputAssembler(EngineDeviceContext context, IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
+        public bool SetInputAssembler(EngineDeviceContext dc, IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
         {
             if (descriptor == null)
             {
@@ -922,8 +922,8 @@ namespace Engine.Common
                     game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
             }
 
-            context.IAInputLayout = vertexShadersInputLayouts[key];
-            context.IAPrimitiveTopology = topology;
+            dc.IAInputLayout = vertexShadersInputLayouts[key];
+            dc.IAPrimitiveTopology = topology;
             return true;
         }
 
@@ -931,9 +931,10 @@ namespace Engine.Common
         /// Writes vertex data into buffer
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
+        /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Data to write</param>
-        public bool WriteVertexBuffer<T>(BufferDescriptor descriptor, IEnumerable<T> data)
+        public bool WriteVertexBuffer<T>(EngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
             where T : struct
         {
             if (descriptor?.Ready != true)
@@ -961,14 +962,15 @@ namespace Engine.Common
 
             var buffer = vertexBuffers[vertexBufferDescriptor.BufferIndex];
 
-            return game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
+            return dc.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
         }
         /// <summary>
         /// Writes instancing data
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Instancig data</param>
-        public bool WriteInstancingData<T>(BufferDescriptor descriptor, IEnumerable<T> data)
+        public bool WriteInstancingData<T>(EngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
             where T : struct
         {
             if (descriptor?.Ready != true)
@@ -996,14 +998,15 @@ namespace Engine.Common
 
             var instancingBuffer = vertexBuffers[instancingBufferDescriptor.BufferIndex];
 
-            return game.Graphics.WriteDiscardBuffer(instancingBuffer, descriptor.BufferOffset, data);
+            return dc.WriteDiscardBuffer(instancingBuffer, descriptor.BufferOffset, data);
         }
         /// <summary>
         /// Writes imdex data into buffer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Data to write</param>
-        public bool WriteIndexBuffer(BufferDescriptor descriptor, IEnumerable<uint> data)
+        public bool WriteIndexBuffer(EngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<uint> data)
         {
             if (descriptor?.Ready != true)
             {
@@ -1030,7 +1033,7 @@ namespace Engine.Common
 
             var buffer = indexBuffers[indexBufferDescriptor.BufferIndex];
 
-            return game.Graphics.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
+            return dc.WriteNoOverwriteBuffer(buffer, descriptor.BufferOffset, data);
         }
 
         /// <summary>

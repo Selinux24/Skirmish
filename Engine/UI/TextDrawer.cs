@@ -435,7 +435,9 @@ namespace Engine.UI
                 return false;
             }
 
-            WriteBuffers();
+            var dc = context.DeviceContext;
+
+            WriteBuffers(dc);
 
             var bufferManager = BufferManager;
 
@@ -448,7 +450,7 @@ namespace Engine.UI
                 FontTexture = fontMap.Texture,
                 ClippingRectangle = ClippingRectangle ?? Rectangle.Empty,
             };
-            fontDrawer.UpdateFont(state);
+            fontDrawer.UpdateFont(dc, state);
 
             int count = indexDrawCount;
 
@@ -460,7 +462,7 @@ namespace Engine.UI
                 int offset = indexDrawCount / 2;
                 count = indexDrawCount / 2;
 
-                fontDrawer.UpdateText(ShadowManipulator.LocalTransform);
+                fontDrawer.UpdateText(dc, ShadowManipulator.LocalTransform);
 
                 var shOptions = new DrawOptions
                 {
@@ -473,7 +475,7 @@ namespace Engine.UI
                 drawn = fontDrawer.Draw(context.DeviceContext, bufferManager, shOptions);
             }
 
-            fontDrawer.UpdateText(Manipulator.LocalTransform);
+            fontDrawer.UpdateText(dc, Manipulator.LocalTransform);
 
             var opOptions = new DrawOptions
             {
@@ -483,20 +485,21 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,
             };
-            return fontDrawer.Draw(context.DeviceContext, bufferManager, opOptions) || drawn;
+            return fontDrawer.Draw(dc, bufferManager, opOptions) || drawn;
         }
         /// <summary>
         /// Writes text data into buffers
         /// </summary>
-        private void WriteBuffers()
+        /// <param name="dc">Device context</param>
+        private void WriteBuffers(EngineDeviceContext dc)
         {
             if (!updateBuffers)
             {
                 return;
             }
 
-            bool vertsWrited = BufferManager.WriteVertexBuffer(vertexBuffer, vertices.Take(verticesCount));
-            bool idxWrited = BufferManager.WriteIndexBuffer(indexBuffer, indices.Take(indicesCount));
+            bool vertsWrited = BufferManager.WriteVertexBuffer(dc, vertexBuffer, vertices.Take(verticesCount));
+            bool idxWrited = BufferManager.WriteIndexBuffer(dc, indexBuffer, indices.Take(indicesCount));
             if (!vertsWrited || !idxWrited)
             {
                 return;

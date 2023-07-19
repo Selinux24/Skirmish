@@ -105,14 +105,14 @@ namespace Engine.BuiltIn.Clouds
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
                 cbPerCloud,
             };
 
-            context.SetPixelShaderConstantBuffers(0, cb);
+            dc.SetPixelShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
@@ -120,7 +120,7 @@ namespace Engine.BuiltIn.Clouds
                 clouds2,
             };
 
-            context.SetPixelShaderResourceViews(0, rv);
+            dc.SetPixelShaderResourceViews(0, rv);
 
             var ss = new[]
             {
@@ -128,7 +128,7 @@ namespace Engine.BuiltIn.Clouds
                 samplerAnisotropic,
             };
 
-            context.SetPixelShaderSamplers(0, ss);
+            dc.SetPixelShaderSamplers(0, ss);
         }
     }
 }

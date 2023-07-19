@@ -266,10 +266,10 @@ namespace Engine
         /// <summary>
         /// Stream output
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void StreamOut(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void StreamOut(EngineDeviceContext dc)
         {
-            context.SetDepthStencilState(Game.Graphics.GetDepthStencilNone());
+            dc.SetDepthStencilState(Game.Graphics.GetDepthStencilNone());
 
             var soState = new BuiltInStreamOutState
             {
@@ -281,10 +281,10 @@ namespace Engine
                 VerticalVelocity = parameters.VerticalVelocity,
                 RandomValues = Helper.RandomGenerator.NextVector4(Vector4.Zero, Vector4.One),
             };
-            particleStreamOut.Update(soState);
+            particleStreamOut.Update(dc, soState);
 
             particleStreamOut.StreamOut(
-                context,
+                dc,
                 firstRun,
                 firstRun ? emittersBuffer : drawingBuffer,
                 streamOutBuffer,
@@ -336,7 +336,7 @@ namespace Engine
                 UseRotation = useRotation,
                 RotateSpeed = parameters.RotateSpeed,
             };
-            particleDrawer.Update(state, TextureCount, Texture);
+            particleDrawer.Update(dc, state, TextureCount, Texture);
 
             if (!particleDrawer.DrawAuto(context.DeviceContext, drawingBuffer, Topology.PointList))
             {

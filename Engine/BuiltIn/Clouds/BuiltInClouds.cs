@@ -77,7 +77,7 @@ namespace Engine.BuiltIn.Clouds
             public float Brightness;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerCloud));
             }
@@ -105,10 +105,11 @@ namespace Engine.BuiltIn.Clouds
         /// <summary>
         /// Updates the cloud drawer state
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateClouds(BuiltInCloudsState state)
+        public void UpdateClouds(EngineDeviceContext dc, BuiltInCloudsState state)
         {
-            cbPerCloud.WriteData(PerCloud.Build(state));
+            cbPerCloud.WriteData(dc, PerCloud.Build(state));
 
             var pixelShader = GetPixelShader<CloudsPs>();
             pixelShader?.SetPerCloudConstantBuffer(cbPerCloud);

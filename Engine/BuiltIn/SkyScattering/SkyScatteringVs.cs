@@ -71,7 +71,7 @@ namespace Engine.BuiltIn.SkyScattering
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
@@ -79,7 +79,7 @@ namespace Engine.BuiltIn.SkyScattering
                 cbPerObject,
             };
 
-            context.SetVertexShaderConstantBuffers(0, cb);
+            dc.SetVertexShaderConstantBuffers(0, cb);
         }
     }
 }

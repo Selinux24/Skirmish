@@ -105,7 +105,7 @@ namespace Engine.BuiltIn.Fonts
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
@@ -113,11 +113,11 @@ namespace Engine.BuiltIn.Fonts
                 cbPerFont,
             };
 
-            context.SetPixelShaderConstantBuffers(0, cb);
+            dc.SetPixelShaderConstantBuffers(0, cb);
 
-            context.SetPixelShaderResourceView(0, texture);
+            dc.SetPixelShaderResourceView(0, texture);
 
-            context.SetPixelShaderSamplers(0, new[] { samplerPoint, samplerLinear });
+            dc.SetPixelShaderSamplers(0, new[] { samplerPoint, samplerLinear });
         }
     }
 }

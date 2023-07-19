@@ -137,17 +137,17 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Prepares the internal shaders in the graphics device
         /// </summary>
-        /// <param name="context">Device context</param>
-        protected virtual void PrepareShaders(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        protected virtual void PrepareShaders(EngineDeviceContext dc)
         {
-            context.SetVertexShader(vertexShader?.Shader);
-            vertexShader?.SetShaderResources(context);
+            dc.SetVertexShader(vertexShader?.Shader);
+            vertexShader?.SetShaderResources(dc);
 
-            context.SetGeometryShader(geometryShader?.Shader);
-            geometryShader?.SetShaderResources(context);
+            dc.SetGeometryShader(geometryShader?.Shader);
+            geometryShader?.SetShaderResources(dc);
 
-            context.SetPixelShader(pixelShader?.Shader);
-            pixelShader?.SetShaderResources(context);
+            dc.SetPixelShader(pixelShader?.Shader);
+            pixelShader?.SetShaderResources(dc);
         }
 
         /// <inheritdoc/>
@@ -156,18 +156,18 @@ namespace Engine.BuiltIn
 
         }
         /// <inheritdoc/>
-        public virtual void UpdateMesh(BuiltInDrawerMeshState state)
+        public virtual void UpdateMesh(EngineDeviceContext dc, BuiltInDrawerMeshState state)
         {
 
         }
         /// <inheritdoc/>
-        public virtual void UpdateMaterial(BuiltInDrawerMaterialState state)
+        public virtual void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
 
         }
 
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext context, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
+        public virtual bool Draw(EngineDeviceContext dc, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
         {
             if (bufferManager == null)
             {
@@ -180,20 +180,20 @@ namespace Engine.BuiltIn
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            PrepareShaders(context);
+            PrepareShaders(dc);
 
             bool instanced = instances > 0;
 
             foreach (var mesh in meshes)
             {
                 // Set the index buffer
-                if (!bufferManager.SetIndexBuffer(context, mesh.IndexBuffer))
+                if (!bufferManager.SetIndexBuffer(dc, mesh.IndexBuffer))
                 {
                     continue;
                 }
 
                 // Set the vertex input layout.
-                if (!bufferManager.SetInputAssembler(context, vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, instanced))
+                if (!bufferManager.SetInputAssembler(dc, vertexShader.Shader, mesh.VertexBuffer, mesh.Topology, instanced))
                 {
                     continue;
                 }
@@ -201,18 +201,18 @@ namespace Engine.BuiltIn
                 // Render the mesh.
                 if (instanced)
                 {
-                    mesh.Draw(context, instances, startInstanceLocation);
+                    mesh.Draw(dc, instances, startInstanceLocation);
                 }
                 else
                 {
-                    mesh.Draw(context);
+                    mesh.Draw(dc);
                 }
             }
 
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext context, BufferManager bufferManager, DrawOptions options)
+        public virtual bool Draw(EngineDeviceContext dc, BufferManager bufferManager, DrawOptions options)
         {
             if (bufferManager == null)
             {
@@ -220,27 +220,27 @@ namespace Engine.BuiltIn
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            PrepareShaders(context);
+            PrepareShaders(dc);
 
             // Set the index buffer
-            if (!bufferManager.SetIndexBuffer(context, options.IndexBuffer))
+            if (!bufferManager.SetIndexBuffer(dc, options.IndexBuffer))
             {
                 return false;
             }
 
             // Set the vertex input layout.
-            if (!bufferManager.SetInputAssembler(context, vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
+            if (!bufferManager.SetInputAssembler(dc, vertexShader.Shader, options.VertexBuffer, options.Topology, options.Instanced))
             {
                 return false;
             }
 
             // Render the primitives.
-            options.Draw(context);
+            options.Draw(dc);
 
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext context, IEngineVertexBuffer buffer, Topology topology, int drawCount)
+        public virtual bool Draw(EngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, int drawCount)
         {
             if (buffer == null)
             {
@@ -248,43 +248,43 @@ namespace Engine.BuiltIn
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            PrepareShaders(context);
+            PrepareShaders(dc);
 
             // Set the vertex input layout.
-            buffer.SetVertexBuffers(context);
-            buffer.SetInputLayout(context);
+            buffer.SetVertexBuffers(dc);
+            buffer.SetInputLayout(dc);
 
-            context.IAPrimitiveTopology = topology;
+            dc.IAPrimitiveTopology = topology;
 
             // Render the primitives.
-            buffer.Draw(context, drawCount);
+            buffer.Draw(dc, drawCount);
 
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext context, Topology topology, int bufferSlot, VertexBufferBinding vertexBufferBinding, Buffer indexBuffer, int count, int startLocation)
+        public virtual bool Draw(EngineDeviceContext dc, Topology topology, int bufferSlot, VertexBufferBinding vertexBufferBinding, Buffer indexBuffer, int count, int startLocation)
         {
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            PrepareShaders(context);
+            PrepareShaders(dc);
 
-            context.IASetVertexBuffers(bufferSlot, vertexBufferBinding);
-            context.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
-            context.IAPrimitiveTopology = topology;
+            dc.IASetVertexBuffers(bufferSlot, vertexBufferBinding);
+            dc.IASetIndexBuffer(indexBuffer, Format.R32_UInt, 0);
+            dc.IAPrimitiveTopology = topology;
 
             if (indexBuffer != null)
             {
-                context.DrawIndexed(count, startLocation, 0);
+                dc.DrawIndexed(count, startLocation, 0);
             }
             else
             {
-                context.Draw(count, startLocation);
+                dc.Draw(count, startLocation);
             }
 
             return true;
         }
 
         /// <inheritdoc/>
-        public virtual bool DrawAuto(EngineDeviceContext context, IEngineVertexBuffer buffer, Topology topology)
+        public virtual bool DrawAuto(EngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology)
         {
             if (buffer == null)
             {
@@ -292,22 +292,22 @@ namespace Engine.BuiltIn
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            PrepareShaders(context);
+            PrepareShaders(dc);
 
             // Set the vertex input layout.
-            buffer.SetVertexBuffers(context);
-            buffer.SetInputLayout(context);
+            buffer.SetVertexBuffers(dc);
+            buffer.SetInputLayout(dc);
 
-            context.IAPrimitiveTopology = topology;
+            dc.IAPrimitiveTopology = topology;
 
             // Render the primitives.
-            buffer.DrawAuto(context);
+            buffer.DrawAuto(dc);
 
             return true;
         }
 
         /// <inheritdoc/>
-        public void StreamOut(EngineDeviceContext context, bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology)
+        public void StreamOut(EngineDeviceContext dc, bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology)
         {
             if (buffer == null)
             {
@@ -320,27 +320,27 @@ namespace Engine.BuiltIn
             }
 
             // Set the vertex and pixel shaders that will be used to render this mesh.
-            PrepareShaders(context);
+            PrepareShaders(dc);
 
             // Set the vertex input layout.
-            buffer.SetVertexBuffers(context);
+            buffer.SetVertexBuffers(dc);
 
             // Set the stream-out target.
-            streamOutBuffer.SetInputLayout(context);
-            streamOutBuffer.SetStreamOutputTargets(context);
+            streamOutBuffer.SetInputLayout(dc);
+            streamOutBuffer.SetStreamOutputTargets(dc);
 
-            context.IAPrimitiveTopology = topology;
+            dc.IAPrimitiveTopology = topology;
 
             if (firstRun)
             {
-                streamOutBuffer.Draw(context, 1);
+                streamOutBuffer.Draw(dc, 1);
             }
             else
             {
-                streamOutBuffer.DrawAuto(context);
+                streamOutBuffer.DrawAuto(dc);
             }
 
-            context.SetGeometryShaderStreamOutputTargets(null);
+            dc.SetGeometryShaderStreamOutputTargets(null);
         }
     }
 }

@@ -222,7 +222,7 @@ namespace Terrain.PerlinNoise
                 noiseMapDirty = true;
             }
 
-            texture.Update(Game, noiseMap?.MapImage.Flatten());
+            texture.Update(Game.Graphics.ImmediateContext, noiseMap?.MapImage.Flatten());
 
             if (noiseMapDirty)
             {
@@ -448,15 +448,13 @@ namespace Terrain.PerlinNoise
 
             if (e.Buttons.HasFlag(MouseButtons.Left))
             {
-                using (var dlg = new SaveFileDialog())
-                {
-                    dlg.DefaultExt = ".png";
-                    dlg.FileName = "Noisemap.png";
+                using var dlg = new SaveFileDialog();
+                dlg.DefaultExt = ".png";
+                dlg.FileName = "Noisemap.png";
 
-                    if (dlg.ShowDialog() == DialogResult.OK)
-                    {
-                        noiseMap.SaveMapToFile(dlg.FileName);
-                    }
+                if (dlg.ShowDialog() == DialogResult.OK)
+                {
+                    noiseMap.SaveMapToFile(dlg.FileName);
                 }
             }
         }
@@ -481,7 +479,7 @@ namespace Terrain.PerlinNoise
             {
                 try
                 {
-                    NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+                    var nmDesc = new NoiseMapDescriptor
                     {
                         MapWidth = mapSize,
                         MapHeight = mapSize,

@@ -459,11 +459,12 @@ namespace Engine
             /// <summary>
             /// Attaches the specified patch to buffer
             /// </summary>
+            /// <param name="dc">Device context</param>
             /// <param name="eyePosition">Eye position</param>
             /// <param name="transparent">The billboards were transparent</param>
             /// <param name="patch">Patch</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void AttachFoliage(Vector3 eyePosition, bool transparent, FoliagePatch patch, BufferManager bufferManager)
+            public void AttachFoliage(EngineDeviceContext dc, Vector3 eyePosition, bool transparent, FoliagePatch patch, BufferManager bufferManager)
             {
                 vertexDrawCount = 0;
                 Attached = false;
@@ -477,7 +478,7 @@ namespace Engine
                 }
 
                 //Attach data to buffer
-                if (!bufferManager.WriteVertexBuffer(VertexBuffer, data))
+                if (!bufferManager.WriteVertexBuffer(dc, VertexBuffer, data))
                 {
                     return;
                 }
@@ -489,16 +490,16 @@ namespace Engine
             /// <summary>
             /// Draws the foliage data
             /// </summary>
-            /// <param name="context">Device context</param>
+            /// <param name="dc">Device context</param>
             /// <param name="drawer">Drawer</param>
-            public bool DrawFoliage(EngineDeviceContext context, BuiltInDrawer drawer)
+            public bool DrawFoliage(EngineDeviceContext dc, BuiltInDrawer drawer)
             {
                 if (vertexDrawCount <= 0)
                 {
                     return false;
                 }
 
-                return drawer.Draw(context, BufferManager, new DrawOptions
+                return drawer.Draw(dc, BufferManager, new DrawOptions
                 {
                     VertexBuffer = VertexBuffer,
                     VertexDrawCount = vertexDrawCount,
@@ -780,12 +781,14 @@ namespace Engine
                 return false;
             }
 
-            WritePatches(context.EyePosition);
+            var dc = context.DeviceContext;
+
+            WritePatches(dc, context.EyePosition);
 
             bool drawn = false;
             foreach (var item in visibleNodes)
             {
-                drawn = DrawNode(context.DeviceContext, item) || drawn;
+                drawn = DrawNode(dc, item) || drawn;
             }
 
             return drawn;
@@ -793,9 +796,9 @@ namespace Engine
         /// <summary>
         /// Draws the node
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="item">Node</param>
-        private bool DrawNode(EngineDeviceContext context, QuadTreeNode item)
+        private bool DrawNode(EngineDeviceContext dc, QuadTreeNode item)
         {
             var buffers = foliageBuffers.Where(b => b.CurrentPatch?.CurrentNode == item);
             if (!buffers.Any())
@@ -826,9 +829,9 @@ namespace Engine
                     Instances = channelData.Count,
                 };
 
-                foliageDrawer.UpdateFoliage(state);
+                foliageDrawer.UpdateFoliage(dc, state);
 
-                if (buffer.DrawFoliage(context, foliageDrawer))
+                if (buffer.DrawFoliage(dc, foliageDrawer))
                 {
                     drawn = true;
                 }
@@ -1103,11 +1106,12 @@ namespace Engine
         /// <summary>
         /// Writes patch data into graphic buffers
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="eyePosition">Eye position</param>
-        private void WritePatches(Vector3 eyePosition)
+        private void WritePatches(EngineDeviceContext dc, Vector3 eyePosition)
         {
             //Mark patches to delete
-            AttachFreePatches(eyePosition);
+            AttachFreePatches(dc,eyePosition);
 
             //Free unused patches
             FreeUnusedPatches(eyePosition);
@@ -1115,6 +1119,7 @@ namespace Engine
         /// <summary>
         /// Attaches patches data into graphic buffers
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="eyePosition">Eye position</param>
         /// <remarks>
         /// For each node to assign
@@ -1122,7 +1127,7 @@ namespace Engine
         ///   - If free buffer found, assign
         ///   - If not, look for a buffer to free, farthest from camera first
         /// </remarks>
-        private void AttachFreePatches(Vector3 eyePosition)
+        private void AttachFreePatches(EngineDeviceContext dc, Vector3 eyePosition)
         {
             if (!toAssign.Any())
             {
@@ -1164,7 +1169,7 @@ namespace Engine
 
             while (toAssign.Count > 0 && freeBuffers.Count > 0)
             {
-                freeBuffers[0].AttachFoliage(eyePosition, transparent, toAssign[0], BufferManager);
+                freeBuffers[0].AttachFoliage(dc, eyePosition, transparent, toAssign[0], BufferManager);
 
                 toAssign.RemoveAt(0);
                 freeBuffers.RemoveAt(0);
@@ -1222,16 +1227,16 @@ namespace Engine
             return foliageMaterial;
         }
         /// <inheritdoc/>
-        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
             if (foliageMaterial == material)
             {
-                return;
+                return false;
             }
 
             foliageMaterial = material;
 
-            Scene.UpdateMaterialPalette();
+            return true;
         }
     }
 }

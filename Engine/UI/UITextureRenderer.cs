@@ -126,7 +126,9 @@ namespace Engine.UI
                 return false;
             }
 
-            spriteDrawer.UpdateSprite(new BuiltInSpriteState
+            var dc = context.DeviceContext;
+
+            spriteDrawer.UpdateSprite(dc, new BuiltInSpriteState
             {
                 Local = Manipulator.LocalTransform,
                 Color1 = Color4.White,
@@ -135,7 +137,7 @@ namespace Engine.UI
                 Channel = Channel,
             });
 
-            bool drawn = spriteDrawer.Draw(context.DeviceContext, BufferManager, new DrawOptions
+            bool drawn = spriteDrawer.Draw(dc, BufferManager, new DrawOptions
             {
                 IndexBuffer = indexBuffer,
                 VertexBuffer = vertexBuffer,

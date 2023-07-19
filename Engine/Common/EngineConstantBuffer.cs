@@ -95,15 +95,16 @@ namespace Engine.Common
         /// <summary>
         /// Writes data to de constant buffer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="data">Data</param>
-        public void WriteData(T data)
+        public void WriteData(EngineDeviceContext dc, T data)
         {
             if (data.Equals(currentData))
             {
                 return;
             }
 
-            graphics.UpdateConstantBuffer(dataStream, buffer, data);
+            dc.UpdateConstantBuffer(dataStream, buffer, data);
 
             currentData = data;
         }

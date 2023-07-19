@@ -67,7 +67,7 @@ namespace Engine.BuiltIn.Billboard
             public float EndRadius;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerBillboard));
             }
@@ -96,10 +96,11 @@ namespace Engine.BuiltIn.Billboard
         /// <summary>
         /// Updates the billboard drawer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Billboard state</param>
-        public void UpdateBillboard(BuiltInBillboardState state)
+        public void UpdateBillboard(EngineDeviceContext dc, BuiltInBillboardState state)
         {
-            cbPerBillboard.WriteData(PerBillboard.Build(state));
+            cbPerBillboard.WriteData(dc, PerBillboard.Build(state));
 
             var vertexShader = GetVertexShader<BillboardVs>();
             vertexShader?.SetPerBillboardConstantBuffer(cbPerBillboard);

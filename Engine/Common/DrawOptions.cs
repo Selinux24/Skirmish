@@ -62,29 +62,29 @@ namespace Engine.Common
         /// <summary>
         /// Draw
         /// </summary>
-        /// <param name="context">Device context</param>
-        public readonly void Draw(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public readonly void Draw(EngineDeviceContext dc)
         {
             if (Instanced)
             {
-                DrawInstanced(context);
+                DrawInstanced(dc);
             }
             else
             {
-                DrawSingle(context);
+                DrawSingle(dc);
             }
         }
         /// <summary>
         /// Draw single
         /// </summary>
-        /// <param name="context">Device context</param>
-        private readonly void DrawSingle(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private readonly void DrawSingle(EngineDeviceContext dc)
         {
             if (Indexed)
             {
                 int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
 
-                context.DrawIndexed(
+                dc.DrawIndexed(
                     drawCount,
                     IndexBuffer.BufferOffset + IndexBufferOffset,
                     VertexBuffer.BufferOffset + VertexBufferOffset);
@@ -93,7 +93,7 @@ namespace Engine.Common
             {
                 int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
-                context.Draw(
+                dc.Draw(
                     drawCount,
                     VertexBuffer.BufferOffset + VertexBufferOffset);
             }
@@ -101,14 +101,14 @@ namespace Engine.Common
         /// <summary>
         /// Draw instanced
         /// </summary>
-        /// <param name="context">Device context</param>
-        private readonly void DrawInstanced(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private readonly void DrawInstanced(EngineDeviceContext dc)
         {
             if (Indexed)
             {
                 int drawCount = IndexDrawCount > 0 ? IndexDrawCount : IndexBuffer.Count;
 
-                context.DrawIndexedInstanced(
+                dc.DrawIndexedInstanced(
                     drawCount,
                     InstanceCount,
                     IndexBuffer.BufferOffset + IndexBufferOffset,
@@ -118,7 +118,7 @@ namespace Engine.Common
             {
                 int drawCount = VertexDrawCount > 0 ? VertexDrawCount : VertexBuffer.Count;
 
-                context.DrawInstanced(
+                dc.DrawInstanced(
                     drawCount,
                     InstanceCount,
                     VertexBuffer.BufferOffset + VertexBufferOffset, StartInstanceLocation);

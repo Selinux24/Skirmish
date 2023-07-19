@@ -28,6 +28,7 @@ namespace Engine
         private ShaderResourceView1 CreateResource(string name, TextureData description, bool tryMipAutogen, bool dynamic)
         {
             bool mipAutogen = false;
+            var dc = ImmediateContext.GetDeviceContext();
 
             if (tryMipAutogen && description.MipMaps == 1)
             {
@@ -55,9 +56,9 @@ namespace Engine
                         DebugName = name,
                     };
 
-                    ImmediateContext.GetDeviceContext().UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+                    dc.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
 
-                    ImmediateContext.GetDeviceContext().GenerateMips(result);
+                    dc.GenerateMips(result);
 
                     return result;
                 }
@@ -105,6 +106,7 @@ namespace Engine
             int count = descriptions.Count();
 
             bool mipAutogen = false;
+            var dc = ImmediateContext.GetDeviceContext();
 
             if (tryMipAutogen && description.MipMaps == 1)
             {
@@ -138,10 +140,10 @@ namespace Engine
                     {
                         var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        ImmediateContext.GetDeviceContext().UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                        dc.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
-                    ImmediateContext.GetDeviceContext().GenerateMips(result);
+                    dc.GenerateMips(result);
 
                     return result;
                 }
@@ -192,6 +194,7 @@ namespace Engine
         private ShaderResourceView1 CreateResourceCubic(string name, TextureData description, bool tryMipAutogen, bool dynamic)
         {
             bool mipAutogen = false;
+            var dc = ImmediateContext.GetDeviceContext();
 
             if (tryMipAutogen && description.MipMaps == 1)
             {
@@ -219,9 +222,9 @@ namespace Engine
                         DebugName = name,
                     };
 
-                    ImmediateContext.GetDeviceContext().UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
+                    dc.UpdateSubresource(description.GetDataBox(0, 0), texture, 0);
 
-                    ImmediateContext.GetDeviceContext().GenerateMips(result);
+                    dc.GenerateMips(result);
 
                     return result;
                 }
@@ -268,6 +271,7 @@ namespace Engine
             int count = descriptions.Count();
 
             bool mipAutogen = false;
+            var dc = ImmediateContext.GetDeviceContext();
 
             if (tryMipAutogen && description.MipMaps == 1)
             {
@@ -301,10 +305,10 @@ namespace Engine
                     {
                         var index = textureArray.CalculateSubResourceIndex(0, i++, out int mipSize);
 
-                        ImmediateContext.GetDeviceContext().UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
+                        dc.UpdateSubresource(currentDesc.GetDataBox(0, 0), textureArray, index);
                     }
 
-                    ImmediateContext.GetDeviceContext().GenerateMips(result);
+                    dc.GenerateMips(result);
 
                     return result;
                 }
@@ -905,55 +909,6 @@ namespace Engine
             catch (Exception ex)
             {
                 throw new EngineException("CreateValueArrayTexture Error. See inner exception for details", ex);
-            }
-        }
-
-        /// <summary>
-        /// Updates a texture
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="texture">Texture to update</param>
-        /// <param name="data">Data to write</param>
-        public void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
-        {
-            if (data?.Any() == true)
-            {
-                using (var resource = texture.GetResource().Resource.QueryInterface<Texture1D>())
-                {
-                    ImmediateContext.GetDeviceContext().MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-                    using (stream)
-                    {
-                        stream.Position = 0;
-                        stream.WriteRange(data.ToArray());
-                    }
-                    ImmediateContext.GetDeviceContext().UnmapSubresource(resource, 0);
-                }
-
-                Counters.BufferWrites++;
-            }
-        }
-        /// <summary>
-        /// Updates a texture
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="texture">Texture to update</param>
-        /// <param name="data">Data to write</param>
-        public void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
-        {
-            if (data?.Any() == true)
-            {
-                using (var resource = texture.GetResource().Resource.QueryInterface<Texture2D1>())
-                {
-                    ImmediateContext.GetDeviceContext().MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-                    using (stream)
-                    {
-                        stream.Position = 0;
-                        stream.WriteRange(data.ToArray());
-                    }
-                    ImmediateContext.GetDeviceContext().UnmapSubresource(resource, 0);
-                }
-
-                Counters.BufferWrites++;
             }
         }
     }

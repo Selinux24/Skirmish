@@ -211,6 +211,8 @@ namespace Engine
 
             int count = 0;
 
+            var dc = context.DeviceContext;
+
             var localTransform = GetTransformByName(meshName);
 
             foreach (string materialName in meshDict.Keys)
@@ -239,7 +241,7 @@ namespace Engine
                     AnimationOffset2 = TransitionOffset,
                     AnimationInterpolationAmount = TransitionInterpolation,
                 };
-                drawer.UpdateMesh(meshState);
+                drawer.UpdateMesh(dc, meshState);
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
@@ -248,10 +250,10 @@ namespace Engine
                     TextureIndex = TextureIndex,
                     TintColor = Color4.White,
                 };
-                drawer.UpdateMaterial(materialState);
+                drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName}.");
-                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }))
+                if (drawer.Draw(dc, BufferManager, new[] { mesh }))
                 {
                     count += mesh.Count;
                 }
@@ -297,6 +299,8 @@ namespace Engine
 
             int count = 0;
 
+            var dc = context.DeviceContext;
+
             var localTransform = GetTransformByName(meshName);
 
             foreach (string materialName in meshDict.Keys)
@@ -330,7 +334,7 @@ namespace Engine
                     AnimationOffset2 = TransitionOffset,
                     AnimationInterpolationAmount = TransitionInterpolation,
                 };
-                drawer.UpdateMesh(meshState);
+                drawer.UpdateMesh(dc, meshState);
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
@@ -339,10 +343,10 @@ namespace Engine
                     TextureIndex = TextureIndex,
                     TintColor = TintColor,
                 };
-                drawer.UpdateMaterial(materialState);
+                drawer.UpdateMaterial(dc, materialState);
 
                 Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName}.");
-                if (drawer.Draw(context.DeviceContext, BufferManager, new[] { mesh }))
+                if (drawer.Draw(dc, BufferManager, new[] { mesh }))
                 {
                     count += mesh.Count;
                 }

@@ -7,8 +7,9 @@ namespace Engine.Common
     using SharpDX;
     using SharpDX.Direct3D;
     using SharpDX.Direct3D11;
-    using SharpDX.DXGI;
     using SharpDX.Mathematics.Interop;
+    using System.Runtime.InteropServices;
+    using Format = SharpDX.DXGI.Format;
 
     /// <summary>
     /// Engine device context
@@ -1226,6 +1227,219 @@ namespace Engine.Common
                 currentIndexFormat = format;
                 currentIndexOffset = offset;
             }
+        }
+
+        /// <summary>
+        /// Updates a constant buffer value in the device
+        /// </summary>
+        /// <typeparam name="T">Type of data</typeparam>
+        /// <param name="dataStream">Data stream</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="value">Value</param>
+        internal bool UpdateConstantBuffer<T>(DataStream dataStream, Buffer buffer, T value) where T : struct, IBufferData
+        {
+            Marshal.StructureToPtr(value, dataStream.DataPointer, false);
+
+            var dataBox = new DataBox(dataStream.DataPointer, 0, 0);
+            deviceContext.UpdateSubresource(dataBox, buffer, 0);
+
+            return true;
+        }
+
+        /// <summary>
+        /// Updates a texture
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="texture">Texture to update</param>
+        /// <param name="data">Data to write</param>
+        public void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        {
+            if (data?.Any() == true)
+            {
+                using (var resource = texture.GetResource().Resource.QueryInterface<Texture1D>())
+                {
+                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    using (stream)
+                    {
+                        stream.Position = 0;
+                        stream.WriteRange(data.ToArray());
+                    }
+                    deviceContext.UnmapSubresource(resource, 0);
+                }
+
+                Counters.BufferWrites++;
+            }
+        }
+        /// <summary>
+        /// Updates a texture
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="texture">Texture to update</param>
+        /// <param name="data">Data to write</param>
+        public void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        {
+            if (data?.Any() == true)
+            {
+                using (var resource = texture.GetResource().Resource.QueryInterface<Texture2D1>())
+                {
+                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                    using (stream)
+                    {
+                        stream.Position = 0;
+                        stream.WriteRange(data.ToArray());
+                    }
+                    deviceContext.UnmapSubresource(resource, 0);
+                }
+
+                Counters.BufferWrites++;
+            }
+        }
+
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        internal bool WriteDiscardBuffer<T>(Buffer buffer, T data)
+            where T : struct
+        {
+            return WriteDiscardBuffer(buffer, 0, new[] { data });
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        internal bool WriteDiscardBuffer<T>(Buffer buffer, IEnumerable<T> data)
+            where T : struct
+        {
+            return WriteDiscardBuffer(buffer, 0, data);
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        internal bool WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
+            where T : struct
+        {
+            if (buffer == null)
+            {
+                return false;
+            }
+
+            if (data?.Any() != true)
+            {
+                return true;
+            }
+
+            deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            using (stream)
+            {
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+                stream.WriteRange(data.ToArray());
+            }
+            deviceContext.UnmapSubresource(buffer, 0);
+
+            Counters.BufferWrites++;
+
+            return true;
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="data">Complete data</param>
+        internal bool WriteNoOverwriteBuffer<T>(Buffer buffer, IEnumerable<T> data)
+            where T : struct
+        {
+            return WriteNoOverwriteBuffer(buffer, 0, data);
+        }
+        /// <summary>
+        /// Writes data into buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphic context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Buffer element offset to write</param>
+        /// <param name="data">Complete data</param>
+        internal bool WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
+            where T : struct
+        {
+            if (buffer == null)
+            {
+                return false;
+            }
+
+            if (data?.Any() != true)
+            {
+                return true;
+            }
+
+            deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+            using (stream)
+            {
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+                stream.WriteRange(data.ToArray());
+            }
+            deviceContext.UnmapSubresource(buffer, 0);
+
+            Counters.BufferWrites++;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Reads an array of values from the specified buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="length">Array length</param>
+        /// <returns>Returns readed data</returns>
+        internal IEnumerable<T> ReadBuffer<T>(Buffer buffer, int length)
+            where T : struct
+        {
+            return ReadBuffer<T>(buffer, 0, length);
+        }
+        /// <summary>
+        /// Reads an array of values from the specified buffer
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="deviceContext">Graphics context</param>
+        /// <param name="buffer">Buffer</param>
+        /// <param name="offset">Offset to read</param>
+        /// <param name="length">Array length</param>
+        /// <returns>Returns readed data</returns>
+        internal IEnumerable<T> ReadBuffer<T>(Buffer buffer, long offset, int length)
+            where T : struct
+        {
+            Counters.BufferReads++;
+
+            T[] data = new T[length];
+
+            deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out DataStream stream);
+            using (stream)
+            {
+                stream.Position = Marshal.SizeOf(default(T)) * offset;
+
+                for (int i = 0; i < length; i++)
+                {
+                    data[i] = stream.Read<T>();
+                }
+            }
+            deviceContext.UnmapSubresource(buffer, 0);
+
+            return data;
         }
 
         /// <summary>

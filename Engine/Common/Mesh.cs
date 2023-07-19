@@ -148,14 +148,14 @@ namespace Engine.Common
         /// <summary>
         /// Draw mesh geometry
         /// </summary>
-        /// <param name="context">Device context</param>
-        public virtual void Draw(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public virtual void Draw(EngineDeviceContext dc)
         {
             if (Indexed)
             {
                 if (IndexBuffer.Count > 0)
                 {
-                    context.DrawIndexed(
+                    dc.DrawIndexed(
                         IndexBuffer.Count,
                         IndexBuffer.BufferOffset,
                         VertexBuffer.BufferOffset);
@@ -165,7 +165,7 @@ namespace Engine.Common
             {
                 if (VertexBuffer.Count > 0)
                 {
-                    context.Draw(
+                    dc.Draw(
                         VertexBuffer.Count,
                         VertexBuffer.BufferOffset);
                 }
@@ -174,10 +174,10 @@ namespace Engine.Common
         /// <summary>
         /// Draw mesh geometry
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="count">Instance count</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        public virtual void Draw(EngineDeviceContext context, int count, int startInstanceLocation)
+        public virtual void Draw(EngineDeviceContext dc, int count, int startInstanceLocation)
         {
             if (count <= 0)
             {
@@ -186,7 +186,7 @@ namespace Engine.Common
 
             if (Indexed && IndexBuffer.Count > 0)
             {
-                context.DrawIndexedInstanced(
+                dc.DrawIndexedInstanced(
                     IndexBuffer.Count,
                     count,
                     IndexBuffer.BufferOffset,
@@ -197,7 +197,7 @@ namespace Engine.Common
 
             if (VertexBuffer.Count > 0)
             {
-                context.DrawInstanced(
+                dc.DrawInstanced(
                     VertexBuffer.Count,
                     count,
                     VertexBuffer.BufferOffset, startInstanceLocation);

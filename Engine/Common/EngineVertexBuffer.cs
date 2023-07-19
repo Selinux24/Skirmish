@@ -154,10 +154,11 @@ namespace Engine.Common
         /// <summary>
         /// Writes data to the buffer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="data">Data to write</param>
-        public void Write(IEnumerable<T> data)
+        public void Write(EngineDeviceContext dc, IEnumerable<T> data)
         {
-            Graphics.WriteDiscardBuffer(VertexBuffer, data);
+            dc.WriteDiscardBuffer(VertexBuffer, data);
         }
 
         /// <inheritdoc/>
@@ -171,29 +172,29 @@ namespace Engine.Common
             InputLayout = layout;
         }
         /// <inheritdoc/>
-        public void SetVertexBuffers(EngineDeviceContext context)
+        public void SetVertexBuffers(EngineDeviceContext dc)
         {
-            context.IASetVertexBuffers(BufferSlot, VertexBufferBinding);
+            dc.IASetVertexBuffers(BufferSlot, VertexBufferBinding);
         }
         /// <inheritdoc/>
-        public void SetInputLayout(EngineDeviceContext context)
+        public void SetInputLayout(EngineDeviceContext dc)
         {
-            context.IAInputLayout = InputLayout;
+            dc.IAInputLayout = InputLayout;
         }
         /// <inheritdoc/>
-        public void SetStreamOutputTargets(EngineDeviceContext context)
+        public void SetStreamOutputTargets(EngineDeviceContext dc)
         {
-            context.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
+            dc.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
         }
         /// <inheritdoc/>
-        public void Draw(EngineDeviceContext context, int drawCount)
+        public void Draw(EngineDeviceContext dc, int drawCount)
         {
-            context.Draw(drawCount, 0);
+            dc.Draw(drawCount, 0);
         }
         /// <inheritdoc/>
-        public void DrawAuto(EngineDeviceContext context)
+        public void DrawAuto(EngineDeviceContext dc)
         {
-            context.DrawAuto();
+            dc.DrawAuto();
         }
     }
 

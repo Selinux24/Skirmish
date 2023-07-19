@@ -172,6 +172,7 @@ namespace Engine
             dc.SetBlendState(graphics.GetBlendState(BlendMode));
 
             decalDrawer.Update(
+                dc,
                 RotateDecals,
                 TextureCount,
                 TintColor,
@@ -227,7 +228,7 @@ namespace Engine
             decals[currentDecalIndex].MaxAge = maxAge;
 
             Logger.WriteTrace(this, $"{Name} - {nameof(AddDecal)} WriteDiscardBuffer");
-            buffer.Write(decals);
+            buffer.Write(Game.Graphics.ImmediateContext, decals);
 
             currentDecalIndex = nextFreeDecal;
         }

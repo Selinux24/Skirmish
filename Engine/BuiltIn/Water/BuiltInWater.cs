@@ -87,7 +87,7 @@ namespace Engine.BuiltIn.Water
             public uint ColorIterations;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerWater));
             }
@@ -115,10 +115,11 @@ namespace Engine.BuiltIn.Water
         /// <summary>
         /// Updates the water drawer state
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateWater(BuiltInWaterState state)
+        public void UpdateWater(EngineDeviceContext dc, BuiltInWaterState state)
         {
-            cbPerWater.WriteData(PerWater.Build(state));
+            cbPerWater.WriteData(dc, PerWater.Build(state));
 
             var pixelShader = GetPixelShader<WaterPs>();
             pixelShader?.SetPerWaterConstantBuffer(cbPerWater);

@@ -51,7 +51,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectCombine(EngineShaderResourceView texture1, EngineShaderResourceView texture2)
+        public IBuiltInDrawer UpdateEffectCombine(EngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInCombine>();
 
@@ -60,29 +60,29 @@ namespace Engine
             return drawer;
         }
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectParameters(BuiltInPostProcessState state)
+        public IBuiltInDrawer UpdateEffectParameters(EngineDeviceContext dc, BuiltInPostProcessState state)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
-            drawer.UpdatePass(state);
+            drawer.UpdatePass(dc, state);
 
             return drawer;
         }
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffect(EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
+        public IBuiltInDrawer UpdateEffect(EngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
-            drawer.UpdateEffect(sourceTexture, effect);
+            drawer.UpdateEffect(dc, sourceTexture, effect);
 
             return drawer;
         }
         /// <inheritdoc/>
-        public void Draw(EngineDeviceContext context, IBuiltInDrawer drawer)
+        public void Draw(EngineDeviceContext dc, IBuiltInDrawer drawer)
         {
             var bufferManager = game.BufferManager;
 
-            drawer.Draw(context, bufferManager, new DrawOptions
+            drawer.Draw(dc, bufferManager, new DrawOptions
             {
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,

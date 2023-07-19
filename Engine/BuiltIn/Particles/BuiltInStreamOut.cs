@@ -71,7 +71,7 @@ namespace Engine.BuiltIn.Particles
             public Vector4 RandomValues;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerStreamOut));
             }
@@ -99,12 +99,11 @@ namespace Engine.BuiltIn.Particles
         /// <summary>
         /// Updates the particle drawer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Particle state</param>
-        /// <param name="textureCount">Texture count</param>
-        /// <param name="textures">Texture array</param>
-        public void Update(BuiltInStreamOutState state)
+        public void Update(EngineDeviceContext dc, BuiltInStreamOutState state)
         {
-            cbPerStreamOut.WriteData(PerStreamOut.Build(state));
+            cbPerStreamOut.WriteData(dc, PerStreamOut.Build(state));
 
             var geometryShader = GetGeometryShader<StreamOutGS>();
             geometryShader?.SetPerStreamOutConstantBuffer(cbPerStreamOut);

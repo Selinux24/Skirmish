@@ -119,7 +119,7 @@ namespace Engine.BuiltIn.Billboard
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
@@ -131,7 +131,7 @@ namespace Engine.BuiltIn.Billboard
                 cbPerBillboard,
             };
 
-            context.SetPixelShaderConstantBuffers(0, cb);
+            dc.SetPixelShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
@@ -143,9 +143,9 @@ namespace Engine.BuiltIn.Billboard
                 normalMapArray,
             };
 
-            context.SetPixelShaderResourceViews(0, rv);
+            dc.SetPixelShaderResourceViews(0, rv);
 
-            context.SetPixelShaderSampler(0, samplerBillboards);
+            dc.SetPixelShaderSampler(0, samplerBillboards);
         }
     }
 }

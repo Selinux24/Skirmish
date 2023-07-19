@@ -32,17 +32,17 @@ namespace Engine.BuiltIn.Forward
         }
 
         /// <inheritdoc/>
-        public override void UpdateMesh(BuiltInDrawerMeshState state)
+        public override void UpdateMesh(EngineDeviceContext dc, BuiltInDrawerMeshState state)
         {
-            cbPerMesh.WriteData(PerMeshSkinned.Build(state));
+            cbPerMesh.WriteData(dc, PerMeshSkinned.Build(state));
 
             var vertexShader = GetVertexShader<PositionColorSkinnedVs>();
             vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);
         }
         /// <inheritdoc/>
-        public override void UpdateMaterial(BuiltInDrawerMaterialState state)
+        public override void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
-            cbPerMaterial.WriteData(PerMaterialColor.Build(state));
+            cbPerMaterial.WriteData(dc, PerMaterialColor.Build(state));
 
             var vertexShader = GetVertexShader<PositionColorSkinnedVs>();
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);

@@ -329,7 +329,7 @@ namespace Engine.Common
             return null;
         }
         /// <inheritdoc/>
-        public void ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
+        public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
         {
             bool updated = false;
 
@@ -343,10 +343,7 @@ namespace Engine.Common
                 }
             }
 
-            if (updated)
-            {
-                Scene.UpdateMaterialPalette();
-            }
+            return updated;
         }
     }
 }

@@ -80,14 +80,14 @@ namespace Engine.BuiltIn.Particles
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
                 cbPerStreamOut,
             };
 
-            context.SetGeometryShaderConstantBuffers(0, cb);
+            dc.SetGeometryShaderConstantBuffers(0, cb);
         }
     }
 }

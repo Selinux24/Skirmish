@@ -180,10 +180,10 @@ namespace Engine
         /// <summary>
         /// Updates the internal buffers according to the new render dimension
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
+        /// <param name="dc">Device context</param>
         /// <param name="width">New width</param>
         /// <param name="height">New height</param>
-        public void Update(Graphics graphics, int width, int height)
+        public void Update(EngineDeviceContext dc, int width, int height)
         {
             var verts = new List<VertexPosition>();
             var indx = new List<uint>();
@@ -196,21 +196,21 @@ namespace Engine
 
             if (lightGeometryVertexBuffer == null)
             {
-                lightGeometryVertexBuffer = graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts, true);
+                lightGeometryVertexBuffer = Graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts, true);
                 lightGeometryVertexBufferBinding = new VertexBufferBinding(lightGeometryVertexBuffer, verts[0].GetStride(), 0);
             }
             else
             {
-                graphics.WriteDiscardBuffer(lightGeometryVertexBuffer, verts);
+                dc.WriteDiscardBuffer(lightGeometryVertexBuffer, verts);
             }
 
             if (lightGeometryIndexBuffer == null)
             {
-                lightGeometryIndexBuffer = graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx, true);
+                lightGeometryIndexBuffer = Graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx, true);
             }
             else
             {
-                graphics.WriteDiscardBuffer(lightGeometryIndexBuffer, indx);
+                dc.WriteDiscardBuffer(lightGeometryIndexBuffer, indx);
             }
         }
         /// <summary>
@@ -279,135 +279,133 @@ namespace Engine
         /// <summary>
         /// Draws a single light
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="geometry">Geometry</param>
         /// <param name="drawer">Drawer</param>
-        private void DrawSingleLight(EngineDeviceContext context, LightGeometry geometry, IBuiltInDrawer drawer)
+        private void DrawSingleLight(EngineDeviceContext dc, LightGeometry geometry, IBuiltInDrawer drawer)
         {
-            drawer.Draw(context, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, geometry.IndexCount, geometry.Offset);
+            drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, geometry.IndexCount, geometry.Offset);
         }
         /// <summary>
         /// Binds the hemispheric/directional (global) light input layout to the input assembler
         /// </summary>
-        /// <param name="context">Device context</param>
-        public void BindGlobalLight(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public void BindGlobalLight(EngineDeviceContext dc)
         {
-            context.IAInputLayout = globalLightInputLayout;
+            dc.IAInputLayout = globalLightInputLayout;
         }
         /// <summary>
         /// Draws a directional light
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawDirectional(EngineDeviceContext context, BuiltInLightDirectional drawer)
+        public void DrawDirectional(EngineDeviceContext dc, BuiltInLightDirectional drawer)
         {
-            drawer.Draw(context, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
+            drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
         /// <summary>
         /// Binds the point light input layout to the input assembler
         /// </summary>
-        /// <param name="context">Device context</param>
-        public void BindPoint(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public void BindPoint(EngineDeviceContext dc)
         {
-            context.IAInputLayout = pointLightInputLayout;
+            dc.IAInputLayout = pointLightInputLayout;
         }
         /// <summary>
         /// Draws a point light
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="stencilDrawer">Stencil drawer</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawPoint(Graphics graphics, EngineDeviceContext context, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
+        public void DrawPoint(EngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
         {
             var geometry = pointLightGeometry;
+            
+            SetRasterizerStencilPass(dc);
+            SetDepthStencilVolumeMarking(dc);
+            dc.ClearDepthStencilBuffer(Graphics.DefaultDepthStencil, false, true);
+            DrawSingleLight(dc, geometry, stencilDrawer);
 
-            SetRasterizerStencilPass(context);
-            SetDepthStencilVolumeMarking(context);
-            context.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            DrawSingleLight(context, geometry, stencilDrawer);
-
-            SetRasterizerLightingPass(context);
-            SetDepthStencilVolumeDrawing(context);
-            DrawSingleLight(context, geometry, drawer);
+            SetRasterizerLightingPass(dc);
+            SetDepthStencilVolumeDrawing(dc);
+            DrawSingleLight(dc, geometry, drawer);
         }
         /// <summary>
         /// Binds the spot light input layout to the input assembler
         /// </summary>
-        /// <param name="context">Device context</param>
-        public void BindSpot(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public void BindSpot(EngineDeviceContext dc)
         {
-            context.IAInputLayout = spotLightInputLayout;
+            dc.IAInputLayout = spotLightInputLayout;
         }
         /// <summary>
         /// Draws a spot light
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="stencilDrawer">Stencil drawer</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawSpot(Graphics graphics, EngineDeviceContext context, BuiltInStencil stencilDrawer, BuiltInLightSpot drawer)
+        public void DrawSpot(EngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightSpot drawer)
         {
             var geometry = spotLightGeometry;
 
-            SetRasterizerStencilPass(context);
-            SetDepthStencilVolumeMarking(context);
-            context.ClearDepthStencilBuffer(graphics.DefaultDepthStencil, false, true);
-            DrawSingleLight(context, geometry, stencilDrawer);
+            SetRasterizerStencilPass(dc);
+            SetDepthStencilVolumeMarking(dc);
+            dc.ClearDepthStencilBuffer(Graphics.DefaultDepthStencil, false, true);
+            DrawSingleLight(dc, geometry, stencilDrawer);
 
-            SetRasterizerLightingPass(context);
-            SetDepthStencilVolumeDrawing(context);
-            DrawSingleLight(context, geometry, drawer);
+            SetRasterizerLightingPass(dc);
+            SetDepthStencilVolumeDrawing(dc);
+            DrawSingleLight(dc, geometry, drawer);
         }
         /// <summary>
         /// Binds the result box input layout to the input assembler
         /// </summary>
-        /// <param name="context">Device context</param>
-        public void BindResult(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public void BindResult(EngineDeviceContext dc)
         {
-            context.IAInputLayout = combineLightsInputLayout;
+            dc.IAInputLayout = combineLightsInputLayout;
         }
         /// <summary>
         /// Draws the resulting light composition
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="drawer">Effect</param>
-        public void DrawResult(EngineDeviceContext context, BuiltInComposer drawer)
+        public void DrawResult(EngineDeviceContext dc, BuiltInComposer drawer)
         {
-            drawer.Draw(context, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
+            drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
 
         /// <summary>
         /// Sets stencil pass rasterizer
         /// </summary>
-        /// <param name="context">Device context</param>
-        private void SetRasterizerStencilPass(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private void SetRasterizerStencilPass(EngineDeviceContext dc)
         {
-            context.SetRasterizerState(rasterizerStencilPass);
+            dc.SetRasterizerState(rasterizerStencilPass);
         }
         /// <summary>
         /// Stes lighting pass rasterizer
         /// </summary>
-        /// <param name="context">Device context</param>
-        public void SetRasterizerLightingPass(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public void SetRasterizerLightingPass(EngineDeviceContext dc)
         {
-            context.SetRasterizerState(rasterizerLightingPass);
+            dc.SetRasterizerState(rasterizerLightingPass);
         }
         /// <summary>
         /// Sets depth stencil for volume marking
         /// </summary>
-        /// <param name="context">Device context</param>
-        public void SetDepthStencilVolumeMarking(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public void SetDepthStencilVolumeMarking(EngineDeviceContext dc)
         {
-            context.SetDepthStencilState(depthStencilVolumeMarking);
+            dc.SetDepthStencilState(depthStencilVolumeMarking);
         }
         /// <summary>
         /// Sets depth stencil for volume drawing
         /// </summary>
-        /// <param name="context">Device context</param>
-        public void SetDepthStencilVolumeDrawing(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        public void SetDepthStencilVolumeDrawing(EngineDeviceContext dc)
         {
-            context.SetDepthStencilState(depthStencilVolumeDrawing);
+            dc.SetDepthStencilState(depthStencilVolumeDrawing);
         }
     }
 }

@@ -71,14 +71,14 @@ namespace Engine.BuiltIn.Shadows
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
                 cbPerCastingLight,
             };
 
-            context.SetGeometryShaderConstantBuffers(0, cb);
+            dc.SetGeometryShaderConstantBuffers(0, cb);
         }
     }
 }

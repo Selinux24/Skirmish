@@ -159,7 +159,7 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
@@ -167,7 +167,7 @@ namespace Engine.BuiltIn.Deferred
                 cbPerTerrain,
             };
 
-            context.SetPixelShaderConstantBuffers(0, cb);
+            dc.SetPixelShaderConstantBuffers(0, cb);
 
             var vr = new[]
             {
@@ -178,7 +178,7 @@ namespace Engine.BuiltIn.Deferred
                 highResolutionTexture,
             };
 
-            context.SetPixelShaderResourceViews(0, vr);
+            dc.SetPixelShaderResourceViews(0, vr);
 
             var ss = new[]
             {
@@ -186,7 +186,7 @@ namespace Engine.BuiltIn.Deferred
                 samplerNormal,
             };
 
-            context.SetPixelShaderSamplers(0, ss);
+            dc.SetPixelShaderSamplers(0, ss);
         }
     }
 }

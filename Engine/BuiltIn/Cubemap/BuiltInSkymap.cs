@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Cubemap
             public float TextureIndex;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerCube));
             }
@@ -60,10 +60,12 @@ namespace Engine.BuiltIn.Cubemap
         /// <summary>
         /// Updates the texture
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="texture">Texture</param>
-        public void Update(EngineShaderResourceView texture, uint textureIndex)
+        /// <param name="textureIndex">Texture index</param>
+        public void Update(EngineDeviceContext dc, EngineShaderResourceView texture, uint textureIndex)
         {
-            cbPerCube.WriteData(PerCube.Build(textureIndex));
+            cbPerCube.WriteData(dc, PerCube.Build(textureIndex));
 
             var pixelShader = GetPixelShader<SkymapPs>();
             pixelShader?.SetPerSkyConstantBuffer(cbPerCube);

@@ -32,7 +32,7 @@ namespace Engine.BuiltIn.Deferred
             public Matrix Local;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerLight));
             }
@@ -68,17 +68,18 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Updates per light buffer
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="light">Light constant buffer</param>
-        public void UpdatePerLight(ISceneLightSpot light)
+        public void UpdatePerLight(EngineDeviceContext dc, ISceneLightSpot light)
         {
             var cbLight = BuiltInShaders.GetConstantBuffer<PerLight>();
-            cbLight?.WriteData(PerLight.Build(light.Local));
+            cbLight?.WriteData(dc, PerLight.Build(light.Local));
 
             var vertexShader = GetVertexShader<DeferredLightVs>();
             vertexShader?.SetPerLightConstantBuffer(cbLight);
 
             var cbSpot = BuiltInShaders.GetConstantBuffer<BuiltInShaders.BufferLightSpot>();
-            cbSpot?.WriteData(BuiltInShaders.BufferLightSpot.Build(light));
+            cbSpot?.WriteData(dc, BuiltInShaders.BufferLightSpot.Build(light));
 
             var pixelShader = GetPixelShader<DeferredLightSpotPs>();
             pixelShader?.SetPerLightConstantBuffer(cbSpot);

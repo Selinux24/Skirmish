@@ -17,10 +17,10 @@ namespace Skybox
     {
         private const float alpha = 0.25f;
 
-        private readonly Color4 ruinsVolumeColor = new Color4(Color.Green.RGB(), alpha);
-        private readonly Color4 torchVolumeColor = new Color4(Color.GreenYellow.RGB(), alpha);
-        private readonly Color4 obeliskVolumeColor = new Color4(Color.DarkGreen.RGB(), alpha);
-        private readonly Color4 fountainVolumeColor = new Color4(Color.DarkSeaGreen.RGB(), alpha);
+        private readonly Color4 ruinsVolumeColor = new(Color.Green.RGB(), alpha);
+        private readonly Color4 torchVolumeColor = new(Color.GreenYellow.RGB(), alpha);
+        private readonly Color4 obeliskVolumeColor = new(Color.DarkGreen.RGB(), alpha);
+        private readonly Color4 fountainVolumeColor = new(Color.DarkSeaGreen.RGB(), alpha);
         private readonly int bsphSlices = 20;
         private readonly int bsphStacks = 10;
         private readonly Vector2[] firePositions = new[]
@@ -45,7 +45,7 @@ namespace Skybox
             Quaternion.Identity,
         };
 
-        private readonly Agent walker = new Agent()
+        private readonly Agent walker = new()
         {
             Name = "Walker",
             Height = 1.7f,
@@ -178,7 +178,7 @@ namespace Skybox
         private async Task InitializeLakeBottom()
         {
             // Generates a random terrain using perlin noise
-            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+            var nmDesc = new NoiseMapDescriptor
             {
                 MapWidth = mapSize,
                 MapHeight = mapSize,
@@ -191,7 +191,7 @@ namespace Skybox
             };
             var noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
 
-            Curve heightCurve = new Curve();
+            var heightCurve = new Curve();
             heightCurve.Keys.Add(0, 0);
             heightCurve.Keys.Add(0.4f, 0f);
             heightCurve.Keys.Add(1f, 1f);
@@ -295,7 +295,7 @@ namespace Skybox
         }
         private async Task InitializeDecalEmitter()
         {
-            DecalDrawerDescription desc = new DecalDrawerDescription
+            var desc = new DecalDrawerDescription
             {
                 TextureName = "resources/bullets/bullet-hole.png",
                 MaxDecalCount = 1000,
@@ -526,7 +526,7 @@ namespace Skybox
             var lp = Camera.Position.GetDescription();
             var lv = Camera.Velocity.GetDescription();
             var d = Vector3.Distance(movingFire.Manipulator.Position, Camera.Position);
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             sb.AppendLine($"Mouse (X:{Game.Input.MouseXDelta}; Y:{Game.Input.MouseYDelta}, Wheel: {Game.Input.MouseWheelDelta}) Absolute (X:{Game.Input.MouseX}; Y:{Game.Input.MouseY})");
             sb.AppendLine($"L {m[0]:0.000} R {m[1]:0.000} Distance {d}");
             sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");

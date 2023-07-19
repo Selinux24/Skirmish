@@ -28,10 +28,11 @@ namespace Engine.BuiltIn.Sprites
         /// <summary>
         /// Updates the sprite drawer state
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateSprite(BuiltInSpriteState state)
+        public void UpdateSprite(EngineDeviceContext dc, BuiltInSpriteState state)
         {
-            cbPerSprite.WriteData(PerSprite.Build(state));
+            cbPerSprite.WriteData(dc, PerSprite.Build(state));
 
             var vertexShader = GetVertexShader<SpriteTextureVs>();
             vertexShader?.SetPerSpriteConstantBuffer(cbPerSprite);

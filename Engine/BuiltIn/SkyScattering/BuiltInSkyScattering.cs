@@ -91,7 +91,7 @@ namespace Engine.BuiltIn.SkyScattering
             public uint Samples;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerObject));
             }
@@ -119,10 +119,12 @@ namespace Engine.BuiltIn.SkyScattering
         /// <summary>
         /// Updates the texture
         /// </summary>
-        /// <param name="texture">Texture</param>
-        public void Update(Vector3 lightDirection, BuiltInSkyScatteringState state)
+        /// <param name="dc">Device context</param>
+        /// <param name="lightDirection">Light direction</param>
+        /// <param name="state">State</param>
+        public void Update(EngineDeviceContext dc, Vector3 lightDirection, BuiltInSkyScatteringState state)
         {
-            cbPerObject.WriteData(PerObject.Build(lightDirection, state));
+            cbPerObject.WriteData(dc, PerObject.Build(lightDirection, state));
 
             var vertexShader = GetVertexShader<SkyScatteringVs>();
             vertexShader?.SetPerObjectConstantBuffer(cbPerObject);

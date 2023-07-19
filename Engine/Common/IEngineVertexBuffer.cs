@@ -22,28 +22,28 @@ namespace Engine.Common
         /// <summary>
         /// Sets the vertex buffer in the input assembler
         /// </summary>
-        /// <param name="context">Device context</param>
-        void SetVertexBuffers(EngineDeviceContext context);
+        /// <param name="dc">Device context</param>
+        void SetVertexBuffers(EngineDeviceContext dc);
         /// <summary>
         /// Sets the buffer input layout in the input assembler
         /// </summary>
-        /// <param name="context">Device context</param>
-        void SetInputLayout(EngineDeviceContext context);
+        /// <param name="dc">Device context</param>
+        void SetInputLayout(EngineDeviceContext dc);
         /// <summary>
         /// Binds the buffer to the device's stream output target
         /// </summary>
-        /// <param name="context">Device context</param>
-        void SetStreamOutputTargets(EngineDeviceContext context);
+        /// <param name="dc">Device context</param>
+        void SetStreamOutputTargets(EngineDeviceContext dc);
         /// <summary>
         /// Draws the specified primitive count
         /// </summary>
-        /// <param name="context">Device context</param>
+        /// <param name="dc">Device context</param>
         /// <param name="">Draw count</param>
-        void Draw(EngineDeviceContext context, int drawCount);
+        void Draw(EngineDeviceContext dc, int drawCount);
         /// <summary>
         /// Draws auto
         /// </summary>
-        /// <param name="context">Device context</param>
-        void DrawAuto(EngineDeviceContext context);
+        /// <param name="dc">Device context</param>
+        void DrawAuto(EngineDeviceContext dc);
     }
 }

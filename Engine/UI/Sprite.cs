@@ -213,8 +213,8 @@ namespace Engine.UI
         /// <summary>
         /// Default sprite draw
         /// </summary>
-        /// <param name="context">Device context</param>
-        private bool Draw(EngineDeviceContext context)
+        /// <param name="dc">Device context</param>
+        private bool Draw(EngineDeviceContext dc)
         {
             BuiltInSpriteState state;
 
@@ -261,13 +261,13 @@ namespace Engine.UI
             bool drawn;
             if (Textured)
             {
-                spriteTextureDrawer.UpdateSprite(state);
-                drawn = spriteTextureDrawer.Draw(context, BufferManager, drawOptions);
+                spriteTextureDrawer.UpdateSprite(dc, state);
+                drawn = spriteTextureDrawer.Draw(dc, BufferManager, drawOptions);
             }
             else
             {
-                spriteColorDrawer.UpdateSprite(state);
-                drawn = spriteColorDrawer.Draw(context, BufferManager, drawOptions);
+                spriteColorDrawer.UpdateSprite(dc, state);
+                drawn = spriteColorDrawer.Draw(dc, BufferManager, drawOptions);
             }
 
             Counters.InstancesPerFrame++;

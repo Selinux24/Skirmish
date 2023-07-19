@@ -337,6 +337,8 @@ namespace Engine
                 return false;
             }
 
+            var dc = context.DeviceContext;
+
             var skyState = new BuiltInSkyScatteringState
             {
                 PlanetRadius = PlanetRadius,
@@ -355,7 +357,7 @@ namespace Engine
                 HdrExposure = HDRExposure,
                 Samples = (uint)Resolution,
             };
-            skyDrawer.Update(keyLight.Direction, skyState);
+            skyDrawer.Update(dc, keyLight.Direction, skyState);
 
             var drawOptions = new DrawOptions
             {
@@ -363,7 +365,7 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            if (!skyDrawer.Draw(context.DeviceContext, BufferManager, drawOptions))
+            if (!skyDrawer.Draw(dc, BufferManager, drawOptions))
             {
                 return false;
             }

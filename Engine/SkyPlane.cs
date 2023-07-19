@@ -221,6 +221,8 @@ namespace Engine
                 return false;
             }
 
+            var dc = context.DeviceContext;
+
             var state = new BuiltInCloudsState
             {
                 Perturbed = skyMode == SkyPlaneModes.Perturbed,
@@ -234,7 +236,7 @@ namespace Engine
                 Clouds1 = skyTexture1,
                 Clouds2 = skyTexture2,
             };
-            cloudsDrawer.UpdateClouds(state);
+            cloudsDrawer.UpdateClouds(dc, state);
 
             var drawOptions = new DrawOptions
             {
@@ -242,7 +244,7 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            bool drawn = cloudsDrawer.Draw(context.DeviceContext, BufferManager, drawOptions);
+            bool drawn = cloudsDrawer.Draw(dc, BufferManager, drawOptions);
 
             Counters.InstancesPerFrame++;
             Counters.PrimitivesPerFrame += indexBuffer.Count / 3;

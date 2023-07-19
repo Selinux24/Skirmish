@@ -149,6 +149,8 @@ namespace Engine
                 return false;
             }
 
+            var dc = context.DeviceContext;
+
             var waterState = new BuiltInWaterState
             {
                 BaseColor = WaterState.BaseColor,
@@ -161,7 +163,7 @@ namespace Engine
                 GeometryIterations = WaterState.GeometryIterations,
                 ColorIterations = WaterState.ColorIterations,
             };
-            waterDrawer.UpdateWater(waterState);
+            waterDrawer.UpdateWater(dc, waterState);
 
             var drawOptions = new DrawOptions
             {
@@ -169,7 +171,7 @@ namespace Engine
                 IndexBuffer = indexBuffer,
                 Topology = Topology.TriangleList,
             };
-            if (!waterDrawer.Draw(context.DeviceContext, BufferManager, drawOptions))
+            if (!waterDrawer.Draw(dc, BufferManager, drawOptions))
             {
                 return false;
             }

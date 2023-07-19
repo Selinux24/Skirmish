@@ -83,7 +83,7 @@ namespace Engine.BuiltIn.Common
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext context)
+        public void SetShaderResources(EngineDeviceContext dc)
         {
             var cb = new[]
             {
@@ -93,7 +93,7 @@ namespace Engine.BuiltIn.Common
                 cbPerMaterial,
             };
 
-            context.SetVertexShaderConstantBuffers(0, cb);
+            dc.SetVertexShaderConstantBuffers(0, cb);
 
             var rv = new[]
             {
@@ -101,7 +101,7 @@ namespace Engine.BuiltIn.Common
                 BuiltInShaders.GetAnimationPaletteResourceView(),
             };
 
-            context.SetVertexShaderResourceViews(0, rv);
+            dc.SetVertexShaderResourceViews(0, rv);
         }
     }
 }
