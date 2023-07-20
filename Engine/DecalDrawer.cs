@@ -29,6 +29,10 @@ namespace Engine
         /// </summary>
         private EngineVertexBuffer<VertexDecal> buffer;
         /// <summary>
+        /// Update decals buffer flag
+        /// </summary>
+        private bool updateBuffer = false;
+        /// <summary>
         /// Current decal index to update data
         /// </summary>
         private int currentDecalIndex = 0;
@@ -158,15 +162,23 @@ namespace Engine
                 return false;
             }
 
+            var graphics = Scene.Game.Graphics;
+            var dc = context.DeviceContext;
+
+            if (updateBuffer)
+            {
+                Logger.WriteTrace(this, $"{Name} - {nameof(Draw)} Update decals buffer");
+                buffer.Write(dc, decals);
+
+                updateBuffer = false;
+            }
+
             var mode = context.DrawerMode;
             if (!mode.HasFlag(DrawerModes.ShadowMap))
             {
                 Counters.InstancesPerFrame++;
                 Counters.PrimitivesPerFrame += currentDecals;
             }
-
-            var graphics = Scene.Game.Graphics;
-            var dc = context.DeviceContext;
 
             dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
             dc.SetBlendState(graphics.GetBlendState(BlendMode));
@@ -178,7 +190,7 @@ namespace Engine
                 TintColor,
                 Texture);
 
-            return decalDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, currentDecals);
+            return decalDrawer.Draw(dc, buffer, Topology.PointList, currentDecals);
         }
 
         /// <inheritdoc/>
@@ -227,8 +239,7 @@ namespace Engine
             decals[currentDecalIndex].StartTime = Scene.Game.GameTime.TotalSeconds;
             decals[currentDecalIndex].MaxAge = maxAge;
 
-            Logger.WriteTrace(this, $"{Name} - {nameof(AddDecal)} WriteDiscardBuffer");
-            buffer.Write(Game.Graphics.ImmediateContext, decals);
+            updateBuffer = true;
 
             currentDecalIndex = nextFreeDecal;
         }

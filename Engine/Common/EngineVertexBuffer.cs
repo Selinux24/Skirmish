@@ -18,7 +18,7 @@ namespace Engine.Common
         /// <summary>
         /// Buffer
         /// </summary>
-        protected Buffer VertexBuffer { get; set; }
+        protected EngineBuffer VertexBuffer { get; set; }
         /// <summary>
         /// Vertex buffer binding
         /// </summary>
@@ -69,7 +69,7 @@ namespace Engine.Common
 
                 StreamOutBinding = new[]
                 {
-                    new StreamOutputBufferBinding(VertexBuffer, 0),
+                    new StreamOutputBufferBinding(VertexBuffer.GetBuffer(), 0),
                 };
             }
             else
@@ -79,7 +79,7 @@ namespace Engine.Common
 
             VertexBufferBinding = new[]
             {
-                new VertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
+                new VertexBufferBinding(VertexBuffer.GetBuffer(), default(T).GetStride(), 0),
             };
         }
         /// <summary>
@@ -108,7 +108,7 @@ namespace Engine.Common
 
                 StreamOutBinding = new[]
                 {
-                    new StreamOutputBufferBinding(VertexBuffer, 0),
+                    new StreamOutputBufferBinding(VertexBuffer.GetBuffer(), 0),
                 };
             }
             else
@@ -118,7 +118,7 @@ namespace Engine.Common
 
             VertexBufferBinding = new[]
             {
-                new VertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
+                new VertexBufferBinding(VertexBuffer.GetBuffer(), default(T).GetStride(), 0),
             };
         }
         /// <summary>

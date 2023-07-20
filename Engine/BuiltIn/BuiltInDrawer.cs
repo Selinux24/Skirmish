@@ -262,7 +262,7 @@ namespace Engine.BuiltIn
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext dc, Topology topology, int bufferSlot, VertexBufferBinding vertexBufferBinding, Buffer indexBuffer, int count, int startLocation)
+        public virtual bool Draw(EngineDeviceContext dc, Topology topology, int bufferSlot, VertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation)
         {
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders(dc);

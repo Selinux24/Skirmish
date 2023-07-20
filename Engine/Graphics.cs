@@ -51,7 +51,6 @@ namespace Engine
         /// Swap chain
         /// </summary>
         private SwapChain4 swapChain = null;
-
         /// <summary>
         /// Back buffer format
         /// </summary>
@@ -60,6 +59,10 @@ namespace Engine
         /// Depth buffer format
         /// </summary>
         private readonly Format depthFormat = DepthBufferFormats.D24_UNorm_S8_UInt;
+        /// <summary>
+        /// Graphics deferred context
+        /// </summary>
+        private readonly List<EngineDeviceContext> deferredContextList = new();
 
         /// <summary>
         /// Device description
@@ -517,6 +520,30 @@ namespace Engine
             {
                 Logger.WriteError(this, $"Error presenting Graphics: Code {res.Code}");
             }
+        }
+
+        /// <summary>
+        /// Creates a new deferred context
+        /// </summary>
+        /// <param name="name">Deferred context name</param>
+        public EngineDeviceContext CreateDeferredContext(string name)
+        {
+            var dc = deferredContextList.Find(d => d.Name == name);
+            if (dc != null)
+            {
+                return dc;
+            }
+
+            var deferredContext = new DeviceContext3(device)
+            {
+                DebugName = name,
+            };
+
+            dc = new EngineDeviceContext(name, deferredContext);
+
+            deferredContextList.Add(dc);
+
+            return dc;
         }
 
         /// <summary>

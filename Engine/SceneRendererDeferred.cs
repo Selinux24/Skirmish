@@ -448,7 +448,7 @@ namespace Engine
 
             Viewport = Scene.Game.Form.GetViewport();
 
-            lightDrawer.Update(Scene.Game.Graphics.ImmediateContext, Width, Height);
+            lightDrawer.Update(Width, Height);
         }
         /// <summary>
         /// Binds graphics for g-buffer pass
@@ -503,6 +503,8 @@ namespace Engine
 #if DEBUG
             Stopwatch swPrepare = Stopwatch.StartNew();
 #endif
+            lightDrawer.WriteBuffers(dc);
+
             var directionalLights = context.Lights.GetVisibleDirectionalLights();
             var spotLights = context.Lights.GetVisibleSpotLights();
             var pointLights = context.Lights.GetVisiblePointLights();

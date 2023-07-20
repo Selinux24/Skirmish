@@ -20,7 +20,7 @@ namespace Engine
         /// <param name="data">Vertex data collection</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer(string name, IEnumerable<IVertexData> data, bool dynamic)
+        public EngineBuffer CreateVertexBuffer(string name, IEnumerable<IVertexData> data, bool dynamic)
         {
             var vertexType = data.First().VertexType;
 
@@ -55,7 +55,7 @@ namespace Engine
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer(string name, int sizeInBytes, bool dynamic)
+        public EngineBuffer CreateVertexBuffer(string name, int sizeInBytes, bool dynamic)
         {
             return CreateBuffer(
                 name,
@@ -72,7 +72,7 @@ namespace Engine
         /// <param name="data">Data to write in the buffer</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
+        public EngineBuffer CreateVertexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
             where T : struct
         {
             return CreateBuffer(
@@ -91,7 +91,7 @@ namespace Engine
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
-        internal Buffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
+        public EngineBuffer CreateIndexBuffer<T>(string name, IEnumerable<T> data, bool dynamic)
             where T : struct
         {
             return CreateBuffer(
@@ -109,7 +109,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data to write in the buffer</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateStreamOutBuffer<T>(string name, IEnumerable<T> data)
+        public EngineBuffer CreateStreamOutBuffer<T>(string name, IEnumerable<T> data)
             where T : struct
         {
             return CreateBuffer(
@@ -125,7 +125,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateStreamOutBuffer(string name, int sizeInBytes)
+        public EngineBuffer CreateStreamOutBuffer(string name, int sizeInBytes)
         {
             return CreateBuffer(
                 name,
@@ -141,7 +141,7 @@ namespace Engine
         /// <param name="name">Buffer name</param>
         /// <param name="length">Buffer length</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateStreamOutBuffer<T>(string name, int length)
+        public EngineBuffer CreateStreamOutBuffer<T>(string name, int length)
             where T : struct
         {
             return CreateBuffer<T>(
@@ -158,7 +158,7 @@ namespace Engine
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="name">Buffer name</param>
         /// <returns>Returns created buffer</returns>
-        internal Buffer CreateConstantBuffer<T>(string name)
+        public EngineBuffer CreateConstantBuffer<T>(string name)
             where T : struct, IBufferData
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T));
@@ -179,10 +179,12 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new Buffer(device, description)
+            var buffer = new Buffer(device, description)
             {
                 DebugName = name,
             };
+
+            return new EngineBuffer(buffer);
         }
 
         /// <summary>
@@ -195,7 +197,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        internal Buffer CreateBuffer(string name, int sizeInBytes, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public EngineBuffer CreateBuffer(string name, int sizeInBytes, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
         {
             Counters.RegBuffer(typeof(object), name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
 
@@ -209,10 +211,12 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new Buffer(device, description)
+            var buffer = new Buffer(device, description)
             {
                 DebugName = name,
             };
+
+            return new EngineBuffer(buffer);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -225,7 +229,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        internal Buffer CreateBuffer<T>(string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public EngineBuffer CreateBuffer<T>(string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
@@ -242,10 +246,12 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new Buffer(device, description)
+            var buffer = new Buffer(device, description)
             {
                 DebugName = name,
             };
+
+            return new EngineBuffer(buffer);
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -258,7 +264,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        internal Buffer CreateBuffer<T>(string name, IEnumerable<T> data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count();
@@ -279,10 +285,12 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            return new Buffer(device, dstr, description)
+            var buffer = new Buffer(device, dstr, description)
             {
                 DebugName = name,
             };
+
+            return new EngineBuffer(buffer);
         }
     }
 }

@@ -1,33 +1,8 @@
 ﻿using System;
+using System.Runtime.InteropServices;
 
 namespace Engine.Common
 {
-    using System.Runtime.InteropServices;
-
-    /// <summary>
-    /// Engine constant buffer interface
-    /// </summary>
-    public interface IEngineConstantBuffer : IDisposable
-    {
-        /// <summary>
-        /// Name
-        /// </summary>
-        string Name { get; }
-        /// <summary>
-        /// Gets the internal buffer
-        /// </summary>
-        EngineBuffer Buffer { get; }
-        /// <summary>
-        /// Gets the internal data stream
-        /// </summary>
-        EngineDataStream DataStream { get; }
-
-        /// <summary>
-        /// Gets the current constant data
-        /// </summary>
-        IBufferData GetData();
-    }
-
     /// <summary>
     /// Engine constant buffer
     /// </summary>
@@ -61,7 +36,7 @@ namespace Engine.Common
         {
             Name = name;
             DataStream = new EngineDataStream(Marshal.SizeOf(typeof(T)), true, true);
-            Buffer = new EngineBuffer(graphics.CreateConstantBuffer<T>(name));
+            Buffer = graphics.CreateConstantBuffer<T>(name);
         }
         /// <summary>
         /// Destructor

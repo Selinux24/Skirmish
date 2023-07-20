@@ -37,7 +37,7 @@ namespace Engine
         /// <summary>
         /// Window vertex buffer
         /// </summary>
-        private Buffer lightGeometryVertexBuffer;
+        private EngineBuffer lightGeometryVertexBuffer;
         /// <summary>
         /// Vertex buffer binding
         /// </summary>
@@ -45,7 +45,19 @@ namespace Engine
         /// <summary>
         /// Window index buffer
         /// </summary>
-        private Buffer lightGeometryIndexBuffer;
+        private EngineBuffer lightGeometryIndexBuffer;
+        /// <summary>
+        /// Lights geometry vertices
+        /// </summary>
+        private readonly List<VertexPosition> lightGeometryVertices = new();
+        /// <summary>
+        /// Light geometry indices
+        /// </summary>
+        private readonly List<uint> lightGeometryIndices = new();
+        /// <summary>
+        /// Update light geometry buffers flag
+        /// </summary>
+        private bool updateLightBuffers = false;
         /// <summary>
         /// Input layout for directional and hemispheric lights
         /// </summary>
@@ -180,102 +192,110 @@ namespace Engine
         /// <summary>
         /// Updates the internal buffers according to the new render dimension
         /// </summary>
-        /// <param name="dc">Device context</param>
         /// <param name="width">New width</param>
         /// <param name="height">New height</param>
-        public void Update(EngineDeviceContext dc, int width, int height)
+        public void Update(int width, int height)
         {
-            var verts = new List<VertexPosition>();
-            var indx = new List<uint>();
+            lightGeometryVertices.Clear();
+            lightGeometryIndices.Clear();
 
-            CreateScreen(verts, indx, width, height);
+            AddRectangle(width, height);
 
-            CreatePointLight(verts, indx);
+            AddPointLight();
 
-            CreateSpotLight(verts, indx);
+            AddSpotLight();
 
-            if (lightGeometryVertexBuffer == null)
-            {
-                lightGeometryVertexBuffer = Graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", verts, true);
-                lightGeometryVertexBufferBinding = new VertexBufferBinding(lightGeometryVertexBuffer, verts[0].GetStride(), 0);
-            }
-            else
-            {
-                dc.WriteDiscardBuffer(lightGeometryVertexBuffer, verts);
-            }
-
-            if (lightGeometryIndexBuffer == null)
-            {
-                lightGeometryIndexBuffer = Graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", indx, true);
-            }
-            else
-            {
-                dc.WriteDiscardBuffer(lightGeometryIndexBuffer, indx);
-            }
+            updateLightBuffers = true;
         }
         /// <summary>
         /// Creates the geometry to draw the screen
         /// </summary>
-        /// <param name="verts">Vertex list</param>
-        /// <param name="indx">Index list</param>
         /// <param name="width">Screen width</param>
         /// <param name="height">Screen height</param>
-        private void CreateScreen(List<VertexPosition> verts, List<uint> indx, int width, int height)
+        private void AddRectangle(int width, int height)
         {
             var screen = GeometryUtil.CreateScreen(width, height);
 
-            screenGeometry.Offset = indx.Count;
+            screenGeometry.Offset = lightGeometryIndices.Count;
             screenGeometry.IndexCount = screen.Indices.Count();
 
             screen.Indices.ToList().ForEach(i =>
             {
                 //Sum offsets
-                indx.Add(i + (uint)verts.Count);
+                lightGeometryIndices.Add(i + (uint)lightGeometryVertices.Count);
             });
 
-            verts.AddRange(VertexPosition.Generate(screen.Vertices));
+            lightGeometryVertices.AddRange(VertexPosition.Generate(screen.Vertices));
         }
         /// <summary>
         /// Creates the geometry to draw a point light
         /// </summary>
-        /// <param name="verts">Vertex list</param>
-        /// <param name="indx">Index list</param>
-        private void CreatePointLight(List<VertexPosition> verts, List<uint> indx)
+        private void AddPointLight()
         {
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
-            pointLightGeometry.Offset = indx.Count;
+            pointLightGeometry.Offset = lightGeometryIndices.Count;
             pointLightGeometry.IndexCount = sphere.Indices.Count();
 
             sphere.Indices.ToList().ForEach(i =>
             {
                 //Sum offsets
-                indx.Add(i + (uint)verts.Count);
+                lightGeometryIndices.Add(i + (uint)lightGeometryVertices.Count);
             });
 
-            verts.AddRange(VertexPosition.Generate(sphere.Vertices));
+            lightGeometryVertices.AddRange(VertexPosition.Generate(sphere.Vertices));
         }
         /// <summary>
         /// Creates the geometry to draw a spot light
         /// </summary>
-        /// <param name="verts">Vertex list</param>
-        /// <param name="indx">Index list</param>
-        private void CreateSpotLight(List<VertexPosition> verts, List<uint> indx)
+        private void AddSpotLight()
         {
             var sphere = GeometryUtil.CreateSphere(Topology.TriangleList, 1, 16, 16);
 
-            spotLightGeometry.Offset = indx.Count;
+            spotLightGeometry.Offset = lightGeometryIndices.Count;
             spotLightGeometry.IndexCount = sphere.Indices.Count();
 
             sphere.Indices.ToList().ForEach(i =>
             {
                 //Sum offsets
-                indx.Add(i + (uint)verts.Count);
+                lightGeometryIndices.Add(i + (uint)lightGeometryVertices.Count);
             });
 
-            verts.AddRange(VertexPosition.Generate(sphere.Vertices));
+            lightGeometryVertices.AddRange(VertexPosition.Generate(sphere.Vertices));
         }
 
+        /// <summary>
+        /// Write light geometry in buffers
+        /// </summary>
+        /// <param name="dc">Device context</param>
+        public void WriteBuffers(EngineDeviceContext dc)
+        {
+            if (!updateLightBuffers)
+            {
+                return;
+            }
+
+            if (lightGeometryVertexBuffer == null)
+            {
+                lightGeometryVertexBuffer = Graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", lightGeometryVertices, true);
+                lightGeometryVertexBufferBinding = new VertexBufferBinding(lightGeometryVertexBuffer.GetBuffer(), lightGeometryVertices[0].GetStride(), 0);
+            }
+            else
+            {
+                dc.WriteDiscardBuffer(lightGeometryVertexBuffer, lightGeometryVertices);
+            }
+
+            if (lightGeometryIndexBuffer == null)
+            {
+                lightGeometryIndexBuffer = Graphics.CreateIndexBuffer("Deferred Redenderer Light Geometry", lightGeometryIndices, true);
+            }
+            else
+            {
+                dc.WriteDiscardBuffer(lightGeometryIndexBuffer, lightGeometryIndices);
+            }
+
+            updateLightBuffers = true;
+        }
         /// <summary>
         /// Draws a single light
         /// </summary>
@@ -320,7 +340,7 @@ namespace Engine
         public void DrawPoint(EngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
         {
             var geometry = pointLightGeometry;
-            
+
             SetRasterizerStencilPass(dc);
             SetDepthStencilVolumeMarking(dc);
             dc.ClearDepthStencilBuffer(Graphics.DefaultDepthStencil, false, true);

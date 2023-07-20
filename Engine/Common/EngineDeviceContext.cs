@@ -305,7 +305,7 @@ namespace Engine.Common
         /// <summary>
         /// Current index buffer reference
         /// </summary>
-        private Buffer currentIndexBufferRef = null;
+        private EngineBuffer currentIndexBufferRef = null;
         /// <summary>
         /// Current index buffer format
         /// </summary>
@@ -612,6 +612,41 @@ namespace Engine.Common
             currentRasterizerState = state;
 
             Counters.RasterizerStateChanges++;
+        }
+
+        /// <summary>
+        /// Bind an array of vertex buffers to the input-assembler stage.
+        /// </summary>
+        /// <param name="firstSlot">The first input slot for binding</param>
+        /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
+        public void IASetVertexBuffers(int firstSlot, params VertexBufferBinding[] vertexBufferBindings)
+        {
+            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
+            {
+                deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
+                Counters.IAVertexBuffersSets++;
+
+                currentVertexBufferFirstSlot = firstSlot;
+                currentVertexBufferBindings = vertexBufferBindings;
+            }
+        }
+        /// <summary>
+        /// Bind an index buffer to the input-assembler stage.
+        /// </summary>
+        /// <param name="indexBufferRef">A reference to an Buffer object</param>
+        /// <param name="format">A SharpDX.DXGI.Format that specifies the format of the data in the index buffer</param>
+        /// <param name="offset">Offset (in bytes) from the start of the index buffer to the first index to use</param>
+        public void IASetIndexBuffer(EngineBuffer indexBufferRef, Format format, int offset)
+        {
+            if (currentIndexBufferRef != indexBufferRef || currentIndexFormat != format || currentIndexOffset != offset)
+            {
+                deviceContext.InputAssembler.SetIndexBuffer(indexBufferRef?.GetBuffer(), format, offset);
+                Counters.IAIndexBufferSets++;
+
+                currentIndexBufferRef = indexBufferRef;
+                currentIndexFormat = format;
+                currentIndexOffset = offset;
+            }
         }
 
         /// <summary>
@@ -1195,41 +1230,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Bind an array of vertex buffers to the input-assembler stage.
-        /// </summary>
-        /// <param name="firstSlot">The first input slot for binding</param>
-        /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
-        public void IASetVertexBuffers(int firstSlot, params VertexBufferBinding[] vertexBufferBindings)
-        {
-            if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
-            {
-                deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
-                Counters.IAVertexBuffersSets++;
-
-                currentVertexBufferFirstSlot = firstSlot;
-                currentVertexBufferBindings = vertexBufferBindings;
-            }
-        }
-        /// <summary>
-        /// Bind an index buffer to the input-assembler stage.
-        /// </summary>
-        /// <param name="indexBufferRef">A reference to an Buffer object</param>
-        /// <param name="format">A SharpDX.DXGI.Format that specifies the format of the data in the index buffer</param>
-        /// <param name="offset">Offset (in bytes) from the start of the index buffer to the first index to use</param>
-        public void IASetIndexBuffer(Buffer indexBufferRef, Format format, int offset)
-        {
-            if (currentIndexBufferRef != indexBufferRef || currentIndexFormat != format || currentIndexOffset != offset)
-            {
-                deviceContext.InputAssembler.SetIndexBuffer(indexBufferRef, format, offset);
-                Counters.IAIndexBufferSets++;
-
-                currentIndexBufferRef = indexBufferRef;
-                currentIndexFormat = format;
-                currentIndexOffset = offset;
-            }
-        }
-
-        /// <summary>
         /// Updates a constant buffer in the device context
         /// </summary>
         /// <param name="constantBuffer">Constant buffer</param>
@@ -1308,7 +1308,7 @@ namespace Engine.Common
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        internal bool WriteDiscardBuffer<T>(Buffer buffer, T data)
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, T data)
             where T : struct
         {
             return WriteDiscardBuffer(buffer, 0, new[] { data });
@@ -1320,7 +1320,7 @@ namespace Engine.Common
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        internal bool WriteDiscardBuffer<T>(Buffer buffer, IEnumerable<T> data)
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, IEnumerable<T> data)
             where T : struct
         {
             return WriteDiscardBuffer(buffer, 0, data);
@@ -1333,10 +1333,12 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        internal bool WriteDiscardBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
+        public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            if (buffer == null)
+            var b = buffer?.GetBuffer();
+
+            if (b == null)
             {
                 return false;
             }
@@ -1346,13 +1348,13 @@ namespace Engine.Common
                 return true;
             }
 
-            deviceContext.MapSubresource(buffer, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
                 stream.WriteRange(data.ToArray());
             }
-            deviceContext.UnmapSubresource(buffer, 0);
+            deviceContext.UnmapSubresource(b, 0);
 
             Counters.BufferWrites++;
 
@@ -1365,7 +1367,7 @@ namespace Engine.Common
         /// <param name="deviceContext">Graphic context</param>
         /// <param name="buffer">Buffer</param>
         /// <param name="data">Complete data</param>
-        internal bool WriteNoOverwriteBuffer<T>(Buffer buffer, IEnumerable<T> data)
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, IEnumerable<T> data)
             where T : struct
         {
             return WriteNoOverwriteBuffer(buffer, 0, data);
@@ -1378,10 +1380,12 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="offset">Buffer element offset to write</param>
         /// <param name="data">Complete data</param>
-        internal bool WriteNoOverwriteBuffer<T>(Buffer buffer, long offset, IEnumerable<T> data)
+        public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
-            if (buffer == null)
+            var b = buffer?.GetBuffer();
+
+            if (b == null)
             {
                 return false;
             }
@@ -1391,13 +1395,13 @@ namespace Engine.Common
                 return true;
             }
 
-            deviceContext.MapSubresource(buffer, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+            deviceContext.MapSubresource(b, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
                 stream.WriteRange(data.ToArray());
             }
-            deviceContext.UnmapSubresource(buffer, 0);
+            deviceContext.UnmapSubresource(b, 0);
 
             Counters.BufferWrites++;
 
@@ -1412,7 +1416,7 @@ namespace Engine.Common
         /// <param name="buffer">Buffer</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        internal IEnumerable<T> ReadBuffer<T>(Buffer buffer, int length)
+        public IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, int length)
             where T : struct
         {
             return ReadBuffer<T>(buffer, 0, length);
@@ -1426,14 +1430,20 @@ namespace Engine.Common
         /// <param name="offset">Offset to read</param>
         /// <param name="length">Array length</param>
         /// <returns>Returns readed data</returns>
-        internal IEnumerable<T> ReadBuffer<T>(Buffer buffer, long offset, int length)
+        public IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, long offset, int length)
             where T : struct
         {
+            var b = buffer?.GetBuffer();
+            if (b == null)
+            {
+                return Enumerable.Empty<T>();
+            }
+
             Counters.BufferReads++;
 
             T[] data = new T[length];
 
-            deviceContext.MapSubresource(buffer, MapMode.Read, MapFlags.None, out DataStream stream);
+            deviceContext.MapSubresource(b, MapMode.Read, MapFlags.None, out DataStream stream);
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
@@ -1443,7 +1453,7 @@ namespace Engine.Common
                     data[i] = stream.Read<T>();
                 }
             }
-            deviceContext.UnmapSubresource(buffer, 0);
+            deviceContext.UnmapSubresource(b, 0);
 
             return data;
         }
@@ -1506,6 +1516,26 @@ namespace Engine.Common
             deviceContext.DrawAuto();
 
             Counters.DrawCallsPerFrame++;
+        }
+
+        /// <summary>
+        /// Finish a command list
+        /// </summary>
+        /// <param name="restoreState">Resore state</param>
+        public IEngineCommandList FinishCommandList(bool restoreState = false)
+        {
+            var cmdList = deviceContext.FinishCommandList(restoreState);
+
+            return new EngineCommandList(cmdList);
+        }
+        /// <summary>
+        /// Executes a command list in the immediate context
+        /// </summary>
+        /// <param name="commandList">Command list</param>
+        /// <param name="restoreState">Resore state</param>
+        public void ExecuteCommandList(IEngineCommandList commandList, bool restoreState = false)
+        {
+            deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
         }
     }
 }

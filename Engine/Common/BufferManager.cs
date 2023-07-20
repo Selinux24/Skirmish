@@ -37,7 +37,7 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         /// <param name="vertices">Vertices</param>
         /// <returns>Returns new buffer</returns>
-        private static async Task<Buffer> CreateVertexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<IVertexData> vertices)
+        private static async Task<EngineBuffer> CreateVertexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<IVertexData> vertices)
         {
             if (vertices?.Any() != true)
             {
@@ -54,7 +54,7 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         /// <param name="instancingData">Instancing data</param>
         /// <returns>Returns the new buffer</returns>
-        private static async Task<Buffer> CreateInstancingBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<VertexInstancingData> instancingData)
+        private static async Task<EngineBuffer> CreateInstancingBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<VertexInstancingData> instancingData)
         {
             if (instancingData?.Any() != true)
             {
@@ -71,7 +71,7 @@ namespace Engine.Common
         /// <param name="dynamic">Dynamic or Inmutable buffers</param>
         /// <param name="indices">Indices</param>
         /// <returns>Returns new buffer</returns>
-        private static async Task<Buffer> CreateIndexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<uint> indices)
+        private static async Task<EngineBuffer> CreateIndexBuffer(Graphics graphics, string name, bool dynamic, IEnumerable<uint> indices)
         {
             if (indices?.Any() != true)
             {
@@ -92,7 +92,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffers
         /// </summary>
-        private readonly List<Buffer> vertexBuffers = new();
+        private readonly List<EngineBuffer> vertexBuffers = new();
         /// <summary>
         /// Vertex buffer bindings
         /// </summary>
@@ -100,7 +100,7 @@ namespace Engine.Common
         /// <summary>
         /// Index buffer
         /// </summary>
-        private readonly List<Buffer> indexBuffers = new();
+        private readonly List<EngineBuffer> indexBuffers = new();
         /// <summary>
         /// Vertex buffer descriptors
         /// </summary>
@@ -408,7 +408,7 @@ namespace Engine.Common
                     string name = $"InstancingBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
                     var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
-                    var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
+                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), data[0].GetStride(), 0);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
                     vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
@@ -427,7 +427,7 @@ namespace Engine.Common
                     string name = $"InstancingBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
                     var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
-                    var binding = new VertexBufferBinding(buffer, data[0].GetStride(), 0);
+                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), data[0].GetStride(), 0);
 
                     vertexBuffers.Add(buffer);
                     vertexBufferBindings.Add(binding);
@@ -468,7 +468,7 @@ namespace Engine.Common
                     //Recreate the buffer and binding
                     string name = $"VertexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
-                    var binding = new VertexBufferBinding(buffer, descriptor.GetStride(), 0);
+                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), descriptor.GetStride(), 0);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
                     vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
@@ -486,7 +486,7 @@ namespace Engine.Common
                     //Create the buffer and binding
                     string name = $"VertexBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
-                    var binding = new VertexBufferBinding(buffer, descriptor.GetStride(), 0);
+                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), descriptor.GetStride(), 0);
 
                     vertexBuffers.Add(buffer);
                     vertexBufferBindings.Add(binding);
