@@ -640,24 +640,9 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         protected void UpdateGlobalState(EngineDeviceContext dc)
         {
-            if (updateGlobals)
-            {
-                ShadowMapperDirectional?.UpdateGlobals();
-                ShadowMapperPoint?.UpdateGlobals();
-                ShadowMapperSpot?.UpdateGlobals();
-
-                BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-
-                updateGlobals = false;
-            }
-        }
-
-        /// <inheritdoc/>
-        public virtual void UpdateGlobals(bool updatedEnvironment, bool updatedComponents)
-        {
-            updateMaterialsPalette = updateMaterialsPalette || updatedComponents;
-            updateAnimationsPalette = updateAnimationsPalette || updatedComponents;
-            updateGlobals = updateGlobals || updatedEnvironment;
+            ShadowMapperDirectional?.UpdateGlobals();
+            ShadowMapperPoint?.UpdateGlobals();
+            ShadowMapperSpot?.UpdateGlobals();
 
             if (updateMaterialsPalette)
             {
@@ -680,6 +665,21 @@ namespace Engine.Common
 
                 updateAnimationsPalette = false;
             }
+
+            if (updateGlobals)
+            {
+                BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+
+                updateGlobals = false;
+            }
+        }
+
+        /// <inheritdoc/>
+        public virtual void UpdateGlobals(bool updatedEnvironment, bool updatedComponents)
+        {
+            updateMaterialsPalette = updateMaterialsPalette || updatedComponents;
+            updateAnimationsPalette = updateAnimationsPalette || updatedComponents;
+            updateGlobals = updateGlobals || updatedEnvironment;
         }
         /// <summary>
         /// Updates the materials palette

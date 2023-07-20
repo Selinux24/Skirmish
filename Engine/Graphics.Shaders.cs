@@ -1,5 +1,4 @@
-﻿using SharpDX.D3DCompiler;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Linq;
 namespace Engine
 {
     using Engine.Common;
+    using SharpDX.D3DCompiler;
     using SharpDX.Direct3D11;
 
     /// <summary>
@@ -18,10 +18,10 @@ namespace Engine
         /// Creates a new Input Layout for a Shader
         /// </summary>
         /// <param name="name">Name</param>
-        /// <param name="bytes">Code bytesk</param>
+        /// <param name="bytes">Code bytes</param>
         /// <param name="elements">Input elements</param>
         /// <returns>Returns a new Input Layout</returns>
-        internal EngineInputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
+        private EngineInputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
         {
             var il = new InputLayout(device, bytes, elements)
             {
@@ -29,6 +29,36 @@ namespace Engine
             };
 
             return new EngineInputLayout(il);
+        }
+        /// <summary>
+        /// Creates a new Input Layout for a vertext data type
+        /// </summary>
+        /// <typeparam name="T">Vertex data type</typeparam>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Code bytes</param>
+        /// <param name="bufferSlot">Buffer slot</param>
+        /// <returns>Returns a new Input Layout</returns>
+        public EngineInputLayout CreateInputLayout<T>(string name, byte[] bytes, int bufferSlot) where T : struct, IVertexData
+        {
+            var inputElements = default(T).GetInput(bufferSlot);
+
+            return CreateInputLayout(name, bytes, inputElements);
+        }
+        /// <summary>
+        /// Creates a new Input Layout for a <see cref="BufferManagerVertices"/> instance
+        /// </summary>
+        /// <param name="name">Name</param>
+        /// <param name="bytes">Code bytes</param>
+        /// <param name="vertices">Vertices</param>
+        /// <param name="instanced">Create a instanced layout</param>
+        /// <returns>Returns a new Input Layout</returns>
+        public EngineInputLayout CreateInputLayout(string name, byte[] bytes, BufferManagerVertices vertices, bool instanced)
+        {
+            var inputElements = instanced ?
+                vertices.Input.ToArray() :
+                vertices.Input.Where(i => i.Classification == InputClassification.PerVertexData).ToArray();
+
+            return CreateInputLayout(name, bytes, inputElements);
         }
 
         /// <summary>

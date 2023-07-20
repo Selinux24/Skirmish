@@ -28,6 +28,10 @@ namespace Engine
         /// </summary>
         private EngineVertexBuffer<VertexCpuParticle> buffer;
         /// <summary>
+        /// Update particles flag
+        /// </summary>
+        private bool updateParticles = false;
+        /// <summary>
         /// Current particle index to update data
         /// </summary>
         private int currentParticleIndex = 0;
@@ -206,15 +210,15 @@ namespace Engine
                 return false;
             }
 
-            var mode = context.DrawerMode;
-            if (!mode.HasFlag(DrawerModes.ShadowMap))
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += ActiveParticles;
-            }
-
             var graphics = Game.Graphics;
             var dc = context.DeviceContext;
+
+            if (updateParticles)
+            {
+                Logger.WriteTrace(this, $"{Name} - updateParticles WriteDiscardBuffer");
+                buffer.Write(dc, particles);
+                updateParticles = false;
+            }
 
             dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
             dc.SetBlendState(graphics.GetBlendState(parameters.BlendMode));
@@ -237,7 +241,14 @@ namespace Engine
 
             particleDrawer.Update(dc, state, TextureCount, Texture);
 
-            return particleDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, ActiveParticles);
+            bool drawn = particleDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, ActiveParticles);
+            if (drawn)
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += ActiveParticles;
+            }
+
+            return drawn;
         }
 
         /// <summary>
@@ -289,8 +300,7 @@ namespace Engine
             particles[currentParticleIndex].RandomValues = randomValues;
             particles[currentParticleIndex].MaxAge = Emitter.TotalTime;
 
-            Logger.WriteTrace(this, $"{Name} - AddParticle WriteDiscardBuffer");
-            buffer.Write(Game.Graphics.ImmediateContext, particles);
+            updateParticles = true;
 
             currentParticleIndex = nextFreeParticle;
         }

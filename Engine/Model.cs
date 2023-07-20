@@ -281,10 +281,15 @@ namespace Engine
                 count += DrawMesh(context, mesh.Key, mesh.Value);
             }
 
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += count;
+            if (count > 0)
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += count;
 
-            return count > 0;
+                return true;
+            }
+
+            return false;
         }
         /// <summary>
         /// Draws a mesh

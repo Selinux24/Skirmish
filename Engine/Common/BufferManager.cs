@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
     using SharpDX.DXGI;
 
     /// <summary>
@@ -913,13 +912,9 @@ namespace Engine.Common
             {
                 // The vertex shader defines the input vertex data type
                 var signature = vertexShader.GetShaderBytecode();
-                var inputLayout = instanced ?
-                    vertexBufferDescriptor.Input.ToArray() :
-                    vertexBufferDescriptor.Input.Where(i => i.Classification == InputClassification.PerVertexData).ToArray();
+                var inputLayout = game.Graphics.CreateInputLayout(descriptor.Id, signature, vertexBufferDescriptor, instanced);
 
-                vertexShadersInputLayouts.Add(
-                    key,
-                    game.Graphics.CreateInputLayout(descriptor.Id, signature, inputLayout));
+                vertexShadersInputLayouts.Add(key, inputLayout);
             }
 
             dc.IAInputLayout = vertexShadersInputLayouts[key];

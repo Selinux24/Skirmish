@@ -343,10 +343,7 @@ namespace Engine
                 return false;
             }
 
-            if (!context.DrawerMode.HasFlag(DrawerModes.ShadowMap))
-            {
-                Counters.InstancesPerFrame++;
-            }
+            Counters.InstancesPerFrame++;
 
             return true;
         }

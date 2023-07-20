@@ -169,15 +169,7 @@ namespace Engine
             {
                 Logger.WriteTrace(this, $"{Name} - {nameof(Draw)} Update decals buffer");
                 buffer.Write(dc, decals);
-
                 updateBuffer = false;
-            }
-
-            var mode = context.DrawerMode;
-            if (!mode.HasFlag(DrawerModes.ShadowMap))
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += currentDecals;
             }
 
             dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
@@ -190,7 +182,14 @@ namespace Engine
                 TintColor,
                 Texture);
 
-            return decalDrawer.Draw(dc, buffer, Topology.PointList, currentDecals);
+            bool drawn = decalDrawer.Draw(dc, buffer, Topology.PointList, currentDecals);
+            if (drawn)
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += currentDecals;
+            }
+
+            return drawn;
         }
 
         /// <inheritdoc/>

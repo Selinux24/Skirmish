@@ -1025,16 +1025,16 @@ namespace Engine
             try
             {
                 RuntimeText = string.Format(
-                    "{0} - {1} - Frame {2} FPS: {3:000} Draw C/D: {4:00}:{5:00} Inst: {6:00} U: {7:00} S: {8}:{9}:{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs)",
+                    "{0} - {1} - Frame {2} FPS: {3:000} PerFrame: DrawCalls/Instances/Triangles => {4:00}/{5:00}/{6:00} Updates: {7:00} Rasterizer/DepthStencil/Blend => {8}/{9}/{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs)",
                     Graphics.DeviceDescription,
                     Name,
                     Counters.FrameCount,
                     Counters.FramesPerSecond,
                     Counters.DrawCallsPerFrame,
                     Counters.InstancesPerFrame,
-                    Counters.MaxInstancesPerFrame,
+                    Counters.PrimitivesPerFrame,
                     Counters.UpdatesPerFrame,
-                    Counters.RasterizerStateChanges, Counters.BlendStateChanges, Counters.DepthStencilStateChanges,
+                    Counters.RasterizerStateChanges, Counters.DepthStencilStateChanges, Counters.BlendStateChanges,
                     GameTime.ElapsedSeconds,
                     GameTime.TotalSeconds);
 #if DEBUG

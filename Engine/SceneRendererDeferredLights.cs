@@ -116,16 +116,16 @@ namespace Engine
             Graphics = graphics;
 
             var ld = BuiltInShaders.GetDrawer<BuiltInLightDirectional>();
-            globalLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredDirectionalLight", ld.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+            globalLightInputLayout = graphics.CreateInputLayout<VertexPosition>("EffectDeferredComposer.DeferredDirectionalLight", ld.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
 
             var lp = BuiltInShaders.GetDrawer<BuiltInLightPoint>();
-            pointLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredPointLight", lp.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+            pointLightInputLayout = graphics.CreateInputLayout<VertexPosition>("EffectDeferredComposer.DeferredPointLight", lp.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
 
             var ls = BuiltInShaders.GetDrawer<BuiltInLightSpot>();
-            spotLightInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredSpotLight", ls.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+            spotLightInputLayout = graphics.CreateInputLayout<VertexPosition>("EffectDeferredComposer.DeferredSpotLight", ls.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
 
             var composer = BuiltInShaders.GetDrawer<BuiltInComposer>();
-            combineLightsInputLayout = graphics.CreateInputLayout("EffectDeferredComposer.DeferredCombineLights", composer.GetVertexShader().Shader.GetShaderBytecode(), VertexPosition.Input(BufferSlot));
+            combineLightsInputLayout = graphics.CreateInputLayout<VertexPosition>("EffectDeferredComposer.DeferredCombineLights", composer.GetVertexShader().Shader.GetShaderBytecode(), BufferSlot);
 
             //Stencil pass rasterizer state
             rasterizerStencilPass = EngineRasterizerState.StencilPass(graphics, nameof(SceneRendererDeferredLights));

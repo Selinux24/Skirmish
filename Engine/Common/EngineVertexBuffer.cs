@@ -162,8 +162,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void CreateInputLayout(string name, byte[] signature, int bufferSlot)
         {
-            var inputElements = default(T).GetInput(bufferSlot);
-            var layout = Graphics.CreateInputLayout(name, signature, inputElements);
+            var layout = Graphics.CreateInputLayout<T>(name, signature, bufferSlot);
             BufferSlot = bufferSlot;
 
             InputLayout?.Dispose();

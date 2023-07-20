@@ -245,9 +245,11 @@ namespace Engine
                 Topology = Topology.TriangleList,
             };
             bool drawn = cloudsDrawer.Draw(dc, BufferManager, drawOptions);
-
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+            if (drawn)
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
+            }
 
             return drawn;
         }

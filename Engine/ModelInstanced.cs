@@ -467,15 +467,22 @@ namespace Engine
                 {
                     UpdateIndependentTransforms(dc, meshName);
 
-                    count += DrawMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
-                    count *= instanceCount;
+                    int dCount = DrawMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
+                    dCount *= instancesToDraw;
+
+                    count += dCount;
                 }
             }
 
-            Counters.InstancesPerFrame += instanceCount;
-            Counters.PrimitivesPerFrame += count;
+            if (count > 0)
+            {
+                Counters.InstancesPerFrame += instanceCount;
+                Counters.PrimitivesPerFrame += count;
 
-            return count > 0;
+                return true;
+            }
+
+            return false;
         }
         /// <summary>
         /// Draws a mesh with a geometry drawer

@@ -196,10 +196,15 @@ namespace Engine
                     }
                 }
 
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += count;
+                if (count > 0)
+                {
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += count;
 
-                return count > 0;
+                    return true;
+                }
+
+                return false;
             }
             /// <summary>
             /// Draws the patch using shaders
