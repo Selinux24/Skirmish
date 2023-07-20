@@ -4,7 +4,6 @@ using System.Linq;
 namespace Engine.BuiltIn
 {
     using Engine.Common;
-    using SharpDX.Direct3D11;
     using SharpDX.DXGI;
 
     /// <summary>
@@ -262,7 +261,7 @@ namespace Engine.BuiltIn
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext dc, Topology topology, int bufferSlot, VertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation)
+        public virtual bool Draw(EngineDeviceContext dc, Topology topology, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation)
         {
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders(dc);

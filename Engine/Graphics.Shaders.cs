@@ -21,12 +21,14 @@ namespace Engine
         /// <param name="bytes">Code bytesk</param>
         /// <param name="elements">Input elements</param>
         /// <returns>Returns a new Input Layout</returns>
-        internal InputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
+        internal EngineInputLayout CreateInputLayout(string name, byte[] bytes, InputElement[] elements)
         {
-            return new InputLayout(device, bytes, elements)
+            var il = new InputLayout(device, bytes, elements)
             {
                 DebugName = name,
             };
+
+            return new EngineInputLayout(il);
         }
 
         /// <summary>

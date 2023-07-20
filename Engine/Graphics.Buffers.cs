@@ -60,9 +60,9 @@ namespace Engine
             return CreateBuffer(
                 name,
                 sizeInBytes,
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.VertexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+                dynamic ? EngineResourceUsage.Dynamic : EngineResourceUsage.Immutable,
+                EngineBindFlags.VertexBuffer,
+                dynamic ? EngineCpuAccessFlags.Write : EngineCpuAccessFlags.None);
         }
         /// <summary>
         /// Creates a vertex buffer
@@ -78,9 +78,9 @@ namespace Engine
             return CreateBuffer(
                 name,
                 data,
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.VertexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+                dynamic ? EngineResourceUsage.Dynamic : EngineResourceUsage.Immutable,
+                EngineBindFlags.VertexBuffer,
+                dynamic ? EngineCpuAccessFlags.Write : EngineCpuAccessFlags.None);
         }
 
         /// <summary>
@@ -97,9 +97,9 @@ namespace Engine
             return CreateBuffer(
                 name,
                 data,
-                dynamic ? ResourceUsage.Dynamic : ResourceUsage.Immutable,
-                BindFlags.IndexBuffer,
-                dynamic ? CpuAccessFlags.Write : CpuAccessFlags.None);
+                dynamic ? EngineResourceUsage.Dynamic : EngineResourceUsage.Immutable,
+                EngineBindFlags.IndexBuffer,
+                dynamic ? EngineCpuAccessFlags.Write : EngineCpuAccessFlags.None);
         }
 
         /// <summary>
@@ -115,9 +115,9 @@ namespace Engine
             return CreateBuffer(
                 name,
                 data,
-                ResourceUsage.Default,
-                BindFlags.VertexBuffer | BindFlags.StreamOutput,
-                CpuAccessFlags.None);
+                EngineResourceUsage.Default,
+                EngineBindFlags.VertexBuffer | EngineBindFlags.StreamOutput,
+                EngineCpuAccessFlags.None);
         }
         /// <summary>
         /// Creates a stream-out buffer
@@ -130,9 +130,9 @@ namespace Engine
             return CreateBuffer(
                 name,
                 sizeInBytes,
-                ResourceUsage.Default,
-                BindFlags.VertexBuffer | BindFlags.StreamOutput,
-                CpuAccessFlags.None);
+                EngineResourceUsage.Default,
+                EngineBindFlags.VertexBuffer | EngineBindFlags.StreamOutput,
+                EngineCpuAccessFlags.None);
         }
         /// <summary>
         /// Creates a stream-out buffer
@@ -147,9 +147,9 @@ namespace Engine
             return CreateBuffer<T>(
                 name,
                 length,
-                ResourceUsage.Default,
-                BindFlags.VertexBuffer | BindFlags.StreamOutput,
-                CpuAccessFlags.None);
+                EngineResourceUsage.Default,
+                EngineBindFlags.VertexBuffer | EngineBindFlags.StreamOutput,
+                EngineCpuAccessFlags.None);
         }
 
         /// <summary>
@@ -197,16 +197,16 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer(string name, int sizeInBytes, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public EngineBuffer CreateBuffer(string name, int sizeInBytes, EngineResourceUsage usage, EngineBindFlags binding, EngineCpuAccessFlags access)
         {
             Counters.RegBuffer(typeof(object), name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
 
             var description = new BufferDescription()
             {
-                Usage = usage,
+                Usage = (ResourceUsage)usage,
                 SizeInBytes = sizeInBytes,
-                BindFlags = binding,
-                CpuAccessFlags = access,
+                BindFlags = (BindFlags)binding,
+                CpuAccessFlags = (CpuAccessFlags)access,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
@@ -229,7 +229,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer</returns>
-        public EngineBuffer CreateBuffer<T>(string name, int length, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public EngineBuffer CreateBuffer<T>(string name, int length, EngineResourceUsage usage, EngineBindFlags binding, EngineCpuAccessFlags access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
@@ -238,10 +238,10 @@ namespace Engine
 
             var description = new BufferDescription()
             {
-                Usage = usage,
+                Usage = (ResourceUsage)usage,
                 SizeInBytes = sizeInBytes,
-                BindFlags = binding,
-                CpuAccessFlags = access,
+                BindFlags = (BindFlags)binding,
+                CpuAccessFlags = (CpuAccessFlags)access,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };
@@ -264,7 +264,7 @@ namespace Engine
         /// <param name="binding">Binding</param>
         /// <param name="access">Cpu access</param>
         /// <returns>Returns created buffer initialized with the specified data</returns>
-        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, ResourceUsage usage, BindFlags binding, CpuAccessFlags access)
+        public EngineBuffer CreateBuffer<T>(string name, IEnumerable<T> data, EngineResourceUsage usage, EngineBindFlags binding, EngineCpuAccessFlags access)
             where T : struct
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count();
@@ -277,10 +277,10 @@ namespace Engine
 
             var description = new BufferDescription()
             {
-                Usage = usage,
+                Usage = (ResourceUsage)usage,
                 SizeInBytes = sizeInBytes,
-                BindFlags = binding,
-                CpuAccessFlags = access,
+                BindFlags = (BindFlags)binding,
+                CpuAccessFlags = (CpuAccessFlags)access,
                 OptionFlags = ResourceOptionFlags.None,
                 StructureByteStride = 0,
             };

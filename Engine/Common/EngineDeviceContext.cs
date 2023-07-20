@@ -164,7 +164,7 @@ namespace Engine.Common
         /// <summary>
         /// Current input layout set in input assembler
         /// </summary>
-        private InputLayout currentIAInputLayout = null;
+        private EngineInputLayout currentIAInputLayout = null;
         /// <summary>
         /// Current viewport
         /// </summary>
@@ -258,7 +258,7 @@ namespace Engine.Common
         /// <summary>
         /// Current stream output bindings
         /// </summary>
-        private IEnumerable<StreamOutputBufferBinding> currentStreamOutputBindings;
+        private IEnumerable<EngineStreamOutputBufferBinding> currentStreamOutputBindings;
 
         /// <summary>
         /// Current pixel shader
@@ -301,7 +301,7 @@ namespace Engine.Common
         /// <summary>
         /// Current vertex buffer bindings
         /// </summary>
-        private VertexBufferBinding[] currentVertexBufferBindings = null;
+        private EngineVertexBufferBinding[] currentVertexBufferBindings = null;
         /// <summary>
         /// Current index buffer reference
         /// </summary>
@@ -342,7 +342,7 @@ namespace Engine.Common
         /// <summary>
         /// Gets or sets the input assembler's input layout
         /// </summary>
-        public InputLayout IAInputLayout
+        public EngineInputLayout IAInputLayout
         {
             get
             {
@@ -352,7 +352,7 @@ namespace Engine.Common
             {
                 if (currentIAInputLayout != value)
                 {
-                    deviceContext.InputAssembler.InputLayout = value;
+                    deviceContext.InputAssembler.InputLayout = value?.GetInputLayout();
                     Counters.IAInputLayoutSets++;
 
                     currentIAInputLayout = value;
@@ -619,11 +619,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="firstSlot">The first input slot for binding</param>
         /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
-        public void IASetVertexBuffers(int firstSlot, params VertexBufferBinding[] vertexBufferBindings)
+        public void IASetVertexBuffers(int firstSlot, params EngineVertexBufferBinding[] vertexBufferBindings)
         {
             if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
             {
-                deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vertexBufferBindings);
+                var vbBindings = vertexBufferBindings?.Select(v => v.GetVertexBufferBinding()).ToArray() ?? Array.Empty<VertexBufferBinding>();
+
+                deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vbBindings);
                 Counters.IAVertexBuffersSets++;
 
                 currentVertexBufferFirstSlot = firstSlot;
@@ -1033,14 +1035,16 @@ namespace Engine.Common
         /// Sets targets for stream output
         /// </summary>
         /// <param name="streamOutBinding">Stream output binding</param>
-        public void SetGeometryShaderStreamOutputTargets(IEnumerable<StreamOutputBufferBinding> streamOutBinding)
+        public void SetGeometryShaderStreamOutputTargets(IEnumerable<EngineStreamOutputBufferBinding> streamOutBinding)
         {
             if (Helper.CompareEnumerables(currentStreamOutputBindings, streamOutBinding))
             {
                 return;
             }
 
-            deviceContext.StreamOutput.SetTargets(streamOutBinding?.ToArray());
+            var soBindings = streamOutBinding?.Select(s => s.GetStreamOutputBufferBinding()).ToArray();
+
+            deviceContext.StreamOutput.SetTargets(soBindings);
             Counters.SOTargetsSet++;
 
             currentStreamOutputBindings = streamOutBinding;

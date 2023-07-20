@@ -96,7 +96,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffer bindings
         /// </summary>
-        private readonly List<VertexBufferBinding> vertexBufferBindings = new();
+        private readonly List<EngineVertexBufferBinding> vertexBufferBindings = new();
         /// <summary>
         /// Index buffer
         /// </summary>
@@ -116,11 +116,11 @@ namespace Engine.Common
         /// <summary>
         /// Input layouts by technique
         /// </summary>
-        private readonly Dictionary<EngineEffectTechnique, InputLayout> techniqueInputLayouts = new();
+        private readonly Dictionary<EngineEffectTechnique, EngineInputLayout> techniqueInputLayouts = new();
         /// <summary>
         /// Input layouts by vertex shaders
         /// </summary>
-        private readonly Dictionary<InputAssemblerKey, InputLayout> vertexShadersInputLayouts = new();
+        private readonly Dictionary<InputAssemblerKey, EngineInputLayout> vertexShadersInputLayouts = new();
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -347,7 +347,7 @@ namespace Engine.Common
 
                     //Empty buffer
                     vertexBuffers.Add(null);
-                    vertexBufferBindings.Add(new VertexBufferBinding());
+                    vertexBufferBindings.Add(new EngineVertexBufferBinding());
 
                     descriptor.ClearInputs();
 
@@ -408,7 +408,7 @@ namespace Engine.Common
                     string name = $"InstancingBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
                     var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
-                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), data[0].GetStride(), 0);
+                    var binding = new EngineVertexBufferBinding(buffer, data[0].GetStride(), 0);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
                     vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
@@ -427,7 +427,7 @@ namespace Engine.Common
                     string name = $"InstancingBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     VertexInstancingData[] data = new VertexInstancingData[descriptor.Instances];
                     var buffer = await CreateInstancingBuffer(game.Graphics, name, descriptor.Dynamic, data);
-                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), data[0].GetStride(), 0);
+                    var binding = new EngineVertexBufferBinding(buffer, data[0].GetStride(), 0);
 
                     vertexBuffers.Add(buffer);
                     vertexBufferBindings.Add(binding);
@@ -468,7 +468,7 @@ namespace Engine.Common
                     //Recreate the buffer and binding
                     string name = $"VertexBuffer.{descriptor.BufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
-                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), descriptor.GetStride(), 0);
+                    var binding = new EngineVertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
                     vertexBuffers[descriptor.BufferIndex] = buffer;
                     vertexBufferBindings[descriptor.BufferBindingIndex] = binding;
@@ -486,7 +486,7 @@ namespace Engine.Common
                     //Create the buffer and binding
                     string name = $"VertexBuffer.{bufferIndex}.{(descriptor.Dynamic ? "dynamic" : "static")}";
                     var buffer = await CreateVertexBuffer(game.Graphics, name, descriptor.Dynamic, descriptor.Data);
-                    var binding = new VertexBufferBinding(buffer?.GetBuffer(), descriptor.GetStride(), 0);
+                    var binding = new EngineVertexBufferBinding(buffer, descriptor.GetStride(), 0);
 
                     vertexBuffers.Add(buffer);
                     vertexBufferBindings.Add(binding);

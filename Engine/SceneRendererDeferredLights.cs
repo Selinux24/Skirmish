@@ -7,7 +7,6 @@ namespace Engine
     using Engine.BuiltIn;
     using Engine.BuiltIn.Deferred;
     using Engine.Common;
-    using SharpDX.Direct3D11;
 
     /// <summary>
     /// Light drawer for deferred renderer
@@ -41,7 +40,7 @@ namespace Engine
         /// <summary>
         /// Vertex buffer binding
         /// </summary>
-        private VertexBufferBinding lightGeometryVertexBufferBinding;
+        private EngineVertexBufferBinding lightGeometryVertexBufferBinding;
         /// <summary>
         /// Window index buffer
         /// </summary>
@@ -61,19 +60,19 @@ namespace Engine
         /// <summary>
         /// Input layout for directional and hemispheric lights
         /// </summary>
-        private InputLayout globalLightInputLayout;
+        private EngineInputLayout globalLightInputLayout;
         /// <summary>
         /// Input layout for point lights
         /// </summary>
-        private InputLayout pointLightInputLayout;
+        private EngineInputLayout pointLightInputLayout;
         /// <summary>
         /// Input layout for spot ligths
         /// </summary>
-        private InputLayout spotLightInputLayout;
+        private EngineInputLayout spotLightInputLayout;
         /// <summary>
         /// Input layout for result light map
         /// </summary>
-        private InputLayout combineLightsInputLayout;
+        private EngineInputLayout combineLightsInputLayout;
         /// <summary>
         /// Screen geometry
         /// </summary>
@@ -278,7 +277,7 @@ namespace Engine
             if (lightGeometryVertexBuffer == null)
             {
                 lightGeometryVertexBuffer = Graphics.CreateVertexBuffer("Deferred Redenderer Light Geometry", lightGeometryVertices, true);
-                lightGeometryVertexBufferBinding = new VertexBufferBinding(lightGeometryVertexBuffer.GetBuffer(), lightGeometryVertices[0].GetStride(), 0);
+                lightGeometryVertexBufferBinding = new EngineVertexBufferBinding(lightGeometryVertexBuffer, lightGeometryVertices[0].GetStride(), 0);
             }
             else
             {

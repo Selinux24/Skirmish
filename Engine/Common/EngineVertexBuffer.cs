@@ -3,8 +3,6 @@ using System.Collections.Generic;
 
 namespace Engine.Common
 {
-    using SharpDX.Direct3D11;
-
     /// <summary>
     /// Engine vertex buffer
     /// </summary>
@@ -22,15 +20,15 @@ namespace Engine.Common
         /// <summary>
         /// Vertex buffer binding
         /// </summary>
-        protected VertexBufferBinding[] VertexBufferBinding { get; set; }
+        protected EngineVertexBufferBinding[] VertexBufferBinding { get; set; }
         /// <summary>
         /// Stream-out binding
         /// </summary>
-        protected StreamOutputBufferBinding[] StreamOutBinding { get; set; }
+        protected EngineStreamOutputBufferBinding[] StreamOutBinding { get; set; }
         /// <summary>
         /// Input layout
         /// </summary>
-        protected InputLayout InputLayout { get; set; }
+        protected EngineInputLayout InputLayout { get; set; }
         /// <summary>
         /// Buffer slot
         /// </summary>
@@ -69,7 +67,7 @@ namespace Engine.Common
 
                 StreamOutBinding = new[]
                 {
-                    new StreamOutputBufferBinding(VertexBuffer.GetBuffer(), 0),
+                    new EngineStreamOutputBufferBinding(VertexBuffer, 0),
                 };
             }
             else
@@ -79,7 +77,7 @@ namespace Engine.Common
 
             VertexBufferBinding = new[]
             {
-                new VertexBufferBinding(VertexBuffer.GetBuffer(), default(T).GetStride(), 0),
+                new EngineVertexBufferBinding(VertexBuffer, default(T).GetStride(), 0),
             };
         }
         /// <summary>
@@ -108,7 +106,7 @@ namespace Engine.Common
 
                 StreamOutBinding = new[]
                 {
-                    new StreamOutputBufferBinding(VertexBuffer.GetBuffer(), 0),
+                    new EngineStreamOutputBufferBinding(VertexBuffer, 0),
                 };
             }
             else
@@ -118,7 +116,7 @@ namespace Engine.Common
 
             VertexBufferBinding = new[]
             {
-                new VertexBufferBinding(VertexBuffer.GetBuffer(), default(T).GetStride(), 0),
+                new EngineVertexBufferBinding (VertexBuffer, default(T).GetStride(), 0),
             };
         }
         /// <summary>
