@@ -41,8 +41,8 @@ namespace GameLogic
 
         private ModelInstanced troops = null;
         private readonly GridAgentType soldierAgent = null;
-        private readonly Dictionary<Soldier, ModelInstance> soldierModels = new Dictionary<Soldier, ModelInstance>();
-        private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new Dictionary<Soldier, ManipulatorController>();
+        private readonly Dictionary<Soldier, ModelInstance> soldierModels = new();
+        private readonly Dictionary<Soldier, ManipulatorController> soldierControllers = new();
         private AnimationPlan soldierCrawl;
         private AnimationPlan soldierWalk;
         private AnimationPlan soldierRun;
@@ -59,8 +59,8 @@ namespace GameLogic
         private readonly float soldierAssaultSpeed = 6f;
 
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
-        private readonly Color4 bsphColor = new Color4(Color.LightYellow.ToColor3(), 0.25f);
-        private readonly Color4 frstColor = new Color4(Color.Yellow.ToColor3(), 1f);
+        private readonly Color4 bsphColor = new(Color.LightYellow.ToColor3(), 0.25f);
+        private readonly Color4 frstColor = new(Color.Yellow.ToColor3(), 1f);
         private readonly int bsphSlices = 50;
         private readonly int bsphStacks = 25;
 
@@ -205,12 +205,12 @@ namespace GameLogic
 
             SetGround(terrain);
 
-            GridInput input = new GridInput(GetTrianglesForNavigationGraph);
-            GridGenerationSettings settings = new GridGenerationSettings()
+            var input = new GridInput(GetTrianglesForNavigationGraph);
+            var settings = new GridGenerationSettings()
             {
                 NodeSize = 5f,
             };
-            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(settings, input);
+            PathFinderDescription = new PathFinderDescription(settings, input);
         }
         private async Task InitializeHUD()
         {

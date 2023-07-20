@@ -19,7 +19,7 @@ namespace Engine.UI
         {
             get
             {
-                List<char> cList = new List<char>((int)KeyCodes);
+                var cList = new List<char>((int)KeyCodes);
 
                 for (uint i = 1; i < KeyCodes; i++)
                 {

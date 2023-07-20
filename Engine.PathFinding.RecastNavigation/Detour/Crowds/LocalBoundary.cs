@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         public const int MAX_LOCAL_POLYS = 16;
 
         private Vector3 m_center;
-        private readonly List<LocalBoundarySegment> m_segs = new List<LocalBoundarySegment>();
+        private readonly List<LocalBoundarySegment> m_segs = new();
 
         private PolyRefs m_polys = null;
 

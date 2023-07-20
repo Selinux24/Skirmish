@@ -20,28 +20,28 @@ namespace Engine.Content.FmtObj
         /// <param name="materials">Result materials</param>
         public static void LoadObj(Stream stream, string folder, Matrix transform, out IEnumerable<SubMeshContent> content, out IEnumerable<Material> materials)
         {
-            List<SubMeshContent> models = new List<SubMeshContent>();
+            var models = new List<SubMeshContent>();
 
             var lines = ReadStreamLines(stream).ToList();
 
             //Read all materials libs file names
-            List<string> matLibFiles = new List<string>();
+            var matLibFiles = new List<string>();
             lines.ForEach(v => matLibFiles.AddRange(ReadMaterialFileName(folder, v, "mtllib")));
 
             //Read all materials
-            List<Material> matLibs = new List<Material>();
+            var matLibs = new List<Material>();
             matLibs.AddRange(ReadMaterialsFromFile(matLibFiles));
 
             //Read all points
-            List<Vector3> points = new List<Vector3>();
+            var points = new List<Vector3>();
             lines.ForEach(v => points.AddRange(ReadVector3(v, "v")));
 
             //Read all texture uvs
-            List<Vector2> uvs = new List<Vector2>();
+            var uvs = new List<Vector2>();
             lines.ForEach(v => uvs.AddRange(ReadVector2(v, "vt")));
 
             //Read all normals
-            List<Vector3> normals = new List<Vector3>();
+            var normals = new List<Vector3>();
             lines.ForEach(v => normals.AddRange(ReadVector3(v, "vn")));
 
             if (!transform.IsIdentity)
@@ -84,9 +84,9 @@ namespace Engine.Content.FmtObj
         }
         private static IEnumerable<string> ReadStreamLines(Stream stream)
         {
-            List<string> lines = new List<string>();
+            var lines = new List<string>();
 
-            using (StreamReader rd = new StreamReader(stream))
+            using (var rd = new StreamReader(stream))
             {
                 while (!rd.EndOfStream)
                 {
@@ -123,7 +123,7 @@ namespace Engine.Content.FmtObj
         {
             var tmp = list.ToList();
 
-            List<Vector3> res = new List<Vector3>();
+            var res = new List<Vector3>();
             tmp.ForEach(p => res.Add(Vector3.TransformCoordinate(p, transform)));
 
             return res;
@@ -132,7 +132,7 @@ namespace Engine.Content.FmtObj
         {
             var tmp = list.ToList();
 
-            List<Vector3> res = new List<Vector3>();
+            var res = new List<Vector3>();
             tmp.ForEach(p => res.Add(Vector3.TransformNormal(p, transform)));
 
             return res;
@@ -210,7 +210,7 @@ namespace Engine.Content.FmtObj
             var face = numbers
                 .Select(n =>
                 {
-                    List<uint> res = new List<uint>();
+                    var res = new List<uint>();
 
                     var nums = n.Split("/".ToArray(), StringSplitOptions.None);
                     foreach (var index in nums)
@@ -259,7 +259,7 @@ namespace Engine.Content.FmtObj
         }
         private static IEnumerable<Material> ReadMaterialsFromFile(IEnumerable<string> fileNames)
         {
-            List<Material> materials = new List<Material>();
+            var materials = new List<Material>();
 
             foreach (var fileName in fileNames.Distinct())
             {
@@ -310,8 +310,8 @@ namespace Engine.Content.FmtObj
 
         private static SubMeshContent CreateModel(string material, IEnumerable<Vector3> points, IEnumerable<Vector2> uvs, IEnumerable<Vector3> normals, IEnumerable<Face[]> faces, int offset)
         {
-            List<VertexData> vertexList = new List<VertexData>();
-            List<uint> indexList = new List<uint>();
+            var vertexList = new List<VertexData>();
+            var indexList = new List<uint>();
 
             int faceIndex = 0;
             foreach (var faceVertices in faces)

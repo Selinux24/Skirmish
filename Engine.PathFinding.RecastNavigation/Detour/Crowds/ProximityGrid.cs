@@ -70,8 +70,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <param name="radius">Radius</param>
         public void AddItem(T item, Vector3 position, float radius)
         {
-            Vector2 min = new Vector2(position.X - radius, position.Z - radius);
-            Vector2 max = new Vector2(position.X + radius, position.Z + radius);
+            var min = new Vector2(position.X - radius, position.Z - radius);
+            var max = new Vector2(position.X + radius, position.Z + radius);
 
             m_bounds = new RectangleF()
             {
@@ -153,11 +153,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <returns>Returns the in range item list</returns>
         public IEnumerable<T> QueryItems(Vector3 position, float range, out IEnumerable<ProximityGridItem<T>> items)
         {
-            Vector2 min = new Vector2(position.X - range, position.Z - range);
-            Vector2 max = new Vector2(position.X + range, position.Z + range);
+            var min = new Vector2(position.X - range, position.Z - range);
+            var max = new Vector2(position.X + range, position.Z + range);
 
-            List<T> itemList = new List<T>();
-            List<ProximityGridItem<T>> pItemList = new List<ProximityGridItem<T>>();
+            var itemList = new List<T>();
+            var pItemList = new List<ProximityGridItem<T>>();
 
             int iminx = (int)Math.Floor(min.X * m_invCellSize);
             int iminy = (int)Math.Floor(min.Y * m_invCellSize);

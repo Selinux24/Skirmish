@@ -24,18 +24,16 @@ namespace Collada
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("4 Collada", WindowsEngineForm.ScreenSize * 0.8f, true, 0, 0))
+                using Game cl = new("4 Collada", WindowsEngineForm.ScreenSize * 0.8f, true, 0, 0);
 #else
-                using (Game cl = new Game("4 Collada"))
+                using Game cl = new("4 Collada");
 #endif
-                {
-                    GameResourceManager.RegisterLoader<LoaderObj>();
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderObj>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<Start.SceneStart>();
+                cl.SetScene<Start.SceneStart>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

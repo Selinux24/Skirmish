@@ -25,7 +25,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new polygon mesh</returns>
         public static PolyMesh Build(ContourSet cset, int nvp)
         {
-            PolyMesh mesh = new PolyMesh
+            var mesh = new PolyMesh
             {
                 BMin = cset.BMin,
                 BMax = cset.BMax,
@@ -280,7 +280,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             var first = meshes.First();
 
-            PolyMesh res = new PolyMesh
+            var res = new PolyMesh
             {
                 NVP = first.NVP,
                 CS = first.CS,
@@ -916,7 +916,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     int v1 = (j + 1 >= vertsPerPoly || IndexedPolygon.IndexIsNull(t[j + 1])) ? t[0] : t[j + 1];
                     if (v0 < v1)
                     {
-                        Edge edge = new Edge()
+                        var edge = new Edge()
                         {
                             Vert = new int[2],
                             PolyEdge = new int[2],
@@ -984,7 +984,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the new polygon mesh</returns>
         public PolyMesh Copy()
         {
-            PolyMesh dst = new PolyMesh
+            var dst = new PolyMesh
             {
                 NVerts = NVerts,
                 NPolys = NPolys,

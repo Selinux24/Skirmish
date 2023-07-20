@@ -14,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Internal log events list
         /// </summary>
-        private static readonly ConcurrentQueue<LogEntry> log = new ConcurrentQueue<LogEntry>();
+        private static readonly ConcurrentQueue<LogEntry> log = new();
         /// <summary>
         /// Custom filter function
         /// </summary>
@@ -299,7 +299,7 @@ namespace Engine
                 logEntries = logEntries.Reverse();
             }
 
-            string logText = new string(logEntries.SelectMany(fncFormat ?? DefaultFormatter).ToArray());
+            string logText = new(logEntries.SelectMany(fncFormat ?? DefaultFormatter).ToArray());
             var lines = logText.Split(Environment.NewLine.ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
 
             if (maxLines > 0 && lines.Length > maxLines)

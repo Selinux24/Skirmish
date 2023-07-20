@@ -128,16 +128,16 @@ namespace Tanks
         /// <returns>Returns the trajectory curve of the shot</returns>
         public Curve3D ComputeCurve(Vector3 shooterPosition, Vector3 targetPosition)
         {
-            Curve3D curve = new Curve3D();
+            var curve = new Curve3D();
 
             float flightTime = GetTimeOfFlight(shooterPosition, targetPosition);
             float sampleTime = 0.1f;
             for (float time = 0; time < flightTime; time += sampleTime)
             {
-                Vector2 horizontalDist = GetHorizontalDistance(time);
+                var horizontalDist = GetHorizontalDistance(time);
                 float verticalDist = GetVerticalDistance(time, shooterPosition, targetPosition);
 
-                Vector3 position = new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
+                var position = new Vector3(horizontalDist.X, verticalDist, horizontalDist.Y) + (wind * time);
                 curve.AddPosition(time, position);
             }
 

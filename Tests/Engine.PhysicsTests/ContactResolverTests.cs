@@ -27,8 +27,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactResolverCollectionCreationTest()
         {
-            ContactResolverSettings settings = new ContactResolverSettings();
-            ContactResolver resolver = new ContactResolver(settings);
+            var settings = new ContactResolverSettings();
+            var resolver = new ContactResolver(settings);
 
             Assert.IsTrue(resolver.ContactCount == 0);
             Assert.IsTrue(resolver.ContactsLeft > 0);
@@ -38,8 +38,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactResolverCollectionAddContactTest()
         {
-            ContactResolverSettings settings = new ContactResolverSettings();
-            ContactResolver resolver = new ContactResolver(settings);
+            var settings = new ContactResolverSettings();
+            var resolver = new ContactResolver(settings);
             IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
 
@@ -54,8 +54,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactResolverCollectionAddResetTest()
         {
-            ContactResolverSettings settings = new ContactResolverSettings();
-            ContactResolver resolver = new ContactResolver(settings);
+            var settings = new ContactResolverSettings();
+            var resolver = new ContactResolver(settings);
             IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
 
@@ -75,8 +75,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactResolverCollectionOverflowTest()
         {
-            ContactResolverSettings settings = new ContactResolverSettings();
-            ContactResolver resolver = new ContactResolver(settings);
+            var settings = new ContactResolverSettings();
+            var resolver = new ContactResolver(settings);
             IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
 
@@ -98,14 +98,14 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactResolverCollectionGetContactTest()
         {
-            ContactResolverSettings settings = new ContactResolverSettings();
-            ContactResolver resolver = new ContactResolver(settings);
+            var settings = new ContactResolverSettings();
+            var resolver = new ContactResolver(settings);
 
             var curr = resolver.CurrentContact;
             IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
             IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
-            Vector3 pos = new Vector3(1, 2, 3);
-            Vector3 norm = new Vector3(4, 5, 6);
+            var pos = new Vector3(1, 2, 3);
+            var norm = new Vector3(4, 5, 6);
             float pen = 7;
 
             resolver.AddContact(r1, r2, pos, norm, pen);
@@ -121,8 +121,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactResolverResolveTest()
         {
-            ContactResolverSettings settings = new ContactResolverSettings();
-            ContactResolver resolver = new ContactResolver(settings);
+            var settings = new ContactResolverSettings();
+            var resolver = new ContactResolver(settings);
             float time = 1f / 60f;
 
             IRigidBody r1 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Identity });
@@ -130,8 +130,8 @@ namespace Engine.PhysicsTests
             IRigidBody r2 = new RigidBody(new() { Mass = 1f, InitialTransform = Matrix.Translation(0, 1, 0) });
             r2.AddLinearVelocity(new Vector3(0, -1, 0));
 
-            Vector3 pos = new Vector3(0, 0, 0);
-            Vector3 norm = new Vector3(0, -1, 0);
+            var pos = new Vector3(0, 0, 0);
+            var norm = new Vector3(0, -1, 0);
             float pen = 0.5f;
 
             resolver.AddContact(r1, r2, pos, norm, pen);

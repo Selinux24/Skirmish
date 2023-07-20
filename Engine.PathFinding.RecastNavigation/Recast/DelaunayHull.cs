@@ -10,13 +10,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         private const float Tolerance = 0.001f;
 
         private readonly int maxEdges;
-        private readonly List<Int4> edges = new List<Int4>();
+        private readonly List<Int4> edges = new();
         private int faces;
 
         public static DelaunayHull Build(IEnumerable<Vector3> pts, IEnumerable<int> hull)
         {
             int max = pts.Count() * 10;
-            DelaunayHull dhull = new DelaunayHull(max);
+            var dhull = new DelaunayHull(max);
 
             int nhull = hull.Count();
             for (int i = 0, j = nhull - 1; i < nhull; j = i++)
@@ -50,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 if (t.X == -1 || t.Y == -1 || t.Z == -1)
                 {
                     Logger.WriteWarning(nameof(DelaunayHull), $"delaunayHull: Removing dangling face {i} [{t.X},{t.Y},{t.Z}].");
-                    tris[i] = tris[tris.Length - 1];
+                    tris[i] = tris[^1];
                     Array.Resize(ref tris, tris.Length - 1);
                     i--;
                 }
@@ -78,9 +78,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float EPS = 1e-6f;
 
             // Calculate the circle relative to p1, to avoid some precision issues.
-            Vector3 v1 = new Vector3();
-            Vector3 v2 = Vector3.Subtract(p2, p1);
-            Vector3 v3 = Vector3.Subtract(p3, p1);
+            var v1 = new Vector3();
+            var v2 = Vector3.Subtract(p2, p1);
+            var v3 = Vector3.Subtract(p3, p1);
 
             float cp = RecastUtils.VCross2(v1, v2, v3);
             if (Math.Abs(cp) > EPS)

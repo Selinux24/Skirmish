@@ -89,7 +89,7 @@ namespace Engine
         /// </summary>
         public float MaxHorizontalVelocity
         {
-            get
+            readonly get
             {
                 return maxHorizontalVelocity;
             }
@@ -105,7 +105,7 @@ namespace Engine
         /// </summary>
         public float MinHorizontalVelocity
         {
-            get
+            readonly get
             {
                 return minHorizontalVelocity;
             }
@@ -122,7 +122,7 @@ namespace Engine
         /// </summary>
         public float MaxVerticalVelocity
         {
-            get
+            readonly get
             {
                 return maxVerticalVelocity;
             }
@@ -138,7 +138,7 @@ namespace Engine
         /// </summary>
         public float MinVerticalVelocity
         {
-            get
+            readonly get
             {
                 return minVerticalVelocity;
             }
@@ -173,7 +173,7 @@ namespace Engine
         /// </summary>
         public float MinRotateSpeed
         {
-            get
+            readonly get
             {
                 return minRotateSpeed;
             }
@@ -189,7 +189,7 @@ namespace Engine
         /// </summary>
         public float MaxRotateSpeed
         {
-            get
+            readonly get
             {
                 return maxRotateSpeed;
             }
@@ -206,7 +206,7 @@ namespace Engine
         /// </summary>
         public float MinStartSize
         {
-            get
+            readonly get
             {
                 return minStartSize;
             }
@@ -222,7 +222,7 @@ namespace Engine
         /// </summary>
         public float MaxStartSize
         {
-            get
+            readonly get
             {
                 return maxStartSize;
             }
@@ -239,7 +239,7 @@ namespace Engine
         /// </summary>
         public float MinEndSize
         {
-            get
+            readonly get
             {
                 return minEndSize;
             }
@@ -255,7 +255,7 @@ namespace Engine
         /// </summary>
         public float MaxEndSize
         {
-            get
+            readonly get
             {
                 return maxEndSize;
             }

@@ -100,7 +100,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is AnimationPathItemState animationPathItemState))
+            if (state is not AnimationPathItemState animationPathItemState)
             {
                 return;
             }

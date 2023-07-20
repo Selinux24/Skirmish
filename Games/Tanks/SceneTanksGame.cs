@@ -530,6 +530,7 @@ namespace Tanks
                 Instances = 2,
                 TransformNames = new[] { tankBarrelPart, tankTurretPart, tankHullPart },
                 TransformDependences = new[] { 1, 2, -1 },
+                PickingHull = PickingHullTypes.Hull,
             };
 
             tanks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Tanks", "Tanks", tDesc, SceneObjectUsages.Agent);
@@ -590,6 +591,7 @@ namespace Tanks
                     Optimize = true,
                     Content = ContentDescription.FromFile("Resources/Environment/Tree", modelFileName),
                     Instances = instances,
+                    PickingHull = PickingHullTypes.Hull,
                 };
 
                 var tree = await AddComponent<ModelInstanced, ModelInstancedDescription>(modelName, modelName, tDesc, SceneObjectUsages.Agent);

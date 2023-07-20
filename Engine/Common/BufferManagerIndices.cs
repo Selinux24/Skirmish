@@ -12,11 +12,11 @@ namespace Engine.Common
         /// <summary>
         /// Data list
         /// </summary>
-        private readonly List<uint> data = new List<uint>();
+        private readonly List<uint> data = new();
         /// <summary>
         /// Descriptor list
         /// </summary>
-        private readonly List<BufferDescriptor> descriptors = new List<BufferDescriptor>();
+        private readonly List<BufferDescriptor> descriptors = new();
 
         /// <summary>
         /// Dynamic

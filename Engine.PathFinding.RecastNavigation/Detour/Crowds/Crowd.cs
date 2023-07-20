@@ -195,19 +195,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         /// <summary>
         /// Agent list
         /// </summary>
-        private readonly List<CrowdAgent> m_agents = new List<CrowdAgent>();
+        private readonly List<CrowdAgent> m_agents = new();
         /// <summary>
         /// Agent animation dictionary
         /// </summary>
-        private readonly Dictionary<CrowdAgent, CrowdAgentAnimation> m_agentAnims = new Dictionary<CrowdAgent, CrowdAgentAnimation>();
+        private readonly Dictionary<CrowdAgent, CrowdAgentAnimation> m_agentAnims = new();
         /// <summary>
         /// Filter list
         /// </summary>
-        private readonly List<QueryFilter> m_filters = new List<QueryFilter>();
+        private readonly List<QueryFilter> m_filters = new();
         /// <summary>
         /// Obstacle query list
         /// </summary>
-        private readonly List<ObstacleAvoidanceParams> m_obstacleQueryParams = new List<ObstacleAvoidanceParams>();
+        private readonly List<ObstacleAvoidanceParams> m_obstacleQueryParams = new();
         /// <summary>
         /// Path queue
         /// </summary>
@@ -267,7 +267,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Init filters
             for (int i = 0; i < DT_CROWD_MAX_QUERY_FILTER_TYPE; i++)
             {
-                QueryFilter filter = new QueryFilter()
+                var filter = new QueryFilter()
                 {
                     IncludeFlags = SamplePolyFlagTypes.Walk,
                 };
@@ -278,7 +278,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Init obstacle query params.
             for (int i = 0; i < DT_CROWD_MAX_OBSTAVOIDANCE_PARAMS; i++)
             {
-                ObstacleAvoidanceParams param = new ObstacleAvoidanceParams
+                var param = new ObstacleAvoidanceParams
                 {
                     VelBias = 0.4f,
                     WeightDesVel = 2.0f,
@@ -330,7 +330,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 state = CrowdAgentState.DT_CROWDAGENT_STATE_INVALID;
             }
 
-            CrowdAgent ag = new CrowdAgent()
+            var ag = new CrowdAgent()
             {
                 Params = param,
                 Partial = false,
@@ -690,7 +690,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
         private IEnumerable<CrowdAgent> FireNewRequests()
         {
-            List<CrowdAgent> queue = new List<CrowdAgent>();
+            var queue = new List<CrowdAgent>();
 
             foreach (var ag in m_agents)
             {
@@ -906,7 +906,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             }
 
             float OPT_TIME_THR = 0.5f; // seconds
-            List<CrowdAgent> queue = new List<CrowdAgent>();
+            var queue = new List<CrowdAgent>();
 
             foreach (var ag in agents)
             {
@@ -1237,7 +1237,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             // Sample new safe velocity.
             int ns;
 
-            ObstacleAvoidanceSampleRequest req = new ObstacleAvoidanceSampleRequest
+            var req = new ObstacleAvoidanceSampleRequest
             {
                 Pos = ag.NPos,
                 Rad = ag.Params.Radius,

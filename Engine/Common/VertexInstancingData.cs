@@ -99,7 +99,7 @@ namespace Engine.Common
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(VertexInstancingData));
         }

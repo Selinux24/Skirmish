@@ -22,7 +22,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int vertCount = Array.IndexOf(verts, -1);
             vertCount = vertCount < 0 ? nvp : vertCount;
 
-            Poly p = new Poly
+            var p = new Poly
             {
                 Flags = flags,
                 Area = area,
@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         public static Poly Create(int start, int end, GraphConnectionFlagTypes flags, GraphConnectionAreaTypes area)
         {
-            Poly p = new Poly
+            var p = new Poly
             {
                 Flags = (SamplePolyFlagTypes)flags,
                 Area = (SamplePolyAreas)area,

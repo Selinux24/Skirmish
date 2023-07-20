@@ -75,7 +75,7 @@ namespace Engine
         /// <summary>
         /// Base position
         /// </summary>
-        public Vector3 BasePosition
+        public readonly Vector3 BasePosition
         {
             get
             {
@@ -85,7 +85,7 @@ namespace Engine
         /// <summary>
         /// Cap position
         /// </summary>
-        public Vector3 CapPosition
+        public readonly Vector3 CapPosition
         {
             get
             {
@@ -111,7 +111,7 @@ namespace Engine
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public ContainmentType Contains(ref Vector3 point)
+        public readonly ContainmentType Contains(ref Vector3 point)
         {
             // Find cylinder central axis
             var p1 = BasePosition;
@@ -153,7 +153,7 @@ namespace Engine
         /// </summary>
         /// <param name="point">The point to test.</param>
         /// <returns>The type of containment the two objects have.</returns>
-        public ContainmentType Contains(Vector3 point)
+        public readonly ContainmentType Contains(Vector3 point)
         {
             return Contains(ref point);
         }
@@ -163,7 +163,7 @@ namespace Engine
         /// </summary>
         /// <param name="sliceCount">Slice count</param>
         /// <returns>Returns a point array of vertices</returns>
-        public IEnumerable<Vector3> GetVertices(int sliceCount)
+        public readonly IEnumerable<Vector3> GetVertices(int sliceCount)
         {
             var geom = GeometryUtil.CreateCylinder(Topology.TriangleList, Center, Radius, Height, sliceCount);
 
@@ -184,12 +184,12 @@ namespace Engine
             return !(left == right);
         }
         /// <inheritdoc/>
-        public bool Equals(BoundingCylinder other)
+        public readonly bool Equals(BoundingCylinder other)
         {
             return this == other;
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is BoundingCylinder cylinder)
             {
@@ -199,12 +199,12 @@ namespace Engine
             return false;
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Center, Radius, Height);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Center: {Center}; Radius: {Radius}; Height: {Height};";
         }

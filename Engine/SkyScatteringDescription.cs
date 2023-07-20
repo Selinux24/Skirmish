@@ -42,7 +42,7 @@ namespace Engine
         /// <summary>
         /// Sun light wave length
         /// </summary>
-        public static readonly Color3 SunLightWaveLength = new Color3(0.650f, 0.570f, 0.475f);
+        public static readonly Color3 SunLightWaveLength = new(0.650f, 0.570f, 0.475f);
 
         /// <summary>
         /// Gets the default sky scattering description

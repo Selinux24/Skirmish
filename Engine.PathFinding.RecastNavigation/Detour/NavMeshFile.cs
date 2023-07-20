@@ -18,7 +18,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the navigation mesh file</returns>
         public static NavMeshFile FromNavmesh(NavMesh navmesh)
         {
-            NavMeshFile file = new NavMeshFile
+            var file = new NavMeshFile
             {
                 NavMeshParams = navmesh.GetParams(),
                 NavMeshData = new List<MeshData>(),
@@ -66,7 +66,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the navigation mesh</returns>
         public static NavMesh FromNavmeshFile(NavMeshFile file)
         {
-            NavMesh navmesh = new NavMesh(file.NavMeshParams);
+            var navmesh = new NavMesh(file.NavMeshParams);
 
             foreach (var tile in file.NavMeshData)
             {

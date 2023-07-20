@@ -13,11 +13,11 @@ namespace Engine.PathFinding
         /// <summary>
         /// Position list
         /// </summary>
-        private readonly List<Vector3> positions = new List<Vector3>();
+        private readonly List<Vector3> positions = new();
         /// <summary>
         /// Normal list
         /// </summary>
-        private readonly List<Vector3> normals = new List<Vector3>();
+        private readonly List<Vector3> normals = new();
 
         /// <summary>
         /// Gets the position control points
@@ -143,12 +143,12 @@ namespace Engine.PathFinding
 
             Logger.WriteTrace(this, $"PathFindingPath.RefinePath delta {delta}.");
 
-            List<Vector3> lPositions = new List<Vector3>();
-            List<Vector3> lNormals = new List<Vector3>();
+            var lPositions = new List<Vector3>();
+            var lNormals = new List<Vector3>();
 
             // Copy path and normals
-            Vector3[] positionArray = positions.ToArray();
-            Vector3[] normalArray = normals.ToArray();
+            var positionArray = positions.ToArray();
+            var normalArray = normals.ToArray();
 
             lPositions.Add(positionArray[0]);
             lNormals.Add(normalArray[0]);

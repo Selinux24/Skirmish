@@ -38,14 +38,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int lh = h - borderSize * 2;
 
             // Build contracted bbox for layers.
-            Vector3 bmin = chf.BoundingBox.Minimum;
-            Vector3 bmax = chf.BoundingBox.Maximum;
+            var bmin = chf.BoundingBox.Minimum;
+            var bmax = chf.BoundingBox.Maximum;
             bmin.X += borderSize * chf.CellSize;
             bmin.Z += borderSize * chf.CellSize;
             bmax.X -= borderSize * chf.CellSize;
             bmax.Z -= borderSize * chf.CellSize;
 
-            HeightfieldLayerData ldata = new HeightfieldLayerData()
+            var ldata = new HeightfieldLayerData()
             {
                 Heightfield = chf,
                 BorderSize = borderSize,

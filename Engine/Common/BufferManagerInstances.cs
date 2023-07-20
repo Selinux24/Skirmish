@@ -12,7 +12,7 @@ namespace Engine.Common
         /// <summary>
         /// Instancing descriptor list
         /// </summary>
-        private readonly List<BufferDescriptor> instancingDescriptors = new List<BufferDescriptor>();
+        private readonly List<BufferDescriptor> instancingDescriptors = new();
 
         /// <summary>
         /// Dynamic buffer

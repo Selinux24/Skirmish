@@ -14,28 +14,28 @@ namespace Engine.PhysicsTests
     {
         static TestContext _testContext;
 
-        static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
+        static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
 
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
-            BoxCollider box = new BoxCollider(extents);
-            RigidBody boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
+            var box = new BoxCollider(extents);
+            var boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
         }
         static HalfSpaceCollider FromPlane(Plane plane, Matrix transform)
         {
-            HalfSpaceCollider p = new HalfSpaceCollider(plane);
-            RigidBody triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
+            var p = new HalfSpaceCollider(plane);
+            var triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
             p.Attach(triBody);
 
             return p;
         }
         static ConvexMeshCollider FromTriangle(Triangle tri, Matrix transform)
         {
-            ConvexMeshCollider ctri = new ConvexMeshCollider(new[] { tri });
-            RigidBody triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
+            var ctri = new ConvexMeshCollider(new[] { tri });
+            var triBody = new RigidBody(new() { Mass = 2f, InitialTransform = transform });
             ctri.Attach(triBody);
 
             return ctri;
@@ -56,7 +56,7 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactDetectorBoxAndTriangleTest()
         {
-            ContactResolver dataTri = new ContactResolver();
+            var dataTri = new ContactResolver();
 
             var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Up * 0.99f));
 
@@ -77,8 +77,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactDetectorBoxAndTriangleTest2()
         {
-            ContactResolver dataPln = new ContactResolver();
-            ContactResolver dataTri = new ContactResolver();
+            var dataPln = new ContactResolver();
+            var dataTri = new ContactResolver();
 
             var box = FromAABB(Vector3.One, Matrix.Translation(Vector3.Down));
             var plane = FromPlane(new Plane(Vector3.Up, 0), Matrix.Identity);

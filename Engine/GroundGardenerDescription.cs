@@ -119,7 +119,7 @@ namespace Engine
         {
             get
             {
-                List<Channel> channels = new List<Channel>
+                var channels = new List<Channel>
                 {
                     ChannelRed,
                     ChannelGreen,

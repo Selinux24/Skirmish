@@ -94,7 +94,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"{X}.{Y}.{Layer}; Id: {UserId}; Bbox: {Bounds}; Polys: {PolyCount}; Vertices: {VertCount}; DMeshes: {DetailMeshCount}; DTriangles: {DetailTriCount}; DVertices: {DetailVertCount}";
         }

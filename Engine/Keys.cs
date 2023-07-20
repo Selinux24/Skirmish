@@ -1,4 +1,4 @@
-﻿using System;
+﻿#pragma warning disable CA1069
 
 namespace Engine
 {
@@ -978,3 +978,4 @@ namespace Engine
         Alt = 0x00040000,
     }
 }
+#pragma warning restore CA1069

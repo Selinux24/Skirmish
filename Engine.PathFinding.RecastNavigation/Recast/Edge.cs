@@ -7,12 +7,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         public int[] PolyEdge { get; set; }
         public int[] Poly { get; set; }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return string.Format("Vert {0}; PolyEdge {1}; Poly {2};",
-                Vert?.Join(","),
-                PolyEdge?.Join(","),
-                Poly?.Join(","));
+            return $"Vert {Vert?.Join(",")}; PolyEdge {PolyEdge?.Join(",")}; Poly {Poly?.Join(",")};";
         }
     };
 }

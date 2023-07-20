@@ -13,15 +13,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <summary>
         /// X axis comparer
         /// </summary>
-        public static readonly CompareX XComparer = new CompareX();
+        public static readonly CompareX XComparer = new();
         /// <summary>
         /// Y axis comparer
         /// </summary>
-        public static readonly CompareY YComparer = new CompareY();
+        public static readonly CompareY YComparer = new();
         /// <summary>
         /// Z axis comparer
         /// </summary>
-        public static readonly CompareZ ZComparer = new CompareZ();
+        public static readonly CompareZ ZComparer = new();
 
         /// <summary>
         /// Minimum bounds of the item's AABB. [(x, y, z)]
@@ -48,7 +48,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"{nameof(BVItem)} Region Id: {I}; BMin: {BMin}; BMax: {BMax};";
         }

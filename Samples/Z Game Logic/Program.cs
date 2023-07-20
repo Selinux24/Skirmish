@@ -23,20 +23,18 @@ namespace GameLogic
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game game = new Game("Game Logic", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game game = new("Game Logic", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game game = new Game("Game Logic"))
+                using Game game = new("Game Logic");
 #endif
-                {
-                    game.VisibleMouse = true;
-                    game.LockMouse = false;
+                game.VisibleMouse = true;
+                game.LockMouse = false;
 
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    game.SetScene<SceneObjects>();
+                game.SetScene<SceneObjects>();
 
-                    game.Run();
-                }
+                game.Run();
             }
             catch (Exception ex)
             {

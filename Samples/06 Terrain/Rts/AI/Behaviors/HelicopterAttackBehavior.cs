@@ -26,10 +26,7 @@ namespace Terrain.Rts.AI.Behaviors
             if (Target != null)
             {
                 var model = Agent.SceneObject;
-                if (model != null)
-                {
-                    model.Manipulator.RotateTo(Target.Value, Vector3.Up, Axis.Y, 0.01f);
-                }
+                model?.Manipulator.RotateTo(Target.Value, Vector3.Up, Axis.Y, 0.01f);
             }
 
             base.Task(gameTime);

@@ -37,15 +37,15 @@ namespace Engine
         /// <summary>
         /// Sound dictionary
         /// </summary>
-        private readonly Dictionary<string, string> soundList = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> soundList = new();
         /// <summary>
         /// Effect parameters library
         /// </summary>
-        private readonly Dictionary<string, GameAudioEffectParameters> effectParamsLib = new Dictionary<string, GameAudioEffectParameters>();
+        private readonly Dictionary<string, GameAudioEffectParameters> effectParamsLib = new();
         /// <summary>
         /// Effect instances list
         /// </summary>
-        private readonly List<EffectInstance> effectInstances = new List<EffectInstance>();
+        private readonly List<EffectInstance> effectInstances = new();
 
         /// <summary>
         /// Gets or sets the master volume
@@ -250,7 +250,7 @@ namespace Engine
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
         public IAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, IManipulator listener)
         {
-            Manipulator3D emitterManipulator = new Manipulator3D();
+            var emitterManipulator = new Manipulator3D();
             emitterManipulator.SetPosition(emitter);
 
             return CreateEffectInstance(effectName, emitterManipulator, listener);

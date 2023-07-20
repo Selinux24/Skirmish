@@ -171,32 +171,16 @@ namespace Animation.SmoothTransitions
                 return;
             }
 
-            Vector3 force;
-            switch (Behavior)
+            var force = Behavior switch
             {
-                case SteeringBehaviors.Seek:
-                    force = DoSeek(Target.Position);
-                    break;
-                case SteeringBehaviors.Flee:
-                    force = DoFlee(Target.Position);
-                    break;
-                case SteeringBehaviors.Pursue:
-                    force = DoPursue(Target);
-                    break;
-                case SteeringBehaviors.Evade:
-                    force = DoEvade(Target);
-                    break;
-                case SteeringBehaviors.Arrival:
-                    force = DoSeek(Target.Position, true);
-                    break;
-                case SteeringBehaviors.FollowPath:
-                    force = DoFollow(Path, PathRadius);
-                    break;
-                default:
-                    force = DoSeek(Target.Position);
-                    break;
-            }
-
+                SteeringBehaviors.Seek => DoSeek(Target.Position),
+                SteeringBehaviors.Flee => DoFlee(Target.Position),
+                SteeringBehaviors.Pursue => DoPursue(Target),
+                SteeringBehaviors.Evade => DoEvade(Target),
+                SteeringBehaviors.Arrival => DoSeek(Target.Position, true),
+                SteeringBehaviors.FollowPath => DoFollow(Path, PathRadius),
+                _ => DoSeek(Target.Position),
+            };
             acceleration += force;
 
             Velocity += acceleration;

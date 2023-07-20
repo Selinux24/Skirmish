@@ -13,11 +13,11 @@ namespace Engine.Animation
         /// <summary>
         /// Joint names list
         /// </summary>
-        private readonly List<string> jointNames = new List<string>();
+        private readonly List<string> jointNames = new();
         /// <summary>
         /// Bone names list
         /// </summary>
-        private readonly List<string> boneNames = new List<string>();
+        private readonly List<string> boneNames = new();
 
         /// <summary>
         /// Skeleton name

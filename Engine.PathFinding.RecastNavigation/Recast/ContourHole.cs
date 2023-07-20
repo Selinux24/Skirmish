@@ -4,7 +4,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 {
     public class ContourHole
     {
-        public static readonly CompareHoles DefaultComparer = new CompareHoles();
+        public static readonly CompareHoles DefaultComparer = new();
 
 
         public Contour Contour { get; set; }

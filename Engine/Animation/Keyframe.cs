@@ -38,7 +38,7 @@ namespace Engine.Animation
         /// </summary>
         public Matrix Transform
         {
-            get
+            readonly get
             {
                 return transform;
             }
@@ -77,7 +77,7 @@ namespace Engine.Animation
         public KeyframeInterpolations Interpolation { get; set; }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             if (Interpolation == KeyframeInterpolations.Linear)
             {
@@ -89,7 +89,7 @@ namespace Engine.Animation
             }
         }
         /// <inheritdoc/>
-        public bool Equals(Keyframe other)
+        public readonly bool Equals(Keyframe other)
         {
             return
                 Time == other.Time &&
@@ -100,12 +100,12 @@ namespace Engine.Animation
                 Interpolation == other.Interpolation;
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is Keyframe keyframe && Equals(keyframe);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Time, Position, Translation, Rotation, Scale, Interpolation);
         }

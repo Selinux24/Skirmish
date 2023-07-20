@@ -35,7 +35,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns a text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Ref {NRef}; Next {Next}; Edge {Edge}; Side {Side}; BMin {BMin}; BMax {BMax};";
         }

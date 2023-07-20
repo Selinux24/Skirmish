@@ -23,8 +23,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         private CompressedTile m_nextFreeTile = null;
         private readonly int m_tileBits;
         private readonly int m_saltBits;
-        private readonly List<ObstacleRequest> m_reqs = new List<ObstacleRequest>();
-        private readonly List<CompressedTile> m_update = new List<CompressedTile>();
+        private readonly List<ObstacleRequest> m_reqs = new();
+        private readonly List<CompressedTile> m_update = new();
 
         /// <summary>
         /// Constructor
@@ -164,7 +164,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns a list of tiles</returns>
         public IEnumerable<CompressedTile> GetTilesAt(int x, int y, int maxTiles)
         {
-            List<CompressedTile> tiles = new List<CompressedTile>();
+            var tiles = new List<CompressedTile>();
 
             // Find tile based on hash.
             int h = DetourUtils.ComputeTileHash(x, y, m_tileLutMask);
@@ -678,7 +678,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
         private IEnumerable<CompressedTile> QueryTiles(BoundingBox bbox, int maxResults)
         {
-            List<CompressedTile> results = new List<CompressedTile>();
+            var results = new List<CompressedTile>();
 
             float tw = m_params.Width * m_params.CellSize;
             float th = m_params.Height * m_params.CellSize;
@@ -744,7 +744,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         }
         private bool BuildTile(CompressedTile tile)
         {
-            NavMeshTileBuildContext bc = new NavMeshTileBuildContext
+            var bc = new NavMeshTileBuildContext
             {
                 // Decompress tile layer data.
                 Layer = tile.Decompress(),

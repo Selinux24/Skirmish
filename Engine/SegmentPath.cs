@@ -20,7 +20,7 @@ namespace Engine
         {
             get
             {
-                return this.path[0];
+                return path[0];
             }
         }
         /// <summary>
@@ -30,7 +30,7 @@ namespace Engine
         {
             get
             {
-                return this.path[this.path.Length - 1];
+                return path[^1];
             }
         }
         /// <summary>
@@ -44,7 +44,7 @@ namespace Engine
         {
             get
             {
-                return this.path != null ? this.path.Length : 0;
+                return path?.Length ?? 0;
             }
         }
         /// <summary>
@@ -65,7 +65,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         public SegmentPath(Vector3 origin, Vector3 destination)
         {
-            this.InitializePath(origin, null, destination);
+            InitializePath(origin, null, destination);
         }
         /// <summary>
         /// Constructor
@@ -75,7 +75,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         public SegmentPath(Vector3 origin, IEnumerable<Vector3> path, Vector3 destination)
         {
-            this.InitializePath(origin, path, destination);
+            InitializePath(origin, path, destination);
         }
         /// <summary>
         /// Constructor
@@ -84,7 +84,7 @@ namespace Engine
         /// <param name="path">Path</param>
         public SegmentPath(Vector3 origin, IEnumerable<Vector3> path)
         {
-            this.InitializePath(origin, path, null);
+            InitializePath(origin, path, null);
         }
         /// <summary>
         /// Constructor
@@ -93,7 +93,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         public SegmentPath(Vector3[] path, Vector3 destination)
         {
-            this.InitializePath(null, path, destination);
+            InitializePath(null, path, destination);
         }
         /// <summary>
         /// Constructor
@@ -101,7 +101,7 @@ namespace Engine
         /// <param name="path">Path</param>
         public SegmentPath(Vector3[] path)
         {
-            this.InitializePath(null, path, null);
+            InitializePath(null, path, null);
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Engine
         /// <param name="destination">Destination</param>
         private void InitializePath(Vector3? origin, IEnumerable<Vector3> path, Vector3? destination)
         {
-            List<Vector3> lPath = new List<Vector3>();
+            var lPath = new List<Vector3>();
 
             if (origin.HasValue) lPath.Add(origin.Value);
             if (path != null) lPath.AddRange(path);
@@ -125,7 +125,7 @@ namespace Engine
             }
 
             this.path = lPath.ToArray();
-            this.Length = length;
+            Length = length;
         }
         /// <summary>
         /// Gets the path position at specified time
@@ -134,10 +134,10 @@ namespace Engine
         /// <returns>Returns the position at time</returns>
         public Vector3 GetPosition(float time)
         {
-            if (this.PositionCount > 0)
+            if (PositionCount > 0)
             {
                 if (time == 0) return path[0];
-                if (time >= this.Length) return path[path.Length - 1];
+                if (time >= Length) return path[^1];
 
                 Vector3 res = Vector3.Zero;
                 float l = time;
@@ -179,10 +179,10 @@ namespace Engine
         /// <returns>Returns the next control path at specified time</returns>
         public Vector3 GetNextControlPoint(float time)
         {
-            if (this.PositionCount > 0)
+            if (PositionCount > 0)
             {
                 if (time == 0) return path[0];
-                if (time >= this.Length) return path[path.Length - 1];
+                if (time >= Length) return path[^1];
 
                 Vector3 res = Vector3.Zero;
                 float l = time;
@@ -215,12 +215,12 @@ namespace Engine
         /// <returns>Returns a vector array</returns>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            List<Vector3> returnPath = new List<Vector3>();
+            var returnPath = new List<Vector3>();
 
             float time = 0;
-            while (time < this.Length)
+            while (time < Length)
             {
-                returnPath.Add(this.GetPosition(time));
+                returnPath.Add(GetPosition(time));
 
                 time += sampleTime;
             }

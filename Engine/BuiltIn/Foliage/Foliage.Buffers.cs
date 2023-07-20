@@ -44,7 +44,7 @@ namespace Engine.BuiltIn.Foliage
         public uint NormalMapCount;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMaterial));
         }
@@ -111,7 +111,7 @@ namespace Engine.BuiltIn.Foliage
         public float WindEffect;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerPatch));
         }

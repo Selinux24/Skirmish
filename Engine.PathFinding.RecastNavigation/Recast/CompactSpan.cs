@@ -54,7 +54,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="dir">Direction</param>
         /// <returns>Returns the connection index</returns>
-        public int GetCon(int dir)
+        public readonly int GetCon(int dir)
         {
             int shift = dir * 6;
             return (Con >> shift) & 0x3f;
@@ -64,7 +64,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Lower Extent {Y}; Region {Reg}; Connection {Con}; Height {H};";
         }

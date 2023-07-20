@@ -39,6 +39,14 @@ namespace Engine
         /// Collider type
         /// </summary>
         public ColliderTypes ColliderType { get; set; } = ColliderTypes.None;
+        /// <summary>
+        /// Picking hull
+        /// </summary>
+        public PickingHullTypes PickingHull { get; set; } = PickingHullTypes.Default;
+        /// <summary>
+        /// Path finding hull
+        /// </summary>
+        public PickingHullTypes PathFindingHull { get; set; } = PickingHullTypes.None;
     }
 
     /// <summary>

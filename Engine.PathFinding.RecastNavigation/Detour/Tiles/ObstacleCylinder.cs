@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the obstacle bounds
         /// </summary>
         /// <returns>Returns a bounding box</returns>
-        public BoundingBox GetBounds()
+        public readonly BoundingBox GetBounds()
         {
             Vector3 bmin;
             Vector3 bmax;
@@ -60,7 +60,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <param name="ch">Cell height</param>
         /// <param name="area">Area type</param>
         /// <returns>Returns true if all layer areas were marked</returns>
-        public bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
+        public readonly bool MarkArea(NavMeshTileBuildContext tc, Vector3 orig, float cs, float ch, AreaTypes area)
         {
             var bbox = GetBounds();
 

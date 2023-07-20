@@ -53,14 +53,14 @@ namespace Engine
             return !(left == right);
         }
         /// <inheritdoc/>
-        public bool Equals(BoundingBoxInt other)
+        public readonly bool Equals(BoundingBoxInt other)
         {
             return
                 Min == other.Min &&
                 Max == other.Max;
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             var objV = obj as BoundingBoxInt?;
             if (objV != null)
@@ -71,12 +71,12 @@ namespace Engine
             return false;
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return Min.GetHashCode() ^ Max.GetHashCode();
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"[{Min}, {Max}]";
         }

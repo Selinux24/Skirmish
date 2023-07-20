@@ -110,7 +110,7 @@ namespace Engine
             };
         }
         /// <inheritdoc/>
-        public bool Equals(MaterialCookTorrance other)
+        public readonly bool Equals(MaterialCookTorrance other)
         {
             return
                 EmissiveColor == other.EmissiveColor &&
@@ -122,17 +122,17 @@ namespace Engine
                 Roughness == other.Roughness;
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is MaterialCookTorrance torrance && Equals(torrance);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(EmissiveColor, AmbientColor, DiffuseColor, SpecularColor, IsTransparent, Metallic, Roughness);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Cook-Torrance. EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Metallic: {Metallic}; Roughness: {Roughness};";
         }

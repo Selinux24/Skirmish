@@ -14,13 +14,13 @@ namespace Engine.PhysicsTests
     {
         static TestContext _testContext;
 
-        static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
+        static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
 
         static HalfSpaceCollider FromPlane(Vector3 normal, float d, Matrix transform)
         {
-            Plane p = new Plane(normal, d);
-            HalfSpaceCollider plane = new HalfSpaceCollider(p);
-            RigidBody planeBody = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
+            var p = new Plane(normal, d);
+            var plane = new HalfSpaceCollider(p);
+            var planeBody = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             plane.Attach(planeBody);
 
             return plane;
@@ -28,8 +28,8 @@ namespace Engine.PhysicsTests
 
         static SphereCollider FromRadius(float radius, Matrix transform)
         {
-            SphereCollider sphere = new SphereCollider(radius);
-            RigidBody boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
+            var sphere = new SphereCollider(radius);
+            var boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             sphere.Attach(boxBody);
 
             return sphere;
@@ -127,7 +127,7 @@ namespace Engine.PhysicsTests
         [DynamicData(nameof(HalfSpaceAndSphereTestData))]
         public void ContactDetectorHalfSpaceAndSphereTest(HalfSpaceAndSphereData testData)
         {
-            ContactResolver data = new ContactResolver();
+            var data = new ContactResolver();
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
 

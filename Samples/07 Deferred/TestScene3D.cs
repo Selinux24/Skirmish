@@ -34,7 +34,7 @@ namespace Deferred
         private Sprite upperPanel = null;
 
         private Agent tankAgentType = null;
-        private readonly List<GameAgent<SteerManipulatorController>> tankAgents = new List<GameAgent<SteerManipulatorController>>();
+        private readonly List<GameAgent<SteerManipulatorController>> tankAgents = new();
         private Model helicopter = null;
         private ModelInstanced helicopters = null;
         private Scenery terrain = null;
@@ -59,7 +59,7 @@ namespace Deferred
 
         private bool onlyModels = true;
 
-        private readonly Dictionary<string, AnimationPlan> animations = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> animations = new();
 
         private bool gameReady = false;
 
@@ -346,7 +346,7 @@ namespace Deferred
             var nodes = GetNodes(tankAgentType).OfType<GraphNode>();
             if (nodes.Any())
             {
-                Random clrRnd = new Random(1);
+                var clrRnd = Helper.SetRandomGeneratorSeed(1);
                 Color[] regions = new Color[nodes.Count()];
                 for (int i = 0; i < nodes.Count(); i++)
                 {
@@ -921,17 +921,17 @@ namespace Deferred
                 return;
             }
 
-            List<Line3D> lines = new List<Line3D>();
+            var lines = new List<Line3D>();
 
             var grid = crowd.GetGrid();
 
             var rect = grid.GetBounds();
 
-            Vector2 c0 = new Vector2(rect.Left, rect.Top);
-            Vector2 c1 = new Vector2(rect.Right, rect.Top);
-            Vector2 c2 = new Vector2(rect.Right, rect.Bottom);
-            Vector2 c3 = new Vector2(rect.Left, rect.Bottom);
-            Vector2 ct = rect.Center;
+            var c0 = new Vector2(rect.Left, rect.Top);
+            var c1 = new Vector2(rect.Right, rect.Top);
+            var c2 = new Vector2(rect.Right, rect.Bottom);
+            var c3 = new Vector2(rect.Left, rect.Bottom);
+            var ct = rect.Center;
 
             FindFirstGroundPosition<Triangle>(c0.X, c0.Y, out var r0);
             FindFirstGroundPosition<Triangle>(c1.X, c1.Y, out var r1);
@@ -1060,7 +1060,7 @@ namespace Deferred
             {
                 for (int x = 0; x < f; x++)
                 {
-                    Vector3 lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
+                    var lightPosition = new Vector3((i * sep) - l, 1f, (x * sep) - l);
 
                     if (FindTopGroundPosition((i * sep) - l, (x * sep) - l, out PickingResult<Triangle> r))
                     {
@@ -1117,7 +1117,7 @@ namespace Deferred
                 return;
             }
 
-            CrowdParameters settings = new CrowdParameters(tankAgentType, tankAgents.Count);
+            var settings = new CrowdParameters(tankAgentType, tankAgents.Count);
 
             crowd = graph.AddCrowd(settings);
 

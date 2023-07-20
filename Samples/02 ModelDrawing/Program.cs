@@ -22,23 +22,21 @@ namespace ModelDrawing
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("2 ModelDrawing", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("2 ModelDrawing", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("2 ModelDrawing"))
+                using Game cl = new("2 ModelDrawing");
 #endif
-                {
 #if DEBUG
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = false;
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
 #else
                     cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
-                    cl.SetScene<TestScene>();
+                cl.SetScene<TestScene>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

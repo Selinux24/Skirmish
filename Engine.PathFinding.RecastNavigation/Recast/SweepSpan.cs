@@ -24,13 +24,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             if (RId != 0 || Id != 0 || NS != 0 || Nei != 0)
             {
-                return string.Format(
-                    "Row Id: {0}; Region Id: {1}; Samples: {2}; Neighbor Id: {3};",
-                    this.RId, this.Id, this.NS, this.Nei);
+                return $"Row Id: {RId}; Region Id: {Id}; Samples: {NS}; Neighbor Id: {Nei};";
             }
             else
             {

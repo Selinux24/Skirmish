@@ -14,13 +14,13 @@ namespace Engine.PhysicsTests
     {
         static TestContext _testContext;
 
-        static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
+        static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
 
         static HalfSpaceCollider FromPlane(Vector3 normal, float d, Matrix transform)
         {
-            Plane p = new Plane(normal, d);
-            HalfSpaceCollider plane = new HalfSpaceCollider(p);
-            RigidBody planeBody = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
+            var p = new Plane(normal, d);
+            var plane = new HalfSpaceCollider(p);
+            var planeBody = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             plane.Attach(planeBody);
 
             return plane;
@@ -28,8 +28,8 @@ namespace Engine.PhysicsTests
 
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
-            BoxCollider box = new BoxCollider(extents);
-            RigidBody boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
+            var box = new BoxCollider(extents);
+            var boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -52,7 +52,7 @@ namespace Engine.PhysicsTests
             public Matrix BoxTransform { get; set; }
             public bool IntersectioExpected { get; set; }
             public HalfSpaceAndBoxContactData[] Contacts { get; set; }
-            public int ContactCount
+            public readonly int ContactCount
             {
                 get { return Contacts?.Length ?? 0; }
             }
@@ -659,7 +659,7 @@ namespace Engine.PhysicsTests
         [DynamicData(nameof(HalfSpaceAndBoxTestData))]
         public void ContactDetectorHalfSpaceAndBoxTest(HalfSpaceAndBoxData testData)
         {
-            ContactResolver data = new ContactResolver();
+            var data = new ContactResolver();
 
             var plane = FromPlane(Vector3.Up, 0, Matrix.Identity);
             var box = FromAABB(Vector3.One, testData.BoxTransform);

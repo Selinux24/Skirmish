@@ -15,22 +15,21 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public Image FromStream(Stream data)
         {
-            using (Bitmap bitmap = System.Drawing.Image.FromStream(data) as Bitmap)
+            using var bitmap = System.Drawing.Image.FromStream(data) as Bitmap;
+
+            var colors = new Color4[bitmap.Width, bitmap.Height];
+
+            for (int h = 0; h < bitmap.Height; h++)
             {
-                Color4[,] colors = new Color4[bitmap.Width, bitmap.Height];
-
-                for (int h = 0; h < bitmap.Height; h++)
+                for (int w = 0; w < bitmap.Width; w++)
                 {
-                    for (int w = 0; w < bitmap.Width; w++)
-                    {
-                        var color = bitmap.GetPixel(w, h);
+                    var color = bitmap.GetPixel(w, h);
 
-                        colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
-                    }
+                    colors[w, h] = new SharpDX.Color(color.R, color.G, color.B, color.A);
                 }
-
-                return new Image(colors);
             }
+
+            return new Image(colors);
         }
         /// <inheritdoc/>
         public void SaveToFile(string fileName, Image image)
@@ -39,10 +38,8 @@ namespace Engine.Windows
             int[] bits = image.Flatten().Select(c => c.ToRgba()).ToArray();
 
             var bitsHandle = GCHandle.Alloc(bits, GCHandleType.Pinned);
-            using (var bitmap = new Bitmap(image.Width, image.Height, image.Width * stride, PixelFormat.Format32bppPArgb, bitsHandle.AddrOfPinnedObject()))
-            {
-                bitmap.Save(fileName);
-            }
+            using var bitmap = new Bitmap(image.Width, image.Height, image.Width * stride, PixelFormat.Format32bppPArgb, bitsHandle.AddrOfPinnedObject());
+            bitmap.Save(fileName);
         }
     }
 }

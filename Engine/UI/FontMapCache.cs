@@ -11,7 +11,7 @@ namespace Engine.UI
         /// <summary>
         /// Font cache
         /// </summary>
-        private static readonly ConcurrentBag<FontMap> gCache = new ConcurrentBag<FontMap>();
+        private static readonly ConcurrentBag<FontMap> gCache = new();
 
         /// <summary>
         /// Adds a new map to the caché

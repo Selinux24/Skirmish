@@ -180,7 +180,7 @@ namespace Engine.Content
             int maxCount = 2;
             int count = paths.Count();
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             for (int i = 0; i < Math.Min(maxCount, count); i++)
             {

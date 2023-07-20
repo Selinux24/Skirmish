@@ -89,7 +89,7 @@ namespace Engine
                 }
                 else
                 {
-                    this.Clear();
+                    Clear();
                 }
             }
         }
@@ -111,7 +111,7 @@ namespace Engine
         /// <inheritdoc/>
         public override void SetState(IGameState state)
         {
-            if (!(state is SteerManipulatorControllerState steerManipulator))
+            if (state is not SteerManipulatorControllerState steerManipulator)
             {
                 return;
             }

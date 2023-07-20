@@ -190,10 +190,7 @@ namespace Engine
 
                 transformUpdateNeeded = false;
 
-                if (Updated != null)
-                {
-                    Updated.Invoke(this, new EventArgs());
-                }
+                Updated?.Invoke(this, new EventArgs());
 
                 Counters.UpdatesPerFrame++;
             }
@@ -618,7 +615,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is Manipulator3DState manipulator3DState))
+            if (state is not Manipulator3DState manipulator3DState)
             {
                 return;
             }

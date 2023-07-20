@@ -56,7 +56,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Linked list of span pools.
         /// </summary>
-        public List<SpanPool> Pools = new List<SpanPool>();
+        public List<SpanPool> Pools = new();
         /// <summary>
         /// The next free span.
         /// </summary>
@@ -100,14 +100,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             {
                 // Create new page.
                 // Allocate memory for the new pool.
-                SpanPool pool = new SpanPool
+                var pool = new SpanPool
                 {
                     // Add the pool into the list of pools.
                     next = Pools.Count > 0 ? Pools[^1] : null
                 };
                 Pools.Add(pool);
                 // Add new items to the free list.
-                Span freelist = FreeList;
+                var freelist = FreeList;
                 int itIndex = SpanPool.RC_SPANS_PER_POOL;
                 do
                 {
@@ -120,7 +120,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Pop item from in front of the free list.
-            Span s = FreeList;
+            var s = FreeList;
             FreeList = FreeList.next;
             return s;
         }

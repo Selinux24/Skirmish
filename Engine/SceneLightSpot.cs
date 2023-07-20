@@ -261,7 +261,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is SceneLightSpotState sceneLightsState))
+            if (state is not SceneLightSpotState sceneLightsState)
             {
                 return;
             }

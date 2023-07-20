@@ -106,7 +106,7 @@ namespace Engine.Tests
 
         private static Mock<ISceneObject> Setup(string id, SceneObjectUsages usage = SceneObjectUsages.None, int layer = 0)
         {
-            Mock<ISceneObject> obj = new Mock<ISceneObject>();
+            var obj = new Mock<ISceneObject>();
             obj.SetupAllProperties();
 
             obj.Setup(o => o.Id).Returns(id);
@@ -119,7 +119,7 @@ namespace Engine.Tests
         }
         private static Mock<IMockModel> SetupModel(string id, SceneObjectUsages usage = SceneObjectUsages.None, int layer = 0)
         {
-            Mock<IMockModel> obj = new Mock<IMockModel>();
+            var obj = new Mock<IMockModel>();
             obj.SetupAllProperties();
 
             obj.Setup(c => c.Id).Returns(id);
@@ -132,7 +132,7 @@ namespace Engine.Tests
         }
         private static Mock<IMockDrawable> SetupDrawable(string id, BlendModes blendMode, bool depthEnabled)
         {
-            Mock<IMockDrawable> obj = new Mock<IMockDrawable>();
+            var obj = new Mock<IMockDrawable>();
             obj.SetupAllProperties();
 
             obj.Setup(c => c.Id).Returns(id);
@@ -146,7 +146,7 @@ namespace Engine.Tests
         }
         private static Mock<IMockUpdatable> SetupUpdatable(string id)
         {
-            Mock<IMockUpdatable> obj = new Mock<IMockUpdatable>();
+            var obj = new Mock<IMockUpdatable>();
             obj.SetupAllProperties();
 
             obj.Setup(c => c.Id).Returns(id);
@@ -166,7 +166,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionAddOneTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
 
             Assert.AreEqual(1, coll.Count);
@@ -178,7 +178,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionAddTwoTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(obj2.Object, SceneObjectUsages.None, 0);
 
@@ -192,7 +192,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionAddSameTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
 
@@ -205,7 +205,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionAddOtherSameIdTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
             Assert.ThrowsException<EngineException>(() => coll.AddComponent(obj1b.Object, SceneObjectUsages.None, 0));
 
@@ -218,7 +218,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionAddNullTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(null, SceneObjectUsages.None, 0);
 
             Assert.AreEqual(0, coll.Count);
@@ -230,7 +230,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionRemoveOneTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
 
             Assert.AreEqual(1, coll.Count);
@@ -246,7 +246,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionRemoveTwoTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(obj2.Object, SceneObjectUsages.None, 0);
 
@@ -277,7 +277,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionRemoveCollectionTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(obj1.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(obj2.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(obj3.Object, SceneObjectUsages.None, 0);
@@ -305,7 +305,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -321,7 +321,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetUsageTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -342,7 +342,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetPredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -360,7 +360,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetUsagePredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -388,7 +388,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -404,7 +404,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstUsageTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -424,7 +424,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstPredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -442,7 +442,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstUsagePredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(objUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(objUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(objUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -468,7 +468,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetGenericTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -484,7 +484,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetGenericUsageTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -505,7 +505,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetGenericPredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -523,7 +523,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetGenericUsagePredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -551,7 +551,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstGenericTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -567,7 +567,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstGenericUsageTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -587,7 +587,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstGenericPredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -605,7 +605,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionFirstGenericUsagePredicateTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -632,7 +632,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetbyIdTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -648,7 +648,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetbyNameTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -664,7 +664,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionGetbyOwnerTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
             coll.AddComponent(mdlUsageNone.Object, SceneObjectUsages.None, 0);
             coll.AddComponent(mdlUsageObject.Object, SceneObjectUsages.Object, 0);
             coll.AddComponent(mdlUsageGround.Object, SceneObjectUsages.Ground, 0);
@@ -685,7 +685,7 @@ namespace Engine.Tests
         [TestMethod()]
         public void SceneComponentCollectionSortTest()
         {
-            SceneComponentCollection coll = new SceneComponentCollection();
+            var coll = new SceneComponentCollection();
 
             coll.AddComponent(mdlUpdatable1a.Object, SceneObjectUsages.Object, 1);
             coll.AddComponent(mdlUpdatable3.Object, SceneObjectUsages.Object, 3);

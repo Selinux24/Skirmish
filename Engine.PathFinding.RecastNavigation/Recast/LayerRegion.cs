@@ -116,7 +116,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="v">Layer value</param>
         /// <returns>Returns true if the layer array contains the value</returns>
-        public bool ContainsLayer(int v)
+        public readonly bool ContainsLayer(int v)
         {
             return Layers?.Take(NLayers)?.Contains(v) ?? false;
         }
@@ -125,7 +125,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="v">Neighbour value</param>
         /// <returns>Returns true if the neighbour array contains the value</returns>
-        public bool ContainsNei(int v)
+        public readonly bool ContainsNei(int v)
         {
             return Neis?.Take(NNeis)?.Contains(v) ?? false;
         }
@@ -134,9 +134,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return string.Format("Id: {0}; Layers: {1}; Neighbors: {2}; Base: {3}", LayerId, NLayers, NNeis, IsBase);
+            return $"Id: {LayerId}; Layers: {NLayers}; Neighbors: {NNeis}; Base: {IsBase}";
         }
     }
 }

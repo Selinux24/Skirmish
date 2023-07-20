@@ -17,11 +17,11 @@ namespace ModelDrawing
         private UIConsole console = null;
         private Sprite backPanel = null;
 
-        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new Dictionary<string, ParticleSystemDescription>();
+        private readonly Dictionary<string, ParticleSystemDescription> pDescriptions = new();
         private ParticleManager pManager = null;
 
         private PrimitiveListDrawer<Line3D> pManagerLineDrawer = null;
-        private readonly List<Line3D> lines = new List<Line3D>();
+        private readonly List<Line3D> lines = new();
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -308,8 +308,8 @@ namespace ModelDrawing
         }
         private void AddExplosionSystem()
         {
-            Vector3 position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
-            Vector3 velocity = Vector3.Up;
+            var position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
+            var velocity = Vector3.Up;
             float duration = 0.5f;
             float rate = 0.01f;
 
@@ -363,8 +363,8 @@ namespace ModelDrawing
         }
         private void AddSmokePlumeSystem()
         {
-            Vector3 position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
-            Vector3 velocity = Vector3.Up;
+            var position = new Vector3(Helper.RandomGenerator.NextFloat(-10, 10), 0, Helper.RandomGenerator.NextFloat(-10, 10));
+            var velocity = Vector3.Up;
             float duration = Helper.RandomGenerator.NextFloat(10, 60);
             float rate = Helper.RandomGenerator.NextFloat(0.1f, 1f);
 

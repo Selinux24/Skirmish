@@ -30,7 +30,7 @@ namespace Engine.Physics.GJK
     /// </summary>
     public struct Simplex
     {
-        private static readonly Vector3 ZeroTolerance = new Vector3(0.0001f);
+        private static readonly Vector3 ZeroTolerance = new(0.0001f);
 
         /// <summary>
         /// Point A. Last added point
@@ -60,19 +60,19 @@ namespace Engine.Physics.GJK
         /// <summary>
         /// Direction to origin
         /// </summary>
-        public Vector3 AO { get { return -A.Point; } }
+        public readonly Vector3 AO { get { return -A.Point; } }
         /// <summary>
         /// ABC face normal
         /// </summary>
-        public Vector3 ABC { get { return Vector3.Cross(B.Point - A.Point, C.Point - A.Point); } }
+        public readonly Vector3 ABC { get { return Vector3.Cross(B.Point - A.Point, C.Point - A.Point); } }
         /// <summary>
         /// ACB face normal
         /// </summary>
-        public Vector3 ACD { get { return Vector3.Cross(C.Point - A.Point, D.Point - A.Point); } }
+        public readonly Vector3 ACD { get { return Vector3.Cross(C.Point - A.Point, D.Point - A.Point); } }
         /// <summary>
         /// ADB face normal
         /// </summary>
-        public Vector3 ADB { get { return Vector3.Cross(D.Point - A.Point, B.Point - A.Point); } }
+        public readonly Vector3 ADB { get { return Vector3.Cross(D.Point - A.Point, B.Point - A.Point); } }
 
         /// <summary>
         /// Initializes the simplex, and performs early exit test

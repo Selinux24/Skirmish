@@ -7,13 +7,13 @@ namespace GameLogic.Rules
 
     public class Melee
     {
-        private readonly List<Soldier> soldiers = new List<Soldier>();
+        private readonly List<Soldier> soldiers = new();
 
         public string[] Factions
         {
             get
             {
-                List<string> factions = new List<string>();
+                var factions = new List<string>();
 
                 soldiers.ForEach(a =>
                 {

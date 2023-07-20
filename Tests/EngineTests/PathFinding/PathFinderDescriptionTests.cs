@@ -74,10 +74,10 @@ namespace Engine.PathFinding.Tests
         [TestMethod()]
         public void PathFinderDescriptionTest()
         {
-            Mock<PathFinderSettings> mockSettings = new Mock<PathFinderSettings>();
+            var mockSettings = new Mock<PathFinderSettings>();
 
-            Func<IEnumerable<Triangle>> fnc = () => { return zeroPlaneTris; };
-            Mock<PathFinderInput> mockInput = new Mock<PathFinderInput>(new object[] { fnc });
+            var fnc = () => { return zeroPlaneTris; };
+            var mockInput = new Mock<PathFinderInput>(new object[] { fnc });
 
             var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
 
@@ -89,12 +89,12 @@ namespace Engine.PathFinding.Tests
         [TestMethod()]
         public void BuildTest()
         {
-            Mock<PathFinderSettings> mockSettings = new Mock<PathFinderSettings>();
+            var mockSettings = new Mock<PathFinderSettings>();
 
-            Func<IEnumerable<Triangle>> fnc = () => { return zeroPlaneTris; };
-            Mock<PathFinderInput> mockInput = new Mock<PathFinderInput>(new object[] { fnc });
+            var fnc = () => { return zeroPlaneTris; };
+            var mockInput = new Mock<PathFinderInput>(new object[] { fnc });
 
-            Mock<IGraph> mockGraph = new Mock<IGraph>();
+            var mockGraph = new Mock<IGraph>();
             mockInput.Setup(i => i.CreateGraph(It.IsAny<PathFinderSettings>())).ReturnsAsync(mockGraph.Object);
 
             var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
@@ -106,9 +106,9 @@ namespace Engine.PathFinding.Tests
         [TestMethod()]
         public void BuildNavmeshZeroTest()
         {
-            BuildSettings settings = BuildSettings.Default;
+            var settings = BuildSettings.Default;
             settings.Agents = new[] { agentDefault };
-            InputGeometry input = new InputGeometry(() => { return zeroPlaneTris; });
+            var input = new InputGeometry(() => { return zeroPlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
             var graph = pfDesc.Build().GetAwaiter().GetResult();
@@ -129,9 +129,9 @@ namespace Engine.PathFinding.Tests
         [TestMethod()]
         public void BuildNavmeshOneTest()
         {
-            BuildSettings settings = BuildSettings.Default;
+            var settings = BuildSettings.Default;
             settings.Agents = new[] { agentDefault };
-            InputGeometry input = new InputGeometry(() => { return hOnePlaneTris; });
+            var input = new InputGeometry(() => { return hOnePlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
             var graph = pfDesc.Build().GetAwaiter().GetResult();
@@ -152,9 +152,9 @@ namespace Engine.PathFinding.Tests
         [TestMethod()]
         public void BuildNavmeshTwoTest()
         {
-            BuildSettings settings = BuildSettings.Default;
+            var settings = BuildSettings.Default;
             settings.Agents = new[] { agentDefault };
-            InputGeometry input = new InputGeometry(() => { return hTwoPlaneTris; });
+            var input = new InputGeometry(() => { return hTwoPlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
             var graph = pfDesc.Build().GetAwaiter().GetResult();
@@ -175,9 +175,9 @@ namespace Engine.PathFinding.Tests
         [TestMethod()]
         public void BuildNavmeshSceneryTest()
         {
-            BuildSettings settings = BuildSettings.Default;
+            var settings = BuildSettings.Default;
             settings.Agents = new[] { agentDefault };
-            InputGeometry input = new InputGeometry(() => { return sceneryTris; });
+            var input = new InputGeometry(() => { return sceneryTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
             var graph = pfDesc.Build().GetAwaiter().GetResult();
@@ -198,9 +198,9 @@ namespace Engine.PathFinding.Tests
         [TestMethod()]
         public void BuildNavmeshInclinedTest()
         {
-            BuildSettings settings = BuildSettings.Default;
+            var settings = BuildSettings.Default;
             settings.Agents = new[] { agentInclined };
-            InputGeometry input = new InputGeometry(() => { return inclinedPlaneTris; });
+            var input = new InputGeometry(() => { return inclinedPlaneTris; });
 
             var pfDesc = new PathFinderDescription(settings, input);
             var graph = pfDesc.Build().GetAwaiter().GetResult();

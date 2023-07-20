@@ -456,7 +456,7 @@ namespace Engine
             float tu = width * cellSize / totalWidth;
             float tv = depth * cellSize / totalDepth;
 
-            VertexData newVertex = new VertexData()
+            var newVertex = new VertexData()
             {
                 Position = new Vector3(posX, posY, posZ),
                 Texture = (new Vector2(tu, tv) + textureDisplacement) / textureScale,

@@ -50,7 +50,7 @@ namespace Engine.Physics.EPA
         /// <summary>
         /// Get face edge by index
         /// </summary>
-        public Edge GetEdge(int index)
+        public readonly Edge GetEdge(int index)
         {
             return new Edge
             {
@@ -63,7 +63,7 @@ namespace Engine.Physics.EPA
         /// </summary>
         /// <param name="index">Index</param>
         /// <exception cref="ArgumentOutOfRangeException">Expected 0 to 2 values</exception>
-        public GJKSupportPoint GetPoint(int index)
+        public readonly GJKSupportPoint GetPoint(int index)
         {
             return index switch
             {

@@ -79,11 +79,13 @@ namespace Engine.Content.Tests
         [TestMethod()]
         public void ColorSettesTest()
         {
-            var res = new ColorRgba();
-            res.R = 1;
-            res.G = 2;
-            res.B = 3;
-            res.A = 4;
+            var res = new ColorRgba
+            {
+                R = 1,
+                G = 2,
+                B = 3,
+                A = 4
+            };
 
             Assert.AreEqual(new ColorRgba(1, 2, 3, 4), res);
         }
@@ -107,11 +109,11 @@ namespace Engine.Content.Tests
         public void ColorToColorTest()
         {
             Color res1 = new ColorRgba(0.1f, 0.2f, 0.3f, 0.4f);
-            Color expected1 = new Color(0.1f, 0.2f, 0.3f, 0.4f);
+            Color expected1 = new(0.1f, 0.2f, 0.3f, 0.4f);
             Assert.AreEqual(expected1, res1);
 
             ColorRgba res2 = Color.Red;
-            ColorRgba expected2 = new ColorRgba(1f, 0f, 0f, 1f);
+            ColorRgba expected2 = new(1f, 0f, 0f, 1f);
             Assert.AreEqual(expected2, res2);
         }
         [TestMethod()]

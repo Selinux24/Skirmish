@@ -20,7 +20,7 @@ namespace Engine.BuiltIn.PostProcess
         public uint Effect;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerEffect));
         }
@@ -122,7 +122,7 @@ namespace Engine.BuiltIn.PostProcess
         public uint ToneMappingTone;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerPass));
         }

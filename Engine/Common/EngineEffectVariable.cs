@@ -32,12 +32,10 @@ namespace Engine.Common
         /// <returns>Returns a value of the specified type from the variable</returns>
         public T GetValue<T>() where T : struct, IBufferData
         {
-            using (var ds = variable.GetRawValue(default(T).GetStride()))
-            {
-                ds.Position = 0;
+            using var ds = variable.GetRawValue(default(T).GetStride());
+            ds.Position = 0;
 
-                return ds.Read<T>();
-            }
+            return ds.Read<T>();
         }
         /// <summary>
         /// Gets a array of values of the specified type from the variable
@@ -47,12 +45,10 @@ namespace Engine.Common
         /// <returns>Returns a array of values of the specified type from the variable</returns>
         public T[] GetValue<T>(int length) where T : struct, IBufferData
         {
-            using (var ds = variable.GetRawValue(default(T).GetStride() * length))
-            {
-                ds.Position = 0;
+            using var ds = variable.GetRawValue(default(T).GetStride() * length);
+            ds.Position = 0;
 
-                return ds.ReadRange<T>(length);
-            }
+            return ds.ReadRange<T>(length);
         }
 
         /// <summary>

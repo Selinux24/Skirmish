@@ -124,7 +124,7 @@ namespace Engine.PathFinding.RecastNavigation
             navQuery.ClosestPointOnPoly(startRef, startPos, out Vector3 iterPos, out _);
             navQuery.ClosestPointOnPoly(iterPath.End, endPos, out Vector3 targetPos, out _);
 
-            List<Vector3> smoothPath = new List<Vector3>
+            var smoothPath = new List<Vector3>
             {
                 iterPos
             };
@@ -407,11 +407,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// Item indices
         /// </summary>
-        private readonly List<GraphItem> itemIndices = new List<GraphItem>();
+        private readonly List<GraphItem> itemIndices = new();
         /// <summary>
         /// Debug info
         /// </summary>
-        private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = new Dictionary<Crowd, List<CrowdAgentDebugInfo>>();
+        private readonly Dictionary<Crowd, List<CrowdAgentDebugInfo>> debugInfo = new();
 
         /// <inheritdoc/>
         public bool Initialized { get; set; }
@@ -524,7 +524,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a list of tiles</returns>
         private IEnumerable<UpdateTileData> LookupTiles(IEnumerable<Vector3> positions)
         {
-            List<UpdateTileData> tiles = new List<UpdateTileData>();
+            var tiles = new List<UpdateTileData>();
 
             foreach (var position in positions)
             {
@@ -532,7 +532,7 @@ namespace Engine.PathFinding.RecastNavigation
 
                 if (!tiles.Exists(t => t.X == tx && t.Y == ty))
                 {
-                    UpdateTileData v = new UpdateTileData()
+                    var v = new UpdateTileData()
                     {
                         X = tx,
                         Y = ty,
@@ -775,7 +775,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <inheritdoc/>
         public IEnumerable<IGraphNode> GetNodes(AgentType agent)
         {
-            List<GraphNode> nodes = new List<GraphNode>();
+            var nodes = new List<GraphNode>();
 
             var graphQuery = GetAgentQuery(agent);
             if (graphQuery == null)
@@ -876,7 +876,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             updated = false;
 
-            List<Tuple<Agent, int>> obstacles = new List<Tuple<Agent, int>>();
+            var obstacles = new List<Tuple<Agent, int>>();
 
             foreach (var agentQ in AgentQueries)
             {
@@ -957,7 +957,7 @@ namespace Engine.PathFinding.RecastNavigation
             var query = GetAgentQuery(agent)?.CreateQuery();
             if (query != null)
             {
-                QueryFilter filter = new QueryFilter();
+                var filter = new QueryFilter();
 
                 var fStatus = query.FindNearestPoly(position, new Vector3(2, 4, 2), filter, out int startRef, out var nearestPt);
                 if (fStatus != Status.DT_SUCCESS)
@@ -1020,7 +1020,7 @@ namespace Engine.PathFinding.RecastNavigation
         {
             var navMesh = AgentQueries.Find(a => settings.Agent.Equals(a.Agent))?.NavMesh;
 
-            Crowd cr = new Crowd(navMesh, settings);
+            var cr = new Crowd(navMesh, settings);
 
             Crowds.Add(cr);
 

@@ -98,7 +98,7 @@ namespace SceneTest.SceneWater
         private async Task InitializeSeaBottom()
         {
             // Generates a random terrain using perlin noise
-            NoiseMapDescriptor nmDesc = new NoiseMapDescriptor
+            var nmDesc = new NoiseMapDescriptor
             {
                 MapWidth = mapSize,
                 MapHeight = mapSize,
@@ -111,7 +111,7 @@ namespace SceneTest.SceneWater
             };
             var noiseMap = NoiseMap.CreateNoiseMap(nmDesc);
 
-            Curve heightCurve = new Curve();
+            var heightCurve = new Curve();
             heightCurve.Keys.Add(0, 0);
             heightCurve.Keys.Add(0.4f, 0f);
             heightCurve.Keys.Add(1f, 1f);

@@ -13,15 +13,15 @@ namespace Engine
         /// <summary>
         /// Data dictionary
         /// </summary>
-        private static readonly Dictionary<string, object> gData = new Dictionary<string, object>();
+        private static readonly Dictionary<string, object> gData = new();
         /// <summary>
         /// Global data keys list
         /// </summary>
-        private static readonly List<string> gGlobalDataKeys = new List<string>();
+        private static readonly List<string> gGlobalDataKeys = new();
         /// <summary>
         /// Per frame data keys list
         /// </summary>
-        private static readonly List<string> gFrameDataKeys = new List<string>();
+        private static readonly List<string> gFrameDataKeys = new();
 
         /// <summary>
         /// Frame count
@@ -424,10 +424,10 @@ namespace Engine
 
             var key = string.Format("{0}.{1}", usage, type);
 
-            if (!(Counters.GetStatistics(key) is ResourceStatus c))
+            if (GetStatistics(key) is not ResourceStatus c)
             {
                 c = new ResourceStatus();
-                Counters.SetStatistics(key, c, true);
+                SetStatistics(key, c, true);
             }
 
             c.Add(name, usage, binding, sizeInBytes, length);

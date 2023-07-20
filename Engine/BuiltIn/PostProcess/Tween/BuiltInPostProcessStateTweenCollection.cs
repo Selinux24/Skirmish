@@ -14,7 +14,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Task list
         /// </summary>
-        private readonly ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>> taskList = new ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>>();
+        private readonly ConcurrentDictionary<BuiltInPostProcessState, List<Func<float, bool>>> taskList = new();
 
         /// <summary>
         /// Updates the task list
@@ -38,7 +38,7 @@ namespace Engine.BuiltIn.PostProcess
                 // Copy active tasks
                 var activeTasks = tasks.ToList();
 
-                List<Func<float, bool>> toDelete = new List<Func<float, bool>>();
+                var toDelete = new List<Func<float, bool>>();
 
                 activeTasks.ForEach(t =>
                 {

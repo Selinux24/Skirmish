@@ -98,10 +98,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
         }
 
         private readonly int m_maxCircles;
-        private readonly List<ObstacleCircle> m_circles = new List<ObstacleCircle>();
+        private readonly List<ObstacleCircle> m_circles = new();
 
         private readonly int m_maxSegments;
-        private readonly List<ObstacleSegment> m_segments = new List<ObstacleSegment>();
+        private readonly List<ObstacleSegment> m_segments = new();
 
         private ObstacleAvoidanceParams m_params;
         private float m_invHorizTime;
@@ -125,7 +125,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return;
             }
 
-            ObstacleCircle cir = new ObstacleCircle
+            var cir = new ObstacleCircle
             {
                 P = pos,
                 Rad = rad,
@@ -142,7 +142,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 return;
             }
 
-            ObstacleSegment seg = new ObstacleSegment
+            var seg = new ObstacleSegment
             {
                 P = p,
                 Q = q
@@ -174,10 +174,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             nvel = Vector3.Zero;
 
-            if (req.Debug != null)
-            {
-                req.Debug.Reset();
-            }
+            req.Debug?.Reset();
 
             float cvx = req.DVel.X * m_params.VelBias;
             float cvz = req.DVel.Z * m_params.VelBias;
@@ -202,7 +199,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         continue;
                     }
 
-                    ObstacleAvoidanceProcessSampleRequest sReq = new ObstacleAvoidanceProcessSampleRequest
+                    var sReq = new ObstacleAvoidanceProcessSampleRequest
                     {
                         VCand = vcand,
                         Cs = cs,
@@ -235,10 +232,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             m_invHorizTime = 1.0f / m_params.HorizTime;
             m_invVmax = req.VMax > 0 ? 1.0f / req.VMax : float.MaxValue;
 
-            if (req.Debug != null)
-            {
-                req.Debug.Reset();
-            }
+            req.Debug?.Reset();
 
             // Build sampling pattern aligned to desired velocity.
             Vector2[] pat = BuildSamplePattern(req.DVel, out int npat);
@@ -319,17 +313,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
 
             // Start sampling.
             float cr = req.VMax * (1.0f - m_params.VelBias);
-            Vector3 res = new Vector3(req.DVel.X * m_params.VelBias, 0, req.DVel.Z * m_params.VelBias);
+            var res = new Vector3(req.DVel.X * m_params.VelBias, 0, req.DVel.Z * m_params.VelBias);
             int depth = m_params.AdaptiveDepth;
 
             for (int k = 0; k < depth; ++k)
             {
                 float minPenalty = float.MaxValue;
-                Vector3 bvel = Vector3.Zero;
+                var bvel = Vector3.Zero;
 
                 for (int i = 0; i < npat; ++i)
                 {
-                    Vector3 vcand = Vector3.Zero;
+                    var vcand = Vector3.Zero;
                     vcand.X = res.X + pat[i].X * cr;
                     vcand.Y = 0;
                     vcand.Z = res.Z + pat[i].Y * cr;
@@ -341,7 +335,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                         continue;
                     }
 
-                    ObstacleAvoidanceProcessSampleRequest sReq = new ObstacleAvoidanceProcessSampleRequest
+                    var sReq = new ObstacleAvoidanceProcessSampleRequest
                     {
                         VCand = vcand,
                         Cs = cr / 10,
@@ -450,10 +444,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             float penalty = vpen + vcpen + spen + tpen;
 
             // Store different penalties for debug viewing
-            if (req.Debug != null)
-            {
-                req.Debug.AddSample(req.VCand, req.Cs, penalty, vpen, vcpen, spen, tpen);
-            }
+            req.Debug?.AddSample(req.VCand, req.Cs, penalty, vpen, vcpen, spen, tpen);
 
             return penalty;
         }
@@ -514,8 +505,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
                 if (seg.Touch)
                 {
                     // Special case when the agent is very close to the segment.
-                    Vector3 sdir = seg.Q - seg.P;
-                    Vector3 snorm = new Vector3(-sdir.Z, 0, sdir.X);
+                    var sdir = seg.Q - seg.P;
+                    var snorm = new Vector3(-sdir.Z, 0, sdir.X);
                     // If the velocity is pointing towards the segment, no collision.
                     if (Vector2.Dot(snorm.XZ(), req.VCand.XZ()) < 0.0f)
                     {

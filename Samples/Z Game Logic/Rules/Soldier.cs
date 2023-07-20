@@ -441,12 +441,14 @@ namespace GameLogic.Rules
         {
             ConsumeActionPoints(points);
 
-            return (Helper.RandomGenerator.Next(0, 6) > 5);
+            return Helper.RandomGenerator.Next(0, 6) > 5;
         }
 
         public bool FightingTest()
         {
-            return (Helper.RandomGenerator.Next(0, 6) >= 4);
+            ConsumeActionPoints(0);
+
+            return Helper.RandomGenerator.Next(0, 6) >= 4;
         }
         public bool LeaveMeleeTest()
         {
@@ -508,10 +510,14 @@ namespace GameLogic.Rules
         }
         public void UseItemForMeleePhase(Item item)
         {
+            ConsumeActionPoints(0);
+
             item.Use();
         }
         public void UseItemForMoralePhase(Item item)
         {
+            ConsumeActionPoints(0);
+
             item.Use();
         }
 

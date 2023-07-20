@@ -1036,7 +1036,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                     int v1 = (j + 1 >= DetourUtils.DT_VERTS_PER_POLYGON || t[j + 1] == DT_TILECACHE_NULL_IDX) ? t[0] : t[j + 1];
                     if (v0 < v1)
                     {
-                        Edge edge = new Edge()
+                        var edge = new Edge()
                         {
                             Vert = new int[2],
                             PolyEdge = new int[2],
@@ -1070,7 +1070,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         bool found = false;
                         for (int e = firstEdge[v1]; e != DT_TILECACHE_NULL_IDX; e = nextEdge[e])
                         {
-                            Edge edge = edges[e];
+                            var edge = edges[e];
                             if (edge.Vert[1] == v0 && edge.Poly[0] == edge.Poly[1])
                             {
                                 edge.Poly[1] = i;
@@ -1082,7 +1082,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         if (!found)
                         {
                             // Matching edge not found, it is an open edge, add it.
-                            Edge edge = new Edge()
+                            var edge = new Edge()
                             {
                                 Vert = new int[2],
                                 PolyEdge = new int[2],
@@ -1107,7 +1107,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Mark portal edges.
             for (int i = 0; i < lcset.NConts; ++i)
             {
-                TileCacheContour cont = lcset.Conts[i];
+                var cont = lcset.Conts[i];
                 if (cont.NVerts < 3)
                 {
                     continue;
@@ -1136,7 +1136,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
                         for (int m = 0; m < edgeCount; ++m)
                         {
-                            Edge e = edges[m];
+                            var e = edges[m];
                             // Skip connected edges.
                             if (e.Poly[0] != e.Poly[1])
                             {
@@ -1172,7 +1172,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
                         }
                         for (int m = 0; m < edgeCount; ++m)
                         {
-                            Edge e = edges[m];
+                            var e = edges[m];
                             // Skip connected edges.
                             if (e.Poly[0] != e.Poly[1])
                             {
@@ -1202,7 +1202,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
             // Store adjacency
             for (int i = 0; i < edgeCount; ++i)
             {
-                Edge e = edges[i];
+                var e = edges[i];
                 if (e.Poly[0] != e.Poly[1])
                 {
                     var p0 = polys[e.Poly[0]];

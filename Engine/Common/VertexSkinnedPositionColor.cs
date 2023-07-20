@@ -117,7 +117,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertexType
+        public readonly VertexTypes VertexType
         {
             get
             {

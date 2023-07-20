@@ -36,7 +36,7 @@ namespace GameLogic.Rules
 
             soldierActions = FilterSoldierActions(soldierActions, phase, soldier, onMelee, actionType);
 
-            List<ActionSpecification> actions = new List<ActionSpecification>();
+            var actions = new List<ActionSpecification>();
 
             if (teamActions.Any()) actions.AddRange(teamActions);
             if (soldierActions.Any()) actions.AddRange(soldierActions);

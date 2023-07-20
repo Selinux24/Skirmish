@@ -89,7 +89,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         public static int Triangulate(IEnumerable<Int4> verts, ref int[] indices, out IEnumerable<Int3> tris)
         {
-            List<Int3> dst = new List<Int3>();
+            var dst = new List<Int3>();
 
             // The last bit of the index is used to indicate if the vertex can be removed.
             SetRemovableIndices(verts, ref indices);
@@ -541,7 +541,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         public static IEnumerable<Int3> TriangulateHull(IEnumerable<Vector3> verts, IEnumerable<int> hull)
         {
-            List<Int3> tris = new List<Int3>();
+            var tris = new List<Int3>();
 
             int nhull = hull.Count();
             int nin = verts.Count();

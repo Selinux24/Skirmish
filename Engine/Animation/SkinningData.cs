@@ -25,15 +25,15 @@ namespace Engine.Animation
         /// <summary>
         /// Animations clip dictionary
         /// </summary>
-        private readonly List<AnimationClip> animations = new List<AnimationClip>();
+        private readonly List<AnimationClip> animations = new();
         /// <summary>
         /// Animation clip names collection
         /// </summary>
-        private readonly List<string> clips = new List<string>();
+        private readonly List<string> clips = new();
         /// <summary>
         /// Clip offsets in animation palette
         /// </summary>
-        private readonly List<int> offsets = new List<int>();
+        private readonly List<int> offsets = new();
         /// <summary>
         /// Skeleton
         /// </summary>
@@ -57,11 +57,11 @@ namespace Engine.Animation
         /// <param name="animationDescription">Animation description</param>
         private static Dictionary<string, IEnumerable<JointAnimation>> InitializeAnimationDictionary(IEnumerable<JointAnimation> jointAnimations, AnimationFile animationDescription)
         {
-            Dictionary<string, IEnumerable<JointAnimation>> dictAnimations = new Dictionary<string, IEnumerable<JointAnimation>>();
+            var dictAnimations = new Dictionary<string, IEnumerable<JointAnimation>>();
 
             foreach (var clip in animationDescription.Clips)
             {
-                List<JointAnimation> ja = new List<JointAnimation>(jointAnimations.Count());
+                var ja = new List<JointAnimation>(jointAnimations.Count());
 
                 foreach (var j in jointAnimations)
                 {
@@ -236,7 +236,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public IEnumerable<Vector4> Pack()
         {
-            List<Vector4> values = new List<Vector4>();
+            var values = new List<Vector4>();
 
             for (int i = 0; i < animations.Count; i++)
             {

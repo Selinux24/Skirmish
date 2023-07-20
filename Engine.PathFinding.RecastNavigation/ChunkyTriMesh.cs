@@ -29,11 +29,11 @@ namespace Engine.PathFinding.RecastNavigation
         /// <summary>
         /// X comparer
         /// </summary>
-        private static readonly BoundsItemComparerX xComparer = new BoundsItemComparerX();
+        private static readonly BoundsItemComparerX xComparer = new();
         /// <summary>
         /// Y comparer
         /// </summary>
-        private static readonly BoundsItemComparerY yComparer = new BoundsItemComparerY();
+        private static readonly BoundsItemComparerY yComparer = new();
 
         /// <summary>
         /// Subdivision data
@@ -87,7 +87,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Build tree
-            List<BoundsItem> items = new List<BoundsItem>(triangles.Count());
+            var items = new List<BoundsItem>(triangles.Count());
 
             foreach (var t in triangles)
             {
@@ -102,7 +102,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             int maxNodes = (triangles.Count() + trisPerChunk - 1) / trisPerChunk * 4;
 
-            SubdivideData data = new SubdivideData
+            var data = new SubdivideData
             {
                 MaxNodes = maxNodes,
                 TrisPerChunk = trisPerChunk,
@@ -136,7 +136,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             var bounds = CalcExtends(data.Items, imin, imax);
 
-            ChunkyTriMeshNode node = new ChunkyTriMeshNode
+            var node = new ChunkyTriMeshNode
             {
                 Bounds = bounds,
             };
@@ -256,7 +256,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns the triangles in the specified node</returns>
         public IEnumerable<Triangle> GetTriangles(ChunkyTriMeshNode node)
         {
-            List<Triangle> res = new List<Triangle>();
+            var res = new List<Triangle>();
 
             if (node.Index >= 0)
             {
@@ -279,7 +279,7 @@ namespace Engine.PathFinding.RecastNavigation
         /// <returns>Returns a list of indices</returns>
         public IEnumerable<int> GetChunksOverlappingRect(Vector2 bmin, Vector2 bmax)
         {
-            List<int> ids = new List<int>();
+            var ids = new List<int>();
 
             // Traverse tree
             int i = 0;

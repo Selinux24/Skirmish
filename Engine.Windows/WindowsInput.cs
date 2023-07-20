@@ -41,11 +41,11 @@ namespace Engine.Windows
         /// <summary>
         /// Keys of last update
         /// </summary>
-        private readonly List<Keys> lastKeyboardKeys = new List<Keys>();
+        private readonly List<Keys> lastKeyboardKeys = new();
         /// <summary>
         /// Current keys
         /// </summary>
-        private readonly List<Keys> currentKeyboardKeys = new List<Keys>();
+        private readonly List<Keys> currentKeyboardKeys = new();
 
         /// <inheritdoc/>
         public float Elapsed { get; set; } = 0f;

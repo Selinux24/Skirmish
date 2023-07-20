@@ -83,7 +83,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             NavMeshQuery navquery, QueryFilter filter)
         {
             // Clamp the ray to max distance.
-            Vector3 goal = target;
+            var goal = target;
             float dist = Vector2.Distance(m_pos.XZ(), goal.XZ());
 
             // If too close to the goal, do not try to optimize.
@@ -96,10 +96,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             dist = Math.Min(dist + 0.01f, pathOptimizationRange);
 
             // Adjust ray length.
-            Vector3 delta = goal - m_pos;
+            var delta = goal - m_pos;
             goal = m_pos + delta * pathOptimizationRange / dist;
 
-            RaycastRequest request = new RaycastRequest
+            var request = new RaycastRequest
             {
                 StartRef = m_path.Start,
                 StartPos = m_pos,
@@ -174,7 +174,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
             refs[0] = prevRef;
             refs[1] = polyRef;
 
-            NavMesh nav = navquery.GetAttachedNavMesh();
+            var nav = navquery.GetAttachedNavMesh();
 
             bool status = nav.GetOffMeshConnectionPolyEndPoints(refs[0], refs[1], out startPos, out endPos);
             if (status)

@@ -64,7 +64,7 @@ namespace Engine
                 return string.Empty;
             }
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             foreach (var ex in exList)
             {

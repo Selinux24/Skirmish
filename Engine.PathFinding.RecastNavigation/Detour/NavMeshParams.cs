@@ -34,12 +34,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return string.Format("Origin: {0}; TileWidth: {1}; TileHeight: {2}; MaxTiles: {3}; MaxPolys: {4};",
-                Origin,
-                TileWidth, TileHeight,
-                MaxTiles, MaxPolys);
+            return $"Origin: {Origin}; TileWidth: {TileWidth}; TileHeight: {TileHeight}; MaxTiles: {MaxTiles}; MaxPolys: {MaxPolys};";
         }
     }
 }

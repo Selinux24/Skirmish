@@ -70,20 +70,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            if (this.Magic == 0 && this.Version == 0)
+            if (Magic == 0 && Version == 0)
             {
                 return "Empty;";
             }
 
-            if (this.Magic != DetourTileCache.DT_TILECACHE_MAGIC)
+            if (Magic != DetourTileCache.DT_TILECACHE_MAGIC)
             {
                 return "Invalid;";
             }
 
-            return string.Format("tx {0:000}; ty {1:000}; tlayer {2:000};",
-                this.TX, this.TY, this.TLayer);
+            return $"tx {TX:000}; ty {TY:000}; tlayer {TLayer:000};";
         }
     }
 }

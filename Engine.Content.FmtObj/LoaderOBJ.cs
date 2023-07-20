@@ -39,8 +39,8 @@ namespace Engine.Content.FmtObj
 
             string materialsFolder = Path.Combine(contentFolder, Path.GetDirectoryName(fileName));
 
-            List<Material> matList = new List<Material>();
-            List<SubMeshContent> res = new List<SubMeshContent>();
+            var matList = new List<Material>();
+            var res = new List<SubMeshContent>();
 
             foreach (var model in modelList)
             {
@@ -62,10 +62,8 @@ namespace Engine.Content.FmtObj
         public static void Save(IEnumerable<Triangle> triangles, string fileName)
         {
             // Write the file
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
-            {
-                Writer.WriteObj(wr, triangles);
-            }
+            using var wr = new StreamWriter(fileName, false, Encoding.Default);
+            Writer.WriteObj(wr, triangles);
         }
         /// <summary>
         /// Saves a model list into a file
@@ -75,16 +73,14 @@ namespace Engine.Content.FmtObj
         public static void Save(IEnumerable<ContentData> models, string fileName)
         {
             // Write the file
-            using (StreamWriter wr = new StreamWriter(fileName, false, Encoding.Default))
+            using var wr = new StreamWriter(fileName, false, Encoding.Default);
+            foreach (var geo in models)
             {
-                foreach (var geo in models)
+                foreach (var g in geo.Geometry.Values)
                 {
-                    foreach (var g in geo.Geometry.Values)
+                    foreach (var s in g.Values)
                     {
-                        foreach (var s in g.Values)
-                        {
-                            Writer.WriteObj(wr, s);
-                        }
+                        Writer.WriteObj(wr, s);
                     }
                 }
             }

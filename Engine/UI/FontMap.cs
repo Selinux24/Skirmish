@@ -33,7 +33,7 @@ namespace Engine.UI
             var textSize = MeasureText(vertices);
 
             //Relocate lines
-            List<VertexFont> res = new List<VertexFont>();
+            var res = new List<VertexFont>();
             foreach (var l in lines)
             {
                 //Find this line width
@@ -70,9 +70,9 @@ namespace Engine.UI
         /// <param name="verts">Vertex list</param>
         private static IEnumerable<VertexFont[]> SeparateLines(VertexFont[] verts)
         {
-            List<VertexFont[]> lines = new List<VertexFont[]>();
+            var lines = new List<VertexFont[]>();
 
-            List<VertexFont> line = new List<VertexFont>();
+            var line = new List<VertexFont>();
 
             for (int i = 0; i < verts.Length; i += 4)
             {
@@ -337,7 +337,7 @@ namespace Engine.UI
         /// <summary>
         /// Map
         /// </summary>
-        private Dictionary<char, FontMapChar> map = new Dictionary<char, FontMapChar>();
+        private Dictionary<char, FontMapChar> map = new();
         /// <summary>
         /// Bitmap stream
         /// </summary>
@@ -465,11 +465,11 @@ namespace Engine.UI
                 };
             }
 
-            List<VertexFont> vertList = new List<VertexFont>();
-            List<uint> indexList = new List<uint>();
+            var vertList = new List<VertexFont>();
+            var indexList = new List<uint>();
 
             var spaceSize = MapSpace();
-            Vector2 pos = Vector2.Zero;
+            var pos = Vector2.Zero;
             bool firstWord = true;
 
             for (int i = 0; i < sentenceDesc.Count(); i++)
@@ -500,7 +500,7 @@ namespace Engine.UI
                 }
 
                 //Store previous cursor position
-                Vector2 prevPos = pos;
+                var prevPos = pos;
 
                 //Map the word
                 var w = MapWord(wordDesc, processShadows, ref pos);
@@ -515,7 +515,7 @@ namespace Engine.UI
                     pos.Y -= (int)w.Height;
 
                     //Move the word to the next line
-                    Vector3 diff = new Vector3(prevPos.X, w.Height, 0);
+                    var diff = new Vector3(prevPos.X, w.Height, 0);
                     for (int index = 0; index < w.Vertices.Length; index++)
                     {
                         w.Vertices[index].Position -= diff;
@@ -544,7 +544,7 @@ namespace Engine.UI
         /// <returns>Returns the space size</returns>
         private Vector2 MapSpace()
         {
-            Vector2 tmpPos = Vector2.Zero;
+            var tmpPos = Vector2.Zero;
             var wordDesc = MapWord(FontMapParsedWord.Space, false, ref tmpPos);
 
             return new Vector2(tmpPos.X, wordDesc.Height);
@@ -561,8 +561,8 @@ namespace Engine.UI
             bool processShadows,
             ref Vector2 pos)
         {
-            List<VertexFont> vertList = new List<VertexFont>();
-            List<uint> indexList = new List<uint>();
+            var vertList = new List<VertexFont>();
+            var indexList = new List<uint>();
 
             float height = 0;
 

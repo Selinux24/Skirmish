@@ -19,7 +19,7 @@ namespace Engine
         /// <returns>Returns the new camera</returns>
         public static Camera CreateIsometric(IsometricAxis axis, Vector3 interest, float distance)
         {
-            Camera cam = new Camera();
+            var cam = new Camera();
 
             cam.SetIsometric(axis, interest, distance);
 
@@ -50,7 +50,7 @@ namespace Engine
         /// <returns>Returns new 2D camera</returns>
         public static Camera CreateOrtho(Vector3 position, Vector3 interest, int width, int height)
         {
-            Camera camera = new Camera
+            var camera = new Camera
             {
                 Position = position,
                 Interest = interest
@@ -264,19 +264,19 @@ namespace Engine
         /// <summary>
         /// Isometric current forward
         /// </summary>
-        private Vector3 isoMetricForward = new Vector3(-1f, 0f, -1f);
+        private Vector3 isoMetricForward = new(-1f, 0f, -1f);
         /// <summary>
         /// Isometric current backward
         /// </summary>
-        private Vector3 isoMetricBackward = new Vector3(1f, 0f, 1f);
+        private Vector3 isoMetricBackward = new(1f, 0f, 1f);
         /// <summary>
         /// Isometric current left
         /// </summary>
-        private Vector3 isoMetricLeft = new Vector3(1f, 0f, -1f);
+        private Vector3 isoMetricLeft = new(1f, 0f, -1f);
         /// <summary>
         /// Isometric current right
         /// </summary>
-        private Vector3 isoMetricRight = new Vector3(-1f, 0f, 1f);
+        private Vector3 isoMetricRight = new(-1f, 0f, 1f);
 
         #endregion
 
@@ -1201,7 +1201,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is CameraState cameraState))
+            if (state is not CameraState cameraState)
             {
                 return;
             }

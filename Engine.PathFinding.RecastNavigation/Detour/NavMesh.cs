@@ -82,12 +82,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             var pmesh = PolyMesh.Build(cset, cfg.MaxVertsPerPoly);
 
             // Build polygon navmesh from the contours.
-            var dmesh = PolyMeshDetail.Build(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError);
-            if (dmesh == null)
-            {
-                throw new EngineException("buildNavigation: Could not build detail mesh.");
-            }
-
+            var dmesh = PolyMeshDetail.Build(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError) ?? throw new EngineException("buildNavigation: Could not build detail mesh.");
             if (cfg.MaxVertsPerPoly > DetourUtils.DT_VERTS_PER_POLYGON)
             {
                 throw new EngineException($"buildNavigation: {cfg.MaxVertsPerPoly} is bigger than DetourUtils.DT_VERTS_PER_POLYGON ({DetourUtils.DT_VERTS_PER_POLYGON}).");
@@ -122,11 +117,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 BuildBvTree = true,
             };
 
-            MeshData navData = DetourUtils.CreateNavMeshData(param);
-            if (navData == null)
-            {
-                throw new EngineException("Could not build Detour navmesh.");
-            }
+            MeshData navData = DetourUtils.CreateNavMeshData(param) ?? throw new EngineException("Could not build Detour navmesh.");
 
             // Make sure the data is in right format.
             MeshHeader header = navData.Header;
@@ -224,8 +215,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Allocate voxel heightfield where we rasterize our input data to.
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
-            Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
+            var tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
+            var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
             if (!cid.Any())
             {
@@ -344,9 +335,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private static IEnumerable<TileCacheData> RasterizeTileLayers(int x, int y, InputGeometry geometry, Config cfg)
         {
             // Allocate voxel heightfield where we rasterize our input data to.
-            List<TileCacheData> tiles = new List<TileCacheData>();
+            var tiles = new List<TileCacheData>();
 
-            ChunkyTriMesh chunkyMesh = geometry.ChunkyMesh;
+            var chunkyMesh = geometry.ChunkyMesh;
 
             // Update tile bounds.
             cfg.UpdateTileBounds(x, y);
@@ -354,8 +345,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Create heightfield
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
 
-            Vector2 tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
-            Vector2 tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
+            var tbmin = new Vector2(cfg.BoundingBox.Minimum.X, cfg.BoundingBox.Minimum.Z);
+            var tbmax = new Vector2(cfg.BoundingBox.Maximum.X, cfg.BoundingBox.Maximum.Z);
 
             var cid = chunkyMesh.GetChunksOverlappingRect(tbmin, tbmax);
             if (!cid.Any())
@@ -445,7 +436,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         public static BoundingBox GetTileBounds(int x, int y, float tileSize, BoundingBox bbox)
         {
-            BoundingBox tbbox = new BoundingBox();
+            var tbbox = new BoundingBox();
 
             tbbox.Minimum.X = bbox.Minimum.X + x * tileSize;
             tbbox.Minimum.Y = bbox.Minimum.Y;
@@ -998,7 +989,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns a tile collection</returns>
         public IEnumerable<MeshTile> GetTilesAt(int x, int y, int maxTiles)
         {
-            List<MeshTile> tiles = new List<MeshTile>();
+            var tiles = new List<MeshTile>();
 
             // Find tile based on hash.
             int h = DetourUtils.ComputeTileHash(x, y, m_tileLutMask);
@@ -1360,8 +1351,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="conarea">Resulting connection areas</param>
         private void FindConnectingPolys(Vector3 va, Vector3 vb, MeshTile tile, int side, int maxcon, out IEnumerable<int> con, out IEnumerable<Vector2> conarea)
         {
-            List<int> conList = new List<int>();
-            List<Vector2> conareaList = new List<Vector2>();
+            var conList = new List<int>();
+            var conareaList = new List<Vector2>();
 
             DetourUtils.CalcSlabEndPoints(va, vb, out Vector2 amin, out Vector2 amax, side);
             float apos = DetourUtils.GetSlabCoord(va, side);
@@ -1384,8 +1375,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         continue;
                     }
 
-                    Vector3 vc = tile.GetPolyVertex(poly, j);
-                    Vector3 vd = tile.GetPolyVertex(poly, (j + 1) % nv);
+                    var vc = tile.GetPolyVertex(poly, j);
+                    var vd = tile.GetPolyVertex(poly, (j + 1) % nv);
                     float bpos = DetourUtils.GetSlabCoord(vc, side);
 
                     // Segments are not close enough.
@@ -1474,7 +1465,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 var poly = tile.GetPoly(con.Poly);
 
-                Vector3 halfExtents = new Vector3(new float[] { con.Rad, tile.Header.WalkableClimb, con.Rad });
+                var halfExtents = new Vector3(new float[] { con.Rad, tile.Header.WalkableClimb, con.Rad });
 
                 // Find polygon to connect to.
                 int r = FindNearestPolyInTile(tile, con.Start, halfExtents, out Vector3 nearestPt);
@@ -1623,7 +1614,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Helper.Swap(ref tmin, ref tmax);
                 }
 
-                Vector2Int res = new Vector2Int
+                var res = new Vector2Int
                 {
                     X = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
                     Y = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
@@ -1639,7 +1630,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     Helper.Swap(ref tmin, ref tmax);
                 }
 
-                Vector2Int res = new Vector2Int
+                var res = new Vector2Int
                 {
                     X = (int)(MathUtil.Clamp(tmin, 0.0f, 1.0f) * 255.0f),
                     Y = (int)(MathUtil.Clamp(tmax, 0.0f, 1.0f) * 255.0f)
@@ -1691,10 +1682,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return;
             }
 
-            Vector3 halfExtents = new Vector3(targetCon.Rad, target.Header.WalkableClimb, targetCon.Rad);
+            var halfExtents = new Vector3(targetCon.Rad, target.Header.WalkableClimb, targetCon.Rad);
 
             // Find polygon to connect to.
-            Vector3 p = targetCon.End;
+            var p = targetCon.End;
             int r = FindNearestPolyInTile(tile, p, halfExtents, out Vector3 nearestPt);
             if (r == 0)
             {
@@ -1818,16 +1809,16 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns a collection of polygon references</returns>
         private IEnumerable<int> QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, int maxPolys)
         {
-            List<int> polys = new List<int>(maxPolys);
+            var polys = new List<int>(maxPolys);
 
             int nodeIndex = 0;
             int endIndex = tile.Header.BvNodeCount;
-            BoundingBox tb = tile.Header.Bounds;
+            var tb = tile.Header.Bounds;
             float qfac = tile.Header.BvQuantFactor;
 
             // Calculate quantized box
-            Int3 bmin = new Int3();
-            Int3 bmax = new Int3();
+            var bmin = new Int3();
+            var bmax = new Int3();
             // dtClamp query box to world box.
             float minx = MathUtil.Clamp(bounds.Minimum.X, tb.Minimum.X, tb.Maximum.X) - tb.Minimum.X;
             float miny = MathUtil.Clamp(bounds.Minimum.Y, tb.Minimum.Y, tb.Maximum.Y) - tb.Minimum.Y;
@@ -1882,7 +1873,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns a collection of polygon references</returns>
         private IEnumerable<int> QueryPolygonsInTileByRefs(MeshTile tile, BoundingBox bounds, int maxPolys)
         {
-            List<int> polys = new List<int>(maxPolys);
+            var polys = new List<int>(maxPolys);
 
             int bse = GetTileRef(tile);
 
@@ -1919,9 +1910,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             nearestPt = Vector3.Zero;
 
-            Vector3 bmin = Vector3.Subtract(center, halfExtents);
-            Vector3 bmax = Vector3.Add(center, halfExtents);
-            BoundingBox bounds = new BoundingBox(bmin, bmax);
+            var bmin = Vector3.Subtract(center, halfExtents);
+            var bmax = Vector3.Add(center, halfExtents);
+            var bounds = new BoundingBox(bmin, bmax);
 
             // Get nearby polygons from proximity grid.
             var polys = QueryPolygonsInTile(tile, bounds, 128);
@@ -1937,7 +1928,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 // If a point is directly over a polygon and closer than
                 // climb height, favor that instead of straight line nearest point.
                 float d;
-                Vector3 diff = Vector3.Subtract(center, closestPtPoly);
+                var diff = Vector3.Subtract(center, closestPtPoly);
                 if (posOverPoly)
                 {
                     d = Math.Abs(diff.Y) - tile.Header.WalkableClimb;
@@ -1972,8 +1963,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             float dmin = float.MaxValue;
             float tmin = 0;
-            Vector3 pmin = Vector3.Zero;
-            Vector3 pmax = Vector3.Zero;
+            var pmin = Vector3.Zero;
+            var pmax = Vector3.Zero;
 
             int ANY_BOUNDARY_EDGE =
                 ((int)DetailTriEdgeFlagTypes.Boundary << 0) |
@@ -1989,7 +1980,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     continue;
                 }
 
-                Triangle v = tile.GetDetailTri(poly, pd.VertBase, tris);
+                var v = tile.GetDetailTri(poly, pd.VertBase, tris);
 
                 for (int k = 0, j = 2; k < 3; j = k++)
                 {
@@ -2104,8 +2095,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Off-mesh connections don't have detail polygons.
             if (tileRef.Poly.Type == PolyTypes.OffmeshConnection)
             {
-                Vector3 v0 = tileRef.Tile.Verts[tileRef.Poly.Verts[0]];
-                Vector3 v1 = tileRef.Tile.Verts[tileRef.Poly.Verts[1]];
+                var v0 = tileRef.Tile.Verts[tileRef.Poly.Verts[0]];
+                var v1 = tileRef.Tile.Verts[tileRef.Poly.Verts[1]];
                 DetourUtils.DistancePtSegSqr2D(pos, v0, v1, out var t);
                 closest = Vector3.Lerp(v0, v1, t);
                 return;

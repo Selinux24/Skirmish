@@ -101,7 +101,7 @@ namespace Engine.BuiltIn.Sprites
         public Vector4 ClippingRecangle;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerSprite));
         }

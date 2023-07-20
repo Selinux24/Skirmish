@@ -35,7 +35,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the obstacle bounds
         /// </summary>
         /// <returns>Returns a bounding box</returns>
-        public BoundingBox GetBounds()
+        public readonly BoundingBox GetBounds()
         {
             return Box;
         }

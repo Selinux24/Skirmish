@@ -9,9 +9,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         public int RegId { get; set; }
         public AreaTypes AreaId { get; set; }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return string.Format("Area: {0}; AreaId: {1}; RegionId: {2}; Neighbors: {3}", Area, AreaId, RegId, NNeis);
+            return $"Area: {Area}; AreaId: {AreaId}; RegionId: {RegId}; Neighbors: {NNeis}";
         }
     }
 }

@@ -17,11 +17,11 @@ namespace Engine.Animation
         /// <summary>
         /// Animation plan
         /// </summary>
-        private readonly AnimationPlan animationPlan = new AnimationPlan();
+        private readonly AnimationPlan animationPlan = new();
         /// <summary>
         /// Transition animation plan
         /// </summary>
-        private readonly AnimationPlan transitionPlan = new AnimationPlan();
+        private readonly AnimationPlan transitionPlan = new();
         /// <summary>
         /// Animation active flag
         /// </summary>
@@ -117,7 +117,7 @@ namespace Engine.Animation
                 return new AnimationPlan();
             }
 
-            AnimationPath path = new AnimationPath()
+            var path = new AnimationPath()
             {
                 Name = clip,
             };
@@ -432,7 +432,7 @@ namespace Engine.Animation
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is AnimationControllerState animationControllerState))
+            if (state is not AnimationControllerState animationControllerState)
             {
                 return;
             }
@@ -450,7 +450,7 @@ namespace Engine.Animation
                 return "Inactive";
             }
 
-            StringBuilder res = new StringBuilder();
+            var res = new StringBuilder();
 
             res.AppendLine(animationPlan.CurrentPath.GetItemList() ?? string.Empty);
             res.AppendLine(animationPlan.NextPath?.GetItemList() ?? string.Empty);

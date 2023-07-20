@@ -63,10 +63,12 @@ namespace Engine.Content.Tests
         [TestMethod()]
         public void PositionSettesTest()
         {
-            var res = new Position3();
-            res.X = 1;
-            res.Y = 2;
-            res.Z = 3;
+            var res = new Position3
+            {
+                X = 1,
+                Y = 2,
+                Z = 3
+            };
 
             Assert.AreEqual(new Position3(1, 2, 3), res);
         }

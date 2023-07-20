@@ -36,7 +36,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int maxhw = MaxHWidth;
             int maxhh = MaxHHeight;
 
-            HeightPatch hp = new HeightPatch()
+            var hp = new HeightPatch()
             {
                 Data = new int[maxhw * maxhh],
             };
@@ -58,7 +58,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 chf.GetHeightData(iPoly, mesh.Verts, hp, borderSize, region);
 
                 // Build detail mesh.
-                BuildPolyDetailParams param = new BuildPolyDetailParams
+                var param = new BuildPolyDetailParams
                 {
                     SampleDist = sampleDist,
                     SampleMaxError = sampleMaxError,
@@ -93,7 +93,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static (IEnumerable<Int4> Bounds, int MaxHWidth, int MaxHHeight) FindBounds(PolyMesh mesh, CompactHeightfield chf)
         {
-            List<Int4> bounds = new List<Int4>();
+            var bounds = new List<Int4>();
 
             int nPolyVerts = 0;
             int maxhw = 0;
@@ -152,7 +152,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<Vector3> BuildPolyVertices(IndexedPolygon p, PolyMesh mesh)
         {
-            List<Vector3> res = new List<Vector3>();
+            var res = new List<Vector3>();
 
             float cs = mesh.CS;
             float ch = mesh.CH;
@@ -174,7 +174,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> verts, Vector3 orig, float cellHeight)
         {
-            List<Vector3> res = new List<Vector3>();
+            var res = new List<Vector3>();
 
             for (int j = 0; j < verts.Count(); ++j)
             {
@@ -188,7 +188,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<Vector3> MoveToWorldSpace(IEnumerable<Vector3> poly, Vector3 orig)
         {
-            List<Vector3> res = new List<Vector3>();
+            var res = new List<Vector3>();
 
             for (int j = 0; j < poly.Count(); ++j)
             {
@@ -201,7 +201,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<PolyMeshTriangleIndices> BuildTriangleList(IEnumerable<Int3> tris, IEnumerable<Vector3> verts, IEnumerable<Vector3> poly)
         {
-            List<PolyMeshTriangleIndices> res = new List<PolyMeshTriangleIndices>();
+            var res = new List<PolyMeshTriangleIndices>();
 
             foreach (var t in tris)
             {
@@ -224,7 +224,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the merged polygon mesh detail</returns>
         public static PolyMeshDetail Merge(IEnumerable<PolyMeshDetail> meshes)
         {
-            PolyMeshDetail res = new PolyMeshDetail();
+            var res = new PolyMeshDetail();
 
             int maxVerts = 0;
             int maxTris = 0;

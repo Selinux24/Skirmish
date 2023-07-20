@@ -203,8 +203,7 @@ Space: Finds random over navmesh";
 
         public override async Task UpdateNavigationGraph()
         {
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            var sw = Stopwatch.StartNew();
             await base.UpdateNavigationGraph();
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
@@ -384,28 +383,24 @@ Space: Finds random over navmesh";
         {
             if (Game.Input.KeyJustReleased(Keys.F5))
             {
-                using (var dlg = new System.Windows.Forms.SaveFileDialog())
-                {
-                    dlg.FileName = @"test.grf";
+                using var dlg = new System.Windows.Forms.SaveFileDialog();
+                dlg.FileName = @"test.grf";
 
-                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        Task.Run(() => PathFinderDescription.Save(dlg.FileName, NavigationGraph));
-                    }
+                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    Task.Run(() => PathFinderDescription.Save(dlg.FileName, NavigationGraph));
                 }
             }
 
             if (Game.Input.KeyJustReleased(Keys.F6))
             {
-                using (var dlg = new System.Windows.Forms.OpenFileDialog())
-                {
-                    dlg.FileName = @"test.grf";
+                using var dlg = new System.Windows.Forms.OpenFileDialog();
+                dlg.FileName = @"test.grf";
 
-                    if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                    {
-                        var graphTask = Task.Run(() => PathFinderDescription.Load(dlg.FileName));
-                        SetNavigationGraph(graphTask.Result);
-                    }
+                if (dlg.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    var graphTask = Task.Run(() => PathFinderDescription.Load(dlg.FileName));
+                    SetNavigationGraph(graphTask.Result);
                 }
             }
         }
@@ -444,8 +439,7 @@ Space: Finds random over navmesh";
             bool remove = Game.Input.ShiftPressed;
             bool create = Game.Input.ControlPressed;
 
-            Stopwatch sw = new Stopwatch();
-            sw.Start();
+            var sw = Stopwatch.StartNew();
             try
             {
                 if (create)

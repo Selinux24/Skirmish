@@ -184,23 +184,17 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public FontMapDescription FromFile(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string fileName, float size, FontMapStyles style)
         {
-            using (PrivateFontCollection collection = new PrivateFontCollection())
-            {
-                collection.AddFontFile(fileName);
+            using var collection = new PrivateFontCollection();
+            collection.AddFontFile(fileName);
 
-                using (FontFamily family = new FontFamily(collection.Families[0].Name, collection))
-                {
-                    return FromFamily(generator, mapParams, family, size, style);
-                }
-            }
+            using var family = new FontFamily(collection.Families[0].Name, collection);
+            return FromFamily(generator, mapParams, family, size, style);
         }
         /// <inheritdoc/>
         public FontMapDescription FromFamilyName(FontMapKeycodeGenerator generator, FontMapProcessParameters mapParams, string familyName, float size, FontMapStyles style)
         {
-            using (var fontFamily = new FontFamily(familyName))
-            {
-                return FromFamily(generator, mapParams, fontFamily, size, style);
-            }
+            using var fontFamily = new FontFamily(familyName);
+            return FromFamily(generator, mapParams, fontFamily, size, style);
         }
 
         /// <inheritdoc/>
@@ -228,12 +222,10 @@ namespace Engine.Windows
         /// <inheritdoc/>
         public string GetFromFileFontName(string fileName)
         {
-            using (PrivateFontCollection collection = new PrivateFontCollection())
-            {
-                collection.AddFontFile(fileName);
+            using var collection = new PrivateFontCollection();
+            collection.AddFontFile(fileName);
 
-                return collection.Families[0].Name;
-            }
+            return collection.Families[0].Name;
         }
     }
 }

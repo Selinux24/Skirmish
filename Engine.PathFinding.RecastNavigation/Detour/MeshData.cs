@@ -163,7 +163,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 int vb = param.DetailMeshes[i].VertBase;
                 int ndv = param.DetailMeshes[i].VertCount;
                 int nv = NavPolys[i].VertCount;
-                PolyDetail dtl = new PolyDetail
+                var dtl = new PolyDetail
                 {
                     VertBase = NavDVerts.Count,
                     VertCount = (ndv - nv),
@@ -188,7 +188,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             for (int i = 0; i < param.PolyCount; ++i)
             {
                 int nv = NavPolys[i].VertCount;
-                PolyDetail dtl = new PolyDetail
+                var dtl = new PolyDetail
                 {
                     VertBase = 0,
                     VertCount = 0,

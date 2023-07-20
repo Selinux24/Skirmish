@@ -79,7 +79,7 @@ namespace Engine.Common
             if (leftSide) totalTriangles -= sideLoss;
             if (rightSide) totalTriangles -= sideLoss;
 
-            List<uint> indices = new List<uint>((int)totalTriangles * 3);
+            var indices = new List<uint>((int)totalTriangles * 3);
 
             for (uint y = 1; y < side; y += 2)
             {
@@ -510,11 +510,11 @@ namespace Engine.Common
         {
             if (topology == Topology.TriangleList)
             {
-                List<Vector3> vertList = new List<Vector3>();
-                List<Vector3> normList = new List<Vector3>();
-                List<Vector3> tangList = new List<Vector3>();
-                List<Vector3> binmList = new List<Vector3>();
-                List<Vector2> uvList = new List<Vector2>();
+                var vertList = new List<Vector3>();
+                var normList = new List<Vector3>();
+                var tangList = new List<Vector3>();
+                var binmList = new List<Vector3>();
+                var uvList = new List<Vector2>();
 
                 sliceCount--;
                 stackCount++;
@@ -547,15 +547,15 @@ namespace Engine.Common
                         float tY = 0.0f;
                         float tZ = +(float)Math.Sin(phi) * (float)Math.Cos(theta);
 
-                        Vector3 position = radius * new Vector3(x, y, z);
-                        Vector3 normal = new Vector3(x, y, z);
-                        Vector3 tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
-                        Vector3 binormal = Vector3.Cross(normal, tangent);
+                        var position = radius * new Vector3(x, y, z);
+                        var normal = new Vector3(x, y, z);
+                        var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
+                        var binormal = Vector3.Cross(normal, tangent);
 
                         float u = theta / MathUtil.Pi * 2f;
                         float v = phi / MathUtil.Pi;
 
-                        Vector2 texture = new Vector2(u, v);
+                        var texture = new Vector2(u, v);
 
                         vertList.Add(position + center);
                         normList.Add(normal);
@@ -574,7 +574,7 @@ namespace Engine.Common
 
                 #endregion
 
-                List<int> indexList = new List<int>();
+                var indexList = new List<int>();
 
                 #region Indexes
 
@@ -626,8 +626,8 @@ namespace Engine.Common
             }
             else if (topology == Topology.LineList)
             {
-                List<Vector3> vertList = new List<Vector3>();
-                List<int> indexList = new List<int>();
+                var vertList = new List<Vector3>();
+                var indexList = new List<int>();
 
                 //North pole
                 vertList.Add(new Vector3(0.0f, +radius, 0.0f) + center);
@@ -646,7 +646,7 @@ namespace Engine.Common
                         float theta = sl * thetaStep;
 
                         //Spherical to Cartesian
-                        Vector3 position = new Vector3(
+                        var position = new Vector3(
                             radius * (float)Math.Sin(phi) * (float)Math.Cos(theta),
                             radius * (float)Math.Cos(phi),
                             radius * (float)Math.Sin(phi) * (float)Math.Sin(theta));
@@ -887,19 +887,19 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateConeBaseRadius(Topology topology, float baseRadius, float height, int sliceCount)
         {
-            List<Vector3> vertList = new List<Vector3>();
-            List<uint> indexList = new List<uint>();
+            var vertList = new List<Vector3>();
+            var indexList = new List<uint>();
 
             vertList.Add(new Vector3(0.0f, 0.0f, 0.0f));
             vertList.Add(new Vector3(0.0f, -height, 0.0f));
 
-            float thetaStep = MathUtil.TwoPi / (float)sliceCount;
+            float thetaStep = MathUtil.TwoPi / sliceCount;
 
             for (int sl = 0; sl < sliceCount; sl++)
             {
                 float theta = sl * thetaStep;
 
-                Vector3 position = new Vector3(
+                var position = new Vector3(
                     baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Cos(theta),
                     -height,
                     baseRadius * (float)Math.Sin(MathUtil.PiOverTwo) * (float)Math.Sin(theta));
@@ -1536,11 +1536,11 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateHemispheric(Topology topology, Vector3 center, float radius, int sliceCount, int stackCount)
         {
-            List<Vector3> vertList = new List<Vector3>();
-            List<Vector3> normList = new List<Vector3>();
-            List<Vector3> tangList = new List<Vector3>();
-            List<Vector3> binmList = new List<Vector3>();
-            List<Vector2> uvList = new List<Vector2>();
+            var vertList = new List<Vector3>();
+            var normList = new List<Vector3>();
+            var tangList = new List<Vector3>();
+            var binmList = new List<Vector3>();
+            var uvList = new List<Vector2>();
 
             sliceCount--;
             stackCount++;
@@ -1572,10 +1572,10 @@ namespace Engine.Common
                     float tY = 0.0f;
                     float tZ = +sinPhi * cosTheta;
 
-                    Vector3 position = radius * new Vector3(x, y, z);
-                    Vector3 normal = new Vector3(x, y, z);
-                    Vector3 tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
-                    Vector3 binormal = Vector3.Cross(normal, tangent);
+                    var position = radius * new Vector3(x, y, z);
+                    var normal = new Vector3(x, y, z);
+                    var tangent = Vector3.Normalize(new Vector3(tX, tY, tZ));
+                    var binormal = Vector3.Cross(normal, tangent);
 
                     float u = theta / MathUtil.TwoPi;
                     float v = phi / MathUtil.PiOverTwo;
@@ -1585,7 +1585,7 @@ namespace Engine.Common
                         u -= halfStep;
                     }
 
-                    Vector2 texture = new Vector2(u, v);
+                    var texture = new Vector2(u, v);
 
                     vertList.Add(position + center);
                     normList.Add(normal);
@@ -1599,7 +1599,7 @@ namespace Engine.Common
 
             if (topology == Topology.TriangleList)
             {
-                List<int> indexList = new List<int>();
+                var indexList = new List<int>();
 
                 #region Indexes
 
@@ -1637,7 +1637,7 @@ namespace Engine.Common
             }
             else if (topology == Topology.LineList)
             {
-                List<uint> indexList = new List<uint>();
+                var indexList = new List<uint>();
 
                 var count = vertList.Count / sliceCount;
 
@@ -1689,7 +1689,7 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCylinder(Topology topology, Vector3 center, float radius, float height, int sliceCount)
         {
-            List<Vector3> verts = new List<Vector3>();
+            var verts = new List<Vector3>();
 
             var bsePosition = new Vector3(center.X, center.Y - (height * 0.5f), center.Z);
             var capPosition = new Vector3(center.X, center.Y + (height * 0.5f), center.Z);
@@ -1711,7 +1711,7 @@ namespace Engine.Common
                 int cBase = verts.Count - 2;
                 int cCap = verts.Count - 1;
 
-                List<int> indexList = new List<int>();
+                var indexList = new List<int>();
 
                 for (int i = 0; i < sliceCount; i++)
                 {
@@ -1739,7 +1739,7 @@ namespace Engine.Common
                 });
                 }
 
-                List<Vector3> norms = new List<Vector3>();
+                var norms = new List<Vector3>();
 
                 for (int i = 0; i < sliceCount * 2; i++)
                 {
@@ -1757,7 +1757,7 @@ namespace Engine.Common
             }
             else if (topology == Topology.LineList)
             {
-                List<int> indexList = new List<int>();
+                var indexList = new List<int>();
 
                 for (int i = 0; i < sliceCount; i++)
                 {
@@ -1818,7 +1818,7 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCapsule(Topology topology, Vector3 center, float radius, float height, int sliceCount, int stackCount)
         {
-            List<Vector3> verts = new List<Vector3>();
+            var verts = new List<Vector3>();
 
             // Create a hemispheric for each position
             var hemispheric = CreateHemispheric(topology, Vector3.Zero, radius, sliceCount, stackCount);
@@ -1840,13 +1840,13 @@ namespace Engine.Common
 
             if (topology == Topology.TriangleList)
             {
-                List<Vector3> norms = new List<Vector3>();
+                var norms = new List<Vector3>();
 
                 //Populate normals
                 norms.AddRange(hemispheric.Normals);
                 norms.AddRange(hemispheric.Normals.Select(n => new Vector3(n.X, -n.Y, n.Z)));
 
-                List<uint> indexList = new List<uint>();
+                var indexList = new List<uint>();
 
                 //Cap
                 indexList.AddRange(hemispheric.Indices);
@@ -1884,7 +1884,7 @@ namespace Engine.Common
             }
             else if (topology == Topology.LineList)
             {
-                List<uint> indexList = new List<uint>();
+                var indexList = new List<uint>();
 
                 var count = verts.Count / sliceCount;
 
@@ -2056,7 +2056,7 @@ namespace Engine.Common
 
 
             // Create the index array.
-            List<uint> indexList = new List<uint>((size + 1) * (size + 1) * 6);
+            var indexList = new List<uint>((size + 1) * (size + 1) * 6);
 
             // Load the vertex and index array with the sky plane array data.
             for (int j = 0; j < size; j++)
@@ -2125,25 +2125,25 @@ namespace Engine.Common
         public static NormalDescriptor ComputeNormals(Vector3 p1, Vector3 p2, Vector3 p3, Vector2 uv1, Vector2 uv2, Vector2 uv3)
         {
             // Calculate the two vectors for the face.
-            Vector3 vector1 = p2 - p1;
-            Vector3 vector2 = p3 - p1;
+            var vector1 = p2 - p1;
+            var vector2 = p3 - p1;
 
             // Calculate the tu and tv texture space vectors.
-            Vector2 tuVector = new Vector2(uv2.X - uv1.X, uv3.X - uv1.X);
-            Vector2 tvVector = new Vector2(uv2.Y - uv1.Y, uv3.Y - uv1.Y);
+            var tuVector = new Vector2(uv2.X - uv1.X, uv3.X - uv1.X);
+            var tvVector = new Vector2(uv2.Y - uv1.Y, uv3.Y - uv1.Y);
 
             // Calculate the denominator of the tangent / bi-normal equation.
             var den = 1.0f / (tuVector[0] * tvVector[1] - tuVector[1] * tvVector[0]);
 
             // Calculate the cross products and multiply by the coefficient to get the tangent and bi-normal.
-            Vector3 tangent = new Vector3
+            var tangent = new Vector3
             {
                 X = (tvVector[1] * vector1.X - tvVector[0] * vector2.X) * den,
                 Y = (tvVector[1] * vector1.Y - tvVector[0] * vector2.Y) * den,
                 Z = (tvVector[1] * vector1.Z - tvVector[0] * vector2.Z) * den
             };
 
-            Vector3 binormal = new Vector3
+            var binormal = new Vector3
             {
                 X = (tuVector[0] * vector2.X - tuVector[1] * vector1.X) * den,
                 Y = (tuVector[0] * vector2.Y - tuVector[1] * vector1.Y) * den,
@@ -2154,7 +2154,7 @@ namespace Engine.Common
             binormal.Normalize();
 
             // Calculate the cross product of the tangent and bi-normal which will give the normal vector.
-            Vector3 normal = Vector3.Cross(tangent, binormal);
+            var normal = Vector3.Cross(tangent, binormal);
 
             return new NormalDescriptor()
             {
@@ -2217,7 +2217,7 @@ namespace Engine.Common
         /// <param name="res">Resulting vertices</param>
         public static void ConstraintVertices(BoundingBox constraint, IEnumerable<VertexData> vertices, out IEnumerable<VertexData> res)
         {
-            List<VertexData> tmpVertices = new List<VertexData>();
+            var tmpVertices = new List<VertexData>();
 
             for (int i = 0; i < vertices.Count(); i += 3)
             {
@@ -2259,7 +2259,7 @@ namespace Engine.Common
         /// <param name="resIndices">Resulting indices</param>
         public static void ConstraintIndices(BoundingBox constraint, IEnumerable<VertexData> vertices, IEnumerable<uint> indices, out IEnumerable<VertexData> resVertices, out IEnumerable<uint> resIndices)
         {
-            List<uint> tmpIndices = new List<uint>();
+            var tmpIndices = new List<uint>();
 
             // Gets all triangle indices into the constraint
             for (int i = 0; i < indices.Count(); i += 3)
@@ -2282,8 +2282,8 @@ namespace Engine.Common
                 }
             }
 
-            List<VertexData> tmpVertices = new List<VertexData>();
-            List<Tuple<uint, uint>> dict = new List<Tuple<uint, uint>>();
+            var tmpVertices = new List<VertexData>();
+            var dict = new List<Tuple<uint, uint>>();
 
             // Adds all the selected vertices for each unique index, and create a index translator for the new vertex list
             foreach (uint index in tmpIndices.Distinct())

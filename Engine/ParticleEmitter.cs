@@ -21,25 +21,25 @@ namespace Engine
         private static BoundingBox SampleBBox(ParticleEmitter emitter, ParticleSystemParams systemParams, float time)
         {
             //Initial position
-            Vector3 initialPos = Vector3.Zero;
-            Vector3 velocity = emitter.Velocity * systemParams.EmitterVelocitySensitivity;
+            var initialPos = Vector3.Zero;
+            var velocity = emitter.Velocity * systemParams.EmitterVelocitySensitivity;
             float horizontalVelocity = Math.Max(systemParams.HorizontalVelocity.X, systemParams.HorizontalVelocity.Y);
 
             //Max v velocity
-            Vector3 vVelocity = velocity;
+            var vVelocity = velocity;
             vVelocity.Y *= Math.Max(systemParams.VerticalVelocity.X, systemParams.VerticalVelocity.Y);
 
             //Max h velocity
-            Vector3 hVelocity1 = velocity;
+            var hVelocity1 = velocity;
             hVelocity1.X *= horizontalVelocity * (float)Math.Cos(0);
             hVelocity1.Z *= horizontalVelocity * (float)Math.Sin(0);
 
-            Vector3 hVelocity2 = velocity;
+            var hVelocity2 = velocity;
             hVelocity2.X *= horizontalVelocity * (float)Math.Cos(1);
             hVelocity2.Z *= horizontalVelocity * (float)Math.Sin(1);
 
             //Final positions
-            Vector3 finalPosV = ComputeParticlePosition(
+            var finalPosV = ComputeParticlePosition(
                 initialPos,
                 vVelocity,
                 systemParams.EndVelocity,
@@ -47,7 +47,7 @@ namespace Engine
                 time,
                 systemParams.Gravity);
 
-            Vector3 finalPosH1 = ComputeParticlePosition(
+            var finalPosH1 = ComputeParticlePosition(
                 initialPos,
                 hVelocity1,
                 systemParams.EndVelocity,
@@ -55,7 +55,7 @@ namespace Engine
                 time,
                 systemParams.Gravity);
 
-            Vector3 finalPosH2 = ComputeParticlePosition(
+            var finalPosH2 = ComputeParticlePosition(
                 initialPos,
                 hVelocity2,
                 systemParams.EndVelocity,
@@ -65,13 +65,13 @@ namespace Engine
 
             float startSize = systemParams.MaxStartSize * 0.5f;
 
-            BoundingSphere initial = new BoundingSphere(initialPos + new Vector3(0, startSize, 0), startSize * 0.5f);
+            var initial = new BoundingSphere(initialPos + new Vector3(0, startSize, 0), startSize * 0.5f);
 
             float endSize = systemParams.MaxEndSize * 0.5f;
 
-            BoundingSphere finalV = new BoundingSphere(finalPosV + new Vector3(0, endSize, 0), endSize * 0.5f);
-            BoundingSphere finalH1 = new BoundingSphere(finalPosH1 + new Vector3(0, endSize, 0), endSize * 0.5f);
-            BoundingSphere finalH2 = new BoundingSphere(finalPosH2 + new Vector3(0, endSize, 0), endSize * 0.5f);
+            var finalV = new BoundingSphere(finalPosV + new Vector3(0, endSize, 0), endSize * 0.5f);
+            var finalH1 = new BoundingSphere(finalPosH1 + new Vector3(0, endSize, 0), endSize * 0.5f);
+            var finalH2 = new BoundingSphere(finalPosH2 + new Vector3(0, endSize, 0), endSize * 0.5f);
 
             var bbox = BoundingBox.FromSphere(initial);
             bbox = BoundingBox.Merge(bbox, BoundingBox.FromSphere(finalV));
@@ -96,10 +96,10 @@ namespace Engine
             float totalVelocityMag = startVelocityMag * endVelocityMag;
             float velocityIntegral = (startVelocityMag * normalizedAge) + (totalVelocityMag - startVelocityMag) * normalizedAge * normalizedAge * 0.5f;
 
-            Vector3 finalVelocity = Vector3.Normalize(velocity) * velocityIntegral;
-            Vector3 finalGravity = gravity * age * normalizedAge;
+            var finalVelocity = Vector3.Normalize(velocity) * velocityIntegral;
+            var finalGravity = gravity * age * normalizedAge;
 
-            Vector3 p = finalVelocity + finalGravity;
+            var p = finalVelocity + finalGravity;
 
             return position + p;
         }

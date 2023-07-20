@@ -157,7 +157,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// Find tight heigh bounds, used for culling out off-mesh start locations.
         /// </summary>
         /// <returns>Returns a bounding box</returns>
-        public BoundingBox FindBounds()
+        public readonly BoundingBox FindBounds()
         {
             float hmin = float.MaxValue;
             float hmax = float.MinValue;

@@ -31,21 +31,17 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="index">Index</param>
         /// <returns>Returns the triangle point index value</returns>
-        public int this[int index]
+        public readonly int this[int index]
         {
             get
             {
-                switch (index)
+                return index switch
                 {
-                    case 0:
-                        return Point1;
-                    case 1:
-                        return Point2;
-                    case 2:
-                        return Point3;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(index), "Bad triangle index");
-                }
+                    0 => Point1,
+                    1 => Point2,
+                    2 => Point3,
+                    _ => throw new ArgumentOutOfRangeException(nameof(index), "Bad triangle index"),
+                };
             }
         }
 
@@ -54,7 +50,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         /// <param name="edgeIndex">The index of the first vertex of the edge. For instance, if 0, returns flags for edge AB.</param>
         /// <returns></returns>
-        public DetailTriEdgeFlagTypes GetDetailTriEdgeFlags(int edgeIndex)
+        public readonly DetailTriEdgeFlagTypes GetDetailTriEdgeFlags(int edgeIndex)
         {
             return (DetailTriEdgeFlagTypes)((Flags >> (edgeIndex * 2)) & 0x3);
         }

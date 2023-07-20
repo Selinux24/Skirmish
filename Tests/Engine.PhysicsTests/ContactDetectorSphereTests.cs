@@ -18,25 +18,25 @@ namespace Engine.PhysicsTests
 
         static HalfSpaceCollider FromPlane(Vector3 point, Vector3 normal, Matrix transform)
         {
-            Plane p = new Plane(point, normal);
-            HalfSpaceCollider c = new HalfSpaceCollider(p);
-            RigidBody rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
+            var p = new Plane(point, normal);
+            var c = new HalfSpaceCollider(p);
+            var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             c.Attach(rb);
 
             return c;
         }
         static TriangleCollider FromTriangle(Triangle tri, Matrix transform)
         {
-            TriangleCollider c = new TriangleCollider(tri);
-            RigidBody rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
+            var c = new TriangleCollider(tri);
+            var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             c.Attach(rb);
 
             return c;
         }
         static ConvexMeshCollider FromTriangles(IEnumerable<Triangle> tris, Matrix transform)
         {
-            ConvexMeshCollider c = new ConvexMeshCollider(tris);
-            RigidBody rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
+            var c = new ConvexMeshCollider(tris);
+            var rb = new RigidBody(new() { Mass = float.PositiveInfinity, InitialTransform = transform });
             c.Attach(rb);
 
             return c;
@@ -44,16 +44,8 @@ namespace Engine.PhysicsTests
 
         static SphereCollider FromRadius(float radius, Matrix transform)
         {
-            SphereCollider c = new SphereCollider(radius);
-            RigidBody rb = new RigidBody(new() { Mass = 1, InitialTransform = transform });
-            c.Attach(rb);
-
-            return c;
-        }
-        static BoxCollider FromSize(Vector3 extents, Matrix transform)
-        {
-            BoxCollider c = new BoxCollider(extents);
-            RigidBody rb = new RigidBody(new() { Mass = 1, InitialTransform = transform });
+            var c = new SphereCollider(radius);
+            var rb = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             c.Attach(rb);
 
             return c;
@@ -74,16 +66,16 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactDetectorSphereTest()
         {
-            ContactResolver data1 = new ContactResolver();
-            ContactResolver data2 = new ContactResolver();
-            ContactResolver data3 = new ContactResolver();
+            var data1 = new ContactResolver();
+            var data2 = new ContactResolver();
+            var data3 = new ContactResolver();
 
             float ah = 0;
-            Matrix trnA = Matrix.Translation(0, 0, 0);
+            var trnA = Matrix.Translation(0, 0, 0);
 
-            Triangle t = new(new Vector3(-10, ah, -10), new Vector3(0, ah, 10), new Vector3(10, ah, -10));
-            Triangle t1 = new(new Vector3(-10, ah, -10), new Vector3(-10, ah, 10), new Vector3(10, ah, -10));
-            Triangle t2 = new(new Vector3(-10, ah, 10), new Vector3(10, ah, 10), new Vector3(10, ah, -10));
+            var t = new Triangle(new Vector3(-10, ah, -10), new Vector3(0, ah, 10), new Vector3(10, ah, -10));
+            var t1 = new Triangle(new Vector3(-10, ah, -10), new Vector3(-10, ah, 10), new Vector3(10, ah, -10));
+            var t2 = new Triangle(new Vector3(-10, ah, 10), new Vector3(10, ah, 10), new Vector3(10, ah, -10));
 
             var c1 = FromPlane(new Vector3(0, ah, 0), Vector3.Up, trnA);
             var c2 = FromTriangle(t, trnA);

@@ -24,26 +24,24 @@ namespace Skybox
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("5 Skybox", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("5 Skybox", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("5 Skybox"))
+                using Game cl = new("5 Skybox");
 #endif
-                {
 #if DEBUG
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = false;
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
 #else
                     cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
-                    GameResourceManager.RegisterLoader<LoaderObj>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderObj>();
 
-                    cl.SetScene<TestScene3D>();
+                cl.SetScene<TestScene3D>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

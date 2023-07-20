@@ -23,17 +23,15 @@ namespace SceneTest
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("3 SceneTest", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("3 SceneTest", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("3 SceneTest"))
+                using Game cl = new("3 SceneTest");
 #endif
-                {
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<SceneStart.SceneStart>();
+                cl.SetScene<SceneStart.SceneStart>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

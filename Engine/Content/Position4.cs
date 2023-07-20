@@ -11,7 +11,7 @@ namespace Engine.Content
         /// <summary>
         /// Position zero
         /// </summary>
-        public static readonly Position4 Zero = new Position4();
+        public static readonly Position4 Zero = new();
 
         /// <summary>
         /// The X component of the position.

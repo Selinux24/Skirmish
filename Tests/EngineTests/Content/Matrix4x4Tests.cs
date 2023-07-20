@@ -154,11 +154,11 @@ namespace Engine.Content.Tests
         public void MatrixToMatrixTest()
         {
             Matrix res1 = new Matrix4X4(matrixValues);
-            Matrix expected1 = new Matrix(matrixValues);
+            Matrix expected1 = new(matrixValues);
             Assert.AreEqual(expected1, res1);
 
             Matrix4X4 res2 = new Matrix(matrixValues);
-            Matrix4X4 expected2 = new Matrix4X4(matrixValues);
+            Matrix4X4 expected2 = new(matrixValues);
             Assert.AreEqual(expected2, res2);
         }
     }

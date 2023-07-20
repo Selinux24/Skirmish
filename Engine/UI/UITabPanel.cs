@@ -16,11 +16,11 @@ namespace Engine.UI
         /// <summary>
         /// Button list
         /// </summary>
-        private readonly List<UIButton> tabButtons = new List<UIButton>();
+        private readonly List<UIButton> tabButtons = new();
         /// <summary>
         /// Panel list
         /// </summary>
-        private readonly List<UIPanel> tabPanels = new List<UIPanel>();
+        private readonly List<UIPanel> tabPanels = new();
         /// <summary>
         /// Update layout flag
         /// </summary>

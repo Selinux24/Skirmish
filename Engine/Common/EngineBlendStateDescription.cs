@@ -101,7 +101,7 @@ namespace Engine.Common
         /// <remarks>
         /// Because this structure contains an array, it is not possible to modify it without making an explicit clone method.
         /// </remarks>
-        public EngineBlendStateDescription Clone()
+        public readonly EngineBlendStateDescription Clone()
         {
             var blendState = Default();
 

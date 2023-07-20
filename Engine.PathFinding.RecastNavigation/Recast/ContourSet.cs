@@ -81,7 +81,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 bmax.Z -= pad;
             }
 
-            ContourSet cset = new ContourSet
+            var cset = new ContourSet
             {
                 BMin = bmin,
                 BMax = bmax,
@@ -182,7 +182,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private static IEnumerable<Int4> Initialize(IEnumerable<Int4> points)
         {
-            List<Int4> simplified = new List<Int4>();
+            var simplified = new List<Int4>();
 
             bool hasConnections = PointsHasConnections(points);
             if (hasConnections)
@@ -222,7 +222,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private static IEnumerable<Int4> GetChangePoints(IEnumerable<Int4> points)
         {
-            List<Int4> changes = new List<Int4>();
+            var changes = new List<Int4>();
 
             for (int i = 0, ni = points.Count(); i < ni; ++i)
             {
@@ -242,7 +242,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private static IEnumerable<Int4> CreateInitialPoints(IEnumerable<Int4> points)
         {
-            List<Int4> initialPoints = new List<Int4>();
+            var initialPoints = new List<Int4>();
 
             int llx = points.First().X;
             int lly = points.First().Y;
@@ -279,7 +279,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<Int4> AddPoints(IEnumerable<Int4> points, IEnumerable<Int4> list, float maxError)
         {
-            List<Int4> simplified = new List<Int4>(list);
+            var simplified = new List<Int4>(list);
 
             int pn = points.Count();
             for (int i = 0; i < simplified.Count;)
@@ -356,7 +356,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 return list.ToArray();
             }
 
-            List<Int4> simplified = new List<Int4>(list);
+            var simplified = new List<Int4>(list);
 
             int pn = points.Count();
             for (int i = 0; i < simplified.Count;)
@@ -433,7 +433,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<Int4> UpdateNeighbors(IEnumerable<Int4> points, IEnumerable<Int4> list)
         {
-            List<Int4> simplified = new List<Int4>(list);
+            var simplified = new List<Int4>(list);
 
             int pn = points.Count();
             for (int i = 0; i < simplified.Count; ++i)
@@ -451,7 +451,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<Int4> RemoveDegenerateSegments(IEnumerable<Int4> list)
         {
-            List<Int4> simplified = new List<Int4>(list);
+            var simplified = new List<Int4>(list);
 
             // Remove adjacent vertices which are equal on xz-plane,
             // or else the triangulator will get confused.

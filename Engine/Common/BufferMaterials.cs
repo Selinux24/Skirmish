@@ -58,7 +58,7 @@ namespace Engine.Common
         /// Packs current instance into a Vector4 array
         /// </summary>
         /// <returns>Returns the packed material</returns>
-        public Vector4[] Pack()
+        public readonly Vector4[] Pack()
         {
             return new[]
             {
@@ -76,14 +76,14 @@ namespace Engine.Common
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public int GetStride()
+        public readonly int GetStride()
         {
 #if DEBUG
             int size = Marshal.SizeOf(typeof(BufferMaterials));
             if (size % 8 != 0) throw new EngineException("Buffer strides must be divisible by 8 in order to be sent to shaders and effects as arrays");
             return size;
 #else
-                return Marshal.SizeOf(typeof(BufferMaterials));
+            return Marshal.SizeOf(typeof(BufferMaterials));
 #endif
         }
     };

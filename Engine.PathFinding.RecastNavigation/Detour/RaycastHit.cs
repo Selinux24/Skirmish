@@ -9,7 +9,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
     /// </summary>
     public class RaycastHit
     {
-        private readonly List<int> path = new List<int>();
+        private readonly List<int> path = new();
 
         /// <summary>
         /// The hit parameter. (FLT_MAX if no wall hit.)
@@ -62,7 +62,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="r">Polygin reference</param>
         public void Add(int r)
         {
-            this.path.Add(r);
+            path.Add(r);
         }
         /// <summary>
         /// Cuts the polygon reference list to the specified length
@@ -70,12 +70,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="length">Final length</param>
         public void Cut(int length)
         {
-            if (this.path.Count > length)
+            if (path.Count > length)
             {
-                var tmp = this.path.Take(length);
+                var tmp = path.Take(length);
 
-                this.path.Clear();
-                this.path.AddRange(tmp);
+                path.Clear();
+                path.AddRange(tmp);
             }
         }
         /// <summary>
@@ -84,7 +84,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns a simple path</returns>
         public SimplePath CreateSimplePath()
         {
-            SimplePath res = new SimplePath(MaxPath);
+            var res = new SimplePath(MaxPath);
             res.StartPath(Path);
 
             return res;

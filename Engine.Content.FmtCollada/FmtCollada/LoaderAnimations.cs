@@ -54,7 +54,7 @@ namespace Engine.Content.FmtCollada
             var modelList = ContentManager.FindContent(contentFolder, fileName);
             if (modelList?.Any() == true)
             {
-                AnimationLibContentData res = new AnimationLibContentData();
+                var res = new AnimationLibContentData();
 
                 foreach (var model in modelList)
                 {
@@ -84,7 +84,7 @@ namespace Engine.Content.FmtCollada
         /// <param name="animation">Animation description</param>
         private static Dictionary<string, IEnumerable<AnimationContent>> ProcessLibraryAnimations(Collada dae)
         {
-            Dictionary<string, IEnumerable<AnimationContent>> res = new Dictionary<string, IEnumerable<AnimationContent>>();
+            var res = new Dictionary<string, IEnumerable<AnimationContent>>();
 
             if (dae.LibraryAnimations?.Length > 0)
             {
@@ -113,7 +113,7 @@ namespace Engine.Content.FmtCollada
                 return Enumerable.Empty<AnimationContent>();
             }
 
-            List<AnimationContent> res = new List<AnimationContent>();
+            var res = new List<AnimationContent>();
 
             foreach (var channel in animationLibrary.Channels)
             {
@@ -154,7 +154,7 @@ namespace Engine.Content.FmtCollada
             //Keyframe interpolation types
             var interpolations = ReadInterpolations(sampler, animationLibrary);
 
-            List<Keyframe> keyframes = new List<Keyframe>();
+            var keyframes = new List<Keyframe>();
 
             for (int i = 0; i < times.Count(); i++)
             {
@@ -175,7 +175,7 @@ namespace Engine.Content.FmtCollada
                     throw new NotImplementedException($"{interpolation} interpolation not supported.g");
                 }
 
-                Keyframe keyframe = new Keyframe()
+                var keyframe = new Keyframe()
                 {
                     Time = time,
                     Position = position,
@@ -270,7 +270,7 @@ namespace Engine.Content.FmtCollada
         /// <returns>Returns the parsed interpolation list</returns>
         private static IEnumerable<KeyframeInterpolations> ParseInterpolations(IEnumerable<string> interpolations)
         {
-            List<KeyframeInterpolations> result = new List<KeyframeInterpolations>();
+            var result = new List<KeyframeInterpolations>();
 
             foreach (var interpolation in interpolations)
             {

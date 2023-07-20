@@ -73,11 +73,11 @@ namespace Tanks
         /// <summary>
         /// Lights collection
         /// </summary>
-        private static readonly List<SceneLightPoint> lights = new List<SceneLightPoint>();
+        private static readonly List<SceneLightPoint> lights = new();
         /// <summary>
         /// Tweeners collection
         /// </summary>
-        private static readonly List<LightTweener> lightTweeners = new List<LightTweener>();
+        private static readonly List<LightTweener> lightTweeners = new();
 
         /// <summary>
         /// Initializes the queue

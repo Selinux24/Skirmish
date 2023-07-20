@@ -13,6 +13,7 @@
     <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

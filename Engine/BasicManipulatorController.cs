@@ -61,7 +61,7 @@ namespace Engine
         /// <inheritdoc/>
         public override void SetState(IGameState state)
         {
-            if (!(state is BasicManipulatorControllerState basicManipulator))
+            if (state is not BasicManipulatorControllerState basicManipulator)
             {
                 return;
             }

@@ -17,11 +17,11 @@ namespace Engine.Common
         /// <summary>
         /// Hull mesh triangle list
         /// </summary>
-        private readonly List<Triangle> hullMesh = new List<Triangle>();
+        private readonly List<Triangle> hullMesh = new();
         /// <summary>
         /// Light list
         /// </summary>
-        private readonly List<ISceneLight> lights = new List<ISceneLight>();
+        private readonly List<ISceneLight> lights = new();
 
         /// <summary>
         /// Game instance
@@ -70,7 +70,7 @@ namespace Engine.Common
         /// <returns>Returns the generated drawing data objects</returns>
         public static async Task<DrawingData> Build(Game game, string name, ContentData modelContent, DrawingDataDescription description, BufferDescriptor instancingBuffer = null)
         {
-            DrawingData res = new DrawingData(game, description);
+            var res = new DrawingData(game, description);
 
             //Animation
             if (description.LoadAnimation)
@@ -405,9 +405,9 @@ namespace Engine.Common
         /// <param name="skinController">Skin controller</param>
         private static IEnumerable<JointAnimation> InitializeJoints(ContentData modelContent, Joint joint, IEnumerable<string> skinController)
         {
-            List<JointAnimation> animations = new List<JointAnimation>();
+            var animations = new List<JointAnimation>();
 
-            List<JointAnimation> boneAnimations = new List<JointAnimation>();
+            var boneAnimations = new List<JointAnimation>();
 
             //Find keyframes for current bone
             var c = modelContent.Animations.Values.FirstOrDefault(a => a.Any(ac => ac.JointName == joint.Name))?.ToArray();
@@ -550,7 +550,7 @@ namespace Engine.Common
                 return;
             }
 
-            List<ISceneLight> modelLights = new List<ISceneLight>();
+            var modelLights = new List<ISceneLight>();
 
             await Task.Run(() =>
             {
@@ -651,7 +651,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's point list</returns>
         public IEnumerable<Vector3> GetPoints(Matrix transform, bool refresh = false)
         {
-            List<Vector3> points = new List<Vector3>();
+            var points = new List<Vector3>();
 
             var meshMaterialList = Meshes.Values.ToArray();
 
@@ -700,7 +700,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's point list</returns>
         public IEnumerable<Vector3> GetPoints(Matrix transform, IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
-            List<Vector3> points = new List<Vector3>();
+            var points = new List<Vector3>();
 
             var meshMaterialList = Meshes.Values.ToArray();
 
@@ -748,7 +748,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(Matrix transform, bool refresh = false)
         {
-            List<Triangle> triangles = new List<Triangle>();
+            var triangles = new List<Triangle>();
 
             var meshMaterialList = Meshes.Values.ToArray();
 
@@ -795,7 +795,7 @@ namespace Engine.Common
         /// <returns>Returns the drawing data's triangle list</returns>
         public IEnumerable<Triangle> GetTriangles(Matrix transform, IEnumerable<Matrix> boneTransforms, bool refresh = false)
         {
-            List<Triangle> triangles = new List<Triangle>();
+            var triangles = new List<Triangle>();
 
             var meshMaterialList = Meshes.Values.ToArray();
 

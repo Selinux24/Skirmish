@@ -24,7 +24,7 @@ namespace Engine.BuiltIn.Common
         public Matrix Local;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMeshSingle));
         }
@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.Common
         public float AnimationInterpolation;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMeshSkinned));
         }
@@ -104,7 +104,7 @@ namespace Engine.BuiltIn.Common
         public uint MaterialIndex;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMaterialColor));
         }
@@ -144,7 +144,7 @@ namespace Engine.BuiltIn.Common
         public uint TextureIndex;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMaterialTexture));
         }
@@ -171,7 +171,7 @@ namespace Engine.BuiltIn.Common
         public uint Channel;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerFramePositionTexture));
         }
@@ -236,7 +236,7 @@ namespace Engine.BuiltIn.Common
         public float Slope2;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerTerrain));
         }

@@ -26,7 +26,7 @@ namespace Engine
         /// <summary>
         /// Random number generator
         /// </summary>
-        public static readonly Random RandomGenerator = new Random();
+        public static readonly Random RandomGenerator = new();
         /// <summary>
         /// Gets a new random generator
         /// </summary>
@@ -73,7 +73,7 @@ namespace Engine
         /// <returns>Returns a memory stream</returns>
         public static MemoryStream CopyToMemory(this Stream stream)
         {
-            MemoryStream ms = new MemoryStream();
+            var ms = new MemoryStream();
 
             stream.CopyTo(ms);
 
@@ -88,10 +88,8 @@ namespace Engine
         /// <returns>Returns a memory stream</returns>
         public static MemoryStream CopyToMemory(this string fileName)
         {
-            using (var stream = File.OpenRead(fileName))
-            {
-                return stream.CopyToMemory();
-            }
+            using var stream = File.OpenRead(fileName);
+            return stream.CopyToMemory();
         }
 
         #endregion
@@ -108,7 +106,7 @@ namespace Engine
             byte[] result = null;
             result = MD5.HashData(buffer);
 
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
             Array.ForEach(result, r => sb.Append(r.ToString("X2")));
             return sb.ToString();
         }
@@ -684,13 +682,13 @@ namespace Engine
         /// <returns>Returns the angle value in radians</returns>
         public static float AngleSigned(Vector3 one, Vector3 two, Vector3 planeNormal)
         {
-            Plane p = new Plane(planeNormal, 0);
+            var p = new Plane(planeNormal, 0);
 
             float dot = Vector3.Dot(Vector3.Normalize(one), Vector3.Normalize(two));
 
             float angle = (float)Math.Acos(MathUtil.Clamp(dot, 0, 1));
 
-            Vector3 cross = Vector3.Cross(one, two);
+            var cross = Vector3.Cross(one, two);
 
             if (Vector3.Dot(p.Normal, cross) > 0)
             {
@@ -755,7 +753,7 @@ namespace Engine
         /// <returns>The world Matrix</returns>
         public static Matrix CreateWorld(Vector3 position, Vector3 forward, Vector3 up)
         {
-            Matrix result = new Matrix();
+            var result = new Matrix();
 
             Vector3.Normalize(ref forward, out Vector3 z);
             Vector3.Cross(ref forward, ref up, out Vector3 x);
@@ -974,7 +972,7 @@ namespace Engine
         /// <returns>Returns a bounding box containing all the boxes in the array</returns>
         public static BoundingBox MergeBoundingBox(IEnumerable<BoundingBox> boxes)
         {
-            BoundingBox fbbox = new BoundingBox();
+            var fbbox = new BoundingBox();
 
             if (boxes?.Any() != true)
             {

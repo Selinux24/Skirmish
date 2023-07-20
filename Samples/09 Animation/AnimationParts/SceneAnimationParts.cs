@@ -15,12 +15,12 @@ namespace Animation.AnimationParts
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
-        private readonly Color sphTrisColor = new Color(Color.Red.ToColor3(), 0.25f);
-        private readonly Color sphLinesColor = new Color(Color.Red.ToColor3(), 1f);
-        private readonly Color boxTrisColor = new Color(Color.Green.ToColor3(), 0.25f);
-        private readonly Color boxLinesColor = new Color(Color.Green.ToColor3(), 1f);
-        private readonly Color obbTrisColor = new Color(Color.Blue.ToColor3(), 0.25f);
-        private readonly Color obbLinesColor = new Color(Color.Blue.ToColor3(), 1f);
+        private readonly Color sphTrisColor = new(Color.Red.ToColor3(), 0.25f);
+        private readonly Color sphLinesColor = new(Color.Red.ToColor3(), 1f);
+        private readonly Color boxTrisColor = new(Color.Green.ToColor3(), 0.25f);
+        private readonly Color boxLinesColor = new(Color.Green.ToColor3(), 1f);
+        private readonly Color obbTrisColor = new(Color.Blue.ToColor3(), 0.25f);
+        private readonly Color obbLinesColor = new(Color.Blue.ToColor3(), 1f);
 
         private Model tank;
 

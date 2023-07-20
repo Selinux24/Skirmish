@@ -143,7 +143,7 @@ namespace Engine
         private static float EvaluateConstant(CurveKeyCollection keys, float position)
         {
             var first = keys[0];
-            var last = keys[keys.Count - 1];
+            var last = keys[^1];
 
             if (position < first.Position)
             {
@@ -167,7 +167,7 @@ namespace Engine
         private static float EvaluateLinear(CurveKeyCollection keys, float position)
         {
             var first = keys[0];
-            var last = keys[keys.Count - 1];
+            var last = keys[^1];
 
             if (position < first.Position)
             {
@@ -191,7 +191,7 @@ namespace Engine
         private static float EvaluateCycle(CurveKeyCollection keys, float position)
         {
             var first = keys[0];
-            var last = keys[keys.Count - 1];
+            var last = keys[^1];
 
             if (position != first.Position)
             {
@@ -213,7 +213,7 @@ namespace Engine
         private static float EvaluateCycleOffset(CurveKeyCollection keys, float position)
         {
             var first = keys[0];
-            var last = keys[keys.Count - 1];
+            var last = keys[^1];
 
             if (position != first.Position)
             {
@@ -235,7 +235,7 @@ namespace Engine
         private static float EvaluateOscillate(CurveKeyCollection keys, float position)
         {
             var first = keys[0];
-            var last = keys[keys.Count - 1];
+            var last = keys[^1];
 
             if (position != first.Position)
             {

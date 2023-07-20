@@ -25,7 +25,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static HeightfieldLayerSet StoreLayers(HeightfieldLayerData ldata)
         {
-            HeightfieldLayerSet lset = new HeightfieldLayerSet
+            var lset = new HeightfieldLayerSet
             {
                 Layers = new HeightfieldLayer[ldata.LayerId],
                 NLayers = ldata.LayerId,

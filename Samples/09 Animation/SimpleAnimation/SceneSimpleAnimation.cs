@@ -22,8 +22,8 @@ namespace Animation.SimpleAnimation
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
         private PrimitiveListDrawer<Line3D> itemLines = null;
-        private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.6f);
-        private readonly Color itemLinesColor = new Color(Color.Red.ToColor3(), 1f);
+        private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.6f);
+        private readonly Color itemLinesColor = new(Color.Red.ToColor3(), 1f);
         private bool showItemDEBUG = false;
         private bool showItem = true;
         private int itemIndex = 0;
@@ -85,10 +85,10 @@ namespace Animation.SimpleAnimation
             };
         }
 
-        private readonly List<ModelInstanced> animObjects = new List<ModelInstanced>();
+        private readonly List<ModelInstanced> animObjects = new();
 
-        private readonly Dictionary<string, AnimationPlan> soldierPaths = new Dictionary<string, AnimationPlan>();
-        private readonly Dictionary<string, AnimationPlan> ratPaths = new Dictionary<string, AnimationPlan>();
+        private readonly Dictionary<string, AnimationPlan> soldierPaths = new();
+        private readonly Dictionary<string, AnimationPlan> ratPaths = new();
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -217,14 +217,14 @@ namespace Animation.SimpleAnimation
             ladder[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             ladder[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
-            AnimationPath def = new AnimationPath();
+            var def = new AnimationPath();
             def.Add("default");
-            AnimationPath pull = new AnimationPath();
+            var pull = new AnimationPath();
             pull.Add("pull");
-            AnimationPath push = new AnimationPath();
+            var push = new AnimationPath();
             push.Add("push");
 
-            Dictionary<string, AnimationPlan> ladderPaths = new Dictionary<string, AnimationPlan>
+            var ladderPaths = new Dictionary<string, AnimationPlan>
             {
                 { "default", new AnimationPlan(def) },
                 { "pull", new AnimationPlan(pull) },
@@ -272,14 +272,14 @@ namespace Animation.SimpleAnimation
             ladder2[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             ladder2[1].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
 
-            AnimationPath def = new AnimationPath();
+            var def = new AnimationPath();
             def.Add("default");
-            AnimationPath pull = new AnimationPath();
+            var pull = new AnimationPath();
             pull.Add("pull");
-            AnimationPath push = new AnimationPath();
+            var push = new AnimationPath();
             push.Add("push");
 
-            Dictionary<string, AnimationPlan> ladder2Paths = new Dictionary<string, AnimationPlan>
+            var ladder2Paths = new Dictionary<string, AnimationPlan>
             {
                 { "default", new AnimationPlan(def) },
                 { "pull", new AnimationPlan(pull) },
@@ -314,19 +314,19 @@ namespace Animation.SimpleAnimation
             soldier[0].AnimationController.PlanEnding += SoldierControllerPathEnding;
             soldier[1].AnimationController.PlanEnding += SoldierControllerPathEnding;
 
-            AnimationPath p1 = new AnimationPath();
+            var p1 = new AnimationPath();
             p1.Add("idle1");
 
-            AnimationPath p2 = new AnimationPath();
+            var p2 = new AnimationPath();
             p2.Add("idle2");
 
-            AnimationPath p3 = new AnimationPath();
+            var p3 = new AnimationPath();
             p3.Add("stand");
 
-            AnimationPath p4 = new AnimationPath();
+            var p4 = new AnimationPath();
             p4.Add("walk");
 
-            AnimationPath p5 = new AnimationPath();
+            var p5 = new AnimationPath();
             p5.Add("run");
 
             soldierPaths.Add("idle1", new AnimationPlan(p1));
@@ -356,7 +356,7 @@ namespace Animation.SimpleAnimation
             rat[0].Manipulator.SetPosition(2, 0, 0, true);
             rat[1].Manipulator.SetPosition(2.5f, 0, 5, true);
 
-            AnimationPath p0 = new AnimationPath();
+            var p0 = new AnimationPath();
             p0.AddLoop("walk");
 
             ratPaths.Add("walk", new AnimationPlan(p0));
@@ -398,17 +398,17 @@ namespace Animation.SimpleAnimation
             walls[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             walls[0].Manipulator.SetScale(2.5f);
 
-            AnimationPath def = new AnimationPath();
+            var def = new AnimationPath();
             def.Add("default");
-            AnimationPath open = new AnimationPath();
+            var open = new AnimationPath();
             open.Add("open");
-            AnimationPath close = new AnimationPath();
+            var close = new AnimationPath();
             close.Add("close");
-            AnimationPath rep = new AnimationPath();
+            var rep = new AnimationPath();
             rep.Add("open");
             rep.Add("close");
 
-            Dictionary<string, AnimationPlan> doorsPaths = new Dictionary<string, AnimationPlan>
+            var doorsPaths = new Dictionary<string, AnimationPlan>
             {
                 { "default", new AnimationPlan(def) },
                 { "open", new AnimationPlan(open) },
@@ -452,17 +452,17 @@ namespace Animation.SimpleAnimation
             doors[0].Manipulator.SetRotation(MathUtil.PiOverTwo, 0, 0);
             doors[0].Manipulator.SetScale(2.5f);
 
-            AnimationPath def = new AnimationPath();
+            var def = new AnimationPath();
             def.Add("default");
-            AnimationPath open = new AnimationPath();
+            var open = new AnimationPath();
             open.Add("open");
-            AnimationPath close = new AnimationPath();
+            var close = new AnimationPath();
             close.Add("close");
-            AnimationPath rep = new AnimationPath();
+            var rep = new AnimationPath();
             rep.Add("open");
             rep.Add("close");
 
-            Dictionary<string, AnimationPlan> jailsPaths = new Dictionary<string, AnimationPlan>
+            var jailsPaths = new Dictionary<string, AnimationPlan>
             {
                 { "default", new AnimationPlan(def) },
                 { "open", new AnimationPlan(open) },
@@ -510,7 +510,7 @@ namespace Animation.SimpleAnimation
             Lights.FillLight.Enabled = false;
             Lights.HemisphericLigth = new SceneLightHemispheric("Ambient", Color.Gray.RGB(), Color.White.RGB(), true);
 
-            BoundingBox bbox = new BoundingBox();
+            var bbox = new BoundingBox();
             animObjects.ForEach(item =>
             {
                 for (int i = 0; i < item.InstanceCount; i++)

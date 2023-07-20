@@ -22,15 +22,13 @@ namespace SpriteDrawing
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("1 SpriteDrawing", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("1 SpriteDrawing", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("1 SpriteDrawing"))
+                using Game cl = new("1 SpriteDrawing");
 #endif
-                {
-                    cl.SetScene<TestScene>();
+                cl.SetScene<TestScene>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

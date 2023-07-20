@@ -12,12 +12,12 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Connected nodes dictionary
         /// </summary>
-        private readonly Dictionary<Headings, int> nodesDictionary = new Dictionary<Headings, int>();
+        private readonly Dictionary<Headings, int> nodesDictionary = new();
 
         /// <summary>
         /// Connections to this node list
         /// </summary>
-        protected List<GridNode> ConnectedNodes = new List<GridNode>();
+        protected List<GridNode> ConnectedNodes = new();
 
         /// <summary>
         /// Gets the connected node list

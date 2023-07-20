@@ -102,7 +102,7 @@ namespace Engine
         /// <returns>Returns a new model content</returns>
         public async Task<ContentData> ReadContentData()
         {
-            HeightMap hm = HeightMap.FromDescription(this);
+            var hm = HeightMap.FromDescription(this);
             var (Vertices, Indices) = await hm.BuildGeometry(
                 CellSize,
                 MaximumHeight,
@@ -110,7 +110,7 @@ namespace Engine
                 Textures.Scale,
                 Textures.Displacement);
 
-            ContentData modelContent = new ContentData();
+            var modelContent = new ContentData();
 
             await Task.Run(() =>
             {
@@ -125,9 +125,9 @@ namespace Engine
                 string materialName = "material";
                 string geoName = "geometry";
 
-                MaterialBlinnPhongContent material = MaterialBlinnPhongContent.Default;
+                var material = MaterialBlinnPhongContent.Default;
 
-                SubMeshContent geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
+                var geo = new SubMeshContent(Topology.TriangleList, materialName, true, false);
                 geo.SetVertices(vertices);
                 geo.SetIndices(indices);
 

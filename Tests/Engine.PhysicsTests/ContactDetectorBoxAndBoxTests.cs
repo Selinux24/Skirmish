@@ -17,8 +17,8 @@ namespace Engine.PhysicsTests
 
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
-            BoxCollider box = new BoxCollider(extents);
-            RigidBody boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
+            var box = new BoxCollider(extents);
+            var boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -26,8 +26,8 @@ namespace Engine.PhysicsTests
         static ConvexMeshCollider FromBox(Vector3 extents, Matrix transform)
         {
             var tris = Triangle.ComputeTriangleList(Topology.TriangleList, new BoundingBox(-extents, extents));
-            ConvexMeshCollider box = new ConvexMeshCollider(tris);
-            RigidBody boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
+            var box = new ConvexMeshCollider(tris);
+            var boxBody = new RigidBody(new() { Mass = 1f, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -48,8 +48,8 @@ namespace Engine.PhysicsTests
         [TestMethod()]
         public void ContactDetectorBoxAndBoxTest()
         {
-            ContactResolver data2 = new ContactResolver();
-            ContactResolver data3 = new ContactResolver();
+            var data2 = new ContactResolver();
+            var data3 = new ContactResolver();
 
             //Matrix r1 = Matrix.RotationAxis(Vector3.ForwardLH, MathUtil.PiOverFour);
             //Matrix r2 = Matrix.RotationAxis(r1.Up, -MathUtil.PiOverFour);

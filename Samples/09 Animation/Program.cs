@@ -23,25 +23,23 @@ namespace Animation
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("9 Animation", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("9 Animation", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("9 Animation"))
+                using Game cl = new("9 Animation");
 #endif
-                {
 #if DEBUG
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = false;
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
 #else
                     cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<Start.SceneStart>();
+                cl.SetScene<Start.SceneStart>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

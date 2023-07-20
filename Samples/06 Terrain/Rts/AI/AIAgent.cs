@@ -498,8 +498,8 @@ namespace Terrain.Rts.AI
 
             Stats.Life -= Helper.RandomGenerator.NextFloat(0, damage);
 
-            if (Stats.PrimaryWeapon != null) Stats.PrimaryWeapon.Delay(damage * 0.1f);
-            if (Stats.SecondaryWeapon != null) Stats.SecondaryWeapon.Delay(damage * 0.1f);
+            Stats.PrimaryWeapon?.Delay(damage * 0.1f);
+            Stats.SecondaryWeapon?.Delay(damage * 0.1f);
 
             FireDamaged(attacker, this);
 

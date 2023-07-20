@@ -126,7 +126,7 @@ namespace Engine.PathFinding.RecastNavigation
             // Tile bounds.
             float tcs = TileSize * CellSize;
 
-            BoundingBox bbox = new BoundingBox();
+            var bbox = new BoundingBox();
 
             bbox.Minimum.X = BoundingBox.Minimum.X + x * tcs;
             bbox.Minimum.Y = BoundingBox.Minimum.Y;

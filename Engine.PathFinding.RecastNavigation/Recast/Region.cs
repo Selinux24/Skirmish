@@ -56,8 +56,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int bid = regb.Id;
 
             // Duplicate current neighbourhood.
-            List<int> acon = new List<int>(rega.connections);
-            List<int> bcon = regb.connections;
+            var acon = new List<int>(rega.connections);
+            var bcon = regb.connections;
 
             // Find insertion point on A.
             int insa = -1;
@@ -117,11 +117,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <summary>
         /// Connection list
         /// </summary>
-        private readonly List<int> connections = new List<int>();
+        private readonly List<int> connections = new();
         /// <summary>
         /// Floor list
         /// </summary>
-        private readonly List<int> floors = new List<int>();
+        private readonly List<int> floors = new();
 
         /// <summary>
         /// ID of the region

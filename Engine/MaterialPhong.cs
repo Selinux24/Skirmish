@@ -104,7 +104,7 @@ namespace Engine
             };
         }
         /// <inheritdoc/>
-        public bool Equals(MaterialPhong other)
+        public readonly bool Equals(MaterialPhong other)
         {
             return
                 EmissiveColor == other.EmissiveColor &&
@@ -115,17 +115,17 @@ namespace Engine
                 Shininess == other.Shininess;
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             return obj is MaterialPhong phong && Equals(phong);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(EmissiveColor, AmbientColor, DiffuseColor, SpecularColor, IsTransparent, Shininess);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Phong. EmissiveColor: {EmissiveColor}; AmbientColor: {AmbientColor}; DiffuseColor: {DiffuseColor}; SpecularColor: {SpecularColor}; Shininess: {Shininess};";
         }

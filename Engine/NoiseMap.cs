@@ -27,7 +27,7 @@ namespace Engine
 
             float[,] noiseMap = new float[mapWidth, mapHeight];
 
-            Random rnd = new Random(seed);
+            var rnd = Helper.SetRandomGeneratorSeed(seed);
             Vector2[] octaveOffsets = new Vector2[octaves];
             for (int i = 0; i < octaves; i++)
             {

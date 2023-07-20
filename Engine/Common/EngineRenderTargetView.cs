@@ -14,7 +14,7 @@ namespace Engine.Common
         /// <summary>
         /// Render target list
         /// </summary>
-        private List<RenderTargetView1> rtvList = new List<RenderTargetView1>();
+        private List<RenderTargetView1> rtvList = new();
 
         /// <summary>
         /// Name

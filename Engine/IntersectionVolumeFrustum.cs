@@ -43,22 +43,22 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingSphere sphere)
+        public readonly ContainmentType Contains(BoundingSphere sphere)
         {
             return Intersection.FrustumContainsSphere(frustum, sphere);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingBox bbox)
+        public readonly ContainmentType Contains(BoundingBox bbox)
         {
             return Intersection.FrustumContainsBox(frustum, bbox);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(BoundingFrustum frustum)
+        public readonly ContainmentType Contains(BoundingFrustum frustum)
         {
             return Intersection.FrustumContainsFrustum(this.frustum, frustum);
         }
         /// <inheritdoc/>
-        public ContainmentType Contains(IEnumerable<Triangle> mesh)
+        public readonly ContainmentType Contains(IEnumerable<Triangle> mesh)
         {
             return Intersection.FrustumContainsMesh(frustum, mesh);
         }

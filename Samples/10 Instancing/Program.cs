@@ -23,25 +23,23 @@ namespace Instancing
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("10 Instancing", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("10 Instancing", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("10 Instancing"))
+                using Game cl = new("10 Instancing");
 #endif
-                {
 #if DEBUG
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = false;
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
 #else
                     cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<TestScene>();
+                cl.SetScene<TestScene>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

@@ -352,9 +352,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int i = 0, j = npolya - 1; i < npolya; j = i++)
             {
-                Vector3 va = polya[j];
-                Vector3 vb = polya[i];
-                Vector3 n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
+                var va = polya[j];
+                var vb = polya[i];
+                var n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
                 ProjectPoly(n, polya, npolya, out float amin, out float amax);
                 ProjectPoly(n, polyb, npolyb, out float bmin, out float bmax);
                 if (!OverlapRange(amin, amax, bmin, bmax, eps))
@@ -365,9 +365,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
             for (int i = 0, j = npolyb - 1; i < npolyb; j = i++)
             {
-                Vector3 va = polyb[j];
-                Vector3 vb = polyb[i];
-                Vector3 n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
+                var va = polyb[j];
+                var vb = polyb[i];
+                var n = new Vector3(vb.Z - va.Z, 0, -(vb.X - va.X));
                 ProjectPoly(n, polya, npolya, out float amin, out float amax);
                 ProjectPoly(n, polyb, npolyb, out float bmin, out float bmax);
                 if (!OverlapRange(amin, amax, bmin, bmax, eps))
@@ -513,7 +513,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             int inum = imax - imin;
             int icur = curNode;
 
-            BVNode node = new BVNode();
+            var node = new BVNode();
             nodes.Add(node);
             curNode++;
 
@@ -699,7 +699,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             // Find unique detail vertices.
             FindUniqueDetailVertices(param, out int uniqueDetailVertCount, out int detailTriCount);
 
-            MeshData data = new MeshData
+            var data = new MeshData
             {
                 // Store header
                 Header = new MeshHeader

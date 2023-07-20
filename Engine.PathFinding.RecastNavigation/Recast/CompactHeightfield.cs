@@ -33,7 +33,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             bbox.Maximum.Y += walkableHeight * hf.CellHeight;
 
             // Fill in header.
-            CompactHeightfield chf = new CompactHeightfield
+            var chf = new CompactHeightfield
             {
                 Width = w,
                 Height = h,
@@ -69,7 +69,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<LevelStackEntry> AppendStacks(IEnumerable<LevelStackEntry> srcStack, IEnumerable<int> srcReg)
         {
-            List<LevelStackEntry> dstStack = new List<LevelStackEntry>();
+            var dstStack = new List<LevelStackEntry>();
 
             for (int j = 0; j < srcStack.Count(); j++)
             {
@@ -703,7 +703,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </remarks>
         public void GetHeightData(IndexedPolygon poly, Int3[] verts, HeightPatch hp, int borderSize, int region)
         {
-            List<HeightDataItem> queue = new List<HeightDataItem>(512);
+            var queue = new List<HeightDataItem>(512);
 
             // Set all heights to RC_UNSET_HEIGHT.
             hp.Data = Helper.CreateArray(hp.Bounds.Width * hp.Bounds.Height, HeightPatch.RC_UNSET_HEIGHT);
@@ -905,9 +905,9 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// </summary>
         private IEnumerable<Vector3> TesselateOutlines(IEnumerable<Vector3> polygon, BuildPolyDetailParams param, HeightPatch hp, out IEnumerable<int> hull)
         {
-            List<Vector3> verts = new List<Vector3>(polygon);
-            Vector3[] edge = new Vector3[(BuildPolyDetailParams.MAX_VERTS_PER_EDGE + 1)];
-            List<int> hullList = new List<int>(BuildPolyDetailParams.MAX_VERTS);
+            var verts = new List<Vector3>(polygon);
+            var edge = new Vector3[(BuildPolyDetailParams.MAX_VERTS_PER_EDGE + 1)];
+            var hullList = new List<int>(BuildPolyDetailParams.MAX_VERTS);
 
             int ninp = polygon.Count();
             for (int i = 0, j = ninp - 1; i < ninp; j = i++)
@@ -997,7 +997,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             for (int k = 0; k <= nn; ++k)
             {
                 float u = k / (float)nn;
-                Vector3 pos = new Vector3
+                var pos = new Vector3
                 {
                     X = vj.X + dx * u,
                     Y = vj.Y + dy * u,
@@ -1065,11 +1065,11 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float sampleDist = param.SampleDist;
             float sampleMaxError = param.SampleMaxError;
 
-            List<Vector3> verts = new List<Vector3>(polygon);
-            List<Int3> triList = new List<Int3>(tris);
+            var verts = new List<Vector3>(polygon);
+            var triList = new List<Int3>(tris);
 
             // Create sample locations in a grid.
-            List<Int4> samples = new List<Int4>(InitializeSamples(polygon, param, hp));
+            var samples = new List<Int4>(InitializeSamples(polygon, param, hp));
 
             // Add the samples starting from the one that has the most
             // error. The procedure stops when all samples are added
@@ -1127,13 +1127,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             float cs = CellSize;
             float ics = 1.0f / cs;
 
-            List<Int4> samples = new List<Int4>();
+            var samples = new List<Int4>();
 
             for (int z = z0; z < z1; ++z)
             {
                 for (int x = x0; x < x1; ++x)
                 {
-                    Vector3 pt = new Vector3
+                    var pt = new Vector3
                     {
                         X = x * sampleDist,
                         Y = (bmax.Y + bmin.Y) * 0.5f,
@@ -1159,7 +1159,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
         private (Vector3 bestpt, float bestd, int besti) FindSampleWithMostError(IEnumerable<Int4> samples, float sampleDist, IEnumerable<Vector3> verts, IEnumerable<Int3> tris)
         {
-            Vector3 bestpt = Vector3.Zero;
+            var bestpt = Vector3.Zero;
             float bestd = 0;
             int besti = -1;
 
@@ -1177,7 +1177,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                Vector3 pt = new Vector3
+                var pt = new Vector3
                 {
                     X = s.X * sampleDist + GetJitterX(i) * cs * 0.1f,
                     Y = s.Y * CellHeight,
@@ -1271,7 +1271,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             pcy /= polyIndices.Length;
 
             // Use seeds array as a stack for DFS
-            List<HeightDataItem> array = new List<HeightDataItem>(512)
+            var array = new List<HeightDataItem>(512)
             {
                 new HeightDataItem
                 {
@@ -1287,7 +1287,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             // directly towards the center without recording intermediate nodes, even though the polygons
             // are convex. In very rare we can get stuck due to contour simplification if we do not
             // record nodes.
-            HeightDataItem hdItem = new HeightDataItem();
+            var hdItem = new HeightDataItem();
             while (true)
             {
                 if (array.Count < 1)
@@ -1383,7 +1383,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the contour list</returns>
         public IEnumerable<int> WalkContour(int x, int y, int i, int dir, int[] srcReg)
         {
-            List<int> cont = new List<int>();
+            var cont = new List<int>();
 
             int startDir = dir;
             int starti = i;
@@ -1465,7 +1465,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         /// <returns>Returns the edge contour list</returns>
         public IEnumerable<Int4> WalkContour(int x, int y, int i, ref int[] flags)
         {
-            List<Int4> points = new List<Int4>();
+            var points = new List<Int4>();
 
             // Choose the first non-connected edge
             int dir = 0;
@@ -1562,7 +1562,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int h = Height;
 
             // Init distance.
-            AreaTypes[] areas = Helper.CreateArray(SpanCount, (AreaTypes)0xff);
+            var areas = Helper.CreateArray(SpanCount, (AreaTypes)0xff);
 
             foreach (var (x, y, i, _) in IterateCells(Cells, w, h))
             {
@@ -1572,7 +1572,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                     continue;
                 }
 
-                AreaTypes[] nei = Helper.CreateArray(9, Areas[i]);
+                var nei = Helper.CreateArray(9, Areas[i]);
 
                 var s = Spans[i];
 
@@ -1704,7 +1704,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
                 if (s.Y >= miny && s.Y <= maxy)
                 {
-                    Vector3 p = new Vector3
+                    var p = new Vector3
                     {
                         X = BoundingBox.Minimum.X + (x + 0.5f) * CellSize,
                         Y = 0,
@@ -2116,13 +2116,13 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 
             int LOG_NB_STACKS = 3;
             int NB_STACKS = 1 << LOG_NB_STACKS;
-            List<List<LevelStackEntry>> lvlStacks = new List<List<LevelStackEntry>>(NB_STACKS);
+            var lvlStacks = new List<List<LevelStackEntry>>(NB_STACKS);
             for (int i = 0; i < NB_STACKS; i++)
             {
                 lvlStacks.Add(new List<LevelStackEntry>());
             }
 
-            List<LevelStackEntry> stack = new List<LevelStackEntry>();
+            var stack = new List<LevelStackEntry>();
 
             int[] srcReg = new int[SpanCount];
             int[] srcDist = new int[SpanCount];
@@ -2510,7 +2510,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
                 }
             }
 
-            List<RecastRegionDirtyEntry> dirtyEntries = new List<RecastRegionDirtyEntry>();
+            var dirtyEntries = new List<RecastRegionDirtyEntry>();
             int iter = 0;
             while (stack.Count > 0)
             {
@@ -2643,7 +2643,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int h = Height;
 
             int nreg = maxRegionId + 1;
-            List<Region> regions = new List<Region>(nreg);
+            var regions = new List<Region>(nreg);
 
             // Construct regions
             for (int i = 0; i < nreg; ++i)
@@ -2652,7 +2652,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Find region neighbours and overlapping regions.
-            List<int> lregs = new List<int>(32);
+            var lregs = new List<int>(32);
             for (int y = 0; y < h; ++y)
             {
                 for (int x = 0; x < w; ++x)
@@ -2726,7 +2726,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Merge montone regions to create non-overlapping areas.
-            List<int> stack = new List<int>(32);
+            var stack = new List<int>(32);
             for (int i = 1; i < nreg; ++i)
             {
                 var root = regions[i];
@@ -2875,7 +2875,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             int h = Height;
 
             int nreg = maxRegionId + 1;
-            List<Region> regions = new List<Region>(nreg);
+            var regions = new List<Region>(nreg);
 
             // Construct regions
             for (int i = 0; i < nreg; ++i)
@@ -2943,8 +2943,8 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Remove too small regions.
-            List<int> stack = new List<int>();
-            List<int> trace = new List<int>();
+            var stack = new List<int>();
+            var trace = new List<int>();
             for (int i = 0; i < nreg; ++i)
             {
                 var reg = regions[i];
@@ -3156,7 +3156,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
             }
 
             // Return regions that we found to be overlapping.
-            List<int> lOverlaps = new List<int>();
+            var lOverlaps = new List<int>();
             for (int i = 0; i < nreg; ++i)
             {
                 if (regions[i].Overlap)

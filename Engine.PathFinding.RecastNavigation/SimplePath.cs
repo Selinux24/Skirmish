@@ -100,7 +100,7 @@ namespace Engine.PathFinding.RecastNavigation
 
             // Get connected polygons
             int maxNeis = 16;
-            List<int> neis = new List<int>();
+            var neis = new List<int>();
 
             var cur = navQuery.GetAttachedNavMesh().GetTileAndPolyByRef(path.Start);
             if (cur.Ref == 0)
@@ -423,7 +423,7 @@ namespace Engine.PathFinding.RecastNavigation
             }
 
             // Copy old path in the beginning.
-            List<int> tmp = new List<int>(referenceList);
+            var tmp = new List<int>(referenceList);
             tmp.InsertRange(0, rlist);
             referenceList = tmp.ToArray();
             Count += count - 1;

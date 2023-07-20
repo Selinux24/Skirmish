@@ -66,14 +66,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the text representation of the instance
         /// </summary>
         /// <returns>Returns the text representation of the instance</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return string.Format("Origin: {0}; CellSize: {1}; CellHeight: {2}; Width: {3}; Height: {4}; WalkableHeight: {5}; WalkableRadius: {6}; WalkableClimb: {7}; MaxSimplificationError: {8}; MaxTiles: {9}; MaxObstacles: {10};",
-                Origin,
-                CellSize, CellHeight,
-                Width, Height,
-                WalkableHeight, WalkableRadius, WalkableClimb,
-                MaxSimplificationError, MaxTiles, MaxObstacles);
+            return $"Origin: {Origin}; CellSize: {CellSize}; CellHeight: {CellHeight}; Width: {Width}; Height: {Height}; WalkableHeight: {WalkableHeight}; WalkableRadius: {WalkableRadius}; WalkableClimb: {WalkableClimb}; MaxSimplificationError: {MaxSimplificationError}; MaxTiles: {MaxTiles}; MaxObstacles: {MaxObstacles};";
         }
     }
 }

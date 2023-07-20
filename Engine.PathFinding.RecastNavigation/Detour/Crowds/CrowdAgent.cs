@@ -8,7 +8,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Crowds
     /// </summary>
     public class CrowdAgent
     {
-        private readonly List<CrowdNeighbour> neighbours = new List<CrowdNeighbour>();
+        private readonly List<CrowdNeighbour> neighbours = new();
 
         /// <summary>
         /// True if the agent is active, false if the agent is in an unused slot in the agent pool.

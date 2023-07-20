@@ -9,6 +9,7 @@
     <Platforms>AnyCPU;x64;x86</Platforms>
     <PackageIconUrl />
     <SonarQubeTestProject>False</SonarQubeTestProject>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

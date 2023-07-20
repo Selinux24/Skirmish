@@ -8,9 +8,9 @@ namespace GameLogic.Rules
 
     public class Skirmish
     {
-        private readonly List<Team> teams = new List<Team>();
-        private readonly Dictionary<Team, bool> turnInfo = new Dictionary<Team, bool>();
-        private readonly List<Melee> melees = new List<Melee>();
+        private readonly List<Team> teams = new();
+        private readonly Dictionary<Team, bool> turnInfo = new();
+        private readonly List<Melee> melees = new();
 
         private int currentTurn = 0;
         private int currentSoldier = 0;
@@ -36,7 +36,7 @@ namespace GameLogic.Rules
         {
             get
             {
-                List<Team> idleTeams = new List<Team>();
+                var idleTeams = new List<Team>();
 
                 foreach (Team team in this.turnInfo.Keys)
                 {
@@ -81,7 +81,7 @@ namespace GameLogic.Rules
         {
             get
             {
-                List<Soldier> soldiers = new List<Soldier>();
+                var soldiers = new List<Soldier>();
 
                 foreach (Team team in this.Teams)
                 {
@@ -99,7 +99,7 @@ namespace GameLogic.Rules
 
         public void AddTeam(string name, string faction, TeamRoles role, int soldiers, int heavy, int docs, bool addLeader = true)
         {
-            Team team = new Team(name)
+            var team = new Team(name)
             {
                 Faction = faction,
                 Role = role,

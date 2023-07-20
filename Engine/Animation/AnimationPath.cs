@@ -12,7 +12,7 @@ namespace Engine.Animation
         /// <summary>
         /// Animation path items list
         /// </summary>
-        private readonly List<AnimationPathItem> items = new List<AnimationPathItem>();
+        private readonly List<AnimationPathItem> items = new();
         /// <summary>
         /// Current item index
         /// </summary>

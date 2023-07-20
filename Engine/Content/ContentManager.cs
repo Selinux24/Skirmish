@@ -24,7 +24,7 @@ namespace Engine.Content
             /// <returns>Returns zip file entry names array</returns>
             public static IEnumerable<string> ReadEntryNames(string file)
             {
-                List<string> files = new List<string>();
+                var files = new List<string>();
 
                 using (var archive = ZipFile.OpenRead(file))
                 {
@@ -68,15 +68,11 @@ namespace Engine.Content
             /// <returns>Returns file stream of the entry</returns>
             public static MemoryStream GetFile(string file, string entryName)
             {
-                using (var archive = ZipFile.OpenRead(file))
-                {
-                    var entry = archive.GetEntry(GetEntryName(file, entryName));
+                using var archive = ZipFile.OpenRead(file);
+                var entry = archive.GetEntry(GetEntryName(file, entryName));
 
-                    using (var stream = entry.Open())
-                    {
-                        return stream.CopyToMemory();
-                    }
-                }
+                using var stream = entry.Open();
+                return stream.CopyToMemory();
             }
             /// <summary>
             /// Gets file stream of the entry pattern
@@ -86,7 +82,7 @@ namespace Engine.Content
             /// <returns>Returns file streams for the entry pattern</returns>
             public static IEnumerable<MemoryStream> GetFiles(string file, string pattern)
             {
-                List<MemoryStream> res = new List<MemoryStream>();
+                var res = new List<MemoryStream>();
 
                 string regexMask = Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".");
 
@@ -99,10 +95,8 @@ namespace Engine.Content
                         var match = Regex.Match(entry.Name, regexMask, RegexOptions.NonBacktracking, TimeSpan.FromMilliseconds(100));
                         if (match.Success)
                         {
-                            using (var stream = entry.Open())
-                            {
-                                res.Add(stream.CopyToMemory());
-                            }
+                            using var stream = entry.Open();
+                            res.Add(stream.CopyToMemory());
                         }
                     }
                 }
@@ -237,7 +231,7 @@ namespace Engine.Content
         /// </remarks>
         public static IEnumerable<MemoryStream> FindContent(string contentSource, IEnumerable<string> resourcePaths, bool throwException = true)
         {
-            List<MemoryStream> res = new List<MemoryStream>();
+            var res = new List<MemoryStream>();
 
             if (resourcePaths.Any())
             {
@@ -326,7 +320,7 @@ namespace Engine.Content
         /// </remarks>
         public static IEnumerable<string> FindPaths(string contentSource, IEnumerable<string> resourcePaths, bool throwException = true)
         {
-            List<string> res = new List<string>();
+            var res = new List<string>();
 
             if (resourcePaths.Any())
             {

@@ -23,17 +23,15 @@ namespace Tanks
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("Tanks!!!", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("Tanks!!!", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("Tanks!!!"))
+                using Game cl = new("Tanks!!!");
 #endif
-                {
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<SceneTanksGame>();
+                cl.SetScene<SceneTanksGame>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

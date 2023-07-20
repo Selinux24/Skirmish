@@ -58,14 +58,14 @@ namespace Engine
         /// </summary>
         /// <param name="width">Width value</param>
         /// <param name="height">Height value</param>
-        public Color4 GetPixel(int width, int height)
+        public readonly Color4 GetPixel(int width, int height)
         {
             return colors[width, height];
         }
         /// <summary>
         /// Flattens the image pixel into a one-dimension array
         /// </summary>
-        public IEnumerable<Color4> Flatten()
+        public readonly IEnumerable<Color4> Flatten()
         {
             Color4[] flatColors = new Color4[Width * Height];
 

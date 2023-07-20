@@ -14,7 +14,7 @@ namespace Terrain.Rts.AI
         /// <summary>
         /// Groups dictionary
         /// </summary>
-        private readonly Dictionary<int, List<AIAgent>> groups = new Dictionary<int, List<AIAgent>>();
+        private readonly Dictionary<int, List<AIAgent>> groups = new();
 
         /// <summary>
         /// Ground instance
@@ -51,7 +51,7 @@ namespace Terrain.Rts.AI
         /// <returns>Returns all available targets for agent, based on group indexes</returns>
         public AIAgent[] GetTargetsForAgent(AIAgent agent)
         {
-            List<AIAgent> targets = new List<AIAgent>();
+            var targets = new List<AIAgent>();
 
             foreach (var key in groups.Keys)
             {

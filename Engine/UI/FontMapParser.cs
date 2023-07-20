@@ -18,7 +18,7 @@ namespace Engine.UI
         /// <summary>
         /// Color validator
         /// </summary>
-        private static readonly Regex colorRegex = new Regex(colorPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
+        private static readonly Regex colorRegex = new(colorPattern, RegexOptions.IgnoreCase | RegexOptions.Compiled, TimeSpan.FromMilliseconds(200));
 
         /// <summary>
         /// Parses a sentence
@@ -34,9 +34,9 @@ namespace Engine.UI
                 return new FontMapParsedSentence();
             }
 
-            List<string> sentenceParts = new List<string>();
-            List<Color4[]> colorParts = new List<Color4[]>();
-            List<Color4[]> shadowColorParts = new List<Color4[]>();
+            var sentenceParts = new List<string>();
+            var colorParts = new List<Color4[]>();
+            var shadowColorParts = new List<Color4[]>();
 
             //Find lines
             var lines = text.Split(new[] { Environment.NewLine }, StringSplitOptions.None);
@@ -109,8 +109,8 @@ namespace Engine.UI
         /// <param name="shadowColors">Returns a shadow color by character list</param>
         private static void ParseLine(string text, Color4 defaultForeColor, Color4 defaultShadowColor, out string parsedString, out IEnumerable<Color4> foreColors, out IEnumerable<Color4> shadowColors)
         {
-            Dictionary<int, Color4> foreColorValues = new Dictionary<int, Color4>();
-            Dictionary<int, Color4> shadowColorValues = new Dictionary<int, Color4>();
+            var foreColorValues = new Dictionary<int, Color4>();
+            var shadowColorValues = new Dictionary<int, Color4>();
             int deletedSize = 0;
 
             parsedString = colorRegex.Replace(
@@ -133,12 +133,12 @@ namespace Engine.UI
                     return string.Empty;
                 });
 
-            List<Color4> foreColorsByChar = new List<Color4>();
-            List<Color4> shadowColorsByChar = new List<Color4>();
+            var foreColorsByChar = new List<Color4>();
+            var shadowColorsByChar = new List<Color4>();
 
             // Fill result
-            Color4 currentForeColor = defaultForeColor;
-            Color4 currentShadowColor = defaultShadowColor;
+            var currentForeColor = defaultForeColor;
+            var currentShadowColor = defaultShadowColor;
             for (int i = 0; i < parsedString.Length; i++)
             {
                 if (foreColorValues.ContainsKey(i))
@@ -268,7 +268,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the number of words in the sentence
         /// </summary>
-        public int Count()
+        public readonly int Count()
         {
             return Words?.Count() ?? 0;
         }
@@ -276,7 +276,7 @@ namespace Engine.UI
         /// Gets the parsed word at index
         /// </summary>
         /// <param name="index">Index</param>
-        public FontMapParsedWord GetWord(int index)
+        public readonly FontMapParsedWord GetWord(int index)
         {
             if (index < Count())
             {
@@ -329,7 +329,7 @@ namespace Engine.UI
         /// <summary>
         /// Gets the number of characters in the word
         /// </summary>
-        public int Count()
+        public readonly int Count()
         {
             return Word?.Length ?? 0;
         }
@@ -337,7 +337,7 @@ namespace Engine.UI
         /// Gets the color of the character at index
         /// </summary>
         /// <param name="index">Index</param>
-        public Color4 GetColor(int index)
+        public readonly Color4 GetColor(int index)
         {
             if (index < Count())
             {
@@ -350,7 +350,7 @@ namespace Engine.UI
         /// Gets the shadow color of the character at index
         /// </summary>
         /// <param name="index">Index</param>
-        public Color4 GetShadowColor(int index)
+        public readonly Color4 GetShadowColor(int index)
         {
             if (index < Count())
             {

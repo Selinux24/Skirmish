@@ -46,7 +46,7 @@ namespace Engine.PathFinding.AStar
 
             var bbox = GeometryUtil.CreateBoundingBox(triangles);
 
-            Dictionary<Vector2, GridCollisionInfo[]> dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
+            var dictionary = new Dictionary<Vector2, GridCollisionInfo[]>();
 
             float fxSize = (bbox.Maximum.X - bbox.Minimum.X) / grid.Settings.NodeSize;
             float fzSize = (bbox.Maximum.Z - bbox.Minimum.Z) / grid.Settings.NodeSize;
@@ -60,7 +60,7 @@ namespace Engine.PathFinding.AStar
                 {
                     GridCollisionInfo[] info;
 
-                    PickingRay ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
+                    var ray = new PickingRay(new Vector3(x, bbox.Maximum.Y + 0.01f, z), Vector3.Down);
 
                     bool intersects = RayPickingHelper.PickAllFromlist(triangles, ray, out var picks);
                     if (intersects)
@@ -115,7 +115,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Generates a grid node list</returns>
         private static IEnumerable<GridNode> GenerateGridNodes(int nodeCount, int xSize, int zSize, float nodeSize, GridCollisionInfo[][] collisionValues)
         {
-            List<GridNode> result = new List<GridNode>();
+            var result = new List<GridNode>();
 
             //Generate grid nodes
             for (int n = 0; n < nodeCount; n++)
@@ -181,7 +181,7 @@ namespace Engine.PathFinding.AStar
                 c2.Triangle.Normal +
                 c3.Triangle.Normal) * 0.25f;
 
-            GridNode newNode = new GridNode(
+            var newNode = new GridNode(
                 c0.Point,
                 c1.Point,
                 c2.Point,
@@ -202,7 +202,7 @@ namespace Engine.PathFinding.AStar
         /// <returns>Returns a node list from multiple collision data</returns>
         private static IEnumerable<GridNode> MultipleCollision(int max, float nodeSize, GridCollisionInfo[] coor0, GridCollisionInfo[] coor1, GridCollisionInfo[] coor2, GridCollisionInfo[] coor3)
         {
-            List<GridNode> result = new List<GridNode>();
+            var result = new List<GridNode>();
 
             for (int i = 0; i < max; i++)
             {

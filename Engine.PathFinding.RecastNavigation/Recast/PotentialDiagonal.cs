@@ -4,14 +4,14 @@ namespace Engine.PathFinding.RecastNavigation.Recast
 {
     public struct PotentialDiagonal
     {
-        public static readonly CompareDiagDist DefaultComparer = new CompareDiagDist();
+        public static readonly CompareDiagDist DefaultComparer = new();
 
         public int Vert { get; set; }
         public int Dist { get; set; }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return string.Format("Vertex: {0}; Distance: {1};", Vert, Dist);
+            return $"Vertex: {Vert}; Distance: {Dist};";
         }
 
         public class CompareDiagDist : IComparer<PotentialDiagonal>

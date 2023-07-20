@@ -901,7 +901,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the cost value</returns>
         private float CalcCostLOS(TileRef neighbour, TileRef parent, TileRef best, ref int? grandpaRef, out bool foundShortCut)
         {
-            RaycastRequest request = new RaycastRequest
+            var request = new RaycastRequest
             {
                 StartRef = parent.Ref,
                 StartPos = parent.Node.Pos,
@@ -971,7 +971,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            List<int> pathList = new List<int>();
+            var pathList = new List<int>();
 
             if (m_query.Status.HasFlag(Status.DT_FAILURE))
             {
@@ -993,7 +993,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     m_query.Status |= Status.DT_PARTIAL_RESULT;
                 }
 
-                Node node = ReversePath(m_query.LastBestNode);
+                var node = ReversePath(m_query.LastBestNode);
 
                 pathList.AddRange(StorePath(node, maxPath));
             }
@@ -1031,7 +1031,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE;
             }
 
-            List<int> pathList = new List<int>();
+            var pathList = new List<int>();
 
             if (m_query.StartRef == m_query.EndRef)
             {
@@ -1086,10 +1086,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             NodeFlagTypes prevRay = 0;
             do
             {
-                Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
+                var next = m_nodePool.GetNodeAtIdx(node.PIdx);
                 node.PIdx = m_nodePool.GetNodeIdx(prev);
                 prev = node;
-                NodeFlagTypes nextRay = node.Flags & NodeFlagTypes.ParentDetached; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                var nextRay = node.Flags & NodeFlagTypes.ParentDetached; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
                 node.Flags = (node.Flags & ~NodeFlagTypes.ParentDetached) | prevRay; // and store it in the reversed path's node
                 prevRay = nextRay;
                 node = next;
@@ -1113,10 +1113,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             Node prev = null;
-            Node node = bestNode;
+            var node = bestNode;
             do
             {
-                Node next = m_tinyNodePool.GetNodeAtIdx(node.PIdx);
+                var next = m_tinyNodePool.GetNodeAtIdx(node.PIdx);
                 node.PIdx = m_tinyNodePool.GetNodeIdx(prev);
                 prev = node;
                 node = next;
@@ -1146,12 +1146,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the reference list path</returns>
         private IEnumerable<int> StorePath(Node node, int maxPath)
         {
-            List<int> pathList = new List<int>();
+            var pathList = new List<int>();
 
             // Store path
             do
             {
-                Node next = m_nodePool.GetNodeAtIdx(node.PIdx);
+                var next = m_nodePool.GetNodeAtIdx(node.PIdx);
 
                 Status status = BuildNodePath(node, next, maxPath - pathList.Count, out var partialPath);
 
@@ -1181,11 +1181,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             Status status = 0;
 
-            List<int> pathList = new List<int>();
+            var pathList = new List<int>();
 
             if (node.Flags.HasFlag(NodeFlagTypes.ParentDetached))
             {
-                RaycastRequest request = new RaycastRequest
+                var request = new RaycastRequest
                 {
                     StartRef = node.Id,
                     StartPos = node.Pos,
@@ -1249,7 +1249,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            Node startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.GetNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
@@ -1264,7 +1264,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             while (!m_openList.Empty())
             {
-                Node bestNode = m_openList.Pop();
+                var bestNode = m_openList.Pop();
                 bestNode.Flags &= ~NodeFlagTypes.Open;
                 bestNode.Flags |= NodeFlagTypes.Closed;
 
@@ -1274,7 +1274,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get parent poly and tile.
                 int parentRef = 0;
-                TileRef parent = TileRef.Null;
+                var parent = TileRef.Null;
                 if (bestNode.PIdx != 0)
                 {
                     parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
@@ -1296,7 +1296,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     status |= Status.DT_BUFFER_TOO_SMALL;
                 }
 
-                FindPolysAroundCircleQuery query = new FindPolysAroundCircleQuery()
+                var query = new FindPolysAroundCircleQuery()
                 {
                     Center = centerPos,
                     Radius = radius,
@@ -1338,14 +1338,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            Vector3 centerPos = Vector3.Zero;
+            var centerPos = Vector3.Zero;
             foreach (var v in verts)
             {
                 centerPos += v;
             }
             centerPos *= (1.0f / verts.Count());
 
-            Node startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.GetNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
@@ -1360,7 +1360,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             while (!m_openList.Empty())
             {
-                Node bestNode = m_openList.Pop();
+                var bestNode = m_openList.Pop();
                 bestNode.Flags &= ~NodeFlagTypes.Open;
                 bestNode.Flags |= NodeFlagTypes.Closed;
 
@@ -1370,7 +1370,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 // Get parent poly and tile.
                 int parentRef = 0;
-                TileRef parent = TileRef.Null;
+                var parent = TileRef.Null;
                 if (bestNode.PIdx != 0)
                 {
                     parentRef = m_nodePool.GetNodeAtIdx(bestNode.PIdx).Id;
@@ -1392,7 +1392,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     status |= Status.DT_BUFFER_TOO_SMALL;
                 }
 
-                FindPolysAroundShapeQuery query = new FindPolysAroundShapeQuery()
+                var query = new FindPolysAroundShapeQuery()
                 {
                     Vertices = verts,
                 };
@@ -1421,7 +1421,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
-                Link link = best.Tile.Links[i];
+                var link = best.Tile.Links[i];
 
                 // Skip invalid neighbours and do not follow back to parent.
                 if (link.NRef == 0 || link.NRef == parent.Ref)
@@ -1599,9 +1599,9 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            Vector3 bmin = Vector3.Subtract(center, halfExtents);
-            Vector3 bmax = Vector3.Add(center, halfExtents);
-            BoundingBox bounds = new BoundingBox(bmin, bmax);
+            var bmin = Vector3.Subtract(center, halfExtents);
+            var bmax = Vector3.Add(center, halfExtents);
+            var bounds = new BoundingBox(bmin, bmax);
 
             // Find tiles the query touches.
             m_nav.CalcTileLoc(bmin, out int minx, out int miny);
@@ -1694,7 +1694,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 for (int i = cur.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
                 {
-                    Link link = cur.Tile.Links[i];
+                    var link = cur.Tile.Links[i];
                     int neighbourRef = link.NRef;
                     // Skip invalid neighbours.
                     if (neighbourRef == 0)
@@ -1703,7 +1703,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     }
 
                     // Skip if cannot alloca more nodes.
-                    Node neighbourNode = m_tinyNodePool.GetNode(neighbourRef, 0);
+                    var neighbourNode = m_tinyNodePool.GetNode(neighbourRef, 0);
                     if (neighbourNode == null)
                     {
                         continue;
@@ -1848,11 +1848,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             Status status = Status.DT_SUCCESS;
 
             int MAX_STACK = 48;
-            List<Node> stack = new List<Node>(MAX_STACK);
+            var stack = new List<Node>(MAX_STACK);
 
             m_tinyNodePool.Clear();
 
-            Node startNode = m_tinyNodePool.GetNode(startRef, 0);
+            var startNode = m_tinyNodePool.GetNode(startRef, 0);
             startNode.PIdx = 0;
             startNode.Cost = 0;
             startNode.Total = 0;
@@ -1861,17 +1861,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             stack.Add(startNode);
 
-            Vector3 bestPos = startPos;
+            var bestPos = startPos;
             float bestDist = float.MaxValue;
             Node bestNode = null;
 
             // Search constraints
-            Vector3 searchPos = Vector3.Lerp(startPos, endPos, 0.5f);
+            var searchPos = Vector3.Lerp(startPos, endPos, 0.5f);
             float searchRadSqr = (float)Math.Pow(Vector3.Distance(startPos, endPos) / 2.0f + 0.001f, 2);
 
             while (stack.Count != 0)
             {
-                Node curNode = stack[0];
+                var curNode = stack[0];
 
                 // Pop front.
                 stack.RemoveAt(0);
@@ -1896,7 +1896,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 {
                     // Find links to neighbours.
                     int MAX_NEIS = 8;
-                    List<int> neis = new List<int>(MAX_NEIS);
+                    var neis = new List<int>(MAX_NEIS);
 
                     if ((cur.Poly.Neis[j] & DetourUtils.DT_EXT_LINK) != 0)
                     {
@@ -1928,8 +1928,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     if (neis.Count == 0)
                     {
                         // Wall edge, calc distance.
-                        Vector3 vj = verts.ElementAt(j);
-                        Vector3 vi = verts.ElementAt(i);
+                        var vj = verts.ElementAt(j);
+                        var vi = verts.ElementAt(i);
                         float distSqr = DetourUtils.DistancePtSegSqr2D(endPos, vj, vi, out float tseg);
                         if (distSqr < bestDist)
                         {
@@ -1944,7 +1944,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         foreach (var nei in neis)
                         {
                             // Skip if no node can be allocated.
-                            Node neighbourNode = m_tinyNodePool.GetNode(nei, 0);
+                            var neighbourNode = m_tinyNodePool.GetNode(nei, 0);
                             if (neighbourNode == null)
                             {
                                 continue;
@@ -1956,8 +1956,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                             }
 
                             // Skip the link if it is too far from search constraint.
-                            Vector3 vj = verts.ElementAt(j);
-                            Vector3 vi = verts.ElementAt(i);
+                            var vj = verts.ElementAt(j);
+                            var vi = verts.ElementAt(i);
                             float distSqr = DetourUtils.DistancePtSegSqr2D(searchPos, vj, vi, out _);
                             if (distSqr > searchRadSqr)
                             {
@@ -2001,10 +2001,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         public Status Raycast(RaycastRequest request, out RaycastHit hit)
         {
             int startRef = request.StartRef;
-            Vector3 startPos = request.StartPos;
-            Vector3 endPos = request.EndPos;
-            QueryFilter filter = request.Filter;
-            RaycastOptions options = request.Options;
+            var startPos = request.StartPos;
+            var endPos = request.EndPos;
+            var filter = request.Filter;
+            var options = request.Options;
             int maxPath = request.MaxPath;
 
             hit = new RaycastHit
@@ -2024,19 +2024,19 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 return Status.DT_FAILURE | Status.DT_INVALID_PARAM;
             }
 
-            Vector3 dir, curPos, lastPos;
+            Vector3 lastPos;
             int n = 0;
 
-            curPos = startPos;
-            dir = Vector3.Subtract(endPos, startPos);
+            var curPos = startPos;
+            var dir = Vector3.Subtract(endPos, startPos);
             hit.HitNormal = Vector3.Zero;
 
             Status status = Status.DT_SUCCESS;
 
             // The API input has been checked already, skip checking internal data.
             var cur = m_nav.GetTileAndPolyByRefUnsafe(startRef);
-            TileRef prev = cur;
-            TileRef next = cur;
+            var prev = cur;
+            var next = cur;
 
             if (request.PrevReference.HasValue)
             {
@@ -2095,7 +2095,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 for (int i = cur.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = cur.Tile.Links[i].Next)
                 {
-                    Link link = cur.Tile.Links[i];
+                    var link = cur.Tile.Links[i];
 
                     // Find link which contains this edge.
                     if (link.Edge != segMax)
@@ -2137,8 +2137,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Check for partial edge links.
                     int v0 = cur.Poly.Verts[link.Edge];
                     int v1 = cur.Poly.Verts[(link.Edge + 1) % cur.Poly.VertCount];
-                    Vector3 left = cur.Tile.Verts[v0];
-                    Vector3 right = cur.Tile.Verts[v1];
+                    var left = cur.Tile.Verts[v0];
+                    var right = cur.Tile.Verts[v1];
 
                     // Check that the intersection lies inside the link portal.
                     if (link.Side == 0 || link.Side == 4)
@@ -2190,10 +2190,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     curPos = Vector3.Add(startPos, dir) * hit.T;
                     var e1 = verts.ElementAt(segMax);
                     var e2 = verts.ElementAt((segMax + 1) % verts.Count());
-                    Vector3 eDir;
-                    Vector3 diff;
-                    eDir = Vector3.Subtract(e2, e1);
-                    diff = Vector3.Subtract(curPos, e1);
+                    var eDir = Vector3.Subtract(e2, e1);
+                    var diff = Vector3.Subtract(curPos, e1);
                     float s = (eDir.X * eDir.X) > (eDir.Z * eDir.Z) ? diff.X / eDir.X : diff.Z / eDir.Z;
                     curPos.Y = e1.Y + eDir.Y * s;
 
@@ -2258,7 +2256,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            Node startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.GetNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
@@ -2273,7 +2271,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             while (!m_openList.Empty())
             {
-                Node bestNode = m_openList.Pop();
+                var bestNode = m_openList.Pop();
                 bestNode.Flags &= ~NodeFlagTypes.Open;
                 bestNode.Flags |= NodeFlagTypes.Closed;
 
@@ -2313,7 +2311,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <returns>Returns the closest hit position</returns>
         private Vector3 HitTestWalls(TileRef best, QueryFilter filter, Vector3 centerPos, float radiusSqr)
         {
-            Vector3 hitPos = Vector3.Zero;
+            var hitPos = Vector3.Zero;
 
             for (int i = 0, j = best.Poly.VertCount - 1; i < best.Poly.VertCount; j = i++)
             {
@@ -2338,8 +2336,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 }
 
                 // Calc distance to the edge.
-                Vector3 vj = best.Tile.Verts[best.Poly.Verts[j]];
-                Vector3 vi = best.Tile.Verts[best.Poly.Verts[i]];
+                var vj = best.Tile.Verts[best.Poly.Verts[j]];
+                var vi = best.Tile.Verts[best.Poly.Verts[i]];
                 float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, vj, vi, out float tseg);
 
                 // Edge is too far, skip.
@@ -2369,7 +2367,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int k = best.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = best.Tile.Links[k].Next)
             {
-                Link link = best.Tile.Links[k];
+                var link = best.Tile.Links[k];
                 if (link.Edge == j)
                 {
                     if (link.NRef != 0)
@@ -2401,7 +2399,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
-                Link link = best.Tile.Links[i];
+                var link = best.Tile.Links[i];
 
                 // Skip invalid neighbours and do not follow back to parent.
                 if (link.NRef == 0 || link.NRef == parentRef)
@@ -2447,8 +2445,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Calc distance to the edge.
-            Vector3 va = best.Tile.Verts[best.Poly.Verts[link.Edge]];
-            Vector3 vb = best.Tile.Verts[best.Poly.Verts[(link.Edge + 1) % best.Poly.VertCount]];
+            var va = best.Tile.Verts[best.Poly.Verts[link.Edge]];
+            var vb = best.Tile.Verts[best.Poly.Verts[(link.Edge + 1) % best.Poly.VertCount]];
             float distSqr = DetourUtils.DistancePtSegSqr2D(centerPos, va, vb, out _);
             if (distSqr > radiusSqr)
             {
@@ -2522,7 +2520,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         {
             segmentsRes = Array.Empty<Segment>();
 
-            List<Segment> segments = new List<Segment>();
+            var segments = new List<Segment>();
 
             var cur = m_nav.GetTileAndPolyByRef(r);
             if (cur.Ref == 0)
@@ -2536,7 +2534,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             int MAX_INTERVAL = 16;
-            List<SegInterval> ints = new List<SegInterval>();
+            var ints = new List<SegInterval>();
 
             bool storePortals = false;
 
@@ -2545,8 +2543,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             for (int i = 0, j = cur.Poly.VertCount - 1; i < cur.Poly.VertCount; j = i++)
             {
                 int neij = cur.Poly.Neis[j];
-                Vector3 vj = cur.Tile.Verts[cur.Poly.Verts[j]];
-                Vector3 vi = cur.Tile.Verts[cur.Poly.Verts[i]];
+                var vj = cur.Tile.Verts[cur.Poly.Verts[j]];
+                var vi = cur.Tile.Verts[cur.Poly.Verts[i]];
 
                 // Skip non-solid edges.
                 if ((neij & DetourUtils.DT_EXT_LINK) != 0)
@@ -2554,7 +2552,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     // Tile border.
                     for (int k = cur.Poly.FirstLink; k != DetourUtils.DT_NULL_LINK; k = cur.Tile.Links[k].Next)
                     {
-                        Link link = cur.Tile.Links[k];
+                        var link = cur.Tile.Links[k];
                         if (link.Edge == j && link.NRef != 0)
                         {
                             var nei = m_nav.GetTileAndPolyByRefUnsafe(link.NRef);
@@ -2679,7 +2677,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Randomly pick one tile. Assume that all tiles cover roughly the same area.
-            MeshTile tile = PickTile();
+            var tile = PickTile();
             if (tile == null)
             {
                 return Status.DT_FAILURE;
@@ -2695,7 +2693,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int i = 0; i < polys.Count(); ++i)
             {
-                Poly p = polys.ElementAt(i);
+                var p = polys.ElementAt(i);
                 // Do not return off-mesh connection polygons.
                 if (p.Type != PolyTypes.Ground)
                 {
@@ -2758,7 +2756,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int i = 0; i < m_nav.MaxTiles; i++)
             {
-                MeshTile tl = m_nav.Tiles[i];
+                var tl = m_nav.Tiles[i];
                 if (tl == null || tl.Header.Magic != DetourUtils.DT_NAVMESH_MAGIC)
                 {
                     continue;
@@ -2814,7 +2812,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_nodePool.Clear();
             m_openList.Clear();
 
-            Node startNode = m_nodePool.GetNode(startRef, 0);
+            var startNode = m_nodePool.GetNode(startRef, 0);
             startNode.Pos = centerPos;
             startNode.PIdx = 0;
             startNode.Cost = 0;
@@ -2825,12 +2823,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             m_openList.Push(startNode);
 
             float radiusSqr = maxRadius * maxRadius;
-            TileRef random = new TileRef();
+            var random = new TileRef();
             float areaSum = 0.0f;
 
             while (!m_openList.Empty())
             {
-                Node bestNode = m_openList.Pop();
+                var bestNode = m_openList.Pop();
                 bestNode.Flags &= ~NodeFlagTypes.Open;
                 bestNode.Flags |= NodeFlagTypes.Closed;
 
@@ -2907,7 +2905,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             for (int i = best.Poly.FirstLink; i != DetourUtils.DT_NULL_LINK; i = best.Tile.Links[i].Next)
             {
-                Link link = best.Tile.Links[i];
+                var link = best.Tile.Links[i];
                 int neighbourRef = link.NRef;
 
                 // Skip invalid neighbours and do not follow back to parent.
@@ -3196,7 +3194,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// </summary>
         private void QueryPolygonsInTileBVTree(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query, int batchSize = 32)
         {
-            List<int> polyRefs = new List<int>(batchSize);
+            var polyRefs = new List<int>(batchSize);
 
             // Calculate quantized box
             CalculateQuantizedBox(tile, bounds, out var bmin, out var bmax);
@@ -3277,7 +3275,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         private void QueryPolygonsInTileByRef(MeshTile tile, BoundingBox bounds, QueryFilter filter, IPolyQuery query)
         {
             int batchSize = 32;
-            List<int> polyRefs = new List<int>(batchSize);
+            var polyRefs = new List<int>(batchSize);
 
             int bse = m_nav.GetTileRef(tile);
 
@@ -3522,7 +3520,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             }
 
             // Write path
-            List<int> tmp = new List<int>();
+            var tmp = new List<int>();
             for (int i = writeCount - 1; i >= 0; i--)
             {
                 tmp.Insert(0, curNode.Id);

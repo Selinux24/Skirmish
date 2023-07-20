@@ -75,7 +75,7 @@ namespace Engine.Collections
             var bottomLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(2), maxDepth, nextTreeDepth, ref nodeCount);
             var bottomRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(3), maxDepth, nextTreeDepth, ref nodeCount);
 
-            List<QuadTreeNode> childList = new List<QuadTreeNode>();
+            var childList = new List<QuadTreeNode>();
 
             if (topLeftChild != null) childList.Add(topLeftChild);
             if (topRightChild != null) childList.Add(topRightChild);
@@ -371,7 +371,7 @@ namespace Engine.Collections
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            List<BoundingBox> bboxes = new List<BoundingBox>();
+            var bboxes = new List<BoundingBox>();
 
             if (Children?.Any() == true)
             {
@@ -429,7 +429,7 @@ namespace Engine.Collections
         /// <returns>Returns the leaf nodes contained into the frustum</returns>
         public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+            var nodes = new List<QuadTreeNode>();
 
             if (Children?.Any() == true)
             {
@@ -459,7 +459,7 @@ namespace Engine.Collections
         /// <returns>Returns the leaf nodes contained into the bounding box</returns>
         public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingBox bbox)
         {
-            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+            var nodes = new List<QuadTreeNode>();
 
             if (Children?.Any() == true)
             {
@@ -489,7 +489,7 @@ namespace Engine.Collections
         /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
         public IEnumerable<QuadTreeNode> GetNodesInVolume(ref BoundingSphere sphere)
         {
-            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+            var nodes = new List<QuadTreeNode>();
 
             if (Children?.Any() == true)
             {
@@ -519,7 +519,7 @@ namespace Engine.Collections
         /// <returns>Returns all leaf nodes</returns>
         public IEnumerable<QuadTreeNode> GetLeafNodes()
         {
-            List<QuadTreeNode> nodes = new List<QuadTreeNode>();
+            var nodes = new List<QuadTreeNode>();
 
             if (Children?.Any() == true)
             {

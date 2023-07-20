@@ -110,12 +110,10 @@ namespace Engine.Windows
 
             form.Show();
 
-            using (var renderLoop = new RenderLoop(form) { UseApplicationDoEvents = useApplicationDoEvents })
+            using var renderLoop = new RenderLoop(form) { UseApplicationDoEvents = useApplicationDoEvents };
+            while (renderLoop.NextFrame())
             {
-                while (renderLoop.NextFrame())
-                {
-                    renderCallback();
-                }
+                renderCallback();
             }
         }
 

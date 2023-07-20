@@ -367,28 +367,28 @@ namespace Engine.Common.Tests
         [TestMethod()]
         public void IntersectableSphereConstructorTest()
         {
-            IntersectionVolumeSphere sph = new IntersectionVolumeSphere(bsph1);
+            var sph = new IntersectionVolumeSphere(bsph1);
 
             Assert.AreEqual(bsph1, (BoundingSphere)sph);
         }
         [TestMethod()]
         public void IntersectableBoxConstructorTest()
         {
-            IntersectionVolumeAxisAlignedBox box = new IntersectionVolumeAxisAlignedBox(bbox1);
+            var box = new IntersectionVolumeAxisAlignedBox(bbox1);
 
             Assert.AreEqual(bbox1, (BoundingBox)box);
         }
         [TestMethod()]
         public void IntersectableMeshConstructorTest()
         {
-            IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(tmesh1);
+            var mesh = new IntersectionVolumeMesh(tmesh1);
 
             CollectionAssert.AreEqual(tmesh1, (Triangle[])mesh);
         }
         [TestMethod()]
         public void IntersectableMeshBadConstructorTest()
         {
-            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { IntersectionVolumeMesh mesh = new IntersectionVolumeMesh(Array.Empty<Triangle>()); });
+            Assert.ThrowsException<ArgumentOutOfRangeException>(() => { var mesh = new IntersectionVolumeMesh(Array.Empty<Triangle>()); });
         }
 
         [TestMethod()]

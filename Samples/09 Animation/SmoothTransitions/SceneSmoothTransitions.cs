@@ -22,11 +22,11 @@ namespace Animation.SmoothTransitions
         private UIConsole console = null;
 
         private Model soldier = null;
-        private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = new Dictionary<string, AnimationPlan>();
-        private readonly Vector3 soldierInitPosition = new Vector3(0, 0, 5);
+        private readonly Dictionary<string, AnimationPlan> soldierAnimationPlans = new();
+        private readonly Vector3 soldierInitPosition = new(0, 0, 5);
 
         private PrimitiveListDrawer<Triangle> itemTris = null;
-        private readonly Color itemTrisColor = new Color(Color.Yellow.ToColor3(), 0.25f);
+        private readonly Color itemTrisColor = new(Color.Yellow.ToColor3(), 0.25f);
 
         private IControllerPath soldierPath;
         private readonly float soldierPathArrival = 5.333f;
@@ -35,8 +35,8 @@ namespace Animation.SmoothTransitions
         private readonly float pathStep = 0.5f;
         private float pathIndex = 0f;
         private readonly float soldierSpeed = 5.3333f;
-        private readonly StringBuilder animData = new StringBuilder();
-        private readonly SteeringAgent steeringAgent = new SteeringAgent();
+        private readonly StringBuilder animData = new();
+        private readonly SteeringAgent steeringAgent = new();
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -173,11 +173,11 @@ namespace Animation.SmoothTransitions
 
             soldier.Manipulator.SetPosition(soldierInitPosition, true);
 
-            AnimationPath pIdle = new AnimationPath();
+            var pIdle = new AnimationPath();
             pIdle.Add("idle1");
             pIdle.AddLoop("idle2");
 
-            AnimationPath pWalk = new AnimationPath();
+            var pWalk = new AnimationPath();
             pWalk.Add("walk");
 
             soldierAnimationPlans.Add("idle", new AnimationPlan(pIdle));

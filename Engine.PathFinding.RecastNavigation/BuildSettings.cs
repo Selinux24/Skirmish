@@ -178,16 +178,16 @@ namespace Engine.PathFinding.RecastNavigation
         internal Config GetSoloConfig(Agent agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
-            int walkableHeight = (int)Math.Ceiling(agent.Height / this.CellHeight);
-            int walkableClimb = (int)Math.Floor(agent.MaxClimb / this.CellHeight);
-            int walkableRadius = (int)Math.Ceiling(agent.Radius / this.CellSize);
-            int maxEdgeLen = (int)(this.EdgeMaxLength / this.CellSize);
-            int minRegionArea = (int)(this.RegionMinSize * this.RegionMinSize);
-            int mergeRegionArea = (int)(this.RegionMergeSize * this.RegionMergeSize);
-            float detailSampleDist = this.DetailSampleDist < 0.9f ? 0 : this.CellSize * this.DetailSampleDist;
-            float detailSampleMaxError = this.CellHeight * this.DetailSampleMaxError;
+            int walkableHeight = (int)Math.Ceiling(agent.Height / CellHeight);
+            int walkableClimb = (int)Math.Floor(agent.MaxClimb / CellHeight);
+            int walkableRadius = (int)Math.Ceiling(agent.Radius / CellSize);
+            int maxEdgeLen = (int)(EdgeMaxLength / CellSize);
+            int minRegionArea = (int)(RegionMinSize * RegionMinSize);
+            int mergeRegionArea = (int)(RegionMergeSize * RegionMergeSize);
+            float detailSampleDist = DetailSampleDist < 0.9f ? 0 : CellSize * DetailSampleDist;
+            float detailSampleMaxError = CellHeight * DetailSampleMaxError;
 
-            BuildSettings.CalcGridSize(generationBounds, this.CellSize, out int width, out int height);
+            CalcGridSize(generationBounds, CellSize, out int width, out int height);
             int borderSize = walkableRadius + 3;
             int tileSize = 0;
 
@@ -196,17 +196,17 @@ namespace Engine.PathFinding.RecastNavigation
             {
                 Agent = agent,
 
-                CellSize = this.CellSize,
-                CellHeight = this.CellHeight,
+                CellSize = CellSize,
+                CellHeight = CellHeight,
                 WalkableSlopeAngle = walkableSlopeAngle,
                 WalkableHeight = walkableHeight,
                 WalkableClimb = walkableClimb,
                 WalkableRadius = walkableRadius,
                 MaxEdgeLen = maxEdgeLen,
-                MaxSimplificationError = this.EdgeMaxError,
+                MaxSimplificationError = EdgeMaxError,
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
-                MaxVertsPerPoly = this.VertsPerPoly,
+                MaxVertsPerPoly = VertsPerPoly,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -215,12 +215,12 @@ namespace Engine.PathFinding.RecastNavigation
                 Width = width,
                 Height = height,
 
-                FilterLedgeSpans = this.FilterLedgeSpans,
-                FilterLowHangingObstacles = this.FilterLowHangingObstacles,
-                FilterWalkableLowHeightSpans = this.FilterWalkableLowHeightSpans,
-                PartitionType = this.PartitionType,
-                UseTileCache = this.UseTileCache,
-                BuildAllTiles = this.BuildAllTiles,
+                FilterLedgeSpans = FilterLedgeSpans,
+                FilterLowHangingObstacles = FilterLowHangingObstacles,
+                FilterWalkableLowHeightSpans = FilterWalkableLowHeightSpans,
+                PartitionType = PartitionType,
+                UseTileCache = UseTileCache,
+                BuildAllTiles = BuildAllTiles,
             };
 
             return cfg;
@@ -234,38 +234,38 @@ namespace Engine.PathFinding.RecastNavigation
         internal Config GetTiledConfig(Agent agent, BoundingBox tileBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
-            int walkableHeight = (int)Math.Ceiling(agent.Height / this.CellHeight);
-            int walkableClimb = (int)Math.Floor(agent.MaxClimb / this.CellHeight);
-            int walkableRadius = (int)Math.Ceiling(agent.Radius / this.CellSize);
-            int maxEdgeLen = (int)(this.EdgeMaxLength / this.CellSize);
-            int minRegionArea = (int)(this.RegionMinSize * this.RegionMinSize);
-            int mergeRegionArea = (int)(this.RegionMergeSize * this.RegionMergeSize);
-            float detailSampleDist = this.DetailSampleDist < 0.9f ? 0 : this.CellSize * this.DetailSampleDist;
-            float detailSampleMaxError = this.CellHeight * this.DetailSampleMaxError;
+            int walkableHeight = (int)Math.Ceiling(agent.Height / CellHeight);
+            int walkableClimb = (int)Math.Floor(agent.MaxClimb / CellHeight);
+            int walkableRadius = (int)Math.Ceiling(agent.Radius / CellSize);
+            int maxEdgeLen = (int)(EdgeMaxLength / CellSize);
+            int minRegionArea = (int)(RegionMinSize * RegionMinSize);
+            int mergeRegionArea = (int)(RegionMergeSize * RegionMergeSize);
+            float detailSampleDist = DetailSampleDist < 0.9f ? 0 : CellSize * DetailSampleDist;
+            float detailSampleMaxError = CellHeight * DetailSampleMaxError;
 
             int borderSize = walkableRadius + 3;
-            int tileSize = (int)this.TileSize;
+            int tileSize = (int)TileSize;
             int width = tileSize + borderSize * 2;
             int height = tileSize + borderSize * 2;
 
-            var generationBounds = AdjustTileBBox(tileBounds, borderSize, this.CellSize);
+            var generationBounds = AdjustTileBBox(tileBounds, borderSize, CellSize);
 
             // Init build configuration from GUI
-            Config cfg = new Config
+            var cfg = new Config
             {
                 Agent = agent,
 
-                CellSize = this.CellSize,
-                CellHeight = this.CellHeight,
+                CellSize = CellSize,
+                CellHeight = CellHeight,
                 WalkableSlopeAngle = walkableSlopeAngle,
                 WalkableHeight = walkableHeight,
                 WalkableClimb = walkableClimb,
                 WalkableRadius = walkableRadius,
                 MaxEdgeLen = maxEdgeLen,
-                MaxSimplificationError = this.EdgeMaxError,
+                MaxSimplificationError = EdgeMaxError,
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
-                MaxVertsPerPoly = this.VertsPerPoly,
+                MaxVertsPerPoly = VertsPerPoly,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -274,12 +274,12 @@ namespace Engine.PathFinding.RecastNavigation
                 Width = width,
                 Height = height,
 
-                FilterLedgeSpans = this.FilterLedgeSpans,
-                FilterLowHangingObstacles = this.FilterLowHangingObstacles,
-                FilterWalkableLowHeightSpans = this.FilterWalkableLowHeightSpans,
-                PartitionType = this.PartitionType,
-                UseTileCache = this.UseTileCache,
-                BuildAllTiles = this.BuildAllTiles,
+                FilterLedgeSpans = FilterLedgeSpans,
+                FilterLowHangingObstacles = FilterLowHangingObstacles,
+                FilterWalkableLowHeightSpans = FilterWalkableLowHeightSpans,
+                PartitionType = PartitionType,
+                UseTileCache = UseTileCache,
+                BuildAllTiles = BuildAllTiles,
             };
 
             return cfg;
@@ -293,35 +293,35 @@ namespace Engine.PathFinding.RecastNavigation
         internal Config GetTileCacheConfig(Agent agent, BoundingBox generationBounds)
         {
             float walkableSlopeAngle = agent.MaxSlope;
-            var walkableHeight = (int)Math.Ceiling(agent.Height / this.CellHeight);
-            var walkableClimb = (int)Math.Floor(agent.MaxClimb / this.CellHeight);
-            var walkableRadius = (int)Math.Ceiling(agent.Radius / this.CellSize);
-            int maxEdgeLen = (int)(this.EdgeMaxLength / this.CellSize);
-            int minRegionArea = (int)(this.RegionMinSize * this.RegionMinSize);
-            int mergeRegionArea = (int)(this.RegionMergeSize * this.RegionMergeSize);
-            float detailSampleDist = this.DetailSampleDist < 0.9f ? 0 : this.CellSize * this.DetailSampleDist;
-            float detailSampleMaxError = this.CellHeight * this.DetailSampleMaxError;
+            var walkableHeight = (int)Math.Ceiling(agent.Height / CellHeight);
+            var walkableClimb = (int)Math.Floor(agent.MaxClimb / CellHeight);
+            var walkableRadius = (int)Math.Ceiling(agent.Radius / CellSize);
+            int maxEdgeLen = (int)(EdgeMaxLength / CellSize);
+            int minRegionArea = (int)(RegionMinSize * RegionMinSize);
+            int mergeRegionArea = (int)(RegionMergeSize * RegionMergeSize);
+            float detailSampleDist = DetailSampleDist < 0.9f ? 0 : CellSize * DetailSampleDist;
+            float detailSampleMaxError = CellHeight * DetailSampleMaxError;
 
             var borderSize = walkableRadius + 3;
-            var tileSize = (int)this.TileSize;
+            var tileSize = (int)TileSize;
             int width = tileSize + borderSize * 2;
             int height = tileSize + borderSize * 2;
 
-            Config cfg = new Config
+            var cfg = new Config
             {
                 Agent = agent,
 
-                CellSize = this.CellSize,
-                CellHeight = this.CellHeight,
+                CellSize = CellSize,
+                CellHeight = CellHeight,
                 WalkableSlopeAngle = walkableSlopeAngle,
                 WalkableHeight = walkableHeight,
                 WalkableClimb = walkableClimb,
                 WalkableRadius = walkableRadius,
                 MaxEdgeLen = maxEdgeLen,
-                MaxSimplificationError = this.EdgeMaxError,
+                MaxSimplificationError = EdgeMaxError,
                 MinRegionArea = minRegionArea,
                 MergeRegionArea = mergeRegionArea,
-                MaxVertsPerPoly = this.VertsPerPoly,
+                MaxVertsPerPoly = VertsPerPoly,
                 DetailSampleDist = detailSampleDist,
                 DetailSampleMaxError = detailSampleMaxError,
                 BoundingBox = generationBounds,
@@ -330,15 +330,15 @@ namespace Engine.PathFinding.RecastNavigation
                 Width = width,
                 Height = height,
 
-                FilterLedgeSpans = this.FilterLedgeSpans,
-                FilterLowHangingObstacles = this.FilterLowHangingObstacles,
-                FilterWalkableLowHeightSpans = this.FilterWalkableLowHeightSpans,
-                PartitionType = this.PartitionType,
-                UseTileCache = this.UseTileCache,
-                BuildAllTiles = this.BuildAllTiles,
+                FilterLedgeSpans = FilterLedgeSpans,
+                FilterLowHangingObstacles = FilterLowHangingObstacles,
+                FilterWalkableLowHeightSpans = FilterWalkableLowHeightSpans,
+                PartitionType = PartitionType,
+                UseTileCache = UseTileCache,
+                BuildAllTiles = BuildAllTiles,
             };
 
-            if (this.UseTileCache)
+            if (UseTileCache)
             {
                 CalcGridSize(generationBounds, CellSize, out int gridWidth, out int gridHeight);
                 int tileWidth = (gridWidth + tileSize - 1) / tileSize;

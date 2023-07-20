@@ -82,11 +82,13 @@ namespace Engine.Content.Tests
         [TestMethod()]
         public void RotationSettesTest()
         {
-            var res = new RotationQ();
-            res.X = 1;
-            res.Y = 2;
-            res.Z = 3;
-            res.W = 4;
+            var res = new RotationQ
+            {
+                X = 1,
+                Y = 2,
+                Z = 3,
+                W = 4
+            };
 
             Assert.AreEqual(new RotationQ(1, 2, 3, 4), res);
         }

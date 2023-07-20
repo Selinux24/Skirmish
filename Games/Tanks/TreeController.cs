@@ -13,11 +13,11 @@ namespace Tanks
         /// <summary>
         /// Controller list
         /// </summary>
-        private static readonly List<IController> trees = new List<IController>();
+        private static readonly List<IController> trees = new();
         /// <summary>
         /// Broken trees
         /// </summary>
-        private static readonly List<ModelInstance> brokenTrees = new List<ModelInstance>();
+        private static readonly List<ModelInstance> brokenTrees = new();
 
         /// <summary>
         /// Adds a tree to the controller

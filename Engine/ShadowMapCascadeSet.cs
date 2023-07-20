@@ -46,10 +46,10 @@ namespace Engine
         private static void ExtractFrustumPoints(Camera camera, float near, float far, out Vector3[] frustumCorners)
         {
             // Get the camera bases
-            Vector3 camPos = camera.Position;
-            Vector3 camRight = camera.Right;
-            Vector3 camUp = camera.Up;
-            Vector3 camForward = camera.Direction;
+            var camPos = camera.Position;
+            var camRight = camera.Right;
+            var camUp = camera.Up;
+            var camForward = camera.Direction;
 
             // Calculate the tangent values (this can be cached
             float tanFOVX = (float)Math.Tan(camera.AspectRelation * camera.FieldOfView);
@@ -79,20 +79,20 @@ namespace Engine
         private static void ExtractFrustumBoundSphere(Camera camera, float near, float far, out BoundingSphere boundingSphere)
         {
             // Get the camera bases
-            Vector3 camPos = camera.Position;
-            Vector3 camRight = camera.Right;
-            Vector3 camUp = camera.Up;
-            Vector3 camForward = camera.Direction;
+            var camPos = camera.Position;
+            var camRight = camera.Right;
+            var camUp = camera.Up;
+            var camForward = camera.Direction;
 
             // Calculate the tangent values (this can be cached as long as the FOV doesn't change)
             float tanFOVX = (float)Math.Tan(camera.AspectRelation * camera.FieldOfView);
             float tanFOVY = (float)Math.Tan(camera.AspectRelation);
 
             // The center of the sphere is in the center of the frustum
-            Vector3 boundCenter = camPos + camForward * (near + 0.5f * (near + far));
+            var boundCenter = camPos + camForward * (near + 0.5f * (near + far));
 
             // Radius is the distance to one of the frustum far corners
-            Vector3 boundSpan = camPos + (-camRight * tanFOVX + camUp * tanFOVY + camForward) * far - boundCenter;
+            var boundSpan = camPos + (-camRight * tanFOVX + camUp * tanFOVY + camForward) * far - boundCenter;
             float boundRadius = boundSpan.Length();
 
             boundingSphere = new BoundingSphere(boundCenter, boundRadius);
@@ -110,7 +110,7 @@ namespace Engine
 
             TotalCascades = cascades.Length;
 
-            List<float> ranges = new List<float>(cascades);
+            var ranges = new List<float>(cascades);
             ranges.Insert(0, nearClip);
             cascadeRanges = ranges.ToArray();
 
@@ -130,9 +130,9 @@ namespace Engine
         {
             // Find the view matrix
             lightPosition = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
-            Vector3 lookAt = lightPosition + (lightDirection) * camera.FarPlaneDistance;
-            Vector3 up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
-            Matrix shadowView = Matrix.LookAtLH(lightPosition, lookAt, up);
+            var lookAt = lightPosition + (lightDirection) * camera.FarPlaneDistance;
+            var up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
+            var shadowView = Matrix.LookAtLH(lightPosition, lookAt, up);
 
             // Get the bounds for the shadow space
             ExtractFrustumBoundSphere(
@@ -145,7 +145,7 @@ namespace Engine
             shadowBoundRadius = Math.Max(shadowBoundRadius, boundingSphere.Radius);
 
             // Find the projection matrix
-            Matrix shadowProj = Matrix.OrthoLH(
+            var shadowProj = Matrix.OrthoLH(
                 shadowBoundRadius,
                 shadowBoundRadius,
                 -shadowBoundRadius,
@@ -158,7 +158,7 @@ namespace Engine
             toCascadeOffsetY = Vector4.Zero;
             toCascadeScale = Vector4.Zero;
 
-            if (this.AntiFlicker)
+            if (AntiFlicker)
             {
                 UpdateAntiFlicker(camera, shadowView);
             }
@@ -174,12 +174,12 @@ namespace Engine
         /// <param name="shadowView">Shadow view</param>
         private void UpdateAntiFlicker(Camera camera, Matrix shadowView)
         {
-            Matrix shadowViewInv = Matrix.Invert(shadowView);
+            var shadowViewInv = Matrix.Invert(shadowView);
 
             // For each cascade find the transformation from shadow to cascade space
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
             {
-                this.UpdateCascadesAntiFlicker(
+                UpdateCascadesAntiFlicker(
                     camera, shadowView, shadowViewInv,
                     cascadeIdx,
                     out var cascadeTrans, out var cascadeScale);
@@ -218,12 +218,12 @@ namespace Engine
             if (CascadeNeedsUpdate(shadowView, cascadeIdx, newBoundingSphere.Center, out Vector3 offset))
             {
                 // To avoid flickering we need to move the bound center in full units
-                Vector3 offsetOut = Vector3.TransformNormal(offset, shadowViewInv);
+                var offsetOut = Vector3.TransformNormal(offset, shadowViewInv);
                 cascadeBoundCenter[cascadeIdx] += offsetOut;
             }
 
             // Get the cascade center in shadow space
-            Vector3 cascadeCenterShadowSpace = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
+            var cascadeCenterShadowSpace = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], worldToShadowSpace);
 
             // Update the translation from shadow to cascade space
             toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
@@ -242,7 +242,7 @@ namespace Engine
         {
             for (int cascadeIdx = 0; cascadeIdx < TotalCascades; cascadeIdx++)
             {
-                this.UpdateCascadesSimple(
+                UpdateCascadesSimple(
                     camera,
                     cascadeIdx,
                     out var cascadeTrans, out var cascadeScale);
@@ -271,11 +271,11 @@ namespace Engine
                 out Vector3[] frustumPoints);
 
             // Transform to shadow space and extract the minimum and maximum
-            Vector3 min = new Vector3(float.MaxValue);
-            Vector3 max = new Vector3(float.MinValue);
+            var min = new Vector3(float.MaxValue);
+            var max = new Vector3(float.MinValue);
             for (int i = 0; i < frustumPoints.Length; i++)
             {
-                Vector3 pointInShadowSpace = Vector3.TransformCoordinate(frustumPoints[i], worldToShadowSpace);
+                var pointInShadowSpace = Vector3.TransformCoordinate(frustumPoints[i], worldToShadowSpace);
 
                 for (int j = 0; j < 3; j++)
                 {
@@ -290,7 +290,7 @@ namespace Engine
                 }
             }
 
-            Vector3 cascadeCenterShadowSpace = 0.5f * (min + max);
+            var cascadeCenterShadowSpace = 0.5f * (min + max);
 
             // Update the translation from shadow to cascade space
             toCascadeOffsetX[cascadeIdx] = -cascadeCenterShadowSpace.X;
@@ -315,12 +315,12 @@ namespace Engine
             offset = Vector3.Zero;
 
             // Find the offset between the new and old bound ceter
-            Vector3 oldCenterInCascade = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], shadowView);
-            Vector3 newCenterInCascade = Vector3.TransformCoordinate(newCenter, shadowView);
-            Vector3 centerDiff = newCenterInCascade - oldCenterInCascade;
+            var oldCenterInCascade = Vector3.TransformCoordinate(cascadeBoundCenter[cascadeIdx], shadowView);
+            var newCenterInCascade = Vector3.TransformCoordinate(newCenter, shadowView);
+            var centerDiff = newCenterInCascade - oldCenterInCascade;
 
             // Find the pixel size based on the diameters and map pixel size
-            float pixelSize = (float)shadowMapSize / (2.0f * cascadeBoundRadius[cascadeIdx]);
+            float pixelSize = shadowMapSize / (2.0f * cascadeBoundRadius[cascadeIdx]);
 
             float pixelOffX = centerDiff.X * pixelSize;
             float pixelOffY = centerDiff.Y * pixelSize;

@@ -85,7 +85,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertexType
+        public readonly VertexTypes VertexType
         {
             get
             {
@@ -98,7 +98,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="channel">Data channel</param>
         /// <returns>Returns true if structure contains data for the specified channel</returns>
-        public bool HasChannel(VertexDataChannels channel)
+        public readonly bool HasChannel(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return true;
             else if (channel == VertexDataChannels.Texture) return true;
@@ -111,7 +111,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="channel">Data channel</param>
         /// <returns>Returns data for the specified channel</returns>
-        public T GetChannelValue<T>(VertexDataChannels channel)
+        public readonly T GetChannelValue<T>(VertexDataChannels channel)
         {
             if (channel == VertexDataChannels.Position) return (T)(object)Position;
             else if (channel == VertexDataChannels.Texture) return (T)(object)Texture;
@@ -135,7 +135,7 @@ namespace Engine.Common
         /// <summary>
         /// Size in bytes
         /// </summary>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(VertexFont));
         }
@@ -144,13 +144,13 @@ namespace Engine.Common
         /// </summary>
         /// <param name="slot">Slot</param>
         /// <returns>Returns input elements</returns>
-        public InputElement[] GetInput(int slot)
+        public readonly InputElement[] GetInput(int slot)
         {
             return Input(slot);
         }
 
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Position: {Position}; Texture: {Texture}; Color: {Color};";
         }

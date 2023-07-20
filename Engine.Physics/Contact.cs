@@ -557,7 +557,7 @@ namespace Engine.Physics
             impulseToTorque = SkewSymmetric(relativeContactPositionsWorld1);
 
             // Get the matrix to convert contact impulse to velocity variation in world coordinates.
-            Matrix3x3 deltaVelWorld = impulseToTorque;
+            var deltaVelWorld = impulseToTorque;
             deltaVelWorld *= inverseInertiaTensor[0];
             deltaVelWorld *= impulseToTorque;
             deltaVelWorld *= -1;
@@ -567,7 +567,7 @@ namespace Engine.Physics
                 impulseToTorque = SkewSymmetric(relativeContactPositionsWorld2);
 
                 // Calculate the velocity modification matrix
-                Matrix3x3 deltaVelWorld2 = impulseToTorque;
+                var deltaVelWorld2 = impulseToTorque;
                 deltaVelWorld2 *= inverseInertiaTensor[1];
                 deltaVelWorld2 *= impulseToTorque;
                 deltaVelWorld2 *= -1;
@@ -580,7 +580,7 @@ namespace Engine.Physics
             }
 
             // Convert to contact coordinates by changing the base.
-            Matrix3x3 deltaVelocity = Matrix3x3.Transpose(contactToWorld);
+            var deltaVelocity = Matrix3x3.Transpose(contactToWorld);
             deltaVelocity *= deltaVelWorld;
             deltaVelocity *= contactToWorld;
 
@@ -590,10 +590,10 @@ namespace Engine.Physics
             deltaVelocity.M33 += inverseMass;
 
             // Reverse to get the momentum needed per unit of speed.
-            Matrix3x3 impulseMatrix = Matrix3x3.Invert(deltaVelocity);
+            var impulseMatrix = Matrix3x3.Invert(deltaVelocity);
 
             // Find the velocities to kill.
-            Vector3 velKill = new Vector3(
+            var velKill = new Vector3(
                 DesiredDeltaVelocity,
                 -velocity.Y,
                 -velocity.Z);

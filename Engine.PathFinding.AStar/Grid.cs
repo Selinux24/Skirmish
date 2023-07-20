@@ -11,7 +11,7 @@ namespace Engine.PathFinding.AStar
     /// </summary>
     public class Grid : IGraph
     {
-        private readonly List<GridNode> nodes = new List<GridNode>();
+        private readonly List<GridNode> nodes = new();
 
         /// <inheritdoc/>
         public event EventHandler Updating;

@@ -7,8 +7,8 @@ namespace Engine
     /// </summary>
     public class SceneLightHemispheric : SceneLight, ISceneLightHemispheric
     {
-        private static readonly Color3 ambientDown = new Color3(0.0f, 0.0f, 0.0f);
-        private static readonly Color3 ambientUp = new Color3(0.1f, 0.1f, 0.1f);
+        private static readonly Color3 ambientDown = new(0.0f, 0.0f, 0.0f);
+        private static readonly Color3 ambientUp = new(0.1f, 0.1f, 0.1f);
 
         /// <summary>
         /// Ambient down color
@@ -108,7 +108,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is SceneLightHemisphericState sceneLightsState))
+            if (state is not SceneLightHemisphericState sceneLightsState)
             {
                 return;
             }

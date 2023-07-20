@@ -18,7 +18,7 @@ namespace Engine
         /// <summary>
         /// Content loaders dictionary
         /// </summary>
-        private static readonly ConcurrentDictionary<string, Func<ILoader>> contentLoaders = new ConcurrentDictionary<string, Func<ILoader>>();
+        private static readonly ConcurrentDictionary<string, Func<ILoader>> contentLoaders = new();
 
         /// <summary>
         /// Register content loader
@@ -105,15 +105,15 @@ namespace Engine
         /// <summary>
         /// Requested resources dictionary
         /// </summary>
-        private readonly ConcurrentDictionary<string, IGameResourceRequest> requestedResources = new ConcurrentDictionary<string, IGameResourceRequest>();
+        private readonly ConcurrentDictionary<string, IGameResourceRequest> requestedResources = new();
         /// <summary>
         /// Resource dictionary
         /// </summary>
-        private readonly Dictionary<string, EngineShaderResourceView> resources = new Dictionary<string, EngineShaderResourceView>();
+        private readonly Dictionary<string, EngineShaderResourceView> resources = new();
         /// <summary>
         /// Global resources dictionary
         /// </summary>
-        private readonly Dictionary<string, EngineShaderResourceView> globalResources = new Dictionary<string, EngineShaderResourceView>();
+        private readonly Dictionary<string, EngineShaderResourceView> globalResources = new();
         /// <summary>
         /// Creating resources flag
         /// </summary>
@@ -228,7 +228,7 @@ namespace Engine
             float current = 0;
 
             // Process requests
-            List<string> toRemove = new List<string>();
+            var toRemove = new List<string>();
             try
             {
                 foreach (var resource in pendingRequests)
@@ -343,7 +343,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource<T>(string name, IEnumerable<T> values, int size, bool dynamic = false) where T : struct
         {
-            GameResourceValueArray<T> resource = new GameResourceValueArray<T>(name)
+            var resource = new GameResourceValueArray<T>(name)
             {
                 Values = values,
                 Size = size,
@@ -366,7 +366,7 @@ namespace Engine
         /// <returns>Returns the created resource view</returns>
         public EngineShaderResourceView CreateGlobalResource(string name, int size, float min, float max, int seed = 0, bool dynamic = false)
         {
-            GameResourceRandomTexture resource = new GameResourceRandomTexture(name)
+            var resource = new GameResourceRandomTexture(name)
             {
                 Size = size,
                 Min = min,

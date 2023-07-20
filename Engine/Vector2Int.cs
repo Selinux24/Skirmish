@@ -13,15 +13,15 @@ namespace Engine
         /// <summary>
 		/// A vector where both X and Y are <see cref="int.MinValue"/>.
 		/// </summary>
-		public static readonly Vector2Int Min = new Vector2Int(int.MinValue, int.MinValue);
+		public static readonly Vector2Int Min = new(int.MinValue, int.MinValue);
         /// <summary>
         /// A vector where both X and Y are <see cref="int.MaxValue"/>.
         /// </summary>
-        public static readonly Vector2Int Max = new Vector2Int(int.MaxValue, int.MaxValue);
+        public static readonly Vector2Int Max = new(int.MaxValue, int.MaxValue);
         /// <summary>
         /// A vector where both X and Y are 0.
         /// </summary>
-        public static readonly Vector2Int Zero = new Vector2Int(0, 0);
+        public static readonly Vector2Int Zero = new(0, 0);
 
         /// <summary>
         /// Compares two instances of <see cref="Vector2Int"/> for equality.

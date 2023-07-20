@@ -18,7 +18,7 @@ namespace Engine.PathFinding.AStar
         /// <summary>
         /// Cached paths
         /// </summary>
-        private static readonly List<PathCache> Cache = new List<PathCache>();
+        private static readonly List<PathCache> Cache = new();
 
         /// <summary>
         /// Gets the path from start to end
@@ -77,9 +77,9 @@ namespace Engine.PathFinding.AStar
         private static IEnumerable<Vector3> CalcReturnPath(GridNode start, GridNode end, HeuristicMethods heuristicMethod, int heuristicEstimateValue)
         {
             //New queue
-            PriorityDictionary<GridNode, float> openPathsQueue = new PriorityDictionary<GridNode, float>();
+            var openPathsQueue = new PriorityDictionary<GridNode, float>();
             //Data dictionary
-            Dictionary<GridNode, AStarQueryData> nodesData = new Dictionary<GridNode, AStarQueryData>();
+            var nodesData = new Dictionary<GridNode, AStarQueryData>();
 
             //Add first node
             openPathsQueue.Enqueue(start, 1);
@@ -122,7 +122,7 @@ namespace Engine.PathFinding.AStar
             if (nodeFound)
             {
                 //We found a valid path
-                List<Vector3> solvedList = new List<Vector3>();
+                var solvedList = new List<Vector3>();
 
                 var node = end;
                 while (node != null)

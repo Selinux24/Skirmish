@@ -43,9 +43,9 @@ namespace Engine.Common
         /// </summary>
         public ColliderTypes ColliderType { get; private set; }
         /// <inheritdoc/>
-        public PickingHullTypes PathFindingHull { get; set; }
-        /// <inheritdoc/>
         public PickingHullTypes PickingHull { get; set; }
+        /// <inheritdoc/>
+        public PickingHullTypes PathFindingHull { get; set; }
 
         /// <summary>
         /// Base model
@@ -86,6 +86,8 @@ namespace Engine.Common
             UseAnisotropicFiltering = description?.UseAnisotropicFiltering ?? false;
             CullingVolumeType = description?.CullingVolumeType ?? CullingVolumeTypes.SphericVolume;
             ColliderType = description?.ColliderType ?? ColliderTypes.None;
+            PickingHull = description?.PickingHull ?? PickingHullTypes.Default;
+            PathFindingHull = description?.PathFindingHull ?? PickingHullTypes.None;
         }
         /// <summary>
         /// Initializes model geometry

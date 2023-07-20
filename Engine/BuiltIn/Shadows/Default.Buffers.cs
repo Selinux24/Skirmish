@@ -57,7 +57,7 @@ namespace Engine.BuiltIn.Shadows
         public uint FaceCount;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerCastingLight));
         }
@@ -84,7 +84,7 @@ namespace Engine.BuiltIn.Shadows
         public Matrix Local;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMeshSingle));
         }
@@ -130,7 +130,7 @@ namespace Engine.BuiltIn.Shadows
         public float AnimationInterpolation;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMeshSkinned));
         }
@@ -157,7 +157,7 @@ namespace Engine.BuiltIn.Shadows
         public uint TextureIndex;
 
         /// <inheritdoc/>
-        public int GetStride()
+        public readonly int GetStride()
         {
             return Marshal.SizeOf(typeof(PerMaterialTexture));
         }

@@ -25,7 +25,7 @@ namespace Engine
         {
             get
             {
-                return this.checkPoints[0];
+                return checkPoints[0];
             }
         }
         /// <summary>
@@ -35,7 +35,7 @@ namespace Engine
         {
             get
             {
-                return this.checkPoints[this.checkPoints.Length - 1];
+                return checkPoints[^1];
             }
         }
         /// <summary>
@@ -49,7 +49,7 @@ namespace Engine
         {
             get
             {
-                return this.checkPoints != null ? this.checkPoints.Length : 0;
+                return checkPoints?.Length ?? 0;
             }
         }
         /// <summary>
@@ -59,7 +59,7 @@ namespace Engine
         {
             get
             {
-                return this.normals != null ? this.normals.Length : 0;
+                return normals?.Length ?? 0;
             }
         }
 
@@ -80,7 +80,7 @@ namespace Engine
 
             this.checkPoints = points;
             this.normals = normals.ToArray();
-            this.Length = length;
+            Length = length;
         }
 
         /// <summary>
@@ -90,10 +90,10 @@ namespace Engine
         /// <returns>Returns the position at time</returns>
         public Vector3 GetPosition(float time)
         {
-            if (this.PositionCount > 0)
+            if (PositionCount > 0)
             {
                 if (time == 0) return checkPoints[0];
-                if (time >= this.Length) return checkPoints[checkPoints.Length - 1];
+                if (time >= Length) return checkPoints[^1];
 
                 Vector3 res = Vector3.Zero;
                 float l = time;
@@ -126,10 +126,10 @@ namespace Engine
         /// <returns>Returns path normal</returns>
         public Vector3 GetNormal(float time)
         {
-            if (this.NormalCount > 0)
+            if (NormalCount > 0)
             {
                 if (time == 0) return normals[0];
-                if (time >= this.Length) return normals[normals.Length - 1];
+                if (time >= Length) return normals[^1];
 
                 Vector3 res = Vector3.Zero;
                 float l = time;
@@ -162,10 +162,10 @@ namespace Engine
         /// <returns>Returns the next control path at specified time</returns>
         public Vector3 GetNextControlPoint(float time)
         {
-            if (this.PositionCount > 0)
+            if (PositionCount > 0)
             {
                 if (time == 0) return checkPoints[0];
-                if (time >= this.Length) return checkPoints[checkPoints.Length - 1];
+                if (time >= Length) return checkPoints[^1];
 
                 Vector3 res = Vector3.Zero;
                 float l = time;
@@ -198,12 +198,12 @@ namespace Engine
         /// <returns>Returns a vector array</returns>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            List<Vector3> returnPath = new List<Vector3>();
+            var returnPath = new List<Vector3>();
 
             float time = 0;
-            while (time < this.Length)
+            while (time < Length)
             {
-                returnPath.Add(this.GetPosition(time));
+                returnPath.Add(GetPosition(time));
 
                 time += sampleTime;
             }

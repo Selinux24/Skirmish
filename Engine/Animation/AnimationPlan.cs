@@ -10,7 +10,7 @@ namespace Engine.Animation
     /// </summary>
     public class AnimationPlan
     {
-        private readonly List<AnimationPath> animationPaths = new List<AnimationPath>();
+        private readonly List<AnimationPath> animationPaths = new();
 
         /// <summary>
         /// Last item time
@@ -82,7 +82,7 @@ namespace Engine.Animation
         /// <returns>Returns a new animation plan</returns>
         public static AnimationPlan Create(string clipName, float timeDelta = 1f)
         {
-            AnimationPath path = new AnimationPath();
+            var path = new AnimationPath();
             path.Add(clipName, timeDelta);
 
             return new AnimationPlan(path);
@@ -96,7 +96,7 @@ namespace Engine.Animation
         /// <returns>Returns a new animation plan</returns>
         public static AnimationPlan CreateRepeat(string clipName, int repeats, float timeDelta = 1f)
         {
-            AnimationPath path = new AnimationPath();
+            var path = new AnimationPath();
             path.AddRepeat(clipName, repeats, timeDelta);
 
             return new AnimationPlan(path);
@@ -109,7 +109,7 @@ namespace Engine.Animation
         /// <returns>Returns a new animation plan</returns>
         public static AnimationPlan CreateLoop(string clipName, float timeDelta = 1f)
         {
-            AnimationPath path = new AnimationPath();
+            var path = new AnimationPath();
             path.AddLoop(clipName, timeDelta);
 
             return new AnimationPlan(path);

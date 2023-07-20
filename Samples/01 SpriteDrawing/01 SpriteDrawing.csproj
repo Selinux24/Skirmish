@@ -9,6 +9,7 @@
     <StartupObject>SpriteDrawing.Program</StartupObject>
     <Platforms>AnyCPU;x64;x86</Platforms>
     <SonarQubeTestProject>False</SonarQubeTestProject>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

@@ -167,7 +167,7 @@ namespace Engine.Audio
         /// <returns>Returns the audio buffer prepared to submit</returns>
         public AudioBuffer GetCompleteAudioBuffer(bool isLooped)
         {
-            List<byte> bufferBytes = new List<byte>();
+            var bufferBytes = new List<byte>();
 
             var iterator = audioDecoder.GetSamples().GetEnumerator();
             while (iterator.MoveNext())
@@ -177,10 +177,10 @@ namespace Engine.Audio
                 bufferBytes.AddRange(pointer.ToArray());
             }
 
-            DataBuffer dataBuffer = new DataBuffer(bufferBytes.Count);
+            var dataBuffer = new DataBuffer(bufferBytes.Count);
             dataBuffer.Set(0, bufferBytes.ToArray());
 
-            AudioBuffer result = new AudioBuffer
+            var result = new AudioBuffer
             {
                 AudioDataPointer = dataBuffer.DataPointer,
                 AudioBytes = bufferBytes.Count,

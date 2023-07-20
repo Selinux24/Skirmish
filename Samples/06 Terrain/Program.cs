@@ -25,25 +25,23 @@ namespace Terrain
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("6 Terrain", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("6 Terrain", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("6 Terrain"))
+                using Game cl = new("6 Terrain");
 #endif
-                {
 #if DEBUG
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = false;
+                cl.VisibleMouse = false;
+                cl.LockMouse = false;
 #else
                     cl.VisibleMouse = false;
                     cl.LockMouse = true;
 #endif
 
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<StartScene>();
+                cl.SetScene<StartScene>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

@@ -45,19 +45,19 @@ namespace Engine
         /// <summary>
         /// Directional lights
         /// </summary>
-        private readonly List<ISceneLightDirectional> directionalLights = new List<ISceneLightDirectional>();
+        private readonly List<ISceneLightDirectional> directionalLights = new();
         /// <summary>
         /// Point lights
         /// </summary>
-        private readonly List<ISceneLightPoint> pointLights = new List<ISceneLightPoint>();
+        private readonly List<ISceneLightPoint> pointLights = new();
         /// <summary>
         /// Spot lights
         /// </summary>
-        private readonly List<ISceneLightSpot> spotLights = new List<ISceneLightSpot>();
+        private readonly List<ISceneLightSpot> spotLights = new();
         /// <summary>
         /// Visible lights
         /// </summary>
-        private readonly List<ISceneLight> visibleLights = new List<ISceneLight>();
+        private readonly List<ISceneLight> visibleLights = new();
 
         /// <summary>
         /// Gets or sets the hemispheric ambient light
@@ -661,7 +661,7 @@ namespace Engine
         /// <inheritdoc/>
         public void SetState(IGameState state)
         {
-            if (!(state is SceneLightsState sceneLightsState))
+            if (state is not SceneLightsState sceneLightsState)
             {
                 return;
             }

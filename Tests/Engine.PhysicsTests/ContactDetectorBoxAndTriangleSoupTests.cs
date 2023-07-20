@@ -15,12 +15,12 @@ namespace Engine.PhysicsTests
     {
         static TestContext _testContext;
 
-        static readonly Vector3 Epsilon = new Vector3(MathUtil.ZeroTolerance);
+        static readonly Vector3 Epsilon = new(MathUtil.ZeroTolerance);
 
         static BoxCollider FromAABB(Vector3 extents, Matrix transform)
         {
-            BoxCollider box = new BoxCollider(extents);
-            RigidBody boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
+            var box = new BoxCollider(extents);
+            var boxBody = new RigidBody(new() { Mass = 1, InitialTransform = transform });
             box.Attach(boxBody);
 
             return box;
@@ -28,16 +28,16 @@ namespace Engine.PhysicsTests
 
         static ConvexMeshCollider FromRectangle(RectangleF rect, float d, Matrix transform)
         {
-            Vector3 p1 = new Vector3(rect.BottomLeft.X, d, rect.BottomLeft.Y);
-            Vector3 p2 = new Vector3(rect.BottomRight.X, d, rect.BottomRight.Y);
-            Vector3 p3 = new Vector3(rect.TopLeft.X, d, rect.TopLeft.Y);
-            Vector3 p4 = new Vector3(rect.TopRight.X, d, rect.TopRight.Y);
+            var p1 = new Vector3(rect.BottomLeft.X, d, rect.BottomLeft.Y);
+            var p2 = new Vector3(rect.BottomRight.X, d, rect.BottomRight.Y);
+            var p3 = new Vector3(rect.TopLeft.X, d, rect.TopLeft.Y);
+            var p4 = new Vector3(rect.TopRight.X, d, rect.TopRight.Y);
 
-            Triangle tri1 = new Triangle(p1, p2, p3);
-            Triangle tri2 = new Triangle(p3, p2, p4);
+            var tri1 = new Triangle(p1, p2, p3);
+            var tri2 = new Triangle(p3, p2, p4);
 
-            ConvexMeshCollider ctri = new ConvexMeshCollider(new[] { tri1, tri2 });
-            RigidBody triBody = new RigidBody(new() { Mass = 2, InitialTransform = transform });
+            var ctri = new ConvexMeshCollider(new[] { tri1, tri2 });
+            var triBody = new RigidBody(new() { Mass = 2, InitialTransform = transform });
             ctri.Attach(triBody);
 
             return ctri;
@@ -667,7 +667,7 @@ namespace Engine.PhysicsTests
         {
             Console.WriteLine(testData.CaseName);
 
-            ContactResolver data = new ContactResolver();
+            var data = new ContactResolver();
 
             var soup = FromRectangle(new RectangleF(-100f, -100f, 200f, 200f), 0, Matrix.Identity);
 

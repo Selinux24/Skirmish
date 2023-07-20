@@ -52,7 +52,7 @@ namespace Engine.Physics
         /// Gets whether the contact resolver is valid or not
         /// </summary>
         /// <returns></returns>
-        public bool IsValid()
+        public readonly bool IsValid()
         {
             if (MaxContacts <= 0 || VelocityIterations <= 0 || PositionIterations <= 0 || PositionEpsilon < 0f || PositionEpsilon < 0f)
             {

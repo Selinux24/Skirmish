@@ -85,7 +85,7 @@ namespace Engine.Collections.Generic
             var bottomLeftChild = CreatePartitions(quadTree, node, boxes.ElementAt(2), items, maxDepth, nextTreeDepth, ref nodeCount);
             var bottomRightChild = CreatePartitions(quadTree, node, boxes.ElementAt(3), items, maxDepth, nextTreeDepth, ref nodeCount);
 
-            List<QuadTreeNode<T>> childList = new List<QuadTreeNode<T>>();
+            var childList = new List<QuadTreeNode<T>>();
 
             if (topLeftChild != null) childList.Add(topLeftChild);
             if (topRightChild != null) childList.Add(topRightChild);
@@ -376,7 +376,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns bounding boxes of specified depth</returns>
         public IEnumerable<BoundingBox> GetBoundingBoxes(int maxDepth = 0)
         {
-            List<BoundingBox> bboxes = new List<BoundingBox>();
+            var bboxes = new List<BoundingBox>();
 
             if (Children?.Any() == true)
             {
@@ -435,7 +435,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the frustum</returns>
         public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingFrustum frustum)
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            var nodes = new List<QuadTreeNode<T>>();
 
             if (Children?.Any() == true)
             {
@@ -465,7 +465,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the bounding box</returns>
         public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingBox bbox)
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            var nodes = new List<QuadTreeNode<T>>();
 
             if (Children?.Any() == true)
             {
@@ -495,7 +495,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns the leaf nodes contained into the bounding sphere</returns>
         public IEnumerable<QuadTreeNode<T>> GetNodesInVolume(ref BoundingSphere sphere)
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            var nodes = new List<QuadTreeNode<T>>();
 
             if (Children?.Any() == true)
             {
@@ -525,7 +525,7 @@ namespace Engine.Collections.Generic
         /// <returns>Returns all leaf nodes</returns>
         public IEnumerable<QuadTreeNode<T>> GetLeafNodes()
         {
-            List<QuadTreeNode<T>> nodes = new List<QuadTreeNode<T>>();
+            var nodes = new List<QuadTreeNode<T>>();
 
             if (Children?.Any() == true)
             {

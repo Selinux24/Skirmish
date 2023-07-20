@@ -34,7 +34,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the tile layer</returns>
         public TileCacheLayer Decompress()
         {
-            TileCacheLayer layer = new TileCacheLayer()
+            var layer = new TileCacheLayer()
             {
                 Header = Header,
                 Areas = null,
@@ -71,10 +71,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// <returns>Returns the text representation of the instance</returns>
         public override string ToString()
         {
-            return string.Format("Salt {0}; Flags {1}; Header {2} Data {3} Next {4}",
-                this.Salt, this.Flags,
-                this.Header, this.Data,
-                this.Next != null);
+            return $"Salt {Salt}; Flags {Flags}; Header {Header} Data {Data} Next {Next != null}";
         }
     }
 }

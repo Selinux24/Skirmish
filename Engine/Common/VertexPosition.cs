@@ -35,7 +35,7 @@ namespace Engine.Common
         {
             var vArray = vertices.ToArray();
 
-            List<VertexPosition> res = new List<VertexPosition>();
+            var res = new List<VertexPosition>();
 
             for (int i = 0; i < vArray.Length; i++)
             {
@@ -74,7 +74,7 @@ namespace Engine.Common
         /// <summary>
         /// Vertex type
         /// </summary>
-        public VertexTypes VertexType
+        public readonly VertexTypes VertexType
         {
             get
             {

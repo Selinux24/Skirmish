@@ -5,7 +5,7 @@ namespace Engine
 {
     public static class EngineServiceFactory
     {
-        private static readonly Dictionary<Type, IGameServiceFactory> serviceFactories = new Dictionary<Type, IGameServiceFactory>();
+        private static readonly Dictionary<Type, IGameServiceFactory> serviceFactories = new();
 
         public static void Register<I, T>()
             where T : class, IGameServiceFactory<I>

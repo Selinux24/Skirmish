@@ -35,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Initial control points
         /// </summary>
-        private readonly List<Vector3> initialControlPoints = new List<Vector3>();
+        private readonly List<Vector3> initialControlPoints = new();
         /// <summary>
         /// Initial minimum distance squared
         /// </summary>
@@ -51,11 +51,11 @@ namespace Engine
         /// <summary>
         /// Control points
         /// </summary>
-        private readonly List<Vector3> controlPoints = new List<Vector3>();
+        private readonly List<Vector3> controlPoints = new();
         /// <summary>
         /// Curve times dictionary
         /// </summary>
-        private readonly Dictionary<int, float> curveTimes = new Dictionary<int, float>();
+        private readonly Dictionary<int, float> curveTimes = new();
 
         /// <summary>
         /// Control points
@@ -64,7 +64,7 @@ namespace Engine
         {
             get
             {
-                List<Vector3> points = new List<Vector3>();
+                var points = new List<Vector3>();
 
                 if (PositionCount > 0)
                 {
@@ -225,11 +225,11 @@ namespace Engine
                 return;
             }
 
-            Stack<Vector3> samplePoints = new Stack<Vector3>();
+            var samplePoints = new Stack<Vector3>();
 
             samplePoints.Push(points[0]);
 
-            Vector3 potentialSamplePoint = points[1];
+            var potentialSamplePoint = points[1];
 
             for (int i = 2; i < points.Length; i++)
             {
@@ -243,9 +243,9 @@ namespace Engine
             }
 
             //now handle last bit of curve
-            Vector3 p1 = samplePoints.Pop(); //last sample point
-            Vector3 p0 = samplePoints.Peek(); //second last sample point
-            Vector3 tangent = Vector3.Normalize(p0 - potentialSamplePoint);
+            var p1 = samplePoints.Pop(); //last sample point
+            var p0 = samplePoints.Peek(); //second last sample point
+            var tangent = Vector3.Normalize(p0 - potentialSamplePoint);
             float d2 = (potentialSamplePoint - p1).Length();
             float d1 = (p1 - p0).Length();
             p1 += tangent * ((d1 - d2) / 2);
@@ -253,7 +253,7 @@ namespace Engine
             samplePoints.Push(p1);
             samplePoints.Push(potentialSamplePoint);
 
-            Vector3[] sampledPoints = samplePoints.ToArray();
+            var sampledPoints = samplePoints.ToArray();
 
             Array.Reverse(sampledPoints);
 
@@ -271,7 +271,7 @@ namespace Engine
             curveTimes.Clear();
             Length = 0;
 
-            List<Vector3> curvePoint = new List<Vector3>();
+            var curvePoint = new List<Vector3>();
 
             for (int i = 0; i < PositionCount; i++)
             {
@@ -435,7 +435,7 @@ namespace Engine
         /// <returns>Returns a vector array</returns>
         public IEnumerable<Vector3> SamplePath(float sampleTime)
         {
-            List<Vector3> returnPath = new List<Vector3>();
+            var returnPath = new List<Vector3>();
 
             float time = 0;
             while (time < Length)

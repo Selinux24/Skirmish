@@ -23,20 +23,18 @@ namespace Physics
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using (Game cl = new Game("11 Physics", WindowsEngineForm.ScreenSize * 0.8f))
+                using Game cl = new("11 Physics", WindowsEngineForm.ScreenSize * 0.8f);
 #else
-                using (Game cl = new Game("11 Physics"))
+                using Game cl = new("11 Physics");
 #endif
-                {
-                    cl.VisibleMouse = true;
-                    cl.LockMouse = false;
+                cl.VisibleMouse = true;
+                cl.LockMouse = false;
 
-                    GameResourceManager.RegisterLoader<LoaderCollada>();
+                GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                    cl.SetScene<TestScene>();
+                cl.SetScene<TestScene>();
 
-                    cl.Run();
-                }
+                cl.Run();
             }
             catch (Exception ex)
             {

@@ -83,8 +83,8 @@ namespace Engine.Physics.Colliders
         {
             dir = Vector3.TransformNormal(dir, RotationScaleInverse); //find support in model space
 
-            Vector3 dir_xz = new Vector3(dir.X, 0, dir.Z);
-            Vector3 result = Vector3.Normalize(dir_xz) * Radius;
+            var dir_xz = new Vector3(dir.X, 0, dir.Z);
+            var result = Vector3.Normalize(dir_xz) * Radius;
             result.Y = dir.Y > 0 ? CapHeight : BaseHeight;
 
             return Vector3.TransformNormal(result, RotationScale) + Position; //convert support to world space

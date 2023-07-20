@@ -131,7 +131,7 @@ namespace Engine.PathFinding.RecastNavigation.Recast
         }
         private static IEnumerable<PotentialDiagonal> FindPotentialDiagonals(Int4 corner, Contour outline)
         {
-            List<PotentialDiagonal> diags = new List<PotentialDiagonal>();
+            var diags = new List<PotentialDiagonal>();
 
             for (int j = 0; j < outline.NVertices; j++)
             {

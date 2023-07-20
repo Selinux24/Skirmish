@@ -55,7 +55,7 @@ namespace Engine.Windows.Helpers
         /// <summary>
         /// Pressed key collection
         /// </summary>
-        private static readonly List<Keys> pressedKeys = new List<Keys>(256);
+        private static readonly List<Keys> pressedKeys = new(256);
 
         /// <summary>
         /// Gets the pressed key collection
@@ -105,7 +105,7 @@ namespace Engine.Windows.Helpers
         /// <returns>Returns the stroked key strings</returns>
         public static string GetStrokes()
         {
-            StringBuilder sb = new StringBuilder();
+            var sb = new StringBuilder();
 
             for (uint i = 0; i < keyState.Length; i++)
             {

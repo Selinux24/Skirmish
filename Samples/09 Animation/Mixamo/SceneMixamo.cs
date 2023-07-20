@@ -18,7 +18,7 @@ namespace Animation.Mixamo
         private Sprite backPanel = null;
         private UIConsole console = null;
 
-        private readonly Vector3 modelInitPosition = new Vector3(0, 0, 0);
+        private readonly Vector3 modelInitPosition = new(0, 0, 0);
 
         private bool uiReady = false;
         private bool gameReady = false;
@@ -149,7 +149,7 @@ namespace Animation.Mixamo
             model.Manipulator.SetRotation(0, MathUtil.DegreesToRadians(-90), 0, true);
             model.Manipulator.SetScale(0.1f, true);
 
-            AnimationPath pDefault = new AnimationPath();
+            var pDefault = new AnimationPath();
             pDefault.AddLoop("rumba");
 
             model.AnimationController.Start(new AnimationPlan(pDefault), 0);

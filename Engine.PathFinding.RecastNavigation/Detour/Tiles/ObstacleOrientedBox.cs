@@ -68,7 +68,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Auxiliary rotation vector
         /// </summary>
         /// <remarks>{ cos(0.5f*angle)*sin(-0.5f*angle); cos(0.5f*angle)*cos(0.5f*angle) - 0.5 }</remarks>
-        public Vector2 RotAux
+        public readonly Vector2 RotAux
         {
             get
             {
@@ -95,7 +95,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
         /// Gets the obstacle bounds
         /// </summary>
         /// <returns>Returns a bounding box</returns>
-        public BoundingBox GetBounds()
+        public readonly BoundingBox GetBounds()
         {
             float maxr = 1.41f * Math.Max(HalfExtents.X, HalfExtents.Z);
 
@@ -166,7 +166,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour.Tiles
 
             return true;
         }
-        private bool FilterRotation(float x2, float z2, float xhalf, float zhalf)
+        private readonly bool FilterRotation(float x2, float z2, float xhalf, float zhalf)
         {
             float xrot = RotAux.Y * x2 + RotAux.X * z2;
             if (xrot > xhalf || xrot < -xhalf)

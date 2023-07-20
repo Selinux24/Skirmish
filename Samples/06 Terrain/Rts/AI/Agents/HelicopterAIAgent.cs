@@ -90,10 +90,7 @@ namespace Terrain.Rts.AI.Agents
             if (Parent.Scene.FindNearestGroundPosition<Triangle>(Manipulator.Position, out var r))
             {
                 SetRouteToPoint(r.Position, 15f, false);
-                if (model != null)
-                {
-                    model.AnimationController.Stop();
-                }
+                model?.AnimationController.Stop();
             }
             else
             {

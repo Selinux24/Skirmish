@@ -6,7 +6,7 @@ namespace GameLogic.Rules
 
     public class Team
     {
-        private readonly List<Soldier> soldiers = new List<Soldier>();
+        private readonly List<Soldier> soldiers = new();
 
         public string Name { get; set; }
         public string Faction { get; set; }

@@ -42,14 +42,14 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private static IEnumerable<RasterizeItem> MarkWalkableTriangles(float walkableSlopeAngle, IEnumerable<Triangle> tris)
         {
-            List<RasterizeItem> res = new List<RasterizeItem>();
+            var res = new List<RasterizeItem>();
 
             float walkableThr = (float)Math.Cos(walkableSlopeAngle / 180.0f * MathUtil.Pi);
 
             foreach (var tri in tris)
             {
                 // Check if the face is walkable.
-                AreaTypes area = tri.Normal.Y > walkableThr ? AreaTypes.RC_WALKABLE_AREA : AreaTypes.RC_NULL_AREA;
+                var area = tri.Normal.Y > walkableThr ? AreaTypes.RC_WALKABLE_AREA : AreaTypes.RC_NULL_AREA;
 
                 res.Add(new RasterizeItem() { Triangle = tri, AreaType = area });
             }
@@ -186,15 +186,15 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         }
         private static (IEnumerable<Vector3> Poly1, IEnumerable<Vector3> Poly2) DividePoly(IEnumerable<Vector3> inPoly, float x, int axis)
         {
-            List<Vector3> outPoly1 = new List<Vector3>();
-            List<Vector3> outPoly2 = new List<Vector3>();
+            var outPoly1 = new List<Vector3>();
+            var outPoly2 = new List<Vector3>();
 
             var d = GetPolyVerticesAxis(inPoly, x, axis);
 
             for (int i = 0, j = inPoly.Count() - 1; i < inPoly.Count(); j = i, i++)
             {
-                Vector3 va = inPoly.ElementAt(j);
-                Vector3 vb = inPoly.ElementAt(i);
+                var va = inPoly.ElementAt(j);
+                var vb = inPoly.ElementAt(i);
 
                 float na = d.ElementAt(j);
                 float nb = d.ElementAt(i);
@@ -204,7 +204,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 if (ina != inb)
                 {
                     float s = na / (na - nb);
-                    Vector3 v = va + (vb - va) * s;
+                    var v = va + (vb - va) * s;
                     outPoly1.Add(v);
                     outPoly2.Add(v);
 

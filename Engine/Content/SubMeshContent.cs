@@ -84,12 +84,12 @@ namespace Engine.Content
                 var firstMesh = meshArray.First();
 
                 string material = firstMesh.Material;
-                Topology topology = firstMesh.Topology;
-                VertexTypes vertexType = firstMesh.VertexType;
+                var topology = firstMesh.Topology;
+                var vertexType = firstMesh.VertexType;
                 bool isTextured = firstMesh.Textured;
 
-                List<VertexData> verts = new List<VertexData>();
-                List<uint> idx = new List<uint>();
+                var verts = new List<VertexData>();
+                var idx = new List<uint>();
 
                 uint indexOffset = 0;
 
@@ -252,7 +252,7 @@ namespace Engine.Content
         {
             if (Topology == Topology.TriangleList)
             {
-                List<Triangle> triangles = new List<Triangle>();
+                var triangles = new List<Triangle>();
 
                 if (Indices.Length > 0)
                 {

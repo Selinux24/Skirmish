@@ -21,7 +21,7 @@ namespace Engine
         /// <summary>
         /// Segment length
         /// </summary>
-        public float Length
+        public readonly float Length
         {
             get
             {
@@ -31,7 +31,7 @@ namespace Engine
         /// <summary>
         /// Segment squared length
         /// </summary>
-        public float LengthSquared
+        public readonly float LengthSquared
         {
             get
             {
@@ -41,7 +41,7 @@ namespace Engine
         /// <summary>
         /// Gets the normalized direction vector
         /// </summary>
-        public Vector3 Direction
+        public readonly Vector3 Direction
         {
             get
             {
@@ -89,12 +89,12 @@ namespace Engine
             return !left.Equals(ref right);
         }
         /// <inheritdoc/>
-        public bool Equals(Segment other)
+        public readonly bool Equals(Segment other)
         {
             return Equals(ref other);
         }
         /// <inheritdoc/>
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object obj)
         {
             if (obj is not Segment)
             {
@@ -106,19 +106,19 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public bool Equals(ref Segment other)
+        public readonly bool Equals(ref Segment other)
         {
             return
                 other.Point1.Equals(Point1) &&
                 other.Point2.Equals(Point2);
         }
         /// <inheritdoc/>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return HashCode.Combine(Point1, Point2);
         }
         /// <inheritdoc/>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Point 1 {Point1}; Point 2 {Point2};";
         }

@@ -42,7 +42,7 @@ namespace Engine.BuiltIn
             public uint AnimationPaletteWidth;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(Global));
             }
@@ -141,7 +141,7 @@ namespace Engine.BuiltIn
             public float FogRange;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PerFrame));
             }
@@ -181,7 +181,7 @@ namespace Engine.BuiltIn
             public Color3 AmbientUp;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(BufferLightHemispheric));
             }
@@ -218,7 +218,7 @@ namespace Engine.BuiltIn
             public BufferLightHemispheric HemiLight;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PSHemispheric));
             }
@@ -334,7 +334,7 @@ namespace Engine.BuiltIn
             public Matrix ToShadowSpace;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(BufferLightDirectional));
             }
@@ -382,7 +382,7 @@ namespace Engine.BuiltIn
             public BufferLightDirectional[] DirLights;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PSDirectional));
             }
@@ -514,7 +514,7 @@ namespace Engine.BuiltIn
             public Matrix FromLightVP;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(BufferLightSpot));
             }
@@ -562,7 +562,7 @@ namespace Engine.BuiltIn
             public BufferLightSpot[] SpotLights;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PSSpots));
             }
@@ -678,7 +678,7 @@ namespace Engine.BuiltIn
             public int MapIndex;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(BufferLightPoint));
             }
@@ -726,7 +726,7 @@ namespace Engine.BuiltIn
             public BufferLightPoint[] PointLights;
 
             /// <inheritdoc/>
-            public int GetStride()
+            public readonly int GetStride()
             {
                 return Marshal.SizeOf(typeof(PSPoints));
             }

@@ -126,7 +126,7 @@ namespace Engine.PathFinding.AStar
             }
 
             // Create the new item
-            PriorityDictionaryItem<TValue, TPriority> newItem = new PriorityDictionaryItem<TValue, TPriority>(value, priority);
+            var newItem = new PriorityDictionaryItem<TValue, TPriority>(value, priority);
 
             int i = Count++;
 

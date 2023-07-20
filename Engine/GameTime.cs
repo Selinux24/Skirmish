@@ -12,7 +12,7 @@ namespace Engine
         /// <summary>
         /// Stop watch
         /// </summary>
-        private readonly TimerTick watch = new TimerTick();
+        private readonly TimerTick watch = new();
 
         /// <summary>
         /// Elapsed time since last frame

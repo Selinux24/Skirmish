@@ -145,28 +145,15 @@ namespace Engine.UI
         /// <param name="logEntry">Log entry</param>
         private string FormatLog(LogEntry logEntry)
         {
-            Color4 defColor = textArea.TextForeColor;
-
-            Color4 logColor;
-            switch (logEntry.LogLevel)
+            var defColor = textArea.TextForeColor;
+            var logColor = logEntry.LogLevel switch
             {
-                case LogLevel.Debug:
-                    logColor = Color.White;
-                    break;
-                case LogLevel.Information:
-                    logColor = Color.Blue;
-                    break;
-                case LogLevel.Warning:
-                    logColor = Color.Yellow;
-                    break;
-                case LogLevel.Error:
-                    logColor = Color.Red;
-                    break;
-                default:
-                    logColor = textArea.TextForeColor;
-                    break;
-            }
-
+                LogLevel.Debug => (Color4)Color.White,
+                LogLevel.Information => (Color4)Color.Blue,
+                LogLevel.Warning => (Color4)Color.Yellow,
+                LogLevel.Error => (Color4)Color.Red,
+                _ => textArea.TextForeColor,
+            };
             return $"{logEntry.EventDate:HH:mm:ss.fff} {logColor}[{logEntry.LogLevel}]{defColor}> {logEntry.Text}{Environment.NewLine}";
         }
         /// <summary>
