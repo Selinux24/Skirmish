@@ -8,6 +8,7 @@ using System.Linq;
 
 namespace Engine.Common
 {
+    using Engine.BuiltIn;
     using Engine.BuiltIn.PostProcess;
 
     /// <summary>
@@ -68,6 +69,36 @@ namespace Engine.Common
         /// Post-processing render target B
         /// </summary>
         private RenderTarget postProcessingTargetB = null;
+
+        /// <summary>
+        /// Update globals
+        /// </summary>
+        private bool updateGlobals = true;
+        /// <summary>
+        /// Update materials palette flag
+        /// </summary>
+        private bool updateMaterialsPalette;
+        /// <summary>
+        /// Material palette resource
+        /// </summary>
+        private EngineShaderResourceView materialPalette;
+        /// <summary>
+        /// Material palette width
+        /// </summary>
+        private uint materialPaletteWidth;
+
+        /// <summary>
+        /// Update animation palette flag
+        /// </summary>
+        private bool updateAnimationsPalette;
+        /// <summary>
+        /// Animation palette resource
+        /// </summary>
+        private EngineShaderResourceView animationPalette;
+        /// <summary>
+        /// Animation palette width
+        /// </summary>
+        private uint animationPaletteWidth;
 
 #if DEBUG
         /// <summary>
@@ -231,6 +262,23 @@ namespace Engine.Common
         public BuiltInPostProcessState PostProcessingFinalEffects { get; set; } = BuiltInPostProcessState.Empty;
 
         /// <summary>
+        /// Gets first normal texture size for the specified pixel count
+        /// </summary>
+        /// <param name="pixelCount">Pixel count</param>
+        /// <returns>Returns the texture size</returns>
+        private static int GetTextureSize(int pixelCount)
+        {
+            int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
+            int texHeight = 1;
+            while (texHeight < texWidth)
+            {
+                texHeight <<= 1;
+            }
+
+            return texHeight;
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
@@ -301,6 +349,9 @@ namespace Engine.Common
             postProcessingTargetA = new RenderTarget(scene.Game, "PostProcessingTargetA", targetFormat, false, 1);
             postProcessingTargetB = new RenderTarget(scene.Game, "PostProcessingTargetB", targetFormat, false, 1);
             processingDrawer = new PostProcessingDrawer(scene.Game);
+
+            updateMaterialsPalette = true;
+            updateAnimationsPalette = true;
         }
         /// <summary>
         /// Destructor
@@ -420,7 +471,10 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public abstract void Draw(GameTime gameTime);
+        public virtual void Draw(GameTime gameTime)
+        {
+            UpdateGlobalState(DrawContext.DeviceContext);
+        }
         /// <summary>
         /// Updates the draw context
         /// </summary>
@@ -444,14 +498,6 @@ namespace Engine.Common
             DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
             DrawContext.ShadowMapPoint = ShadowMapperPoint;
             DrawContext.ShadowMapSpot = ShadowMapperSpot;
-        }
-
-        /// <inheritdoc/>
-        public virtual void UpdateGlobals()
-        {
-            ShadowMapperDirectional?.UpdateGlobals();
-            ShadowMapperPoint?.UpdateGlobals();
-            ShadowMapperSpot?.UpdateGlobals();
         }
 
         /// <summary>
@@ -586,6 +632,138 @@ namespace Engine.Common
             }
 
             return res;
+        }
+
+        /// <summary>
+        /// Updates the global resources state
+        /// </summary>
+        /// <param name="dc">Device context</param>
+        protected void UpdateGlobalState(EngineDeviceContext dc)
+        {
+            if (updateGlobals)
+            {
+                ShadowMapperDirectional?.UpdateGlobals();
+                ShadowMapperPoint?.UpdateGlobals();
+                ShadowMapperSpot?.UpdateGlobals();
+
+                BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+
+                updateGlobals = false;
+            }
+        }
+
+        /// <inheritdoc/>
+        public virtual void UpdateGlobals(bool updatedEnvironment, bool updatedComponents)
+        {
+            updateMaterialsPalette = updateMaterialsPalette || updatedComponents;
+            updateAnimationsPalette = updateAnimationsPalette || updatedComponents;
+            updateGlobals = updateGlobals || updatedEnvironment;
+
+            if (updateMaterialsPalette)
+            {
+                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Material palette.");
+
+                UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
+
+                updateGlobals = true;
+
+                updateMaterialsPalette = false;
+            }
+
+            if (updateAnimationsPalette)
+            {
+                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Animation palette.");
+
+                UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
+
+                updateGlobals = true;
+
+                updateAnimationsPalette = false;
+            }
+        }
+        /// <summary>
+        /// Updates the materials palette
+        /// </summary>
+        public virtual void UpdateMaterialPalette()
+        {
+            updateMaterialsPalette = true;
+        }
+        /// <summary>
+        /// Updates the global material palette
+        /// </summary>
+        /// <param name="materialPalette">Material palette</param>
+        /// <param name="materialPaletteWidth">Material palette width</param>
+        private void UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
+        {
+            List<IMeshMaterial> mats = new()
+            {
+                MeshMaterial.DefaultBlinnPhong,
+            };
+
+            var matComponents = Scene.Components.Get<IUseMaterials>().SelectMany(c => c.GetMaterials());
+            if (matComponents.Any())
+            {
+                mats.AddRange(matComponents);
+            }
+
+            List<Vector4> values = new();
+
+            for (int i = 0; i < mats.Count; i++)
+            {
+                var mat = mats[i];
+                var matV = mat.Material.Convert().Pack();
+
+                mat.UpdateResource((uint)i, (uint)values.Count, (uint)matV.Length);
+
+                values.AddRange(matV);
+            }
+
+            int texWidth = GetTextureSize(values.Count);
+
+            materialPalette = Scene.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
+            materialPaletteWidth = (uint)texWidth;
+        }
+        /// <summary>
+        /// Updates the global animation palette
+        /// </summary>
+        /// <param name="animationPalette">Animation palette</param>
+        /// <param name="animationPaletteWidth">Animation palette width</param>
+        private void UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
+        {
+            var skData = Scene.Components.Get<IUseSkinningData>(c => c.SkinningData != null)
+                .Select(c => c.SkinningData)
+                .ToArray();
+
+            List<ISkinningData> addedSks = new();
+
+            List<Vector4> values = new();
+
+            for (int i = 0; i < skData.Length; i++)
+            {
+                var sk = skData[i];
+
+                if (!addedSks.Contains(sk))
+                {
+                    var skV = sk.Pack();
+
+                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Count());
+
+                    values.AddRange(skV);
+
+                    addedSks.Add(sk);
+                }
+                else
+                {
+                    var cMat = addedSks.Find(m => m.Equals(sk));
+
+                    sk.UpdateResource(cMat.ResourceIndex, cMat.ResourceOffset, cMat.ResourceSize);
+                }
+            }
+
+            int texWidth = GetTextureSize(values.Count);
+
+            animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
+            animationPaletteWidth = (uint)texWidth;
         }
 
         /// <summary>

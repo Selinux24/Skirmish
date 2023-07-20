@@ -52,6 +52,8 @@ namespace Engine
         /// <inheritdoc/>
         public override void Draw(GameTime gameTime)
         {
+            base.Draw(gameTime);
+
             if (!Updated)
             {
                 return;

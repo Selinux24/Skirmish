@@ -14,15 +14,15 @@ namespace Engine.Common
         /// <summary>
         /// Data list
         /// </summary>
-        private readonly List<IVertexData> data = new List<IVertexData>();
+        private readonly List<IVertexData> data = new();
         /// <summary>
         /// Input element list
         /// </summary>
-        private readonly List<InputElement> input = new List<InputElement>();
+        private readonly List<InputElement> input = new();
         /// <summary>
         /// Vertex descriptor list
         /// </summary>
-        private readonly List<BufferDescriptor> vertexDescriptors = new List<BufferDescriptor>();
+        private readonly List<BufferDescriptor> vertexDescriptors = new();
 
         /// <summary>
         /// Vertex type

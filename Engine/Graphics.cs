@@ -498,13 +498,15 @@ namespace Engine
         /// </summary>
         public void Begin(Scene scene)
         {
-            ImmediateContext.GetDeviceContext().ClearDepthStencilView(
+            var dc = ImmediateContext.GetDeviceContext();
+
+            dc.ClearDepthStencilView(
                 depthStencilView.GetDepthStencil(),
                 DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
                 1.0f,
                 0);
 
-            ImmediateContext.GetDeviceContext().ClearRenderTargetView(
+            dc.ClearRenderTargetView(
                 renderTargetView.GetRenderTarget(),
                 scene.GameEnvironment.Background);
         }
