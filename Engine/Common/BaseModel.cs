@@ -309,22 +309,18 @@ namespace Engine.Common
         public IEnumerable<IMeshMaterial> GetMaterials()
         {
             var drawingData = GetDrawingData(LevelOfDetail.High);
-            if (drawingData == null)
-            {
-                return Enumerable.Empty<IMeshMaterial>();
-            }
 
-            return drawingData.Materials.Values.ToArray();
+            return drawingData?.GetMaterials() ?? Enumerable.Empty<IMeshMaterial>();
         }
         /// <inheritdoc/>
         public IMeshMaterial GetMaterial(string meshMaterialName)
         {
-            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
+            foreach (var drawingData in meshesByLOD.Values)
             {
-                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
-                if (meshMaterial != null)
+                var material = drawingData.GetFirstMaterial(meshMaterialName);
+                if (material != null)
                 {
-                    return meshMaterials[meshMaterial];
+                    return material;
                 }
             }
 
@@ -335,12 +331,10 @@ namespace Engine.Common
         {
             bool updated = false;
 
-            foreach (var meshMaterials in meshesByLOD.Values.Select(d => d.Materials))
+            foreach (var drawingData in meshesByLOD.Values)
             {
-                var meshMaterial = meshMaterials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
-                if (meshMaterial != null)
+                if (drawingData.ReplaceMaterials(meshMaterialName, material))
                 {
-                    meshMaterials[meshMaterial] = material;
                     updated = true;
                 }
             }

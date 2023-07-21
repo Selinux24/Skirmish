@@ -328,52 +328,52 @@ namespace Engine
                 maxCount -= instancesToDraw;
                 instanceCount += instancesToDraw;
 
-                foreach (string meshName in drawingData.Meshes.Keys)
-                {
-                    UpdateIndependentTransforms(context.DeviceContext, meshName);
+                int dCount = DrawShadowMesh(context, drawingData, instancesToDraw, startInstanceLocation);
+                dCount *= instancesToDraw;
 
-                    count += DrawShadowMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
-                    count *= instanceCount;
-                }
+                count += dCount;
             }
 
-            return count > 0;
+            if (count > 0)
+            {
+                Counters.InstancesPerFrame += instanceCount;
+                Counters.PrimitivesPerFrame += count;
+
+                return true;
+            }
+
+            return false;
         }
         /// <summary>
         /// Draws a mesh with a shadow map drawer
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
-        /// <param name="meshName">Mesh name</param>
         /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, string meshName, int instancesToDraw, int startInstanceLocation)
+        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, int instancesToDraw, int startInstanceLocation)
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
-
             int count = 0;
 
             var dc = context.DeviceContext;
 
-            var meshDict = drawingData.Meshes[meshName];
-
-            foreach (string materialName in meshDict.Keys)
+            foreach (var meshMaterial in drawingData.IterateMaterials())
             {
-                var mesh = meshDict[materialName];
-                if (!mesh.Ready)
-                {
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
-                    continue;
-                }
+                string materialName = meshMaterial.MaterialName;
+                var material = meshMaterial.Material;
+                string meshName = meshMaterial.MeshName;
+                var mesh = meshMaterial.Mesh;
 
-                var material = drawingData.Materials[materialName];
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}.");
 
                 var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, true, material.Material.IsTransparent);
                 if (drawer == null)
                 {
                     continue;
                 }
+
+                UpdateIndependentTransforms(dc, meshName);
 
                 drawer.UpdateCastingLight(context);
 
@@ -463,15 +463,10 @@ namespace Engine
                 maxCount -= instancesToDraw;
                 instanceCount += instancesToDraw;
 
-                foreach (string meshName in drawingData.Meshes.Keys)
-                {
-                    UpdateIndependentTransforms(dc, meshName);
+                int dCount = DrawMesh(context, drawingData, instancesToDraw, startInstanceLocation);
+                dCount *= instancesToDraw;
 
-                    int dCount = DrawMesh(context, drawingData, meshName, instancesToDraw, startInstanceLocation);
-                    dCount *= instancesToDraw;
-
-                    count += dCount;
-                }
+                count += dCount;
             }
 
             if (count > 0)
@@ -489,30 +484,23 @@ namespace Engine
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
-        /// <param name="meshName">Mesh name</param>
         /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, DrawingData drawingData, string meshName, int instancesToDraw, int startInstanceLocation)
+        private int DrawMesh(DrawContext context, DrawingData drawingData, int instancesToDraw, int startInstanceLocation)
         {
-            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
-
             int count = 0;
 
             var dc = context.DeviceContext;
 
-            var meshDict = drawingData.Meshes[meshName];
-
-            foreach (string materialName in meshDict.Keys)
+            foreach (var meshMaterial in drawingData.IterateMaterials())
             {
-                var mesh = meshDict[materialName];
-                if (!mesh.Ready)
-                {
-                    Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
-                    continue;
-                }
+                string materialName = meshMaterial.MaterialName;
+                var material = meshMaterial.Material;
+                string meshName = meshMaterial.MeshName;
+                var mesh = meshMaterial.Mesh;
 
-                var material = drawingData.Materials[materialName];
+                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawMesh)}: {meshName}. Index {startInstanceLocation} Length {instancesToDraw}. {context.DrawerMode}");
 
                 bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
@@ -526,6 +514,8 @@ namespace Engine
                 {
                     continue;
                 }
+
+                UpdateIndependentTransforms(dc, meshName);
 
                 var materialState = new BuiltInDrawerMaterialState
                 {

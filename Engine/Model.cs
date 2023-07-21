@@ -191,40 +191,19 @@ namespace Engine
             }
 
             int count = 0;
-            foreach (var mesh in DrawingData.Meshes)
-            {
-                count += DrawShadowMesh(context, mesh.Key, mesh.Value);
-            }
-
-            return count > 0;
-        }
-        /// <summary>
-        /// Draws a mesh shadow
-        /// </summary>
-        /// <param name="context">Context</param>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="meshDict">Mesh dictionary</param>
-        /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawShadowMesh(DrawContextShadows context, string meshName, Dictionary<string, Mesh> meshDict)
-        {
-            Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.");
-
-            int count = 0;
 
             var dc = context.DeviceContext;
 
-            var localTransform = GetTransformByName(meshName);
-
-            foreach (string materialName in meshDict.Keys)
+            foreach (var meshMaterial in DrawingData.IterateMaterials())
             {
-                var mesh = meshDict[materialName];
-                if (!mesh.Ready)
-                {
-                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
-                    continue;
-                }
+                string materialName = meshMaterial.MaterialName;
+                var material = meshMaterial.Material;
+                string meshName = meshMaterial.MeshName;
+                var mesh = meshMaterial.Mesh;
 
-                var material = DrawingData.Materials[materialName];
+                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.");
+
+                var localTransform = GetTransformByName(meshName);
 
                 var drawer = context.ShadowMap?.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
                 if (drawer == null)
@@ -252,14 +231,22 @@ namespace Engine
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
-                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadowMesh)}: {meshName}.{materialName}.");
+                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawShadows)}: {meshName}.{materialName}.");
                 if (drawer.Draw(dc, BufferManager, new[] { mesh }))
                 {
                     count += mesh.Count;
                 }
             }
 
-            return count;
+            if (count > 0)
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += count;
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <inheritdoc/>
@@ -276,53 +263,24 @@ namespace Engine
             }
 
             int count = 0;
-            foreach (var mesh in DrawingData.Meshes)
-            {
-                count += DrawMesh(context, mesh.Key, mesh.Value);
-            }
-
-            if (count > 0)
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += count;
-
-                return true;
-            }
-
-            return false;
-        }
-        /// <summary>
-        /// Draws a mesh
-        /// </summary>
-        /// <param name="context">Context</param>
-        /// <param name="meshName">Mesh name</param>
-        /// <param name="meshDict">Mesh dictionary</param>
-        /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, string meshName, Dictionary<string, Mesh> meshDict)
-        {
-            Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.");
-
-            int count = 0;
 
             var dc = context.DeviceContext;
 
-            var localTransform = GetTransformByName(meshName);
-
-            foreach (string materialName in meshDict.Keys)
+            foreach (var meshMaterial in DrawingData.IterateMaterials())
             {
-                var mesh = meshDict[materialName];
-                if (!mesh.Ready)
-                {
-                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
-                    continue;
-                }
+                string materialName = meshMaterial.MaterialName;
+                var material = meshMaterial.Material;
+                string meshName = meshMaterial.MeshName;
+                var mesh = meshMaterial.Mesh;
 
-                var material = DrawingData.Materials[materialName];
+                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.");
+
+                var localTransform = GetTransformByName(meshName);
 
                 bool draw = context.ValidateDraw(BlendMode, material.Material.IsTransparent);
                 if (!draw)
                 {
-                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
+                    Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.{materialName} discard => BlendMode {BlendMode}");
                     continue;
                 }
 
@@ -350,15 +308,24 @@ namespace Engine
                 };
                 drawer.UpdateMaterial(dc, materialState);
 
-                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(DrawMesh)}: {meshName}.{materialName}.");
+                Logger.WriteTrace(this, $"{nameof(Model)}.{Name} - {nameof(Draw)}: {meshName}.{materialName}.");
                 if (drawer.Draw(dc, BufferManager, new[] { mesh }))
                 {
                     count += mesh.Count;
                 }
             }
 
-            return count;
+            if (count > 0)
+            {
+                Counters.InstancesPerFrame++;
+                Counters.PrimitivesPerFrame += count;
+
+                return true;
+            }
+
+            return false;
         }
+
         /// <summary>
         /// Add model parts
         /// </summary>

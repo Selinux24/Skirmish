@@ -70,7 +70,13 @@ namespace Engine
             /// Drawing data
             /// </summary>
             public DrawingData DrawingData = null;
+            /// <summary>
+            /// Next node id
+            /// </summary>
             public int CreationNodeId = -1;
+            /// <summary>
+            /// Node creation time
+            /// </summary>
             public TimeSpan CreationDuration = TimeSpan.Zero;
 
             /// <summary>
@@ -122,36 +128,34 @@ namespace Engine
                     return false;
                 }
 
-                bool drawn = false;
+                int count = 0;
 
-                foreach (string meshName in DrawingData.Meshes.Keys)
+                foreach (var meshMaterial in DrawingData.IterateMaterials())
                 {
-                    var meshDict = DrawingData.Meshes[meshName];
+                    var material = meshMaterial.Material;
+                    var mesh = meshMaterial.Mesh;
 
-                    foreach (string materialName in meshDict.Keys)
+                    var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
+                    if (sceneryDrawer == null)
                     {
-                        var mesh = meshDict[materialName];
-                        if (!mesh.Ready)
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        var material = DrawingData.Materials[materialName];
-
-                        var sceneryDrawer = context.ShadowMap.GetDrawer(mesh.VertextType, false, material.Material.IsTransparent);
-                        if (sceneryDrawer == null)
-                        {
-                            continue;
-                        }
-
-                        if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
-                        {
-                            drawn = true;
-                        }
+                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
+                    {
+                        count += mesh.Count;
                     }
                 }
 
-                return drawn;
+                if (count > 0)
+                {
+                    Counters.InstancesPerFrame++;
+                    Counters.PrimitivesPerFrame += count;
+
+                    return true;
+                }
+
+                return false;
             }
             /// <summary>
             /// Draws the scenery patch
@@ -163,36 +167,26 @@ namespace Engine
             {
                 int count = 0;
 
-                foreach (string meshName in DrawingData.Meshes.Keys)
+                foreach (var meshMaterial in DrawingData.IterateMaterials())
                 {
-                    var meshDict = DrawingData.Meshes[meshName];
+                    var material = meshMaterial.Material;
+                    var mesh = meshMaterial.Mesh;
 
-                    foreach (string materialName in meshDict.Keys)
+                    bool draw = context.ValidateDraw(blendMode, material.Material.IsTransparent);
+                    if (!draw)
                     {
-                        var mesh = meshDict[materialName];
-                        if (!mesh.Ready)
-                        {
-                            continue;
-                        }
+                        continue;
+                    }
 
-                        var material = DrawingData.Materials[materialName];
+                    var sceneryDrawer = GetDrawer(context.DrawerMode, mesh.VertextType);
+                    if (sceneryDrawer == null)
+                    {
+                        continue;
+                    }
 
-                        bool draw = context.ValidateDraw(blendMode, material.Material.IsTransparent);
-                        if (!draw)
-                        {
-                            continue;
-                        }
-
-                        var sceneryDrawer = GetDrawer(context.DrawerMode, mesh.VertextType);
-                        if (sceneryDrawer == null)
-                        {
-                            continue;
-                        }
-
-                        if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
-                        {
-                            count += mesh.Count;
-                        }
+                    if (DrawWithDrawer(context.DeviceContext, bufferManager, sceneryDrawer, mesh, material))
+                    {
+                        count += mesh.Count;
                     }
                 }
 
@@ -257,7 +251,7 @@ namespace Engine
             /// <returns>Returns the used materials array</returns>
             public IEnumerable<IMeshMaterial> GetMaterials()
             {
-                return DrawingData.Materials.Values.ToArray();
+                return DrawingData.GetMaterials();
             }
             /// <summary>
             /// Gets a material by mesh material name
@@ -266,18 +260,7 @@ namespace Engine
             /// <returns>Returns a material by mesh material name</returns>
             public IMeshMaterial GetMaterial(string meshMaterialName)
             {
-                if (!DrawingData.Materials.Any())
-                {
-                    return null;
-                }
-
-                var meshMaterial = DrawingData.Materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
-                if (meshMaterial == null)
-                {
-                    return null;
-                }
-
-                return DrawingData.Materials[meshMaterial];
+                return DrawingData.GetFirstMaterial(meshMaterialName);
             }
             /// <summary>
             /// Replaces the material
@@ -287,20 +270,7 @@ namespace Engine
             /// <returns>Returns true if any material were replaced</returns>
             public bool ReplaceMaterial(string meshMaterialName, IMeshMaterial material)
             {
-                if (!DrawingData.Materials.Any())
-                {
-                    return false;
-                }
-
-                var meshMaterial = DrawingData.Materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
-                if (meshMaterial == null)
-                {
-                    return false;
-                }
-
-                DrawingData.Materials[meshMaterial] = material;
-
-                return true;
+                return DrawingData.ReplaceMaterials(meshMaterialName, material);
             }
 
             /// <inheritdoc/>
@@ -417,8 +387,7 @@ namespace Engine
         /// <summary>
         /// Initializes internal patch collection
         /// </summary>
-        /// <returns></returns>
-        internal async Task IntializePatches()
+        private async Task IntializePatches()
         {
             Stopwatch watch = new();
             watch.Start();

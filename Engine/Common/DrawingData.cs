@@ -15,51 +15,6 @@ namespace Engine.Common
     public class DrawingData : IDisposable
     {
         /// <summary>
-        /// Hull mesh triangle list
-        /// </summary>
-        private readonly List<Triangle> hullMesh = new();
-        /// <summary>
-        /// Light list
-        /// </summary>
-        private readonly List<ISceneLight> lights = new();
-
-        /// <summary>
-        /// Game instance
-        /// </summary>
-        protected readonly Game Game = null;
-        /// <summary>
-        /// Description
-        /// </summary>
-        protected readonly DrawingDataDescription Description;
-
-        /// <summary>
-        /// Materials dictionary
-        /// </summary>
-        public Dictionary<string, IMeshMaterial> Materials { get; private set; } = new Dictionary<string, IMeshMaterial>();
-        /// <summary>
-        /// Texture dictionary
-        /// </summary>
-        public Dictionary<string, EngineShaderResourceView> Textures { get; private set; } = new Dictionary<string, EngineShaderResourceView>();
-        /// <summary>
-        /// Meshes
-        /// </summary>
-        public Dictionary<string, Dictionary<string, Mesh>> Meshes { get; private set; } = new Dictionary<string, Dictionary<string, Mesh>>();
-        /// <summary>
-        /// Hull mesh
-        /// </summary>
-        public IEnumerable<Triangle> HullMesh
-        {
-            get
-            {
-                return hullMesh.ToArray();
-            }
-        }
-        /// <summary>
-        /// Datos de animación
-        /// </summary>
-        public ISkinningData SkinningData { get; set; } = null;
-
-        /// <summary>
         /// Model initialization
         /// </summary>
         /// <param name="game">Game</param>
@@ -122,7 +77,7 @@ namespace Engine.Common
                     throw new EngineException(errorMessage);
                 }
 
-                drw.Textures.Add(images.Key, view);
+                drw.textures.Add(images.Key, view);
             }
         }
         /// <summary>
@@ -144,8 +99,8 @@ namespace Engine.Common
                     var matName = mat.Key;
                     var matContent = mat.Value;
 
-                    var meshMaterial = matContent.CreateMeshMaterial(drw.Textures);
-                    drw.Materials.Add(matName, meshMaterial);
+                    var meshMaterial = matContent.CreateMeshMaterial(drw.textures);
+                    drw.materials.Add(matName, meshMaterial);
                 }
             });
         }
@@ -202,7 +157,7 @@ namespace Engine.Common
                 var geometry = subMesh.Value;
 
                 //Get vertex type
-                var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.Materials, subMesh.Key);
+                var vertexType = GetVertexType(geometry.VertexType, isSkinned, description.LoadNormalMaps, drw.materials, subMesh.Key);
 
                 var meshInfo = await CreateMesh(meshName, geometry, vertexType, description.Constraint, skinningInfo);
                 if (!meshInfo.Any())
@@ -213,18 +168,18 @@ namespace Engine.Common
                 var nMesh = meshInfo.First().Mesh;
                 var materialName = meshInfo.First().MaterialName;
 
-                if (!drw.Meshes.ContainsKey(meshName))
+                if (!drw.meshes.ContainsKey(meshName))
                 {
                     var dict = new Dictionary<string, Mesh>
                     {
                         { materialName, nMesh }
                     };
 
-                    drw.Meshes.Add(meshName, dict);
+                    drw.meshes.Add(meshName, dict);
                 }
                 else
                 {
-                    drw.Meshes[meshName].Add(materialName, nMesh);
+                    drw.meshes[meshName].Add(materialName, nMesh);
                 }
             }
         }
@@ -460,18 +415,18 @@ namespace Engine.Common
         /// <param name="instancingBuffer">Instancing buffer descriptor</param>
         private static async Task InitializeMeshes(DrawingData drw, Game game, string name, bool dynamicBuffers, BufferDescriptor instancingBuffer)
         {
-            if (drw.Meshes?.Any() != true)
+            if (drw.meshes?.Any() != true)
             {
                 return;
             }
 
-            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {drw.Meshes.Keys.AsEnumerable().Join("|")}");
+            Logger.WriteTrace(nameof(DrawingData), $"{name} Processing Material Meshes Dictionary => {drw.meshes.Keys.AsEnumerable().Join("|")}");
 
             var beforeCount = game.BufferManager.PendingRequestCount;
             Logger.WriteTrace(nameof(DrawingData), $"{name} Pending Requests before Initialization => {beforeCount}");
 
             //Generates a task list from the materials-mesh dictionary
-            var taskList = drw.Meshes.Values
+            var taskList = drw.meshes.Values
                 .Where(dictionary => dictionary?.Any() == true)
                 .Select(dictionary => Task.Run(() => InitializeMeshDictionaryAsync(game, name, dynamicBuffers, instancingBuffer, dictionary)));
 
@@ -571,6 +526,51 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Materials dictionary
+        /// </summary>
+        private readonly Dictionary<string, IMeshMaterial> materials = new();
+        /// <summary>
+        /// Texture dictionary
+        /// </summary>
+        private readonly Dictionary<string, EngineShaderResourceView> textures = new();
+        /// <summary>
+        /// Meshes
+        /// </summary>
+        private readonly Dictionary<string, Dictionary<string, Mesh>> meshes = new();
+        /// <summary>
+        /// Hull mesh triangle list
+        /// </summary>
+        private readonly List<Triangle> hullMesh = new();
+        /// <summary>
+        /// Light list
+        /// </summary>
+        private readonly List<ISceneLight> lights = new();
+
+        /// <summary>
+        /// Game instance
+        /// </summary>
+        protected readonly Game Game = null;
+        /// <summary>
+        /// Description
+        /// </summary>
+        protected readonly DrawingDataDescription Description;
+
+        /// <summary>
+        /// Hull mesh
+        /// </summary>
+        public IEnumerable<Triangle> HullMesh
+        {
+            get
+            {
+                return hullMesh.ToArray();
+            }
+        }
+        /// <summary>
+        /// Datos de animación
+        /// </summary>
+        public ISkinningData SkinningData { get; set; } = null;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="game">Game</param>
@@ -604,7 +604,7 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                foreach (var item in Meshes?.Values)
+                foreach (var item in meshes?.Values)
                 {
                     foreach (var mesh in item.Values)
                     {
@@ -620,17 +620,39 @@ namespace Engine.Common
                         mesh.Dispose();
                     }
                 }
-                Meshes?.Clear();
-                Meshes = null;
+                meshes?.Clear();
 
-                Materials?.Clear();
-                Materials = null;
+                materials?.Clear();
 
                 //Don't dispose textures!
-                Textures?.Clear();
-                Textures = null;
+                textures?.Clear();
 
                 SkinningData = null;
+            }
+        }
+
+        /// <summary>
+        /// Iterate the materials list
+        /// </summary>
+        public IEnumerable<(string MaterialName, IMeshMaterial Material, string MeshName, Mesh Mesh)> IterateMaterials()
+        {
+            foreach (string meshName in meshes.Keys)
+            {
+                var meshDict = meshes[meshName];
+
+                foreach (string materialName in meshDict.Keys)
+                {
+                    var mesh = meshDict[materialName];
+                    if (!mesh.Ready)
+                    {
+                        Logger.WriteTrace(this, $"{nameof(DrawingData)} - {nameof(IterateMaterials)}: {meshName}.{materialName} discard => Ready {mesh.Ready}");
+                        continue;
+                    }
+
+                    var material = materials[materialName];
+
+                    yield return new(materialName, material, meshName, mesh);
+                }
             }
         }
 
@@ -653,30 +675,25 @@ namespace Engine.Common
         {
             var points = new List<Vector3>();
 
-            var meshMaterialList = Meshes.Values.ToArray();
-
-            foreach (var dictionary in meshMaterialList)
+            foreach (var meshMaterial in IterateMaterials())
             {
-                var meshList = dictionary.Values.ToArray();
+                var mesh = meshMaterial.Mesh;
 
-                foreach (var mesh in meshList)
+                var meshPoints = mesh.GetPoints(refresh);
+                if (!meshPoints.Any())
                 {
-                    var meshPoints = mesh.GetPoints(refresh);
-                    if (!meshPoints.Any())
-                    {
-                        continue;
-                    }
-
-                    var trnPoints = meshPoints.ToArray();
-                    if (transform.IsIdentity)
-                    {
-                        points.AddRange(trnPoints);
-                        continue;
-                    }
-
-                    Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
-                    points.AddRange(trnPoints);
+                    continue;
                 }
+
+                var trnPoints = meshPoints.ToArray();
+                if (transform.IsIdentity)
+                {
+                    points.AddRange(trnPoints);
+                    continue;
+                }
+
+                Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
+                points.AddRange(trnPoints);
             }
 
             return points.Distinct().ToArray();
@@ -702,35 +719,30 @@ namespace Engine.Common
         {
             var points = new List<Vector3>();
 
-            var meshMaterialList = Meshes.Values.ToArray();
-
-            foreach (var dictionary in meshMaterialList)
+            foreach (var meshMaterial in IterateMaterials())
             {
-                var meshList = dictionary.Values.ToArray();
+                var mesh = meshMaterial.Mesh;
 
-                foreach (var mesh in meshList)
+                var meshPoints = mesh.GetPoints(boneTransforms, refresh);
+                if (!meshPoints.Any())
                 {
-                    var meshPoints = mesh.GetPoints(boneTransforms, refresh);
-                    if (!meshPoints.Any())
-                    {
-                        continue;
-                    }
-
-                    var trnPoints = meshPoints.ToArray();
-                    if (transform.IsIdentity)
-                    {
-                        points.AddRange(trnPoints);
-                        continue;
-                    }
-
-                    Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
-                    points.AddRange(trnPoints);
+                    continue;
                 }
+
+                var trnPoints = meshPoints.ToArray();
+                if (transform.IsIdentity)
+                {
+                    points.AddRange(trnPoints);
+                    continue;
+                }
+
+                Vector3.TransformCoordinate(trnPoints, ref transform, trnPoints);
+                points.AddRange(trnPoints);
             }
 
             return points.Distinct().ToArray();
         }
- 
+
         /// <summary>
         /// Gets the drawing data's triangle list
         /// </summary>
@@ -750,28 +762,23 @@ namespace Engine.Common
         {
             var triangles = new List<Triangle>();
 
-            var meshMaterialList = Meshes.Values.ToArray();
-
-            foreach (var dictionary in meshMaterialList)
+            foreach (var meshMaterial in IterateMaterials())
             {
-                var meshList = dictionary.Values.ToArray();
+                var mesh = meshMaterial.Mesh;
 
-                foreach (var mesh in meshList)
+                var meshTriangles = mesh.GetTriangles(refresh);
+                if (!meshTriangles.Any())
                 {
-                    var meshTriangles = mesh.GetTriangles(refresh);
-                    if (!meshTriangles.Any())
-                    {
-                        continue;
-                    }
-
-                    if (transform.IsIdentity)
-                    {
-                        triangles.AddRange(meshTriangles);
-                        continue;
-                    }
-
-                    triangles.AddRange(Triangle.Transform(meshTriangles, transform));
+                    continue;
                 }
+
+                if (transform.IsIdentity)
+                {
+                    triangles.AddRange(meshTriangles);
+                    continue;
+                }
+
+                triangles.AddRange(Triangle.Transform(meshTriangles, transform));
             }
 
             return triangles.Distinct().ToArray();
@@ -797,28 +804,23 @@ namespace Engine.Common
         {
             var triangles = new List<Triangle>();
 
-            var meshMaterialList = Meshes.Values.ToArray();
-
-            foreach (var dictionary in meshMaterialList)
+            foreach (var meshMaterial in IterateMaterials())
             {
-                var meshList = dictionary.Values.ToArray();
+                var mesh = meshMaterial.Mesh;
 
-                foreach (var mesh in meshList)
+                var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
+                if (!meshTriangles.Any())
                 {
-                    var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
-                    if (!meshTriangles.Any())
-                    {
-                        continue;
-                    }
-
-                    if (transform.IsIdentity)
-                    {
-                        triangles.AddRange(meshTriangles);
-                        continue;
-                    }
-
-                    triangles.AddRange(Triangle.Transform(meshTriangles, transform));
+                    continue;
                 }
+
+                if (transform.IsIdentity)
+                {
+                    triangles.AddRange(meshTriangles);
+                    continue;
+                }
+
+                triangles.AddRange(Triangle.Transform(meshTriangles, transform));
             }
 
             return triangles.Distinct().ToArray();
@@ -830,12 +832,86 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         public Mesh GetMeshByName(string name)
         {
-            if (!Meshes.ContainsKey(name))
+            if (!meshes.ContainsKey(name))
             {
                 return null;
             }
 
-            return Meshes[name].Values.FirstOrDefault();
+            return meshes[name].Values.FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Gets the material list
+        /// </summary>
+        public IEnumerable<IMeshMaterial> GetMaterials()
+        {
+            return materials.Values.ToArray();
+        }
+        /// <summary>
+        /// Gets the material list by name
+        /// </summary>
+        /// <param name="meshMaterialName">Mesh material name</param>
+        public IEnumerable<IMeshMaterial> GetMaterials(string meshMaterialName)
+        {
+            var meshMaterial = materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+            if (meshMaterial != null)
+            {
+                yield return materials[meshMaterial];
+            }
+        }
+        /// <summary>
+        /// Gets the first material by name
+        /// </summary>
+        /// <param name="meshMaterialName">Mesh material name</param>
+        /// <returns>Returns the material by name</returns>
+        public IMeshMaterial GetFirstMaterial(string meshMaterialName)
+        {
+            var meshMaterial = materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+            if (meshMaterial != null)
+            {
+                return materials[meshMaterial];
+            }
+
+            return null;
+        }
+        /// <summary>
+        /// Replaces the first material
+        /// </summary>
+        /// <param name="meshMaterialName">Mesh material name</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns true if the material is replaced</returns>
+        public bool ReplaceFirstMaterial(string meshMaterialName, IMeshMaterial material)
+        {
+            var meshMaterial = materials.Keys.FirstOrDefault(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+            if (meshMaterial != null)
+            {
+                materials[meshMaterial] = material;
+
+                return true;
+            }
+
+            return false;
+        }
+        /// <summary>
+        /// Replaces the materials by name
+        /// </summary>
+        /// <param name="meshMaterialName">Mesh material name</param>
+        /// <param name="material">Material</param>
+        /// <returns>Returns true if the materials were replaced</returns>
+        public bool ReplaceMaterials(string meshMaterialName, IMeshMaterial material)
+        {
+            var meshMaterials = materials.Keys.Where(m => string.Equals(m, meshMaterialName, StringComparison.OrdinalIgnoreCase));
+            if (!meshMaterials.Any())
+            {
+                return false;
+            }
+
+            foreach (var meshMaterial in meshMaterials)
+            {
+                materials[meshMaterial] = material;
+            }
+
+            return true;
         }
 
         /// <summary>
