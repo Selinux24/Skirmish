@@ -526,6 +526,10 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Meshes
+        /// </summary>
+        private readonly Dictionary<string, Dictionary<string, Mesh>> meshes = new();
+        /// <summary>
         /// Materials dictionary
         /// </summary>
         private readonly Dictionary<string, IMeshMaterial> materials = new();
@@ -533,10 +537,6 @@ namespace Engine.Common
         /// Texture dictionary
         /// </summary>
         private readonly Dictionary<string, EngineShaderResourceView> textures = new();
-        /// <summary>
-        /// Meshes
-        /// </summary>
-        private readonly Dictionary<string, Dictionary<string, Mesh>> meshes = new();
         /// <summary>
         /// Hull mesh triangle list
         /// </summary>
@@ -632,7 +632,7 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Iterate the materials list
+        /// Iterates the materials list
         /// </summary>
         public IEnumerable<(string MaterialName, IMeshMaterial Material, string MeshName, Mesh Mesh)> IterateMaterials()
         {
@@ -652,6 +652,19 @@ namespace Engine.Common
                     var material = materials[materialName];
 
                     yield return new(materialName, material, meshName, mesh);
+                }
+            }
+        }
+        /// <summary>
+        /// Iterates the mesh list
+        /// </summary>
+        public IEnumerable<(string MeshName, Mesh Mesh)> IterateMeshes()
+        {
+            foreach (var meshMaterial in meshes.Values)
+            {
+                foreach (var mesh in meshMaterial)
+                {
+                    yield return (mesh.Key, mesh.Value);
                 }
             }
         }
@@ -675,11 +688,9 @@ namespace Engine.Common
         {
             var points = new List<Vector3>();
 
-            foreach (var meshMaterial in IterateMaterials())
+            foreach (var mesh in IterateMeshes())
             {
-                var mesh = meshMaterial.Mesh;
-
-                var meshPoints = mesh.GetPoints(refresh);
+                var meshPoints = mesh.Mesh.GetPoints(refresh);
                 if (!meshPoints.Any())
                 {
                     continue;
@@ -719,11 +730,9 @@ namespace Engine.Common
         {
             var points = new List<Vector3>();
 
-            foreach (var meshMaterial in IterateMaterials())
+            foreach (var mesh in IterateMeshes())
             {
-                var mesh = meshMaterial.Mesh;
-
-                var meshPoints = mesh.GetPoints(boneTransforms, refresh);
+                var meshPoints = mesh.Mesh.GetPoints(boneTransforms, refresh);
                 if (!meshPoints.Any())
                 {
                     continue;
@@ -762,11 +771,9 @@ namespace Engine.Common
         {
             var triangles = new List<Triangle>();
 
-            foreach (var meshMaterial in IterateMaterials())
+            foreach (var mesh in IterateMeshes())
             {
-                var mesh = meshMaterial.Mesh;
-
-                var meshTriangles = mesh.GetTriangles(refresh);
+                var meshTriangles = mesh.Mesh.GetTriangles(refresh);
                 if (!meshTriangles.Any())
                 {
                     continue;
@@ -804,11 +811,9 @@ namespace Engine.Common
         {
             var triangles = new List<Triangle>();
 
-            foreach (var meshMaterial in IterateMaterials())
+            foreach (var mesh in IterateMeshes())
             {
-                var mesh = meshMaterial.Mesh;
-
-                var meshTriangles = mesh.GetTriangles(boneTransforms, refresh);
+                var meshTriangles = mesh.Mesh.GetTriangles(boneTransforms, refresh);
                 if (!meshTriangles.Any())
                 {
                     continue;
