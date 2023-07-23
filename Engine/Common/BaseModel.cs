@@ -333,10 +333,7 @@ namespace Engine.Common
 
             foreach (var drawingData in meshesByLOD.Values)
             {
-                if (drawingData.ReplaceMaterials(meshMaterialName, material))
-                {
-                    updated = true;
-                }
+                updated = drawingData.ReplaceMaterials(meshMaterialName, material) || updated;
             }
 
             return updated;

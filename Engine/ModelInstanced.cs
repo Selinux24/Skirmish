@@ -426,8 +426,6 @@ namespace Engine
             int count = 0;
             int instanceCount = 0;
 
-            var dc = context.DeviceContext;
-
             int maxCount = GetMaxCount();
 
             //Render by level of detail

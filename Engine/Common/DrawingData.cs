@@ -604,7 +604,7 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                foreach (var item in meshes?.Values)
+                foreach (var item in meshes.Values)
                 {
                     foreach (var mesh in item.Values)
                     {
@@ -620,12 +620,12 @@ namespace Engine.Common
                         mesh.Dispose();
                     }
                 }
-                meshes?.Clear();
+                meshes.Clear();
 
-                materials?.Clear();
+                materials.Clear();
 
                 //Don't dispose textures!
-                textures?.Clear();
+                textures.Clear();
 
                 SkinningData = null;
             }
