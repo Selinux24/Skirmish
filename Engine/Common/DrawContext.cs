@@ -5,16 +5,16 @@ namespace Engine.Common
     /// <summary>
     /// Drawing context
     /// </summary>
-    public class DrawContext
+    public struct DrawContext
     {
         /// <summary>
         /// Context name
         /// </summary>
-        public string Name { get; set; } = string.Empty;
+        public string Name { get; set; }
         /// <summary>
         /// Drawer mode
         /// </summary>
-        public DrawerModes DrawerMode { get; set; } = DrawerModes.Forward;
+        public DrawerModes DrawerMode { get; set; }
 
         /// <summary>
         /// Engine form
@@ -72,7 +72,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="blendMode">Blend mode</param>
         /// <returns>Returns true if the specified blend mode is valid for the current drawing stage</returns>
-        public bool ValidateDraw(BlendModes blendMode)
+        public readonly bool ValidateDraw(BlendModes blendMode)
         {
             if (DrawerMode.HasFlag(DrawerModes.OpaqueOnly))
             {
@@ -92,7 +92,7 @@ namespace Engine.Common
         /// <param name="blendMode">Blend mode</param>
         /// <param name="transparent">The component to draw is has transparency</param>
         /// <returns>Returns true if the specified blend mode is valid for the current drawing stage</returns>
-        public bool ValidateDraw(BlendModes blendMode, bool transparent)
+        public readonly bool ValidateDraw(BlendModes blendMode, bool transparent)
         {
             if (DrawerMode.HasFlag(DrawerModes.OpaqueOnly) && !transparent)
             {

@@ -205,8 +205,6 @@ namespace Engine
         /// <inheritdoc/>
         public override void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
-
             if (!Updated)
             {
                 return;
@@ -224,16 +222,20 @@ namespace Engine
 #if DEBUG
             frameStats.Clear();
 
-            Stopwatch swTotal = Stopwatch.StartNew();
+            var swTotal = Stopwatch.StartNew();
 #endif
             //Updates the draw context
-            UpdateDrawContext(gameTime, DrawerModes.Deferred);
+            var drawContext = GetImmediateDrawContext(gameTime, DrawerModes.Deferred, Scene.Game.Form);
+
+            UpdateGlobalState(drawContext.DeviceContext);
+
+            int passIndex = 0;
 
             //Shadow mapping
-            DoShadowMapping(DrawContext);
+            DoShadowMapping(drawContext, ref passIndex);
 
             //Binds the result target
-            SetTarget(DrawContext.DeviceContext, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+            SetTarget(drawContext.DeviceContext, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
             var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
             bool anyDeferred = deferredEnabledComponents.Any();
@@ -245,17 +247,17 @@ namespace Engine
                 if (anyDeferred)
                 {
                     //Render to G-Buffer deferred enabled components
-                    DoDeferred(DrawContext, deferredEnabledComponents);
+                    DoDeferred(drawContext, deferredEnabledComponents);
 
                     //Binds the result target
-                    SetTarget(DrawContext.DeviceContext, Targets.Objects, false, Color.Transparent);
+                    SetTarget(drawContext.DeviceContext, Targets.Objects, false, Color.Transparent);
 
                     #region Final composition
 #if DEBUG
                     Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
                     //Draw scene result on screen using g-buffer and light buffer
-                    DrawResult(DrawContext);
+                    DrawResult(drawContext);
 
 #if DEBUG
                     swComponsition.Stop();
@@ -268,34 +270,34 @@ namespace Engine
                 if (anyForward)
                 {
                     //Render to screen deferred disabled components
-                    DoForward(deferredDisabledComponents);
+                    DoForward(drawContext, deferredDisabledComponents);
                 }
 
                 //Post-processing
-                DoPostProcessing(DrawContext, Targets.Objects, RenderPass.Objects);
+                DoPostProcessing(drawContext, Targets.Objects, RenderPass.Objects);
             }
 
             //Binds the result target
-            SetTarget(DrawContext.DeviceContext, Targets.UI, true, Color.Transparent);
+            SetTarget(drawContext.DeviceContext, Targets.UI, true, Color.Transparent);
 
             //Render to screen deferred disabled components
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
                 //UI render
-                DoForward(uiComponents);
+                DoForward(drawContext, uiComponents);
                 //UI post-processing
-                DoPostProcessing(DrawContext, Targets.UI, RenderPass.UI);
+                DoPostProcessing(drawContext, Targets.UI, RenderPass.UI);
             }
 
             //Combine to screen
-            CombineTargets(DrawContext, Targets.Objects, Targets.UI, Targets.Result);
+            CombineTargets(drawContext, Targets.Objects, Targets.UI, Targets.Result);
 
             //Final post-processing
-            DoPostProcessing(DrawContext, Targets.Result, RenderPass.Final);
+            DoPostProcessing(drawContext, Targets.Result, RenderPass.Final);
 
             //Draw to screen
-            DrawToScreen(DrawContext, Targets.Result);
+            DrawToScreen(drawContext, Targets.Result);
 
 #if DEBUG
             swTotal.Stop();
@@ -312,32 +314,11 @@ namespace Engine
         {
             var dc = context.DeviceContext;
 #if DEBUG
-            Stopwatch swCull = Stopwatch.StartNew();
+            var swCull = Stopwatch.StartNew();
 #endif
-            var toCullDeferred = deferredEnabledComponents.OfType<ICullable>();
-
-            bool draw = true;
-            if (Scene.PerformFrustumCulling)
-            {
-                //Frustum culling
-                draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullDeferred);
-            }
-
-            if (!draw)
-            {
-                return;
-            }
-
-            var groundVolume = Scene.GetSceneVolume();
-            if (groundVolume != null)
-            {
-                //Ground culling
-                draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullDeferred);
-            }
-
+            bool draw = CullingTest(Scene, context.CameraVolume, deferredEnabledComponents.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
-
             frameStats.DeferredCull = swCull.ElapsedTicks;
 #endif
 
@@ -347,21 +328,18 @@ namespace Engine
             }
 
 #if DEBUG
-            Stopwatch swGeometryBuffer = Stopwatch.StartNew();
-
-            Stopwatch swGeometryBufferInit = Stopwatch.StartNew();
+            var swGeometryBuffer = Stopwatch.StartNew();
+            var swGeometryBufferInit = Stopwatch.StartNew();
 #endif
             BindGBuffer(dc);
 #if DEBUG
             swGeometryBufferInit.Stop();
-
-            Stopwatch swGeometryBufferDraw = Stopwatch.StartNew();
+            var swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
             //Draw scene on g-buffer render targets
-            DrawResultComponents(DrawContext, CullIndexDrawIndex, deferredEnabledComponents);
+            DrawResultComponents(context, CullIndexDrawIndex, deferredEnabledComponents);
 #if DEBUG
             swGeometryBufferDraw.Stop();
-
             swGeometryBuffer.Stop();
 
             frameStats.DeferredGbuffer = swGeometryBuffer.ElapsedTicks;
@@ -370,12 +348,12 @@ namespace Engine
 #endif
 
 #if DEBUG
-            Stopwatch swLightBuffer = Stopwatch.StartNew();
+            var swLightBuffer = Stopwatch.StartNew();
 #endif
             BindLights(dc);
 
             //Draw scene lights on light buffer using g-buffer output
-            DrawLights(DrawContext);
+            DrawLights(context);
 #if DEBUG
             swLightBuffer.Stop();
 
@@ -386,58 +364,37 @@ namespace Engine
         /// Do forward rendering (UI, transparents, etc.)
         /// </summary>
         /// <param name="deferredDisabledComponents">Components</param>
-        private void DoForward(IEnumerable<IDrawable> deferredDisabledComponents)
+        private void DoForward(DrawContext context, IEnumerable<IDrawable> deferredDisabledComponents)
         {
 #if DEBUG
-            Stopwatch swCull = Stopwatch.StartNew();
+            var swCull = Stopwatch.StartNew();
 #endif
-            var toCullNotDeferred = deferredDisabledComponents.OfType<ICullable>();
-
-            bool draw = false;
-            if (Scene.PerformFrustumCulling)
-            {
-                //Frustum culling
-                draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullNotDeferred);
-            }
-            else
-            {
-                draw = true;
-            }
-
-            if (draw)
-            {
-                var groundVolume = Scene.GetSceneVolume();
-                if (groundVolume != null)
-                {
-                    //Ground culling
-                    draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullNotDeferred);
-                }
-            }
+            bool draw = CullingTest(Scene, context.CameraVolume, deferredDisabledComponents.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
-
             frameStats.DisabledDeferredCull = swCull.ElapsedTicks;
 #endif
 
-            if (draw)
+            if (!draw)
             {
-#if DEBUG
-                Stopwatch swDraw = Stopwatch.StartNew();
-#endif
-                //Set forward mode
-                DrawContext.DrawerMode = DrawerModes.Forward;
-
-                //Draw scene
-                DrawResultComponents(DrawContext, CullIndexDrawIndex, deferredDisabledComponents);
-
-                //Set deferred mode
-                DrawContext.DrawerMode = DrawerModes.Deferred;
-#if DEBUG
-                swDraw.Stop();
-
-                frameStats.DisabledDeferredDraw = swDraw.ElapsedTicks;
-#endif
+                return;
             }
+
+#if DEBUG
+            var swDraw = Stopwatch.StartNew();
+#endif
+            //Set forward mode
+            context.DrawerMode = DrawerModes.Forward;
+
+            //Draw scene
+            DrawResultComponents(context, CullIndexDrawIndex, deferredDisabledComponents);
+
+            //Set deferred mode
+            context.DrawerMode = DrawerModes.Deferred;
+#if DEBUG
+            swDraw.Stop();
+            frameStats.DisabledDeferredDraw = swDraw.ElapsedTicks;
+#endif
         }
 
         /// <summary>

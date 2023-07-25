@@ -71,6 +71,11 @@ namespace Engine.Common
         private RenderTarget postProcessingTargetB = null;
 
         /// <summary>
+        /// Deferred context list
+        /// </summary>
+        private readonly List<EngineDeviceContext> deferredContextList = new();
+
+        /// <summary>
         /// Update globals
         /// </summary>
         private bool updateGlobals = true;
@@ -102,17 +107,9 @@ namespace Engine.Common
 
 #if DEBUG
         /// <summary>
-        /// Directional shadow mapping stats dictionary
+        /// Shadow mapping stats dictionary
         /// </summary>
-        private readonly Dictionary<string, double> directionalShadowMappingDict = new();
-        /// <summary>
-        /// Point shadow mapping stats dictionary
-        /// </summary>
-        private readonly Dictionary<string, double> pointShadowMappingDict = new();
-        /// <summary>
-        /// Spot shadow mapping stats dictionary
-        /// </summary>
-        private readonly Dictionary<string, double> spotShadowMappingDict = new();
+        private readonly Dictionary<string, double> shadowMappingDict = new();
 #endif
 
         /// <summary>
@@ -184,14 +181,6 @@ namespace Engine.Common
         /// Update context
         /// </summary>
         protected UpdateContext UpdateContext = null;
-        /// <summary>
-        /// Draw context
-        /// </summary>
-        protected DrawContext DrawContext = null;
-        /// <summary>
-        /// Context for shadow map drawing
-        /// </summary>
-        protected DrawContextShadows DrawShadowsContext = null;
         /// <summary>
         /// Cull manager
         /// </summary>
@@ -319,25 +308,9 @@ namespace Engine.Common
 
             cullManager = new SceneCullManager();
 
-            var dc = Scene.Game.Graphics.ImmediateContext;
-
             UpdateContext = new UpdateContext()
             {
                 Name = "Primary",
-            };
-
-            DrawContext = new DrawContext()
-            {
-                Name = "Primary",
-                DrawerMode = DrawerModes.Forward,
-                Form = scene.Game.Form,
-                DeviceContext = dc,
-            };
-
-            DrawShadowsContext = new DrawContextShadows()
-            {
-                Name = "Shadow mapping",
-                DeviceContext = dc,
             };
 
             var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
@@ -396,6 +369,9 @@ namespace Engine.Common
                 postProcessingTargetA = null;
                 postProcessingTargetB?.Dispose();
                 postProcessingTargetB = null;
+
+                deferredContextList.ForEach(dc => dc.Dispose());
+                deferredContextList.Clear();
             }
         }
 
@@ -470,35 +446,103 @@ namespace Engine.Common
             UpdateContext.Lights = Scene.Lights;
         }
 
-        /// <inheritdoc/>
-        public virtual void Draw(GameTime gameTime)
+        /// <summary>
+        /// Gets the immediate draw context
+        /// </summary>
+        protected virtual DrawContext GetImmediateDrawContext(GameTime gameTime, DrawerModes drawMode, IEngineForm form)
         {
-            UpdateGlobalState(DrawContext.DeviceContext);
+            return new DrawContext
+            {
+                Name = $"Immediate context.",
+
+                GameTime = gameTime,
+                DrawerMode = drawMode,
+                Form = form,
+
+                //Initialize context data from update context
+                ViewProjection = UpdateContext.ViewProjection,
+                CameraVolume = UpdateContext.CameraVolume,
+                EyePosition = UpdateContext.EyePosition,
+                EyeDirection = UpdateContext.EyeDirection,
+
+                //Initialize context data from scene
+                Lights = Scene.Lights,
+                LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow),
+                ShadowMapDirectional = ShadowMapperDirectional,
+                ShadowMapPoint = ShadowMapperPoint,
+                ShadowMapSpot = ShadowMapperSpot,
+
+                //Device context
+                DeviceContext = Scene.Game.Graphics.ImmediateContext,
+            };
         }
         /// <summary>
-        /// Updates the draw context
+        /// Gets a deferred draw context
         /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="drawMode">Draw mode</param>
-        protected virtual void UpdateDrawContext(GameTime gameTime, DrawerModes drawMode)
+        protected virtual DrawContext GetDeferredDrawContext(DrawContext context, int passIndex)
         {
-            DrawContext.GameTime = gameTime;
+            return new DrawContext
+            {
+                Name = $"Deferred pass[{passIndex}] context.",
 
-            DrawContext.DrawerMode = drawMode;
+                GameTime = context.GameTime,
+                DrawerMode = context.DrawerMode,
+                Form = context.Form,
 
-            //Initialize context data from update context
-            DrawContext.ViewProjection = UpdateContext.ViewProjection;
-            DrawContext.CameraVolume = UpdateContext.CameraVolume;
-            DrawContext.EyePosition = UpdateContext.EyePosition;
-            DrawContext.EyeDirection = UpdateContext.EyeDirection;
+                //Initialize context data from update context
+                ViewProjection = UpdateContext.ViewProjection,
+                CameraVolume = UpdateContext.CameraVolume,
+                EyePosition = UpdateContext.EyePosition,
+                EyeDirection = UpdateContext.EyeDirection,
 
-            //Initialize context data from scene
-            DrawContext.Lights = Scene.Lights;
-            DrawContext.LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow);
-            DrawContext.ShadowMapDirectional = ShadowMapperDirectional;
-            DrawContext.ShadowMapPoint = ShadowMapperPoint;
-            DrawContext.ShadowMapSpot = ShadowMapperSpot;
+                //Initialize context data from scene
+                Lights = Scene.Lights,
+                LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow),
+                ShadowMapDirectional = ShadowMapperDirectional,
+                ShadowMapPoint = ShadowMapperPoint,
+                ShadowMapSpot = ShadowMapperSpot,
+
+                //Device context
+                DeviceContext = GetDeferredContext(passIndex),
+            };
         }
+        /// <summary>
+        /// Gets per light draw context
+        /// </summary>
+        protected virtual DrawContextShadows GetPerLightDrawContext(int passIndex, IShadowMap shadowMapper, ISceneLight light, int lightIndex)
+        {
+            var dc = GetDeferredContext(passIndex);
+
+            shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
+            shadowMapper.Bind(dc, lightIndex);
+
+            return new DrawContextShadows()
+            {
+                Name = $"Per light pass[{passIndex}] context.",
+
+                ViewProjection = shadowMapper.ToShadowMatrix,
+                EyePosition = shadowMapper.LightPosition,
+                Frustum = Scene.Camera.Frustum,
+                ShadowMap = shadowMapper,
+
+                DeviceContext = dc,
+            };
+        }
+        /// <summary>
+        /// Creates a deferred context
+        /// </summary>
+        private EngineDeviceContext GetDeferredContext(int passIndex)
+        {
+            while (passIndex >= deferredContextList.Count)
+            {
+                deferredContextList.Add(Scene.Game.Graphics.CreateDeferredContext($"Deferred Context {passIndex}"));
+            }
+
+            return deferredContextList[passIndex];
+        }
+
+        /// <inheritdoc/>
+        public abstract void Draw(GameTime gameTime);
 
         /// <summary>
         /// Gets opaque components
@@ -767,6 +811,36 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Performs the culling test
+        /// </summary>
+        /// <param name="scene">Scene</param>
+        /// <param name="components">Components collection to test</param>
+        /// <param name="cullIndex">Cull index</param>
+        /// <returns>Returns true if the test find components to draw</returns>
+        protected virtual bool CullingTest(Scene scene, ICullingVolume volume, IEnumerable<ICullable> components, int cullIndex)
+        {
+            if (!components.Any())
+            {
+                return false;
+            }
+
+            //Frustum culling
+            bool draw = cullManager.Cull(volume, cullIndex, components) || scene.PerformFrustumCulling;
+
+            if (draw)
+            {
+                var groundVolume = scene.GetSceneVolume();
+                if (groundVolume != null)
+                {
+                    //Ground culling
+                    draw = cullManager.Cull(groundVolume, cullIndex, components);
+                }
+            }
+
+            return draw;
+        }
+
+        /// <summary>
         /// Draws an object
         /// </summary>
         /// <param name="context">Drawing context</param>
@@ -828,36 +902,43 @@ namespace Engine.Common
         /// Draw shadow maps
         /// </summary>
         /// <param name="context">Drawing context</param>
-        protected virtual void DoShadowMapping(DrawContext context)
+        protected virtual void DoShadowMapping(DrawContext context, ref int passIndex)
         {
+#if DEBUG
+            shadowMappingDict.Clear();
+#endif
+
             int cullIndex = CullIndexShadowMaps;
 
-            DoDirectionalShadowMapping(context, ref cullIndex);
+            DoDirectionalShadowMapping(context, ref passIndex, ref cullIndex);
 
-            DoPointShadowMapping(context, ref cullIndex);
+            DoPointShadowMapping(context, ref passIndex, ref cullIndex);
 
-            DoSpotShadowMapping(context, ref cullIndex);
+            DoSpotShadowMapping(context, ref passIndex, ref cullIndex);
+
+#if DEBUG
+            if (Scene.Game.CollectGameStatus)
+            {
+                Scene.Game.GameStatus.Add(shadowMappingDict);
+            }
+#endif
         }
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>
         /// <param name="context">Drawing context</param>
+        /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoDirectionalShadowMapping(DrawContext context, ref int cullIndex)
+        protected virtual void DoDirectionalShadowMapping(DrawContext context, ref int passIndex, ref int cullIndex)
         {
 #if DEBUG
-            directionalShadowMappingDict.Clear();
-
-            Stopwatch gStopwatch = new();
-            gStopwatch.Start();
-
-            Stopwatch stopwatch = new();
-            stopwatch.Start();
+            var gStopwatch = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
 #endif
             var shadowCastingLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
-            directionalShadowMappingDict.Add($"DoDirectionalShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowCastingLights.Any())
@@ -872,7 +953,7 @@ namespace Engine.Common
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
 #if DEBUG
             stopwatch.Stop();
-            directionalShadowMappingDict.Add($"DoDirectionalShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} Getting components", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowObjs.Any())
@@ -880,29 +961,15 @@ namespace Engine.Common
                 return;
             }
 
-            //Objects that cast shadows and suitable for culling test
+            //All objects suitable for culling
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
-            if (toCullShadowObjs.Any())
+            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
+
+            var camVolume = context.CameraVolume;
+            var shadowSph = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
+            if (!DoShadowCullingTest(toCullShadowObjs, 0, shadowSph, cullIndex, allCullingObjects))
             {
-                //All objects suitable for culling
-                bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
-                var camVolume = DrawContext.CameraVolume;
-
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                var shadowSph = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
-                var doShadows = cullManager.Cull(shadowSph, cullIndex, toCullShadowObjs);
-#if DEBUG
-                stopwatch.Stop();
-                directionalShadowMappingDict.Add($"DoDirectionalShadowMapping - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                if (allCullingObjects && !doShadows)
-                {
-                    //All objects suitable for culling but no one pass the culling test
-                    return;
-                }
+                return;
             }
 
             int assigned = 0;
@@ -921,20 +988,18 @@ namespace Engine.Common
 #if DEBUG
                 stopwatch.Restart();
 #endif
-                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperDirectional;
-                shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
-                shadowMapper.Bind(context.DeviceContext, assigned * MaxDirectionalCascadeShadowMaps);
-                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+                var drawContext = GetPerLightDrawContext(passIndex, ShadowMapperDirectional, light, assigned * MaxDirectionalCascadeShadowMaps);
+                DrawShadowComponents(drawContext, cullIndex, shadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                directionalShadowMappingDict.Add($"DoDirectionalShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
                 light.ShadowMapCount++;
+
+                passIndex++;
 
                 assigned++;
 
@@ -945,12 +1010,7 @@ namespace Engine.Common
 
 #if DEBUG
             gStopwatch.Stop();
-            directionalShadowMappingDict.Add($"DoDirectionalShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
-
-            if (Scene.Game.CollectGameStatus)
-            {
-                Scene.Game.GameStatus.Add(directionalShadowMappingDict);
-            }
+            shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
         }
         /// <summary>
@@ -958,20 +1018,16 @@ namespace Engine.Common
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoPointShadowMapping(DrawContext context, ref int cullIndex)
+        protected virtual void DoPointShadowMapping(DrawContext context, ref int passIndex, ref int cullIndex)
         {
 #if DEBUG
-            pointShadowMappingDict.Clear();
-
-            Stopwatch gStopwatch = new();
-            gStopwatch.Start();
-
-            Stopwatch stopwatch = new();
+            var gStopwatch = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
 #endif
             var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
-            pointShadowMappingDict.Add($"DoPointShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowCastingLights.Any())
@@ -986,7 +1042,7 @@ namespace Engine.Common
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
 #if DEBUG
             stopwatch.Stop();
-            pointShadowMappingDict.Add($"DoPointShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} Getting components", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowObjs.Any())
@@ -994,9 +1050,8 @@ namespace Engine.Common
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
-
             //All objects suitable for culling
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
             int assigned = 0;
@@ -1011,23 +1066,9 @@ namespace Engine.Common
                     continue;
                 }
 
-                cullIndex++;
-                l++;
-
                 //Cull test
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
-                var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-#if DEBUG
-                stopwatch.Stop();
-                pointShadowMappingDict.Add($"DoPointShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                if (allCullingObjects && !doShadows)
+                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex, allCullingObjects))
                 {
-                    //All objects suitable for culling but no one pass the culling test
                     continue;
                 }
 
@@ -1035,31 +1076,28 @@ namespace Engine.Common
 #if DEBUG
                 stopwatch.Restart();
 #endif
-                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperPoint;
-                shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
-                shadowMapper.Bind(context.DeviceContext, assigned);
-                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+                var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperPoint, light, assigned);
+                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                pointShadowMappingDict.Add($"DoPointShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 //Assign light parameters
                 light.ShadowMapIndex = assigned;
 
+                passIndex++;
+
                 assigned++;
+
+                cullIndex++;
+
+                l++;
             }
 
 #if DEBUG
             gStopwatch.Stop();
-            pointShadowMappingDict.Add($"DoPointShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
-
-            if (Scene.Game.CollectGameStatus)
-            {
-                Scene.Game.GameStatus.Add(pointShadowMappingDict);
-            }
+            shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
         }
         /// <summary>
@@ -1067,21 +1105,16 @@ namespace Engine.Common
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoSpotShadowMapping(DrawContext context, ref int cullIndex)
+        protected virtual void DoSpotShadowMapping(DrawContext context, ref int passIndex, ref int cullIndex)
         {
 #if DEBUG
-            spotShadowMappingDict.Clear();
-
-            Stopwatch gStopwatch = new();
-            gStopwatch.Start();
-
-            Stopwatch stopwatch = new();
-            stopwatch.Start();
+            var gStopwatch = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
 #endif
             var shadowCastingLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
-            spotShadowMappingDict.Add($"DoSpotShadowMapping Getting lights", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowCastingLights.Any())
@@ -1096,7 +1129,7 @@ namespace Engine.Common
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
 #if DEBUG
             stopwatch.Stop();
-            spotShadowMappingDict.Add($"DoSpotShadowMapping Getting components", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} Getting components", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowObjs.Any())
@@ -1104,9 +1137,8 @@ namespace Engine.Common
                 return;
             }
 
-            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
-
             //All objects suitable for culling
+            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
             int assigned = 0;
@@ -1122,19 +1154,8 @@ namespace Engine.Common
                 }
 
                 //Cull test
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                var sph = new IntersectionVolumeSphere(light.Position, light.Radius);
-                var doShadows = cullManager.Cull(sph, cullIndex, toCullShadowObjs);
-#if DEBUG
-                stopwatch.Stop();
-                spotShadowMappingDict.Add($"DoSpotShadowMapping {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                if (allCullingObjects && !doShadows)
+                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex, allCullingObjects))
                 {
-                    //All objects suitable for culling but no one pass the culling test
                     continue;
                 }
 
@@ -1142,21 +1163,19 @@ namespace Engine.Common
 #if DEBUG
                 stopwatch.Restart();
 #endif
-                var shadowMapper = DrawShadowsContext.ShadowMap = ShadowMapperSpot;
-                shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
-                shadowMapper.Bind(context.DeviceContext, assigned);
-                DrawShadowsContext.EyePosition = shadowMapper.LightPosition;
-                DrawShadowsContext.ViewProjection = shadowMapper.ToShadowMatrix;
-                DrawShadowComponents(DrawShadowsContext, cullIndex, shadowObjs);
+                var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperSpot, light, assigned);
+                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
 #if DEBUG
                 stopwatch.Stop();
-                spotShadowMappingDict.Add($"DoSpotShadowMapping {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+                shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
                 //Assign light parameters
-                light.FromLightVP = shadowMapper.FromLightViewProjectionArray;
+                light.FromLightVP = drawShadowsContext.ShadowMap.FromLightViewProjectionArray;
                 light.ShadowMapIndex = assigned;
                 light.ShadowMapCount = 1;
+
+                passIndex++;
 
                 assigned++;
 
@@ -1167,13 +1186,43 @@ namespace Engine.Common
 
 #if DEBUG
             gStopwatch.Stop();
-            spotShadowMappingDict.Add($"DoSpotShadowMapping TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
-
-            if (Scene.Game.CollectGameStatus)
-            {
-                Scene.Game.GameStatus.Add(spotShadowMappingDict);
-            }
+            shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
+        }
+        /// <summary>
+        /// Performs shadow culling testing
+        /// </summary>
+        /// <param name="components">Component list</param>
+        /// <param name="l">Light index</param>
+        /// <param name="lightVolume">Light volume</param>
+        /// <param name="cullIndex">Cull index</param>
+        /// <param name="allCullingObjects">All components were culling components</param>
+        /// <returns></returns>
+        protected virtual bool DoShadowCullingTest(IEnumerable<ICullable> components, int l, IntersectionVolumeSphere lightVolume, int cullIndex, bool allCullingObjects)
+        {
+            if (components.Any())
+            {
+                return true;
+            }
+
+#if DEBUG
+            var stopwatch = Stopwatch.StartNew();
+#endif
+
+            var doShadows = cullManager.Cull(lightVolume, cullIndex, components);
+
+#if DEBUG
+            stopwatch.Stop();
+            shadowMappingDict.Add($"{nameof(DoShadowCullingTest)} {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
+
+            if (allCullingObjects && !doShadows)
+            {
+                //All objects suitable for culling but no one pass the culling test
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>

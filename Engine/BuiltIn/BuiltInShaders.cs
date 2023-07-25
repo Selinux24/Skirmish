@@ -316,11 +316,6 @@ namespace Engine.BuiltIn
         /// <param name="context">Draw context</param>
         public static void UpdatePerFrame(DrawContext context)
         {
-            if (context == null)
-            {
-                return;
-            }
-
             var dc = context.DeviceContext;
 
             var cbPerFrame = GetConstantBuffer<PerFrame>();

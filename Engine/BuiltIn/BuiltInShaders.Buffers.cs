@@ -198,11 +198,6 @@ namespace Engine.BuiltIn
             /// <param name="context">Draw context</param>
             public static PSHemispheric Build(DrawContext context)
             {
-                if (context == null)
-                {
-                    return new PSHemispheric();
-                }
-
                 var hemiLight = BufferLightHemispheric.Build(context.Lights?.GetVisibleHemisphericLight());
 
                 return new PSHemispheric
@@ -356,11 +351,6 @@ namespace Engine.BuiltIn
             /// <param name="context">Draw context</param>
             public static PSDirectional Build(DrawContext context)
             {
-                if (context == null)
-                {
-                    return new PSDirectional();
-                }
-
                 var dirLights = BufferLightDirectional.Build(context.Lights?.GetVisibleDirectionalLights(), MaxDirectional, out int dirLength);
 
                 return new PSDirectional
@@ -536,11 +526,6 @@ namespace Engine.BuiltIn
             /// <param name="context">Draw context</param>
             public static PSSpots Build(DrawContext context)
             {
-                if (context == null)
-                {
-                    return new PSSpots();
-                }
-
                 var spotLights = BufferLightSpot.Build(context.Lights?.GetVisibleSpotLights(), MaxSpots, out int spotLength);
 
                 return new PSSpots
@@ -700,11 +685,6 @@ namespace Engine.BuiltIn
             /// <param name="context">Draw context</param>
             public static PSPoints Build(DrawContext context)
             {
-                if (context == null)
-                {
-                    return new PSPoints();
-                }
-
                 var pointLights = BufferLightPoint.Build(context.Lights?.GetVisiblePointLights(), MaxPoints, out int pointLength);
 
                 return new PSPoints

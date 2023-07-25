@@ -23,7 +23,7 @@ namespace Engine.BuiltIn.Shadows
         /// <param name="context">Draw context</param>
         public static PerCastingLight Build(DrawContextShadows context)
         {
-            var viewProjection = context?.ShadowMap?.FromLightViewProjectionArray;
+            var viewProjection = context.ShadowMap?.FromLightViewProjectionArray;
             int length = viewProjection?.Length ?? 0;
 
             if (length > MaxCount)

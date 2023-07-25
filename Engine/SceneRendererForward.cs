@@ -52,8 +52,6 @@ namespace Engine
         /// <inheritdoc/>
         public override void Draw(GameTime gameTime)
         {
-            base.Draw(gameTime);
-
             if (!Updated)
             {
                 return;
@@ -70,47 +68,50 @@ namespace Engine
 
 #if DEBUG
             frameStats.Clear();
-
             var swTotal = Stopwatch.StartNew();
 #endif
             //Updates the draw context
-            UpdateDrawContext(gameTime, DrawerModes.Forward);
+            var drawContext = GetImmediateDrawContext(gameTime, DrawerModes.Forward, Scene.Game.Form);
+
+            UpdateGlobalState(drawContext.DeviceContext);
+
+            int passIndex = 0;
 
             //Shadow mapping
-            DoShadowMapping(DrawContext);
+            DoShadowMapping(drawContext, ref passIndex);
 
             //Binds the result target
-            SetTarget(DrawContext.DeviceContext, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+            SetTarget(drawContext.DeviceContext, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
             if (objectComponents.Any())
             {
                 //Render objects
-                DoRender(Scene, objectComponents);
+                DoRender(drawContext, Scene, objectComponents);
                 //Post-processing
-                DoPostProcessing(DrawContext, Targets.Objects, RenderPass.Objects);
+                DoPostProcessing(drawContext, Targets.Objects, RenderPass.Objects);
             }
 
             //Binds the UI target
-            SetTarget(DrawContext.DeviceContext, Targets.UI, true, Color.Transparent);
+            SetTarget(drawContext.DeviceContext, Targets.UI, true, Color.Transparent);
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
                 //Render UI
-                DoRender(Scene, uiComponents);
+                DoRender(drawContext, Scene, uiComponents);
                 //UI post-processing
-                DoPostProcessing(DrawContext, Targets.UI, RenderPass.UI);
+                DoPostProcessing(drawContext, Targets.UI, RenderPass.UI);
             }
 
             //Combine to result
-            CombineTargets(DrawContext, Targets.Objects, Targets.UI, Targets.Result);
+            CombineTargets(drawContext, Targets.Objects, Targets.UI, Targets.Result);
 
             //Final post-processing
-            DoPostProcessing(DrawContext, Targets.Result, RenderPass.Final);
+            DoPostProcessing(drawContext, Targets.Result, RenderPass.Final);
 
             //Draw to screen
-            DrawToScreen(DrawContext, Targets.Result);
+            DrawToScreen(drawContext, Targets.Result);
 
 #if DEBUG
             swTotal.Stop();
@@ -124,67 +125,36 @@ namespace Engine
         /// </summary>
         /// <param name="scene">Scene</param>
         /// <param name="components">Components</param>
-        private void DoRender(Scene scene, IEnumerable<IDrawable> components)
+        private void DoRender(DrawContext context, Scene scene, IEnumerable<IDrawable> components)
         {
             if (!components.Any())
             {
                 return;
             }
 
-            bool draw = false;
-
-            #region Cull
 #if DEBUG
-            Stopwatch swCull = Stopwatch.StartNew();
+            var swCull = Stopwatch.StartNew();
 #endif
-            var toCullVisible = components.OfType<ICullable>();
-
-            if (scene.PerformFrustumCulling)
-            {
-                //Frustum culling
-                draw = cullManager.Cull(DrawContext.CameraVolume, CullIndexDrawIndex, toCullVisible);
-            }
-            else
-            {
-                draw = true;
-            }
-
-            if (draw)
-            {
-                var groundVolume = scene.GetSceneVolume();
-                if (groundVolume != null)
-                {
-                    //Ground culling
-                    draw = cullManager.Cull(groundVolume, CullIndexDrawIndex, toCullVisible);
-                }
-            }
-
+            bool draw = CullingTest(scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
-
             frameStats.ForwardCull = swCull.ElapsedTicks;
 #endif
-            #endregion
 
             if (!draw)
             {
                 return;
             }
 
-            #region Draw
-
 #if DEBUG
-            Stopwatch swDraw = Stopwatch.StartNew();
+            var swDraw = Stopwatch.StartNew();
 #endif
             //Draw solid
-            DrawResultComponents(DrawContext, CullIndexDrawIndex, components);
+            DrawResultComponents(context, CullIndexDrawIndex, components);
 #if DEBUG
             swDraw.Stop();
-
             frameStats.ForwardDraw = swDraw.ElapsedTicks;
 #endif
-
-            #endregion
         }
         /// <summary>
         /// Draw components

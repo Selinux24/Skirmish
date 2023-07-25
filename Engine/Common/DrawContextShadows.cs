@@ -5,7 +5,7 @@ namespace Engine.Common
     /// <summary>
     /// Drawing context for shadow mapping
     /// </summary>
-    public class DrawContextShadows
+    public struct DrawContextShadows
     {
         /// <summary>
         /// Context name
