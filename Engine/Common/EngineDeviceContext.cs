@@ -1541,5 +1541,13 @@ namespace Engine.Common
         {
             deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
         }
+
+        public void ExecuteCommandLists(IEnumerable<IEngineCommandList> commandLists, bool restoreState = false)
+        {
+            foreach (var commandList in commandLists)
+            {
+                ExecuteCommandList(commandList, restoreState);
+            }
+        }
     }
 }

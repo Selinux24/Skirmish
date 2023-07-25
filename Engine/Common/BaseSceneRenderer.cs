@@ -449,15 +449,15 @@ namespace Engine.Common
         /// <summary>
         /// Gets the immediate draw context
         /// </summary>
-        protected virtual DrawContext GetImmediateDrawContext(GameTime gameTime, DrawerModes drawMode, IEngineForm form)
+        protected DrawContext GetImmediateDrawContext(DrawerModes drawMode)
         {
             return new DrawContext
             {
                 Name = $"Immediate context.",
 
-                GameTime = gameTime,
+                GameTime = Scene.Game.GameTime,
+                Form = Scene.Game.Form,
                 DrawerMode = drawMode,
-                Form = form,
 
                 //Initialize context data from update context
                 ViewProjection = UpdateContext.ViewProjection,
@@ -479,15 +479,17 @@ namespace Engine.Common
         /// <summary>
         /// Gets a deferred draw context
         /// </summary>
-        protected virtual DrawContext GetDeferredDrawContext(DrawContext context, int passIndex)
+        /// <param name="drawerMode">Drawer mode</param>
+        /// <param name="passIndex">Pass index</param>
+        protected DrawContext GetDeferredDrawContext(DrawerModes drawMode, int passIndex)
         {
             return new DrawContext
             {
                 Name = $"Deferred pass[{passIndex}] context.",
 
-                GameTime = context.GameTime,
-                DrawerMode = context.DrawerMode,
-                Form = context.Form,
+                GameTime = Scene.Game.GameTime,
+                Form = Scene.Game.Form,
+                DrawerMode = drawMode,
 
                 //Initialize context data from update context
                 ViewProjection = UpdateContext.ViewProjection,
@@ -538,7 +540,11 @@ namespace Engine.Common
                 deferredContextList.Add(Scene.Game.Graphics.CreateDeferredContext($"Deferred Context {passIndex}"));
             }
 
-            return deferredContextList[passIndex];
+            var dc = deferredContextList[passIndex];
+
+            dc.ClearState();
+
+            return dc;
         }
 
         /// <inheritdoc/>
@@ -901,8 +907,9 @@ namespace Engine.Common
         /// <summary>
         /// Draw shadow maps
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        protected virtual void DoShadowMapping(DrawContext context, ref int passIndex)
+        /// <param name="camVolume">Camera volume</param>
+        /// <param name="passIndex">Pass index</param>
+        protected IEnumerable<IEngineCommandList> DoShadowMapping(ICullingVolume camVolume, ref int passIndex)
         {
 #if DEBUG
             shadowMappingDict.Clear();
@@ -910,11 +917,13 @@ namespace Engine.Common
 
             int cullIndex = CullIndexShadowMaps;
 
-            DoDirectionalShadowMapping(context, ref passIndex, ref cullIndex);
+            var commandList = new List<IEngineCommandList>();
 
-            DoPointShadowMapping(context, ref passIndex, ref cullIndex);
+            commandList.AddRange(DoDirectionalShadowMapping(camVolume, ref passIndex, ref cullIndex));
 
-            DoSpotShadowMapping(context, ref passIndex, ref cullIndex);
+            commandList.AddRange(DoPointShadowMapping(ref passIndex, ref cullIndex));
+
+            commandList.AddRange(DoSpotShadowMapping(ref passIndex, ref cullIndex));
 
 #if DEBUG
             if (Scene.Game.CollectGameStatus)
@@ -922,14 +931,16 @@ namespace Engine.Common
                 Scene.Game.GameStatus.Add(shadowMappingDict);
             }
 #endif
+
+            return commandList;
         }
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <param name="camVolume">Camera volume</param>
         /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoDirectionalShadowMapping(DrawContext context, ref int passIndex, ref int cullIndex)
+        protected IEnumerable<IEngineCommandList> DoDirectionalShadowMapping(ICullingVolume camVolume, ref int passIndex, ref int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -943,7 +954,7 @@ namespace Engine.Common
 
             if (!shadowCastingLights.Any())
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             //Objects that cast shadows
@@ -958,22 +969,20 @@ namespace Engine.Common
 
             if (!shadowObjs.Any())
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             //All objects suitable for culling
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var camVolume = context.CameraVolume;
-            var shadowSph = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
-            if (!DoShadowCullingTest(toCullShadowObjs, 0, shadowSph, cullIndex, allCullingObjects))
+            if (!DoShadowCullingTest(toCullShadowObjs, 0, camVolume, cullIndex, allCullingObjects))
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
+            var commandList = new List<IEngineCommandList>();
             int assigned = 0;
-
             int l = 0;
             foreach (var light in shadowCastingLights)
             {
@@ -989,7 +998,7 @@ namespace Engine.Common
                 stopwatch.Restart();
 #endif
                 var drawContext = GetPerLightDrawContext(passIndex, ShadowMapperDirectional, light, assigned * MaxDirectionalCascadeShadowMaps);
-                DrawShadowComponents(drawContext, cullIndex, shadowObjs);
+                commandList.Add(DrawShadowComponents(drawContext, cullIndex, shadowObjs));
 #if DEBUG
                 stopwatch.Stop();
                 shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -1012,13 +1021,15 @@ namespace Engine.Common
             gStopwatch.Stop();
             shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
+
+            return commandList;
         }
         /// <summary>
         /// Draw point light shadow maps
         /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoPointShadowMapping(DrawContext context, ref int passIndex, ref int cullIndex)
+        protected IEnumerable<IEngineCommandList> DoPointShadowMapping(ref int passIndex, ref int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1032,7 +1043,7 @@ namespace Engine.Common
 
             if (!shadowCastingLights.Any())
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             //Draw components if drop shadow (opaque)
@@ -1047,15 +1058,15 @@ namespace Engine.Common
 
             if (!shadowObjs.Any())
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             //All objects suitable for culling
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
+            var commandList = new List<IEngineCommandList>();
             int assigned = 0;
-
             int l = 0;
             foreach (var light in shadowCastingLights)
             {
@@ -1077,7 +1088,7 @@ namespace Engine.Common
                 stopwatch.Restart();
 #endif
                 var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperPoint, light, assigned);
-                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
+                commandList.Add(DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs));
 #if DEBUG
                 stopwatch.Stop();
                 shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -1099,13 +1110,15 @@ namespace Engine.Common
             gStopwatch.Stop();
             shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
+
+            return commandList;
         }
         /// <summary>
         /// Draw spot light shadow maps
         /// </summary>
-        /// <param name="context">Drawing context</param>
+        /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected virtual void DoSpotShadowMapping(DrawContext context, ref int passIndex, ref int cullIndex)
+        protected IEnumerable<IEngineCommandList> DoSpotShadowMapping(ref int passIndex, ref int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1119,7 +1132,7 @@ namespace Engine.Common
 
             if (!shadowCastingLights.Any())
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             //Draw components if drop shadow (opaque)
@@ -1134,15 +1147,15 @@ namespace Engine.Common
 
             if (!shadowObjs.Any())
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             //All objects suitable for culling
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
+            var commandList = new List<IEngineCommandList>();
             int assigned = 0;
-
             int l = 0;
             foreach (var light in shadowCastingLights)
             {
@@ -1164,7 +1177,7 @@ namespace Engine.Common
                 stopwatch.Restart();
 #endif
                 var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperSpot, light, assigned);
-                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
+                commandList.Add(DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs));
 #if DEBUG
                 stopwatch.Stop();
                 shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -1188,6 +1201,8 @@ namespace Engine.Common
             gStopwatch.Stop();
             shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
+
+            return commandList;
         }
         /// <summary>
         /// Performs shadow culling testing
@@ -1198,7 +1213,7 @@ namespace Engine.Common
         /// <param name="cullIndex">Cull index</param>
         /// <param name="allCullingObjects">All components were culling components</param>
         /// <returns></returns>
-        protected virtual bool DoShadowCullingTest(IEnumerable<ICullable> components, int l, IntersectionVolumeSphere lightVolume, int cullIndex, bool allCullingObjects)
+        protected bool DoShadowCullingTest(IEnumerable<ICullable> components, int l, ICullingVolume lightVolume, int cullIndex, bool allCullingObjects)
         {
             if (components.Any())
             {
@@ -1231,7 +1246,7 @@ namespace Engine.Common
         /// <param name="context">Context</param>
         /// <param name="index">Culling index</param>
         /// <param name="components">Components to draw</param>
-        protected void DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<IDrawable> components)
+        protected IEngineCommandList DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<IDrawable> components)
         {
             var objects = components
                 .Where(c => IsVisible(c, index))
@@ -1239,12 +1254,16 @@ namespace Engine.Common
 
             if (!objects.Any())
             {
-                return;
+                return null;
             }
 
             objects.Sort((c1, c2) => Sort(c1, c2, index));
 
+            context.DeviceContext.ClearState();
+
             objects.ForEach((c) => DrawShadows(context, c));
+
+            return context.DeviceContext.FinishCommandList();
         }
         /// <summary>
         /// Gets if the specified object is not culled by the cull index
@@ -1461,18 +1480,18 @@ namespace Engine.Common
         /// <param name="target">Target to set result</param>
         /// <param name="renderPass">Render pass</param>
         /// <param name="gameTime">Game time</param>
-        protected virtual bool DoPostProcessing(DrawContext context, Targets target, RenderPass renderPass)
+        protected IEnumerable<IEngineCommandList> DoPostProcessing(Targets target, RenderPass renderPass, ref int passIndex)
         {
             if (!ValidateRenderPass(renderPass, out var state))
             {
-                return false;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             //Gets the last used target texture
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
-            var dc = context.DeviceContext;
+            var dc = GetDeferredContext(passIndex++);
 
             dc.SetRasterizerState(graphics.GetRasterizerCullNone());
             dc.SetDepthStencilState(graphics.GetDepthStencilNone());
@@ -1481,7 +1500,7 @@ namespace Engine.Common
             var drawer = processingDrawer.UpdateEffectParameters(dc, state);
             if (drawer == null)
             {
-                return false;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
             var activeEffects = state.GetEffects();
@@ -1514,7 +1533,7 @@ namespace Engine.Common
             var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, resultDrawer);
 
-            return true;
+            return new[] { dc.FinishCommandList() };
         }
         /// <summary>
         /// Gets the target textures
@@ -1539,10 +1558,10 @@ namespace Engine.Common
         /// <param name="target1">Target 1</param>
         /// <param name="target2">Target 2</param>
         /// <param name="resultTarget">Result target</param>
-        protected virtual void CombineTargets(DrawContext context, Targets target1, Targets target2, Targets resultTarget)
+        protected IEnumerable<IEngineCommandList> CombineTargets(Targets target1, Targets target2, Targets resultTarget, ref int passIndex)
         {
             var graphics = Scene.Game.Graphics;
-            var dc = context.DeviceContext;
+            var dc = GetDeferredContext(passIndex++);
 
             SetTarget(dc, resultTarget, false, Color.Transparent);
 
@@ -1555,13 +1574,15 @@ namespace Engine.Common
 
             var drawer = processingDrawer.UpdateEffectCombine(dc, texture1, texture2);
             processingDrawer.Draw(dc, drawer);
+
+            return new[] { dc.FinishCommandList() };
         }
         /// <summary>
         /// Draws the specified target to screen
         /// </summary>
         /// <param name="context">Drawing context</param>
         /// <param name="target">Target</param>
-        protected virtual void DrawToScreen(DrawContext context, Targets target)
+        protected virtual void DrawToScreen(DrawContext context, Targets target, IEnumerable<IEngineCommandList> commands)
         {
             var graphics = Scene.Game.Graphics;
             var dc = context.DeviceContext;
@@ -1576,6 +1597,8 @@ namespace Engine.Common
 
             var drawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, drawer);
+
+            dc.ExecuteCommandLists(commands);
         }
 
         /// <inheritdoc/>

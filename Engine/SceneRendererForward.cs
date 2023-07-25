@@ -71,47 +71,51 @@ namespace Engine
             var swTotal = Stopwatch.StartNew();
 #endif
             //Updates the draw context
-            var drawContext = GetImmediateDrawContext(gameTime, DrawerModes.Forward, Scene.Game.Form);
+            var drawContext = GetImmediateDrawContext(DrawerModes.Forward);
+            var ic = drawContext.DeviceContext;
 
-            UpdateGlobalState(drawContext.DeviceContext);
+            UpdateGlobalState(ic);
+
+            //Binds the result target
+            SetTarget(ic, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
             int passIndex = 0;
 
-            //Shadow mapping
-            DoShadowMapping(drawContext, ref passIndex);
+            List<IEngineCommandList> commands = new();
 
-            //Binds the result target
-            SetTarget(drawContext.DeviceContext, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+            //Shadow mapping
+            var camVolume = drawContext.CameraVolume;
+            commands.AddRange(DoShadowMapping(new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius), ref passIndex));
 
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
             if (objectComponents.Any())
             {
                 //Render objects
-                DoRender(drawContext, Scene, objectComponents);
+                commands.AddRange(DoRender(camVolume, objectComponents, ref passIndex));
                 //Post-processing
-                DoPostProcessing(drawContext, Targets.Objects, RenderPass.Objects);
+                commands.AddRange(DoPostProcessing(Targets.Objects, RenderPass.Objects, ref passIndex));
             }
 
             //Binds the UI target
-            SetTarget(drawContext.DeviceContext, Targets.UI, true, Color.Transparent);
+            SetTarget(ic, Targets.UI, true, Color.Transparent);
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
                 //Render UI
-                DoRender(drawContext, Scene, uiComponents);
+                commands.AddRange(DoRender(camVolume, uiComponents, ref passIndex));
                 //UI post-processing
-                DoPostProcessing(drawContext, Targets.UI, RenderPass.UI);
+                commands.AddRange(DoPostProcessing(Targets.UI, RenderPass.UI, ref passIndex));
             }
 
             //Combine to result
-            CombineTargets(drawContext, Targets.Objects, Targets.UI, Targets.Result);
+            commands.AddRange(CombineTargets(Targets.Objects, Targets.UI, Targets.Result, ref passIndex));
 
             //Final post-processing
-            DoPostProcessing(drawContext, Targets.Result, RenderPass.Final);
+            commands.AddRange(DoPostProcessing(Targets.Result, RenderPass.Final, ref passIndex));
 
             //Draw to screen
-            DrawToScreen(drawContext, Targets.Result);
+            DrawToScreen(drawContext, Targets.Result, commands);
 
 #if DEBUG
             swTotal.Stop();
@@ -123,19 +127,19 @@ namespace Engine
         /// <summary>
         /// Do rendering
         /// </summary>
-        /// <param name="scene">Scene</param>
+        /// <param name="camVolume">Camera volume</param>
         /// <param name="components">Components</param>
-        private void DoRender(DrawContext context, Scene scene, IEnumerable<IDrawable> components)
+        private IEnumerable<IEngineCommandList> DoRender(ICullingVolume camVolume, IEnumerable<IDrawable> components, ref int passIndex)
         {
             if (!components.Any())
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            bool draw = CullingTest(scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
+            bool draw = CullingTest(Scene, camVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.ForwardCull = swCull.ElapsedTicks;
@@ -143,18 +147,23 @@ namespace Engine
 
             if (!draw)
             {
-                return;
+                return Enumerable.Empty<IEngineCommandList>();
             }
 
 #if DEBUG
             var swDraw = Stopwatch.StartNew();
 #endif
+            //Get draw context
+            var context = GetDeferredDrawContext(DrawerModes.Forward, passIndex++);
+
             //Draw solid
             DrawResultComponents(context, CullIndexDrawIndex, components);
 #if DEBUG
             swDraw.Stop();
             frameStats.ForwardDraw = swDraw.ElapsedTicks;
 #endif
+
+            return new[] { context.DeviceContext.FinishCommandList() };
         }
         /// <summary>
         /// Draw components
