@@ -7,7 +7,7 @@ namespace Engine.Common
     /// <summary>
     /// Command list interface
     /// </summary>
-    public interface IEngineCommandList
+    public interface IEngineCommandList : IDisposable
     {
         /// <summary>
         /// Gets the internal command list
@@ -33,6 +33,33 @@ namespace Engine.Common
         internal EngineCommandList(CommandList commandList)
         {
             this.commandList = commandList ?? throw new ArgumentNullException(nameof(commandList));
+        }
+        /// <summary>
+        /// Destructor
+        /// </summary>
+        ~EngineCommandList()
+        {
+            // Finalizer calls Dispose(false)  
+            Dispose(false);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        /// <summary>
+        /// Dispose resources
+        /// </summary>
+        /// <param name="disposing">Free managed resources</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                commandList?.Dispose();
+            }
         }
 
         /// <inheritdoc/>

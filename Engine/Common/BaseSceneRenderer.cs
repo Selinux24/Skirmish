@@ -553,10 +553,10 @@ namespace Engine.Common
         /// <summary>
         /// Gets opaque components
         /// </summary>
-        /// <param name="index">Cull index</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the opaque components</returns>
-        protected virtual List<IDrawable> GetOpaques(int index, IEnumerable<IDrawable> components)
+        protected virtual List<IDrawable> GetOpaques(int cullIndex, IEnumerable<IDrawable> components)
         {
             var opaques = components.Where(c =>
             {
@@ -566,7 +566,7 @@ namespace Engine.Common
 
                 if (c is ICullable cull)
                 {
-                    return !cullManager.GetCullValue(index, cull).Culled;
+                    return !cullManager.GetCullValue(cullIndex, cull).Culled;
                 }
 
                 return true;
@@ -577,11 +577,11 @@ namespace Engine.Common
         /// <summary>
         /// Sorting opaque list comparer
         /// </summary>
-        /// <param name="index">Cull index</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (nearest first)</returns>
-        protected virtual int SortOpaques(int index, IDrawable c1, IDrawable c2)
+        protected virtual int SortOpaques(int cullIndex, IDrawable c1, IDrawable c2)
         {
             int res = c1.Layer.CompareTo(c2.Layer);
 
@@ -595,13 +595,13 @@ namespace Engine.Common
                 float d1 = float.MaxValue;
                 if (c1 is ICullable cull1)
                 {
-                    d1 = cullManager.GetCullValue(index, cull1).Distance;
+                    d1 = cullManager.GetCullValue(cullIndex, cull1).Distance;
                 }
 
                 float d2 = float.MaxValue;
                 if (c2 is ICullable cull2)
                 {
-                    d2 = cullManager.GetCullValue(index, cull2).Distance;
+                    d2 = cullManager.GetCullValue(cullIndex, cull2).Distance;
                 }
 
                 // Nearest first
@@ -618,10 +618,10 @@ namespace Engine.Common
         /// <summary>
         /// Gets transparent components
         /// </summary>
-        /// <param name="index">Cull index</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="components">Component list</param>
         /// <returns>Returns the transparent components</returns>
-        protected virtual List<IDrawable> GetTransparents(int index, IEnumerable<IDrawable> components)
+        protected virtual List<IDrawable> GetTransparents(int cullIndex, IEnumerable<IDrawable> components)
         {
             var transparents = components.Where(c =>
             {
@@ -634,7 +634,7 @@ namespace Engine.Common
 
                 if (c is ICullable cull)
                 {
-                    return !cullManager.GetCullValue(index, cull).Culled;
+                    return !cullManager.GetCullValue(cullIndex, cull).Culled;
                 }
 
                 return true;
@@ -645,11 +645,11 @@ namespace Engine.Common
         /// <summary>
         /// Sorting transparent list comparer
         /// </summary>
-        /// <param name="index">Cull index</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="c1">First component</param>
         /// <param name="c2">Second component</param>
         /// <returns>Returns sorting order (far first)</returns>
-        protected virtual int SortTransparents(int index, IDrawable c1, IDrawable c2)
+        protected virtual int SortTransparents(int cullIndex, IDrawable c1, IDrawable c2)
         {
             int res = c1.Layer.CompareTo(c2.Layer);
 
@@ -663,13 +663,13 @@ namespace Engine.Common
                 float d1 = float.MaxValue;
                 if (c1 is ICullable cull1)
                 {
-                    d1 = cullManager.GetCullValue(index, cull1).Distance;
+                    d1 = cullManager.GetCullValue(cullIndex, cull1).Distance;
                 }
 
                 float d2 = float.MaxValue;
                 if (c2 is ICullable cull2)
                 {
-                    d2 = cullManager.GetCullValue(index, cull2).Distance;
+                    d2 = cullManager.GetCullValue(cullIndex, cull2).Distance;
                 }
 
                 // Far objects first
@@ -907,9 +907,8 @@ namespace Engine.Common
         /// <summary>
         /// Draw shadow maps
         /// </summary>
-        /// <param name="camVolume">Camera volume</param>
         /// <param name="passIndex">Pass index</param>
-        protected IEnumerable<IEngineCommandList> DoShadowMapping(ICullingVolume camVolume, ref int passIndex)
+        protected IEnumerable<IEngineCommandList> DoShadowMapping(ref int passIndex)
         {
 #if DEBUG
             shadowMappingDict.Clear();
@@ -919,7 +918,7 @@ namespace Engine.Common
 
             var commandList = new List<IEngineCommandList>();
 
-            commandList.AddRange(DoDirectionalShadowMapping(camVolume, ref passIndex, ref cullIndex));
+            commandList.AddRange(DoDirectionalShadowMapping(ref passIndex, ref cullIndex));
 
             commandList.AddRange(DoPointShadowMapping(ref passIndex, ref cullIndex));
 
@@ -937,10 +936,9 @@ namespace Engine.Common
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>
-        /// <param name="camVolume">Camera volume</param>
         /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected IEnumerable<IEngineCommandList> DoDirectionalShadowMapping(ICullingVolume camVolume, ref int passIndex, ref int cullIndex)
+        protected IEnumerable<IEngineCommandList> DoDirectionalShadowMapping(ref int passIndex, ref int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -976,7 +974,9 @@ namespace Engine.Common
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            if (!DoShadowCullingTest(toCullShadowObjs, 0, camVolume, cullIndex, allCullingObjects))
+            var camVolume = UpdateContext.CameraVolume;
+            var camSphere = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
+            if (!DoShadowCullingTest(toCullShadowObjs, 0, camSphere, cullIndex, allCullingObjects))
             {
                 return Enumerable.Empty<IEngineCommandList>();
             }
@@ -998,7 +998,14 @@ namespace Engine.Common
                 stopwatch.Restart();
 #endif
                 var drawContext = GetPerLightDrawContext(passIndex, ShadowMapperDirectional, light, assigned * MaxDirectionalCascadeShadowMaps);
-                commandList.Add(DrawShadowComponents(drawContext, cullIndex, shadowObjs));
+                var dc = drawContext.DeviceContext;
+
+                //Binds the result target
+                SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+
+                //Draw
+                DrawShadowComponents(drawContext, cullIndex, shadowObjs);
+                commandList.Add(dc.FinishCommandList());
 #if DEBUG
                 stopwatch.Stop();
                 shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -1088,7 +1095,14 @@ namespace Engine.Common
                 stopwatch.Restart();
 #endif
                 var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperPoint, light, assigned);
-                commandList.Add(DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs));
+                var dc = drawShadowsContext.DeviceContext;
+
+                //Binds the result target
+                SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+
+                //Draw
+                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
+                commandList.Add(dc.FinishCommandList());
 #if DEBUG
                 stopwatch.Stop();
                 shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -1177,7 +1191,14 @@ namespace Engine.Common
                 stopwatch.Restart();
 #endif
                 var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperSpot, light, assigned);
-                commandList.Add(DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs));
+                var dc = drawShadowsContext.DeviceContext;
+
+                //Binds the result target
+                SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+
+                //Draw
+                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
+                commandList.Add(dc.FinishCommandList());
 #if DEBUG
                 stopwatch.Stop();
                 shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -1244,26 +1265,22 @@ namespace Engine.Common
         /// Draw components for shadow mapping
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="index">Culling index</param>
+        /// <param name="cullIndex">Culling index</param>
         /// <param name="components">Components to draw</param>
-        protected IEngineCommandList DrawShadowComponents(DrawContextShadows context, int index, IEnumerable<IDrawable> components)
+        protected void DrawShadowComponents(DrawContextShadows context, int cullIndex, IEnumerable<IDrawable> components)
         {
             var objects = components
-                .Where(c => IsVisible(c, index))
+                .Where(c => IsVisible(c, cullIndex))
                 .ToList();
 
             if (!objects.Any())
             {
-                return null;
+                return;
             }
 
-            objects.Sort((c1, c2) => Sort(c1, c2, index));
-
-            context.DeviceContext.ClearState();
+            objects.Sort((c1, c2) => Sort(c1, c2, cullIndex));
 
             objects.ForEach((c) => DrawShadows(context, c));
-
-            return context.DeviceContext.FinishCommandList();
         }
         /// <summary>
         /// Gets if the specified object is not culled by the cull index
@@ -1476,10 +1493,9 @@ namespace Engine.Common
         /// <summary>
         /// Does the post-processing draw
         /// </summary>
-        /// <param name="context">Drawing context</param>
         /// <param name="target">Target to set result</param>
         /// <param name="renderPass">Render pass</param>
-        /// <param name="gameTime">Game time</param>
+        /// <param name="passIndex">Pass index</param>
         protected IEnumerable<IEngineCommandList> DoPostProcessing(Targets target, RenderPass renderPass, ref int passIndex)
         {
             if (!ValidateRenderPass(renderPass, out var state))
@@ -1540,7 +1556,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="target">Target type</param>
         /// <returns>Returns the target texture list</returns>
-        protected virtual IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
+        protected IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
         {
             return target switch
             {
@@ -1554,10 +1570,10 @@ namespace Engine.Common
         /// <summary>
         /// Combine the specified targets into the result target
         /// </summary>
-        /// <param name="context">Drawing context</param>
         /// <param name="target1">Target 1</param>
         /// <param name="target2">Target 2</param>
         /// <param name="resultTarget">Result target</param>
+        /// <param name="passIndex">Pass index</param>
         protected IEnumerable<IEngineCommandList> CombineTargets(Targets target1, Targets target2, Targets resultTarget, ref int passIndex)
         {
             var graphics = Scene.Game.Graphics;
@@ -1580,12 +1596,12 @@ namespace Engine.Common
         /// <summary>
         /// Draws the specified target to screen
         /// </summary>
-        /// <param name="context">Drawing context</param>
         /// <param name="target">Target</param>
-        protected virtual void DrawToScreen(DrawContext context, Targets target, IEnumerable<IEngineCommandList> commands)
+        /// <param name="passIndex">Pass index</param>
+        protected IEnumerable<IEngineCommandList> DrawToScreen(Targets target, ref int passIndex)
         {
             var graphics = Scene.Game.Graphics;
-            var dc = context.DeviceContext;
+            var dc = GetDeferredContext(passIndex++);
 
             SetTarget(dc, Targets.Screen, false, Color.Transparent);
 
@@ -1598,7 +1614,7 @@ namespace Engine.Common
             var drawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, drawer);
 
-            dc.ExecuteCommandLists(commands);
+            return new[] { dc.FinishCommandList() };
         }
 
         /// <inheritdoc/>

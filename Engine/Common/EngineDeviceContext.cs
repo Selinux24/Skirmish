@@ -416,6 +416,25 @@ namespace Engine.Common
         public void ClearState()
         {
             deviceContext.ClearState();
+
+            currentIAPrimitiveTopology = Topology.Undefined;
+            currentIAInputLayout = null;
+            currentViewports = null;
+
+            currentDepthStencilState = null;
+            currentDepthStencilRef = 0;
+            currentBlendState = null;
+            currentRasterizerState = null;
+
+            ClearShaderResources();
+
+            currentStreamOutputBindings = null;
+
+            currentVertexBufferFirstSlot = -1;
+            currentVertexBufferBindings = null;
+            currentIndexBufferRef = null;
+            currentIndexFormat = Format.Unknown;
+            currentIndexOffset = -1;
         }
 
         /// <summary>
@@ -1529,6 +1548,7 @@ namespace Engine.Common
         public IEngineCommandList FinishCommandList(bool restoreState = false)
         {
             var cmdList = deviceContext.FinishCommandList(restoreState);
+            cmdList.DebugName = $"{Name} commands";
 
             return new EngineCommandList(cmdList);
         }
@@ -1540,8 +1560,13 @@ namespace Engine.Common
         public void ExecuteCommandList(IEngineCommandList commandList, bool restoreState = false)
         {
             deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
+            commandList.Dispose();
         }
-
+        /// <summary>
+        /// Executes a command list in the immediate context
+        /// </summary>
+        /// <param name="commandLists">Command list</param>
+        /// <param name="restoreState">Resore state</param>
         public void ExecuteCommandLists(IEnumerable<IEngineCommandList> commandLists, bool restoreState = false)
         {
             foreach (var commandList in commandLists)

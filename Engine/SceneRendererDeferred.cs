@@ -18,8 +18,13 @@ namespace Engine
     public class SceneRendererDeferred : BaseSceneRenderer
     {
 #if DEBUG
+        /// <summary>
+        /// Frame statistics
+        /// </summary>
         private readonly FrameStatsDeferred frameStats = new();
-
+        /// <summary>
+        /// Frame light statistics
+        /// </summary>
         private readonly FrameStatsLight lightStats = new();
 #endif
 
@@ -32,6 +37,11 @@ namespace Engine
         {
             return graphics != null && !graphics.MultiSampled;
         }
+
+        /// <summary>
+        /// Command list
+        /// </summary>
+        private readonly List<IEngineCommandList> commands = new();
 
         /// <summary>
         /// Geometry buffer
@@ -219,6 +229,8 @@ namespace Engine
                 return;
             }
 
+            commands.Clear();
+
 #if DEBUG
             frameStats.Clear();
 
@@ -230,16 +242,10 @@ namespace Engine
 
             UpdateGlobalState(ic);
 
-            //Binds the result target
-            SetTarget(ic, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
-
             int passIndex = 0;
 
-            List<IEngineCommandList> commands = new();
-
             //Shadow mapping
-            var camVolume = drawContext.CameraVolume;
-            commands.AddRange(DoShadowMapping(new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius), ref passIndex));
+            commands.AddRange(DoShadowMapping(ref passIndex));
 
             var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
             bool anyDeferred = deferredEnabledComponents.Any();
@@ -251,7 +257,7 @@ namespace Engine
                 if (anyDeferred)
                 {
                     //Render to G-Buffer deferred enabled components
-                    commands.AddRange(DoDeferred(camVolume, deferredEnabledComponents, ref passIndex));
+                    commands.AddRange(DoDeferred(deferredEnabledComponents, ref passIndex));
 
                     //Binds the result target
                     SetTarget(ic, Targets.Objects, false, Color.Transparent);
@@ -274,22 +280,19 @@ namespace Engine
                 if (anyForward)
                 {
                     //Render to screen deferred disabled components
-                    commands.AddRange(DoForward(camVolume, deferredDisabledComponents, ref passIndex));
+                    commands.AddRange(DoForward(deferredDisabledComponents, ref passIndex));
                 }
 
                 //Post-processing
                 commands.AddRange(DoPostProcessing(Targets.Objects, RenderPass.Objects, ref passIndex));
             }
 
-            //Binds the result target
-            SetTarget(ic, Targets.UI, true, Color.Transparent);
-
             //Render to screen deferred disabled components
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
                 //UI render
-                commands.AddRange(DoForward(camVolume, uiComponents, ref passIndex));
+                commands.AddRange(DoForward(uiComponents, ref passIndex));
                 //UI post-processing
                 commands.AddRange(DoPostProcessing(Targets.UI, RenderPass.UI, ref passIndex));
             }
@@ -301,7 +304,10 @@ namespace Engine
             commands.AddRange(DoPostProcessing(Targets.Result, RenderPass.Final, ref passIndex));
 
             //Draw to screen
-            DrawToScreen(drawContext, Targets.Result, commands);
+            commands.AddRange(DrawToScreen(Targets.Result, ref passIndex));
+
+            //Execute command list
+            ic.ExecuteCommandLists(commands);
 
 #if DEBUG
             swTotal.Stop();
@@ -312,16 +318,20 @@ namespace Engine
         /// <summary>
         /// Do deferred rendering
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        /// <param name="deferredEnabledComponents">Components</param>
-        private IEnumerable<IEngineCommandList> DoDeferred(ICullingVolume camVolume, IEnumerable<IDrawable> deferredEnabledComponents, ref int passIndex)
+        /// <param name="components">Components</param>
+        /// <param name="passIndex">Pass index</param>
+        private IEnumerable<IEngineCommandList> DoDeferred(IEnumerable<IDrawable> components, ref int passIndex)
         {
-            var context = GetDeferredDrawContext(DrawerModes.Deferred, passIndex);
-            var dc = context.DeviceContext;
+            if (!components.Any())
+            {
+                return Enumerable.Empty<IEngineCommandList>();
+            }
+
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            bool draw = CullingTest(Scene, camVolume, deferredEnabledComponents.OfType<ICullable>(), CullIndexDrawIndex);
+            var context = GetDeferredDrawContext(DrawerModes.Deferred, passIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DeferredCull = swCull.ElapsedTicks;
@@ -331,6 +341,8 @@ namespace Engine
             {
                 return Enumerable.Empty<IEngineCommandList>();
             }
+
+            var dc = context.DeviceContext;
 
 #if DEBUG
             var swGeometryBuffer = Stopwatch.StartNew();
@@ -342,7 +354,7 @@ namespace Engine
             var swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
             //Draw scene on g-buffer render targets
-            DrawResultComponents(context, CullIndexDrawIndex, deferredEnabledComponents);
+            DrawResultComponents(context, CullIndexDrawIndex, components);
 #if DEBUG
             swGeometryBufferDraw.Stop();
             swGeometryBuffer.Stop();
@@ -370,15 +382,20 @@ namespace Engine
         /// <summary>
         /// Do forward rendering (UI, transparents, etc.)
         /// </summary>
-        /// <param name="deferredDisabledComponents">Components</param>
-        private IEnumerable<IEngineCommandList> DoForward(ICullingVolume camVolume, IEnumerable<IDrawable> deferredDisabledComponents, ref int passIndex)
+        /// <param name="components">Components</param>
+        /// <param name="passIndex">Pass index</param>
+        private IEnumerable<IEngineCommandList> DoForward(IEnumerable<IDrawable> components, ref int passIndex)
         {
-            var context = GetDeferredDrawContext(DrawerModes.Forward, passIndex);
-            var dc = context.DeviceContext;
+            if (!components.Any())
+            {
+                return Enumerable.Empty<IEngineCommandList>();
+            }
+
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            bool draw = CullingTest(Scene, context.CameraVolume, deferredDisabledComponents.OfType<ICullable>(), CullIndexDrawIndex);
+            var context = GetDeferredDrawContext(DrawerModes.Forward, passIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DisabledDeferredCull = swCull.ElapsedTicks;
@@ -393,14 +410,14 @@ namespace Engine
             var swDraw = Stopwatch.StartNew();
 #endif
             //Draw scene
-            DrawResultComponents(context, CullIndexDrawIndex, deferredDisabledComponents);
+            DrawResultComponents(context, CullIndexDrawIndex, components);
 
 #if DEBUG
             swDraw.Stop();
             frameStats.DisabledDeferredDraw = swDraw.ElapsedTicks;
 #endif
 
-            return new[] { dc.FinishCommandList() };
+            return new[] { context.DeviceContext.FinishCommandList() };
         }
 
         /// <summary>
@@ -621,8 +638,9 @@ namespace Engine
         /// Draw components
         /// </summary>
         /// <param name="context">Context</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="components">Components</param>
-        private void DrawResultComponents(DrawContext context, int index, IEnumerable<IDrawable> components)
+        private void DrawResultComponents(DrawContext context, int cullIndex, IEnumerable<IDrawable> components)
         {
             BuiltInShaders.UpdatePerFrame(context);
 
@@ -630,28 +648,28 @@ namespace Engine
             var mode = context.DrawerMode;
 
             //First opaques
-            var opaques = GetOpaques(index, components);
+            var opaques = GetOpaques(cullIndex, components);
             if (opaques.Any())
             {
                 //Set opaques draw mode
                 context.DrawerMode = mode | DrawerModes.OpaqueOnly;
 
                 //Sort items (nearest first)
-                opaques.Sort((c1, c2) => SortOpaques(index, c1, c2));
+                opaques.Sort((c1, c2) => SortOpaques(cullIndex, c1, c2));
 
                 //Draw items
                 opaques.ForEach((c) => Draw(context, c));
             }
 
             //Then transparents
-            var transparents = GetTransparents(index, components);
+            var transparents = GetTransparents(cullIndex, components);
             if (transparents.Any())
             {
                 //Set transparents draw mode
                 context.DrawerMode = mode | DrawerModes.TransparentOnly;
 
                 //Sort items (far first)
-                transparents.Sort((c1, c2) => SortTransparents(index, c1, c2));
+                transparents.Sort((c1, c2) => SortTransparents(cullIndex, c1, c2));
 
                 //Draw items
                 transparents.ForEach((c) => Draw(context, c));

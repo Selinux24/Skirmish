@@ -15,8 +15,19 @@ namespace Engine
     /// </summary>
     public class SceneRendererForward : BaseSceneRenderer
     {
+        /// <summary>
+        /// Command list
+        /// </summary>
+        private readonly List<IEngineCommandList> commands = new();
+
 #if DEBUG
+        /// <summary>
+        /// Frame statistics
+        /// </summary>
         private readonly FrameStatsForward frameStats = new();
+        /// <summary>
+        /// Statistics dictionary
+        /// </summary>
         private readonly Dictionary<string, double> dict = new();
 
         /// <summary>
@@ -66,6 +77,8 @@ namespace Engine
                 return;
             }
 
+            commands.Clear();
+
 #if DEBUG
             frameStats.Clear();
             var swTotal = Stopwatch.StartNew();
@@ -76,34 +89,25 @@ namespace Engine
 
             UpdateGlobalState(ic);
 
-            //Binds the result target
-            SetTarget(ic, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
-
             int passIndex = 0;
 
-            List<IEngineCommandList> commands = new();
-
             //Shadow mapping
-            var camVolume = drawContext.CameraVolume;
-            commands.AddRange(DoShadowMapping(new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius), ref passIndex));
+            commands.AddRange(DoShadowMapping(ref passIndex));
 
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
             if (objectComponents.Any())
             {
                 //Render objects
-                commands.AddRange(DoRender(camVolume, objectComponents, ref passIndex));
+                commands.AddRange(DoRender(Targets.Objects, true, Scene.GameEnvironment.Background, true, true, objectComponents, ref passIndex));
                 //Post-processing
                 commands.AddRange(DoPostProcessing(Targets.Objects, RenderPass.Objects, ref passIndex));
             }
-
-            //Binds the UI target
-            SetTarget(ic, Targets.UI, true, Color.Transparent);
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
                 //Render UI
-                commands.AddRange(DoRender(camVolume, uiComponents, ref passIndex));
+                commands.AddRange(DoRender(Targets.UI, true, Color.Transparent, false, false, uiComponents, ref passIndex));
                 //UI post-processing
                 commands.AddRange(DoPostProcessing(Targets.UI, RenderPass.UI, ref passIndex));
             }
@@ -115,7 +119,10 @@ namespace Engine
             commands.AddRange(DoPostProcessing(Targets.Result, RenderPass.Final, ref passIndex));
 
             //Draw to screen
-            DrawToScreen(drawContext, Targets.Result, commands);
+            commands.AddRange(DrawToScreen(Targets.Result, ref passIndex));
+
+            //Execute command list
+            ic.ExecuteCommandLists(commands);
 
 #if DEBUG
             swTotal.Stop();
@@ -127,9 +134,14 @@ namespace Engine
         /// <summary>
         /// Do rendering
         /// </summary>
-        /// <param name="camVolume">Camera volume</param>
+        /// <param name="target">Render target</param>
+        /// <param name="clearRT">Clear render target</param>
+        /// <param name="clearRTColor">Clear render target color</param>
+        /// <param name="clearDepth">Clear depth buffer</param>
+        /// <param name="clearStencil">Clear stencil buffer</param>
         /// <param name="components">Components</param>
-        private IEnumerable<IEngineCommandList> DoRender(ICullingVolume camVolume, IEnumerable<IDrawable> components, ref int passIndex)
+        /// <param name="passIndex">Pass index</param>
+        private IEnumerable<IEngineCommandList> DoRender(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, ref int passIndex)
         {
             if (!components.Any())
             {
@@ -139,7 +151,9 @@ namespace Engine
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            bool draw = CullingTest(Scene, camVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
+            //Get draw context
+            var context = GetDeferredDrawContext(DrawerModes.Forward, passIndex++);
+            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.ForwardCull = swCull.ElapsedTicks;
@@ -150,11 +164,13 @@ namespace Engine
                 return Enumerable.Empty<IEngineCommandList>();
             }
 
+            var dc = context.DeviceContext;
+
 #if DEBUG
             var swDraw = Stopwatch.StartNew();
 #endif
-            //Get draw context
-            var context = GetDeferredDrawContext(DrawerModes.Forward, passIndex++);
+            //Binds the result target
+            SetTarget(dc, target, clearRT, clearRTColor, clearDepth, clearStencil);
 
             //Draw solid
             DrawResultComponents(context, CullIndexDrawIndex, components);
@@ -163,7 +179,7 @@ namespace Engine
             frameStats.ForwardDraw = swDraw.ElapsedTicks;
 #endif
 
-            return new[] { context.DeviceContext.FinishCommandList() };
+            return new[] { dc.FinishCommandList() };
         }
         /// <summary>
         /// Draw components
