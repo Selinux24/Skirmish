@@ -15,7 +15,10 @@ namespace Engine.Common
         /// Drawer mode
         /// </summary>
         public DrawerModes DrawerMode { get; set; }
-
+        /// <summary>
+        /// Graphics
+        /// </summary>
+        public Graphics Graphics { get; set; }
         /// <summary>
         /// Engine form
         /// </summary>

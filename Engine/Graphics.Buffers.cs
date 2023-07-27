@@ -179,12 +179,7 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            var buffer = new Buffer(device, description)
-            {
-                DebugName = name,
-            };
-
-            return new EngineBuffer(buffer);
+            return new EngineBuffer(name, new Buffer(device, description));
         }
 
         /// <summary>
@@ -211,12 +206,7 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            var buffer = new Buffer(device, description)
-            {
-                DebugName = name,
-            };
-
-            return new EngineBuffer(buffer);
+            return new EngineBuffer(name, new Buffer(device, description));
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -246,12 +236,7 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            var buffer = new Buffer(device, description)
-            {
-                DebugName = name,
-            };
-
-            return new EngineBuffer(buffer);
+            return new EngineBuffer(name, new Buffer(device, description));
         }
         /// <summary>
         /// Creates a buffer for the specified data type
@@ -285,12 +270,7 @@ namespace Engine
                 StructureByteStride = 0,
             };
 
-            var buffer = new Buffer(device, dstr, description)
-            {
-                DebugName = name,
-            };
-
-            return new EngineBuffer(buffer);
+            return new EngineBuffer(name, new Buffer(device, dstr, description));
         }
     }
 }

@@ -449,13 +449,17 @@ namespace Engine.Common
         /// <summary>
         /// Gets the immediate draw context
         /// </summary>
-        protected DrawContext GetImmediateDrawContext(DrawerModes drawMode)
+        protected DrawContext GetImmediateDrawContext(DrawerModes drawMode, bool freeOMResources)
         {
+            var ic = Scene.Game.Graphics.ImmediateContext;
+            ic.ClearState(freeOMResources);
+
             return new DrawContext
             {
                 Name = $"Immediate context.",
 
                 GameTime = Scene.Game.GameTime,
+                Graphics = Scene.Game.Graphics,
                 Form = Scene.Game.Form,
                 DrawerMode = drawMode,
 
@@ -473,21 +477,26 @@ namespace Engine.Common
                 ShadowMapSpot = ShadowMapperSpot,
 
                 //Device context
-                DeviceContext = Scene.Game.Graphics.ImmediateContext,
+                DeviceContext = ic,
             };
         }
         /// <summary>
         /// Gets a deferred draw context
         /// </summary>
-        /// <param name="drawerMode">Drawer mode</param>
+        /// <param name="drawMode">Draw mode</param>
+        /// <param name="name">Name</param>
         /// <param name="passIndex">Pass index</param>
-        protected DrawContext GetDeferredDrawContext(DrawerModes drawMode, int passIndex)
+        protected DrawContext GetDeferredDrawContext(DrawerModes drawMode, string name, int passIndex, bool freeOMResources)
         {
+            var dc = GetDeferredContext(name, passIndex);
+            dc.ClearState(freeOMResources);
+
             return new DrawContext
             {
                 Name = $"Deferred pass[{passIndex}] context.",
 
                 GameTime = Scene.Game.GameTime,
+                Graphics = Scene.Game.Graphics,
                 Form = Scene.Game.Form,
                 DrawerMode = drawMode,
 
@@ -505,22 +514,29 @@ namespace Engine.Common
                 ShadowMapSpot = ShadowMapperSpot,
 
                 //Device context
-                DeviceContext = GetDeferredContext(passIndex),
+                DeviceContext = dc,
             };
         }
         /// <summary>
         /// Gets per light draw context
         /// </summary>
-        protected virtual DrawContextShadows GetPerLightDrawContext(int passIndex, IShadowMap shadowMapper, ISceneLight light, int lightIndex)
+        /// <param name="name">Name</param>
+        /// <param name="passIndex">Pass index</param>
+        /// <param name="shadowMapper">Shadow mapper</param>
+        /// <param name="light">Light</param>
+        /// <param name="lightIndex">Light index</param>
+        protected virtual DrawContextShadows GetPerLightDrawContext(string name, int passIndex, bool freeOMResources, IShadowMap shadowMapper, ISceneLight light, int lightIndex)
         {
-            var dc = GetDeferredContext(passIndex);
+            var dc = GetDeferredContext(name, passIndex);
+            dc.ClearState(freeOMResources);
 
             shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
             shadowMapper.Bind(dc, lightIndex);
 
             return new DrawContextShadows()
             {
-                Name = $"Per light pass[{passIndex}] context.",
+                Name = $"{name} pass[{passIndex}] context.",
+                Graphics = Scene.Game.Graphics,
 
                 ViewProjection = shadowMapper.ToShadowMatrix,
                 EyePosition = shadowMapper.LightPosition,
@@ -533,18 +549,16 @@ namespace Engine.Common
         /// <summary>
         /// Creates a deferred context
         /// </summary>
-        private EngineDeviceContext GetDeferredContext(int passIndex)
+        /// <param name="name">Name</param>
+        /// <param name="passIndex">Pass index</param>
+        private EngineDeviceContext GetDeferredContext(string name, int passIndex)
         {
             while (passIndex >= deferredContextList.Count)
             {
-                deferredContextList.Add(Scene.Game.Graphics.CreateDeferredContext($"Deferred Context {passIndex}"));
+                deferredContextList.Add(Scene.Game.Graphics.CreateDeferredContext($"Deferred Context {name}.{passIndex}"));
             }
 
-            var dc = deferredContextList[passIndex];
-
-            dc.ClearState();
-
-            return dc;
+            return deferredContextList[passIndex];
         }
 
         /// <inheritdoc/>
@@ -716,7 +730,7 @@ namespace Engine.Common
                 updateAnimationsPalette = false;
             }
 
-            if (updateGlobals)
+            //if (updateGlobals)
             {
                 BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
 
@@ -997,14 +1011,22 @@ namespace Engine.Common
 #if DEBUG
                 stopwatch.Restart();
 #endif
-                var drawContext = GetPerLightDrawContext(passIndex, ShadowMapperDirectional, light, assigned * MaxDirectionalCascadeShadowMaps);
+                var drawContext = GetPerLightDrawContext("Directional", passIndex, false, ShadowMapperDirectional, light, assigned * MaxDirectionalCascadeShadowMaps);
                 var dc = drawContext.DeviceContext;
 
+                if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+                {
+                    break;
+                }
+
+                UpdateGlobalState(dc);
+
                 //Binds the result target
-                SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
+                //SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
                 //Draw
                 DrawShadowComponents(drawContext, cullIndex, shadowObjs);
+
                 commandList.Add(dc.FinishCommandList());
 #if DEBUG
                 stopwatch.Stop();
@@ -1094,14 +1116,22 @@ namespace Engine.Common
 #if DEBUG
                 stopwatch.Restart();
 #endif
-                var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperPoint, light, assigned);
+                var drawShadowsContext = GetPerLightDrawContext("Point", passIndex, false, ShadowMapperPoint, light, assigned);
                 var dc = drawShadowsContext.DeviceContext;
+
+                if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+                {
+                    break;
+                }
+
+                UpdateGlobalState(dc);
 
                 //Binds the result target
                 SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
                 //Draw
                 DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
+
                 commandList.Add(dc.FinishCommandList());
 #if DEBUG
                 stopwatch.Stop();
@@ -1190,14 +1220,22 @@ namespace Engine.Common
 #if DEBUG
                 stopwatch.Restart();
 #endif
-                var drawShadowsContext = GetPerLightDrawContext(passIndex, ShadowMapperSpot, light, assigned);
+                var drawShadowsContext = GetPerLightDrawContext("Spot", passIndex, false, ShadowMapperSpot, light, assigned);
                 var dc = drawShadowsContext.DeviceContext;
+
+                if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+                {
+                    break;
+                }
+
+                UpdateGlobalState(dc);
 
                 //Binds the result target
                 SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
                 //Draw
                 DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
+
                 commandList.Add(dc.FinishCommandList());
 #if DEBUG
                 stopwatch.Stop();
@@ -1507,7 +1545,15 @@ namespace Engine.Common
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
-            var dc = GetDeferredContext(passIndex++);
+            var dc = GetDeferredContext($"PostProcessing {renderPass}->{target}", passIndex++);
+            dc.ClearState(true);
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return Enumerable.Empty<IEngineCommandList>();
+            }
+
+            UpdateGlobalState(dc);
 
             dc.SetRasterizerState(graphics.GetRasterizerCullNone());
             dc.SetDepthStencilState(graphics.GetDepthStencilNone());
@@ -1577,7 +1623,15 @@ namespace Engine.Common
         protected IEnumerable<IEngineCommandList> CombineTargets(Targets target1, Targets target2, Targets resultTarget, ref int passIndex)
         {
             var graphics = Scene.Game.Graphics;
-            var dc = GetDeferredContext(passIndex++);
+            var dc = GetDeferredContext($"Combine {target1}+{target2}->{resultTarget}", passIndex++);
+            dc.ClearState(false);
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return Enumerable.Empty<IEngineCommandList>();
+            }
+
+            UpdateGlobalState(dc);
 
             SetTarget(dc, resultTarget, false, Color.Transparent);
 
@@ -1601,7 +1655,15 @@ namespace Engine.Common
         protected IEnumerable<IEngineCommandList> DrawToScreen(Targets target, ref int passIndex)
         {
             var graphics = Scene.Game.Graphics;
-            var dc = GetDeferredContext(passIndex++);
+            var dc = GetDeferredContext($"{nameof(DrawToScreen)} {target}->Screen", passIndex++);
+            dc.ClearState(false);
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return Enumerable.Empty<IEngineCommandList>();
+            }
+
+            UpdateGlobalState(dc);
 
             SetTarget(dc, Targets.Screen, false, Color.Transparent);
 

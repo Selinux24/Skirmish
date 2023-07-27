@@ -15,12 +15,21 @@ namespace Engine.Common
         private readonly Buffer buffer;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="buffer">Buffer</param>
-        internal EngineBuffer(Buffer buffer)
+        internal EngineBuffer(string name, Buffer buffer)
         {
+            Name = name;
             this.buffer = buffer ?? throw new ArgumentNullException(nameof(buffer));
+
+            this.buffer.DebugName = name;
         }
         /// <summary>
         /// Destructor

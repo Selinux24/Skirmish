@@ -9,6 +9,10 @@ namespace Engine.Common
     public struct EngineStreamOutputBufferBinding
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; set; }
+        /// <summary>
         /// Gets or sets the buffer being bound.
         /// </summary>
         public EngineBuffer Buffer { get; set; }
@@ -20,10 +24,12 @@ namespace Engine.Common
         /// <summary>
         /// Initializes a new instance of the SharpDX.Direct3D11.StreamOutputBufferBinding struct.
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="buffer">The buffer being bound.</param>
         /// <param name="offset">The offset to the first vertex (in bytes).</param>
-        public EngineStreamOutputBufferBinding(EngineBuffer buffer, int offset)
+        public EngineStreamOutputBufferBinding(string name, EngineBuffer buffer, int offset)
         {
+            Name = name;
             Buffer = buffer;
             Offset = offset;
         }

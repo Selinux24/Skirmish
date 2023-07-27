@@ -84,10 +84,15 @@ namespace Engine
             var swTotal = Stopwatch.StartNew();
 #endif
             //Updates the draw context
-            var drawContext = GetImmediateDrawContext(DrawerModes.Forward);
+            var drawContext = GetImmediateDrawContext(DrawerModes.Forward, false);
+            var graphics = drawContext.Graphics;
             var ic = drawContext.DeviceContext;
 
-            UpdateGlobalState(ic);
+            ic.SetViewport(graphics.Viewport);
+            ic.SetRenderTargets(
+                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
+                graphics.DefaultDepthStencil, true, true,
+                false);
 
             int passIndex = 0;
 
@@ -121,8 +126,17 @@ namespace Engine
             //Draw to screen
             commands.AddRange(DrawToScreen(Targets.Result, ref passIndex));
 
+            ic.SetViewport(graphics.Viewport);
+            ic.SetRenderTargets(
+                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
+                graphics.DefaultDepthStencil, true, true,
+                false);
+
             //Execute command list
             ic.ExecuteCommandLists(commands);
+
+            ic.SetViewport(graphics.Viewport);
+            ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
 
 #if DEBUG
             swTotal.Stop();
@@ -152,7 +166,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             //Get draw context
-            var context = GetDeferredDrawContext(DrawerModes.Forward, passIndex++);
+            var context = GetDeferredDrawContext(DrawerModes.Forward, $"{nameof(DoRender)}", passIndex++, false);
             bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
@@ -164,11 +178,19 @@ namespace Engine
                 return Enumerable.Empty<IEngineCommandList>();
             }
 
+            //Store a command list
             var dc = context.DeviceContext;
 
 #if DEBUG
             var swDraw = Stopwatch.StartNew();
 #endif
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return Enumerable.Empty<IEngineCommandList>();
+            }
+
+            UpdateGlobalState(dc);
+
             //Binds the result target
             SetTarget(dc, target, clearRT, clearRTColor, clearDepth, clearStencil);
 

@@ -881,14 +881,9 @@ namespace Engine
 
             FrameSceneUpdate(activeScene);
 
-            if (BufferManager.SetVertexBuffers(Graphics.ImmediateContext))
-            {
-                FrameBegin(activeScene);
+            FrameSceneDraw(activeScene);
 
-                FrameSceneDraw(activeScene);
-
-                FrameEnd();
-            }
+            FramePresent();
 
             gSW.Stop();
             GameStatus.Add("TOTAL", gSW);
@@ -927,36 +922,14 @@ namespace Engine
         {
             try
             {
-                Stopwatch pSW = new();
-                pSW.Start();
+                var iSW = Stopwatch.StartNew();
                 Input.Update(GameTime);
-                pSW.Stop();
-                GameStatus.Add("Input", pSW);
+                iSW.Stop();
+                GameStatus.Add(nameof(FrameInput), iSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Frame: Input Update error: {ex.Message}", ex);
-            }
-        }
-        /// <summary>
-        /// Begin frame
-        /// </summary>
-        /// <param name="scene">Scene</param>
-        private void FrameBegin(Scene scene)
-        {
-            try
-            {
-                Stopwatch pSW = new();
-                pSW.Start();
-                Graphics.Begin(scene);
-                pSW.Stop();
-                GameStatus.Add("Begin", pSW);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Frame: Graphics Begin error: {ex.Message}", ex);
-
-                throw;
+                Logger.WriteError(this, $"{nameof(FrameInput)}: Input Update error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -967,15 +940,14 @@ namespace Engine
         {
             try
             {
-                Stopwatch uSW = new();
-                uSW.Start();
+                var uSW = Stopwatch.StartNew();
                 scene.Update(GameTime);
                 uSW.Stop();
-                GameStatus.Add($"Scene {scene}.Update", uSW);
+                GameStatus.Add(nameof(FrameSceneUpdate), uSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Scene: Update error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(FrameSceneUpdate)}: Update error: {ex.Message}", ex);
             }
         }
         /// <summary>
@@ -986,33 +958,31 @@ namespace Engine
         {
             try
             {
-                Stopwatch dSW = new();
-                dSW.Start();
+                var dSW = Stopwatch.StartNew();
                 scene.Draw(GameTime);
                 dSW.Stop();
-                GameStatus.Add($"Scene {scene}.Draw", dSW);
+                GameStatus.Add(nameof(FrameSceneDraw), dSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Scene: Draw error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(FrameSceneDraw)}: Draw error: {ex.Message}. {Graphics.GetDeviceRemovedReason()}", ex);
             }
         }
         /// <summary>
-        /// End frame
+        /// Present frame
         /// </summary>
-        private void FrameEnd()
+        private void FramePresent()
         {
             try
             {
-                Stopwatch pSW = new();
-                pSW.Start();
-                Graphics.End();
+                var pSW = Stopwatch.StartNew();
+                Graphics.Present();
                 pSW.Stop();
-                GameStatus.Add("End", pSW);
+                GameStatus.Add(nameof(FramePresent), pSW);
             }
             catch (Exception ex)
             {
-                Logger.WriteError(this, $"Frame: Graphics End error: {ex.Message}", ex);
+                Logger.WriteError(this, $"{nameof(FramePresent)}: Graphics End error: {ex.Message}. {Graphics.GetDeviceRemovedReason()}", ex);
 
                 throw;
             }

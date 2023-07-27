@@ -15,11 +15,19 @@ namespace Engine.Common
         private readonly InputLayout inputLayout;
 
         /// <summary>
+        /// Name
+        /// </summary>
+        public string Name { get; private set; }
+
+        /// <summary>
         /// Constructor
         /// </summary>
-        internal EngineInputLayout(InputLayout inputLayout)
+        internal EngineInputLayout(string name, InputLayout inputLayout)
         {
+            Name = name;
             this.inputLayout = inputLayout ?? throw new ArgumentNullException(nameof(inputLayout));
+
+            this.inputLayout.DebugName = name;
         }
         /// <summary>
         /// Destructor

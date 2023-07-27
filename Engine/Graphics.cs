@@ -59,10 +59,6 @@ namespace Engine
         /// Depth buffer format
         /// </summary>
         private readonly Format depthFormat = DepthBufferFormats.D24_UNorm_S8_UInt;
-        /// <summary>
-        /// Graphics deferred context
-        /// </summary>
-        private readonly List<EngineDeviceContext> deferredContextList = new();
 
         /// <summary>
         /// Device description
@@ -357,33 +353,32 @@ namespace Engine
         /// <param name="disposing">Free managed resources</param>
         private void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing)
             {
-                if (swapChain?.IsFullScreen == true)
-                {
-                    swapChain.IsFullScreen = false;
-                }
+                return;
+            }
 
-                swapChain?.Dispose();
-                swapChain = null;
+            if (swapChain?.IsFullScreen == true)
+            {
+                swapChain.IsFullScreen = false;
+            }
 
-                DisposeResources();
+            swapChain?.Dispose();
+            swapChain = null;
 
-                deferredContextList.ForEach(c => c?.Dispose());
-                deferredContextList.Clear();
+            DisposeResources();
 
-                device?.Dispose();
-                device = null;
+            device?.Dispose();
+            device = null;
 
 #if DEBUG
-                deviceDebugInfoQueue?.Dispose();
-                deviceDebugInfoQueue = null;
+            deviceDebugInfoQueue?.Dispose();
+            deviceDebugInfoQueue = null;
 
-                deviceDebug?.ReportLiveDeviceObjects(ReportingLevel.Detail);
-                deviceDebug?.Dispose();
-                deviceDebug = null;
+            deviceDebug?.ReportLiveDeviceObjects(ReportingLevel.Detail);
+            deviceDebug?.Dispose();
+            deviceDebug = null;
 #endif
-            }
         }
 
         /// <summary>
@@ -494,26 +489,9 @@ namespace Engine
 #endif
 
         /// <summary>
-        /// Begin frame
+        /// Present frame
         /// </summary>
-        public void Begin(Scene scene)
-        {
-            var dc = ImmediateContext.GetDeviceContext();
-
-            dc.ClearDepthStencilView(
-                depthStencilView.GetDepthStencil(),
-                DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil,
-                1.0f,
-                0);
-
-            dc.ClearRenderTargetView(
-                renderTargetView.GetRenderTarget(),
-                scene.GameEnvironment.Background);
-        }
-        /// <summary>
-        /// End frame
-        /// </summary>
-        public void End()
+        public void Present()
         {
             int syncInterval = vsyncEnabled ? 1 : 0;
             var res = swapChain.Present(syncInterval, PresentFlags.None);
@@ -525,27 +503,26 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the device removed reason
+        /// </summary>
+        public string GetDeviceRemovedReason()
+        {
+            var res = device.DeviceRemovedReason;
+            if (res.Failure)
+            {
+                return ResultDescriptor.Find(res)?.Description;
+            }
+
+            return null;
+        }
+
+        /// <summary>
         /// Creates a new deferred context
         /// </summary>
         /// <param name="name">Deferred context name</param>
         public EngineDeviceContext CreateDeferredContext(string name)
         {
-            var dc = deferredContextList.Find(d => d.Name == name);
-            if (dc != null)
-            {
-                return dc;
-            }
-
-            var deferredContext = new DeviceContext3(device)
-            {
-                DebugName = name,
-            };
-
-            dc = new EngineDeviceContext(name, deferredContext);
-
-            deferredContextList.Add(dc);
-
-            return dc;
+            return new EngineDeviceContext(name, new DeviceContext3(device));
         }
 
         /// <summary>

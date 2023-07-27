@@ -67,7 +67,7 @@ namespace Engine.Common
 
                 StreamOutBinding = new[]
                 {
-                    new EngineStreamOutputBufferBinding(VertexBuffer, 0),
+                    new EngineStreamOutputBufferBinding(name, VertexBuffer, 0),
                 };
             }
             else
@@ -106,7 +106,7 @@ namespace Engine.Common
 
                 StreamOutBinding = new[]
                 {
-                    new EngineStreamOutputBufferBinding(VertexBuffer, 0),
+                    new EngineStreamOutputBufferBinding(name, VertexBuffer, 0),
                 };
             }
             else

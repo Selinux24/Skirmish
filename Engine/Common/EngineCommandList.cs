@@ -10,6 +10,10 @@ namespace Engine.Common
     public interface IEngineCommandList : IDisposable
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; }
+        /// <summary>
         /// Gets the internal command list
         /// </summary>
         /// <returns></returns>
@@ -26,13 +30,20 @@ namespace Engine.Common
         /// </summary>
         private readonly CommandList commandList;
 
+        /// <inheritdoc/>
+        public string Name { get; private set; }
+
         /// <summary>
         /// Constructor
         /// </summary>
+        /// <param name="name">Name</param>
         /// <param name="commandList">Command list</param>
-        internal EngineCommandList(CommandList commandList)
+        internal EngineCommandList(string name, CommandList commandList)
         {
+            Name = name;
             this.commandList = commandList ?? throw new ArgumentNullException(nameof(commandList));
+
+            this.commandList.DebugName = name;
         }
         /// <summary>
         /// Destructor
@@ -66,6 +77,12 @@ namespace Engine.Common
         public CommandList GetCommandList()
         {
             return commandList;
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"{Name ?? nameof(EngineCommandList)}";
         }
     }
 }

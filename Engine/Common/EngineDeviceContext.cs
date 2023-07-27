@@ -30,10 +30,7 @@ namespace Engine.Common
 
             public void SetConstantBuffer(CommonShaderStage shaderStage, int slot, IEngineConstantBuffer buffer)
             {
-                if (!Update(slot, buffer))
-                {
-                    return;
-                }
+                Update(slot, buffer);
 
                 var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
@@ -41,10 +38,7 @@ namespace Engine.Common
 
             public void SetConstantBuffers(CommonShaderStage shaderStage, int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
             {
-                if (!Update(startSlot, bufferList))
-                {
-                    return;
-                }
+                Update(startSlot, bufferList);
 
                 var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
@@ -52,11 +46,6 @@ namespace Engine.Common
 
             public void Clear(CommonShaderStage shaderStage)
             {
-                if (Resources?.Any() != true)
-                {
-                    return;
-                }
-
                 shaderStage.SetConstantBuffers(StartSlot, nullBuffers.Length - StartSlot, nullBuffers);
 
                 Clear();
@@ -74,10 +63,7 @@ namespace Engine.Common
 
             public void SetShaderResource(CommonShaderStage shaderStage, int slot, EngineShaderResourceView resourceView)
             {
-                if (!Update(slot, resourceView))
-                {
-                    return;
-                }
+                Update(slot, resourceView);
 
                 var resources = Resources.Select(r => r?.GetResource()).ToArray();
                 shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
@@ -85,10 +71,7 @@ namespace Engine.Common
 
             public void SetShaderResources(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineShaderResourceView> resourceList)
             {
-                if (!Update(startSlot, resourceList))
-                {
-                    return;
-                }
+                Update(startSlot, resourceList);
 
                 var resources = Resources.Select(r => r?.GetResource()).ToArray();
                 shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
@@ -96,11 +79,6 @@ namespace Engine.Common
 
             public void Clear(CommonShaderStage shaderStage)
             {
-                if (Resources?.Any() != true)
-                {
-                    return;
-                }
-
                 shaderStage.SetShaderResources(StartSlot, nullSrv.Length - StartSlot, nullSrv);
 
                 Clear();
@@ -118,10 +96,7 @@ namespace Engine.Common
 
             public void SetSampler(CommonShaderStage shaderStage, int slot, EngineSamplerState samplerState)
             {
-                if (!Update(slot, samplerState))
-                {
-                    return;
-                }
+                Update(slot, samplerState);
 
                 var resources = Resources.Select(r => r?.GetSamplerState()).ToArray();
                 shaderStage.SetSamplers(StartSlot, resources.Length, resources);
@@ -129,10 +104,7 @@ namespace Engine.Common
 
             public void SetSamplers(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineSamplerState> samplerList)
             {
-                if (!Update(startSlot, samplerList))
-                {
-                    return;
-                }
+                Update(startSlot, samplerList);
 
                 var samplers = Resources.Select(r => r?.GetSamplerState()).ToArray();
                 shaderStage.SetSamplers(StartSlot, samplers.Length, samplers);
@@ -140,11 +112,6 @@ namespace Engine.Common
 
             public void Clear(CommonShaderStage shaderStage)
             {
-                if (Resources?.Any() != true)
-                {
-                    return;
-                }
-
                 shaderStage.SetSamplers(StartSlot, nullSamplers.Length - StartSlot, nullSamplers);
 
                 Clear();
@@ -156,7 +123,7 @@ namespace Engine.Common
         /// <summary>
         /// Internal device context
         /// </summary>
-        private DeviceContext3 deviceContext = null;
+        private readonly DeviceContext3 deviceContext = null;
         /// <summary>
         /// Current primitive topology set in input assembler
         /// </summary>
@@ -397,7 +364,6 @@ namespace Engine.Common
             if (disposing)
             {
                 deviceContext?.Dispose();
-                deviceContext = null;
             }
         }
 
@@ -413,7 +379,7 @@ namespace Engine.Common
         /// <summary>
         /// Clears the device context state
         /// </summary>
-        public void ClearState()
+        public void ClearState(bool freeOMResources)
         {
             deviceContext.ClearState();
 
@@ -426,15 +392,26 @@ namespace Engine.Common
             currentBlendState = null;
             currentRasterizerState = null;
 
-            ClearShaderResources();
-
+            currentVertexShader = null;
+            currentHullShader = null;
+            currentDomainShader = null;
+            currentGeomeryShader = null;
             currentStreamOutputBindings = null;
+            currentPixelShader = null;
+            currentComputeShader = null;
 
             currentVertexBufferFirstSlot = -1;
             currentVertexBufferBindings = null;
             currentIndexBufferRef = null;
             currentIndexFormat = Format.Unknown;
             currentIndexOffset = -1;
+
+            if (!freeOMResources)
+            {
+                return;
+            }
+
+            ClearShaderResources();
         }
 
         /// <summary>
@@ -485,6 +462,15 @@ namespace Engine.Common
             currentViewports = viewports;
         }
 
+        /// <summary>
+        /// Set render target
+        /// </summary>
+        /// <param name="renderTargets">Render targets</param>
+        /// <param name="depthMap">Depth map</param>
+        public void SetRenderTargets(EngineRenderTargetView renderTargets, EngineDepthStencilView depthMap)
+        {
+            deviceContext.OutputMerger.SetTargets(depthMap.GetDepthStencil(), renderTargets.GetRenderTarget());
+        }
         /// <summary>
         /// Set render targets
         /// </summary>
@@ -1262,7 +1248,6 @@ namespace Engine.Common
             {
                 return false;
             }
-
             var value = constantBuffer.GetData();
             var dataStream = constantBuffer.DataStream.GetDataStream();
             var buffer = constantBuffer.Buffer.GetBuffer();
@@ -1418,7 +1403,8 @@ namespace Engine.Common
                 return true;
             }
 
-            deviceContext.MapSubresource(b, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
+            //This should be MapMode.WriteNoOverwrite
+            deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
@@ -1547,10 +1533,11 @@ namespace Engine.Common
         /// <param name="restoreState">Resore state</param>
         public IEngineCommandList FinishCommandList(bool restoreState = false)
         {
-            var cmdList = deviceContext.FinishCommandList(restoreState);
-            cmdList.DebugName = $"{Name} commands";
+            deviceContext.ClearState();
 
-            return new EngineCommandList(cmdList);
+            var cmdList = deviceContext.FinishCommandList(restoreState);
+
+            return new EngineCommandList($"{Name} commands", cmdList);
         }
         /// <summary>
         /// Executes a command list in the immediate context
@@ -1559,6 +1546,11 @@ namespace Engine.Common
         /// <param name="restoreState">Resore state</param>
         public void ExecuteCommandList(IEngineCommandList commandList, bool restoreState = false)
         {
+            if (commandList == null)
+            {
+                return;
+            }
+
             deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
             commandList.Dispose();
         }
@@ -1569,6 +1561,11 @@ namespace Engine.Common
         /// <param name="restoreState">Resore state</param>
         public void ExecuteCommandLists(IEnumerable<IEngineCommandList> commandLists, bool restoreState = false)
         {
+            if (!commandLists.Any())
+            {
+                return;
+            }
+
             foreach (var commandList in commandLists)
             {
                 ExecuteCommandList(commandList, restoreState);
