@@ -212,11 +212,7 @@ namespace Engine
             };
         }
 
-        /// <summary>
-        /// Gets the light volume
-        /// </summary>
-        /// <param name="sliceCount">Cone slice count</param>
-        /// <returns>Returns a line list representing the light volume</returns>
+        /// <inheritdoc/>
         public IEnumerable<Line3D> GetVolume(int sliceCount)
         {
             var coneLines = Line3D.CreateFromVertices(GeometryUtil.CreateConeCupAngle(Topology.LineList, FallOffAngleRadians, Radius, sliceCount));
@@ -229,6 +225,15 @@ namespace Engine
             Matrix trn = Helper.CreateWorld(Position, Direction, f == 1 ? Vector3.ForwardLH : Vector3.Up);
 
             return Line3D.Transform(coneLines, rot * trn);
+        }
+
+        /// <inheritdoc/>
+        public void SetShadowParameters(Matrix[] fromLightViewProjectionArray, int assignedShadowMap, uint shadowMapCount)
+        {
+            FromLightVP = fromLightViewProjectionArray;
+            ShadowMapIndex = assignedShadowMap;
+            ShadowMapCount = shadowMapCount;
+
         }
 
         /// <inheritdoc/>

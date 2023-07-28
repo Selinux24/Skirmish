@@ -46,5 +46,12 @@ namespace Engine
         /// <param name="distance">Distance</param>
         /// <returns>Returns light position at specified distance</returns>
         Vector3 GetPosition(float distance);
+
+        /// <summary>
+        /// Sets the shadow parameters
+        /// </summary>
+        /// <param name="assignedShadowMap">Assigned shadow map index</param>
+        /// <param name="shadowMapCount">Shadow map count</param>
+        void SetShadowParameters(int assignedShadowMap, uint shadowMapCount);
     }
 }

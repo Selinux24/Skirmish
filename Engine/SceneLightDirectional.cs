@@ -196,14 +196,17 @@ namespace Engine
             };
         }
 
-        /// <summary>
-        /// Gets light position at specified distance
-        /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns light position at specified distance</returns>
+        /// <inheritdoc/>
         public Vector3 GetPosition(float distance)
         {
             return distance * -2f * Direction;
+        }
+
+        /// <inheritdoc/>
+        public void SetShadowParameters(int assignedShadowMap, uint shadowMapCount)
+        {
+            ShadowMapIndex = assignedShadowMap;
+            ShadowMapCount = shadowMapCount;
         }
 
         /// <inheritdoc/>

@@ -144,15 +144,16 @@ namespace Engine
                 ParentTransform = ParentTransform,
             };
         }
-        /// <summary>
-        /// Gets the light volume
-        /// </summary>
-        /// <param name="sliceCount">Sphere slice count (vertical subdivisions - meridians)</param>
-        /// <param name="stackCount">Sphere stack count (horizontal subdivisions - parallels)</param>
-        /// <returns>Returns a line list representing the light volume</returns>
+        /// <inheritdoc/>
         public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
             return Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, BoundingSphere, sliceCount, stackCount));
+        }
+
+        /// <inheritdoc/>
+        public void SetShadowParameters(int assignedShadowMap)
+        {
+            ShadowMapIndex = assignedShadowMap;
         }
 
         /// <inheritdoc/>

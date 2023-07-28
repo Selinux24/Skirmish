@@ -55,5 +55,13 @@ namespace Engine
         /// <param name="sliceCount">Cone slice count</param>
         /// <returns>Returns a line list representing the light volume</returns>
         IEnumerable<Line3D> GetVolume(int sliceCount);
+
+        /// <summary>
+        /// Sets the shadow parameters
+        /// </summary>
+        /// <param name="fromLightViewProjectionArray">From light view*projection transform array</param>
+        /// <param name="assignedShadowMap">Assigned shadow map index</param>
+        /// <param name="shadowMapCount">Shadow map count</param>
+        void SetShadowParameters(Matrix[] fromLightViewProjectionArray, int assignedShadowMap, uint shadowMapCount);
     }
 }

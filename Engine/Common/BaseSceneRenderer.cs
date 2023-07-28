@@ -1020,8 +1020,7 @@ namespace Engine.Common
 #endif
 
                 //Assign light parameters
-                light.ShadowMapIndex = assigned;
-                light.ShadowMapCount++;
+                light.SetShadowParameters(assigned, 1);
 
                 passIndex++;
 
@@ -1125,7 +1124,7 @@ namespace Engine.Common
 #endif
 
                 //Assign light parameters
-                light.ShadowMapIndex = assigned;
+                light.SetShadowParameters(assigned);
 
                 passIndex++;
 
@@ -1229,9 +1228,7 @@ namespace Engine.Common
 #endif
 
                 //Assign light parameters
-                light.FromLightVP = drawShadowsContext.ShadowMap.FromLightViewProjectionArray;
-                light.ShadowMapIndex = assigned;
-                light.ShadowMapCount = 1;
+                light.SetShadowParameters(drawShadowsContext.ShadowMap.FromLightViewProjectionArray, assigned, 1);
 
                 passIndex++;
 
