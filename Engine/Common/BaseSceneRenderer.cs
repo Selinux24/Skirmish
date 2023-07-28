@@ -1111,9 +1111,6 @@ namespace Engine.Common
 
                 UpdateGlobalState(dc);
 
-                //Binds the result target
-                SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
-
                 //Draw
                 DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
 
@@ -1214,9 +1211,6 @@ namespace Engine.Common
                 }
 
                 UpdateGlobalState(dc);
-
-                //Binds the result target
-                SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
                 //Draw
                 DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
