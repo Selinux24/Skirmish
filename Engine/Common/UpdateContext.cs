@@ -5,12 +5,12 @@ namespace Engine.Common
     /// <summary>
     /// Updating context
     /// </summary>
-    public class UpdateContext
+    public struct UpdateContext
     {
         /// <summary>
         /// Context name
         /// </summary>
-        public string Name { get; set; } = "";
+        public string Name { get; set; }
         /// <summary>
         /// Game time
         /// </summary>

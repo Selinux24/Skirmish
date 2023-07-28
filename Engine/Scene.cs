@@ -189,9 +189,9 @@ namespace Engine
         {
             try
             {
-                bool updateEnvironment = GameEnvironment.Update(gameTime);
+                GameEnvironment.Update(gameTime);
 
-                Renderer?.UpdateGlobals(updateEnvironment, false);
+                Renderer?.UpdateGlobals(false);
 
                 this.EvaluateInput();
 
@@ -645,7 +645,7 @@ namespace Engine
         /// </summary>
         private void ComponentsUpdated(object sender, EventArgs e)
         {
-            Renderer?.UpdateGlobals(false, true);
+            Renderer?.UpdateGlobals(true);
         }
 
         /// <summary>

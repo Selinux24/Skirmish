@@ -76,10 +76,6 @@ namespace Engine.Common
         private readonly List<EngineDeviceContext> deferredContextList = new();
 
         /// <summary>
-        /// Update globals
-        /// </summary>
-        private bool updateGlobals = true;
-        /// <summary>
         /// Update materials palette flag
         /// </summary>
         private bool updateMaterialsPalette;
@@ -177,10 +173,6 @@ namespace Engine.Common
         /// Renderer height
         /// </summary>
         protected int Height;
-        /// <summary>
-        /// Update context
-        /// </summary>
-        protected UpdateContext UpdateContext = null;
         /// <summary>
         /// Cull manager
         /// </summary>
@@ -308,11 +300,6 @@ namespace Engine.Common
 
             cullManager = new SceneCullManager();
 
-            UpdateContext = new UpdateContext()
-            {
-                Name = "Primary",
-            };
-
             var targetFormat = SharpDX.DXGI.Format.R32G32B32A32_Float;
 
             sceneObjectsTarget = new RenderTarget(scene.Game, "SceneObjectsTarget", targetFormat, false, 1);
@@ -398,10 +385,10 @@ namespace Engine.Common
         public virtual void Update(GameTime gameTime)
         {
             //Updates the update context
-            UpdateUpdateContext(gameTime);
+            var updateContext = GetUpdateContext(gameTime);
 
             //Cull lights
-            Scene.Lights.Cull(UpdateContext.CameraVolume, UpdateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
+            Scene.Lights.Cull(updateContext.CameraVolume, updateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
 
             //Update active components
             var updatables = Scene.Components.Get<IUpdatable>(c => c.Active);
@@ -410,17 +397,17 @@ namespace Engine.Common
                 updatables
                     .AsParallel()
                     .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                    .ForAll(c => c.EarlyUpdate(UpdateContext));
+                    .ForAll(c => c.EarlyUpdate(updateContext));
 
                 updatables
                     .AsParallel()
                     .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                    .ForAll(c => c.Update(UpdateContext));
+                    .ForAll(c => c.Update(updateContext));
 
                 updatables
                     .AsParallel()
                     .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                    .ForAll(c => c.LateUpdate(UpdateContext));
+                    .ForAll(c => c.LateUpdate(updateContext));
             }
 
             Updated = true;
@@ -429,21 +416,26 @@ namespace Engine.Common
         /// Updates the update context
         /// </summary>
         /// <param name="gameTime">Game time</param>
-        protected virtual void UpdateUpdateContext(GameTime gameTime)
+        protected virtual UpdateContext GetUpdateContext(GameTime gameTime)
         {
-            UpdateContext.GameTime = gameTime;
+            var camera = Scene.Camera;
+            var viewProj = camera.View * camera.Projection;
 
-            Matrix viewProj = Scene.Camera.View * Scene.Camera.Projection;
-            UpdateContext.View = Scene.Camera.View;
-            UpdateContext.Projection = Scene.Camera.Projection;
-            UpdateContext.ViewProjection = viewProj;
-            UpdateContext.CameraVolume = new IntersectionVolumeFrustum(viewProj);
-            UpdateContext.NearPlaneDistance = Scene.Camera.NearPlaneDistance;
-            UpdateContext.FarPlaneDistance = Scene.Camera.FarPlaneDistance;
-            UpdateContext.EyePosition = Scene.Camera.Position;
-            UpdateContext.EyeDirection = Scene.Camera.Direction;
+            return new UpdateContext
+            {
+                GameTime = gameTime,
 
-            UpdateContext.Lights = Scene.Lights;
+                View = camera.View,
+                Projection = camera.Projection,
+                ViewProjection = viewProj,
+                CameraVolume = new IntersectionVolumeFrustum(viewProj),
+                NearPlaneDistance = camera.NearPlaneDistance,
+                FarPlaneDistance = camera.FarPlaneDistance,
+                EyePosition = camera.Position,
+                EyeDirection = camera.Direction,
+
+                Lights = Scene.Lights,
+            };
         }
 
         /// <summary>
@@ -453,6 +445,9 @@ namespace Engine.Common
         {
             var ic = Scene.Game.Graphics.ImmediateContext;
             ic.ClearState(freeOMResources);
+
+            var camera = Scene.Camera;
+            var environment = Scene.GameEnvironment;
 
             return new DrawContext
             {
@@ -464,14 +459,14 @@ namespace Engine.Common
                 DrawerMode = drawMode,
 
                 //Initialize context data from update context
-                ViewProjection = UpdateContext.ViewProjection,
-                CameraVolume = UpdateContext.CameraVolume,
-                EyePosition = UpdateContext.EyePosition,
-                EyeDirection = UpdateContext.EyeDirection,
+                ViewProjection = camera.View * camera.Projection,
+                CameraVolume = camera.Frustum,
+                EyePosition = camera.Position,
+                EyeDirection = camera.Direction,
 
                 //Initialize context data from scene
                 Lights = Scene.Lights,
-                LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow),
+                LevelOfDetail = new Vector3(environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow),
                 ShadowMapDirectional = ShadowMapperDirectional,
                 ShadowMapPoint = ShadowMapperPoint,
                 ShadowMapSpot = ShadowMapperSpot,
@@ -491,6 +486,9 @@ namespace Engine.Common
             var dc = GetDeferredContext(name, passIndex);
             dc.ClearState(freeOMResources);
 
+            var camera = Scene.Camera;
+            var environment = Scene.GameEnvironment;
+
             return new DrawContext
             {
                 Name = $"Deferred pass[{passIndex}] context.",
@@ -501,14 +499,14 @@ namespace Engine.Common
                 DrawerMode = drawMode,
 
                 //Initialize context data from update context
-                ViewProjection = UpdateContext.ViewProjection,
-                CameraVolume = UpdateContext.CameraVolume,
-                EyePosition = UpdateContext.EyePosition,
-                EyeDirection = UpdateContext.EyeDirection,
+                ViewProjection = camera.View * camera.Projection,
+                CameraVolume = camera.Frustum,
+                EyePosition = camera.Position,
+                EyeDirection = camera.Direction,
 
                 //Initialize context data from scene
                 Lights = Scene.Lights,
-                LevelOfDetail = new Vector3(Scene.GameEnvironment.LODDistanceHigh, Scene.GameEnvironment.LODDistanceMedium, Scene.GameEnvironment.LODDistanceLow),
+                LevelOfDetail = new Vector3(environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow),
                 ShadowMapDirectional = ShadowMapperDirectional,
                 ShadowMapPoint = ShadowMapperPoint,
                 ShadowMapSpot = ShadowMapperSpot,
@@ -530,7 +528,9 @@ namespace Engine.Common
             var dc = GetDeferredContext(name, passIndex);
             dc.ClearState(freeOMResources);
 
-            shadowMapper.UpdateFromLightViewProjection(Scene.Camera, light);
+            var camera = Scene.Camera;
+
+            shadowMapper.UpdateFromLightViewProjection(camera, light);
             shadowMapper.Bind(dc, lightIndex);
 
             return new DrawContextShadows()
@@ -540,7 +540,7 @@ namespace Engine.Common
 
                 ViewProjection = shadowMapper.ToShadowMatrix,
                 EyePosition = shadowMapper.LightPosition,
-                Frustum = Scene.Camera.Frustum,
+                Frustum = camera.Frustum,
                 ShadowMap = shadowMapper,
 
                 DeviceContext = dc,
@@ -710,40 +710,30 @@ namespace Engine.Common
 
             if (updateMaterialsPalette)
             {
-                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Material palette.");
+                Logger.WriteInformation(this, $"{nameof(UpdateGlobalState)} =>Updating Material palette.");
 
                 UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
-
-                updateGlobals = true;
 
                 updateMaterialsPalette = false;
             }
 
             if (updateAnimationsPalette)
             {
-                Logger.WriteInformation(this, $"{nameof(Scene)} =>Updating Animation palette.");
+                Logger.WriteInformation(this, $"{nameof(UpdateGlobalState)} =>Updating Animation palette.");
 
                 UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
-
-                updateGlobals = true;
 
                 updateAnimationsPalette = false;
             }
 
-            //if (updateGlobals)
-            {
-                BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-
-                updateGlobals = false;
-            }
+            BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
 
         /// <inheritdoc/>
-        public virtual void UpdateGlobals(bool updatedEnvironment, bool updatedComponents)
+        public virtual void UpdateGlobals(bool updatedComponents)
         {
             updateMaterialsPalette = updateMaterialsPalette || updatedComponents;
             updateAnimationsPalette = updateAnimationsPalette || updatedComponents;
-            updateGlobals = updateGlobals || updatedEnvironment;
         }
         /// <summary>
         /// Updates the materials palette
@@ -988,8 +978,7 @@ namespace Engine.Common
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var camVolume = UpdateContext.CameraVolume;
-            var camSphere = new IntersectionVolumeSphere(camVolume.Position, camVolume.Radius);
+            var camSphere = Scene.Camera.GetIntersectionVolume(IntersectDetectionMode.Sphere);
             if (!DoShadowCullingTest(toCullShadowObjs, 0, camSphere, cullIndex, allCullingObjects))
             {
                 return Enumerable.Empty<IEngineCommandList>();
@@ -1020,9 +1009,6 @@ namespace Engine.Common
                 }
 
                 UpdateGlobalState(dc);
-
-                //Binds the result target
-                //SetTarget(dc, Targets.Objects, true, Scene.GameEnvironment.Background, true, true);
 
                 //Draw
                 DrawShadowComponents(drawContext, cullIndex, shadowObjs);

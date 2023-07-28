@@ -46,9 +46,8 @@ namespace Engine
         /// <summary>
         /// Updates the scene renderer globals
         /// </summary>
-        /// <param name="updatedEnvironment">Force environment update</param>
         /// <param name="updatedComponents">Force components update</param>
-        void UpdateGlobals(bool updatedEnvironment, bool updatedComponents);
+        void UpdateGlobals(bool updatedComponents);
 
         /// <summary>
         /// Gets renderer resources

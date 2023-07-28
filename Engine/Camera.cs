@@ -1154,6 +1154,13 @@ namespace Engine
 
                 return (IntersectionVolumeSphere)bsph;
             }
+            else if (detectionMode == IntersectDetectionMode.Box)
+            {
+                var extents = new Vector3(CameraRadius);
+                var bbox = new BoundingBox(position - extents, position + extents);
+
+                return (IntersectionVolumeAxisAlignedBox)bbox;
+            }
             else
             {
                 return (IntersectionVolumeFrustum)Frustum;
