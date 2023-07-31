@@ -33,8 +33,12 @@ namespace Engine.Common
         public IShadowMap ShadowMap { get; set; }
 
         /// <summary>
+        /// Pass context
+        /// </summary>
+        public PassContext PassContext { get; set; }
+        /// <summary>
         /// Device context
         /// </summary>
-        public EngineDeviceContext DeviceContext { get; set; }
+        public readonly EngineDeviceContext DeviceContext { get => PassContext.DeviceContext; }
     }
 }

@@ -17,6 +17,27 @@ namespace Engine
     /// </summary>
     public class SceneRendererDeferred : BaseSceneRenderer
     {
+        /// <summary>
+        /// Deferred enable objects pass index
+        /// </summary>
+        private const int ObjectsDeferredPass = NextPass;
+        /// <summary>
+        /// Forward objects pass index
+        /// </summary>
+        private const int ObjectsForwardPass = NextPass + 1;
+        /// <summary>
+        /// Objects post processing pass index
+        /// </summary>
+        private const int ObjectsPostProcessingPass = NextPass + 2;
+        /// <summary>
+        /// UI pass index
+        /// </summary>
+        private const int UIPass = NextPass + 3;
+        /// <summary>
+        /// UI post processing pass index
+        /// </summary>
+        private const int UIPostProcessingPass = NextPass + 4;
+
 #if DEBUG
         /// <summary>
         /// Frame statistics
@@ -37,11 +58,6 @@ namespace Engine
         {
             return graphics != null && !graphics.MultiSampled;
         }
-
-        /// <summary>
-        /// Command list
-        /// </summary>
-        private readonly List<IEngineCommandList> commands = new();
 
         /// <summary>
         /// Geometry buffer
@@ -186,6 +202,20 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        protected override void PrepareScene()
+        {
+            base.PrepareScene();
+
+            //Create commandList
+            AddPassContext(ObjectsDeferredPass, "Objects Deferred");
+            AddPassContext(ObjectsForwardPass, "Objects Forward");
+            AddPassContext(ObjectsPostProcessingPass, "Objects Post processing");
+
+            AddPassContext(UIPass, "UI");
+            AddPassContext(UIPostProcessingPass, "UI Post processing");
+        }
+
+        /// <inheritdoc/>
         public override void Resize()
         {
             UpdateRectangleAndView();
@@ -229,27 +259,15 @@ namespace Engine
                 return;
             }
 
-            commands.Clear();
-
 #if DEBUG
             frameStats.Clear();
             var swTotal = Stopwatch.StartNew();
 #endif
-            //Updates the draw context
-            var drawContext = GetImmediateDrawContext(DrawerModes.Deferred, false);
-            var graphics = drawContext.Graphics;
-            var ic = drawContext.DeviceContext;
-
-            ic.SetViewport(graphics.Viewport);
-            ic.SetRenderTargets(
-                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
-                graphics.DefaultDepthStencil, true, true,
-                false);
-
-            int passIndex = 0;
+            //Initializes the scene graphics state
+            InitializeScene();
 
             //Shadow mapping
-            commands.AddRange(DoShadowMapping(ref passIndex));
+            DoShadowMapping();
 
             var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
             bool anyDeferred = deferredEnabledComponents.Any();
@@ -261,17 +279,17 @@ namespace Engine
                 if (anyDeferred)
                 {
                     //Render to G-Buffer deferred enabled components
-                    commands.AddRange(DoDeferred(deferredEnabledComponents, ref passIndex));
+                    DoDeferred(deferredEnabledComponents, ObjectsDeferredPass);
                 }
 
                 if (anyForward)
                 {
                     //Render to screen deferred disabled components
-                    commands.AddRange(DoForward(Targets.Objects, false, Scene.GameEnvironment.Background, false, false, deferredDisabledComponents, ref passIndex));
+                    DoForward(Targets.Objects, false, Scene.GameEnvironment.Background, false, false, deferredDisabledComponents, ObjectsForwardPass);
                 }
 
                 //Post-processing
-                commands.AddRange(DoPostProcessing(Targets.Objects, RenderPass.Objects, ref passIndex));
+                DoPostProcessing(Targets.Objects, RenderPass.Objects, ObjectsPostProcessingPass);
             }
 
             //Render to screen deferred disabled components
@@ -279,31 +297,13 @@ namespace Engine
             if (uiComponents.Any())
             {
                 //UI render
-                commands.AddRange(DoForward(Targets.UI, true, Color.Transparent, false, false, uiComponents, ref passIndex));
+                DoForward(Targets.UI, true, Color.Transparent, false, false, uiComponents, UIPass);
                 //UI post-processing
-                commands.AddRange(DoPostProcessing(Targets.UI, RenderPass.UI, ref passIndex));
+                DoPostProcessing(Targets.UI, RenderPass.UI, UIPostProcessingPass);
             }
 
-            //Combine to result
-            commands.AddRange(CombineTargets(Targets.Objects, Targets.UI, Targets.Result, ref passIndex));
-
-            //Final post-processing
-            commands.AddRange(DoPostProcessing(Targets.Result, RenderPass.Final, ref passIndex));
-
-            //Draw to screen
-            commands.AddRange(DrawToScreen(Targets.Result, ref passIndex));
-
-            ic.SetViewport(graphics.Viewport);
-            ic.SetRenderTargets(
-                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
-                graphics.DefaultDepthStencil, true, true,
-                false);
-
-            //Execute command list
-            ic.ExecuteCommandLists(commands);
-
-            ic.SetViewport(graphics.Viewport);
-            ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
+            //Merge to result
+            MergeToScreen();
 
 #if DEBUG
             swTotal.Stop();
@@ -316,17 +316,17 @@ namespace Engine
         /// </summary>
         /// <param name="components">Components</param>
         /// <param name="passIndex">Pass index</param>
-        private IEnumerable<IEngineCommandList> DoDeferred(IEnumerable<IDrawable> components, ref int passIndex)
+        private void DoDeferred(IEnumerable<IDrawable> components, int passIndex)
         {
             if (!components.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            var context = GetDeferredDrawContext(DrawerModes.Deferred, $"{nameof(DoDeferred)}", passIndex++, false);
+            var context = GetDeferredDrawContext(passIndex, DrawerModes.Deferred, false);
             bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
@@ -335,7 +335,7 @@ namespace Engine
 
             if (!draw)
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
             var dc = context.DeviceContext;
@@ -346,7 +346,7 @@ namespace Engine
 #endif
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
             UpdateGlobalState(dc);
@@ -373,7 +373,7 @@ namespace Engine
             BindLights(dc);
 
             //Draw scene lights on light buffer using g-buffer output
-            DrawLights(context);
+            DrawLights(dc, context.Lights);
 #if DEBUG
             swLightBuffer.Stop();
 
@@ -388,7 +388,7 @@ namespace Engine
             Stopwatch swComponsition = Stopwatch.StartNew();
 #endif
             //Draw scene result on screen using g-buffer and light buffer
-            DrawResult(context);
+            DrawResult(dc);
 
 #if DEBUG
             swComponsition.Stop();
@@ -397,24 +397,29 @@ namespace Engine
 #endif
             #endregion
 
-            return new[] { dc.FinishCommandList() };
+            QueueCommand(dc.FinishCommandList(), passIndex);
         }
         /// <summary>
         /// Do forward rendering (UI, transparents, etc.)
         /// </summary>
+        /// <param name="target">Render target</param>
+        /// <param name="clearRT">Clears the render target</param>
+        /// <param name="clearRTColor">Render target clear color</param>
+        /// <param name="clearDepth">Clears the depth buffer</param>
+        /// <param name="clearStencil">Clears the stencil buffer</param>
         /// <param name="components">Components</param>
         /// <param name="passIndex">Pass index</param>
-        private IEnumerable<IEngineCommandList> DoForward(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, ref int passIndex)
+        private void DoForward(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, int passIndex)
         {
             if (!components.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            var context = GetDeferredDrawContext(DrawerModes.Forward, $"{nameof(DoForward)}", passIndex++, false);
+            var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward, false);
             bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
 #if DEBUG
             swCull.Stop();
@@ -423,7 +428,7 @@ namespace Engine
 
             if (!draw)
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
             var dc = context.DeviceContext;
@@ -433,7 +438,7 @@ namespace Engine
 #endif
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
             UpdateGlobalState(dc);
@@ -449,7 +454,7 @@ namespace Engine
             frameStats.DisabledDeferredDraw = swDraw.ElapsedTicks;
 #endif
 
-            return new[] { dc.FinishCommandList() };
+            QueueCommand(dc.FinishCommandList(), passIndex);
         }
 
         /// <summary>
@@ -497,11 +502,10 @@ namespace Engine
         /// <summary>
         /// Draw lights
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        private void DrawLights(DrawContext context)
+        /// <param name="dc">Device context</param>
+        /// <param name="lights">Light collection</param>
+        private void DrawLights(EngineDeviceContext dc, SceneLights lights)
         {
-            var dc = context.DeviceContext;
-
 #if DEBUG
             lightStats.Clear();
 
@@ -509,9 +513,9 @@ namespace Engine
 #endif
             var graphics = Scene.Game.Graphics;
 
-            Counters.MaxInstancesPerFrame += context.Lights.DirectionalLights.Length;
-            Counters.MaxInstancesPerFrame += context.Lights.PointLights.Length;
-            Counters.MaxInstancesPerFrame += context.Lights.SpotLights.Length;
+            Counters.MaxInstancesPerFrame += lights.DirectionalLights.Length;
+            Counters.MaxInstancesPerFrame += lights.PointLights.Length;
+            Counters.MaxInstancesPerFrame += lights.SpotLights.Length;
 
             #region Initialization
 #if DEBUG
@@ -519,9 +523,9 @@ namespace Engine
 #endif
             lightDrawer.WriteBuffers(dc);
 
-            var directionalLights = context.Lights.GetVisibleDirectionalLights();
-            var spotLights = context.Lights.GetVisibleSpotLights();
-            var pointLights = context.Lights.GetVisiblePointLights();
+            var directionalLights = lights.GetVisibleDirectionalLights();
+            var spotLights = lights.GetVisibleSpotLights();
+            var pointLights = lights.GetVisiblePointLights();
 
             dc.SetDepthStencilState(graphics.GetDepthStencilRDZDisabled());
             SetBlendDeferredLighting(dc);
@@ -616,11 +620,10 @@ namespace Engine
         /// <summary>
         /// Draw result
         /// </summary>
-        /// <param name="context">Drawing context</param>
-        private void DrawResult(DrawContext context)
+        /// <param name="dc">Device context</param>
+        private void DrawResult(EngineDeviceContext dc)
         {
             var graphics = Scene.Game.Graphics;
-            var dc = context.DeviceContext;
 
 #if DEBUG
             long init = 0;

@@ -10,6 +10,7 @@ namespace Engine.Common
 {
     using Engine.BuiltIn;
     using Engine.BuiltIn.PostProcess;
+    using System.Collections.Concurrent;
 
     /// <summary>
     /// Base scene renderer
@@ -46,6 +47,27 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Directional shadows pass index
+        /// </summary>
+        protected const int ShadowsDirectionalPass = 0;
+        /// <summary>
+        /// Spot shadows pass index
+        /// </summary>
+        protected const int ShadowsSpotPass = 1;
+        /// <summary>
+        /// Point shadows pass index
+        /// </summary>
+        protected const int ShadowsPointPass = 2;
+        /// <summary>
+        /// Merge to screen pass index
+        /// </summary>
+        protected const int MergeScreenPass = 3;
+        /// <summary>
+        /// Next free pass index
+        /// </summary>
+        protected const int NextPass = 4;
+
+        /// <summary>
         /// Post-processing drawer
         /// </summary>
         private readonly IPostProcessingDrawer processingDrawer = null;
@@ -74,6 +96,14 @@ namespace Engine.Common
         /// Deferred context list
         /// </summary>
         private readonly List<EngineDeviceContext> deferredContextList = new();
+        /// <summary>
+        /// Pass list
+        /// </summary>
+        private readonly List<PassContext> passLists = new();
+        /// <summary>
+        /// Command list
+        /// </summary>
+        private readonly ConcurrentBag<(IEngineCommandList Command, int Order)> commandList = new();
 
         /// <summary>
         /// Update materials palette flag
@@ -312,6 +342,8 @@ namespace Engine.Common
 
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
+
+            PrepareScene();
         }
         /// <summary>
         /// Destructor
@@ -439,59 +471,35 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Gets the immediate draw context
+        /// Creates a deferred context
         /// </summary>
-        protected DrawContext GetImmediateDrawContext(DrawerModes drawMode, bool freeOMResources)
+        /// <param name="passIndex">Pass index</param>
+        protected EngineDeviceContext GetDeferredContext(int passIndex)
         {
-            var ic = Scene.Game.Graphics.ImmediateContext;
-            ic.ClearState(freeOMResources);
-
-            var camera = Scene.Camera;
-            var environment = Scene.GameEnvironment;
-
-            return new DrawContext
+            while (passIndex >= deferredContextList.Count)
             {
-                Name = $"Immediate context.",
+                deferredContextList.Add(Scene.Game.Graphics.CreateDeferredContext($"Deferred Context({passIndex})"));
+            }
 
-                GameTime = Scene.Game.GameTime,
-                Graphics = Scene.Game.Graphics,
-                Form = Scene.Game.Form,
-                DrawerMode = drawMode,
-
-                //Initialize context data from update context
-                ViewProjection = camera.View * camera.Projection,
-                CameraVolume = camera.Frustum,
-                EyePosition = camera.Position,
-                EyeDirection = camera.Direction,
-
-                //Initialize context data from scene
-                Lights = Scene.Lights,
-                LevelOfDetail = new Vector3(environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow),
-                ShadowMapDirectional = ShadowMapperDirectional,
-                ShadowMapPoint = ShadowMapperPoint,
-                ShadowMapSpot = ShadowMapperSpot,
-
-                //Device context
-                DeviceContext = ic,
-            };
+            return deferredContextList[passIndex];
         }
         /// <summary>
         /// Gets a deferred draw context
         /// </summary>
-        /// <param name="drawMode">Draw mode</param>
-        /// <param name="name">Name</param>
         /// <param name="passIndex">Pass index</param>
-        protected DrawContext GetDeferredDrawContext(DrawerModes drawMode, string name, int passIndex, bool freeOMResources)
+        /// <param name="drawMode">Draw mode</param>
+        /// <param name="freeOMResources">Frees output-merger resources</param>
+        protected DrawContext GetDeferredDrawContext(int passIndex, DrawerModes drawMode, bool freeOMResources)
         {
-            var dc = GetDeferredContext(name, passIndex);
-            dc.ClearState(freeOMResources);
+            var passContext = passLists[passIndex];
+            passContext.DeviceContext.ClearState(freeOMResources);
 
             var camera = Scene.Camera;
             var environment = Scene.GameEnvironment;
 
             return new DrawContext
             {
-                Name = $"Deferred pass[{passIndex}] context.",
+                Name = $"{drawMode} pass[{passIndex}] context.",
 
                 GameTime = Scene.Game.GameTime,
                 Graphics = Scene.Game.Graphics,
@@ -511,27 +519,23 @@ namespace Engine.Common
                 ShadowMapPoint = ShadowMapperPoint,
                 ShadowMapSpot = ShadowMapperSpot,
 
-                //Device context
-                DeviceContext = dc,
+                //Pass context
+                PassContext = passContext,
             };
         }
         /// <summary>
         /// Gets per light draw context
         /// </summary>
-        /// <param name="name">Name</param>
         /// <param name="passIndex">Pass index</param>
+        /// <param name="name">Name</param>
+        /// <param name="freeOMResources">Free resources</param>
         /// <param name="shadowMapper">Shadow mapper</param>
-        /// <param name="light">Light</param>
-        /// <param name="lightIndex">Light index</param>
-        protected virtual DrawContextShadows GetPerLightDrawContext(string name, int passIndex, bool freeOMResources, IShadowMap shadowMapper, ISceneLight light, int lightIndex)
+        protected virtual DrawContextShadows GetPerLightDrawContext(int passIndex, string name, bool freeOMResources, IShadowMap shadowMapper)
         {
-            var dc = GetDeferredContext(name, passIndex);
-            dc.ClearState(freeOMResources);
+            var passContext = passLists[passIndex];
+            passContext.DeviceContext.ClearState(freeOMResources);
 
             var camera = Scene.Camera;
-
-            shadowMapper.UpdateFromLightViewProjection(camera, light);
-            shadowMapper.Bind(dc, lightIndex);
 
             return new DrawContextShadows()
             {
@@ -543,22 +547,8 @@ namespace Engine.Common
                 Frustum = camera.Frustum,
                 ShadowMap = shadowMapper,
 
-                DeviceContext = dc,
+                PassContext = passContext,
             };
-        }
-        /// <summary>
-        /// Creates a deferred context
-        /// </summary>
-        /// <param name="name">Name</param>
-        /// <param name="passIndex">Pass index</param>
-        private EngineDeviceContext GetDeferredContext(string name, int passIndex)
-        {
-            while (passIndex >= deferredContextList.Count)
-            {
-                deferredContextList.Add(Scene.Game.Graphics.CreateDeferredContext($"Deferred Context {name}.{passIndex}"));
-            }
-
-            return deferredContextList[passIndex];
         }
 
         /// <inheritdoc/>
@@ -699,10 +689,59 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Updates the global resources state
+        /// Prepares the internal command list for deferred multithreaded rendering
         /// </summary>
-        /// <param name="dc">Device context</param>
-        protected void UpdateGlobalState(EngineDeviceContext dc)
+        /// <remarks>
+        /// Enumerate each pass for each single deferred device context, used in the scene
+        /// </remarks>
+        protected virtual void PrepareScene()
+        {
+            passLists.Clear();
+
+            AddPassContext(ShadowsDirectionalPass, "Directional Shadows");
+            AddPassContext(ShadowsSpotPass, "Spot Shadows");
+            AddPassContext(ShadowsPointPass, "Point Shadows");
+            AddPassContext(MergeScreenPass, "Merge to Screen");
+        }
+        /// <summary>
+        /// Adds a new pass to the pass list collection
+        /// </summary>
+        /// <param name="passIndex">Pass index</param>
+        /// <param name="name">Pass name</param>
+        protected void AddPassContext(int passIndex, string name)
+        {
+            if (passLists.Exists(c => c.PassIndex == passIndex))
+            {
+                return;
+            }
+
+            var dc = GetDeferredContext(passIndex);
+            passLists.Add(new PassContext
+            {
+                PassIndex = passIndex,
+                Name = name,
+                DeviceContext = dc,
+            });
+        }
+        /// <summary>
+        /// Queues a command in the command list by order
+        /// </summary>
+        /// <param name="command">Command</param>
+        /// <param name="order">Order</param>
+        protected void QueueCommand(IEngineCommandList command, int order)
+        {
+            if (command == null)
+            {
+                return;
+            }
+
+            commandList.Add((command, order));
+        }
+
+        /// <summary>
+        /// Refresh the global resources state
+        /// </summary>
+        protected void RefreshGlobalState()
         {
             ShadowMapperDirectional?.UpdateGlobals();
             ShadowMapperPoint?.UpdateGlobals();
@@ -725,7 +764,13 @@ namespace Engine.Common
 
                 updateAnimationsPalette = false;
             }
-
+        }
+        /// <summary>
+        /// Updates the global resources state in the specified device context
+        /// </summary>
+        /// <param name="dc">Device context</param>
+        protected void UpdateGlobalState(EngineDeviceContext dc)
+        {
             BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
 
@@ -824,6 +869,7 @@ namespace Engine.Common
         /// Performs the culling test
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="volume">Culling volume</param>
         /// <param name="components">Components collection to test</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns>Returns true if the test find components to draw</returns>
@@ -911,8 +957,7 @@ namespace Engine.Common
         /// <summary>
         /// Draw shadow maps
         /// </summary>
-        /// <param name="passIndex">Pass index</param>
-        protected IEnumerable<IEngineCommandList> DoShadowMapping(ref int passIndex)
+        protected void DoShadowMapping()
         {
 #if DEBUG
             shadowMappingDict.Clear();
@@ -920,13 +965,11 @@ namespace Engine.Common
 
             int cullIndex = CullIndexShadowMaps;
 
-            var commandList = new List<IEngineCommandList>();
+            DoDirectionalShadowMapping(ref cullIndex);
 
-            commandList.AddRange(DoDirectionalShadowMapping(ref passIndex, ref cullIndex));
+            DoPointShadowMapping(ref cullIndex);
 
-            commandList.AddRange(DoPointShadowMapping(ref passIndex, ref cullIndex));
-
-            commandList.AddRange(DoSpotShadowMapping(ref passIndex, ref cullIndex));
+            DoSpotShadowMapping(ref cullIndex);
 
 #if DEBUG
             if (Scene.Game.CollectGameStatus)
@@ -934,20 +977,18 @@ namespace Engine.Common
                 Scene.Game.GameStatus.Add(shadowMappingDict);
             }
 #endif
-
-            return commandList;
         }
         /// <summary>
         /// Draw directional shadow maps
         /// </summary>
-        /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected IEnumerable<IEngineCommandList> DoDirectionalShadowMapping(ref int passIndex, ref int cullIndex)
+        protected void DoDirectionalShadowMapping(ref int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
             var stopwatch = Stopwatch.StartNew();
 #endif
+            //Get directional lights which cast shadows
             var shadowCastingLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
@@ -956,13 +997,13 @@ namespace Engine.Common
 
             if (!shadowCastingLights.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
-            //Objects that cast shadows
 #if DEBUG
             stopwatch.Restart();
 #endif
+            //Get the object list affected by directional shadows
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
 #if DEBUG
             stopwatch.Stop();
@@ -971,20 +1012,27 @@ namespace Engine.Common
 
             if (!shadowObjs.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
-            //All objects suitable for culling
+            //Crate the draw context for directional lights
+            var drawContext = GetPerLightDrawContext(ShadowsDirectionalPass, "Directional", false, ShadowMapperDirectional);
+            var dc = drawContext.DeviceContext;
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return;
+            }
+
+            UpdateGlobalState(dc);
+
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
+            //Get if all affected objects are suitable for cull testing
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
+            //Get the camera sphere volume for cull testing
             var camSphere = Scene.Camera.GetIntersectionVolume(IntersectDetectionMode.Sphere);
-            if (!DoShadowCullingTest(toCullShadowObjs, 0, camSphere, cullIndex, allCullingObjects))
-            {
-                return Enumerable.Empty<IEngineCommandList>();
-            }
 
-            var commandList = new List<IEngineCommandList>();
             int assigned = 0;
             int l = 0;
             foreach (var light in shadowCastingLights)
@@ -996,37 +1044,17 @@ namespace Engine.Common
                     continue;
                 }
 
-                //Draw shadows
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                var drawContext = GetPerLightDrawContext("Directional", passIndex, false, ShadowMapperDirectional, light, assigned * MaxDirectionalCascadeShadowMaps);
-                var dc = drawContext.DeviceContext;
-
-                if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+                //Cull testing
+                if (!DoShadowCullingTest(toCullShadowObjs, l, camSphere, cullIndex++, allCullingObjects))
                 {
-                    break;
+                    continue;
                 }
 
-                UpdateGlobalState(dc);
-
-                //Draw
-                DrawShadowComponents(drawContext, cullIndex, shadowObjs);
-
-                commandList.Add(dc.FinishCommandList());
-#if DEBUG
-                stopwatch.Stop();
-                shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                //Assign light parameters
-                light.SetShadowParameters(assigned, 1);
-
-                passIndex++;
-
-                assigned++;
-
-                cullIndex++;
+                if (DrawLight(drawContext, shadowObjs, light, l, cullIndex, assigned * MaxDirectionalCascadeShadowMaps))
+                {
+                    //Assign light parameters
+                    light.SetShadowParameters(assigned++, 1);
+                }
 
                 l++;
             }
@@ -1036,19 +1064,19 @@ namespace Engine.Common
             shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
 
-            return commandList;
+            QueueCommand(dc.FinishCommandList(), ShadowsDirectionalPass);
         }
         /// <summary>
         /// Draw point light shadow maps
         /// </summary>
-        /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected IEnumerable<IEngineCommandList> DoPointShadowMapping(ref int passIndex, ref int cullIndex)
+        protected void DoPointShadowMapping(ref int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
             var stopwatch = Stopwatch.StartNew();
 #endif
+            //Get point lights which cast shadows
             var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
@@ -1057,13 +1085,13 @@ namespace Engine.Common
 
             if (!shadowCastingLights.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
-            //Draw components if drop shadow (opaque)
 #if DEBUG
             stopwatch.Restart();
 #endif
+            //Get the object list affected by point shadows
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
 #if DEBUG
             stopwatch.Stop();
@@ -1072,14 +1100,25 @@ namespace Engine.Common
 
             if (!shadowObjs.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
-            //All objects suitable for culling
+            //Crate the draw context for point lights
+            var drawContext = GetPerLightDrawContext(ShadowsPointPass, "Point", false, ShadowMapperPoint);
+            var dc = drawContext.DeviceContext;
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return;
+            }
+
+            UpdateGlobalState(dc);
+
+
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
+            //Get if all affected objects are suitable for cull testing
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var commandList = new List<IEngineCommandList>();
             int assigned = 0;
             int l = 0;
             foreach (var light in shadowCastingLights)
@@ -1091,43 +1130,17 @@ namespace Engine.Common
                     continue;
                 }
 
-                //Cull test
-                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex, allCullingObjects))
+                //Cull testing
+                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex++, allCullingObjects))
                 {
                     continue;
                 }
 
-                //Draw shadows
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                var drawShadowsContext = GetPerLightDrawContext("Point", passIndex, false, ShadowMapperPoint, light, assigned);
-                var dc = drawShadowsContext.DeviceContext;
-
-                if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+                if (DrawLight(drawContext, shadowObjs, light, l, cullIndex, assigned))
                 {
-                    break;
+                    //Assign light parameters
+                    light.SetShadowParameters(assigned++);
                 }
-
-                UpdateGlobalState(dc);
-
-                //Draw
-                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
-
-                commandList.Add(dc.FinishCommandList());
-#if DEBUG
-                stopwatch.Stop();
-                shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                //Assign light parameters
-                light.SetShadowParameters(assigned);
-
-                passIndex++;
-
-                assigned++;
-
-                cullIndex++;
 
                 l++;
             }
@@ -1137,19 +1150,19 @@ namespace Engine.Common
             shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
 
-            return commandList;
+            QueueCommand(dc.FinishCommandList(), ShadowsPointPass);
         }
         /// <summary>
         /// Draw spot light shadow maps
         /// </summary>
-        /// <param name="passIndex">Pass index</param>
         /// <param name="cullIndex">Cull index</param>
-        protected IEnumerable<IEngineCommandList> DoSpotShadowMapping(ref int passIndex, ref int cullIndex)
+        protected void DoSpotShadowMapping(ref int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
             var stopwatch = Stopwatch.StartNew();
 #endif
+            //Get spot lights which cast shadows
             var shadowCastingLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
 #if DEBUG
             stopwatch.Stop();
@@ -1158,13 +1171,13 @@ namespace Engine.Common
 
             if (!shadowCastingLights.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
-            //Draw components if drop shadow (opaque)
 #if DEBUG
             stopwatch.Restart();
 #endif
+            //Get the object list affected by spot shadows
             var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
 #if DEBUG
             stopwatch.Stop();
@@ -1173,14 +1186,24 @@ namespace Engine.Common
 
             if (!shadowObjs.Any())
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
             }
 
-            //All objects suitable for culling
+            //Crate the draw context for spot lights
+            var drawContext = GetPerLightDrawContext(ShadowsSpotPass, "Spot", false, ShadowMapperSpot);
+            var dc = drawContext.DeviceContext;
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return;
+            }
+
+            UpdateGlobalState(dc);
+
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
+            //Get if all affected objects are suitable for cull testing
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            var commandList = new List<IEngineCommandList>();
             int assigned = 0;
             int l = 0;
             foreach (var light in shadowCastingLights)
@@ -1192,43 +1215,17 @@ namespace Engine.Common
                     continue;
                 }
 
-                //Cull test
-                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex, allCullingObjects))
+                //Cull testing
+                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex++, allCullingObjects))
                 {
                     continue;
                 }
 
-                //Draw shadows
-#if DEBUG
-                stopwatch.Restart();
-#endif
-                var drawShadowsContext = GetPerLightDrawContext("Spot", passIndex, false, ShadowMapperSpot, light, assigned);
-                var dc = drawShadowsContext.DeviceContext;
-
-                if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+                if (DrawLight(drawContext, shadowObjs, light, l, cullIndex, assigned))
                 {
-                    break;
+                    //Assign light parameters
+                    light.SetShadowParameters(drawContext.ShadowMap.FromLightViewProjectionArray, assigned++, 1);
                 }
-
-                UpdateGlobalState(dc);
-
-                //Draw
-                DrawShadowComponents(drawShadowsContext, cullIndex, shadowObjs);
-
-                commandList.Add(dc.FinishCommandList());
-#if DEBUG
-                stopwatch.Stop();
-                shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-                //Assign light parameters
-                light.SetShadowParameters(drawShadowsContext.ShadowMap.FromLightViewProjectionArray, assigned, 1);
-
-                passIndex++;
-
-                assigned++;
-
-                cullIndex++;
 
                 l++;
             }
@@ -1238,7 +1235,7 @@ namespace Engine.Common
             shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
 
-            return commandList;
+            QueueCommand(dc.FinishCommandList(), ShadowsSpotPass);
         }
         /// <summary>
         /// Performs shadow culling testing
@@ -1248,7 +1245,6 @@ namespace Engine.Common
         /// <param name="lightVolume">Light volume</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="allCullingObjects">All components were culling components</param>
-        /// <returns></returns>
         protected bool DoShadowCullingTest(IEnumerable<ICullable> components, int l, ICullingVolume lightVolume, int cullIndex, bool allCullingObjects)
         {
             if (components.Any())
@@ -1272,6 +1268,32 @@ namespace Engine.Common
                 //All objects suitable for culling but no one pass the culling test
                 return false;
             }
+
+            return true;
+        }
+        /// <summary>
+        /// Draws a light in a shadow map
+        /// </summary>
+        /// <param name="drawContext">Drawing context</param>
+        /// <param name="components">Object list affected by the light</param>
+        /// <param name="light">Light</param>
+        /// <param name="l">Light index</param>
+        /// <param name="cullIndex">Cull index</param>
+        /// <param name="assigned">Assigned buffer index</param>
+        private bool DrawLight(DrawContextShadows drawContext, IEnumerable<IDrawable> components, ISceneLight light, int l, int cullIndex, int assigned)
+        {
+#if DEBUG
+            var stopwatch = Stopwatch.StartNew();
+#endif
+            drawContext.ShadowMap.UpdateFromLightViewProjection(Scene.Camera, light);
+            drawContext.ShadowMap.Bind(drawContext.DeviceContext, assigned);
+
+            //Draw
+            DrawShadowComponents(drawContext, cullIndex, components);
+#if DEBUG
+            stopwatch.Stop();
+            shadowMappingDict.Add($"{nameof(DrawLight)} {light.GetType()} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+#endif
 
             return true;
         }
@@ -1371,6 +1393,22 @@ namespace Engine.Common
             drawable.DrawShadows(context);
         }
 
+        /// <summary>
+        /// Gets the target textures
+        /// </summary>
+        /// <param name="target">Target type</param>
+        /// <returns>Returns the target texture list</returns>
+        protected IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
+        {
+            return target switch
+            {
+                Targets.Screen => Enumerable.Empty<EngineShaderResourceView>(),
+                Targets.Objects => sceneObjectsTarget?.Textures,
+                Targets.UI => sceneUITarget?.Textures,
+                Targets.Result => sceneResultsTarget?.Textures,
+                _ => Enumerable.Empty<EngineShaderResourceView>(),
+            };
+        }
         /// <summary>
         /// Binds graphics for results pass
         /// </summary>
@@ -1511,38 +1549,139 @@ namespace Engine.Common
         /// <param name="target">Target to set result</param>
         /// <param name="renderPass">Render pass</param>
         /// <param name="passIndex">Pass index</param>
-        protected IEnumerable<IEngineCommandList> DoPostProcessing(Targets target, RenderPass renderPass, ref int passIndex)
+        protected void DoPostProcessing(Targets target, RenderPass renderPass, int passIndex)
+        {
+            var pass = passLists[passIndex];
+            var dc = pass.DeviceContext;
+            dc.ClearState(true);
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return;
+            }
+
+            UpdateGlobalState(dc);
+
+            DrawPostProcessing(dc, target, renderPass);
+
+            QueueCommand(dc.FinishCommandList(), passIndex);
+        }
+
+        /// <summary>
+        /// Initializes the scene state
+        /// </summary>
+        protected void InitializeScene()
+        {
+            commandList.Clear();
+
+            RefreshGlobalState();
+
+            var graphics = Scene.Game.Graphics;
+            var ic = graphics.ImmediateContext;
+
+            ic.SetViewport(graphics.Viewport);
+            ic.SetRenderTargets(
+                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
+                graphics.DefaultDepthStencil, true, true,
+                false);
+        }
+        /// <summary>
+        /// Merge to screen
+        /// </summary>
+        protected void MergeToScreen()
+        {
+            var pass = passLists[MergeScreenPass];
+            var dc = pass.DeviceContext;
+            dc.ClearState(true);
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return;
+            }
+
+            UpdateGlobalState(dc);
+
+            //Combine to result
+            CombineTargets(dc, Targets.Objects, Targets.UI, Targets.Result);
+
+            //Final post-processing
+            //DoPostProcessing(dc, Targets.Result, RenderPass.Final);
+
+            //Draw to screen
+            DrawToScreen(dc, Targets.Result);
+
+            QueueCommand(dc.FinishCommandList(), int.MaxValue);
+
+            var graphics = Scene.Game.Graphics;
+            var ic = graphics.ImmediateContext;
+            ic.SetViewport(graphics.Viewport);
+            ic.SetRenderTargets(
+                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
+                graphics.DefaultDepthStencil, true, true,
+                false);
+
+            //Execute command list
+            var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
+            ic.ExecuteCommandLists(commands);
+
+            ic.SetViewport(graphics.Viewport);
+            ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
+        }
+        /// <summary>
+        /// Combine the specified targets into the result target
+        /// </summary>
+        /// <param name="dc">Device context</param>
+        /// <param name="target1">Target 1</param>
+        /// <param name="target2">Target 2</param>
+        /// <param name="resultTarget">Result target</param>
+        private void CombineTargets(EngineDeviceContext dc, Targets target1, Targets target2, Targets resultTarget)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            SetTarget(dc, resultTarget, false, Color.Transparent);
+
+            dc.SetDepthStencilState(graphics.GetDepthStencilNone());
+            dc.SetRasterizerState(graphics.GetRasterizerDefault());
+            dc.SetBlendState(graphics.GetBlendDefault());
+
+            var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
+            var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
+
+            var drawer = processingDrawer.UpdateEffectCombine(dc, texture1, texture2);
+            processingDrawer.Draw(dc, drawer);
+        }
+        /// <summary>
+        /// Does the post-processing draw
+        /// </summary>
+        /// <param name="dc">Device context</param>
+        /// <param name="target">Target to set result</param>
+        /// <param name="renderPass">Render pass</param>
+        private void DrawPostProcessing(EngineDeviceContext dc, Targets target, RenderPass renderPass)
         {
             if (!ValidateRenderPass(renderPass, out var state))
             {
-                return Enumerable.Empty<IEngineCommandList>();
+                return;
+            }
+
+            var drawer = processingDrawer.UpdateEffectParameters(dc, state);
+            if (drawer == null)
+            {
+                return;
+            }
+
+            var activeEffects = state.GetEffects();
+            if (!activeEffects.Any())
+            {
+                return;
             }
 
             //Gets the last used target texture
             var texture = GetTargetTextures(target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
-            var dc = GetDeferredContext($"PostProcessing {renderPass}->{target}", passIndex++);
-            dc.ClearState(true);
-
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
-            {
-                return Enumerable.Empty<IEngineCommandList>();
-            }
-
-            UpdateGlobalState(dc);
-
             dc.SetRasterizerState(graphics.GetRasterizerCullNone());
             dc.SetDepthStencilState(graphics.GetDepthStencilNone());
             dc.SetBlendState(graphics.GetBlendDefault());
-
-            var drawer = processingDrawer.UpdateEffectParameters(dc, state);
-            if (drawer == null)
-            {
-                return Enumerable.Empty<IEngineCommandList>();
-            }
-
-            var activeEffects = state.GetEffects();
 
             for (int i = 0; i < activeEffects.Count(); i++)
             {
@@ -1571,76 +1710,15 @@ namespace Engine.Common
             //Draw the result
             var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, resultDrawer);
-
-            return new[] { dc.FinishCommandList() };
-        }
-        /// <summary>
-        /// Gets the target textures
-        /// </summary>
-        /// <param name="target">Target type</param>
-        /// <returns>Returns the target texture list</returns>
-        protected IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
-        {
-            return target switch
-            {
-                Targets.Screen => Enumerable.Empty<EngineShaderResourceView>(),
-                Targets.Objects => sceneObjectsTarget?.Textures,
-                Targets.UI => sceneUITarget?.Textures,
-                Targets.Result => sceneResultsTarget?.Textures,
-                _ => Enumerable.Empty<EngineShaderResourceView>(),
-            };
-        }
-        /// <summary>
-        /// Combine the specified targets into the result target
-        /// </summary>
-        /// <param name="target1">Target 1</param>
-        /// <param name="target2">Target 2</param>
-        /// <param name="resultTarget">Result target</param>
-        /// <param name="passIndex">Pass index</param>
-        protected IEnumerable<IEngineCommandList> CombineTargets(Targets target1, Targets target2, Targets resultTarget, ref int passIndex)
-        {
-            var graphics = Scene.Game.Graphics;
-            var dc = GetDeferredContext($"Combine {target1}+{target2}->{resultTarget}", passIndex++);
-            dc.ClearState(false);
-
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
-            {
-                return Enumerable.Empty<IEngineCommandList>();
-            }
-
-            UpdateGlobalState(dc);
-
-            SetTarget(dc, resultTarget, false, Color.Transparent);
-
-            dc.SetDepthStencilState(graphics.GetDepthStencilNone());
-            dc.SetRasterizerState(graphics.GetRasterizerDefault());
-            dc.SetBlendState(graphics.GetBlendDefault());
-
-            var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
-            var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
-
-            var drawer = processingDrawer.UpdateEffectCombine(dc, texture1, texture2);
-            processingDrawer.Draw(dc, drawer);
-
-            return new[] { dc.FinishCommandList() };
         }
         /// <summary>
         /// Draws the specified target to screen
         /// </summary>
+        /// <param name="dc">Device context</param>
         /// <param name="target">Target</param>
-        /// <param name="passIndex">Pass index</param>
-        protected IEnumerable<IEngineCommandList> DrawToScreen(Targets target, ref int passIndex)
+        private void DrawToScreen(EngineDeviceContext dc, Targets target)
         {
             var graphics = Scene.Game.Graphics;
-            var dc = GetDeferredContext($"{nameof(DrawToScreen)} {target}->Screen", passIndex++);
-            dc.ClearState(false);
-
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
-            {
-                return Enumerable.Empty<IEngineCommandList>();
-            }
-
-            UpdateGlobalState(dc);
 
             SetTarget(dc, Targets.Screen, false, Color.Transparent);
 
@@ -1652,8 +1730,6 @@ namespace Engine.Common
 
             var drawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, drawer);
-
-            return new[] { dc.FinishCommandList() };
         }
 
         /// <inheritdoc/>
