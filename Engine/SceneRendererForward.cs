@@ -73,7 +73,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        protected override void PrepareScene()
+        public override void PrepareScene()
         {
             base.PrepareScene();
 
@@ -116,7 +116,7 @@ namespace Engine
             if (objectComponents.Any())
             {
                 //Render objects
-                DoRender(Targets.Objects, true, Scene.GameEnvironment.Background, true, true, objectComponents, ObjectsPass);
+                DoRender(Targets.Objects, true, Scene.GameEnvironment.Background, true, true, objectComponents, CullObjects, ObjectsPass);
                 //Post-processing
                 DoPostProcessing(Targets.Objects, RenderPass.Objects, ObjectsPostProcessingPass);
             }
@@ -125,7 +125,7 @@ namespace Engine
             if (uiComponents.Any())
             {
                 //Render UI
-                DoRender(Targets.UI, true, Color.Transparent, false, false, uiComponents, UIPass);
+                DoRender(Targets.UI, true, Color.Transparent, false, false, uiComponents, CullUI, UIPass);
                 //UI post-processing
                 DoPostProcessing(Targets.UI, RenderPass.UI, UIPostProcessingPass);
             }
@@ -149,8 +149,9 @@ namespace Engine
         /// <param name="clearDepth">Clear depth buffer</param>
         /// <param name="clearStencil">Clear stencil buffer</param>
         /// <param name="components">Components</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoRender(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, int passIndex)
+        private void DoRender(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
         {
             if (!components.Any())
             {
@@ -162,7 +163,7 @@ namespace Engine
 #endif
             //Get draw context
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward, false);
-            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.ForwardCull = swCull.ElapsedTicks;
@@ -190,7 +191,7 @@ namespace Engine
             SetTarget(dc, target, clearRT, clearRTColor, clearDepth, clearStencil);
 
             //Draw solid
-            DrawResultComponents(context, CullIndexDrawIndex, components);
+            DrawResultComponents(context, cullIndex, components);
 #if DEBUG
             swDraw.Stop();
             frameStats.ForwardDraw = swDraw.ElapsedTicks;

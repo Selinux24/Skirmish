@@ -28,6 +28,14 @@ namespace Engine
         BuiltInPostProcessState PostProcessingFinalEffects { get; set; }
 
         /// <summary>
+        /// Prepares the internal command list for deferred multithreaded rendering
+        /// </summary>
+        /// <remarks>
+        /// Enumerate each pass for each single deferred device context, used in the scene
+        /// </remarks>
+        void PrepareScene();
+
+        /// <summary>
         /// Updates scene components
         /// </summary>
         /// <param name="gameTime">Game time</param>

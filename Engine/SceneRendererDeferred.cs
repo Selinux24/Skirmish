@@ -202,7 +202,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        protected override void PrepareScene()
+        public override void PrepareScene()
         {
             base.PrepareScene();
 
@@ -279,13 +279,13 @@ namespace Engine
                 if (anyDeferred)
                 {
                     //Render to G-Buffer deferred enabled components
-                    DoDeferred(deferredEnabledComponents, ObjectsDeferredPass);
+                    DoDeferred(deferredEnabledComponents, CullObjects, ObjectsDeferredPass);
                 }
 
                 if (anyForward)
                 {
                     //Render to screen deferred disabled components
-                    DoForward(Targets.Objects, false, Scene.GameEnvironment.Background, false, false, deferredDisabledComponents, ObjectsForwardPass);
+                    DoForward(Targets.Objects, false, Scene.GameEnvironment.Background, false, false, deferredDisabledComponents, CullObjects, ObjectsForwardPass);
                 }
 
                 //Post-processing
@@ -297,7 +297,7 @@ namespace Engine
             if (uiComponents.Any())
             {
                 //UI render
-                DoForward(Targets.UI, true, Color.Transparent, false, false, uiComponents, UIPass);
+                DoForward(Targets.UI, true, Color.Transparent, false, false, uiComponents, CullUI, UIPass);
                 //UI post-processing
                 DoPostProcessing(Targets.UI, RenderPass.UI, UIPostProcessingPass);
             }
@@ -315,8 +315,9 @@ namespace Engine
         /// Do deferred rendering
         /// </summary>
         /// <param name="components">Components</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoDeferred(IEnumerable<IDrawable> components, int passIndex)
+        private void DoDeferred(IEnumerable<IDrawable> components, int cullIndex, int passIndex)
         {
             if (!components.Any())
             {
@@ -327,7 +328,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Deferred, false);
-            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DeferredCull = swCull.ElapsedTicks;
@@ -357,7 +358,7 @@ namespace Engine
             var swGeometryBufferDraw = Stopwatch.StartNew();
 #endif
             //Draw scene on g-buffer render targets
-            DrawResultComponents(context, CullIndexDrawIndex, components);
+            DrawResultComponents(context, cullIndex, components);
 #if DEBUG
             swGeometryBufferDraw.Stop();
             swGeometryBuffer.Stop();
@@ -408,8 +409,9 @@ namespace Engine
         /// <param name="clearDepth">Clears the depth buffer</param>
         /// <param name="clearStencil">Clears the stencil buffer</param>
         /// <param name="components">Components</param>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoForward(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, int passIndex)
+        private void DoForward(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
         {
             if (!components.Any())
             {
@@ -420,7 +422,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward, false);
-            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), CullIndexDrawIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DisabledDeferredCull = swCull.ElapsedTicks;
@@ -447,7 +449,7 @@ namespace Engine
             SetTarget(dc, target, clearRT, clearRTColor, clearDepth, clearStencil);
 
             //Draw scene
-            DrawResultComponents(context, CullIndexDrawIndex, components);
+            DrawResultComponents(context, cullIndex, components);
 
 #if DEBUG
             swDraw.Stop();

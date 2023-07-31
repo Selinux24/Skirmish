@@ -68,6 +68,19 @@ namespace Engine.Common
         protected const int NextPass = 4;
 
         /// <summary>
+        /// Cull index for objects
+        /// </summary>
+        protected const int CullObjects = 0;
+        /// <summary>
+        /// Cull index for UI components
+        /// </summary>
+        protected const int CullUI = 1;
+        /// <summary>
+        /// First cull index for shadows
+        /// </summary>
+        protected const int CullShadows = 2;
+
+        /// <summary>
         /// Post-processing drawer
         /// </summary>
         private readonly IPostProcessingDrawer processingDrawer = null;
@@ -168,15 +181,6 @@ namespace Engine.Common
         /// Max spot shadows
         /// </summary>
         protected const int MaxSpotShadows = 16;
-
-        /// <summary>
-        /// Cull index for drawing
-        /// </summary>
-        protected const int CullIndexDrawIndex = 0;
-        /// <summary>
-        /// Cull index for low definition shadows
-        /// </summary>
-        protected const int CullIndexShadowMaps = 100;
 
         /// <summary>
         /// Shadow mapper for directional lights
@@ -342,8 +346,6 @@ namespace Engine.Common
 
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
-
-            PrepareScene();
         }
         /// <summary>
         /// Destructor
@@ -688,13 +690,8 @@ namespace Engine.Common
             return res;
         }
 
-        /// <summary>
-        /// Prepares the internal command list for deferred multithreaded rendering
-        /// </summary>
-        /// <remarks>
-        /// Enumerate each pass for each single deferred device context, used in the scene
-        /// </remarks>
-        protected virtual void PrepareScene()
+        /// <inheritdoc/>
+        public virtual void PrepareScene()
         {
             passLists.Clear();
 
@@ -963,13 +960,15 @@ namespace Engine.Common
             shadowMappingDict.Clear();
 #endif
 
-            int cullIndex = CullIndexShadowMaps;
+            int cullIndexDir = CullShadows;
+            int cullIndexPoint = cullIndexDir + Scene.Lights.DirectionalLights.Length;
+            int cullIndexSpot = cullIndexPoint + Scene.Lights.PointLights.Length;
 
-            DoDirectionalShadowMapping(ref cullIndex);
+            DoDirectionalShadowMapping(cullIndexDir);
 
-            DoPointShadowMapping(ref cullIndex);
+            DoPointShadowMapping(cullIndexPoint);
 
-            DoSpotShadowMapping(ref cullIndex);
+            DoSpotShadowMapping(cullIndexSpot);
 
 #if DEBUG
             if (Scene.Game.CollectGameStatus)
@@ -982,7 +981,7 @@ namespace Engine.Common
         /// Draw directional shadow maps
         /// </summary>
         /// <param name="cullIndex">Cull index</param>
-        protected void DoDirectionalShadowMapping(ref int cullIndex)
+        protected void DoDirectionalShadowMapping(int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1034,9 +1033,10 @@ namespace Engine.Common
             var camSphere = Scene.Camera.GetIntersectionVolume(IntersectDetectionMode.Sphere);
 
             int assigned = 0;
-            int l = 0;
-            foreach (var light in shadowCastingLights)
+            var lArray = shadowCastingLights.ToArray();
+            for (int l = 0; l < lArray.Length; l++)
             {
+                var light = lArray[l];
                 light.ClearShadowParameters();
 
                 if (assigned >= MaxDirectionalShadowMaps)
@@ -1044,19 +1044,19 @@ namespace Engine.Common
                     continue;
                 }
 
+                int lCullIndex = cullIndex + l;
+
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, l, camSphere, cullIndex++, allCullingObjects))
+                if (!DoShadowCullingTest(toCullShadowObjs, l, camSphere, lCullIndex, allCullingObjects))
                 {
                     continue;
                 }
 
-                if (DrawLight(drawContext, shadowObjs, light, l, cullIndex, assigned * MaxDirectionalCascadeShadowMaps))
+                if (DrawLight(drawContext, shadowObjs, light, lCullIndex, assigned * MaxDirectionalCascadeShadowMaps))
                 {
                     //Assign light parameters
                     light.SetShadowParameters(assigned++, 1);
                 }
-
-                l++;
             }
 
 #if DEBUG
@@ -1070,7 +1070,7 @@ namespace Engine.Common
         /// Draw point light shadow maps
         /// </summary>
         /// <param name="cullIndex">Cull index</param>
-        protected void DoPointShadowMapping(ref int cullIndex)
+        protected void DoPointShadowMapping(int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1114,15 +1114,16 @@ namespace Engine.Common
 
             UpdateGlobalState(dc);
 
-
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             //Get if all affected objects are suitable for cull testing
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
+            var lArray = shadowCastingLights.ToArray();
             int assigned = 0;
-            int l = 0;
-            foreach (var light in shadowCastingLights)
+            for (int l = 0; l < lArray.Length; l++)
             {
+                var light = lArray[l];
+
                 light.ClearShadowParameters();
 
                 if (assigned >= MaxCubicShadows)
@@ -1130,21 +1131,20 @@ namespace Engine.Common
                     continue;
                 }
 
+                int lCullIndex = cullIndex + l;
+
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex++, allCullingObjects))
+                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
                 {
                     continue;
                 }
 
-                if (DrawLight(drawContext, shadowObjs, light, l, cullIndex, assigned))
+                if (DrawLight(drawContext, shadowObjs, light, lCullIndex, assigned))
                 {
                     //Assign light parameters
                     light.SetShadowParameters(assigned++);
                 }
-
-                l++;
             }
-
 #if DEBUG
             gStopwatch.Stop();
             shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
@@ -1156,7 +1156,7 @@ namespace Engine.Common
         /// Draw spot light shadow maps
         /// </summary>
         /// <param name="cullIndex">Cull index</param>
-        protected void DoSpotShadowMapping(ref int cullIndex)
+        protected void DoSpotShadowMapping(int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1204,10 +1204,12 @@ namespace Engine.Common
             //Get if all affected objects are suitable for cull testing
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
+            var lArray = shadowCastingLights.ToArray();
             int assigned = 0;
-            int l = 0;
-            foreach (var light in shadowCastingLights)
+            for (int l = 0; l < lArray.Length; l++)
             {
+                var light = lArray[l];
+
                 light.ClearShadowParameters();
 
                 if (assigned >= MaxCubicShadows)
@@ -1215,21 +1217,20 @@ namespace Engine.Common
                     continue;
                 }
 
+                int lCullIndex = cullIndex + l;
+
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), cullIndex++, allCullingObjects))
+                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
                 {
                     continue;
                 }
 
-                if (DrawLight(drawContext, shadowObjs, light, l, cullIndex, assigned))
+                if (DrawLight(drawContext, shadowObjs, light, lCullIndex, assigned))
                 {
                     //Assign light parameters
                     light.SetShadowParameters(drawContext.ShadowMap.FromLightViewProjectionArray, assigned++, 1);
                 }
-
-                l++;
             }
-
 #if DEBUG
             gStopwatch.Stop();
             shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
@@ -1277,10 +1278,9 @@ namespace Engine.Common
         /// <param name="drawContext">Drawing context</param>
         /// <param name="components">Object list affected by the light</param>
         /// <param name="light">Light</param>
-        /// <param name="l">Light index</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="assigned">Assigned buffer index</param>
-        private bool DrawLight(DrawContextShadows drawContext, IEnumerable<IDrawable> components, ISceneLight light, int l, int cullIndex, int assigned)
+        private bool DrawLight(DrawContextShadows drawContext, IEnumerable<IDrawable> components, ISceneLight light, int cullIndex, int assigned)
         {
 #if DEBUG
             var stopwatch = Stopwatch.StartNew();
@@ -1292,7 +1292,7 @@ namespace Engine.Common
             DrawShadowComponents(drawContext, cullIndex, components);
 #if DEBUG
             stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DrawLight)} {light.GetType()} {l} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DrawLight)} {light.GetType()} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             return true;
@@ -1605,7 +1605,7 @@ namespace Engine.Common
             CombineTargets(dc, Targets.Objects, Targets.UI, Targets.Result);
 
             //Final post-processing
-            //DoPostProcessing(dc, Targets.Result, RenderPass.Final);
+            DrawPostProcessing(dc, Targets.Result, RenderPass.Final);
 
             //Draw to screen
             DrawToScreen(dc, Targets.Result);

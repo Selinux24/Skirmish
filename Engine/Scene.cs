@@ -265,6 +265,8 @@ namespace Engine
                 return false;
             }
 
+            renderer.PrepareScene();
+
             ReplaceRenderer(renderer);
             sceneMode = mode;
 
