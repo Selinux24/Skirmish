@@ -11,6 +11,7 @@ namespace Engine.Common
     using Engine.BuiltIn;
     using Engine.BuiltIn.PostProcess;
     using System.Collections.Concurrent;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Base scene renderer
@@ -44,6 +45,32 @@ namespace Engine.Common
             /// Screen
             /// </summary>
             Screen,
+        }
+        /// <summary>
+        /// Render target parameters
+        /// </summary>
+        protected struct RenderTargetParameters
+        {
+            /// <summary>
+            /// Render target
+            /// </summary>
+            public Targets Target;
+            /// <summary>
+            /// Clears the render target using the <see cref="ClearRTColor"/> value
+            /// </summary>
+            public bool ClearRT;
+            /// <summary>
+            /// Render target clear color
+            /// </summary>
+            public Color4 ClearRTColor;
+            /// <summary>
+            /// Clears the depth buffer
+            /// </summary>
+            public bool ClearDepth;
+            /// <summary>
+            /// Clears the stencil buffer
+            /// </summary>
+            public bool ClearStencil;
         }
 
         /// <summary>
@@ -117,6 +144,10 @@ namespace Engine.Common
         /// Command list
         /// </summary>
         private readonly ConcurrentBag<(IEngineCommandList Command, int Order)> commandList = new();
+        /// <summary>
+        /// Action queue
+        /// </summary>
+        private readonly ConcurrentBag<Action> actions = new();
 
         /// <summary>
         /// Update materials palette flag
@@ -476,7 +507,7 @@ namespace Engine.Common
         /// Creates a deferred context
         /// </summary>
         /// <param name="passIndex">Pass index</param>
-        protected EngineDeviceContext GetDeferredContext(int passIndex)
+        private EngineDeviceContext GetDeferredContext(int passIndex)
         {
             while (passIndex >= deferredContextList.Count)
             {
@@ -490,11 +521,10 @@ namespace Engine.Common
         /// </summary>
         /// <param name="passIndex">Pass index</param>
         /// <param name="drawMode">Draw mode</param>
-        /// <param name="freeOMResources">Frees output-merger resources</param>
-        protected DrawContext GetDeferredDrawContext(int passIndex, DrawerModes drawMode, bool freeOMResources)
+        protected DrawContext GetDeferredDrawContext(int passIndex, DrawerModes drawMode)
         {
             var passContext = passLists[passIndex];
-            passContext.DeviceContext.ClearState(freeOMResources);
+            passContext.DeviceContext.ClearState();
 
             var camera = Scene.Camera;
             var environment = Scene.GameEnvironment;
@@ -530,12 +560,11 @@ namespace Engine.Common
         /// </summary>
         /// <param name="passIndex">Pass index</param>
         /// <param name="name">Name</param>
-        /// <param name="freeOMResources">Free resources</param>
         /// <param name="shadowMapper">Shadow mapper</param>
-        protected virtual DrawContextShadows GetPerLightDrawContext(int passIndex, string name, bool freeOMResources, IShadowMap shadowMapper)
+        protected virtual DrawContextShadows GetPerLightDrawContext(int passIndex, string name, IShadowMap shadowMapper)
         {
             var passContext = passLists[passIndex];
-            passContext.DeviceContext.ClearState(freeOMResources);
+            passContext.DeviceContext.ClearState();
 
             var camera = Scene.Camera;
 
@@ -981,7 +1010,7 @@ namespace Engine.Common
         /// Draw directional shadow maps
         /// </summary>
         /// <param name="cullIndex">Cull index</param>
-        protected void DoDirectionalShadowMapping(int cullIndex)
+        private void DoDirectionalShadowMapping(int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1015,7 +1044,7 @@ namespace Engine.Common
             }
 
             //Crate the draw context for directional lights
-            var drawContext = GetPerLightDrawContext(ShadowsDirectionalPass, "Directional", false, ShadowMapperDirectional);
+            var drawContext = GetPerLightDrawContext(ShadowsDirectionalPass, "Directional", ShadowMapperDirectional);
             var dc = drawContext.DeviceContext;
 
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
@@ -1064,13 +1093,13 @@ namespace Engine.Common
             shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
 
-            QueueCommand(dc.FinishCommandList(), ShadowsDirectionalPass);
+            QueueCommand(dc.FinishCommandList(nameof(DoDirectionalShadowMapping)), ShadowsDirectionalPass);
         }
         /// <summary>
         /// Draw point light shadow maps
         /// </summary>
         /// <param name="cullIndex">Cull index</param>
-        protected void DoPointShadowMapping(int cullIndex)
+        private void DoPointShadowMapping(int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1104,7 +1133,7 @@ namespace Engine.Common
             }
 
             //Crate the draw context for point lights
-            var drawContext = GetPerLightDrawContext(ShadowsPointPass, "Point", false, ShadowMapperPoint);
+            var drawContext = GetPerLightDrawContext(ShadowsPointPass, "Point", ShadowMapperPoint);
             var dc = drawContext.DeviceContext;
 
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
@@ -1150,13 +1179,13 @@ namespace Engine.Common
             shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
 
-            QueueCommand(dc.FinishCommandList(), ShadowsPointPass);
+            QueueCommand(dc.FinishCommandList(nameof(DoPointShadowMapping)), ShadowsPointPass);
         }
         /// <summary>
         /// Draw spot light shadow maps
         /// </summary>
         /// <param name="cullIndex">Cull index</param>
-        protected void DoSpotShadowMapping(int cullIndex)
+        private void DoSpotShadowMapping(int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
@@ -1190,7 +1219,7 @@ namespace Engine.Common
             }
 
             //Crate the draw context for spot lights
-            var drawContext = GetPerLightDrawContext(ShadowsSpotPass, "Spot", false, ShadowMapperSpot);
+            var drawContext = GetPerLightDrawContext(ShadowsSpotPass, "Spot", ShadowMapperSpot);
             var dc = drawContext.DeviceContext;
 
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
@@ -1236,7 +1265,7 @@ namespace Engine.Common
             shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
 
-            QueueCommand(dc.FinishCommandList(), ShadowsSpotPass);
+            QueueCommand(dc.FinishCommandList(nameof(DoSpotShadowMapping)), ShadowsSpotPass);
         }
         /// <summary>
         /// Performs shadow culling testing
@@ -1246,7 +1275,7 @@ namespace Engine.Common
         /// <param name="lightVolume">Light volume</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="allCullingObjects">All components were culling components</param>
-        protected bool DoShadowCullingTest(IEnumerable<ICullable> components, int l, ICullingVolume lightVolume, int cullIndex, bool allCullingObjects)
+        private bool DoShadowCullingTest(IEnumerable<ICullable> components, int l, ICullingVolume lightVolume, int cullIndex, bool allCullingObjects)
         {
             if (components.Any())
             {
@@ -1297,14 +1326,13 @@ namespace Engine.Common
 
             return true;
         }
-
         /// <summary>
         /// Draw components for shadow mapping
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="cullIndex">Culling index</param>
         /// <param name="components">Components to draw</param>
-        protected void DrawShadowComponents(DrawContextShadows context, int cullIndex, IEnumerable<IDrawable> components)
+        private void DrawShadowComponents(DrawContextShadows context, int cullIndex, IEnumerable<IDrawable> components)
         {
             var objects = components
                 .Where(c => IsVisible(c, cullIndex))
@@ -1413,29 +1441,25 @@ namespace Engine.Common
         /// Binds graphics for results pass
         /// </summary>
         /// <param name="dc">Drawing context</param>
-        /// <param name="target">Target type</param>
-        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
-        /// <param name="clearRTColor">Target clear color</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        protected virtual void SetTarget(EngineDeviceContext dc, Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth = false, bool clearStencil = false)
+        /// <param name="renderTarget">Render target parameters</param>
+        protected virtual void SetTarget(EngineDeviceContext dc, RenderTargetParameters renderTarget)
         {
-            switch (target)
+            switch (renderTarget.Target)
             {
                 case Targets.Screen:
-                    BindDefaultTarget(dc, clearRT, clearRTColor);
+                    BindDefaultTarget(dc, renderTarget.ClearRT, renderTarget.ClearRTColor);
                     break;
                 case Targets.Objects:
-                    BindObjectsTarget(dc, clearRT, clearRTColor, clearDepth, clearStencil);
+                    BindObjectsTarget(dc, renderTarget.ClearRT, renderTarget.ClearRTColor, renderTarget.ClearDepth, renderTarget.ClearStencil);
                     break;
                 case Targets.UI:
-                    BindUITarget(dc, clearRT, clearRTColor);
+                    BindUITarget(dc, renderTarget.ClearRT, renderTarget.ClearRTColor);
                     break;
                 case Targets.Result:
-                    BindResultsTarget(dc, clearRT, clearRTColor);
+                    BindResultsTarget(dc, renderTarget.ClearRT, renderTarget.ClearRTColor);
                     break;
                 default:
-                    BindDefaultTarget(dc, clearRT, clearRTColor);
+                    BindDefaultTarget(dc, renderTarget.ClearRT, renderTarget.ClearRTColor);
                     break;
             }
         }
@@ -1546,14 +1570,14 @@ namespace Engine.Common
         /// <summary>
         /// Does the post-processing draw
         /// </summary>
-        /// <param name="target">Target to set result</param>
+        /// <param name="renderTarget">Render target</param>
         /// <param name="renderPass">Render pass</param>
         /// <param name="passIndex">Pass index</param>
-        protected void DoPostProcessing(Targets target, RenderPass renderPass, int passIndex)
+        protected void DoPostProcessing(RenderTargetParameters renderTarget, RenderPass renderPass, int passIndex)
         {
             var pass = passLists[passIndex];
             var dc = pass.DeviceContext;
-            dc.ClearState(true);
+            dc.ClearState();
 
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
             {
@@ -1562,9 +1586,12 @@ namespace Engine.Common
 
             UpdateGlobalState(dc);
 
-            DrawPostProcessing(dc, target, renderPass);
+            if (!DrawPostProcessing(dc, renderTarget, renderPass))
+            {
+                return;
+            }
 
-            QueueCommand(dc.FinishCommandList(), passIndex);
+            QueueCommand(dc.FinishCommandList($"{nameof(DoPostProcessing)} {renderPass}"), passIndex);
         }
 
         /// <summary>
@@ -1573,6 +1600,7 @@ namespace Engine.Common
         protected void InitializeScene()
         {
             commandList.Clear();
+            actions.Clear();
 
             RefreshGlobalState();
 
@@ -1592,7 +1620,7 @@ namespace Engine.Common
         {
             var pass = passLists[MergeScreenPass];
             var dc = pass.DeviceContext;
-            dc.ClearState(true);
+            dc.ClearState();
 
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
             {
@@ -1601,17 +1629,30 @@ namespace Engine.Common
 
             UpdateGlobalState(dc);
 
-            //Combine to result
+            //Combine object and ui targets into to result target
             CombineTargets(dc, Targets.Objects, Targets.UI, Targets.Result);
 
-            //Final post-processing
-            DrawPostProcessing(dc, Targets.Result, RenderPass.Final);
+            //Final post-processing in the result target
+            var rtpp = new RenderTargetParameters
+            {
+                Target = Targets.Result,
+            };
+            DrawPostProcessing(dc, rtpp, RenderPass.Final);
 
-            //Draw to screen
-            DrawToScreen(dc, Targets.Result);
+            //Draw from result target to screen
+            var rtScreen = new RenderTargetParameters
+            {
+                Target = Targets.Screen
+            };
+            DrawToScreen(dc, Targets.Result, rtScreen);
 
-            QueueCommand(dc.FinishCommandList(), int.MaxValue);
-
+            QueueCommand(dc.FinishCommandList(nameof(MergeToScreen)), int.MaxValue);
+        }
+        /// <summary>
+        /// Ends the scene
+        /// </summary>
+        protected void EndScene()
+        {
             var graphics = Scene.Game.Graphics;
             var ic = graphics.ImmediateContext;
             ic.SetViewport(graphics.Viewport);
@@ -1620,12 +1661,15 @@ namespace Engine.Common
                 graphics.DefaultDepthStencil, true, true,
                 false);
 
-            //Execute command list
-            var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
-            ic.ExecuteCommandLists(commands);
+            if (PlayActions())
+            {
+                //Execute command list
+                var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
+                ic.ExecuteCommandLists(commands);
 
-            ic.SetViewport(graphics.Viewport);
-            ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
+                ic.SetViewport(graphics.Viewport);
+                ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
+            }
         }
         /// <summary>
         /// Combine the specified targets into the result target
@@ -1638,7 +1682,7 @@ namespace Engine.Common
         {
             var graphics = Scene.Game.Graphics;
 
-            SetTarget(dc, resultTarget, false, Color.Transparent);
+            SetTarget(dc, new RenderTargetParameters { Target = resultTarget });
 
             dc.SetDepthStencilState(graphics.GetDepthStencilNone());
             dc.SetRasterizerState(graphics.GetRasterizerDefault());
@@ -1654,29 +1698,29 @@ namespace Engine.Common
         /// Does the post-processing draw
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="target">Target to set result</param>
+        /// <param name="renderTarget">Render target</param>
         /// <param name="renderPass">Render pass</param>
-        private void DrawPostProcessing(EngineDeviceContext dc, Targets target, RenderPass renderPass)
+        private bool DrawPostProcessing(EngineDeviceContext dc, RenderTargetParameters renderTarget, RenderPass renderPass)
         {
             if (!ValidateRenderPass(renderPass, out var state))
             {
-                return;
+                return false;
             }
 
             var drawer = processingDrawer.UpdateEffectParameters(dc, state);
             if (drawer == null)
             {
-                return;
+                return false;
             }
 
             var activeEffects = state.GetEffects();
             if (!activeEffects.Any())
             {
-                return;
+                return false;
             }
 
             //Gets the last used target texture
-            var texture = GetTargetTextures(target)?.FirstOrDefault();
+            var texture = GetTargetTextures(renderTarget.Target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
             dc.SetRasterizerState(graphics.GetRasterizerCullNone());
@@ -1705,28 +1749,31 @@ namespace Engine.Common
             }
 
             //Set the result render target
-            SetTarget(dc, target, false, Color.Transparent);
+            SetTarget(dc, renderTarget);
 
             //Draw the result
             var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, resultDrawer);
+
+            return true;
         }
         /// <summary>
         /// Draws the specified target to screen
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="target">Target</param>
-        private void DrawToScreen(EngineDeviceContext dc, Targets target)
+        /// <param name="sourceTarget">Target</param>
+        /// <param name="renderTarget">Render target</param>
+        private void DrawToScreen(EngineDeviceContext dc, Targets sourceTarget, RenderTargetParameters renderTarget)
         {
             var graphics = Scene.Game.Graphics;
 
-            SetTarget(dc, Targets.Screen, false, Color.Transparent);
+            SetTarget(dc, renderTarget);
 
             dc.SetDepthStencilState(graphics.GetDepthStencilNone());
             dc.SetRasterizerState(graphics.GetRasterizerDefault());
             dc.SetBlendState(graphics.GetBlendDefault());
 
-            var texture = GetTargetTextures(target)?.FirstOrDefault();
+            var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
 
             var drawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, drawer);
@@ -1738,6 +1785,32 @@ namespace Engine.Common
             PostProcessingObjectsEffects = BuiltInPostProcessState.Empty;
             PostProcessingUIEffects = BuiltInPostProcessState.Empty;
             PostProcessingFinalEffects = BuiltInPostProcessState.Empty;
+        }
+
+        /// <summary>
+        /// Queues a action to the action queue
+        /// </summary>
+        /// <param name="action">Action</param>
+        protected void QueueAction(Action action)
+        {
+            actions.Add(action);
+        }
+        /// <summary>
+        /// Plays all the actions in the action queue in parallel
+        /// </summary>
+        private bool PlayActions()
+        {
+            ParallelOptions options = new()
+            {
+                MaxDegreeOfParallelism = 4,
+            };
+
+            var res = Parallel.ForEach(actions, options, action =>
+            {
+                action.Invoke();
+            });
+
+            return res.IsCompleted;
         }
     }
 }

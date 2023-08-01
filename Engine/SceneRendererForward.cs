@@ -110,28 +110,66 @@ namespace Engine
             InitializeScene();
 
             //Shadow mapping
-            DoShadowMapping();
+            QueueAction(DoShadowMapping);
 
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
             if (objectComponents.Any())
             {
-                //Render objects
-                DoRender(Targets.Objects, true, Scene.GameEnvironment.Background, true, true, objectComponents, CullObjects, ObjectsPass);
-                //Post-processing
-                DoPostProcessing(Targets.Objects, RenderPass.Objects, ObjectsPostProcessingPass);
+                QueueAction(() =>
+                {
+                    //Render objects
+                    var rt = new RenderTargetParameters
+                    {
+                        Target = Targets.Objects,
+                        ClearRT = true,
+                        ClearRTColor = Scene.GameEnvironment.Background,
+                        ClearDepth = true,
+                        ClearStencil = true,
+                    };
+                    DoRender(rt, objectComponents, CullObjects, ObjectsPass);
+                });
+
+                QueueAction(() =>
+                {
+                    //Post-processing
+                    var rtpp = new RenderTargetParameters
+                    {
+                        Target = Targets.Objects
+                    };
+                    DoPostProcessing(rtpp, RenderPass.Objects, ObjectsPostProcessingPass);
+                });
             }
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
-                //Render UI
-                DoRender(Targets.UI, true, Color.Transparent, false, false, uiComponents, CullUI, UIPass);
-                //UI post-processing
-                DoPostProcessing(Targets.UI, RenderPass.UI, UIPostProcessingPass);
+                QueueAction(() =>
+                {
+                    //Render UI
+                    var rt = new RenderTargetParameters
+                    {
+                        Target = Targets.UI,
+                        ClearRT = true,
+                        ClearRTColor = Color.Transparent,
+                    };
+                    DoRender(rt, uiComponents, CullUI, UIPass);
+                });
+
+                QueueAction(() =>
+                {
+                    //UI post-processing
+                    var rtpp = new RenderTargetParameters
+                    {
+                        Target = Targets.UI
+                    };
+                    DoPostProcessing(rtpp, RenderPass.UI, UIPostProcessingPass);
+                });
             }
 
             //Merge to screen
-            MergeToScreen();
+            QueueAction(MergeToScreen);
+
+            EndScene();
 
 #if DEBUG
             swTotal.Stop();
@@ -143,15 +181,11 @@ namespace Engine
         /// <summary>
         /// Do rendering
         /// </summary>
-        /// <param name="target">Render target</param>
-        /// <param name="clearRT">Clear render target</param>
-        /// <param name="clearRTColor">Clear render target color</param>
-        /// <param name="clearDepth">Clear depth buffer</param>
-        /// <param name="clearStencil">Clear stencil buffer</param>
+        /// <param name="renderTarget">Render target</param>
         /// <param name="components">Components</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoRender(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
+        private void DoRender(RenderTargetParameters renderTarget, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
         {
             if (!components.Any())
             {
@@ -162,7 +196,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             //Get draw context
-            var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward, false);
+            var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward);
             bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
 #if DEBUG
             swCull.Stop();
@@ -188,7 +222,7 @@ namespace Engine
             UpdateGlobalState(dc);
 
             //Binds the result target
-            SetTarget(dc, target, clearRT, clearRTColor, clearDepth, clearStencil);
+            SetTarget(dc, renderTarget);
 
             //Draw solid
             DrawResultComponents(context, cullIndex, components);
@@ -197,7 +231,7 @@ namespace Engine
             frameStats.ForwardDraw = swDraw.ElapsedTicks;
 #endif
 
-            QueueCommand(dc.FinishCommandList(), passIndex);
+            QueueCommand(dc.FinishCommandList($"{nameof(DoRender)} {renderTarget.Target}"), passIndex);
         }
         /// <summary>
         /// Draw components
@@ -311,3 +345,4 @@ namespace Engine
         }
     }
 }
+

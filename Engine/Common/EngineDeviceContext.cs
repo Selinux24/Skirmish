@@ -379,7 +379,7 @@ namespace Engine.Common
         /// <summary>
         /// Clears the device context state
         /// </summary>
-        public void ClearState(bool freeOMResources)
+        public void ClearState()
         {
             deviceContext.ClearState();
 
@@ -405,13 +405,6 @@ namespace Engine.Common
             currentIndexBufferRef = null;
             currentIndexFormat = Format.Unknown;
             currentIndexOffset = -1;
-
-            if (!freeOMResources)
-            {
-                return;
-            }
-
-            ClearShaderResources();
         }
 
         /// <summary>
@@ -1530,14 +1523,15 @@ namespace Engine.Common
         /// <summary>
         /// Finish a command list
         /// </summary>
+        /// <param name="name">Command list debug name</param>
         /// <param name="restoreState">Resore state</param>
-        public IEngineCommandList FinishCommandList(bool restoreState = false)
+        public IEngineCommandList FinishCommandList(string name, bool restoreState = false)
         {
             deviceContext.ClearState();
 
             var cmdList = deviceContext.FinishCommandList(restoreState);
 
-            return new EngineCommandList($"{Name} commands", cmdList);
+            return new EngineCommandList($"{Name} {name ?? "commands"}", cmdList);
         }
         /// <summary>
         /// Executes a command list in the immediate context

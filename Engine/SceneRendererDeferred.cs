@@ -267,7 +267,7 @@ namespace Engine
             InitializeScene();
 
             //Shadow mapping
-            DoShadowMapping();
+            QueueAction(DoShadowMapping);
 
             var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
             bool anyDeferred = deferredEnabledComponents.Any();
@@ -278,32 +278,74 @@ namespace Engine
             {
                 if (anyDeferred)
                 {
-                    //Render to G-Buffer deferred enabled components
-                    DoDeferred(deferredEnabledComponents, CullObjects, ObjectsDeferredPass);
+                    QueueAction(() =>
+                    {
+                        //Render to G-Buffer deferred enabled components
+                        var rt = new RenderTargetParameters
+                        {
+                            Target = Targets.Objects,
+                            ClearRT = true,
+                            ClearRTColor = Scene.GameEnvironment.Background,
+                        };
+                        DoDeferred(rt, deferredEnabledComponents, CullObjects, ObjectsDeferredPass);
+                    });
                 }
 
                 if (anyForward)
                 {
-                    //Render to screen deferred disabled components
-                    DoForward(Targets.Objects, false, Scene.GameEnvironment.Background, false, false, deferredDisabledComponents, CullObjects, ObjectsForwardPass);
+                    QueueAction(() =>
+                    {
+                        //Render to screen deferred disabled components
+                        var rt = new RenderTargetParameters
+                        {
+                            Target = Targets.Objects
+                        };
+                        DoForward(rt, deferredDisabledComponents, CullObjects, ObjectsForwardPass);
+                    });
                 }
 
-                //Post-processing
-                DoPostProcessing(Targets.Objects, RenderPass.Objects, ObjectsPostProcessingPass);
+                QueueAction(() =>
+                {
+                    //Post-processing
+                    var rtpp = new RenderTargetParameters
+                    {
+                        Target = Targets.Objects
+                    };
+                    DoPostProcessing(rtpp, RenderPass.Objects, ObjectsPostProcessingPass);
+                });
             }
 
             //Render to screen deferred disabled components
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
             if (uiComponents.Any())
             {
-                //UI render
-                DoForward(Targets.UI, true, Color.Transparent, false, false, uiComponents, CullUI, UIPass);
-                //UI post-processing
-                DoPostProcessing(Targets.UI, RenderPass.UI, UIPostProcessingPass);
+                QueueAction(() =>
+                {
+                    //UI render
+                    var rt = new RenderTargetParameters
+                    {
+                        Target = Targets.UI,
+                        ClearRT = true,
+                        ClearRTColor = Color.Transparent,
+                    };
+                    DoForward(rt, uiComponents, CullUI, UIPass);
+                });
+
+                QueueAction(() =>
+                {
+                    //UI post-processing
+                    var rtpp = new RenderTargetParameters
+                    {
+                        Target = Targets.UI
+                    };
+                    DoPostProcessing(rtpp, RenderPass.UI, UIPostProcessingPass);
+                });
             }
 
             //Merge to result
-            MergeToScreen();
+            QueueAction(MergeToScreen);
+
+            EndScene();
 
 #if DEBUG
             swTotal.Stop();
@@ -314,10 +356,11 @@ namespace Engine
         /// <summary>
         /// Do deferred rendering
         /// </summary>
+        /// <param name="renderTarget">Render target</param>
         /// <param name="components">Components</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoDeferred(IEnumerable<IDrawable> components, int cullIndex, int passIndex)
+        private void DoDeferred(RenderTargetParameters renderTarget, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
         {
             if (!components.Any())
             {
@@ -327,7 +370,7 @@ namespace Engine
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            var context = GetDeferredDrawContext(passIndex, DrawerModes.Deferred, false);
+            var context = GetDeferredDrawContext(passIndex, DrawerModes.Deferred);
             bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
 #if DEBUG
             swCull.Stop();
@@ -382,7 +425,7 @@ namespace Engine
 #endif
 
             //Binds the result target
-            SetTarget(dc, Targets.Objects, false, Color.Transparent);
+            SetTarget(dc, renderTarget);
 
             #region Final composition
 #if DEBUG
@@ -398,20 +441,16 @@ namespace Engine
 #endif
             #endregion
 
-            QueueCommand(dc.FinishCommandList(), passIndex);
+            QueueCommand(dc.FinishCommandList($"{nameof(DoDeferred)} {renderTarget.Target}"), passIndex);
         }
         /// <summary>
         /// Do forward rendering (UI, transparents, etc.)
         /// </summary>
-        /// <param name="target">Render target</param>
-        /// <param name="clearRT">Clears the render target</param>
-        /// <param name="clearRTColor">Render target clear color</param>
-        /// <param name="clearDepth">Clears the depth buffer</param>
-        /// <param name="clearStencil">Clears the stencil buffer</param>
+        /// <param name="renderTarget">Render target</param>
         /// <param name="components">Components</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="passIndex">Pass index</param>
-        private void DoForward(Targets target, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
+        private void DoForward(RenderTargetParameters renderTarget, IEnumerable<IDrawable> components, int cullIndex, int passIndex)
         {
             if (!components.Any())
             {
@@ -421,7 +460,7 @@ namespace Engine
 #if DEBUG
             var swCull = Stopwatch.StartNew();
 #endif
-            var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward, false);
+            var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward);
             bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
 #if DEBUG
             swCull.Stop();
@@ -446,7 +485,7 @@ namespace Engine
             UpdateGlobalState(dc);
 
             //Binds the result target
-            SetTarget(dc, target, clearRT, clearRTColor, clearDepth, clearStencil);
+            SetTarget(dc, renderTarget);
 
             //Draw scene
             DrawResultComponents(context, cullIndex, components);
@@ -456,7 +495,7 @@ namespace Engine
             frameStats.DisabledDeferredDraw = swDraw.ElapsedTicks;
 #endif
 
-            QueueCommand(dc.FinishCommandList(), passIndex);
+            QueueCommand(dc.FinishCommandList($"{nameof(DoForward)} {renderTarget.Target}"), passIndex);
         }
 
         /// <summary>
