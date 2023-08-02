@@ -1530,6 +1530,8 @@ namespace Collada.ModularDungeon
             if (scenery.CurrentLevel.Name != "Lvl1")
             {
                 human.Visible = false;
+
+                return;
             }
 
             for (int i = 0; i < human.InstanceCount; i++)

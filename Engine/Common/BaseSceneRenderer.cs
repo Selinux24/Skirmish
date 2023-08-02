@@ -54,23 +54,23 @@ namespace Engine.Common
             /// <summary>
             /// Render target
             /// </summary>
-            public Targets Target;
+            public Targets Target { get; set; }
             /// <summary>
             /// Clears the render target using the <see cref="ClearRTColor"/> value
             /// </summary>
-            public bool ClearRT;
+            public bool ClearRT { get; set; }
             /// <summary>
             /// Render target clear color
             /// </summary>
-            public Color4 ClearRTColor;
+            public Color4 ClearRTColor { get; set; }
             /// <summary>
             /// Clears the depth buffer
             /// </summary>
-            public bool ClearDepth;
+            public bool ClearDepth { get; set; }
             /// <summary>
             /// Clears the stencil buffer
             /// </summary>
-            public bool ClearStencil;
+            public bool ClearStencil { get; set; }
         }
 
         /// <summary>
@@ -895,31 +895,24 @@ namespace Engine.Common
         /// Performs the culling test
         /// </summary>
         /// <param name="scene">Scene</param>
-        /// <param name="volume">Culling volume</param>
+        /// <param name="cameraVolume">Camera volume</param>
         /// <param name="components">Components collection to test</param>
         /// <param name="cullIndex">Cull index</param>
         /// <returns>Returns true if the test find components to draw</returns>
-        protected virtual bool CullingTest(Scene scene, ICullingVolume volume, IEnumerable<ICullable> components, int cullIndex)
+        protected virtual bool CullingTest(Scene scene, IntersectionVolumeFrustum cameraVolume, IEnumerable<IDrawable> components, int cullIndex)
         {
-            if (!components.Any())
+            if (!scene.PerformFrustumCulling)
             {
                 return false;
             }
 
-            //Frustum culling
-            bool draw = cullManager.Cull(volume, cullIndex, components) || scene.PerformFrustumCulling;
-
-            if (draw)
+            var cullables = components?.OfType<ICullable>() ?? Enumerable.Empty<ICullable>();
+            if (!cullables.Any())
             {
-                var groundVolume = scene.GetSceneVolume();
-                if (groundVolume != null)
-                {
-                    //Ground culling
-                    draw = cullManager.Cull(groundVolume, cullIndex, components);
-                }
+                return false;
             }
 
-            return draw;
+            return cullManager.Cull(cameraVolume, cullIndex, cullables);
         }
 
         /// <summary>
@@ -1076,7 +1069,7 @@ namespace Engine.Common
                 int lCullIndex = cullIndex + l;
 
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, l, camSphere, lCullIndex, allCullingObjects))
+                if (!DoShadowCullingTest(toCullShadowObjs, camSphere, lCullIndex, allCullingObjects))
                 {
                     continue;
                 }
@@ -1163,7 +1156,7 @@ namespace Engine.Common
                 int lCullIndex = cullIndex + l;
 
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
+                if (!DoShadowCullingTest(toCullShadowObjs, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
                 {
                     continue;
                 }
@@ -1249,7 +1242,7 @@ namespace Engine.Common
                 int lCullIndex = cullIndex + l;
 
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, l, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
+                if (!DoShadowCullingTest(toCullShadowObjs, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
                 {
                     continue;
                 }
@@ -1271,11 +1264,10 @@ namespace Engine.Common
         /// Performs shadow culling testing
         /// </summary>
         /// <param name="components">Component list</param>
-        /// <param name="l">Light index</param>
         /// <param name="lightVolume">Light volume</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="allCullingObjects">All components were culling components</param>
-        private bool DoShadowCullingTest(IEnumerable<ICullable> components, int l, ICullingVolume lightVolume, int cullIndex, bool allCullingObjects)
+        private bool DoShadowCullingTest(IEnumerable<ICullable> components, ICullingVolume lightVolume, int cullIndex, bool allCullingObjects)
         {
             if (components.Any())
             {
@@ -1290,7 +1282,7 @@ namespace Engine.Common
 
 #if DEBUG
             stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoShadowCullingTest)} {l} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoShadowCullingTest)} - Cull {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (allCullingObjects && !doShadows)
@@ -1586,10 +1578,7 @@ namespace Engine.Common
 
             UpdateGlobalState(dc);
 
-            if (!DrawPostProcessing(dc, renderTarget, renderPass))
-            {
-                return;
-            }
+            DrawPostProcessing(dc, renderTarget, renderPass);
 
             QueueCommand(dc.FinishCommandList($"{nameof(DoPostProcessing)} {renderPass}"), passIndex);
         }
@@ -1616,7 +1605,9 @@ namespace Engine.Common
         /// <summary>
         /// Merge to screen
         /// </summary>
-        protected void MergeToScreen()
+        /// <param name="hasObjects">Sets whether the current pass, includes objects phase or not</param>
+        /// <param name="hasUI">Sets whether the current pass, includes UI phase or not</param>
+        protected void MergeToScreen(bool hasObjects, bool hasUI)
         {
             var pass = passLists[MergeScreenPass];
             var dc = pass.DeviceContext;
@@ -1629,22 +1620,37 @@ namespace Engine.Common
 
             UpdateGlobalState(dc);
 
-            //Combine object and ui targets into to result target
-            CombineTargets(dc, Targets.Objects, Targets.UI, Targets.Result);
+            //Select source render target to copy to screen
+            Targets source;
+            if (hasObjects && hasUI)
+            {
+                //Combine object and ui targets into to result target
+                CombineTargets(dc, Targets.Objects, Targets.UI, Targets.Result);
+                source = Targets.Result;
+            }
+            else if (hasObjects)
+            {
+                source = Targets.Objects;
+            }
+            else if (hasUI)
+            {
+                source = Targets.UI;
+            }
+            else
+            {
+                //Nothing to do
+                return;
+            }
 
             //Final post-processing in the result target
             var rtpp = new RenderTargetParameters
             {
-                Target = Targets.Result,
+                Target = source,
             };
             DrawPostProcessing(dc, rtpp, RenderPass.Final);
 
-            //Draw from result target to screen
-            var rtScreen = new RenderTargetParameters
-            {
-                Target = Targets.Screen
-            };
-            DrawToScreen(dc, Targets.Result, rtScreen);
+            //Draw from source target to screen
+            DrawToScreen(dc, source);
 
             QueueCommand(dc.FinishCommandList(nameof(MergeToScreen)), int.MaxValue);
         }
@@ -1700,23 +1706,23 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="renderTarget">Render target</param>
         /// <param name="renderPass">Render pass</param>
-        private bool DrawPostProcessing(EngineDeviceContext dc, RenderTargetParameters renderTarget, RenderPass renderPass)
+        private void DrawPostProcessing(EngineDeviceContext dc, RenderTargetParameters renderTarget, RenderPass renderPass)
         {
             if (!ValidateRenderPass(renderPass, out var state))
             {
-                return false;
-            }
-
-            var drawer = processingDrawer.UpdateEffectParameters(dc, state);
-            if (drawer == null)
-            {
-                return false;
+                return;
             }
 
             var activeEffects = state.GetEffects();
             if (!activeEffects.Any())
             {
-                return false;
+                return;
+            }
+
+            var drawer = processingDrawer.UpdateEffectParameters(dc, state);
+            if (drawer == null)
+            {
+                return;
             }
 
             //Gets the last used target texture
@@ -1754,20 +1760,21 @@ namespace Engine.Common
             //Draw the result
             var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, resultDrawer);
-
-            return true;
         }
         /// <summary>
         /// Draws the specified target to screen
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="sourceTarget">Target</param>
-        /// <param name="renderTarget">Render target</param>
-        private void DrawToScreen(EngineDeviceContext dc, Targets sourceTarget, RenderTargetParameters renderTarget)
+        private void DrawToScreen(EngineDeviceContext dc, Targets sourceTarget)
         {
             var graphics = Scene.Game.Graphics;
 
-            SetTarget(dc, renderTarget);
+            var rtScreen = new RenderTargetParameters
+            {
+                Target = Targets.Screen
+            };
+            SetTarget(dc, rtScreen);
 
             dc.SetDepthStencilState(graphics.GetDepthStencilNone());
             dc.SetRasterizerState(graphics.GetRasterizerDefault());
@@ -1802,7 +1809,7 @@ namespace Engine.Common
         {
             ParallelOptions options = new()
             {
-                MaxDegreeOfParallelism = 4,
+                MaxDegreeOfParallelism = 1,
             };
 
             var res = Parallel.ForEach(actions, options, action =>

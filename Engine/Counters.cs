@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Engine
@@ -13,7 +14,7 @@ namespace Engine
         /// <summary>
         /// Data dictionary
         /// </summary>
-        private static readonly Dictionary<string, object> gData = new();
+        private static readonly ConcurrentDictionary<string, object> gData = new();
         /// <summary>
         /// Global data keys list
         /// </summary>
@@ -343,7 +344,7 @@ namespace Engine
 
             foreach (var key in gFrameDataKeys)
             {
-                gData.Remove(key);
+                gData.TryRemove(key, out _);
             }
             gFrameDataKeys.Clear();
         }
@@ -383,14 +384,7 @@ namespace Engine
         /// <param name="value">Key value</param>
         public static void SetStatistics(string key, object value, bool global = false)
         {
-            if (gData.ContainsKey(key))
-            {
-                gData[key] = value;
-            }
-            else
-            {
-                gData.Add(key, value);
-            }
+            gData.AddOrUpdate(key, value, (k, o) => o);
 
             RefreshDataKeys(key, global);
         }

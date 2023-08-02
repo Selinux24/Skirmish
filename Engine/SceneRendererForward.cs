@@ -113,7 +113,9 @@ namespace Engine
             QueueAction(DoShadowMapping);
 
             var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
-            if (objectComponents.Any())
+            bool hasObjects = objectComponents.Any();
+
+            if (hasObjects)
             {
                 QueueAction(() =>
                 {
@@ -141,7 +143,9 @@ namespace Engine
             }
 
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
-            if (uiComponents.Any())
+            bool hasUI = uiComponents.Any();
+
+            if (hasUI)
             {
                 QueueAction(() =>
                 {
@@ -167,7 +171,7 @@ namespace Engine
             }
 
             //Merge to screen
-            QueueAction(MergeToScreen);
+            QueueAction(() => MergeToScreen(hasObjects, hasUI));
 
             EndScene();
 
@@ -197,7 +201,7 @@ namespace Engine
 #endif
             //Get draw context
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward);
-            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components, cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.ForwardCull = swCull.ElapsedTicks;

@@ -273,8 +273,9 @@ namespace Engine
             bool anyDeferred = deferredEnabledComponents.Any();
             var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
             bool anyForward = deferredDisabledComponents.Any();
+            bool hasObjects = anyForward || anyDeferred;
 
-            if (anyForward || anyDeferred)
+            if (hasObjects)
             {
                 if (anyDeferred)
                 {
@@ -317,7 +318,9 @@ namespace Engine
 
             //Render to screen deferred disabled components
             var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
-            if (uiComponents.Any())
+            bool hasUI = uiComponents.Any();
+
+            if (hasUI)
             {
                 QueueAction(() =>
                 {
@@ -343,7 +346,7 @@ namespace Engine
             }
 
             //Merge to result
-            QueueAction(MergeToScreen);
+            QueueAction(() => MergeToScreen(hasObjects, hasUI));
 
             EndScene();
 
@@ -371,7 +374,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Deferred);
-            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components, cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DeferredCull = swCull.ElapsedTicks;
@@ -461,7 +464,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward);
-            bool draw = CullingTest(Scene, context.CameraVolume, components.OfType<ICullable>(), cullIndex);
+            bool draw = CullingTest(Scene, context.CameraVolume, components, cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DisabledDeferredCull = swCull.ElapsedTicks;
