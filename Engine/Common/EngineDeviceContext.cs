@@ -361,15 +361,6 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Gets the device context
-        /// </summary>
-        /// <returns></returns>
-        internal DeviceContext3 GetDeviceContext()
-        {
-            return deviceContext;
-        }
-
         /// <inheritdoc/>
         public void ClearState()
         {
@@ -1204,6 +1195,14 @@ namespace Engine.Common
             {
                 ExecuteCommandList(commandList, restoreState);
             }
+        }
+
+        /// <summary>
+        /// Implicit conversion between the Engine Device Context and the DX11 device context
+        /// </summary>
+        public static implicit operator DeviceContext3(EngineDeviceContext value)
+        {
+            return value.deviceContext;
         }
     }
 }
