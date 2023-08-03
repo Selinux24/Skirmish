@@ -63,7 +63,7 @@ namespace Engine.Common
         /// Draw
         /// </summary>
         /// <param name="dc">Device context</param>
-        public readonly void Draw(EngineDeviceContext dc)
+        public readonly void Draw(IEngineDeviceContext dc)
         {
             if (Instanced)
             {
@@ -78,7 +78,7 @@ namespace Engine.Common
         /// Draw single
         /// </summary>
         /// <param name="dc">Device context</param>
-        private readonly void DrawSingle(EngineDeviceContext dc)
+        private readonly void DrawSingle(IEngineDeviceContext dc)
         {
             if (Indexed)
             {
@@ -102,7 +102,7 @@ namespace Engine.Common
         /// Draw instanced
         /// </summary>
         /// <param name="dc">Device context</param>
-        private readonly void DrawInstanced(EngineDeviceContext dc)
+        private readonly void DrawInstanced(IEngineDeviceContext dc)
         {
             if (Indexed)
             {

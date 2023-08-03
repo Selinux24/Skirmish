@@ -98,7 +98,7 @@ namespace Engine.BuiltIn.Billboard
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Billboard state</param>
-        public void UpdateBillboard(EngineDeviceContext dc, BuiltInBillboardState state)
+        public void UpdateBillboard(IEngineDeviceContext dc, BuiltInBillboardState state)
         {
             cbPerBillboard.WriteData(PerBillboard.Build(state));
             dc.UpdateConstantBuffer(cbPerBillboard);

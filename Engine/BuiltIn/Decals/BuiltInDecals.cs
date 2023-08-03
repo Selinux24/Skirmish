@@ -80,7 +80,7 @@ namespace Engine.BuiltIn.Decals
         /// <param name="textureCount">Texture count</param>
         /// <param name="tintColor">Tint color</param>
         /// <param name="textures">Texture array</param>
-        public void Update(EngineDeviceContext dc, bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
+        public void Update(IEngineDeviceContext dc, bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
         {
             cbPerDecal.WriteData(PerDecal.Build(rotation, textureCount, tintColor));
             dc.UpdateConstantBuffer(cbPerDecal);

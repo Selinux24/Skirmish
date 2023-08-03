@@ -186,7 +186,7 @@ namespace Engine
         /// Draws the cubic texture
         /// </summary>
         /// <param name="dc">Device context</param>
-        private bool DrawCubic(EngineDeviceContext dc)
+        private bool DrawCubic(IEngineDeviceContext dc)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInCubemap>();
             if (drawer == null)
@@ -207,7 +207,7 @@ namespace Engine
         /// Draws the plain texture
         /// </summary>
         /// <param name="dc">Device context</param>
-        private bool DrawPlain(EngineDeviceContext dc)
+        private bool DrawPlain(IEngineDeviceContext dc)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInSkymap>();
             if (drawer == null)

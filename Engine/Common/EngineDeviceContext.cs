@@ -14,7 +14,7 @@ namespace Engine.Common
     /// <summary>
     /// Engine device context
     /// </summary>
-    public class EngineDeviceContext : IDisposable
+    public class EngineDeviceContext : IEngineDeviceContext
     {
         #region Support classes
 
@@ -282,13 +282,9 @@ namespace Engine.Common
         /// </summary>
         private int currentIndexOffset = -1;
 
-        /// <summary>
-        /// Name
-        /// </summary>
+        /// <inheritdoc/>
         public string Name { get; private set; }
-        /// <summary>
-        /// Gets or sets the input assembler's primitive topology
-        /// </summary>
+        /// <inheritdoc/>
         public Topology IAPrimitiveTopology
         {
             get
@@ -306,9 +302,7 @@ namespace Engine.Common
                 }
             }
         }
-        /// <summary>
-        /// Gets or sets the input assembler's input layout
-        /// </summary>
+        /// <inheritdoc/>
         public EngineInputLayout IAInputLayout
         {
             get
@@ -376,9 +370,7 @@ namespace Engine.Common
             return deviceContext;
         }
 
-        /// <summary>
-        /// Clears the device context state
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearState()
         {
             deviceContext.ClearState();
@@ -407,34 +399,22 @@ namespace Engine.Common
             currentIndexOffset = -1;
         }
 
-        /// <summary>
-        /// Sets viewport
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
+        /// <inheritdoc/>
         public void SetViewport(Viewport viewport)
         {
             SetViewPorts(new[] { (RawViewportF)viewport });
         }
-        /// <summary>
-        /// Sets viewport
-        /// </summary>
-        /// <param name="viewport">Viewport</param>
+        /// <inheritdoc/>
         public void SetViewport(ViewportF viewport)
         {
             SetViewPorts(new[] { (RawViewportF)viewport });
         }
-        /// <summary>
-        /// Sets viewports
-        /// </summary>
-        /// <param name="viewports">Viewports</param>
+        /// <inheritdoc/>
         public void SetViewports(IEnumerable<Viewport> viewports)
         {
             SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
         }
-        /// <summary>
-        /// Sets viewports
-        /// </summary>
-        /// <param name="viewports">Viewports</param>
+        /// <inheritdoc/>
         public void SetViewports(IEnumerable<ViewportF> viewports)
         {
             SetViewPorts(viewports.Select(v => (RawViewportF)v).ToArray());
@@ -455,32 +435,17 @@ namespace Engine.Common
             currentViewports = viewports;
         }
 
-        /// <summary>
-        /// Set render target
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="depthMap">Depth map</param>
+        /// <inheritdoc/>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, EngineDepthStencilView depthMap)
         {
             deviceContext.OutputMerger.SetTargets(depthMap.GetDepthStencil(), renderTargets.GetRenderTarget());
         }
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the target must be cleared</param>
-        /// <param name="clearRTColor">Render target clear color</param>
+        /// <inheritdoc/>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor)
         {
             SetRenderTargets(renderTargets, clearRT, clearRTColor, false);
         }
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the target must be cleared</param>
-        /// <param name="clearRTColor">Render target clear color</param>
-        /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
+        /// <inheritdoc/>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, bool freeOMResources)
         {
             if (freeOMResources)
@@ -501,16 +466,7 @@ namespace Engine.Common
                 }
             }
         }
-        /// <summary>
-        /// Set render targets
-        /// </summary>
-        /// <param name="renderTargets">Render targets</param>
-        /// <param name="clearRT">Indicates whether the render target must be cleared</param>
-        /// <param name="clearRTColor">Target clear color</param>
-        /// <param name="depthMap">Depth map</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        /// <param name="freeOMResources">Indicates whether the Output merger Shader Resources must be cleared</param>
+        /// <inheritdoc/>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor, EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil, bool freeOMResources)
         {
             if (freeOMResources)
@@ -535,12 +491,7 @@ namespace Engine.Common
             ClearDepthStencilBuffer(depthMap, clearDepth, clearStencil);
         }
 
-        /// <summary>
-        /// Clear depth / stencil buffer
-        /// </summary>
-        /// <param name="depthMap">Depth buffer</param>
-        /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
-        /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
+        /// <inheritdoc/>
         public void ClearDepthStencilBuffer(EngineDepthStencilView depthMap, bool clearDepth, bool clearStencil)
         {
             if ((clearDepth || clearStencil) && depthMap != null)
@@ -556,11 +507,7 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Sets depth stencil state
-        /// </summary>
-        /// <param name="state">Depth stencil state</param>
-        /// <param name="stencilRef">Stencil reference</param>
+        /// <inheritdoc/>
         public void SetDepthStencilState(EngineDepthStencilState state, int stencilRef = 0)
         {
             if (currentDepthStencilState == state && currentDepthStencilRef == stencilRef)
@@ -576,10 +523,7 @@ namespace Engine.Common
             currentDepthStencilRef = stencilRef;
         }
 
-        /// <summary>
-        /// Sets blend state
-        /// </summary>
-        /// <param name="state">Blend state</param>
+        /// <inheritdoc/>
         public void SetBlendState(EngineBlendState state)
         {
             if (currentBlendState == state)
@@ -594,10 +538,7 @@ namespace Engine.Common
             Counters.BlendStateChanges++;
         }
 
-        /// <summary>
-        /// Sets rasterizer state
-        /// </summary>
-        /// <param name="state">Rasterizer state</param>
+        /// <inheritdoc/>
         public void SetRasterizerState(EngineRasterizerState state)
         {
             if (currentRasterizerState == state)
@@ -612,11 +553,7 @@ namespace Engine.Common
             Counters.RasterizerStateChanges++;
         }
 
-        /// <summary>
-        /// Bind an array of vertex buffers to the input-assembler stage.
-        /// </summary>
-        /// <param name="firstSlot">The first input slot for binding</param>
-        /// <param name="vertexBufferBindings">A reference to an array of VertexBufferBinding</param>
+        /// <inheritdoc/>
         public void IASetVertexBuffers(int firstSlot, params EngineVertexBufferBinding[] vertexBufferBindings)
         {
             if (currentVertexBufferFirstSlot != firstSlot || !Helper.CompareEnumerables(currentVertexBufferBindings, vertexBufferBindings))
@@ -630,12 +567,7 @@ namespace Engine.Common
                 currentVertexBufferBindings = vertexBufferBindings;
             }
         }
-        /// <summary>
-        /// Bind an index buffer to the input-assembler stage.
-        /// </summary>
-        /// <param name="indexBufferRef">A reference to an Buffer object</param>
-        /// <param name="format">A SharpDX.DXGI.Format that specifies the format of the data in the index buffer</param>
-        /// <param name="offset">Offset (in bytes) from the start of the index buffer to the first index to use</param>
+        /// <inheritdoc/>
         public void IASetIndexBuffer(EngineBuffer indexBufferRef, Format format, int offset)
         {
             if (currentIndexBufferRef != indexBufferRef || currentIndexFormat != format || currentIndexOffset != offset)
@@ -649,9 +581,7 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Clear shader resources
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearShaderResources()
         {
             var vs = deviceContext.VertexShader;
@@ -685,10 +615,7 @@ namespace Engine.Common
             currentComputeShaderSamplerState.Clear(cs);
         }
 
-        /// <summary>
-        /// Sets the vertex shader in the current device context
-        /// </summary>
-        /// <param name="vertexShader">Vertex shader</param>
+        /// <inheritdoc/>
         public void SetVertexShader(EngineVertexShader vertexShader)
         {
             if (currentVertexShader == vertexShader)
@@ -700,9 +627,7 @@ namespace Engine.Common
 
             currentVertexShader = vertexShader;
         }
-        /// <summary>
-        /// Removes the vertex shader from the current device context
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearVertexShader()
         {
             if (currentVertexShader == null)
@@ -714,67 +639,38 @@ namespace Engine.Common
 
             currentVertexShader = null;
         }
-        /// <summary>
-        /// Sets the constant buffer to the current vertex shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="slot">Slot</param>
-        /// <param name="buffer">Buffer</param>
+        /// <inheritdoc/>
         public void SetVertexShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
             currentVertexShaderConstantBufferState.SetConstantBuffer(deviceContext.VertexShader, slot, buffer);
         }
-        /// <summary>
-        /// Sets the constant buffer list to the current vertex shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="bufferList">Buffer list</param>
+        /// <inheritdoc/>
         public void SetVertexShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
             currentVertexShaderConstantBufferState.SetConstantBuffers(deviceContext.VertexShader, startSlot, bufferList);
         }
-        /// <summary>
-        /// Sets the specified resource in the current vertex shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetVertexShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
             currentVertexShaderResourceViewState.SetShaderResource(deviceContext.VertexShader, slot, resourceView);
         }
-        /// <summary>
-        /// Sets the specified resource in the current vertex shader shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetVertexShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
             currentVertexShaderResourceViewState.SetShaderResources(deviceContext.VertexShader, startSlot, resourceViews);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current vertex shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="samplerState">Sampler</param>
+        /// <inheritdoc/>
         public void SetVertexShaderSampler(int slot, EngineSamplerState samplerState)
         {
             currentVertexShaderSamplerState.SetSampler(deviceContext.VertexShader, slot, samplerState);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current vertex shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="samplerStates">Samplers</param>
+        /// <inheritdoc/>
         public void SetVertexShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentVertexShaderSamplerState.SetSamplers(deviceContext.VertexShader, startSlot, samplerStates);
         }
 
-        /// <summary>
-        /// Sets the hull shader in the current device context
-        /// </summary>
-        /// <param name="hullShader">Hull shader</param>
+        /// <inheritdoc/>
         public void SetHullShader(EngineHullShader hullShader)
         {
             if (currentHullShader == hullShader)
@@ -786,9 +682,7 @@ namespace Engine.Common
 
             currentHullShader = hullShader;
         }
-        /// <summary>
-        /// Removes the hull shader from the current device context
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearHullShader()
         {
             if (currentHullShader == null)
@@ -800,67 +694,38 @@ namespace Engine.Common
 
             currentHullShader = null;
         }
-        /// <summary>
-        /// Sets the constant buffer to the current hull shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="slot">Slot</param>
-        /// <param name="buffer">Buffer</param>
+        /// <inheritdoc/>
         public void SetHullShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
             currentHullShaderConstantBufferState.SetConstantBuffer(deviceContext.HullShader, slot, buffer);
         }
-        /// <summary>
-        /// Sets the constant buffer list to the current hull shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="bufferList">Buffer list</param>
+        /// <inheritdoc/>
         public void SetHullShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
             currentHullShaderConstantBufferState.SetConstantBuffers(deviceContext.HullShader, startSlot, bufferList);
         }
-        /// <summary>
-        /// Sets the specified resource in the current hull shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetHullShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
             currentHullShaderResourceViewState.SetShaderResource(deviceContext.HullShader, slot, resourceView);
         }
-        /// <summary>
-        /// Sets the specified resource in the current hull shader shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetHullShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
             currentHullShaderResourceViewState.SetShaderResources(deviceContext.HullShader, startSlot, resourceViews);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current hull shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="samplerState">Sampler</param>
+        /// <inheritdoc/>
         public void SetHullShaderSampler(int slot, EngineSamplerState samplerState)
         {
             currentHullShaderSamplerState.SetSampler(deviceContext.HullShader, slot, samplerState);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current hull shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="samplerStates">Samplers</param>
+        /// <inheritdoc/>
         public void SetHullShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentHullShaderSamplerState.SetSamplers(deviceContext.HullShader, startSlot, samplerStates);
         }
 
-        /// <summary>
-        /// Sets the domain shader in the current device context
-        /// </summary>
-        /// <param name="domainShader">Domain shader</param>
+        /// <inheritdoc/>
         public void SetDomainShader(EngineDomainShader domainShader)
         {
             if (currentDomainShader == domainShader)
@@ -872,9 +737,7 @@ namespace Engine.Common
 
             currentDomainShader = domainShader;
         }
-        /// <summary>
-        /// Removes the domain shader from the current device context
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearDomainShader()
         {
             if (currentDomainShader == null)
@@ -886,67 +749,38 @@ namespace Engine.Common
 
             currentDomainShader = null;
         }
-        /// <summary>
-        /// Sets the constant buffer to the current domain shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="slot">Slot</param>
-        /// <param name="buffer">Buffer</param>
+        /// <inheritdoc/>
         public void SetDomainShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
             currentDomainShaderConstantBufferState.SetConstantBuffer(deviceContext.DomainShader, slot, buffer);
         }
-        /// <summary>
-        /// Sets the constant buffer list to the current domain shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="bufferList">Buffer list</param>
+        /// <inheritdoc/>
         public void SetDomainShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
             currentDomainShaderConstantBufferState.SetConstantBuffers(deviceContext.DomainShader, startSlot, bufferList);
         }
-        /// <summary>
-        /// Sets the specified resource in the current domain shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetDomainShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
             currentDomainShaderResourceViewState.SetShaderResource(deviceContext.DomainShader, slot, resourceView);
         }
-        /// <summary>
-        /// Sets the specified resource in the current domain shader shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetDomainShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
             currentDomainShaderResourceViewState.SetShaderResources(deviceContext.DomainShader, startSlot, resourceViews);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current domain shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="samplerState">Sampler</param>
+        /// <inheritdoc/>
         public void SetDomainShaderSampler(int slot, EngineSamplerState samplerState)
         {
             currentDomainShaderSamplerState.SetSampler(deviceContext.DomainShader, slot, samplerState);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current domain shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="samplerStates">Samplers</param>
+        /// <inheritdoc/>
         public void SetDomainShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentDomainShaderSamplerState.SetSamplers(deviceContext.DomainShader, startSlot, samplerStates);
         }
 
-        /// <summary>
-        /// Sets the geometry shader in the current device context
-        /// </summary>
-        /// <param name="geometryShader">Geometry shader</param>
+        /// <inheritdoc/>
         public void SetGeometryShader(EngineGeometryShader geometryShader)
         {
             if (currentGeomeryShader == geometryShader)
@@ -958,9 +792,7 @@ namespace Engine.Common
 
             currentGeomeryShader = geometryShader;
         }
-        /// <summary>
-        /// Removes the geometry shader from the current device context
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearGeometryShader()
         {
             if (currentGeomeryShader == null)
@@ -972,67 +804,37 @@ namespace Engine.Common
 
             currentGeomeryShader = null;
         }
-        /// <summary>
-        /// Sets the constant buffer to the current geometry shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="slot">Slot</param>
-        /// <param name="buffer">Buffer</param>
+        /// <inheritdoc/>
         public void SetGeometryShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
             currentGeometryShaderConstantBufferState.SetConstantBuffer(deviceContext.GeometryShader, slot, buffer);
         }
-        /// <summary>
-        /// Sets the constant buffer list to the current geometry shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="bufferList">Buffer list</param>
+        /// <inheritdoc/>
         public void SetGeometryShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
             currentGeometryShaderConstantBufferState.SetConstantBuffers(deviceContext.GeometryShader, startSlot, bufferList);
         }
-        /// <summary>
-        /// Sets the specified resource in the current geometry shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetGeometryShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
             currentGeometryShaderResourceViewState.SetShaderResource(deviceContext.GeometryShader, slot, resourceView);
         }
-        /// <summary>
-        /// Sets the specified resource in the current geometry shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetGeometryShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
             currentGeometryShaderResourceViewState.SetShaderResources(deviceContext.GeometryShader, startSlot, resourceViews);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current geometry shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="samplerState">Sampler</param>
+        /// <inheritdoc/>
         public void SetGeometryShaderSampler(int slot, EngineSamplerState samplerState)
         {
             currentGeometryShaderSamplerState.SetSampler(deviceContext.GeometryShader, slot, samplerState);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current geometry shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="samplerStates">Samplers</param>
+        /// <inheritdoc/>
         public void SetGeometryShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentGeometryShaderSamplerState.SetSamplers(deviceContext.GeometryShader, startSlot, samplerStates);
         }
-
-        /// <summary>
-        /// Sets targets for stream output
-        /// </summary>
-        /// <param name="streamOutBinding">Stream output binding</param>
+        /// <inheritdoc/>
         public void SetGeometryShaderStreamOutputTargets(IEnumerable<EngineStreamOutputBufferBinding> streamOutBinding)
         {
             if (Helper.CompareEnumerables(currentStreamOutputBindings, streamOutBinding))
@@ -1048,10 +850,7 @@ namespace Engine.Common
             currentStreamOutputBindings = streamOutBinding;
         }
 
-        /// <summary>
-        /// Sets the pixel shader in the current device context
-        /// </summary>
-        /// <param name="pixelShader">Pixel shader</param>
+        /// <inheritdoc/>
         public void SetPixelShader(EnginePixelShader pixelShader)
         {
             if (currentPixelShader == pixelShader)
@@ -1063,9 +862,7 @@ namespace Engine.Common
 
             currentPixelShader = pixelShader;
         }
-        /// <summary>
-        /// Removes the pixel shader from the current device context
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearPixelShader()
         {
             if (currentPixelShader == null)
@@ -1077,67 +874,38 @@ namespace Engine.Common
 
             currentPixelShader = null;
         }
-        /// <summary>
-        /// Sets the constant buffer to the current pixel shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="slot">Slot</param>
-        /// <param name="buffer">Buffer</param>
+        /// <inheritdoc/>
         public void SetPixelShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
             currentPixelShaderConstantBufferState.SetConstantBuffer(deviceContext.PixelShader, slot, buffer);
         }
-        /// <summary>
-        /// Sets the constant buffer list to the current pixel shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="bufferList">Buffer list</param>
+        /// <inheritdoc/>
         public void SetPixelShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
             currentPixelShaderConstantBufferState.SetConstantBuffers(deviceContext.PixelShader, startSlot, bufferList);
         }
-        /// <summary>
-        /// Sets the specified resource in the current pixel shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetPixelShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
             currentPixelShaderResourceViewState.SetShaderResource(deviceContext.PixelShader, slot, resourceView);
         }
-        /// <summary>
-        /// Sets the specified resource in the current pixel shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetPixelShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
             currentPixelShaderResourceViewState.SetShaderResources(deviceContext.PixelShader, startSlot, resourceViews);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current pixel shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="samplerState">Sampler</param>
+        /// <inheritdoc/>
         public void SetPixelShaderSampler(int slot, EngineSamplerState samplerState)
         {
             currentPixelShaderSamplerState.SetSampler(deviceContext.PixelShader, slot, samplerState);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current pixel shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="samplerStates">Samplers</param>
+        /// <inheritdoc/>
         public void SetPixelShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentPixelShaderSamplerState.SetSamplers(deviceContext.PixelShader, startSlot, samplerStates);
         }
 
-        /// <summary>
-        /// Sets the compute shader in the current device context
-        /// </summary>
-        /// <param name="computeShader">Compute shader</param>
+        /// <inheritdoc/>
         public void SetComputeShader(EngineComputeShader computeShader)
         {
             if (currentComputeShader == computeShader)
@@ -1149,9 +917,7 @@ namespace Engine.Common
 
             currentComputeShader = computeShader;
         }
-        /// <summary>
-        /// Removes the compute shader from the current device context
-        /// </summary>
+        /// <inheritdoc/>
         public void ClearComputeShader()
         {
             if (currentComputeShader == null)
@@ -1163,78 +929,44 @@ namespace Engine.Common
 
             currentComputeShader = null;
         }
-        /// <summary>
-        /// Sets the constant buffer to the current compute shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="slot">Slot</param>
-        /// <param name="buffer">Buffer</param>
+        /// <inheritdoc/>
         public void SetComputeShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
         {
             currentComputeShaderConstantBufferState.SetConstantBuffer(deviceContext.ComputeShader, slot, buffer);
         }
-        /// <summary>
-        /// Sets the constant buffer list to the current compute shader
-        /// </summary>
-        /// <typeparam name="T">Type o buffer</typeparam>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="bufferList">Buffer list</param>
+        /// <inheritdoc/>
         public void SetComputeShaderConstantBuffers(int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
         {
             currentComputeShaderConstantBufferState.SetConstantBuffers(deviceContext.ComputeShader, startSlot, bufferList);
         }
-        /// <summary>
-        /// Sets the specified resource in the current compute shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetComputeShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
             currentComputeShaderResourceViewState.SetShaderResource(deviceContext.ComputeShader, slot, resourceView);
         }
-        /// <summary>
-        /// Sets the specified resource in the current compute shader shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="resourceView">Resource</param>
+        /// <inheritdoc/>
         public void SetComputeShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
             currentComputeShaderResourceViewState.SetShaderResources(deviceContext.ComputeShader, startSlot, resourceViews);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current compute shader
-        /// </summary>
-        /// <param name="slot">Slot</param>
-        /// <param name="samplerState">Sampler</param>
+        /// <inheritdoc/>
         public void SetComputeShaderSampler(int slot, EngineSamplerState samplerState)
         {
             currentComputeShaderSamplerState.SetSampler(deviceContext.ComputeShader, slot, samplerState);
         }
-        /// <summary>
-        /// Sets the specified sampler state in the current compute shader
-        /// </summary>
-        /// <param name="startSlot">Start slot</param>
-        /// <param name="samplerStates">Samplers</param>
+        /// <inheritdoc/>
         public void SetComputeShaderSamplers(int startSlot, IEnumerable<EngineSamplerState> samplerStates)
         {
             currentComputeShaderSamplerState.SetSamplers(deviceContext.ComputeShader, startSlot, samplerStates);
         }
 
-        /// <summary>
-        /// Apply effect pass
-        /// </summary>
-        /// <param name="technique"></param>
-        /// <param name="index"></param>
-        /// <param name="flags"></param>
+        /// <inheritdoc/>
         public void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
             technique.GetPass(index).Apply(deviceContext, flags);
         }
 
-        /// <summary>
-        /// Updates a constant buffer in the device context
-        /// </summary>
-        /// <param name="constantBuffer">Constant buffer</param>
+        /// <inheritdoc/>
         public bool UpdateConstantBuffer(IEngineConstantBuffer constantBuffer)
         {
             if (constantBuffer == null)
@@ -1253,12 +985,7 @@ namespace Engine.Common
             return true;
         }
 
-        /// <summary>
-        /// Updates a texture
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="texture">Texture to update</param>
-        /// <param name="data">Data to write</param>
+        /// <inheritdoc/>
         public void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
             if (data?.Any() == true)
@@ -1277,12 +1004,7 @@ namespace Engine.Common
                 Counters.BufferWrites++;
             }
         }
-        /// <summary>
-        /// Updates a texture
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="texture">Texture to update</param>
-        /// <param name="data">Data to write</param>
+        /// <inheritdoc/>
         public void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
             if (data?.Any() == true)
@@ -1302,38 +1024,19 @@ namespace Engine.Common
             }
         }
 
-        /// <summary>
-        /// Writes data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphic context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="data">Complete data</param>
+        /// <inheritdoc/>
         public bool WriteDiscardBuffer<T>(EngineBuffer buffer, T data)
             where T : struct
         {
             return WriteDiscardBuffer(buffer, 0, new[] { data });
         }
-        /// <summary>
-        /// Writes data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphic context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="data">Complete data</param>
+        /// <inheritdoc/>
         public bool WriteDiscardBuffer<T>(EngineBuffer buffer, IEnumerable<T> data)
             where T : struct
         {
             return WriteDiscardBuffer(buffer, 0, data);
         }
-        /// <summary>
-        /// Writes data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphic context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="offset">Buffer element offset to write</param>
-        /// <param name="data">Complete data</param>
+        /// <inheritdoc/>
         public bool WriteDiscardBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
@@ -1361,26 +1064,14 @@ namespace Engine.Common
 
             return true;
         }
-        /// <summary>
-        /// Writes data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphic context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="data">Complete data</param>
+
+        /// <inheritdoc/>
         public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, IEnumerable<T> data)
             where T : struct
         {
             return WriteNoOverwriteBuffer(buffer, 0, data);
         }
-        /// <summary>
-        /// Writes data into buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphic context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="offset">Buffer element offset to write</param>
-        /// <param name="data">Complete data</param>
+        /// <inheritdoc/>
         public bool WriteNoOverwriteBuffer<T>(EngineBuffer buffer, long offset, IEnumerable<T> data)
             where T : struct
         {
@@ -1410,28 +1101,13 @@ namespace Engine.Common
             return true;
         }
 
-        /// <summary>
-        /// Reads an array of values from the specified buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphics context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="length">Array length</param>
-        /// <returns>Returns readed data</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, int length)
             where T : struct
         {
             return ReadBuffer<T>(buffer, 0, length);
         }
-        /// <summary>
-        /// Reads an array of values from the specified buffer
-        /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
-        /// <param name="deviceContext">Graphics context</param>
-        /// <param name="buffer">Buffer</param>
-        /// <param name="offset">Offset to read</param>
-        /// <param name="length">Array length</param>
-        /// <returns>Returns readed data</returns>
+        /// <inheritdoc/>
         public IEnumerable<T> ReadBuffer<T>(EngineBuffer buffer, long offset, int length)
             where T : struct
         {
@@ -1460,59 +1136,35 @@ namespace Engine.Common
             return data;
         }
 
-        /// <summary>
-        /// Draw
-        /// </summary>
-        /// <param name="vertexCount">Vertex count</param>
-        /// <param name="startVertexLocation">Start vertex location</param>
+        /// <inheritdoc/>
         public void Draw(int vertexCount, int startVertexLocation)
         {
             deviceContext.Draw(vertexCount, startVertexLocation);
 
             Counters.DrawCallsPerFrame++;
         }
-        /// <summary>
-        /// Draw indexed
-        /// </summary>
-        /// <param name="indexCount">Index count</param>
-        /// <param name="startIndexLocation">Start vertex location</param>
-        /// <param name="baseVertexLocation">Base vertex location</param>
+        /// <inheritdoc/>
         public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
             deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
 
             Counters.DrawCallsPerFrame++;
         }
-        /// <summary>
-        /// Draw instanced
-        /// </summary>
-        /// <param name="vertexCountPerInstance">Vertex count per instance</param>
-        /// <param name="instanceCount">Instance count</param>
-        /// <param name="startVertexLocation">Start vertex location</param>
-        /// <param name="startInstanceLocation">Start instance count</param>
+        /// <inheritdoc/>
         public void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
         {
             deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
 
             Counters.DrawCallsPerFrame++;
         }
-        /// <summary>
-        /// Draw indexed instanced
-        /// </summary>
-        /// <param name="indexCountPerInstance">Index count per instance</param>
-        /// <param name="instanceCount">Instance count</param>
-        /// <param name="startIndexLocation">Start index location</param>
-        /// <param name="baseVertexLocation">Base vertex location</param>
-        /// <param name="startInstanceLocation">Start instance location</param>
+        /// <inheritdoc/>
         public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
         {
             deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
 
             Counters.DrawCallsPerFrame++;
         }
-        /// <summary>
-        /// Draw auto
-        /// </summary>
+        /// <inheritdoc/>
         public void DrawAuto()
         {
             deviceContext.DrawAuto();
@@ -1520,11 +1172,7 @@ namespace Engine.Common
             Counters.DrawCallsPerFrame++;
         }
 
-        /// <summary>
-        /// Finish a command list
-        /// </summary>
-        /// <param name="name">Command list debug name</param>
-        /// <param name="restoreState">Resore state</param>
+        /// <inheritdoc/>
         public IEngineCommandList FinishCommandList(string name, bool restoreState = false)
         {
             deviceContext.ClearState();
@@ -1533,11 +1181,7 @@ namespace Engine.Common
 
             return new EngineCommandList($"{Name} {name ?? "commands"}", cmdList);
         }
-        /// <summary>
-        /// Executes a command list in the immediate context
-        /// </summary>
-        /// <param name="commandList">Command list</param>
-        /// <param name="restoreState">Resore state</param>
+        /// <inheritdoc/>
         public void ExecuteCommandList(IEngineCommandList commandList, bool restoreState = false)
         {
             if (commandList == null)
@@ -1548,11 +1192,7 @@ namespace Engine.Common
             deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
             commandList.Dispose();
         }
-        /// <summary>
-        /// Executes a command list in the immediate context
-        /// </summary>
-        /// <param name="commandLists">Command list</param>
-        /// <param name="restoreState">Resore state</param>
+        /// <inheritdoc/>
         public void ExecuteCommandLists(IEnumerable<IEngineCommandList> commandLists, bool restoreState = false)
         {
             if (!commandLists.Any())

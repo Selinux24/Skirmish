@@ -107,7 +107,7 @@ namespace Engine.BuiltIn.Clouds
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateClouds(EngineDeviceContext dc, BuiltInCloudsState state)
+        public void UpdateClouds(IEngineDeviceContext dc, BuiltInCloudsState state)
         {
             cbPerCloud.WriteData(PerCloud.Build(state));
             dc.UpdateConstantBuffer(cbPerCloud);

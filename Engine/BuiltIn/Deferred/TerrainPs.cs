@@ -159,7 +159,7 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext dc)
+        public void SetShaderResources(IEngineDeviceContext dc)
         {
             var cb = new[]
             {

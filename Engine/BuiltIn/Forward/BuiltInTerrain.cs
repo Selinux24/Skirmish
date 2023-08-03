@@ -43,7 +43,7 @@ namespace Engine.BuiltIn.Forward
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Terrain state</param>
-        public void Update(EngineDeviceContext dc, BuiltInTerrainState state)
+        public void Update(IEngineDeviceContext dc, BuiltInTerrainState state)
         {
             cbPerTerrain.WriteData(PerTerrain.Build(state));
             dc.UpdateConstantBuffer(cbPerTerrain);

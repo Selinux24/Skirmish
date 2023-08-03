@@ -409,7 +409,7 @@ namespace Engine
             /// <param name="bufferManager">Buffer manager</param>
             /// <param name="drawer">Drawer</param>
             /// <param name="nodeList">Node list</param>
-            private static bool DrawNodeList(EngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
+            private static bool DrawNodeList(IEngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer drawer, MapGridNode[] nodeList)
             {
                 int instanceCount = 0;
                 int primitiveCount = 0;

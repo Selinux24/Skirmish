@@ -36,7 +36,7 @@ namespace Engine.BuiltIn.Foliage
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Billboard state</param>
-        public void UpdateFoliage(EngineDeviceContext dc, BuiltInFoliageState state)
+        public void UpdateFoliage(IEngineDeviceContext dc, BuiltInFoliageState state)
         {
             cbPerMaterial.WriteData(PerMaterial.Build(state));
             cbPerPatch.WriteData(PerPatch.Build(state));

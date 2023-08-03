@@ -102,7 +102,7 @@ namespace Engine.BuiltIn.Particles
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Particle state</param>
-        public void Update(EngineDeviceContext dc, BuiltInStreamOutState state)
+        public void Update(IEngineDeviceContext dc, BuiltInStreamOutState state)
         {
             cbPerStreamOut.WriteData(PerStreamOut.Build(state));
             dc.UpdateConstantBuffer(cbPerStreamOut);

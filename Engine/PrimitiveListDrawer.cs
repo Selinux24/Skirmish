@@ -297,7 +297,7 @@ namespace Engine
         /// Writes dictionary data in buffer
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void WriteDataInBuffer(EngineDeviceContext dc)
+        public void WriteDataInBuffer(IEngineDeviceContext dc)
         {
             if (!dictionaryChanged)
             {

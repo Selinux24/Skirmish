@@ -208,7 +208,7 @@ namespace Engine
             /// <param name="sceneryDrawer">Drawer</param>
             /// <param name="mesh">Mesh</param>
             /// <param name="material">Material</param>
-            private static bool DrawWithDrawer(EngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
+            private static bool DrawWithDrawer(IEngineDeviceContext dc, BufferManager bufferManager, IBuiltInDrawer sceneryDrawer, Mesh mesh, IMeshMaterial material)
             {
                 sceneryDrawer.UpdateMesh(dc, BuiltInDrawerMeshState.Default());
 

@@ -464,7 +464,7 @@ namespace Engine
             /// <param name="transparent">The billboards were transparent</param>
             /// <param name="patch">Patch</param>
             /// <param name="bufferManager">Buffer manager</param>
-            public void AttachFoliage(EngineDeviceContext dc, Vector3 eyePosition, bool transparent, FoliagePatch patch, BufferManager bufferManager)
+            public void AttachFoliage(IEngineDeviceContext dc, Vector3 eyePosition, bool transparent, FoliagePatch patch, BufferManager bufferManager)
             {
                 vertexDrawCount = 0;
                 Attached = false;
@@ -492,7 +492,7 @@ namespace Engine
             /// </summary>
             /// <param name="dc">Device context</param>
             /// <param name="drawer">Drawer</param>
-            public bool DrawFoliage(EngineDeviceContext dc, BuiltInDrawer drawer)
+            public bool DrawFoliage(IEngineDeviceContext dc, BuiltInDrawer drawer)
             {
                 if (vertexDrawCount <= 0)
                 {
@@ -798,7 +798,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="item">Node</param>
-        private bool DrawNode(EngineDeviceContext dc, QuadTreeNode item)
+        private bool DrawNode(IEngineDeviceContext dc, QuadTreeNode item)
         {
             var buffers = foliageBuffers.Where(b => b.CurrentPatch?.CurrentNode == item);
             if (!buffers.Any())
@@ -1108,7 +1108,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="eyePosition">Eye position</param>
-        private void WritePatches(EngineDeviceContext dc, Vector3 eyePosition)
+        private void WritePatches(IEngineDeviceContext dc, Vector3 eyePosition)
         {
             //Mark patches to delete
             AttachFreePatches(dc,eyePosition);
@@ -1127,7 +1127,7 @@ namespace Engine
         ///   - If free buffer found, assign
         ///   - If not, look for a buffer to free, farthest from camera first
         /// </remarks>
-        private void AttachFreePatches(EngineDeviceContext dc, Vector3 eyePosition)
+        private void AttachFreePatches(IEngineDeviceContext dc, Vector3 eyePosition)
         {
             if (!toAssign.Any())
             {

@@ -17,6 +17,6 @@ namespace Engine.Common
         /// <summary>
         /// Device context
         /// </summary>
-        public EngineDeviceContext DeviceContext { get; set; }
+        public IEngineDeviceContext DeviceContext { get; set; }
     }
 }

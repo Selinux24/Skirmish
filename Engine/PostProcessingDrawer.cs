@@ -51,7 +51,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectCombine(EngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
+        public IBuiltInDrawer UpdateEffectCombine(IEngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInCombine>();
 
@@ -60,7 +60,7 @@ namespace Engine
             return drawer;
         }
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectParameters(EngineDeviceContext dc, BuiltInPostProcessState state)
+        public IBuiltInDrawer UpdateEffectParameters(IEngineDeviceContext dc, BuiltInPostProcessState state)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
@@ -69,7 +69,7 @@ namespace Engine
             return drawer;
         }
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffect(EngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
+        public IBuiltInDrawer UpdateEffect(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
         {
             var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
 
@@ -78,7 +78,7 @@ namespace Engine
             return drawer;
         }
         /// <inheritdoc/>
-        public void Draw(EngineDeviceContext dc, IBuiltInDrawer drawer)
+        public void Draw(IEngineDeviceContext dc, IBuiltInDrawer drawer)
         {
             var bufferManager = game.BufferManager;
 

@@ -267,7 +267,7 @@ namespace Engine
         /// Write light geometry in buffers
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void WriteBuffers(EngineDeviceContext dc)
+        public void WriteBuffers(IEngineDeviceContext dc)
         {
             if (!updateLightBuffers)
             {
@@ -301,7 +301,7 @@ namespace Engine
         /// <param name="dc">Device context</param>
         /// <param name="geometry">Geometry</param>
         /// <param name="drawer">Drawer</param>
-        private void DrawSingleLight(EngineDeviceContext dc, LightGeometry geometry, IBuiltInDrawer drawer)
+        private void DrawSingleLight(IEngineDeviceContext dc, LightGeometry geometry, IBuiltInDrawer drawer)
         {
             drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, geometry.IndexCount, geometry.Offset);
         }
@@ -309,7 +309,7 @@ namespace Engine
         /// Binds the hemispheric/directional (global) light input layout to the input assembler
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void BindGlobalLight(EngineDeviceContext dc)
+        public void BindGlobalLight(IEngineDeviceContext dc)
         {
             dc.IAInputLayout = globalLightInputLayout;
         }
@@ -318,7 +318,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawDirectional(EngineDeviceContext dc, BuiltInLightDirectional drawer)
+        public void DrawDirectional(IEngineDeviceContext dc, BuiltInLightDirectional drawer)
         {
             drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
@@ -326,7 +326,7 @@ namespace Engine
         /// Binds the point light input layout to the input assembler
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void BindPoint(EngineDeviceContext dc)
+        public void BindPoint(IEngineDeviceContext dc)
         {
             dc.IAInputLayout = pointLightInputLayout;
         }
@@ -336,7 +336,7 @@ namespace Engine
         /// <param name="dc">Device context</param>
         /// <param name="stencilDrawer">Stencil drawer</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawPoint(EngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
+        public void DrawPoint(IEngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightPoint drawer)
         {
             var geometry = pointLightGeometry;
 
@@ -353,7 +353,7 @@ namespace Engine
         /// Binds the spot light input layout to the input assembler
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void BindSpot(EngineDeviceContext dc)
+        public void BindSpot(IEngineDeviceContext dc)
         {
             dc.IAInputLayout = spotLightInputLayout;
         }
@@ -363,7 +363,7 @@ namespace Engine
         /// <param name="dc">Device context</param>
         /// <param name="stencilDrawer">Stencil drawer</param>
         /// <param name="drawer">Drawer</param>
-        public void DrawSpot(EngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightSpot drawer)
+        public void DrawSpot(IEngineDeviceContext dc, BuiltInStencil stencilDrawer, BuiltInLightSpot drawer)
         {
             var geometry = spotLightGeometry;
 
@@ -380,7 +380,7 @@ namespace Engine
         /// Binds the result box input layout to the input assembler
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void BindResult(EngineDeviceContext dc)
+        public void BindResult(IEngineDeviceContext dc)
         {
             dc.IAInputLayout = combineLightsInputLayout;
         }
@@ -389,7 +389,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="drawer">Effect</param>
-        public void DrawResult(EngineDeviceContext dc, BuiltInComposer drawer)
+        public void DrawResult(IEngineDeviceContext dc, BuiltInComposer drawer)
         {
             drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
         }
@@ -398,7 +398,7 @@ namespace Engine
         /// Sets stencil pass rasterizer
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void SetRasterizerStencilPass(EngineDeviceContext dc)
+        private void SetRasterizerStencilPass(IEngineDeviceContext dc)
         {
             dc.SetRasterizerState(rasterizerStencilPass);
         }
@@ -406,7 +406,7 @@ namespace Engine
         /// Stes lighting pass rasterizer
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void SetRasterizerLightingPass(EngineDeviceContext dc)
+        public void SetRasterizerLightingPass(IEngineDeviceContext dc)
         {
             dc.SetRasterizerState(rasterizerLightingPass);
         }
@@ -414,7 +414,7 @@ namespace Engine
         /// Sets depth stencil for volume marking
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void SetDepthStencilVolumeMarking(EngineDeviceContext dc)
+        public void SetDepthStencilVolumeMarking(IEngineDeviceContext dc)
         {
             dc.SetDepthStencilState(depthStencilVolumeMarking);
         }
@@ -422,7 +422,7 @@ namespace Engine
         /// Sets depth stencil for volume drawing
         /// </summary>
         /// <param name="dc">Device context</param>
-        public void SetDepthStencilVolumeDrawing(EngineDeviceContext dc)
+        public void SetDepthStencilVolumeDrawing(IEngineDeviceContext dc)
         {
             dc.SetDepthStencilState(depthStencilVolumeDrawing);
         }

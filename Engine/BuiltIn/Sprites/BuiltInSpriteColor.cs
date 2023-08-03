@@ -30,7 +30,7 @@ namespace Engine.BuiltIn.Sprites
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateSprite(EngineDeviceContext dc, BuiltInSpriteState state)
+        public void UpdateSprite(IEngineDeviceContext dc, BuiltInSpriteState state)
         {
             cbPerSprite.WriteData(PerSprite.Build(state));
             dc.UpdateConstantBuffer(cbPerSprite);

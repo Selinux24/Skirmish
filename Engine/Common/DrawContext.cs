@@ -72,7 +72,7 @@ namespace Engine.Common
         /// <summary>
         /// Device context
         /// </summary>
-        public readonly EngineDeviceContext DeviceContext { get => PassContext.DeviceContext; }
+        public readonly IEngineDeviceContext DeviceContext { get => PassContext.DeviceContext; }
 
         /// <summary>
         /// Validates the drawing stage

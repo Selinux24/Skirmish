@@ -42,7 +42,7 @@ namespace Engine.BuiltIn.Shadows
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
         }
         /// <inheritdoc/>
-        public override void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
+        public override void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
             var pixelShader = GetPixelShader<TransparentPs>();
             pixelShader?.SetDiffuseMap(state.Material?.DiffuseTexture);

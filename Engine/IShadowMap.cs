@@ -41,7 +41,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="index">Array index</param>
-        void Bind(EngineDeviceContext dc, int index);
+        void Bind(IEngineDeviceContext dc, int index);
         /// <summary>
         /// Gets the drawer to draw this shadow map
         /// </summary>

@@ -63,7 +63,7 @@ namespace Engine.BuiltIn.Cubemap
         /// <param name="dc">Device context</param>
         /// <param name="texture">Texture</param>
         /// <param name="textureIndex">Texture index</param>
-        public void Update(EngineDeviceContext dc, EngineShaderResourceView texture, uint textureIndex)
+        public void Update(IEngineDeviceContext dc, EngineShaderResourceView texture, uint textureIndex)
         {
             cbPerCube.WriteData(PerCube.Build(textureIndex));
             dc.UpdateConstantBuffer(cbPerCube);

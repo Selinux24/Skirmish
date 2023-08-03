@@ -279,7 +279,7 @@ namespace Engine.BuiltIn
         /// <param name="materialPaletteWidth">Material palette width</param>
         /// <param name="animationPalette">Animation palette resource view</param>
         /// <param name="animationPaletteWidth">Animation palette width</param>
-        public static void UpdateGlobals(EngineDeviceContext dc, EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
+        public static void UpdateGlobals(IEngineDeviceContext dc, EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             var cbGlobal = GetConstantBuffer<Global>();
             cbGlobal?.WriteData(Global.Build(materialPaletteWidth, animationPaletteWidth));

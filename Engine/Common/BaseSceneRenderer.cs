@@ -135,7 +135,7 @@ namespace Engine.Common
         /// <summary>
         /// Deferred context list
         /// </summary>
-        private readonly List<EngineDeviceContext> deferredContextList = new();
+        private readonly List<IEngineDeviceContext> deferredContextList = new();
         /// <summary>
         /// Pass list
         /// </summary>
@@ -507,7 +507,7 @@ namespace Engine.Common
         /// Creates a deferred context
         /// </summary>
         /// <param name="passIndex">Pass index</param>
-        private EngineDeviceContext GetDeferredContext(int passIndex)
+        private IEngineDeviceContext GetDeferredContext(int passIndex)
         {
             while (passIndex >= deferredContextList.Count)
             {
@@ -795,7 +795,7 @@ namespace Engine.Common
         /// Updates the global resources state in the specified device context
         /// </summary>
         /// <param name="dc">Device context</param>
-        protected void UpdateGlobalState(EngineDeviceContext dc)
+        protected void UpdateGlobalState(IEngineDeviceContext dc)
         {
             BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
         }
@@ -942,7 +942,7 @@ namespace Engine.Common
         /// Sets the rasterizer state
         /// </summary>
         /// <param name="dc">Device context</param>
-        protected virtual void SetRasterizer(EngineDeviceContext dc)
+        protected virtual void SetRasterizer(IEngineDeviceContext dc)
         {
             dc.SetRasterizerState(Scene.Game.Graphics.GetRasterizerDefault());
         }
@@ -952,7 +952,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="drawerMode">Draw mode</param>
         /// <param name="blendMode">Blend mode</param>
-        protected virtual void SetBlendState(EngineDeviceContext dc, DrawerModes drawerMode, BlendModes blendMode)
+        protected virtual void SetBlendState(IEngineDeviceContext dc, DrawerModes drawerMode, BlendModes blendMode)
         {
             dc.SetBlendState(Scene.Game.Graphics.GetBlendState(blendMode));
         }
@@ -961,7 +961,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="enableWrite">Enables the z-buffer writing</param>
-        protected virtual void SetDepthStencil(EngineDeviceContext dc, bool enableWrite)
+        protected virtual void SetDepthStencil(IEngineDeviceContext dc, bool enableWrite)
         {
             if (enableWrite)
             {
@@ -1434,7 +1434,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dc">Drawing context</param>
         /// <param name="renderTarget">Render target parameters</param>
-        protected virtual void SetTarget(EngineDeviceContext dc, RenderTargetParameters renderTarget)
+        protected virtual void SetTarget(IEngineDeviceContext dc, RenderTargetParameters renderTarget)
         {
             switch (renderTarget.Target)
             {
@@ -1461,7 +1461,7 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindDefaultTarget(EngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindDefaultTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             var graphics = Scene.Game.Graphics;
 
@@ -1477,7 +1477,7 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         /// <param name="clearDepth">Indicates whether the depth buffer must be cleared</param>
         /// <param name="clearStencil">Indicates whether the stencil buffer must be cleared</param>
-        private void BindObjectsTarget(EngineDeviceContext dc, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
+        private void BindObjectsTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor, bool clearDepth, bool clearStencil)
         {
             var graphics = Scene.Game.Graphics;
 
@@ -1490,7 +1490,7 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindUITarget(EngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindUITarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport);
@@ -1501,7 +1501,7 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindResultsTarget(EngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindResultsTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
             dc.SetViewport(Scene.Game.Graphics.Viewport);
@@ -1512,7 +1512,7 @@ namespace Engine.Common
         /// <param name="dc">Drawing context</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindPostProcessingTarget(EngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindPostProcessingTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(postProcessingTargetA.Targets, clearRT, clearRTColor);
 
@@ -1684,7 +1684,7 @@ namespace Engine.Common
         /// <param name="target1">Target 1</param>
         /// <param name="target2">Target 2</param>
         /// <param name="resultTarget">Result target</param>
-        private void CombineTargets(EngineDeviceContext dc, Targets target1, Targets target2, Targets resultTarget)
+        private void CombineTargets(IEngineDeviceContext dc, Targets target1, Targets target2, Targets resultTarget)
         {
             var graphics = Scene.Game.Graphics;
 
@@ -1706,7 +1706,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="renderTarget">Render target</param>
         /// <param name="renderPass">Render pass</param>
-        private void DrawPostProcessing(EngineDeviceContext dc, RenderTargetParameters renderTarget, RenderPass renderPass)
+        private void DrawPostProcessing(IEngineDeviceContext dc, RenderTargetParameters renderTarget, RenderPass renderPass)
         {
             if (!ValidateRenderPass(renderPass, out var state))
             {
@@ -1766,7 +1766,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="sourceTarget">Target</param>
-        private void DrawToScreen(EngineDeviceContext dc, Targets sourceTarget)
+        private void DrawToScreen(IEngineDeviceContext dc, Targets sourceTarget)
         {
             var graphics = Scene.Game.Graphics;
 

@@ -491,7 +491,7 @@ namespace Engine.UI
         /// Writes text data into buffers
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void WriteBuffers(EngineDeviceContext dc)
+        private void WriteBuffers(IEngineDeviceContext dc)
         {
             if (!updateBuffers)
             {

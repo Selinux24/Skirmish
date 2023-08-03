@@ -148,7 +148,7 @@ namespace Engine.BuiltIn.Particles
         /// <param name="state">Particle state</param>
         /// <param name="textureCount">Texture count</param>
         /// <param name="textures">Texture array</param>
-        public void Update(EngineDeviceContext dc, BuiltInParticlesState state, uint textureCount, EngineShaderResourceView textures)
+        public void Update(IEngineDeviceContext dc, BuiltInParticlesState state, uint textureCount, EngineShaderResourceView textures)
         {
             cbPerEmitter.WriteData(PerEmitter.Build(state, textureCount));
             dc.UpdateConstantBuffer(cbPerEmitter);

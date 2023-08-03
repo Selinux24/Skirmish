@@ -31,7 +31,7 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">State</param>
-        public void UpdatePass(EngineDeviceContext dc, BuiltInPostProcessState state)
+        public void UpdatePass(IEngineDeviceContext dc, BuiltInPostProcessState state)
         {
             var cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>();
             cbPerPass.WriteData(PerPass.Build(state));
@@ -46,7 +46,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="dc">Device context</param>
         /// <param name="sourceTexture">Source texture</param>
         /// <param name="effect">Effect</param>
-        public void UpdateEffect(EngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
+        public void UpdateEffect(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
         {
             var cbPerEffect = BuiltInShaders.GetConstantBuffer<PerEffect>();
             cbPerEffect.WriteData(PerEffect.Build(effect));

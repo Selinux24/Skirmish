@@ -18,6 +18,6 @@ namespace Engine.BuiltIn
         /// Sets the shader resources
         /// </summary>
         /// <param name="dc">Device context</param>
-        void SetShaderResources(EngineDeviceContext dc);
+        void SetShaderResources(IEngineDeviceContext dc);
     }
 }

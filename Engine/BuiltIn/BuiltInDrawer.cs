@@ -137,7 +137,7 @@ namespace Engine.BuiltIn
         /// Prepares the internal shaders in the graphics device
         /// </summary>
         /// <param name="dc">Device context</param>
-        protected virtual void PrepareShaders(EngineDeviceContext dc)
+        protected virtual void PrepareShaders(IEngineDeviceContext dc)
         {
             dc.SetVertexShader(vertexShader?.Shader);
             vertexShader?.SetShaderResources(dc);
@@ -155,18 +155,18 @@ namespace Engine.BuiltIn
 
         }
         /// <inheritdoc/>
-        public virtual void UpdateMesh(EngineDeviceContext dc, BuiltInDrawerMeshState state)
+        public virtual void UpdateMesh(IEngineDeviceContext dc, BuiltInDrawerMeshState state)
         {
 
         }
         /// <inheritdoc/>
-        public virtual void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
+        public virtual void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
 
         }
 
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext dc, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
+        public virtual bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0)
         {
             if (bufferManager == null)
             {
@@ -211,7 +211,7 @@ namespace Engine.BuiltIn
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext dc, BufferManager bufferManager, DrawOptions options)
+        public virtual bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, DrawOptions options)
         {
             if (bufferManager == null)
             {
@@ -239,7 +239,7 @@ namespace Engine.BuiltIn
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, int drawCount)
+        public virtual bool Draw(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, int drawCount)
         {
             if (buffer == null)
             {
@@ -261,7 +261,7 @@ namespace Engine.BuiltIn
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(EngineDeviceContext dc, Topology topology, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation)
+        public virtual bool Draw(IEngineDeviceContext dc, Topology topology, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation)
         {
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders(dc);
@@ -283,7 +283,7 @@ namespace Engine.BuiltIn
         }
 
         /// <inheritdoc/>
-        public virtual bool DrawAuto(EngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology)
+        public virtual bool DrawAuto(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology)
         {
             if (buffer == null)
             {
@@ -306,7 +306,7 @@ namespace Engine.BuiltIn
         }
 
         /// <inheritdoc/>
-        public void StreamOut(EngineDeviceContext dc, bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology)
+        public void StreamOut(IEngineDeviceContext dc, bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology)
         {
             if (buffer == null)
             {

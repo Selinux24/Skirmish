@@ -267,7 +267,7 @@ namespace Engine
         /// Stream output
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void StreamOut(EngineDeviceContext dc)
+        private void StreamOut(IEngineDeviceContext dc)
         {
             dc.SetDepthStencilState(Game.Graphics.GetDepthStencilNone());
 

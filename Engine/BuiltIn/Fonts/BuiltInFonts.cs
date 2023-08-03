@@ -122,7 +122,7 @@ namespace Engine.BuiltIn.Fonts
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateFont(EngineDeviceContext dc, BuiltInFontState state)
+        public void UpdateFont(IEngineDeviceContext dc, BuiltInFontState state)
         {
             cbPerFont.WriteData(PerFont.Build(state));
             dc.UpdateConstantBuffer(cbPerFont);
@@ -136,7 +136,7 @@ namespace Engine.BuiltIn.Fonts
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="local">Local transform</param>
-        public void UpdateText(EngineDeviceContext dc, Matrix local)
+        public void UpdateText(IEngineDeviceContext dc, Matrix local)
         {
             cbPerText.WriteData(PerText.Build(local));
             dc.UpdateConstantBuffer(cbPerText);

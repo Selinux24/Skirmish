@@ -214,7 +214,7 @@ namespace Engine.UI
         /// Default sprite draw
         /// </summary>
         /// <param name="dc">Device context</param>
-        private bool Draw(EngineDeviceContext dc)
+        private bool Draw(IEngineDeviceContext dc)
         {
             BuiltInSpriteState state;
 

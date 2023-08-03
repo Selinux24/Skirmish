@@ -122,7 +122,7 @@ namespace Engine.BuiltIn.SkyScattering
         /// <param name="dc">Device context</param>
         /// <param name="lightDirection">Light direction</param>
         /// <param name="state">State</param>
-        public void Update(EngineDeviceContext dc, Vector3 lightDirection, BuiltInSkyScatteringState state)
+        public void Update(IEngineDeviceContext dc, Vector3 lightDirection, BuiltInSkyScatteringState state)
         {
             cbPerObject.WriteData(PerObject.Build(lightDirection, state));
             dc.UpdateConstantBuffer(cbPerObject);

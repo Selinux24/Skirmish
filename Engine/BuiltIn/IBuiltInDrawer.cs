@@ -20,13 +20,13 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        void UpdateMesh(EngineDeviceContext dc, BuiltInDrawerMeshState state);
+        void UpdateMesh(IEngineDeviceContext dc, BuiltInDrawerMeshState state);
         /// <summary>
         /// Updates drawer material state
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state);
+        void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state);
 
         /// <summary>
         /// Draws the specified meshes
@@ -36,14 +36,14 @@ namespace Engine.BuiltIn
         /// <param name="meshes">Mesh list</param>
         /// <param name="instances">Number of instances</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        bool Draw(EngineDeviceContext dc, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0);
+        bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, IEnumerable<Mesh> meshes, int instances = 0, int startInstanceLocation = 0);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="bufferManager">Buffer manager</param>
         /// <param name="options">Draw options</param>
-        bool Draw(EngineDeviceContext dc, BufferManager bufferManager, DrawOptions options);
+        bool Draw(IEngineDeviceContext dc, BufferManager bufferManager, DrawOptions options);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>
@@ -51,7 +51,7 @@ namespace Engine.BuiltIn
         /// <param name="buffer">Vertex buffer</param>
         /// <param name="topology">Primitive topology</param>
         /// <param name="drawCount">Draw count</param>
-        bool Draw(EngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, int drawCount);
+        bool Draw(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology, int drawCount);
         /// <summary>
         /// Draws the specified vertex buffer
         /// </summary>
@@ -62,7 +62,7 @@ namespace Engine.BuiltIn
         /// <param name="indexBuffer">Index buffer</param>
         /// <param name="count">Draw count</param>
         /// <param name="startLocation">Start location</param>
-        bool Draw(EngineDeviceContext dc, Topology topology, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation);
+        bool Draw(IEngineDeviceContext dc, Topology topology, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation);
 
         /// <summary>
         /// Draws the specified vertex buffer
@@ -70,7 +70,7 @@ namespace Engine.BuiltIn
         /// <param name="dc">Device context</param>
         /// <param name="buffer">Vertex buffer</param>
         /// <param name="topology">Primitive topology</param>
-        bool DrawAuto(EngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology);
+        bool DrawAuto(IEngineDeviceContext dc, IEngineVertexBuffer buffer, Topology topology);
 
         /// <summary>
         /// Streams-out the specified buffer into the stream-out buffer
@@ -80,6 +80,6 @@ namespace Engine.BuiltIn
         /// <param name="buffer">Data buffer</param>
         /// <param name="streamOutBuffer">Stream-out target buffer</param>
         /// <param name="topology">Primitive topology</param>
-        void StreamOut(EngineDeviceContext dc, bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology);
+        void StreamOut(IEngineDeviceContext dc, bool firstRun, IEngineVertexBuffer buffer, IEngineVertexBuffer streamOutBuffer, Topology topology);
     }
 }

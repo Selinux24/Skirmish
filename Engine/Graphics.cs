@@ -48,6 +48,10 @@ namespace Engine
         /// </summary>
         private Device3 device = null;
         /// <summary>
+        /// Immediate context
+        /// </summary>
+        private readonly EngineDeviceContext immediateContext = null;
+        /// <summary>
         /// Swap chain
         /// </summary>
         private SwapChain4 swapChain = null;
@@ -65,9 +69,9 @@ namespace Engine
         /// </summary>
         public string DeviceDescription { get; private set; }
         /// <summary>
-        /// Graphics immmediate context
+        /// Gets the graphics immmediate context
         /// </summary>
-        public EngineDeviceContext ImmediateContext { get; private set; }
+        public IEngineDeviceContext ImmediateContext { get => immediateContext; }
 
         /// <summary>
         /// Screen viewport
@@ -288,7 +292,7 @@ namespace Engine
                 swapChain.DebugName = "GraphicsSwapChain";
             }
 
-            ImmediateContext = new EngineDeviceContext("Immediate", device.ImmediateContext3);
+            immediateContext = new EngineDeviceContext("Immediate", device.ImmediateContext3);
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -520,7 +524,7 @@ namespace Engine
         /// Creates a new deferred context
         /// </summary>
         /// <param name="name">Deferred context name</param>
-        public EngineDeviceContext CreateDeferredContext(string name)
+        public IEngineDeviceContext CreateDeferredContext(string name)
         {
             return new EngineDeviceContext(name, new DeviceContext3(device));
         }

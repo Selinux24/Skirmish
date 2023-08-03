@@ -119,7 +119,7 @@ namespace Engine.BuiltIn.Billboard
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext dc)
+        public void SetShaderResources(IEngineDeviceContext dc)
         {
             var cb = new[]
             {

@@ -149,7 +149,7 @@ namespace Engine.Common
         /// Draw mesh geometry
         /// </summary>
         /// <param name="dc">Device context</param>
-        public virtual void Draw(EngineDeviceContext dc)
+        public virtual void Draw(IEngineDeviceContext dc)
         {
             if (Indexed)
             {
@@ -177,7 +177,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="count">Instance count</param>
         /// <param name="startInstanceLocation">Start instance location</param>
-        public virtual void Draw(EngineDeviceContext dc, int count, int startInstanceLocation)
+        public virtual void Draw(IEngineDeviceContext dc, int count, int startInstanceLocation)
         {
             if (count <= 0)
             {

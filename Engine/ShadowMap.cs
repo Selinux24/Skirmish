@@ -97,7 +97,7 @@ namespace Engine
         /// <inheritdoc/>
         public abstract void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
         /// <inheritdoc/>
-        public void Bind(EngineDeviceContext dc, int index)
+        public void Bind(IEngineDeviceContext dc, int index)
         {
             //Set shadow mapper viewport
             dc.SetViewports(Viewports);

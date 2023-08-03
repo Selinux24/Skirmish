@@ -27,7 +27,7 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public override void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
+        public override void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
             cbPerMaterial.WriteData(PerMaterialColor.Build(state));
             dc.UpdateConstantBuffer(cbPerMaterial);

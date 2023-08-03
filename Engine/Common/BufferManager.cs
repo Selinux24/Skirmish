@@ -816,7 +816,7 @@ namespace Engine.Common
         /// Sets vertex buffers to device context
         /// </summary>
         /// <param name="dc">Device context</param>
-        public bool SetVertexBuffers(EngineDeviceContext dc)
+        public bool SetVertexBuffers(IEngineDeviceContext dc)
         {
             if (!Initilialized)
             {
@@ -839,7 +839,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
-        public bool SetIndexBuffer(EngineDeviceContext dc, BufferDescriptor descriptor)
+        public bool SetIndexBuffer(IEngineDeviceContext dc, BufferDescriptor descriptor)
         {
             if (descriptor == null)
             {
@@ -877,7 +877,7 @@ namespace Engine.Common
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="topology">Topology</param>
         /// <param name="instanced">Use instancig data</param>
-        public bool SetInputAssembler(EngineDeviceContext dc, IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
+        public bool SetInputAssembler(IEngineDeviceContext dc, IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
         {
             if (descriptor == null)
             {
@@ -929,7 +929,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Data to write</param>
-        public bool WriteVertexBuffer<T>(EngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
+        public bool WriteVertexBuffer<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
             where T : struct
         {
             if (descriptor?.Ready != true)
@@ -965,7 +965,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Instancig data</param>
-        public bool WriteInstancingData<T>(EngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
+        public bool WriteInstancingData<T>(IEngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<T> data)
             where T : struct
         {
             if (descriptor?.Ready != true)
@@ -1001,7 +1001,7 @@ namespace Engine.Common
         /// <param name="dc">Device context</param>
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="data">Data to write</param>
-        public bool WriteIndexBuffer(EngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<uint> data)
+        public bool WriteIndexBuffer(IEngineDeviceContext dc, BufferDescriptor descriptor, IEnumerable<uint> data)
         {
             if (descriptor?.Ready != true)
             {

@@ -38,7 +38,7 @@ namespace Engine.BuiltIn.Forward
         }
 
         /// <inheritdoc/>
-        public override void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
+        public override void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
             cbPerMaterial.WriteData(PerMaterialTexture.Build(state));
             dc.UpdateConstantBuffer(cbPerMaterial);

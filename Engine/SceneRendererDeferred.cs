@@ -517,7 +517,7 @@ namespace Engine
         /// Binds graphics for g-buffer pass
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void BindGBuffer(EngineDeviceContext dc)
+        private void BindGBuffer(IEngineDeviceContext dc)
         {
             //Set local viewport
             dc.SetViewport(Viewport);
@@ -532,7 +532,7 @@ namespace Engine
         /// Binds graphics for light acummulation pass
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void BindLights(EngineDeviceContext dc)
+        private void BindLights(IEngineDeviceContext dc)
         {
             //Set local viewport
             dc.SetViewport(Viewport);
@@ -548,7 +548,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="lights">Light collection</param>
-        private void DrawLights(EngineDeviceContext dc, SceneLights lights)
+        private void DrawLights(IEngineDeviceContext dc, SceneLights lights)
         {
 #if DEBUG
             lightStats.Clear();
@@ -665,7 +665,7 @@ namespace Engine
         /// Draw result
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void DrawResult(EngineDeviceContext dc)
+        private void DrawResult(IEngineDeviceContext dc)
         {
             var graphics = Scene.Game.Graphics;
 
@@ -759,7 +759,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        protected override void SetBlendState(EngineDeviceContext dc, DrawerModes drawerMode, BlendModes blendMode)
+        protected override void SetBlendState(IEngineDeviceContext dc, DrawerModes drawerMode, BlendModes blendMode)
         {
             if (drawerMode.HasFlag(DrawerModes.Deferred))
             {
@@ -785,7 +785,7 @@ namespace Engine
         /// Sets deferred composer blend state
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void SetBlendDeferredComposer(EngineDeviceContext dc)
+        private void SetBlendDeferredComposer(IEngineDeviceContext dc)
         {
             dc.SetBlendState(blendDeferredComposer);
         }
@@ -793,7 +793,7 @@ namespace Engine
         /// Sets transparent deferred composer blend state
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void SetBlendDeferredComposerTransparent(EngineDeviceContext dc)
+        private void SetBlendDeferredComposerTransparent(IEngineDeviceContext dc)
         {
             dc.SetBlendState(blendDeferredComposerTransparent);
         }
@@ -801,7 +801,7 @@ namespace Engine
         /// Sets additive deferred composer blend state
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void SetBlendDeferredComposerAdditive(EngineDeviceContext dc)
+        private void SetBlendDeferredComposerAdditive(IEngineDeviceContext dc)
         {
             dc.SetBlendState(blendDeferredComposerAdditive);
         }
@@ -809,7 +809,7 @@ namespace Engine
         /// Sets deferred lighting blend state
         /// </summary>
         /// <param name="dc">Device context</param>
-        private void SetBlendDeferredLighting(EngineDeviceContext dc)
+        private void SetBlendDeferredLighting(IEngineDeviceContext dc)
         {
             dc.SetBlendState(blendDeferredLighting);
         }

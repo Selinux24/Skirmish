@@ -70,7 +70,7 @@ namespace Engine.BuiltIn.Deferred
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="light">Light constant buffer</param>
-        public void UpdatePerLight(EngineDeviceContext dc, ISceneLightPoint light)
+        public void UpdatePerLight(IEngineDeviceContext dc, ISceneLightPoint light)
         {
             var cbLight = BuiltInShaders.GetConstantBuffer<PerLight>();
             cbLight?.WriteData(PerLight.Build(light.Local));

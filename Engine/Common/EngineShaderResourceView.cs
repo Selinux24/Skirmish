@@ -95,7 +95,7 @@ namespace Engine.Common
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="dc">Device context</param>
         /// <param name="data">New data</param>
-        public void Update<T>(EngineDeviceContext dc, IEnumerable<T> data) where T : struct
+        public void Update<T>(IEngineDeviceContext dc, IEnumerable<T> data) where T : struct
         {
             if (srv == null)
             {

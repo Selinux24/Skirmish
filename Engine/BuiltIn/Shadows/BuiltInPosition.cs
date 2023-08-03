@@ -41,7 +41,7 @@ namespace Engine.BuiltIn.Shadows
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);
         }
         /// <inheritdoc/>
-        public override void UpdateMesh(EngineDeviceContext dc, BuiltInDrawerMeshState state)
+        public override void UpdateMesh(IEngineDeviceContext dc, BuiltInDrawerMeshState state)
         {
             cbPerMesh.WriteData(PerMeshSingle.Build(state));
             dc.UpdateConstantBuffer(cbPerMesh);

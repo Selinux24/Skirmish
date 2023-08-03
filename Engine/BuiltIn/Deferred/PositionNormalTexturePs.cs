@@ -85,7 +85,7 @@ namespace Engine.BuiltIn.Deferred
         }
 
         /// <inheritdoc/>
-        public void SetShaderResources(EngineDeviceContext dc)
+        public void SetShaderResources(IEngineDeviceContext dc)
         {
             dc.SetPixelShaderResourceView(0, diffuseMapArray);
 

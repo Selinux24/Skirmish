@@ -43,7 +43,7 @@ namespace Engine.BuiltIn.Forward
         }
 
         /// <inheritdoc/>
-        public override void UpdateMesh(EngineDeviceContext dc, BuiltInDrawerMeshState state)
+        public override void UpdateMesh(IEngineDeviceContext dc, BuiltInDrawerMeshState state)
         {
             cbPerMesh.WriteData(PerMeshSingle.Build(state));
             dc.UpdateConstantBuffer(cbPerMesh);
@@ -52,7 +52,7 @@ namespace Engine.BuiltIn.Forward
             vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);
         }
         /// <inheritdoc/>
-        public override void UpdateMaterial(EngineDeviceContext dc, BuiltInDrawerMaterialState state)
+        public override void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
             cbPerMaterial.WriteData(PerMaterialTexture.Build(state));
             dc.UpdateConstantBuffer(cbPerMaterial);

@@ -154,7 +154,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="data">Data to write</param>
-        public void Write(EngineDeviceContext dc, IEnumerable<T> data)
+        public void Write(IEngineDeviceContext dc, IEnumerable<T> data)
         {
             dc.WriteDiscardBuffer(VertexBuffer, data);
         }
@@ -169,27 +169,27 @@ namespace Engine.Common
             InputLayout = layout;
         }
         /// <inheritdoc/>
-        public void SetVertexBuffers(EngineDeviceContext dc)
+        public void SetVertexBuffers(IEngineDeviceContext dc)
         {
             dc.IASetVertexBuffers(BufferSlot, VertexBufferBinding);
         }
         /// <inheritdoc/>
-        public void SetInputLayout(EngineDeviceContext dc)
+        public void SetInputLayout(IEngineDeviceContext dc)
         {
             dc.IAInputLayout = InputLayout;
         }
         /// <inheritdoc/>
-        public void SetStreamOutputTargets(EngineDeviceContext dc)
+        public void SetStreamOutputTargets(IEngineDeviceContext dc)
         {
             dc.SetGeometryShaderStreamOutputTargets(StreamOutBinding);
         }
         /// <inheritdoc/>
-        public void Draw(EngineDeviceContext dc, int drawCount)
+        public void Draw(IEngineDeviceContext dc, int drawCount)
         {
             dc.Draw(drawCount, 0);
         }
         /// <inheritdoc/>
-        public void DrawAuto(EngineDeviceContext dc)
+        public void DrawAuto(IEngineDeviceContext dc)
         {
             dc.DrawAuto();
         }

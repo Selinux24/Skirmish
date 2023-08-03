@@ -118,7 +118,7 @@ namespace Engine.BuiltIn.Water
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="state">Drawer state</param>
-        public void UpdateWater(EngineDeviceContext dc, BuiltInWaterState state)
+        public void UpdateWater(IEngineDeviceContext dc, BuiltInWaterState state)
         {
             cbPerWater.WriteData(PerWater.Build(state));
             dc.UpdateConstantBuffer(cbPerWater);

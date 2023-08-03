@@ -194,7 +194,7 @@ namespace Engine
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="meshName">Mesh name</param>
-        private void UpdateIndependentTransforms(EngineDeviceContext dc, string meshName)
+        private void UpdateIndependentTransforms(IEngineDeviceContext dc, string meshName)
         {
             if (!hasIndependentTransforms)
             {
