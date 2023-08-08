@@ -130,7 +130,7 @@ namespace Engine
         {
             // Find the view matrix
             lightPosition = camera.Position + camera.Direction * cascadeTotalRange * 0.5f;
-            var lookAt = lightPosition + (lightDirection) * camera.FarPlaneDistance;
+            var lookAt = lightPosition + lightDirection * camera.FarPlaneDistance;
             var up = Vector3.Normalize(Vector3.Cross(lightDirection, Vector3.Left));
             var shadowView = Matrix.LookAtLH(lightPosition, lookAt, up);
 

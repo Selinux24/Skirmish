@@ -374,7 +374,7 @@ namespace Engine
             /// <param name="drawer">Drawer</param>
             public bool DrawShadows(DrawContextShadows context, BufferManager bufferManager, IBuiltInDrawer drawer)
             {
-                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Frustum);
+                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
                 var dc = context.DeviceContext;
                 var r0 = DrawNodeList(dc, bufferManager, drawer, visibleNodesHigh);
@@ -392,7 +392,7 @@ namespace Engine
             /// <param name="drawer">Drawer</param>
             public bool Draw(DrawContext context, BufferManager bufferManager, IBuiltInDrawer drawer)
             {
-                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull(context.CameraVolume);
+                var (visibleNodesHigh, visibleNodesMedium, visibleNodesLow, visibleNodesMinimum) = Cull((IntersectionVolumeFrustum)context.Camera.Frustum);
 
                 var dc = context.DeviceContext;
                 var r0 = DrawNodeList(dc, bufferManager, drawer, visibleNodesHigh);
@@ -815,7 +815,7 @@ namespace Engine
                 return;
             }
 
-            mapGrid?.Update(context.EyePosition);
+            mapGrid?.Update(context.Camera.Position);
         }
         /// <inheritdoc/>
         public override bool DrawShadows(DrawContextShadows context)

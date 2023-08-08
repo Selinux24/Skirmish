@@ -453,7 +453,7 @@ namespace Engine.Common
             var updateContext = GetUpdateContext(gameTime);
 
             //Cull lights
-            Scene.Lights.Cull(updateContext.CameraVolume, updateContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
+            Scene.Lights.Cull((IntersectionVolumeFrustum)updateContext.Camera.Frustum, updateContext.Camera.Position, Scene.GameEnvironment.LODDistanceLow);
 
             //Update active components
             var updatables = Scene.Components.Get<IUpdatable>(c => c.Active);
@@ -483,22 +483,10 @@ namespace Engine.Common
         /// <param name="gameTime">Game time</param>
         protected virtual UpdateContext GetUpdateContext(GameTime gameTime)
         {
-            var camera = Scene.Camera;
-            var viewProj = camera.View * camera.Projection;
-
             return new UpdateContext
             {
                 GameTime = gameTime,
-
-                View = camera.View,
-                Projection = camera.Projection,
-                ViewProjection = viewProj,
-                CameraVolume = new IntersectionVolumeFrustum(viewProj),
-                NearPlaneDistance = camera.NearPlaneDistance,
-                FarPlaneDistance = camera.FarPlaneDistance,
-                EyePosition = camera.Position,
-                EyeDirection = camera.Direction,
-
+                Camera = Scene.Camera,
                 Lights = Scene.Lights,
             };
         }
@@ -509,9 +497,11 @@ namespace Engine.Common
         /// <param name="passIndex">Pass index</param>
         private IEngineDeviceContext GetDeferredContext(int passIndex)
         {
+            var graphics = Scene.Game.Graphics;
+
             while (passIndex >= deferredContextList.Count)
             {
-                deferredContextList.Add(Scene.Game.Graphics.CreateDeferredContext($"Deferred Context({passIndex})"));
+                deferredContextList.Add(graphics.CreateDeferredContext($"Deferred Context({passIndex})"));
             }
 
             return deferredContextList[passIndex];
@@ -526,27 +516,20 @@ namespace Engine.Common
             var passContext = passLists[passIndex];
             passContext.DeviceContext.ClearState();
 
-            var camera = Scene.Camera;
-            var environment = Scene.GameEnvironment;
-
             return new DrawContext
             {
                 Name = $"{drawMode} pass[{passIndex}] context.",
 
-                GameTime = Scene.Game.GameTime,
-                Graphics = Scene.Game.Graphics,
-                Form = Scene.Game.Form,
                 DrawerMode = drawMode,
 
-                //Initialize context data from update context
-                ViewProjection = camera.View * camera.Projection,
-                CameraVolume = camera.Frustum,
-                EyePosition = camera.Position,
-                EyeDirection = camera.Direction,
-
-                //Initialize context data from scene
+                //Scene data
+                GameTime = Scene.Game.GameTime,
+                Form = Scene.Game.Form,
+                Camera = Scene.Camera,
                 Lights = Scene.Lights,
-                LevelOfDetail = new Vector3(environment.LODDistanceHigh, environment.LODDistanceMedium, environment.LODDistanceLow),
+                LevelOfDetail = Scene.GameEnvironment.GetLODDistances(),
+
+                //Shadow mappers
                 ShadowMapDirectional = ShadowMapperDirectional,
                 ShadowMapPoint = ShadowMapperPoint,
                 ShadowMapSpot = ShadowMapperSpot,
@@ -566,18 +549,17 @@ namespace Engine.Common
             var passContext = passLists[passIndex];
             passContext.DeviceContext.ClearState();
 
-            var camera = Scene.Camera;
-
             return new DrawContextShadows()
             {
                 Name = $"{name} pass[{passIndex}] context.",
-                Graphics = Scene.Game.Graphics,
 
-                ViewProjection = shadowMapper.ToShadowMatrix,
-                EyePosition = shadowMapper.LightPosition,
-                Frustum = camera.Frustum,
+                //Scene data
+                Camera = Scene.Camera,
+
+                //Shadow mapper
                 ShadowMap = shadowMapper,
 
+                //Pass context
                 PassContext = passContext,
             };
         }

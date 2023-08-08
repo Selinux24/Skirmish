@@ -783,7 +783,7 @@ namespace Engine
 
             var dc = context.DeviceContext;
 
-            WritePatches(dc, context.EyePosition);
+            WritePatches(dc, context.Camera.Position);
 
             bool drawn = false;
             foreach (var item in visibleNodes)
@@ -912,9 +912,9 @@ namespace Engine
 
             BuildQuadtree(bbox.Value, Description.NodeSize);
 
-            foliageSphere.Center = context.EyePosition;
+            foliageSphere.Center = context.Camera.Position;
 
-            visibleNodes = GetFoliageNodes(context.CameraVolume, foliageSphere);
+            visibleNodes = GetFoliageNodes((IntersectionVolumeFrustum)context.Camera.Frustum, foliageSphere);
             if (!visibleNodes.Any())
             {
                 return;
@@ -923,7 +923,7 @@ namespace Engine
             bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
 
             //Sort nodes by distance from camera position
-            SortVisibleNodes(context.GameTime, context.EyePosition, transparent);
+            SortVisibleNodes(context.GameTime, context.Camera.Position, transparent);
 
             //Find patches to assign data
             toAssign.Clear();
@@ -1111,7 +1111,7 @@ namespace Engine
         private void WritePatches(IEngineDeviceContext dc, Vector3 eyePosition)
         {
             //Mark patches to delete
-            AttachFreePatches(dc,eyePosition);
+            AttachFreePatches(dc, eyePosition);
 
             //Free unused patches
             FreeUnusedPatches(eyePosition);

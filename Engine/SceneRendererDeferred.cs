@@ -374,7 +374,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Deferred);
-            bool draw = CullingTest(Scene, context.CameraVolume, components, cullIndex);
+            bool draw = CullingTest(Scene, context.Camera.Frustum, components, cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DeferredCull = swCull.ElapsedTicks;
@@ -464,7 +464,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward);
-            bool draw = CullingTest(Scene, context.CameraVolume, components, cullIndex);
+            bool draw = CullingTest(Scene, context.Camera.Frustum, components, cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.DisabledDeferredCull = swCull.ElapsedTicks;

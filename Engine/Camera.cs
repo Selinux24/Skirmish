@@ -30,23 +30,29 @@ namespace Engine
         /// </summary>
         /// <param name="position">Viewer position</param>
         /// <param name="interest">Interest point</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
         /// <returns>Returns the new camera</returns>
-        public static Camera CreateFree(Vector3 position, Vector3 interest)
+        public static Camera CreateFree(Vector3 position, Vector3 interest, int width, int height)
         {
-            return new Camera
+            var camera = new Camera
             {
                 mode = CameraModes.Free,
                 position = position,
                 interest = interest
             };
+
+            camera.SetLens(width, height);
+
+            return camera;
         }
         /// <summary>
         /// Creates 2D camera
         /// </summary>
         /// <param name="position">Position</param>
         /// <param name="interest">Interest</param>
-        /// <param name="width">Width</param>
-        /// <param name="height">Height</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
         /// <returns>Returns new 2D camera</returns>
         public static Camera CreateOrtho(Vector3 position, Vector3 interest, int width, int height)
         {
@@ -57,6 +63,29 @@ namespace Engine
             };
 
             camera.SetLens(width, height);
+
+            return camera;
+        }
+        /// <summary>
+        /// Creates 2D camera
+        /// </summary>
+        /// <param name="area">Area of interest</param>
+        /// <param name="nearPlane">Near plane distance</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns new 2D camera</returns>
+        public static Camera CreateOrtho(Vector3 area, float nearPlane, float width, float height)
+        {
+            var position = new Vector3(0, area.Y + nearPlane, 0);
+            var interest = Vector3.Zero;
+
+            var camera = new Camera
+            {
+                Position = position,
+                Interest = interest
+            };
+
+            camera.SetLens(width, height, area, nearPlane);
 
             return camera;
         }
@@ -475,6 +504,10 @@ namespace Engine
         /// </summary>
         public Matrix Projection { get; private set; }
         /// <summary>
+        /// View * projection matrix
+        /// </summary>
+        public Matrix ViewProjection { get; private set; }
+        /// <summary>
         /// Camera frustum
         /// </summary>
         public BoundingFrustum Frustum { get; private set; }
@@ -505,6 +538,8 @@ namespace Engine
                 Vector3.UnitY);
 
             Projection = Matrix.Identity;
+
+            ViewProjection = View * Projection;
 
             InvertY = false;
         }
@@ -548,6 +583,46 @@ namespace Engine
             UpdateLens();
         }
         /// <summary>
+        /// Sets dimensions of viewport
+        /// </summary>
+        /// <param name="width">Viewport width</param>
+        /// <param name="height">Viewport height</param>
+        /// <param name="extents">Extents</param>
+        /// <param name="nearPlane">Near plane distance</param>
+        public void SetLens(float width, float height, Vector3 extents, float nearPlane)
+        {
+            aspectRelation = height / width;
+
+            viewportWidth = extents.X / aspectRelation;
+            viewportHeight = extents.Z;
+            nearPlaneDistance = nearPlane;
+            farPlaneDistance = extents.Y + nearPlane;
+
+            UpdateLens();
+        }
+        /// <summary>
+        /// Update projections
+        /// </summary>
+        private void UpdateLens()
+        {
+            if (mode == CameraModes.Ortho)
+            {
+                Projection = Matrix.OrthoLH(
+                    viewportWidth,
+                    viewportHeight,
+                    nearPlaneDistance,
+                    farPlaneDistance);
+            }
+            else
+            {
+                Projection = Matrix.PerspectiveFovLH(
+                    fieldOfView,
+                    aspectRelation,
+                    nearPlaneDistance,
+                    farPlaneDistance);
+            }
+        }
+        /// <summary>
         /// Updates camera state
         /// </summary>
         public void Update(GameTime gameTime)
@@ -573,7 +648,9 @@ namespace Engine
                     Vector3.UnitY);
             }
 
-            Frustum = new BoundingFrustum(View * Projection);
+            ViewProjection = View * Projection;
+
+            Frustum = new BoundingFrustum(ViewProjection);
         }
         /// <summary>
         /// Sets previous isometrix axis
@@ -824,28 +901,6 @@ namespace Engine
             Interest = Vector3.Zero;
 
             mode = CameraModes.Ortho;
-        }
-        /// <summary>
-        /// Update projections
-        /// </summary>
-        private void UpdateLens()
-        {
-            if (mode == CameraModes.Ortho)
-            {
-                Projection = Matrix.OrthoLH(
-                    viewportWidth,
-                    viewportHeight,
-                    nearPlaneDistance,
-                    farPlaneDistance);
-            }
-            else
-            {
-                Projection = Matrix.PerspectiveFovLH(
-                    fieldOfView,
-                    aspectRelation,
-                    nearPlaneDistance,
-                    farPlaneDistance);
-            }
         }
 
         /// <summary>
@@ -1240,6 +1295,7 @@ namespace Engine
             SlowZoomDelta = cameraState.SlowZoomDelta;
             View = cameraState.View;
             Projection = cameraState.Projection;
+            ViewProjection = cameraState.View * cameraState.Projection;
             Frustum = new BoundingFrustum(cameraState.Frustum);
             Following = null;
             InvertY = cameraState.InvertY;

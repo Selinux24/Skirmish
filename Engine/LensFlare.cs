@@ -123,12 +123,12 @@ namespace Engine
             var keyLight = context.Lights.KeyLight;
             if (keyLight?.Enabled == true)
             {
-                if (!IsFlareVisible(keyLight, context.EyePosition))
+                if (!IsFlareVisible(keyLight, context.Camera.Position))
                 {
                     return;
                 }
 
-                float dot = Math.Max(0, Vector3.Dot(context.EyeDirection, -keyLight.Direction));
+                float dot = Math.Max(0, Vector3.Dot(context.Camera.Direction, -keyLight.Direction));
                 float scale = dot * keyLight.Brightness;
                 if (scale <= 0)
                 {
@@ -138,13 +138,13 @@ namespace Engine
                 float transparency = dot;
 
                 // Set view translation to Zero to simulate infinite
-                var infiniteView = context.View;
+                var infiniteView = context.Camera.View;
                 infiniteView.TranslationVector = Vector3.Zero;
 
                 // Project the light position into 2D screen space.
                 var projectedPosition = Game.Graphics.Viewport.Project(
-                    -keyLight.Direction * (1f + context.NearPlaneDistance), //Move position into near and far plane projection bounds
-                    context.Projection,
+                    -keyLight.Direction * (1f + context.Camera.NearPlaneDistance), //Move position into near and far plane projection bounds
+                    context.Camera.Projection,
                     infiniteView,
                     Matrix.Identity);
 

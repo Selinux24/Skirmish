@@ -16,10 +16,6 @@ namespace Engine.Common
         /// </summary>
         public DrawerModes DrawerMode { get; set; }
         /// <summary>
-        /// Graphics
-        /// </summary>
-        public Graphics Graphics { get; set; }
-        /// <summary>
         /// Engine form
         /// </summary>
         public IEngineForm Form { get; set; }
@@ -28,21 +24,9 @@ namespace Engine.Common
         /// </summary>
         public GameTime GameTime { get; set; }
         /// <summary>
-        /// View * projection matrix
+        /// Camera
         /// </summary>
-        public Matrix ViewProjection { get; set; }
-        /// <summary>
-        /// Camera culling volume
-        /// </summary>
-        public IntersectionVolumeFrustum CameraVolume { get; set; }
-        /// <summary>
-        /// Eye position
-        /// </summary>
-        public Vector3 EyePosition { get; set; }
-        /// <summary>
-        /// Eye view direction
-        /// </summary>
-        public Vector3 EyeDirection { get; set; }
+        public Camera Camera { get; set; }
         /// <summary>
         /// Lights
         /// </summary>
@@ -51,7 +35,6 @@ namespace Engine.Common
         /// Level of detail
         /// </summary>
         public Vector3 LevelOfDetail { get; set; }
-
         /// <summary>
         /// Directional shadow map
         /// </summary>
@@ -64,7 +47,6 @@ namespace Engine.Common
         /// Spot light shadow map
         /// </summary>
         public IShadowMap ShadowMapSpot { get; set; }
-
         /// <summary>
         /// Pass context
         /// </summary>
@@ -112,6 +94,29 @@ namespace Engine.Common
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Clones the actual draw context
+        /// </summary>
+        /// <param name="name">New name</param>
+        /// <param name="drawerMode">New drawer mode</param>
+        public DrawContext Clone(string name, DrawerModes drawerMode)
+        {
+            return new DrawContext
+            {
+                Name = name,
+                DrawerMode = drawerMode,
+                Form = Form,
+                GameTime = GameTime,
+                Camera = Camera,
+                Lights = Lights,
+                LevelOfDetail = LevelOfDetail,
+                ShadowMapDirectional = ShadowMapDirectional,
+                ShadowMapPoint = ShadowMapPoint,
+                ShadowMapSpot = ShadowMapSpot,
+                PassContext = PassContext,
+            };
         }
     }
 }

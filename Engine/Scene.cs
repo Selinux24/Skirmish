@@ -116,13 +116,12 @@ namespace Engine
 
             AudioManager = new GameAudioManager();
 
+            var form = Game.Form;
             Camera = Camera.CreateFree(
-                new Vector3(0.0f, 0.0f, -10.0f),
-                Vector3.Zero);
-
-            Camera.SetLens(
-                Game.Form.RenderWidth,
-                Game.Form.RenderHeight);
+                Vector3.ForwardLH * -10f,
+                Vector3.Zero,
+                form.RenderWidth,
+                form.RenderHeight);
 
             Lights = SceneLights.CreateDefault(this);
 
@@ -463,7 +462,7 @@ namespace Engine
             return Helper.UnprojectToScreen(
                 position,
                 Game.Graphics.Viewport,
-                Camera.View * Camera.Projection,
+                Camera.ViewProjection,
                 out inside);
         }
 
@@ -710,16 +709,16 @@ namespace Engine
         {
             int mouseX = Game.Input.MouseX;
             int mouseY = Game.Input.MouseY;
-            Matrix worldViewProjection = world * Camera.View * Camera.Projection;
+            var worldViewProjection = world * Camera.ViewProjection;
             float nDistance = Camera.NearPlaneDistance;
             float fDistance = Camera.FarPlaneDistance;
-            ViewportF viewport = Game.Graphics.Viewport;
+            var viewport = Game.Graphics.Viewport;
 
-            Vector3 nVector = new(mouseX, mouseY, nDistance);
-            Vector3 fVector = new(mouseX, mouseY, fDistance);
+            var nVector = new Vector3(mouseX, mouseY, nDistance);
+            var fVector = new Vector3(mouseX, mouseY, fDistance);
 
-            Vector3 nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
-            Vector3 fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var nPoint = Vector3.Unproject(nVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
+            var fPoint = Vector3.Unproject(fVector, 0, 0, viewport.Width, viewport.Height, nDistance, fDistance, worldViewProjection);
 
             return new PickingRay(nPoint, Vector3.Normalize(fPoint - nPoint), pickingParams);
         }

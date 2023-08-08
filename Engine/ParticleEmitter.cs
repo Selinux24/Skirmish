@@ -253,7 +253,7 @@ namespace Engine
                 Duration -= ElapsedTime;
             }
 
-            Distance = Vector3.Distance(Position, context.EyePosition);
+            Distance = Vector3.Distance(Position, context.Camera.Position);
 
             UpdateBoundingBox();
         }

@@ -5,6 +5,7 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Concurrent;
 
 namespace Engine
 {
@@ -40,7 +41,7 @@ namespace Engine
         /// <summary>
         /// Statistics dictionary
         /// </summary>
-        private readonly Dictionary<string, double> dict = new();
+        private readonly ConcurrentDictionary<string, double> dict = new();
 
         /// <summary>
         /// Writes a trace in the trace dictionary
@@ -49,7 +50,7 @@ namespace Engine
         /// <param name="milliseconds">Milliseconds</param>
         private void WriteTrace(string key, double milliseconds)
         {
-            dict[key] = milliseconds;
+            dict.AddOrUpdate(key, milliseconds, (k, o) => o);
         }
 #endif
 
@@ -201,7 +202,7 @@ namespace Engine
 #endif
             //Get draw context
             var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward);
-            bool draw = CullingTest(Scene, context.CameraVolume, components, cullIndex);
+            bool draw = CullingTest(Scene, context.Camera.Frustum, components, cullIndex);
 #if DEBUG
             swCull.Stop();
             frameStats.ForwardCull = swCull.ElapsedTicks;

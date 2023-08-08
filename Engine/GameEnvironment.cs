@@ -304,6 +304,15 @@ namespace Engine
             }
         }
 
+        /// <summary>
+        /// Gets the level of detail distances packed into a vector
+        /// </summary>
+        /// <returns>Returns a vector with high, medium and low level of detail distances</returns>
+        public Vector3 GetLODDistances()
+        {
+            return new Vector3(LODDistanceHigh, LODDistanceMedium, LODDistanceLow);
+        }
+
         /// <inheritdoc/>
         public IGameState GetState()
         {

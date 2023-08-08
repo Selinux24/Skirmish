@@ -161,7 +161,7 @@ namespace Engine
                 return;
             }
 
-            SortInstances(context.EyePosition);
+            SortInstances(context.Camera.Position);
 
             int instanceIndex = 0;
 

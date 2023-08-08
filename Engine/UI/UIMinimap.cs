@@ -29,13 +29,17 @@ namespace Engine.UI
         /// </summary>
         private EngineShaderResourceView renderTexture;
         /// <summary>
-        /// Context to draw
-        /// </summary>
-        private DrawContext drawContext;
-        /// <summary>
         /// Minimap rendered area
         /// </summary>
         private BoundingBox minimapArea;
+        /// <summary>
+        /// Minimap camera
+        /// </summary>
+        private Camera minimapCamera;
+        /// <summary>
+        /// Minimap lights
+        /// </summary>
+        private SceneLights minimapLights;
 
         /// <summary>
         /// Reference to the objects that we render in the minimap
@@ -103,7 +107,8 @@ namespace Engine.UI
             renderTarget = rt.RenderTarget;
             renderTexture = rt.ShaderResource;
 
-            InitializeContext();
+            minimapCamera = Camera.CreateOrtho(minimapArea.Size, 0.1f, minimapBox.Width, minimapBox.Height);
+            minimapLights = SceneLights.CreateDefault(Scene);
         }
         private async Task<UITextureRenderer> CreateRenderer()
         {
@@ -113,42 +118,6 @@ namespace Engine.UI
                 $"{Id}.TextureRenderer",
                 $"{Name}.TextureRenderer",
                 desc);
-        }
-
-        /// <summary>
-        /// Initialize terrain context
-        /// </summary>
-        private void InitializeContext()
-        {
-            float x = minimapArea.Maximum.X - minimapArea.Minimum.X;
-            float y = minimapArea.Maximum.Y - minimapArea.Minimum.Y;
-            float z = minimapArea.Maximum.Z - minimapArea.Minimum.Z;
-
-            float aspect = minimapBox.Height / minimapBox.Width;
-            float near = 0.1f;
-
-            var eyePosition = new Vector3(0, y + near, 0);
-            var eyeDirection = Vector3.Zero;
-
-            var view = Matrix.LookAtLH(
-                eyePosition,
-                eyeDirection,
-                Vector3.UnitZ);
-
-            var proj = Matrix.OrthoLH(
-                x / aspect,
-                z,
-                near,
-                y + near);
-
-            drawContext = new DrawContext()
-            {
-                DrawerMode = DrawerModes.Forward | DrawerModes.OpaqueOnly,
-                ViewProjection = view * proj,
-                EyePosition = eyePosition,
-                EyeDirection = eyeDirection,
-                Lights = SceneLights.CreateDefault(Scene),
-            };
         }
 
         /// <inheritdoc/>
@@ -172,10 +141,12 @@ namespace Engine.UI
                 return false;
             }
 
-            drawContext.GameTime = context.GameTime;
+            var drawContext = context.Clone($"{Name ?? nameof(UIMinimap)}", DrawerModes.Forward | DrawerModes.OpaqueOnly);
+            drawContext.Camera = minimapCamera;
+            drawContext.Lights = minimapLights;
 
             var graphics = Game.Graphics;
-            var dc = context.DeviceContext;
+            var dc = drawContext.DeviceContext;
 
             dc.SetViewport(viewport);
 
@@ -192,9 +163,9 @@ namespace Engine.UI
             dc.SetRenderTargets(graphics.DefaultRenderTarget, false, Color.Transparent);
 
             minimapBox.Texture = renderTexture;
-            bool drawn = minimapBox.Draw(context);
+            bool drawn = minimapBox.Draw(drawContext);
 
-            return base.Draw(context) || drawn;
+            return base.Draw(drawContext) || drawn;
         }
 
         /// <summary>
@@ -208,7 +179,7 @@ namespace Engine.UI
         /// <inheritdoc/>
         public override bool Cull(ICullingVolume volume, out float distance)
         {
-            drawContext.Lights.Cull(volume, drawContext.EyePosition, Scene.GameEnvironment.LODDistanceLow);
+            minimapLights.Cull(volume, Scene.Camera.Position, Scene.GameEnvironment.LODDistanceLow);
 
             return base.Cull(volume, out distance);
         }

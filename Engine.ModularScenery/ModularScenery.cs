@@ -1046,7 +1046,7 @@ namespace Engine.Modular
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            assetMapIntersections?.Update(context.CameraVolume);
+            assetMapIntersections?.Update(context.Camera.Frustum);
 
             if (activeCallbacks?.Any() == true)
             {

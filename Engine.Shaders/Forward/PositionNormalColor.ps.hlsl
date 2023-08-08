@@ -47,7 +47,7 @@ float4 main(PSVertexPositionNormalColor input) : SV_TARGET
 	lInput.material = input.material;
 	lInput.objectPosition = input.positionWorld;
 	lInput.objectNormal = normalize(input.normalWorld);
-	lInput.objectDiffuseColor = input.color;
+    lInput.objectDiffuseColor = input.material.Diffuse * input.color;
 
     lInput.eyePosition = gPerFrame.EyePosition;
     lInput.levelOfDetailRanges = gPerFrame.LOD;

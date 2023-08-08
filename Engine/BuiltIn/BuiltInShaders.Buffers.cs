@@ -64,9 +64,9 @@ namespace Engine.BuiltIn
             {
                 return new PerFrame
                 {
-                    ViewProjection = Matrix.Transpose(context.ViewProjection),
+                    ViewProjection = Matrix.Transpose(context.Camera.ViewProjection),
                     OrthoViewProjection = Matrix.Transpose(context.Form.GetOrthoProjectionMatrix()),
-                    EyePosition = context.EyePosition,
+                    EyePosition = context.Camera.Position,
                     ScreenResolution = context.Form.RenderRectangle.BottomRight,
                     TotalTime = context.GameTime.TotalSeconds,
                     ElapsedTime = context.GameTime.ElapsedSeconds,

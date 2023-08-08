@@ -152,7 +152,7 @@ namespace Engine
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            SetLOD(context.EyePosition);
+            SetLOD(context.Camera.Position);
 
             AnimationController.Update(context.GameTime.ElapsedSeconds);
             AnimationOffset = AnimationController.AnimationOffset;

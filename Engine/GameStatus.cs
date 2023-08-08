@@ -60,7 +60,7 @@ namespace Engine
         /// Adds the dictionary to the status
         /// </summary>
         /// <param name="dictionary">Dictionary</param>
-        public void Add(Dictionary<string, double> dictionary)
+        public void Add(IDictionary<string, double> dictionary)
         {
             foreach (var item in dictionary)
             {

@@ -1,5 +1,4 @@
-﻿using SharpDX;
-
+﻿
 namespace Engine.Common
 {
     /// <summary>
@@ -12,26 +11,13 @@ namespace Engine.Common
         /// </summary>
         public string Name { get; set; }
         /// <summary>
-        /// Graphics
+        /// Camera
         /// </summary>
-        public Graphics Graphics { get; set; }
-        /// <summary>
-        /// View * projection matrix
-        /// </summary>
-        public Matrix ViewProjection { get; set; }
-        /// <summary>
-        /// Eye position
-        /// </summary>
-        public Vector3 EyePosition { get; set; }
-        /// <summary>
-        /// Bounding frustum
-        /// </summary>
-        public BoundingFrustum Frustum { get; set; }
+        public Camera Camera { get; set; }
         /// <summary>
         /// Shadow map to fill
         /// </summary>
         public IShadowMap ShadowMap { get; set; }
-
         /// <summary>
         /// Pass context
         /// </summary>
@@ -40,5 +26,20 @@ namespace Engine.Common
         /// Device context
         /// </summary>
         public readonly IEngineDeviceContext DeviceContext { get => PassContext.DeviceContext; }
+
+        /// <summary>
+        /// Clones the actual draw context
+        /// </summary>
+        /// <param name="name">New name</param>
+        public DrawContextShadows Clone(string name)
+        {
+            return new DrawContextShadows
+            {
+                Name = name,
+                Camera = Camera,
+                ShadowMap = ShadowMap,
+                PassContext = PassContext,
+            };
+        }
     }
 }

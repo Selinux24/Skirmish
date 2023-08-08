@@ -1536,11 +1536,11 @@ You will lost all the game progress.",
 
             var (from, shotDirection) = GetTankBarrel(Shooter);
 
-            Vector3 to = from + (shotDirection * 1000f);
+            var to = from + (shotDirection * 1000f);
 
             float sampleDist = 20;
             float distance = Vector3.Distance(from, to);
-            Vector3 shootDirection = Vector3.Normalize(to - from);
+            var shootDirection = Vector3.Normalize(to - from);
             int markers = Math.Min(trajectoryMarkerPool.Length, (int)(distance / sampleDist));
             if (markers == 0)
             {
@@ -1551,7 +1551,7 @@ You will lost all the game progress.",
             float dist = sampleDist;
             for (int i = 0; i < markers; i++)
             {
-                Vector3 markerPos = from + (shootDirection * dist);
+                var markerPos = from + (shootDirection * dist);
                 dist += sampleDist;
 
                 // Test the individual marker visibility against camera
@@ -1560,14 +1560,14 @@ You will lost all the game progress.",
                     continue;
                 }
 
-                Vector3 screenPos = Vector3.Project(markerPos,
+                var screenPos = Vector3.Project(markerPos,
                     Game.Graphics.Viewport.X,
                     Game.Graphics.Viewport.Y,
                     Game.Graphics.Viewport.Width,
                     Game.Graphics.Viewport.Height,
                     Game.Graphics.Viewport.MinDepth,
                     Game.Graphics.Viewport.MaxDepth,
-                    Camera.View * Camera.Projection);
+                    Camera.ViewProjection);
                 float scale = (1f - screenPos.Z) * 1000f;
 
                 trajectoryMarkerPool[i].Left = screenPos.X - (trajectoryMarkerPool[i].Width * 0.5f);
