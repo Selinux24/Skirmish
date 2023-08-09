@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -7,6 +8,11 @@ namespace Engine
     /// </summary>
     public class SceneLightDirectional : SceneLight, ISceneLightDirectional
     {
+        /// <summary>
+        /// Cascade matrix set
+        /// </summary>
+        private ShadowMapCascadeSet MatrixSet { get; set; } = new();
+
         /// <summary>
         /// Primary default light source
         /// </summary>
@@ -73,21 +79,7 @@ namespace Engine
         /// </summary>
         private Vector3 initialDirection = Vector3.ForwardLH;
 
-        /// <summary>
-        /// Light direction
-        /// </summary>
-        public Vector3 Direction { get; set; }
-        /// <summary>
-        /// Base brightness
-        /// </summary>
-        public float BaseBrightness { get; set; } = 1f;
-        /// <summary>
-        /// Light brightness
-        /// </summary>
-        public float Brightness { get; set; } = 1f;
-        /// <summary>
-        /// Parent local transform matrix
-        /// </summary>
+        /// <inheritdoc/>
         public override Matrix ParentTransform
         {
             get
@@ -101,25 +93,19 @@ namespace Engine
                 UpdateLocalTransform();
             }
         }
-        /// <summary>
-        /// Shadow map count
-        /// </summary>
-        public uint ShadowMapCount { get; set; } = 0;
-        /// <summary>
-        /// From light view * projection matrix array
-        /// </summary>
+        /// <inheritdoc/>
+        public Vector3 Direction { get; set; }
+        /// <inheritdoc/>
+        public float BaseBrightness { get; set; } = 1f;
+        /// <inheritdoc/>
+        public float Brightness { get; set; } = 1f;
+        /// <inheritdoc/>
         public Matrix ToShadowSpace { get; set; }
-        /// <summary>
-        /// X cascade offset
-        /// </summary>
+        /// <inheritdoc/>
         public Vector4 ToCascadeOffsetX { get; set; }
-        /// <summary>
-        /// Y cascade offset
-        /// </summary>
+        /// <inheritdoc/>
         public Vector4 ToCascadeOffsetY { get; set; }
-        /// <summary>
-        /// Cascasde scale
-        /// </summary>
+        /// <inheritdoc/>
         public Vector4 ToCascadeScale { get; set; }
 
         /// <summary>
@@ -158,23 +144,39 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void ClearShadowParameters()
-        {
-            base.ClearShadowParameters();
-
-            ShadowMapCount = 0;
-            ToShadowSpace = Matrix.Identity;
-            ToCascadeOffsetX = Vector4.Zero;
-            ToCascadeOffsetY = Vector4.Zero;
-            ToCascadeScale = Vector4.Zero;
-        }
-        /// <inheritdoc/>
         public override bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition)
         {
             CastShadowsMarked = CastShadow;
 
             return CastShadowsMarked;
         }
+        /// <inheritdoc/>
+        public override void ClearShadowParameters()
+        {
+            ShadowMapIndex = -1;
+            ShadowMapCount = 0;
+            FromLightVP = Array.Empty<Matrix>();
+            ToShadowSpace = Matrix.Identity;
+            ToCascadeOffsetX = Vector4.Zero;
+            ToCascadeOffsetY = Vector4.Zero;
+            ToCascadeScale = Vector4.Zero;
+            Position = Vector3.Zero;
+        }
+        /// <inheritdoc/>
+        public override void SetShadowParameters(Camera camera, int assignedShadowMap)
+        {
+            MatrixSet.Update(camera, Direction);
+
+            ShadowMapIndex = assignedShadowMap;
+            ShadowMapCount = 1;
+            FromLightVP = MatrixSet.GetWorldToCascadeProj();
+            ToShadowSpace = MatrixSet.GetWorldToShadowSpace();
+            ToCascadeOffsetX = MatrixSet.GetToCascadeOffsetX();
+            ToCascadeOffsetY = MatrixSet.GetToCascadeOffsetY();
+            ToCascadeScale = MatrixSet.GetToCascadeScale();
+            Position = MatrixSet.GetLigthPosition();
+        }
+
         /// <inheritdoc/>
         public override ISceneLight Clone()
         {
@@ -197,16 +199,9 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public Vector3 GetPosition(float distance)
+        public void UpdateEnvironment(int size, float[] cascades)
         {
-            return distance * -2f * Direction;
-        }
-
-        /// <inheritdoc/>
-        public void SetShadowParameters(int assignedShadowMap, uint shadowMapCount)
-        {
-            ShadowMapIndex = assignedShadowMap;
-            ShadowMapCount = shadowMapCount;
+            MatrixSet.UpdateEnvironment(size, cascades);
         }
 
         /// <inheritdoc/>
@@ -220,7 +215,6 @@ namespace Engine
                 CastShadowsMarked = CastShadowsMarked,
                 DiffuseColor = DiffuseColor,
                 SpecularColor = SpecularColor,
-                ShadowMapIndex = ShadowMapIndex,
                 State = State,
                 ParentTransform = ParentTransform,
 
@@ -228,11 +222,6 @@ namespace Engine
                 Direction = Direction,
                 BaseBrightness = BaseBrightness,
                 Brightness = Brightness,
-                ShadowMapCount = ShadowMapCount,
-                ToShadowSpace = ToShadowSpace,
-                ToCascadeOffsetX = ToCascadeOffsetX,
-                ToCascadeOffsetY = ToCascadeOffsetY,
-                ToCascadeScale = ToCascadeScale,
             };
         }
         /// <inheritdoc/>
@@ -249,7 +238,6 @@ namespace Engine
             CastShadowsMarked = sceneLightsState.CastShadowsMarked;
             DiffuseColor = sceneLightsState.DiffuseColor;
             SpecularColor = sceneLightsState.SpecularColor;
-            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
             State = sceneLightsState.State;
             ParentTransform = sceneLightsState.ParentTransform;
 
@@ -257,11 +245,6 @@ namespace Engine
             Direction = sceneLightsState.Direction;
             BaseBrightness = sceneLightsState.BaseBrightness;
             Brightness = sceneLightsState.Brightness;
-            ShadowMapCount = sceneLightsState.ShadowMapCount;
-            ToShadowSpace = sceneLightsState.ToShadowSpace;
-            ToCascadeOffsetX = sceneLightsState.ToCascadeOffsetX;
-            ToCascadeOffsetY = sceneLightsState.ToCascadeOffsetY;
-            ToCascadeScale = sceneLightsState.ToCascadeScale;
         }
     }
 }

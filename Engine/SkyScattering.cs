@@ -365,15 +365,7 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            if (!skyDrawer.Draw(dc, BufferManager, drawOptions))
-            {
-                return false;
-            }
-
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            return true;
+            return skyDrawer.Draw(dc, BufferManager, drawOptions);
         }
 
         /// <summary>

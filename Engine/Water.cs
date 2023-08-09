@@ -171,15 +171,7 @@ namespace Engine
                 IndexBuffer = indexBuffer,
                 Topology = Topology.TriangleList,
             };
-            if (!waterDrawer.Draw(dc, BufferManager, drawOptions))
-            {
-                return false;
-            }
-
-            Counters.InstancesPerFrame++;
-            Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-
-            return true;
+            return waterDrawer.Draw(dc, BufferManager, drawOptions);
         }
     }
 }

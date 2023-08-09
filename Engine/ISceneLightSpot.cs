@@ -9,10 +9,6 @@ namespace Engine
     public interface ISceneLightSpot : ISceneLight, IHasGameState
     {
         /// <summary>
-        /// Position
-        /// </summary>
-        Vector3 Position { get; set; }
-        /// <summary>
         /// Light direction
         /// </summary>
         Vector3 Direction { get; set; }
@@ -40,14 +36,6 @@ namespace Engine
         /// Local matrix
         /// </summary>
         Matrix Local { get; }
-        /// <summary>
-        /// Shadow map index
-        /// </summary>
-        uint ShadowMapCount { get; set; }
-        /// <summary>
-        /// From light view * projection matrix array
-        /// </summary>
-        Matrix[] FromLightVP { get; set; }
 
         /// <summary>
         /// Gets the light volume
@@ -55,13 +43,5 @@ namespace Engine
         /// <param name="sliceCount">Cone slice count</param>
         /// <returns>Returns a line list representing the light volume</returns>
         IEnumerable<Line3D> GetVolume(int sliceCount);
-
-        /// <summary>
-        /// Sets the shadow parameters
-        /// </summary>
-        /// <param name="fromLightViewProjectionArray">From light view*projection transform array</param>
-        /// <param name="assignedShadowMap">Assigned shadow map index</param>
-        /// <param name="shadowMapCount">Shadow map count</param>
-        void SetShadowParameters(Matrix[] fromLightViewProjectionArray, int assignedShadowMap, uint shadowMapCount);
     }
 }

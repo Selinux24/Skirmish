@@ -32,8 +32,12 @@ float4 main(PSVertexPositionTexture input) : SV_TARGET
     if (gPerFrame.FogRange > 0)
 	{
         float distToEye = length(gPerFrame.EyePosition - input.positionWorld);
-
-        color = ComputeFog(color, distToEye, gPerFrame.FogStart, gPerFrame.FogRange, gPerFrame.FogColor);
+        float fog = CalcFogFactor(distToEye, gPerFrame.FogStart, gPerFrame.FogRange);
+        if (fog >= 1)
+        {
+            return gPerFrame.FogColor;
+        }
+        color = ApplyFog(color, gPerFrame.FogColor, fog);
     }
 
 	color = GetChannel(color, gChannel);

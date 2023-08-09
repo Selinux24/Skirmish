@@ -26,6 +26,17 @@ namespace Engine
         private bool drawFlares = false;
 
         /// <summary>
+        /// Gets light position at specified distance
+        /// </summary>
+        /// <param name="distance">Distance</param>
+        /// <param name="direction">Light direction</param>
+        /// <returns>Returns light position at specified distance</returns>
+        private static Vector3 GetPosition(float distance, Vector3 direction)
+        {
+            return distance * -2f * direction;
+        }
+
+        /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="scene">Scene</param>
@@ -208,7 +219,7 @@ namespace Engine
             if (frustum.Contains(lPositionUnit) != ContainmentType.Disjoint)
             {
                 //Calculate the ray from light to position
-                Vector3 lightPosition = light.GetPosition(maxZ);
+                Vector3 lightPosition = GetPosition(maxZ, light.Direction);
                 var ray = new Ray(lightPosition, -light.Direction);
 
                 var coarseRay = new PickingRay(ray, PickingHullTypes.Coarse);

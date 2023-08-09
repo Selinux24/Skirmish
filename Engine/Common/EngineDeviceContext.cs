@@ -34,6 +34,7 @@ namespace Engine.Common
 
                 var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
+                Counters.ConstantBufferSets++;
             }
 
             public void SetConstantBuffers(CommonShaderStage shaderStage, int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
@@ -42,11 +43,13 @@ namespace Engine.Common
 
                 var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
+                Counters.ConstantBufferSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
                 shaderStage.SetConstantBuffers(StartSlot, nullBuffers.Length - StartSlot, nullBuffers);
+                Counters.ConstantBufferClears++;
 
                 Clear();
             }
@@ -67,6 +70,7 @@ namespace Engine.Common
 
                 var resources = Resources.Select(r => r?.GetResource()).ToArray();
                 shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
+                Counters.ShaderResourceSets++;
             }
 
             public void SetShaderResources(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineShaderResourceView> resourceList)
@@ -75,11 +79,13 @@ namespace Engine.Common
 
                 var resources = Resources.Select(r => r?.GetResource()).ToArray();
                 shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
+                Counters.ShaderResourceSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
                 shaderStage.SetShaderResources(StartSlot, nullSrv.Length - StartSlot, nullSrv);
+                Counters.ShaderResourceClears++;
 
                 Clear();
             }
@@ -100,6 +106,7 @@ namespace Engine.Common
 
                 var resources = Resources.Select(r => r?.GetSamplerState()).ToArray();
                 shaderStage.SetSamplers(StartSlot, resources.Length, resources);
+                Counters.SamplerSets++;
             }
 
             public void SetSamplers(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineSamplerState> samplerList)
@@ -108,11 +115,13 @@ namespace Engine.Common
 
                 var samplers = Resources.Select(r => r?.GetSamplerState()).ToArray();
                 shaderStage.SetSamplers(StartSlot, samplers.Length, samplers);
+                Counters.SamplerSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
                 shaderStage.SetSamplers(StartSlot, nullSamplers.Length - StartSlot, nullSamplers);
+                Counters.SamplerClears++;
 
                 Clear();
             }
@@ -365,6 +374,7 @@ namespace Engine.Common
         public void ClearState()
         {
             deviceContext.ClearState();
+            Counters.ContextClears++;
 
             currentIAPrimitiveTopology = Topology.Undefined;
             currentIAInputLayout = null;
@@ -422,6 +432,7 @@ namespace Engine.Common
             }
 
             deviceContext.Rasterizer.SetViewports(viewports.ToArray());
+            Counters.ViewportsSets++;
 
             currentViewports = viewports;
         }
@@ -430,6 +441,7 @@ namespace Engine.Common
         public void SetRenderTargets(EngineRenderTargetView renderTargets, EngineDepthStencilView depthMap)
         {
             deviceContext.OutputMerger.SetTargets(depthMap.GetDepthStencil(), renderTargets.GetRenderTarget());
+            Counters.RenderTargetSets++;
         }
         /// <inheritdoc/>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor)
@@ -448,12 +460,14 @@ namespace Engine.Common
             var rtvCount = rtv.Count();
 
             deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv.ToArray());
+            Counters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
                     deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
+                    Counters.RenderTargetClears++;
                 }
             }
         }
@@ -470,12 +484,14 @@ namespace Engine.Common
             var rtvCount = rtv.Count();
 
             deviceContext.OutputMerger.SetTargets(dsv, 0, Array.Empty<UnorderedAccessView>(), Array.Empty<int>(), rtv.ToArray());
+            Counters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
                     deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
+                    Counters.RenderTargetClears++;
                 }
             }
 
@@ -491,13 +507,10 @@ namespace Engine.Common
                 if (clearDepth) clearDSFlags |= DepthStencilClearFlags.Depth;
                 if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
 
-                deviceContext.ClearDepthStencilView(
-                    depthMap.GetDepthStencil(),
-                    clearDSFlags,
-                    1.0f, 0);
+                deviceContext.ClearDepthStencilView(depthMap.GetDepthStencil(), clearDSFlags, 1.0f, 0);
+                Counters.DepthStencilClears++;
             }
         }
-
         /// <inheritdoc/>
         public void SetDepthStencilState(EngineDepthStencilState state, int stencilRef = 0)
         {
@@ -507,26 +520,10 @@ namespace Engine.Common
             }
 
             deviceContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), stencilRef);
-
             Counters.DepthStencilStateChanges++;
 
             currentDepthStencilState = state;
             currentDepthStencilRef = stencilRef;
-        }
-
-        /// <inheritdoc/>
-        public void SetBlendState(EngineBlendState state)
-        {
-            if (currentBlendState == state)
-            {
-                return;
-            }
-
-            deviceContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
-
-            currentBlendState = state;
-
-            Counters.BlendStateChanges++;
         }
 
         /// <inheritdoc/>
@@ -538,10 +535,22 @@ namespace Engine.Common
             }
 
             deviceContext.Rasterizer.State = state.GetRasterizerState();
+            Counters.RasterizerStateChanges++;
 
             currentRasterizerState = state;
+        }
+        /// <inheritdoc/>
+        public void SetBlendState(EngineBlendState state)
+        {
+            if (currentBlendState == state)
+            {
+                return;
+            }
 
-            Counters.RasterizerStateChanges++;
+            deviceContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
+            Counters.OMBlendStateChanges++;
+
+            currentBlendState = state;
         }
 
         /// <inheritdoc/>
@@ -615,20 +624,14 @@ namespace Engine.Common
             }
 
             deviceContext.VertexShader.Set(vertexShader?.GetShader());
+            Counters.VertexShadersSets++;
 
             currentVertexShader = vertexShader;
         }
         /// <inheritdoc/>
         public void ClearVertexShader()
         {
-            if (currentVertexShader == null)
-            {
-                return;
-            }
-
-            deviceContext.VertexShader.Set(null);
-
-            currentVertexShader = null;
+            SetVertexShader(null);
         }
         /// <inheritdoc/>
         public void SetVertexShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
@@ -670,20 +673,14 @@ namespace Engine.Common
             }
 
             deviceContext.HullShader.Set(hullShader?.GetShader());
+            Counters.HullShadersSets++;
 
             currentHullShader = hullShader;
         }
         /// <inheritdoc/>
         public void ClearHullShader()
         {
-            if (currentHullShader == null)
-            {
-                return;
-            }
-
-            deviceContext.HullShader.Set(null);
-
-            currentHullShader = null;
+            SetHullShader(null);
         }
         /// <inheritdoc/>
         public void SetHullShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
@@ -725,20 +722,14 @@ namespace Engine.Common
             }
 
             deviceContext.DomainShader.Set(domainShader?.GetShader());
+            Counters.DomainShadersSets++;
 
             currentDomainShader = domainShader;
         }
         /// <inheritdoc/>
         public void ClearDomainShader()
         {
-            if (currentDomainShader == null)
-            {
-                return;
-            }
-
-            deviceContext.DomainShader.Set(null);
-
-            currentDomainShader = null;
+            SetDomainShader(null);
         }
         /// <inheritdoc/>
         public void SetDomainShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
@@ -780,20 +771,14 @@ namespace Engine.Common
             }
 
             deviceContext.GeometryShader.Set(geometryShader?.GetShader());
+            Counters.GeometryShadersSets++;
 
             currentGeomeryShader = geometryShader;
         }
         /// <inheritdoc/>
         public void ClearGeometryShader()
         {
-            if (currentGeomeryShader == null)
-            {
-                return;
-            }
-
-            deviceContext.GeometryShader.Set(null);
-
-            currentGeomeryShader = null;
+            SetGeometryShader(null);
         }
         /// <inheritdoc/>
         public void SetGeometryShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
@@ -836,7 +821,7 @@ namespace Engine.Common
             var soBindings = streamOutBinding?.Select(s => s.GetStreamOutputBufferBinding()).ToArray();
 
             deviceContext.StreamOutput.SetTargets(soBindings);
-            Counters.SOTargetsSet++;
+            Counters.SOTargetsSets++;
 
             currentStreamOutputBindings = streamOutBinding;
         }
@@ -850,20 +835,14 @@ namespace Engine.Common
             }
 
             deviceContext.PixelShader.Set(pixelShader?.GetShader());
+            Counters.PixelShadersSets++;
 
             currentPixelShader = pixelShader;
         }
         /// <inheritdoc/>
         public void ClearPixelShader()
         {
-            if (currentPixelShader == null)
-            {
-                return;
-            }
-
-            deviceContext.PixelShader.Set(null);
-
-            currentPixelShader = null;
+            SetPixelShader(null);
         }
         /// <inheritdoc/>
         public void SetPixelShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
@@ -905,20 +884,14 @@ namespace Engine.Common
             }
 
             deviceContext.ComputeShader.Set(computeShader?.GetShader());
+            Counters.ComputeShadersSets++;
 
             currentComputeShader = computeShader;
         }
         /// <inheritdoc/>
         public void ClearComputeShader()
         {
-            if (currentComputeShader == null)
-            {
-                return;
-            }
-
-            deviceContext.ComputeShader.Set(null);
-
-            currentComputeShader = null;
+            SetComputeShader(null);
         }
         /// <inheritdoc/>
         public void SetComputeShaderConstantBuffer(int slot, IEngineConstantBuffer buffer)
@@ -955,6 +928,7 @@ namespace Engine.Common
         public void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
             technique.GetPass(index).Apply(deviceContext, flags);
+            Counters.TechniquePasses++;
         }
 
         /// <inheritdoc/>
@@ -972,6 +946,7 @@ namespace Engine.Common
 
             var dataBox = new DataBox(dataStream.DataPointer, 0, 0);
             deviceContext.UpdateSubresource(dataBox, buffer, 0);
+            Counters.SubresourceUpdates++;
 
             return true;
         }
@@ -979,40 +954,75 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void UpdateTexture1D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
-            if (data?.Any() == true)
+            var t = texture?.GetResource();
+            if (t == null)
             {
-                using (var resource = texture.GetResource().Resource.QueryInterface<Texture1D>())
-                {
-                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-                    using (stream)
-                    {
-                        stream.Position = 0;
-                        stream.WriteRange(data.ToArray());
-                    }
-                    deviceContext.UnmapSubresource(resource, 0);
-                }
-
-                Counters.BufferWrites++;
+                return;
             }
+
+            if (data?.Any() != true)
+            {
+                return;
+            }
+
+            UpdateResource(t.Resource.QueryInterface<Texture1D>(), data);
         }
         /// <inheritdoc/>
         public void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
         {
-            if (data?.Any() == true)
+            var t = texture?.GetResource();
+            if (t == null)
             {
-                using (var resource = texture.GetResource().Resource.QueryInterface<Texture2D1>())
+                return;
+            }
+
+            if (data?.Any() != true)
+            {
+                return;
+            }
+
+            UpdateResource(t.Resource.QueryInterface<Texture2D1>(), data);
+        }
+        /// <inheritdoc/>
+        public void UpdateTexture3D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct
+        {
+            var t = texture?.GetResource();
+            if (t == null)
+            {
+                return;
+            }
+
+            if (data?.Any() != true)
+            {
+                return;
+            }
+
+            UpdateResource(t.Resource.QueryInterface<Texture3D1>(), data);
+        }
+        /// <summary>
+        /// Updates a resource
+        /// </summary>
+        /// <typeparam name="T">Type of data</typeparam>
+        /// <param name="resource">Resource to update</param>
+        /// <param name="data">Data</param>
+        private void UpdateResource<T>(Resource resource, IEnumerable<T> data) where T : struct
+        {
+            using (resource)
+            {
+                deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+                Counters.SubresourceMaps++;
+
+                using (stream)
                 {
-                    deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-                    using (stream)
-                    {
-                        stream.Position = 0;
-                        stream.WriteRange(data.ToArray());
-                    }
-                    deviceContext.UnmapSubresource(resource, 0);
+                    stream.Position = 0;
+                    stream.WriteRange(data.ToArray());
                 }
 
-                Counters.BufferWrites++;
+                deviceContext.UnmapSubresource(resource, 0);
+                Counters.SubresourceUnmaps++;
             }
+
+            Counters.TextureWrites++;
         }
 
         /// <inheritdoc/>
@@ -1032,7 +1042,6 @@ namespace Engine.Common
             where T : struct
         {
             var b = buffer?.GetBuffer();
-
             if (b == null)
             {
                 return false;
@@ -1044,12 +1053,16 @@ namespace Engine.Common
             }
 
             deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            Counters.SubresourceMaps++;
+
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
                 stream.WriteRange(data.ToArray());
             }
+
             deviceContext.UnmapSubresource(b, 0);
+            Counters.SubresourceUnmaps++;
 
             Counters.BufferWrites++;
 
@@ -1067,7 +1080,6 @@ namespace Engine.Common
             where T : struct
         {
             var b = buffer?.GetBuffer();
-
             if (b == null)
             {
                 return false;
@@ -1080,12 +1092,16 @@ namespace Engine.Common
 
             //This should be MapMode.WriteNoOverwrite
             deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            Counters.SubresourceMaps++;
+
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
                 stream.WriteRange(data.ToArray());
             }
+
             deviceContext.UnmapSubresource(b, 0);
+            Counters.SubresourceUnmaps++;
 
             Counters.BufferWrites++;
 
@@ -1108,11 +1124,11 @@ namespace Engine.Common
                 return Enumerable.Empty<T>();
             }
 
-            Counters.BufferReads++;
-
             T[] data = new T[length];
 
             deviceContext.MapSubresource(b, MapMode.Read, MapFlags.None, out DataStream stream);
+            Counters.SubresourceMaps++;
+
             using (stream)
             {
                 stream.Position = Marshal.SizeOf(default(T)) * offset;
@@ -1122,7 +1138,11 @@ namespace Engine.Common
                     data[i] = stream.Read<T>();
                 }
             }
+
             deviceContext.UnmapSubresource(b, 0);
+            Counters.SubresourceUnmaps++;
+
+            Counters.BufferReads++;
 
             return data;
         }
@@ -1131,44 +1151,62 @@ namespace Engine.Common
         public void Draw(int vertexCount, int startVertexLocation)
         {
             deviceContext.Draw(vertexCount, startVertexLocation);
-
-            Counters.DrawCallsPerFrame++;
+            UpdateDrawPrimitives(vertexCount, 1);
         }
         /// <inheritdoc/>
         public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
             deviceContext.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
-
-            Counters.DrawCallsPerFrame++;
+            UpdateDrawPrimitives(indexCount, 1);
         }
         /// <inheritdoc/>
         public void DrawInstanced(int vertexCountPerInstance, int instanceCount, int startVertexLocation, int startInstanceLocation)
         {
             deviceContext.DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
-
-            Counters.DrawCallsPerFrame++;
+            UpdateDrawPrimitives(vertexCountPerInstance, instanceCount);
         }
         /// <inheritdoc/>
         public void DrawIndexedInstanced(int indexCountPerInstance, int instanceCount, int startIndexLocation, int baseVertexLocation, int startInstanceLocation)
         {
             deviceContext.DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
-
-            Counters.DrawCallsPerFrame++;
+            UpdateDrawPrimitives(indexCountPerInstance, instanceCount);
         }
         /// <inheritdoc/>
         public void DrawAuto()
         {
             deviceContext.DrawAuto();
-
+            UpdateDrawPrimitives(1, 1);
+        }
+        /// <summary>
+        /// Updates the draw related counter variables
+        /// </summary>
+        /// <param name="count">Submitted vertices / indexes</param>
+        /// <param name="instanceCount">Instace count</param>
+        private void UpdateDrawPrimitives(int count, int instanceCount)
+        {
             Counters.DrawCallsPerFrame++;
+
+            //Figure number of real primitives using the primitive topology
+            int div = (int)currentIAPrimitiveTopology switch
+            {
+                >= 2 and <= 3 or >= 10 and <= 11 => 2,
+                >= 4 and <= 5 or >= 12 and <= 13 => 3,
+                _ => 1,
+            };
+
+            int primitives = count / div;
+            Counters.PrimitivesPerFrame += primitives * instanceCount;
+            Counters.InstancesPerFrame += instanceCount;
         }
 
         /// <inheritdoc/>
         public IEngineCommandList FinishCommandList(string name, bool restoreState = false)
         {
             deviceContext.ClearState();
+            Counters.ContextClears++;
 
             var cmdList = deviceContext.FinishCommandList(restoreState);
+            Counters.FinishCommandLists++;
 
             return new EngineCommandList($"{Name} {name ?? "commands"}", cmdList);
         }
@@ -1181,6 +1219,8 @@ namespace Engine.Common
             }
 
             deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
+            Counters.ExecuteCommandLists++;
+
             commandList.Dispose();
         }
         /// <inheritdoc/>

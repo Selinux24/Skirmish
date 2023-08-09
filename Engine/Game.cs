@@ -1003,8 +1003,8 @@ namespace Engine
                     Counters.DrawCallsPerFrame,
                     Counters.InstancesPerFrame,
                     Counters.PrimitivesPerFrame,
-                    Counters.UpdatesPerFrame,
-                    Counters.RasterizerStateChanges, Counters.DepthStencilStateChanges, Counters.BlendStateChanges,
+                    Counters.TransformUpdatesPerFrame,
+                    Counters.RasterizerStateChanges, Counters.DepthStencilStateChanges, Counters.OMBlendStateChanges,
                     GameTime.ElapsedSeconds,
                     GameTime.TotalSeconds);
 #if DEBUG

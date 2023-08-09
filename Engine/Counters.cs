@@ -36,18 +36,24 @@ namespace Engine
         /// Frame time
         /// </summary>
         public static float FrameTime { get; set; } = 0f;
+
         /// <summary>
-        /// Draw calls per frame
+        /// Texture count
         /// </summary>
-        public static int DrawCallsPerFrame { get; set; } = 0;
+        public static int Textures { get; set; } = 0;
         /// <summary>
-        /// Sum of single draw calls and instance draw calls * instance count of this call
+        /// Active buffers
         /// </summary>
-        public static int InstancesPerFrame { get; set; } = 0;
+        public static int Buffers { get; set; } = 0;
+
         /// <summary>
         /// Maximum count of single draw calls and instance draw calls * instance count of this call
         /// </summary>
         public static int MaxInstancesPerFrame { get; set; } = 0;
+        /// <summary>
+        /// Sum of single draw calls and instance draw calls * instance count of this call
+        /// </summary>
+        public static int InstancesPerFrame { get; set; } = 0;
         /// <summary>
         /// Sum of primitives drawn per frame
         /// </summary>
@@ -55,23 +61,7 @@ namespace Engine
         /// <summary>
         /// Updates per frame
         /// </summary>
-        public static int UpdatesPerFrame { get; set; } = 0;
-        /// <summary>
-        /// Updates per object
-        /// </summary>
-        public static int UpdatesPerObject { get; set; } = 0;
-        /// <summary>
-        /// Updates per instance
-        /// </summary>
-        public static int UpdatesPerInstance { get; set; } = 0;
-        /// <summary>
-        /// Texture count
-        /// </summary>
-        public static int Textures { get; set; } = 0;
-        /// <summary>
-        /// Texture updates
-        /// </summary>
-        public static int TextureUpdates { get; set; } = 0;
+        public static int TransformUpdatesPerFrame { get; set; } = 0;
         /// <summary>
         /// Picking test per frame
         /// </summary>
@@ -120,18 +110,159 @@ namespace Engine
         /// Average frustum volume tests time cost
         /// </summary>
         public static float VolumeFrustumTestAverageTime { get; private set; }
+
         /// <summary>
-        /// Rasterizer state changes count per frame
+        /// Context state clear calls per frame (ClearState)
+        /// </summary>
+        public static int ContextClears { get; set; } = 0;
+
+        /// <summary>
+        /// Viewport set calls count per frame (SetViewports)
+        /// </summary>
+        public static int ViewportsSets { get; set; } = 0;
+        /// <summary>
+        /// Render target set calls count per frame (SetTargets)
+        /// </summary>
+        public static int RenderTargetSets { get; set; } = 0;
+        /// <summary>
+        /// Render target clear calls count per frame (ClearRenderTargetView)
+        /// </summary>
+        public static int RenderTargetClears { get; set; } = 0;
+        /// <summary>
+        /// Depth-Stencil clear calls count per frame (ClearDepthStencilView)
+        /// </summary>
+        public static int DepthStencilClears { get; set; } = 0;
+        /// <summary>
+        /// Depth-Stencil state changes count per frame (SetDepthStencilState)
+        /// </summary>
+        public static int DepthStencilStateChanges { get; set; } = 0;
+
+        /// <summary>
+        /// Rasterizer state changes count per frame (Rasterizer setter)
         /// </summary>
         public static int RasterizerStateChanges { get; set; } = 0;
         /// <summary>
-        /// Blend state changes count per frame
+        /// Blend state changes count per frame (OM.SetBlendState)
         /// </summary>
-        public static int BlendStateChanges { get; set; } = 0;
+        public static int OMBlendStateChanges { get; set; } = 0;
+
         /// <summary>
-        /// Depth-Stencil state changes count per frame
+        /// Input assembler layout sets
         /// </summary>
-        public static int DepthStencilStateChanges { get; set; } = 0;
+        public static int IAInputLayoutSets { get; set; } = 0;
+        /// <summary>
+        /// Input assembler primitive topology sets
+        /// </summary>
+        public static int IAPrimitiveTopologySets { get; set; } = 0;
+        /// <summary>
+        /// Vertex buffer sets
+        /// </summary>
+        public static int IAVertexBuffersSets { get; set; } = 0;
+        /// <summary>
+        /// Index buffer sets
+        /// </summary>
+        public static int IAIndexBufferSets { get; set; } = 0;
+
+        /// <summary>
+        /// Constant buffer update calls per frame (SetConstantBuffers)
+        /// </summary>
+        public static int ConstantBufferSets { get; set; } = 0;
+        /// <summary>
+        /// Constant buffer clear calls per frame (SetConstantBuffers)
+        /// </summary>
+        public static int ConstantBufferClears { get; set; } = 0;
+        /// <summary>
+        /// Shader resource update calls per frame (SetShaderResources)
+        /// </summary>
+        public static int ShaderResourceSets { get; set; } = 0;
+        /// <summary>
+        /// Shader resource clear calls per frame (SetShaderResources)
+        /// </summary>
+        public static int ShaderResourceClears { get; set; } = 0;
+        /// <summary>
+        /// Sampler update calls per frame (SetSamplers)
+        /// </summary>
+        public static int SamplerSets { get; set; } = 0;
+        /// <summary>
+        /// Sampler clear calls per frame (SetSamplers)
+        /// </summary>
+        public static int SamplerClears { get; set; } = 0;
+
+        /// <summary>
+        /// Vertex shader sets per frame (VertexShader setter)
+        /// </summary>
+        public static int VertexShadersSets { get; set; } = 0;
+        /// <summary>
+        /// Hull shader sets per frame (HullShader setter)
+        /// </summary>
+        public static int HullShadersSets { get; set; } = 0;
+        /// <summary>
+        /// Domain shader sets per frame (DomainShader setter)
+        /// </summary>
+        public static int DomainShadersSets { get; set; } = 0;
+        /// <summary>
+        /// Geometry shader sets per frame (GeometryShader setter)
+        /// </summary>
+        public static int GeometryShadersSets { get; set; } = 0;
+        /// <summary>
+        /// Pixel shader sets per frame (PixelShader setter)
+        /// </summary>
+        public static int PixelShadersSets { get; set; } = 0;
+        /// <summary>
+        /// Compute shader sets per frame (ComputeShader setter)
+        /// </summary>
+        public static int ComputeShadersSets { get; set; } = 0;
+
+        /// <summary>
+        /// Technique passes per frame (Apply)
+        /// </summary>
+        public static int TechniquePasses { get; set; } = 0;
+
+        /// <summary>
+        /// Subresource updates per frame (UpdateSubresource)
+        /// </summary>
+        public static int SubresourceUpdates { get; set; } = 0;
+        /// <summary>
+        /// Subresource maps per frame (MapSubresource)
+        /// </summary>
+        public static int SubresourceMaps { get; set; } = 0;
+        /// <summary>
+        /// Subresource unmaps per frame (UnmapSubresource)
+        /// </summary>
+        public static int SubresourceUnmaps { get; set; } = 0;
+
+        /// <summary>
+        /// Complete texture writes per frame
+        /// </summary>
+        public static int TextureWrites { get; set; } = 0;
+        /// <summary>
+        /// Complete buffer writes per frame
+        /// </summary>
+        public static int BufferWrites { get; set; } = 0;
+        /// <summary>
+        /// Complete buffer reads per frame
+        /// </summary>
+        public static int BufferReads { get; set; } = 0;
+
+        /// <summary>
+        /// Stream output targets sets per frame (SO.SetTargets)
+        /// </summary>
+        public static int SOTargetsSets { get; set; } = 0;
+
+        /// <summary>
+        /// Draw calls per frame
+        /// </summary>
+        public static int DrawCallsPerFrame { get; set; } = 0;
+
+        /// <summary>
+        /// Finish command list calls per frame (FinishCommandList)
+        /// </summary>
+        public static int FinishCommandLists { get; set; } = 0;
+        /// <summary>
+        /// Execute command list calls per frame (ExecuteCommandList)
+        /// </summary>
+        public static int ExecuteCommandLists { get; set; } = 0;
+
         /// <summary>
         /// State changes count per frame (rasterizer, blend and depth-stencil states)
         /// </summary>
@@ -139,13 +270,10 @@ namespace Engine
         {
             get
             {
-                return RasterizerStateChanges + BlendStateChanges + DepthStencilStateChanges;
+                return RasterizerStateChanges + OMBlendStateChanges + DepthStencilStateChanges;
             }
         }
-        /// <summary>
-        /// Active buffers
-        /// </summary>
-        public static int Buffers { get; set; } = 0;
+
         /// <summary>
         /// Total buffer bytes
         /// </summary>
@@ -187,34 +315,6 @@ namespace Engine
             }
         }
         /// <summary>
-        /// Buffer reads
-        /// </summary>
-        public static int BufferReads { get; set; } = 0;
-        /// <summary>
-        /// Buffer writes
-        /// </summary>
-        public static int BufferWrites { get; set; } = 0;
-        /// <summary>
-        /// Input assembler layout sets
-        /// </summary>
-        public static int IAInputLayoutSets { get; set; } = 0;
-        /// <summary>
-        /// Input assembler primitive topology sets
-        /// </summary>
-        public static int IAPrimitiveTopologySets { get; set; } = 0;
-        /// <summary>
-        /// Vertex buffer sets
-        /// </summary>
-        public static int IAVertexBuffersSets { get; set; } = 0;
-        /// <summary>
-        /// Index buffer sets
-        /// </summary>
-        public static int IAIndexBufferSets { get; set; } = 0;
-        /// <summary>
-        /// Stream output targets sets
-        /// </summary>
-        public static int SOTargetsSet { get; set; } = 0;
-        /// <summary>
         /// Statistics keys
         /// </summary>
         /// <remarks>
@@ -251,48 +351,10 @@ namespace Engine
         /// </summary>
         public static void ClearAll()
         {
-            FramesPerSecond = 0;
-
-            DrawCallsPerFrame = 0;
-
-            InstancesPerFrame = 0;
-            MaxInstancesPerFrame = 0;
-            PrimitivesPerFrame = 0;
-
-            UpdatesPerFrame = 0;
-            UpdatesPerObject = 0;
-            UpdatesPerInstance = 0;
-
-            Textures = 0;
-            TextureUpdates = 0;
-
-            PicksPerFrame = 0;
-            PickingTotalTimePerFrame = 0f;
-            PickingAverageTime = 0f;
-            VolumeBoxTestPerFrame = 0;
-            VolumeBoxTestTotalTimePerFrame = 0f;
-            VolumeBoxTestAverageTime = 0f;
-            VolumeSphereTestPerFrame = 0;
-            VolumeSphereTestTotalTimePerFrame = 0f;
-            VolumeSphereTestAverageTime = 0f;
-            VolumeFrustumTestPerFrame = 0;
-            VolumeFrustumTestTotalTimePerFrame = 0f;
-            VolumeFrustumTestAverageTime = 0f;
-
-            RasterizerStateChanges = 0;
-            BlendStateChanges = 0;
-            DepthStencilStateChanges = 0;
-
             Buffers = 0;
-            BufferReads = 0;
-            BufferWrites = 0;
+            Textures = 0;
 
-            IAInputLayoutSets = 0;
-            IAPrimitiveTopologySets = 0;
-            IAVertexBuffersSets = 0;
-            IAIndexBufferSets = 0;
-
-            SOTargetsSet = 0;
+            ResetCounters();
 
             gData.Clear();
             gGlobalDataKeys.Clear();
@@ -303,17 +365,70 @@ namespace Engine
         /// </summary>
         public static void ClearFrame()
         {
+            ResetCounters();
+
+            foreach (var key in gFrameDataKeys)
+            {
+                gData.TryRemove(key, out _);
+            }
+            gFrameDataKeys.Clear();
+        }
+        /// <summary>
+        /// Reset all counters to zero.
+        /// </summary>
+        private static void ResetCounters()
+        {
+            ContextClears = 0;
+
+            ViewportsSets = 0;
+            RenderTargetSets = 0;
+            RenderTargetClears = 0;
+            DepthStencilClears = 0;
+            DepthStencilStateChanges = 0;
+
+            RasterizerStateChanges = 0;
+            OMBlendStateChanges = 0;
+
+            IAInputLayoutSets = 0;
+            IAPrimitiveTopologySets = 0;
+            IAVertexBuffersSets = 0;
+            IAIndexBufferSets = 0;
+
+            ConstantBufferSets = 0;
+            ConstantBufferClears = 0;
+            ShaderResourceSets = 0;
+            ShaderResourceClears = 0;
+            SamplerSets = 0;
+            SamplerClears = 0;
+
+            VertexShadersSets = 0;
+            HullShadersSets = 0;
+            DomainShadersSets = 0;
+            GeometryShadersSets = 0;
+            SOTargetsSets = 0;
+            PixelShadersSets = 0;
+            ComputeShadersSets = 0;
+
+            TechniquePasses = 0;
+            SubresourceUpdates = 0;
+            SubresourceMaps = 0;
+            SubresourceUnmaps = 0;
+
+            TextureWrites = 0;
+            BufferWrites = 0;
+            BufferReads = 0;
+
             DrawCallsPerFrame = 0;
+
+            FinishCommandLists = 0;
+            ExecuteCommandLists = 0;
+
 
             InstancesPerFrame = 0;
             MaxInstancesPerFrame = 0;
             PrimitivesPerFrame = 0;
 
-            UpdatesPerFrame = 0;
-            UpdatesPerObject = 0;
-            UpdatesPerInstance = 0;
-
-            TextureUpdates = 0;
+            TransformUpdatesPerFrame = 0;
 
             PicksPerFrame = 0;
             PickingTotalTimePerFrame = 0f;
@@ -327,26 +442,6 @@ namespace Engine
             VolumeFrustumTestPerFrame = 0;
             VolumeFrustumTestTotalTimePerFrame = 0f;
             VolumeFrustumTestAverageTime = 0f;
-
-            RasterizerStateChanges = 0;
-            BlendStateChanges = 0;
-            DepthStencilStateChanges = 0;
-
-            BufferReads = 0;
-            BufferWrites = 0;
-
-            IAInputLayoutSets = 0;
-            IAPrimitiveTopologySets = 0;
-            IAVertexBuffersSets = 0;
-            IAIndexBufferSets = 0;
-
-            SOTargetsSet = 0;
-
-            foreach (var key in gFrameDataKeys)
-            {
-                gData.TryRemove(key, out _);
-            }
-            gFrameDataKeys.Clear();
         }
 
         /// <summary>

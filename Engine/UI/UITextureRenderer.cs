@@ -144,12 +144,6 @@ namespace Engine.UI
                 Topology = Topology.TriangleList,
             });
 
-            if (drawn)
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-            }
-
             return base.Draw(context) || drawn;
         }
     }

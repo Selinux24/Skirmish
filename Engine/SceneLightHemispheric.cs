@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 
 namespace Engine
 {
@@ -10,13 +11,9 @@ namespace Engine
         private static readonly Color3 ambientDown = new(0.0f, 0.0f, 0.0f);
         private static readonly Color3 ambientUp = new(0.1f, 0.1f, 0.1f);
 
-        /// <summary>
-        /// Ambient down color
-        /// </summary>
+        /// <inheritdoc/>
         public Color3 AmbientDown { get; set; } = ambientDown;
-        /// <summary>
-        /// Ambient up color
-        /// </summary>
+        /// <inheritdoc/>
         public Color3 AmbientUp { get; set; } = ambientUp;
 
         /// <summary>
@@ -70,6 +67,21 @@ namespace Engine
 
             return CastShadowsMarked;
         }
+        /// <inheritdoc/>
+        public override void ClearShadowParameters()
+        {
+            ShadowMapIndex = -1;
+            ShadowMapCount = 0;
+            FromLightVP = Array.Empty<Matrix>();
+        }
+        /// <inheritdoc/>
+        public override void SetShadowParameters(Camera camera, int assignedShadowMap)
+        {
+            ShadowMapIndex = assignedShadowMap;
+            ShadowMapCount = 1;
+            FromLightVP = new[] { Matrix.Identity };
+        }
+
         /// <inheritdoc/>
         public override ISceneLight Clone()
         {

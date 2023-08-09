@@ -334,15 +334,7 @@ namespace Engine
                 count += dCount;
             }
 
-            if (count > 0)
-            {
-                Counters.InstancesPerFrame += instanceCount;
-                Counters.PrimitivesPerFrame += count;
-
-                return true;
-            }
-
-            return false;
+            return count > 0;
         }
         /// <summary>
         /// Draws a mesh with a shadow map drawer
@@ -467,15 +459,7 @@ namespace Engine
                 count += dCount;
             }
 
-            if (count > 0)
-            {
-                Counters.InstancesPerFrame += instanceCount;
-                Counters.PrimitivesPerFrame += count;
-
-                return true;
-            }
-
-            return false;
+            return count > 0;
         }
         /// <summary>
         /// Draws a mesh with a geometry drawer

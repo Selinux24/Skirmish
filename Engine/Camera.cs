@@ -76,13 +76,13 @@ namespace Engine
         /// <returns>Returns new 2D camera</returns>
         public static Camera CreateOrtho(Vector3 area, float nearPlane, float width, float height)
         {
-            var position = new Vector3(0, area.Y + nearPlane, 0);
-            var interest = Vector3.Zero;
+            var eyePosition = new Vector3(0, area.Y + nearPlane, 0);
+            var eyeInterest = Vector3.Zero;
 
             var camera = new Camera
             {
-                Position = position,
-                Interest = interest
+                Position = eyePosition,
+                Interest = eyeInterest
             };
 
             camera.SetLens(width, height, area, nearPlane);

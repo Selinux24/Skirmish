@@ -437,15 +437,7 @@ namespace Engine
                     primitiveCount += gNode.IBDesc.Count / 3;
                 }
 
-                if (primitiveCount > 0)
-                {
-                    Counters.InstancesPerFrame += instanceCount;
-                    Counters.PrimitivesPerFrame += primitiveCount;
-
-                    return true;
-                }
-
-                return false;
+                return primitiveCount > 0;
             }
         }
         /// <summary>

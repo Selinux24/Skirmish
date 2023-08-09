@@ -751,10 +751,6 @@ namespace Engine.Common
         /// </summary>
         protected void RefreshGlobalState()
         {
-            ShadowMapperDirectional?.UpdateGlobals();
-            ShadowMapperPoint?.UpdateGlobals();
-            ShadowMapperSpot?.UpdateGlobals();
-
             if (updateMaterialsPalette)
             {
                 Logger.WriteInformation(this, $"{nameof(UpdateGlobalState)} =>Updating Material palette.");
@@ -956,6 +952,69 @@ namespace Engine.Common
         }
 
         /// <summary>
+        /// Assign light information for shadow mapping
+        /// </summary>
+        protected void AssignLightShadowMaps()
+        {
+            var camera = Scene.Camera;
+
+            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position).ToArray();
+            if (dirLights.Any())
+            {
+                int assigned = 0;
+                foreach (var light in dirLights)
+                {
+                    light.ClearShadowParameters();
+
+                    light.UpdateEnvironment(DirectionalShadowMapSize, Scene.GameEnvironment.CascadeShadowMapsDistances);
+
+                    if (assigned >= MaxDirectionalShadowMaps)
+                    {
+                        continue;
+                    }
+
+                    //Assign light parameters
+                    light.SetShadowParameters(camera, assigned++);
+                }
+            }
+
+            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+            if (pointLights.Any())
+            {
+                int assigned = 0;
+                foreach (var light in pointLights)
+                {
+                    light.ClearShadowParameters();
+
+                    if (assigned >= MaxCubicShadows)
+                    {
+                        continue;
+                    }
+
+                    //Assign light parameters
+                    light.SetShadowParameters(camera, assigned++);
+                }
+            }
+
+            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+            if (spotLights.Any())
+            {
+                int assigned = 0;
+                foreach (var light in spotLights)
+                {
+                    light.ClearShadowParameters();
+
+                    if (assigned >= MaxSpotShadows)
+                    {
+                        continue;
+                    }
+
+                    //Assign light parameters
+                    light.SetShadowParameters(camera, assigned++);
+                }
+            }
+        }
+        /// <summary>
         /// Draw shadow maps
         /// </summary>
         protected void DoShadowMapping()
@@ -968,11 +1027,28 @@ namespace Engine.Common
             int cullIndexPoint = cullIndexDir + Scene.Lights.DirectionalLights.Length;
             int cullIndexSpot = cullIndexPoint + Scene.Lights.PointLights.Length;
 
-            DoDirectionalShadowMapping(cullIndexDir);
+            var camPosition = Scene.Camera.Position;
 
-            DoPointShadowMapping(cullIndexPoint);
+            //Get directional lights which cast shadows
+            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, camPosition);
+            //Get the object list affected by directional shadows
+            var dirObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
+            //Draw shadow map
+            DoShadowMapping(ShadowsDirectionalPass, "Directional", ShadowMapperDirectional, dirLights, dirObjs, cullIndexDir);
 
-            DoSpotShadowMapping(cullIndexSpot);
+            //Get point lights which cast shadows
+            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, camPosition);
+            //Get the object list affected by point shadows
+            var pointObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
+            //Draw shadow map
+            DoShadowMapping(ShadowsPointPass, "Point", ShadowMapperPoint, pointLights, pointObjs, cullIndexPoint);
+
+            //Get spot lights which cast shadows
+            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, camPosition);
+            //Get the object list affected by spot shadows
+            var spotObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
+            //Draw shadow map
+            DoShadowMapping(ShadowsSpotPass, "Spot", ShadowMapperSpot, spotLights, spotObjs, cullIndexSpot);
 
 #if DEBUG
             if (Scene.Game.CollectGameStatus)
@@ -982,20 +1058,17 @@ namespace Engine.Common
 #endif
         }
         /// <summary>
-        /// Draw directional shadow maps
+        /// Draw shadow maps
         /// </summary>
+        /// <param name="passIndex">Pass index</param>
+        /// <param name="passName">Pass name</param>
+        /// <param name="shadowCastingLights">Lights</param>
+        /// <param name="shadowObjs">Affected objects</param>
         /// <param name="cullIndex">Cull index</param>
-        private void DoDirectionalShadowMapping(int cullIndex)
+        private void DoShadowMapping(int passIndex, string passName, IShadowMap shadowMapper, IEnumerable<ISceneLight> shadowCastingLights, IEnumerable<IDrawable> shadowObjs, int cullIndex)
         {
 #if DEBUG
             var gStopwatch = Stopwatch.StartNew();
-            var stopwatch = Stopwatch.StartNew();
-#endif
-            //Get directional lights which cast shadows
-            var shadowCastingLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-#if DEBUG
-            stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} Getting lights", stopwatch.Elapsed.TotalMilliseconds);
 #endif
 
             if (!shadowCastingLights.Any())
@@ -1003,23 +1076,13 @@ namespace Engine.Common
                 return;
             }
 
-#if DEBUG
-            stopwatch.Restart();
-#endif
-            //Get the object list affected by directional shadows
-            var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Directional));
-#if DEBUG
-            stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} Getting components", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
             if (!shadowObjs.Any())
             {
                 return;
             }
 
-            //Crate the draw context for directional lights
-            var drawContext = GetPerLightDrawContext(ShadowsDirectionalPass, "Directional", ShadowMapperDirectional);
+            //Crate the draw context for lights
+            var drawContext = GetPerLightDrawContext(passIndex, passName, shadowMapper);
             var dc = drawContext.DeviceContext;
 
             if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
@@ -1036,14 +1099,12 @@ namespace Engine.Common
             //Get the camera sphere volume for cull testing
             var camSphere = Scene.Camera.GetIntersectionVolume(IntersectDetectionMode.Sphere);
 
-            int assigned = 0;
             var lArray = shadowCastingLights.ToArray();
             for (int l = 0; l < lArray.Length; l++)
             {
                 var light = lArray[l];
-                light.ClearShadowParameters();
 
-                if (assigned >= MaxDirectionalShadowMaps)
+                if (light.ShadowMapIndex < 0)
                 {
                     continue;
                 }
@@ -1051,205 +1112,29 @@ namespace Engine.Common
                 int lCullIndex = cullIndex + l;
 
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, camSphere, lCullIndex, allCullingObjects))
+                if (!DoShadowCullingTest(toCullShadowObjs, lCullIndex, allCullingObjects, camSphere))
                 {
                     continue;
                 }
 
-                if (DrawLight(drawContext, shadowObjs, light, lCullIndex, assigned * MaxDirectionalCascadeShadowMaps))
-                {
-                    //Assign light parameters
-                    light.SetShadowParameters(assigned++, 1);
-                }
+                DrawLight(drawContext, shadowObjs, lCullIndex, light);
             }
 
 #if DEBUG
             gStopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoDirectionalShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
+            shadowMappingDict.Add($"{nameof(DoShadowMapping)}.{passName}({passIndex}) TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
 #endif
 
-            QueueCommand(dc.FinishCommandList(nameof(DoDirectionalShadowMapping)), ShadowsDirectionalPass);
-        }
-        /// <summary>
-        /// Draw point light shadow maps
-        /// </summary>
-        /// <param name="cullIndex">Cull index</param>
-        private void DoPointShadowMapping(int cullIndex)
-        {
-#if DEBUG
-            var gStopwatch = Stopwatch.StartNew();
-            var stopwatch = Stopwatch.StartNew();
-#endif
-            //Get point lights which cast shadows
-            var shadowCastingLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-#if DEBUG
-            stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} Getting lights", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            if (!shadowCastingLights.Any())
-            {
-                return;
-            }
-
-#if DEBUG
-            stopwatch.Restart();
-#endif
-            //Get the object list affected by point shadows
-            var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Point));
-#if DEBUG
-            stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} Getting components", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            if (!shadowObjs.Any())
-            {
-                return;
-            }
-
-            //Crate the draw context for point lights
-            var drawContext = GetPerLightDrawContext(ShadowsPointPass, "Point", ShadowMapperPoint);
-            var dc = drawContext.DeviceContext;
-
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
-            {
-                return;
-            }
-
-            UpdateGlobalState(dc);
-
-            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
-            //Get if all affected objects are suitable for cull testing
-            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
-
-            var lArray = shadowCastingLights.ToArray();
-            int assigned = 0;
-            for (int l = 0; l < lArray.Length; l++)
-            {
-                var light = lArray[l];
-
-                light.ClearShadowParameters();
-
-                if (assigned >= MaxCubicShadows)
-                {
-                    continue;
-                }
-
-                int lCullIndex = cullIndex + l;
-
-                //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
-                {
-                    continue;
-                }
-
-                if (DrawLight(drawContext, shadowObjs, light, lCullIndex, assigned))
-                {
-                    //Assign light parameters
-                    light.SetShadowParameters(assigned++);
-                }
-            }
-#if DEBUG
-            gStopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoPointShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            QueueCommand(dc.FinishCommandList(nameof(DoPointShadowMapping)), ShadowsPointPass);
-        }
-        /// <summary>
-        /// Draw spot light shadow maps
-        /// </summary>
-        /// <param name="cullIndex">Cull index</param>
-        private void DoSpotShadowMapping(int cullIndex)
-        {
-#if DEBUG
-            var gStopwatch = Stopwatch.StartNew();
-            var stopwatch = Stopwatch.StartNew();
-#endif
-            //Get spot lights which cast shadows
-            var shadowCastingLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-#if DEBUG
-            stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} Getting lights", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            if (!shadowCastingLights.Any())
-            {
-                return;
-            }
-
-#if DEBUG
-            stopwatch.Restart();
-#endif
-            //Get the object list affected by spot shadows
-            var shadowObjs = Scene.Components.Get<IDrawable>(c => c.Visible && c.CastShadow.HasFlag(ShadowCastingAlgorihtms.Spot));
-#if DEBUG
-            stopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} Getting components", stopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            if (!shadowObjs.Any())
-            {
-                return;
-            }
-
-            //Crate the draw context for spot lights
-            var drawContext = GetPerLightDrawContext(ShadowsSpotPass, "Spot", ShadowMapperSpot);
-            var dc = drawContext.DeviceContext;
-
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
-            {
-                return;
-            }
-
-            UpdateGlobalState(dc);
-
-            var toCullShadowObjs = shadowObjs.OfType<ICullable>();
-            //Get if all affected objects are suitable for cull testing
-            bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
-
-            var lArray = shadowCastingLights.ToArray();
-            int assigned = 0;
-            for (int l = 0; l < lArray.Length; l++)
-            {
-                var light = lArray[l];
-
-                light.ClearShadowParameters();
-
-                if (assigned >= MaxCubicShadows)
-                {
-                    continue;
-                }
-
-                int lCullIndex = cullIndex + l;
-
-                //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, new IntersectionVolumeSphere(light.Position, light.Radius), lCullIndex, allCullingObjects))
-                {
-                    continue;
-                }
-
-                if (DrawLight(drawContext, shadowObjs, light, lCullIndex, assigned))
-                {
-                    //Assign light parameters
-                    light.SetShadowParameters(drawContext.ShadowMap.FromLightViewProjectionArray, assigned++, 1);
-                }
-            }
-#if DEBUG
-            gStopwatch.Stop();
-            shadowMappingDict.Add($"{nameof(DoSpotShadowMapping)} TOTAL", gStopwatch.Elapsed.TotalMilliseconds);
-#endif
-
-            QueueCommand(dc.FinishCommandList(nameof(DoSpotShadowMapping)), ShadowsSpotPass);
+            QueueCommand(dc.FinishCommandList($"{nameof(DoShadowMapping)}.{passName}"), passIndex);
         }
         /// <summary>
         /// Performs shadow culling testing
         /// </summary>
         /// <param name="components">Component list</param>
-        /// <param name="lightVolume">Light volume</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="allCullingObjects">All components were culling components</param>
-        private bool DoShadowCullingTest(IEnumerable<ICullable> components, ICullingVolume lightVolume, int cullIndex, bool allCullingObjects)
+        /// <param name="lightVolume">Light volume</param>
+        private bool DoShadowCullingTest(IEnumerable<ICullable> components, int cullIndex, bool allCullingObjects, ICullingVolume lightVolume)
         {
             if (components.Any())
             {
@@ -1280,19 +1165,18 @@ namespace Engine.Common
         /// </summary>
         /// <param name="drawContext">Drawing context</param>
         /// <param name="components">Object list affected by the light</param>
-        /// <param name="light">Light</param>
         /// <param name="cullIndex">Cull index</param>
-        /// <param name="assigned">Assigned buffer index</param>
-        private bool DrawLight(DrawContextShadows drawContext, IEnumerable<IDrawable> components, ISceneLight light, int cullIndex, int assigned)
+        /// <param name="light">Light</param>
+        private bool DrawLight(DrawContextShadows drawContext, IEnumerable<IDrawable> components, int cullIndex, ISceneLight light)
         {
 #if DEBUG
             var stopwatch = Stopwatch.StartNew();
 #endif
-            drawContext.ShadowMap.UpdateFromLightViewProjection(Scene.Camera, light);
-            drawContext.ShadowMap.Bind(drawContext.DeviceContext, assigned);
+            drawContext.ShadowMap.Light = light;
+            drawContext.ShadowMap.Bind(drawContext.DeviceContext);
 
             //Draw
-            DrawShadowComponents(drawContext, cullIndex, components);
+            DrawShadowComponents(drawContext, components, cullIndex);
 #if DEBUG
             stopwatch.Stop();
             shadowMappingDict.Add($"{nameof(DrawLight)} {light.GetType()} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
@@ -1304,9 +1188,9 @@ namespace Engine.Common
         /// Draw components for shadow mapping
         /// </summary>
         /// <param name="context">Context</param>
-        /// <param name="cullIndex">Culling index</param>
         /// <param name="components">Components to draw</param>
-        private void DrawShadowComponents(DrawContextShadows context, int cullIndex, IEnumerable<IDrawable> components)
+        /// <param name="cullIndex">Culling index</param>
+        private void DrawShadowComponents(DrawContextShadows context, IEnumerable<IDrawable> components, int cullIndex)
         {
             var objects = components
                 .Where(c => IsVisible(c, cullIndex))
@@ -1575,6 +1459,8 @@ namespace Engine.Common
 
             RefreshGlobalState();
 
+            AssignLightShadowMaps();
+
             var graphics = Scene.Game.Graphics;
             var ic = graphics.ImmediateContext;
 
@@ -1791,7 +1677,7 @@ namespace Engine.Common
         {
             ParallelOptions options = new()
             {
-                MaxDegreeOfParallelism = 1,
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
             };
 
             var res = Parallel.ForEach(actions, options, action =>

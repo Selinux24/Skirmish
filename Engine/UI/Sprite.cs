@@ -270,12 +270,6 @@ namespace Engine.UI
                 drawn = spriteColorDrawer.Draw(dc, BufferManager, drawOptions);
             }
 
-            if (drawn)
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-            }
-
             return drawn;
         }
 

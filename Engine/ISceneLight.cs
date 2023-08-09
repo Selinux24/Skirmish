@@ -36,6 +36,14 @@ namespace Engine
         /// </summary>
         int ShadowMapIndex { get; set; }
         /// <summary>
+        /// Shadow map count
+        /// </summary>
+        uint ShadowMapCount { get; set; }
+        /// <summary>
+        /// From light view * projection matrix array
+        /// </summary>
+        Matrix[] FromLightVP { get; set; }
+        /// <summary>
         /// Free use variable
         /// </summary>
         object State { get; set; }
@@ -46,11 +54,11 @@ namespace Engine
         /// Parent local transform matrix
         /// </summary>
         Matrix ParentTransform { get; set; }
-
         /// <summary>
-        /// Clears all light shadow parameters
+        /// Light position
         /// </summary>
-        void ClearShadowParameters();
+        Vector3 Position { get; set; }
+
         /// <summary>
         /// Test the light shadow casting based on the viewer position
         /// </summary>
@@ -58,6 +66,17 @@ namespace Engine
         /// <param name="eyePosition">Viewer eye position</param>
         /// <returns>Returns true if the light can cast shadows</returns>
         bool MarkForShadowCasting(GameEnvironment environment, Vector3 eyePosition);
+        /// <summary>
+        /// Clears all light shadow parameters
+        /// </summary>
+        void ClearShadowParameters();
+        /// <summary>
+        /// Sets the shadow parameters
+        /// </summary>
+        /// <param name="camera">Current camera</param>
+        /// <param name="assignedShadowMap">Assigned shadow map index</param>
+        void SetShadowParameters(Camera camera, int assignedShadowMap);
+
         /// <summary>
         /// Clones the light
         /// </summary>

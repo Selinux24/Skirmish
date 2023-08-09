@@ -20,10 +20,6 @@ namespace Engine
         /// </summary>
         float Brightness { get; set; }
         /// <summary>
-        /// Shadow map index
-        /// </summary>
-        uint ShadowMapCount { get; set; }
-        /// <summary>
         /// From light view * projection matrix array
         /// </summary>
         Matrix ToShadowSpace { get; set; }
@@ -41,17 +37,10 @@ namespace Engine
         Vector4 ToCascadeScale { get; set; }
 
         /// <summary>
-        /// Gets light position at specified distance
+        /// Updates internal state 
         /// </summary>
-        /// <param name="distance">Distance</param>
-        /// <returns>Returns light position at specified distance</returns>
-        Vector3 GetPosition(float distance);
-
-        /// <summary>
-        /// Sets the shadow parameters
-        /// </summary>
-        /// <param name="assignedShadowMap">Assigned shadow map index</param>
-        /// <param name="shadowMapCount">Shadow map count</param>
-        void SetShadowParameters(int assignedShadowMap, uint shadowMapCount);
+        /// <param name="size">Map size</param>
+        /// <param name="cascades">Cascade distances</param>
+        void UpdateEnvironment(int size, float[] cascades);
     }
 }

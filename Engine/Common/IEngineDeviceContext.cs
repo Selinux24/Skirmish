@@ -451,6 +451,13 @@ namespace Engine.Common
         /// <param name="texture">Texture to update</param>
         /// <param name="data">Data to write</param>
         void UpdateTexture2D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct;
+        /// <summary>
+        /// Updates a texture
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="texture">Texture to update</param>
+        /// <param name="data">Data to write</param>
+        void UpdateTexture3D<T>(EngineShaderResourceView texture, IEnumerable<T> data) where T : struct;
 
         /// <summary>
         /// Reads an array of values from the specified buffer

@@ -182,14 +182,7 @@ namespace Engine
                 TintColor,
                 Texture);
 
-            bool drawn = decalDrawer.Draw(dc, buffer, Topology.PointList, currentDecals);
-            if (drawn)
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += currentDecals;
-            }
-
-            return drawn;
+            return decalDrawer.Draw(dc, buffer, Topology.PointList, currentDecals);
         }
 
         /// <inheritdoc/>

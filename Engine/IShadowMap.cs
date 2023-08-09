@@ -16,32 +16,19 @@ namespace Engine
         /// </summary>
         EngineShaderResourceView Texture { get; }
         /// <summary>
-        /// To shadow view*projection matrix
-        /// </summary>
-        Matrix ToShadowMatrix { get; set; }
-        /// <summary>
-        /// Light position
-        /// </summary>
-        Vector3 LightPosition { get; set; }
-        /// <summary>
-        /// From light view projection
-        /// </summary>
-        Matrix[] FromLightViewProjectionArray { get; set; }
-        /// <summary>
         /// Gets or sets the high resolution map flag (if available)
         /// </summary>
         bool HighResolutionMap { get; set; }
-
         /// <summary>
-        /// Updates the from light view projection
+        /// Light
         /// </summary>
-        void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
+        ISceneLight Light { get; set; }
+
         /// <summary>
         /// Binds the shadow map data to graphics
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="index">Array index</param>
-        void Bind(IEngineDeviceContext dc, int index);
+        void Bind(IEngineDeviceContext dc);
         /// <summary>
         /// Gets the drawer to draw this shadow map
         /// </summary>
@@ -50,10 +37,5 @@ namespace Engine
         /// <param name="useTextureAlpha">Uses alpha channel</param>
         /// <returns>Returns a drawer</returns>
         IBuiltInDrawer GetDrawer(VertexTypes vertexType, bool instanced, bool useTextureAlpha);
-
-        /// <summary>
-        /// Update shadow map globals
-        /// </summary>
-        void UpdateGlobals();
     }
 }

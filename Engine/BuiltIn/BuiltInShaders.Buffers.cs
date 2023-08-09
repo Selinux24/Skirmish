@@ -601,20 +601,27 @@ namespace Engine.BuiltIn
                     return new BufferLightPoint();
                 }
 
-                float radius = light?.Radius ?? 0;
+                float radius = light.Radius;
                 var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius + 0.1f);
 
-                return new BufferLightPoint
+                var tmp = new BufferLightPoint
                 {
-                    Position = light?.Position ?? Vector3.Zero,
-                    DiffuseColor = light?.DiffuseColor ?? Color3.Black,
-                    SpecularColor = light?.SpecularColor ?? Color3.Black,
-                    Intensity = light?.Intensity ?? 0,
-                    Radius = light?.Radius ?? 0,
-                    CastShadow = light?.CastShadowsMarked ?? false ? 1 : 0,
-                    MapIndex = light?.ShadowMapIndex ?? -1,
+                    Position = light.Position,
+                    DiffuseColor = light.DiffuseColor,
+                    SpecularColor = light.SpecularColor,
+                    Intensity = light.Intensity,
+                    Radius = radius,
+                    CastShadow = light.CastShadowsMarked ? 1 : 0,
+                    MapIndex = light.ShadowMapIndex,
                     PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]),
                 };
+
+                if (tmp.MapIndex < 0)
+                {
+                    
+                }
+
+                return tmp;
             }
 
             /// <summary>

@@ -34,13 +34,11 @@ namespace Engine
         /// <inheritdoc/>
         public EngineShaderResourceView Texture { get; protected set; }
         /// <inheritdoc/>
-        public Matrix ToShadowMatrix { get; set; } = Matrix.Identity;
-        /// <inheritdoc/>
-        public Vector3 LightPosition { get; set; } = Vector3.Zero;
-        /// <inheritdoc/>
-        public Matrix[] FromLightViewProjectionArray { get; set; }
-        /// <inheritdoc/>
         public virtual bool HighResolutionMap { get; set; }
+        /// <summary>
+        /// Light
+        /// </summary>
+        public ISceneLight Light { get; set; }
 
         /// <summary>
         /// Constructor
@@ -55,8 +53,6 @@ namespace Engine
             Name = name;
 
             Viewports = Helper.CreateArray(arraySize, new Viewport(0, 0, width, height, 0, 1.0f));
-
-            FromLightViewProjectionArray = Helper.CreateArray(arraySize, Matrix.Identity);
         }
         /// <summary>
         /// Destructor
@@ -95,9 +91,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public abstract void UpdateFromLightViewProjection(Camera camera, ISceneLight light);
-        /// <inheritdoc/>
-        public void Bind(IEngineDeviceContext dc, int index)
+        public void Bind(IEngineDeviceContext dc)
         {
             //Set shadow mapper viewport
             dc.SetViewports(Viewports);
@@ -105,7 +99,7 @@ namespace Engine
             //Set shadow map depth map without render target
             dc.SetRenderTargets(
                 null, false, Color.Transparent,
-                DepthMap.ElementAtOrDefault(index), true, false,
+                DepthMap.ElementAtOrDefault(Light?.ShadowMapIndex ?? -1), true, false,
                 true);
         }
         /// <inheritdoc/>
@@ -184,8 +178,5 @@ namespace Engine
                 }
             }
         }
-
-        /// <inheritdoc/>
-        public abstract void UpdateGlobals();
     }
 }

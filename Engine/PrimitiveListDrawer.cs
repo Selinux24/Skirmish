@@ -285,12 +285,6 @@ namespace Engine
                 Topology = topology,
             });
 
-            if (drawn)
-            {
-                Counters.InstancesPerFrame += dictionary.Count;
-                Counters.PrimitivesPerFrame += drawCount / stride;
-            }
-
             return drawn;
         }
         /// <summary>

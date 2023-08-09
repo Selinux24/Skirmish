@@ -524,7 +524,7 @@ namespace Engine
 
             //Set g-buffer render targets
             dc.SetRenderTargets(
-                geometryBuffer.Targets, true, Color.Transparent,
+                geometryBuffer.Targets, true, Scene.GameEnvironment.Background,
                 Scene.Game.Graphics.DefaultDepthStencil, true, true,
                 true);
         }
@@ -613,6 +613,11 @@ namespace Engine
 
                 foreach (var light in pointLights)
                 {
+                    if (light.ShadowMapIndex < 0)
+                    {
+                        continue;
+                    }
+
                     //Draw Pass
                     lightPointDrawer.UpdatePerLight(dc, light);
 

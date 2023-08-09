@@ -20,8 +20,12 @@ float4 main(PSVertexPositionColor input) : SV_TARGET
     if (gPerFrame.FogRange > 0)
 	{
         float distToEye = length(gPerFrame.EyePosition - input.positionWorld);
-
-        matColor = ComputeFog(matColor, distToEye, gPerFrame.FogStart, gPerFrame.FogRange, gPerFrame.FogColor);
+        float fog = CalcFogFactor(distToEye, gPerFrame.FogStart, gPerFrame.FogRange);
+        if (fog >= 1)
+        {
+            return gPerFrame.FogColor;
+        }
+        matColor = ApplyFog(matColor, gPerFrame.FogColor, fog);
     }
 
 	return matColor;

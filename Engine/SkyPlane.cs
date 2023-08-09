@@ -244,14 +244,7 @@ namespace Engine
                 VertexBuffer = vertexBuffer,
                 Topology = Topology.TriangleList,
             };
-            bool drawn = cloudsDrawer.Draw(dc, BufferManager, drawOptions);
-            if (drawn)
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += indexBuffer.Count / 3;
-            }
-
-            return drawn;
+            return cloudsDrawer.Draw(dc, BufferManager, drawOptions);
         }
     }
 }

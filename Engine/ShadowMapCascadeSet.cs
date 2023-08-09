@@ -1,7 +1,6 @@
 ﻿using SharpDX;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Engine
 {
@@ -13,19 +12,20 @@ namespace Engine
         /// <summary>
         /// Total cascades
         /// </summary>
-        public readonly int TotalCascades;
+        public int TotalCascades { get; private set; }
 
-        private readonly int shadowMapSize;
-        private readonly float cascadeTotalRange;
-        private readonly float[] cascadeRanges;
+        private int shadowMapSize;
+        private float[] shadowCascades;
+        private float cascadeTotalRange;
+        private float[] cascadeRanges;
 
         private float shadowBoundRadius = 0;
-        private readonly Vector3[] cascadeBoundCenter;
-        private readonly float[] cascadeBoundRadius;
+        private Vector3[] cascadeBoundCenter;
+        private float[] cascadeBoundRadius;
 
         private Vector3 lightPosition = Vector3.Zero;
         private Matrix worldToShadowSpace = Matrix.Identity;
-        private readonly Matrix[] worldToCascadeProj;
+        private Matrix[] worldToCascadeProj;
 
         private Vector4 toCascadeOffsetX;
         private Vector4 toCascadeOffsetY;
@@ -101,24 +101,9 @@ namespace Engine
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="mapSize">Shadow map size</param>
-        /// <param name="nearClip">Near clipping distance</param>
-        /// <param name="cascades">Cascade far clipping distances</param>
-        public ShadowMapCascadeSet(int mapSize, float nearClip, float[] cascades)
+        public ShadowMapCascadeSet()
         {
-            shadowMapSize = mapSize;
 
-            TotalCascades = cascades.Length;
-
-            var ranges = new List<float>(cascades);
-            ranges.Insert(0, nearClip);
-            cascadeRanges = ranges.ToArray();
-
-            cascadeTotalRange = ranges[^1];
-
-            cascadeBoundCenter = Helper.CreateArray(TotalCascades, Vector3.Zero);
-            cascadeBoundRadius = Helper.CreateArray(TotalCascades, 0.0f);
-            worldToCascadeProj = Helper.CreateArray(TotalCascades, Matrix.Identity);
         }
 
         /// <summary>
@@ -300,6 +285,36 @@ namespace Engine
             // Update the scale from shadow to cascade space
             toCascadeScale[cascadeIdx] = 2.0f / Math.Max(max.X - min.X, max.Y - min.Y);
             cascadeScale = Matrix.Scaling(toCascadeScale[cascadeIdx], toCascadeScale[cascadeIdx], 1.0f);
+        }
+
+        /// <summary>
+        /// Updates the matrix set internal state
+        /// </summary>
+        /// <param name="mapSize">Maps size</param>
+        /// <param name="cascades">Cascade set</param>
+        public void UpdateEnvironment(int mapSize, float[] cascades)
+        {
+            if (shadowMapSize != mapSize)
+            {
+                shadowMapSize = mapSize;
+            }
+
+            if (!Helper.CompareEnumerables(shadowCascades, cascades))
+            {
+                shadowCascades = cascades;
+
+                TotalCascades = cascades.Length;
+
+                var ranges = new List<float>(cascades);
+                ranges.Insert(0, 1);
+                cascadeRanges = ranges.ToArray();
+
+                cascadeTotalRange = ranges[^1];
+
+                cascadeBoundCenter = Helper.CreateArray(TotalCascades, Vector3.Zero);
+                cascadeBoundRadius = Helper.CreateArray(TotalCascades, 0.0f);
+                worldToCascadeProj = Helper.CreateArray(TotalCascades, Matrix.Identity);
+            }
         }
 
         /// <summary>

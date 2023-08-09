@@ -338,14 +338,7 @@ namespace Engine
             };
             particleDrawer.Update(dc, state, TextureCount, Texture);
 
-            if (!particleDrawer.DrawAuto(context.DeviceContext, drawingBuffer, Topology.PointList))
-            {
-                return false;
-            }
-
-            Counters.InstancesPerFrame++;
-
-            return true;
+            return particleDrawer.DrawAuto(context.DeviceContext, drawingBuffer, Topology.PointList);
         }
 
         /// <inheritdoc/>

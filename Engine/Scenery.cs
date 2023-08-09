@@ -147,15 +147,7 @@ namespace Engine
                     }
                 }
 
-                if (count > 0)
-                {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += count;
-
-                    return true;
-                }
-
-                return false;
+                return count > 0;
             }
             /// <summary>
             /// Draws the scenery patch
@@ -190,15 +182,7 @@ namespace Engine
                     }
                 }
 
-                if (count > 0)
-                {
-                    Counters.InstancesPerFrame++;
-                    Counters.PrimitivesPerFrame += count;
-
-                    return true;
-                }
-
-                return false;
+                return count > 0;
             }
             /// <summary>
             /// Draws the patch using shaders

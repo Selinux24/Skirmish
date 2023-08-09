@@ -54,6 +54,17 @@ float4 main(PSLightInput input) : SV_TARGET
     Material k;
     UnPack(gBuffer, position, normal, albedo, doLighting, k);
     
+    float fog = 0;
+    if (gPerFrame.FogRange > 0)
+    {
+        float distToEye = length(gPerFrame.EyePosition - position);
+        fog = CalcFogFactor(distToEye, gPerFrame.FogStart, gPerFrame.FogRange);
+        if (fog >= 1)
+        {
+            return gPerFrame.FogColor;
+        }
+    }
+    
     if (!doLighting)
     {
         return albedo;
@@ -66,11 +77,9 @@ float4 main(PSLightInput input) : SV_TARGET
     float3 light = DeferredLightEquation(k, lAmbient, diffuseSpecular);
     float4 color = float4(light, 1) * albedo;
 
-    if (gPerFrame.FogRange > 0)
+    if (fog > 0)
     {
-        float distToEye = length(gPerFrame.EyePosition - position);
-
-        color = ComputeFog(color, distToEye, gPerFrame.FogStart, gPerFrame.FogRange, gPerFrame.FogColor);
+        color = ApplyFog(color, gPerFrame.FogColor, fog);
     }
 
     return saturate(color);

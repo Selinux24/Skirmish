@@ -1,4 +1,5 @@
 ﻿using SharpDX;
+using System;
 using System.Collections.Generic;
 
 namespace Engine
@@ -23,21 +24,11 @@ namespace Engine
         /// </summary>
         private float initialIntensity = 1f;
 
-        /// <summary>
-        /// Ligth position
-        /// </summary>
-        public Vector3 Position { get; set; }
-        /// <summary>
-        /// Light radius
-        /// </summary>
+        /// <inheritdoc/>
         public float Radius { get; set; }
-        /// <summary>
-        /// Intensity
-        /// </summary>
+        /// <inheritdoc/>
         public float Intensity { get; set; }
-        /// <summary>
-        /// Gets the bounding sphere of the active light
-        /// </summary>
+        /// <inheritdoc/>
         public BoundingSphere BoundingSphere
         {
             get
@@ -45,9 +36,7 @@ namespace Engine
                 return new BoundingSphere(Position, Radius);
             }
         }
-        /// <summary>
-        /// Parent local transform matrix
-        /// </summary>
+        /// <inheritdoc/>
         public override Matrix ParentTransform
         {
             get
@@ -61,15 +50,26 @@ namespace Engine
                 UpdateLocalTransform();
             }
         }
-        /// <summary>
-        /// Local matrix
-        /// </summary>
+        /// <inheritdoc/>
         public Matrix Local
         {
             get
             {
                 return Matrix.Scaling(Radius) * Matrix.Translation(Position);
             }
+        }
+
+        /// <summary>
+        /// Gets the point light from light view matrix
+        /// </summary>
+        /// <param name="lightPosition">Light position</param>
+        /// <param name="direction">Direction</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns the point light from light view matrix</returns>
+        private static Matrix GetFromPointLightViewProjection(Vector3 lightPosition, Vector3 direction, Vector3 up)
+        {
+            // View from light to scene center position
+            return Matrix.LookAtLH(lightPosition, lightPosition + direction, up);
         }
 
         /// <summary>
@@ -89,9 +89,7 @@ namespace Engine
         /// <param name="specular">Specular color contribution</param>
         /// <param name="enabled">Light is enabled</param>
         /// <param name="description">Light description</param>
-        public SceneLightPoint(
-            string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled,
-            SceneLightPointDescription description)
+        public SceneLightPoint(string name, bool castShadow, Color3 diffuse, Color3 specular, bool enabled, SceneLightPointDescription description)
             : base(name, castShadow, diffuse, specular, enabled)
         {
             initialTransform = description.Transform;
@@ -122,6 +120,40 @@ namespace Engine
             return CastShadowsMarked;
         }
         /// <inheritdoc/>
+        public override void ClearShadowParameters()
+        {
+            ShadowMapIndex = -1;
+            ShadowMapCount = 0;
+            FromLightVP = Array.Empty<Matrix>();
+        }
+        /// <inheritdoc/>
+        public override void SetShadowParameters(Camera camera, int assignedShadowMap)
+        {
+            ShadowMapIndex = assignedShadowMap;
+            ShadowMapCount = 1;
+            FromLightVP = UpdateFromLightViewProjection();
+        }
+        /// <summary>
+        /// Gets from light view * projection matrix cube
+        /// </summary>
+        /// <returns>Returns the from light view * projection matrix cube</returns>
+        private Matrix[] UpdateFromLightViewProjection()
+        {
+            // Orthogonal projection from center
+            var projection = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1f, 0.1f, Radius);
+
+            return new Matrix[]
+            {
+                GetFromPointLightViewProjection(Position, Vector3.Right,      Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3.Left,       Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3.Up,         Vector3.BackwardLH) * projection,
+                GetFromPointLightViewProjection(Position, Vector3.Down,       Vector3.ForwardLH)  * projection,
+                GetFromPointLightViewProjection(Position, Vector3.ForwardLH,  Vector3.Up)         * projection,
+                GetFromPointLightViewProjection(Position, Vector3.BackwardLH, Vector3.Up)         * projection,
+            };
+        }
+
+        /// <inheritdoc/>
         public override ISceneLight Clone()
         {
             return new SceneLightPoint()
@@ -144,16 +176,11 @@ namespace Engine
                 ParentTransform = ParentTransform,
             };
         }
+
         /// <inheritdoc/>
         public IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount)
         {
             return Line3D.CreateFromVertices(GeometryUtil.CreateSphere(Topology.LineList, BoundingSphere, sliceCount, stackCount));
-        }
-
-        /// <inheritdoc/>
-        public void SetShadowParameters(int assignedShadowMap)
-        {
-            ShadowMapIndex = assignedShadowMap;
         }
 
         /// <inheritdoc/>
@@ -167,7 +194,6 @@ namespace Engine
                 CastShadowsMarked = CastShadowsMarked,
                 DiffuseColor = DiffuseColor,
                 SpecularColor = SpecularColor,
-                ShadowMapIndex = ShadowMapIndex,
                 State = State,
                 ParentTransform = ParentTransform,
 
@@ -193,7 +219,6 @@ namespace Engine
             CastShadowsMarked = sceneLightsState.CastShadowsMarked;
             DiffuseColor = sceneLightsState.DiffuseColor;
             SpecularColor = sceneLightsState.SpecularColor;
-            ShadowMapIndex = sceneLightsState.ShadowMapIndex;
             State = sceneLightsState.State;
             ParentTransform = sceneLightsState.ParentTransform;
 

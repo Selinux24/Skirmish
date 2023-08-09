@@ -241,14 +241,7 @@ namespace Engine
 
             particleDrawer.Update(dc, state, TextureCount, Texture);
 
-            bool drawn = particleDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, ActiveParticles);
-            if (drawn)
-            {
-                Counters.InstancesPerFrame++;
-                Counters.PrimitivesPerFrame += ActiveParticles;
-            }
-
-            return drawn;
+            return particleDrawer.Draw(context.DeviceContext, buffer, Topology.PointList, ActiveParticles);
         }
 
         /// <summary>

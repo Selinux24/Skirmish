@@ -739,7 +739,7 @@ namespace Collada.ModularDungeon
             Lights.BackLight.Enabled = false;
             Lights.FillLight.Enabled = false;
 
-            Lights.BaseFogColor = GameEnvironment.Background = Color.Black;
+            Lights.FogColor = GameEnvironment.Background = Color.Black;
             Lights.FogRange = 10f;
             Lights.FogStart = maxDistance - 15f;
 

@@ -9,10 +9,6 @@ namespace Engine
     public interface ISceneLightPoint : ISceneLight, IHasGameState
     {
         /// <summary>
-        /// Position
-        /// </summary>
-        Vector3 Position { get; set; }
-        /// <summary>
         /// Light radius
         /// </summary>
         float Radius { get; set; }
@@ -36,11 +32,5 @@ namespace Engine
         /// <param name="stackCount">Sphere stack count (horizontal subdivisions - parallels)</param>
         /// <returns>Returns a line list representing the light volume</returns>
         IEnumerable<Line3D> GetVolume(int sliceCount, int stackCount);
-
-        /// <summary>
-        /// Sets the shadow parameters
-        /// </summary>
-        /// <param name="assignedShadowMap">Assigned shadow map index</param>
-        void SetShadowParameters(int assignedShadowMap);
     }
 }

@@ -29,10 +29,6 @@ namespace Engine.UI
         /// </summary>
         private EngineShaderResourceView renderTexture;
         /// <summary>
-        /// Minimap rendered area
-        /// </summary>
-        private BoundingBox minimapArea;
-        /// <summary>
         /// Minimap camera
         /// </summary>
         private Camera minimapCamera;
@@ -93,7 +89,7 @@ namespace Engine.UI
             Drawables = Description.Drawables;
             BackColor = Description.BackColor;
 
-            minimapArea = Description.MinimapArea;
+            var minimapArea = Description.MinimapArea;
 
             viewport = new Viewport(0, 0, Description.Width, Description.Height);
 
