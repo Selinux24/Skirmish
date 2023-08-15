@@ -28,10 +28,7 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="positionColorVsSkinned">Skinned position color vertex shader</param>
-        /// <param name="positionColorPs">Position color pixel shader</param>
-        public BuiltInTransparentPositionSkinned(Graphics graphics) : base(graphics)
+        public BuiltInTransparentPositionSkinned() : base()
         {
             SetVertexShader<PositionSkinnedVs>();
             SetGeometryShader<ShadowsTransparentGs>();

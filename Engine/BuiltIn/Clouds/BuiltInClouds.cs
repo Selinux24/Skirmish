@@ -93,8 +93,7 @@ namespace Engine.BuiltIn.Clouds
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInClouds(Graphics graphics) : base(graphics)
+        public BuiltInClouds() : base()
         {
             SetVertexShader<CloudsVs>();
             SetPixelShader<CloudsPs>();

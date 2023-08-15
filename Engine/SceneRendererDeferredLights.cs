@@ -303,7 +303,7 @@ namespace Engine
         /// <param name="drawer">Drawer</param>
         private void DrawSingleLight(IEngineDeviceContext dc, LightGeometry geometry, IBuiltInDrawer drawer)
         {
-            drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, geometry.IndexCount, geometry.Offset);
+            drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, geometry.IndexCount, geometry.Offset);
         }
         /// <summary>
         /// Binds the hemispheric/directional (global) light input layout to the input assembler
@@ -320,7 +320,7 @@ namespace Engine
         /// <param name="drawer">Drawer</param>
         public void DrawDirectional(IEngineDeviceContext dc, BuiltInLightDirectional drawer)
         {
-            drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
+            drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, screenGeometry.IndexCount, screenGeometry.Offset);
         }
         /// <summary>
         /// Binds the point light input layout to the input assembler
@@ -391,7 +391,7 @@ namespace Engine
         /// <param name="drawer">Effect</param>
         public void DrawResult(IEngineDeviceContext dc, BuiltInComposer drawer)
         {
-            drawer.Draw(dc, Topology.TriangleList, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, screenGeometry.IndexCount, screenGeometry.Offset);
+            drawer.Draw(dc, BufferSlot, lightGeometryVertexBufferBinding, lightGeometryIndexBuffer, Topology.TriangleList, screenGeometry.IndexCount, screenGeometry.Offset);
         }
 
         /// <summary>

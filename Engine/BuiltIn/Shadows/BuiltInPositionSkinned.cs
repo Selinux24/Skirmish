@@ -1,7 +1,6 @@
 ﻿
 namespace Engine.BuiltIn.Shadows
 {
-    using Engine.BuiltIn.Sprites;
     using Engine.Common;
 
     /// <summary>
@@ -21,10 +20,7 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        /// <param name="positionColorVsSkinned">Skinned position color vertex shader</param>
-        /// <param name="positionColorPs">Position color pixel shader</param>
-        public BuiltInPositionSkinned(Graphics graphics) : base(graphics)
+        public BuiltInPositionSkinned() : base()
         {
             SetVertexShader<PositionSkinnedVs>();
             SetGeometryShader<ShadowsGs>();

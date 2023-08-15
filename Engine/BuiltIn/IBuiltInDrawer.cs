@@ -56,13 +56,13 @@ namespace Engine.BuiltIn
         /// Draws the specified vertex buffer
         /// </summary>
         /// <param name="dc">Device context</param>
-        /// <param name="topology">Primitive topology</param>
         /// <param name="bufferSlot">Buffer slot</param>
         /// <param name="vertexBufferBinding">Vertex binding</param>
         /// <param name="indexBuffer">Index buffer</param>
+        /// <param name="topology">Primitive topology</param>
         /// <param name="count">Draw count</param>
         /// <param name="startLocation">Start location</param>
-        bool Draw(IEngineDeviceContext dc, Topology topology, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation);
+        bool Draw(IEngineDeviceContext dc, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, Topology topology, int count, int startLocation);
 
         /// <summary>
         /// Draws the specified vertex buffer

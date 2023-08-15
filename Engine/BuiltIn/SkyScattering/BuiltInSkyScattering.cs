@@ -107,8 +107,7 @@ namespace Engine.BuiltIn.SkyScattering
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInSkyScattering(Graphics graphics) : base(graphics)
+        public BuiltInSkyScattering() : base()
         {
             SetVertexShader<SkyScatteringVs>();
             SetPixelShader<SkyScatteringPs>();

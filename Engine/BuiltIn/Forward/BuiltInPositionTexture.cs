@@ -29,8 +29,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionTexture(Graphics graphics) : base(graphics)
+        public BuiltInPositionTexture() : base()
         {
             SetVertexShader<PositionTextureVs>();
             SetPixelShader<PositionTexturePs>();

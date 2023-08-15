@@ -11,8 +11,7 @@ namespace Engine.BuiltIn.Cubemap
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInCubemap(Graphics graphics) : base(graphics)
+        public BuiltInCubemap() : base()
         {
             SetVertexShader<CubemapVs>();
             SetPixelShader<CubemapPs>();

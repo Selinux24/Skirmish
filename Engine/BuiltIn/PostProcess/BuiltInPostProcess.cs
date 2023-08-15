@@ -16,8 +16,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPostProcess(Graphics graphics) : base(graphics)
+        public BuiltInPostProcess() : base()
         {
             SetVertexShader<PostProcessVs>(false);
             SetPixelShader<PostProcessPs>(false);

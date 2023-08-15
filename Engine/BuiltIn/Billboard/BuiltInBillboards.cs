@@ -83,8 +83,7 @@ namespace Engine.BuiltIn.Billboard
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInBillboards(Graphics graphics) : base(graphics)
+        public BuiltInBillboards() : base()
         {
             SetVertexShader<BillboardVs>();
             SetGeometryShader<BillboardGS>();

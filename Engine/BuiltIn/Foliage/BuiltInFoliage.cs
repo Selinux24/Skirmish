@@ -20,8 +20,7 @@ namespace Engine.BuiltIn.Foliage
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInFoliage(Graphics graphics) : base(graphics)
+        public BuiltInFoliage() : base()
         {
             SetVertexShader<FoliageVs>();
             SetGeometryShader<FoliageGS>();

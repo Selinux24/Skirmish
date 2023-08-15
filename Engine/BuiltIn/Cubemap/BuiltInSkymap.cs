@@ -48,8 +48,7 @@ namespace Engine.BuiltIn.Cubemap
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInSkymap(Graphics graphics) : base(graphics)
+        public BuiltInSkymap() : base()
         {
             SetVertexShader<SkymapVs>();
             SetPixelShader<SkymapPs>();

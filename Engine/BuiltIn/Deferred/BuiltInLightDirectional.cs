@@ -17,8 +17,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInLightDirectional(Graphics graphics) : base(graphics)
+        public BuiltInLightDirectional() : base()
         {
             SetVertexShader<DeferredLightOrthoVs>(false);
             SetPixelShader<DeferredLightDirectionalPs>(false);

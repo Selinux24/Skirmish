@@ -37,17 +37,11 @@ namespace Engine.BuiltIn
         private IBuiltInShader<EngineComputeShader> computeShader = BuiltInShaders.GetComputeShader<Empty<EngineComputeShader>>();
 
         /// <summary>
-        /// Graphics
-        /// </summary>
-        protected readonly Graphics Graphics;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        protected BuiltInDrawer(Graphics graphics)
+        protected BuiltInDrawer()
         {
-            Graphics = graphics;
+
         }
 
         /// <summary>
@@ -375,7 +369,7 @@ namespace Engine.BuiltIn
             return true;
         }
         /// <inheritdoc/>
-        public virtual bool Draw(IEngineDeviceContext dc, Topology topology, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, int count, int startLocation)
+        public virtual bool Draw(IEngineDeviceContext dc, int bufferSlot, EngineVertexBufferBinding vertexBufferBinding, EngineBuffer indexBuffer, Topology topology, int count, int startLocation)
         {
             // Set the vertex and pixel shaders that will be used to render this mesh.
             PrepareShaders(dc);

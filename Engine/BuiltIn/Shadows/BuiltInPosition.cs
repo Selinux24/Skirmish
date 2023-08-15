@@ -1,7 +1,6 @@
 ﻿
 namespace Engine.BuiltIn.Shadows
 {
-    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -21,8 +20,7 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPosition(Graphics graphics) : base(graphics)
+        public BuiltInPosition() : base()
         {
             SetVertexShader<PositionVs>();
             SetGeometryShader<ShadowsGs>();

@@ -46,8 +46,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInLightSpot(Graphics graphics) : base(graphics)
+        public BuiltInLightSpot() : base()
         {
             SetVertexShader<DeferredLightVs>(false);
             SetPixelShader<DeferredLightSpotPs>(false);

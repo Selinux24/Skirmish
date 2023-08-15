@@ -62,8 +62,7 @@ namespace Engine.BuiltIn.Decals
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInDecals(Graphics graphics) : base(graphics)
+        public BuiltInDecals() : base()
         {
             SetVertexShader<DecalsVs>();
             SetGeometryShader<DecalsGS>();

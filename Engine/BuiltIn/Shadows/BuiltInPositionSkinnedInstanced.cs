@@ -16,8 +16,7 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionSkinnedInstanced(Graphics graphics) : base(graphics)
+        public BuiltInPositionSkinnedInstanced() : base()
         {
             SetVertexShader<PositionSkinnedVsI>();
             SetGeometryShader<ShadowsGs>();

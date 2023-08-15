@@ -1,10 +1,8 @@
 ﻿using SharpDX;
-using System;
 using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Fonts
 {
-    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -107,8 +105,7 @@ namespace Engine.BuiltIn.Fonts
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInFonts(Graphics graphics) : base(graphics)
+        public BuiltInFonts() : base()
         {
             SetVertexShader<FontsVs>();
             SetPixelShader<FontsPs>();

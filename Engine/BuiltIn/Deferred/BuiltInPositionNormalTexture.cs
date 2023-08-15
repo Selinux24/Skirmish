@@ -29,8 +29,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionNormalTexture(Graphics graphics) : base(graphics)
+        public BuiltInPositionNormalTexture() : base()
         {
             SetVertexShader<PositionNormalTextureVs>();
             SetPixelShader<PositionNormalTexturePs>();

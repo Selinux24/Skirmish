@@ -7,7 +7,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Empty shader
     /// </summary>
-    public class Empty<T> : IBuiltInShader<T> where T : class, IDisposable
+    public class Empty<T> : IBuiltInShader<T> where T : IEngineShader
     {
         /// <inheritdoc/>
         public T Shader { get; private set; }
@@ -24,7 +24,7 @@ namespace Engine.BuiltIn
         public Empty(Graphics graphics)
         {
             Graphics = graphics;
-            Shader = null;
+            Shader = default;
         }
         /// <summary>
         /// Destructor
@@ -49,7 +49,6 @@ namespace Engine.BuiltIn
             if (disposing)
             {
                 Shader?.Dispose();
-                Shader = null;
             }
         }
 

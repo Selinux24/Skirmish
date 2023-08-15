@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Water
 {
-    using Engine.BuiltIn.Sprites;
     using Engine.Common;
 
     /// <summary>
@@ -104,8 +103,7 @@ namespace Engine.BuiltIn.Water
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInWater(Graphics graphics) : base(graphics)
+        public BuiltInWater() : base()
         {
             SetVertexShader<WaterVs>();
             SetPixelShader<WaterPs>();

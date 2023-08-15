@@ -25,8 +25,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionNormalTextureSkinnedInstanced(Graphics graphics) : base(graphics)
+        public BuiltInPositionNormalTextureSkinnedInstanced() : base()
         {
             SetVertexShader<PositionNormalTextureSkinnedVsI>();
             SetPixelShader<PositionNormalTexturePs>();

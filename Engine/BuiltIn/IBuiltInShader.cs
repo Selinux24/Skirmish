@@ -7,7 +7,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Built-in shader interface
     /// </summary>
-    public interface IBuiltInShader<T> : IDisposable where T : class, IDisposable
+    public interface IBuiltInShader<out T> : IDisposable where T : IEngineShader
     {
         /// <summary>
         /// Shader

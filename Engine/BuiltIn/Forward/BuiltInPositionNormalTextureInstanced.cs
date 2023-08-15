@@ -25,8 +25,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionNormalTextureInstanced(Graphics graphics) : base(graphics)
+        public BuiltInPositionNormalTextureInstanced() : base()
         {
             SetVertexShader<PositionNormalTextureVsI>();
             SetPixelShader<PositionNormalTexturePs>();

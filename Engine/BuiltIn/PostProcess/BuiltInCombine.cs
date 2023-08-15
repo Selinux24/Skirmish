@@ -16,8 +16,7 @@ namespace Engine.BuiltIn.PostProcess
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInCombine(Graphics graphics) : base(graphics)
+        public BuiltInCombine() : base()
         {
             SetVertexShader<PostProcessVs>(false);
             SetPixelShader<CombinePs>(false);

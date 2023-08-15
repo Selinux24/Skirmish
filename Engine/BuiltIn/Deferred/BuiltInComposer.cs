@@ -17,8 +17,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInComposer(Graphics graphics) : base(graphics)
+        public BuiltInComposer() : base()
         {
             SetVertexShader<DeferredLightOrthoVs>(false);
             SetPixelShader<DeferredComposerPs>(false);

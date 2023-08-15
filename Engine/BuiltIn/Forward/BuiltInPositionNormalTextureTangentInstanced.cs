@@ -25,8 +25,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionNormalTextureTangentInstanced(Graphics graphics) : base(graphics)
+        public BuiltInPositionNormalTextureTangentInstanced() : base()
         {
             SetVertexShader<PositionNormalTextureTangentVsI>();
             SetPixelShader<PositionNormalTextureTangentPs>();

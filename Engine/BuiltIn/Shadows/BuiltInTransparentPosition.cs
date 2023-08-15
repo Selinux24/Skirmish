@@ -28,8 +28,7 @@ namespace Engine.BuiltIn.Shadows
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInTransparentPosition(Graphics graphics) : base(graphics)
+        public BuiltInTransparentPosition() : base()
         {
             SetVertexShader<PositionTextureVs>();
             SetGeometryShader<ShadowsTransparentGs>();

@@ -3,7 +3,6 @@ using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Particles
 {
-    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -88,8 +87,7 @@ namespace Engine.BuiltIn.Particles
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInStreamOut(Graphics graphics) : base(graphics)
+        public BuiltInStreamOut() : base()
         {
             SetVertexShader<StreamOutVs>();
             SetGeometryShader<StreamOutGS>();

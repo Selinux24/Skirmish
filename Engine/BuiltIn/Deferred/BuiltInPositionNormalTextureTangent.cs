@@ -29,8 +29,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionNormalTextureTangent(Graphics graphics) : base(graphics)
+        public BuiltInPositionNormalTextureTangent() : base()
         {
             SetVertexShader<PositionNormalTextureTangentVs>();
             SetPixelShader<PositionNormalTextureTangentPs>();

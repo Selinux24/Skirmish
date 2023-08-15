@@ -25,8 +25,7 @@ namespace Engine.BuiltIn.Deferred
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionTextureInstanced(Graphics graphics) : base(graphics)
+        public BuiltInPositionTextureInstanced() : base()
         {
             SetVertexShader<PositionTextureVsI>();
             SetPixelShader<PositionTexturePs>();

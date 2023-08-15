@@ -21,8 +21,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInPositionColorSkinned(Graphics graphics) : base(graphics)
+        public BuiltInPositionColorSkinned() : base()
         {
             SetVertexShader<PositionColorSkinnedVs>();
             SetPixelShader<PositionColorPs>();

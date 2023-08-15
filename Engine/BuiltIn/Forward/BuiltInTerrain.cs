@@ -2,7 +2,6 @@
 namespace Engine.BuiltIn.Forward
 {
     using Engine.BuiltIn.Common;
-    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -26,8 +25,7 @@ namespace Engine.BuiltIn.Forward
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics</param>
-        public BuiltInTerrain(Graphics graphics) : base(graphics)
+        public BuiltInTerrain() : base()
         {
             SetVertexShader<TerrainVs>();
             SetPixelShader<TerrainPs>();

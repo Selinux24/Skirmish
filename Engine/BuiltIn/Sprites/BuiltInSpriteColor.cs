@@ -17,7 +17,7 @@ namespace Engine.BuiltIn.Sprites
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics</param>
-        public BuiltInSpriteColor(Graphics graphics) : base(graphics)
+        public BuiltInSpriteColor() : base()
         {
             SetVertexShader<SpriteColorVs>();
             SetPixelShader<SpriteColorPs>();
