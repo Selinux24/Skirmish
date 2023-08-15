@@ -604,7 +604,7 @@ namespace Engine.BuiltIn
                 float radius = light.Radius;
                 var perspectiveMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverTwo, 1, 0.1f, radius + 0.1f);
 
-                var tmp = new BufferLightPoint
+                return new BufferLightPoint
                 {
                     Position = light.Position,
                     DiffuseColor = light.DiffuseColor,
@@ -615,13 +615,6 @@ namespace Engine.BuiltIn
                     MapIndex = light.ShadowMapIndex,
                     PerspectiveValues = new Vector2(perspectiveMatrix[2, 2], perspectiveMatrix[3, 2]),
                 };
-
-                if (tmp.MapIndex < 0)
-                {
-                    
-                }
-
-                return tmp;
             }
 
             /// <summary>

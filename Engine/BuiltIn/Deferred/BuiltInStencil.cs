@@ -12,7 +12,7 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="graphics">Graphics</param>
         public BuiltInStencil(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<DeferredStencilVs>();
+            SetVertexShader<DeferredStencilVs>(false);
         }
     }
 }

@@ -19,8 +19,8 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="graphics">Graphics</param>
         public BuiltInCombine(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<PostProcessVs>();
-            SetPixelShader<CombinePs>();
+            SetVertexShader<PostProcessVs>(false);
+            SetPixelShader<CombinePs>(false);
 
             linear = BuiltInShaders.GetSamplerLinear();
         }

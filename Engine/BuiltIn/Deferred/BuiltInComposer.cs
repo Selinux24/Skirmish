@@ -20,8 +20,8 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="graphics">Graphics</param>
         public BuiltInComposer(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<DeferredLightOrthoVs>();
-            SetPixelShader<DeferredComposerPs>();
+            SetVertexShader<DeferredLightOrthoVs>(false);
+            SetPixelShader<DeferredComposerPs>(false);
 
             pointSampler = BuiltInShaders.GetSamplerPoint();
         }

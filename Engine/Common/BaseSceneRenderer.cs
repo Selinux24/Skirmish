@@ -72,6 +72,24 @@ namespace Engine.Common
             /// </summary>
             public bool ClearStencil { get; set; }
         }
+        /// <summary>
+        /// Post-processing target state data
+        /// </summary>
+        struct PostProcessinStateData
+        {
+            /// <summary>
+            /// Render pass
+            /// </summary>
+            public RenderPass RenderPass;
+            /// <summary>
+            /// Post-process state
+            /// </summary>
+            public BuiltInPostProcessState State;
+            /// <summary>
+            /// Effect list
+            /// </summary>
+            public IEnumerable<(BuiltInPostProcessEffects Effect, int TargetIndex)> Effects;
+        }
 
         /// <summary>
         /// Directional shadows pass index
@@ -108,29 +126,46 @@ namespace Engine.Common
         protected const int CullShadows = 2;
 
         /// <summary>
-        /// Post-processing drawer
+        /// Post-processing objects drawer
         /// </summary>
-        private readonly IPostProcessingDrawer processingDrawer = null;
+        private readonly IPostProcessingDrawer processingDrawerObjects = null;
+        /// <summary>
+        /// Post-processing UI drawer
+        /// </summary>
+        private readonly IPostProcessingDrawer processingDrawerUI = null;
+        /// <summary>
+        /// Post-processing results drawer
+        /// </summary>
+        private readonly IPostProcessingDrawer processingDrawerFinal = null;
         /// <summary>
         /// Scene objects target
         /// </summary>
-        private RenderTarget sceneObjectsTarget = null;
+        private readonly RenderTarget sceneObjectsTarget = null;
         /// <summary>
         /// Scene UI target
         /// </summary>
-        private RenderTarget sceneUITarget = null;
+        private readonly RenderTarget sceneUITarget = null;
         /// <summary>
         /// Scene results target
         /// </summary>
-        private RenderTarget sceneResultsTarget = null;
+        private readonly RenderTarget sceneResultsTarget = null;
+
         /// <summary>
-        /// Post-processing render target A
+        /// Current post-processing render target
         /// </summary>
-        private RenderTarget postProcessingTargetA = null;
+        private RenderTarget postProcessingTarget = null;
         /// <summary>
-        /// Post-processing render target B
+        /// First post-processing render target
         /// </summary>
-        private RenderTarget postProcessingTargetB = null;
+        private readonly RenderTarget postProcessingTarget0 = null;
+        /// <summary>
+        /// Second post-processing render target
+        /// </summary>
+        private readonly RenderTarget postProcessingTarget1 = null;
+        /// <summary>
+        /// Post-processing effects list
+        /// </summary>
+        private readonly List<PostProcessinStateData> postProcessingEffects = new();
 
         /// <summary>
         /// Deferred context list
@@ -249,7 +284,7 @@ namespace Engine.Common
         {
             get
             {
-                return ShadowMapperDirectional?.Texture;
+                return ShadowMapperDirectional.Texture;
             }
         }
         /// <summary>
@@ -259,7 +294,7 @@ namespace Engine.Common
         {
             get
             {
-                return ShadowMapperPoint?.Texture;
+                return ShadowMapperPoint.Texture;
             }
         }
         /// <summary>
@@ -269,7 +304,7 @@ namespace Engine.Common
         {
             get
             {
-                return ShadowMapperSpot?.Texture;
+                return ShadowMapperSpot.Texture;
             }
         }
         /// <summary>
@@ -312,7 +347,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="pixelCount">Pixel count</param>
         /// <returns>Returns the texture size</returns>
-        private static int GetTextureSize(int pixelCount)
+        protected static int GetTextureSize(int pixelCount)
         {
             int texWidth = (int)Math.Sqrt((float)pixelCount) + 1;
             int texHeight = 1;
@@ -322,6 +357,32 @@ namespace Engine.Common
             }
 
             return texHeight;
+        }
+        /// <summary>
+        /// Executes the specified action list in parallel
+        /// </summary>
+        /// <param name="actionList">Action list</param>
+        protected static bool ExecuteParallel(params Action[] actionList)
+        {
+            return ExecuteParallel(actionList.AsEnumerable());
+        }
+        /// <summary>
+        /// Executes the specified action list in parallel
+        /// </summary>
+        /// <param name="actionList">Action list</param>
+        protected static bool ExecuteParallel(IEnumerable<Action> actionList)
+        {
+            ParallelOptions options = new()
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+            };
+
+            var res = Parallel.ForEach(actionList, options, action =>
+            {
+                action.Invoke();
+            });
+
+            return res.IsCompleted;
         }
 
         /// <summary>
@@ -371,9 +432,11 @@ namespace Engine.Common
             sceneUITarget = new RenderTarget(scene.Game, "SceneUITarget", targetFormat, false, 1);
             sceneResultsTarget = new RenderTarget(scene.Game, "SceneResultsTarget", targetFormat, false, 1);
 
-            postProcessingTargetA = new RenderTarget(scene.Game, "PostProcessingTargetA", targetFormat, false, 1);
-            postProcessingTargetB = new RenderTarget(scene.Game, "PostProcessingTargetB", targetFormat, false, 1);
-            processingDrawer = new PostProcessingDrawer(scene.Game);
+            postProcessingTarget0 = new RenderTarget(scene.Game, "PostProcessingTargetA", targetFormat, false, 1);
+            postProcessingTarget1 = new RenderTarget(scene.Game, "PostProcessingTargetB", targetFormat, false, 1);
+            processingDrawerObjects = new PostProcessingDrawer(scene.Game);
+            processingDrawerUI = new PostProcessingDrawer(scene.Game);
+            processingDrawerFinal = new PostProcessingDrawer(scene.Game);
 
             updateMaterialsPalette = true;
             updateAnimationsPalette = true;
@@ -402,25 +465,15 @@ namespace Engine.Common
         {
             if (disposing)
             {
-                ShadowMapperDirectional?.Dispose();
-                ShadowMapperDirectional = null;
+                ShadowMapperDirectional.Dispose();
+                ShadowMapperPoint.Dispose();
+                ShadowMapperSpot.Dispose();
 
-                ShadowMapperPoint?.Dispose();
-                ShadowMapperPoint = null;
-
-                ShadowMapperSpot?.Dispose();
-                ShadowMapperSpot = null;
-
-                sceneObjectsTarget?.Dispose();
-                sceneObjectsTarget = null;
-                sceneUITarget?.Dispose();
-                sceneUITarget = null;
-                sceneResultsTarget?.Dispose();
-                sceneResultsTarget = null;
-                postProcessingTargetA?.Dispose();
-                postProcessingTargetA = null;
-                postProcessingTargetB?.Dispose();
-                postProcessingTargetB = null;
+                sceneObjectsTarget.Dispose();
+                sceneUITarget.Dispose();
+                sceneResultsTarget.Dispose();
+                postProcessingTarget0.Dispose();
+                postProcessingTarget1.Dispose();
 
                 deferredContextList.ForEach(dc => dc.Dispose());
                 deferredContextList.Clear();
@@ -430,12 +483,15 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual void Resize()
         {
-            sceneObjectsTarget?.Resize();
-            sceneUITarget?.Resize();
-            sceneResultsTarget?.Resize();
-            postProcessingTargetA?.Resize();
-            postProcessingTargetB?.Resize();
-            processingDrawer?.Resize();
+            sceneObjectsTarget.Resize();
+            sceneUITarget.Resize();
+            sceneResultsTarget.Resize();
+            postProcessingTarget0.Resize();
+            postProcessingTarget1.Resize();
+
+            processingDrawerObjects.Resize();
+            processingDrawerUI.Resize();
+            processingDrawerFinal.Resize();
         }
         /// <inheritdoc/>
         public virtual EngineShaderResourceView GetResource(SceneRendererResults result)
@@ -745,6 +801,14 @@ namespace Engine.Common
 
             commandList.Add((command, order));
         }
+        /// <summary>
+        /// Queues a action to the action queue
+        /// </summary>
+        /// <param name="action">Action</param>
+        protected void QueueAction(Action action)
+        {
+            actions.Add(action);
+        }
 
         /// <summary>
         /// Refresh the global resources state
@@ -956,64 +1020,92 @@ namespace Engine.Common
         /// </summary>
         protected void AssignLightShadowMaps()
         {
+            ExecuteParallel(AssignLightShadowMapsDirectional, AssignLightShadowMapsPoint, AssignLightShadowMapsSpot);
+        }
+        /// <summary>
+        /// Assign light information for directional shadow mapping
+        /// </summary>
+        private void AssignLightShadowMapsDirectional()
+        {
+            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position).ToArray();
+            if (!dirLights.Any())
+            {
+                return;
+            }
+
             var camera = Scene.Camera;
 
-            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position).ToArray();
-            if (dirLights.Any())
+            int assigned = 0;
+            foreach (var light in dirLights)
             {
-                int assigned = 0;
-                foreach (var light in dirLights)
+                light.ClearShadowParameters();
+
+                light.UpdateEnvironment(DirectionalShadowMapSize, Scene.GameEnvironment.CascadeShadowMapsDistances);
+
+                if (assigned >= MaxDirectionalShadowMaps)
                 {
-                    light.ClearShadowParameters();
-
-                    light.UpdateEnvironment(DirectionalShadowMapSize, Scene.GameEnvironment.CascadeShadowMapsDistances);
-
-                    if (assigned >= MaxDirectionalShadowMaps)
-                    {
-                        continue;
-                    }
-
-                    //Assign light parameters
-                    light.SetShadowParameters(camera, assigned++);
+                    continue;
                 }
-            }
 
-            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-            if (pointLights.Any())
-            {
-                int assigned = 0;
-                foreach (var light in pointLights)
-                {
-                    light.ClearShadowParameters();
-
-                    if (assigned >= MaxCubicShadows)
-                    {
-                        continue;
-                    }
-
-                    //Assign light parameters
-                    light.SetShadowParameters(camera, assigned++);
-                }
-            }
-
-            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-            if (spotLights.Any())
-            {
-                int assigned = 0;
-                foreach (var light in spotLights)
-                {
-                    light.ClearShadowParameters();
-
-                    if (assigned >= MaxSpotShadows)
-                    {
-                        continue;
-                    }
-
-                    //Assign light parameters
-                    light.SetShadowParameters(camera, assigned++);
-                }
+                //Assign light parameters
+                light.SetShadowParameters(camera, assigned++);
             }
         }
+        /// <summary>
+        /// Assign light information for point shadow mapping
+        /// </summary>
+        private void AssignLightShadowMapsPoint()
+        {
+            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+            if (!pointLights.Any())
+            {
+                return;
+            }
+
+            var camera = Scene.Camera;
+
+            int assigned = 0;
+            foreach (var light in pointLights)
+            {
+                light.ClearShadowParameters();
+
+                if (assigned >= MaxCubicShadows)
+                {
+                    continue;
+                }
+
+                //Assign light parameters
+                light.SetShadowParameters(camera, assigned++);
+            }
+        }
+        /// <summary>
+        /// Assign light information for spot shadow mapping
+        /// </summary>
+        private void AssignLightShadowMapsSpot()
+        {
+            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+            if (!spotLights.Any())
+            {
+                return;
+            }
+
+            var camera = Scene.Camera;
+
+            int assigned = 0;
+            foreach (var light in spotLights)
+            {
+                light.ClearShadowParameters();
+
+                if (assigned >= MaxSpotShadows)
+                {
+                    continue;
+                }
+
+                //Assign light parameters
+                light.SetShadowParameters(camera, assigned++);
+            }
+        }
+
         /// <summary>
         /// Draw shadow maps
         /// </summary>
@@ -1167,7 +1259,7 @@ namespace Engine.Common
         /// <param name="components">Object list affected by the light</param>
         /// <param name="cullIndex">Cull index</param>
         /// <param name="light">Light</param>
-        private bool DrawLight(DrawContextShadows drawContext, IEnumerable<IDrawable> components, int cullIndex, ISceneLight light)
+        private void DrawLight(DrawContextShadows drawContext, IEnumerable<IDrawable> components, int cullIndex, ISceneLight light)
         {
 #if DEBUG
             var stopwatch = Stopwatch.StartNew();
@@ -1181,8 +1273,6 @@ namespace Engine.Common
             stopwatch.Stop();
             shadowMappingDict.Add($"{nameof(DrawLight)} {light.GetType()} - Draw {cullIndex}", stopwatch.Elapsed.TotalMilliseconds);
 #endif
-
-            return true;
         }
         /// <summary>
         /// Draw components for shadow mapping
@@ -1289,9 +1379,9 @@ namespace Engine.Common
             return target switch
             {
                 Targets.Screen => Enumerable.Empty<EngineShaderResourceView>(),
-                Targets.Objects => sceneObjectsTarget?.Textures,
-                Targets.UI => sceneUITarget?.Textures,
-                Targets.Result => sceneResultsTarget?.Textures,
+                Targets.Objects => sceneObjectsTarget.Textures,
+                Targets.UI => sceneUITarget.Textures,
+                Targets.Result => sceneResultsTarget.Textures,
                 _ => Enumerable.Empty<EngineShaderResourceView>(),
             };
         }
@@ -1380,18 +1470,153 @@ namespace Engine.Common
         /// <param name="clearRTColor">Target clear color</param>
         private void BindPostProcessingTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
-            dc.SetRenderTargets(postProcessingTargetA.Targets, clearRT, clearRTColor);
+            dc.SetRenderTargets(postProcessingTarget.Targets, clearRT, clearRTColor);
 
             //Set local viewport
             var viewport = Scene.Game.Form.GetViewport();
             dc.SetViewport(viewport);
         }
+
         /// <summary>
-        /// Toggles post-processing render targets
+        /// Pre-assing post-processing targets
         /// </summary>
-        private void TogglePostProcessingTargets()
+        protected void AssignPostProcessTargets()
         {
-            (postProcessingTargetB, postProcessingTargetA) = (postProcessingTargetA, postProcessingTargetB);
+            postProcessingEffects.Clear();
+
+            int targetIndex = 0;
+
+            if (PostProcessingObjectsEffects.Ready)
+            {
+                var effects = PostProcessingObjectsEffects.GetEffects();
+
+                postProcessingEffects.Add(new PostProcessinStateData
+                {
+                    State = PostProcessingObjectsEffects,
+                    RenderPass = RenderPass.Objects,
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)),
+                });
+            }
+
+            if (PostProcessingUIEffects.Ready)
+            {
+                var effects = PostProcessingUIEffects.GetEffects();
+
+                postProcessingEffects.Add(new PostProcessinStateData
+                {
+                    State = PostProcessingUIEffects,
+                    RenderPass = RenderPass.UI,
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)),
+                });
+            }
+
+            if (PostProcessingFinalEffects.Ready)
+            {
+                var effects = PostProcessingFinalEffects.GetEffects();
+
+                postProcessingEffects.Add(new PostProcessinStateData
+                {
+                    State = PostProcessingFinalEffects,
+                    RenderPass = RenderPass.Final,
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)),
+                });
+            }
+        }
+        /// <inheritdoc/>
+        public void ClearPostProcessingEffects()
+        {
+            PostProcessingObjectsEffects = BuiltInPostProcessState.Empty;
+            PostProcessingUIEffects = BuiltInPostProcessState.Empty;
+            PostProcessingFinalEffects = BuiltInPostProcessState.Empty;
+        }
+
+        /// <summary>
+        /// Does the post-processing draw
+        /// </summary>
+        /// <param name="renderTarget">Render target</param>
+        /// <param name="renderPass">Render pass</param>
+        /// <param name="passIndex">Pass index</param>
+        protected void DoPostProcessing(RenderTargetParameters renderTarget, RenderPass renderPass, int passIndex)
+        {
+            var passEffects = postProcessingEffects.Where(ppe => ppe.RenderPass == renderPass);
+            if (!passEffects.Any())
+            {
+                return;
+            }
+
+            var pass = passLists[passIndex];
+            var dc = pass.DeviceContext;
+            dc.ClearState();
+
+            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            {
+                return;
+            }
+
+            UpdateGlobalState(dc);
+
+            DrawPostProcessing(dc, renderTarget, passEffects.First());
+
+            QueueCommand(dc.FinishCommandList($"{nameof(DoPostProcessing)} {renderPass}"), passIndex);
+        }
+        /// <summary>
+        /// Does the post-processing draw
+        /// </summary>
+        /// <param name="dc">Device context</param>
+        /// <param name="renderTarget">Render target</param>
+        /// <param name="renderPass">Render pass</param>
+        private void DrawPostProcessing(IEngineDeviceContext dc, RenderTargetParameters renderTarget, PostProcessinStateData state)
+        {
+            if (state.Effects?.Any() != true)
+            {
+                return;
+            }
+
+            var processingDrawer = state.RenderPass switch
+            {
+                RenderPass.Objects => processingDrawerObjects,
+                RenderPass.UI => processingDrawerUI,
+                RenderPass.Final => processingDrawerFinal,
+                _ => throw new NotImplementedException(),
+            };
+
+            var drawer = processingDrawer.UpdateEffectParameters(dc, state.State);
+            if (drawer == null)
+            {
+                return;
+            }
+
+            //Gets the last used target texture
+            var texture = GetTargetTextures(renderTarget.Target)?.FirstOrDefault();
+
+            var graphics = Scene.Game.Graphics;
+            dc.SetRasterizerState(graphics.GetRasterizerCullNone());
+            dc.SetDepthStencilState(graphics.GetDepthStencilNone());
+            dc.SetBlendState(graphics.GetBlendDefault());
+
+            for (int i = 0; i < state.Effects.Count(); i++)
+            {
+                var (effect, targetIndex) = state.Effects.ElementAt(i);
+
+                //Toggles post-processing buffers
+                TogglePostProcessingTargets(targetIndex);
+
+                //Use the next buffer as render target
+                BindPostProcessingTarget(dc, false, Color.Transparent);
+
+                processingDrawer.UpdateEffect(dc, texture, effect);
+                processingDrawer.Draw(dc, drawer);
+
+                //Gets the source texture
+                texture = postProcessingTarget.Textures?.FirstOrDefault();
+            }
+
+            //Set the result render target
+            SetTarget(dc, renderTarget);
+
+            //Draw the result
+            var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
+            processingDrawer.Draw(dc, resultDrawer);
         }
         /// <summary>
         /// Validates the post-processing render pass
@@ -1426,27 +1651,18 @@ namespace Engine.Common
             return false;
         }
         /// <summary>
-        /// Does the post-processing draw
+        /// Toggles post-processing render targets
         /// </summary>
-        /// <param name="renderTarget">Render target</param>
-        /// <param name="renderPass">Render pass</param>
-        /// <param name="passIndex">Pass index</param>
-        protected void DoPostProcessing(RenderTargetParameters renderTarget, RenderPass renderPass, int passIndex)
+        private void TogglePostProcessingTargets(int index)
         {
-            var pass = passLists[passIndex];
-            var dc = pass.DeviceContext;
-            dc.ClearState();
-
-            if (!Scene.Game.BufferManager.SetVertexBuffers(dc))
+            if (index % 2 == 0)
             {
-                return;
+                postProcessingTarget = postProcessingTarget0;
             }
-
-            UpdateGlobalState(dc);
-
-            DrawPostProcessing(dc, renderTarget, renderPass);
-
-            QueueCommand(dc.FinishCommandList($"{nameof(DoPostProcessing)} {renderPass}"), passIndex);
+            else
+            {
+                postProcessingTarget = postProcessingTarget1;
+            }
         }
 
         /// <summary>
@@ -1460,6 +1676,7 @@ namespace Engine.Common
             RefreshGlobalState();
 
             AssignLightShadowMaps();
+            AssignPostProcessTargets();
 
             var graphics = Scene.Game.Graphics;
             var ic = graphics.ImmediateContext;
@@ -1510,12 +1727,16 @@ namespace Engine.Common
                 return;
             }
 
-            //Final post-processing in the result target
-            var rtpp = new RenderTargetParameters
+            var passEffects = postProcessingEffects.Where(ppe => ppe.RenderPass == RenderPass.Final);
+            if (passEffects.Any())
             {
-                Target = source,
-            };
-            DrawPostProcessing(dc, rtpp, RenderPass.Final);
+                //Final post-processing in the result target
+                var rtpp = new RenderTargetParameters
+                {
+                    Target = source,
+                };
+                DrawPostProcessing(dc, rtpp, passEffects.First());
+            }
 
             //Draw from source target to screen
             DrawToScreen(dc, source);
@@ -1535,7 +1756,7 @@ namespace Engine.Common
                 graphics.DefaultDepthStencil, true, true,
                 false);
 
-            if (PlayActions())
+            if (ExecuteParallel(actions))
             {
                 //Execute command list
                 var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
@@ -1565,69 +1786,8 @@ namespace Engine.Common
             var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
             var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
 
-            var drawer = processingDrawer.UpdateEffectCombine(dc, texture1, texture2);
-            processingDrawer.Draw(dc, drawer);
-        }
-        /// <summary>
-        /// Does the post-processing draw
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        /// <param name="renderTarget">Render target</param>
-        /// <param name="renderPass">Render pass</param>
-        private void DrawPostProcessing(IEngineDeviceContext dc, RenderTargetParameters renderTarget, RenderPass renderPass)
-        {
-            if (!ValidateRenderPass(renderPass, out var state))
-            {
-                return;
-            }
-
-            var activeEffects = state.GetEffects();
-            if (!activeEffects.Any())
-            {
-                return;
-            }
-
-            var drawer = processingDrawer.UpdateEffectParameters(dc, state);
-            if (drawer == null)
-            {
-                return;
-            }
-
-            //Gets the last used target texture
-            var texture = GetTargetTextures(renderTarget.Target)?.FirstOrDefault();
-
-            var graphics = Scene.Game.Graphics;
-            dc.SetRasterizerState(graphics.GetRasterizerCullNone());
-            dc.SetDepthStencilState(graphics.GetDepthStencilNone());
-            dc.SetBlendState(graphics.GetBlendDefault());
-
-            for (int i = 0; i < activeEffects.Count(); i++)
-            {
-                var effect = activeEffects.ElementAt(i);
-                if (effect == BuiltInPostProcessEffects.None)
-                {
-                    break;
-                }
-
-                //Toggles post-processing buffers
-                TogglePostProcessingTargets();
-
-                //Use the next buffer as render target
-                BindPostProcessingTarget(dc, false, Color.Transparent);
-
-                processingDrawer.UpdateEffect(dc, texture, effect);
-                processingDrawer.Draw(dc, drawer);
-
-                //Gets the source texture
-                texture = postProcessingTargetA.Textures?.FirstOrDefault();
-            }
-
-            //Set the result render target
-            SetTarget(dc, renderTarget);
-
-            //Draw the result
-            var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
-            processingDrawer.Draw(dc, resultDrawer);
+            var drawer = processingDrawerFinal.UpdateEffectCombine(dc, texture1, texture2);
+            processingDrawerFinal.Draw(dc, drawer);
         }
         /// <summary>
         /// Draws the specified target to screen
@@ -1650,42 +1810,8 @@ namespace Engine.Common
 
             var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
 
-            var drawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
-            processingDrawer.Draw(dc, drawer);
-        }
-
-        /// <inheritdoc/>
-        public void ClearPostProcessingEffects()
-        {
-            PostProcessingObjectsEffects = BuiltInPostProcessState.Empty;
-            PostProcessingUIEffects = BuiltInPostProcessState.Empty;
-            PostProcessingFinalEffects = BuiltInPostProcessState.Empty;
-        }
-
-        /// <summary>
-        /// Queues a action to the action queue
-        /// </summary>
-        /// <param name="action">Action</param>
-        protected void QueueAction(Action action)
-        {
-            actions.Add(action);
-        }
-        /// <summary>
-        /// Plays all the actions in the action queue in parallel
-        /// </summary>
-        private bool PlayActions()
-        {
-            ParallelOptions options = new()
-            {
-                MaxDegreeOfParallelism = Environment.ProcessorCount,
-            };
-
-            var res = Parallel.ForEach(actions, options, action =>
-            {
-                action.Invoke();
-            });
-
-            return res.IsCompleted;
+            var drawer = processingDrawerFinal.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
+            processingDrawerFinal.Draw(dc, drawer);
         }
     }
 }

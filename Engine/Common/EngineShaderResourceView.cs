@@ -41,6 +41,16 @@ namespace Engine.Common
             SetResource(view);
         }
         /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="view">Shader resource view</param>
+        public EngineShaderResourceView(ShaderResourceView1 view)
+        {
+            Name = view?.DebugName ?? throw new ArgumentNullException(nameof(view), "A shader resource must be specified.");
+
+            SetResource(view);
+        }
+        /// <summary>
         /// Destructor
         /// </summary>
         ~EngineShaderResourceView()

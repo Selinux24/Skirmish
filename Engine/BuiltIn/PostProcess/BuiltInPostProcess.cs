@@ -1,7 +1,6 @@
 ﻿
 namespace Engine.BuiltIn.PostProcess
 {
-    using Engine.BuiltIn.Foliage;
     using Engine.Common;
 
     /// <summary>
@@ -20,8 +19,8 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="graphics">Graphics</param>
         public BuiltInPostProcess(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<PostProcessVs>();
-            SetPixelShader<PostProcessPs>();
+            SetVertexShader<PostProcessVs>(false);
+            SetPixelShader<PostProcessPs>(false);
 
             linear = BuiltInShaders.GetSamplerLinear();
         }

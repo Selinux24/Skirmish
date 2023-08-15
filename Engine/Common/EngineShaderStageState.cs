@@ -11,13 +11,18 @@ namespace Engine.Common
     public class EngineShaderStageState<T>
     {
         /// <summary>
+        /// Internal resource list
+        /// </summary>
+        private readonly List<T> resources = new();
+
+        /// <summary>
         /// Start slot of the last call
         /// </summary>
         public int StartSlot { get; set; }
         /// <summary>
         /// Resource list of the last call
         /// </summary>
-        public IEnumerable<T> Resources { get; set; }
+        public IEnumerable<T> Resources { get => resources.AsReadOnly(); }
         /// <summary>
         /// Number of resources of the last call
         /// </summary>
@@ -25,7 +30,7 @@ namespace Engine.Common
         {
             get
             {
-                return Resources?.Count() ?? 0;
+                return resources.Count;
             }
         }
 
@@ -37,7 +42,7 @@ namespace Engine.Common
         /// <returns>Returns true if the resource is in the specified slot since the las call</returns>
         private bool LookupResource(int slot, T resource)
         {
-            int index = Resources?.ToList()?.IndexOf(resource) ?? -1;
+            int index = resources.IndexOf(resource);
             if (index < 0)
             {
                 //The resource is not into the collection
@@ -68,20 +73,20 @@ namespace Engine.Common
                 return true;
             }
 
-            if (Resources?.Any() != true)
+            if (!resources.Any())
             {
                 //Resources is empty
                 return false;
             }
 
-            if (StartSlot == startSlot && Helper.CompareEnumerables(Resources, resourceList))
+            if (StartSlot == startSlot && Helper.CompareEnumerables(resources, resourceList))
             {
                 //Same data
                 return true;
             }
 
             //Look up coincidences
-            int currentMaxSlot = StartSlot + Resources.Count();
+            int currentMaxSlot = StartSlot + resources.Count;
             int newMaxSlot = startSlot + resourceList.Count();
             if (newMaxSlot > currentMaxSlot)
             {
@@ -89,7 +94,7 @@ namespace Engine.Common
             }
 
             //Get range
-            var range = Resources.Skip(startSlot).Take(resourceList.Count());
+            var range = resources.Skip(startSlot).Take(resourceList.Count());
             if (!Helper.CompareEnumerables(range, resourceList))
             {
                 //The specified list is not into the current resource list
@@ -117,30 +122,26 @@ namespace Engine.Common
                 return false;
             }
 
-            if (Resources?.Any() != true)
+            if (!resources.Any())
             {
                 //Empty resource state
                 StartSlot = slot;
-                Resources = new[] { resource };
+                resources.Add(resource);
 
                 return true;
             }
 
             int setSlot = slot + StartSlot;
-            if (setSlot < Resources.Count())
+            if (setSlot < resources.Count)
             {
                 //Update the slot
-                var array = Resources.ToArray();
-                array[setSlot] = resource;
-                Resources = array;
+                resources[setSlot] = resource;
 
                 return true;
             }
 
             //Add space to the new resource
-            var list = Resources.ToList();
-            list.Add(resource);
-            Resources = list;
+            resources.Add(resource);
 
             return true;
         }
@@ -168,15 +169,15 @@ namespace Engine.Common
                 return false;
             }
 
-            if (Resources?.Any() != true)
+            if (!resources.Any())
             {
                 StartSlot = startSlot;
-                Resources = resourceList;
+                resources.AddRange(resourceList);
 
                 return true;
             }
 
-            int currCount = Resources.Count();
+            int currCount = resources.Count;
             int newCount = resourceList.Count();
 
             //Get the range to update
@@ -185,16 +186,18 @@ namespace Engine.Common
                 if (currCount == newCount)
                 {
                     //Same size. Replace resouce list
-                    Resources = resourceList.ToArray();
+                    resources.Clear();
+                    resources.AddRange(resourceList);
 
                     return true;
                 }
 
                 //Resize the resource list (always bigger), copy current resources, then copy new resources
                 T[] tmp = new T[Math.Max(currCount, newCount)];
-                Array.Copy(Resources.ToArray(), 0, tmp, 0, currCount);
+                Array.Copy(resources.ToArray(), 0, tmp, 0, currCount);
                 Array.Copy(resourceList.ToArray(), 0, tmp, 0, newCount);
-                Resources = tmp;
+                resources.Clear();
+                resources.AddRange(tmp);
 
                 return true;
             }
@@ -206,10 +209,11 @@ namespace Engine.Common
                 T[] tmp = new T[newSize];
 
                 //Copy current resources at current start slot
-                Array.Copy(Resources.ToArray(), 0, tmp, StartSlot - minSlot, currCount);
+                Array.Copy(resources.ToArray(), 0, tmp, StartSlot - minSlot, currCount);
                 //Then copy new resources at new start slot
                 Array.Copy(resourceList.ToArray(), 0, tmp, startSlot - minSlot, newCount);
-                Resources = tmp;
+                resources.Clear();
+                resources.AddRange(tmp);
                 //Update start slot to the minimum value
                 StartSlot = minSlot;
 
@@ -223,7 +227,7 @@ namespace Engine.Common
         protected void Clear()
         {
             StartSlot = 0;
-            Resources = Enumerable.Empty<T>();
+            resources.Clear();
         }
     }
 }

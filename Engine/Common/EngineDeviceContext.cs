@@ -64,7 +64,7 @@ namespace Engine.Common
             /// </summary>
             private static readonly ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
 
-            public void SetShaderResource(CommonShaderStage shaderStage, int slot, EngineShaderResourceView resourceView)
+            public void SetShaderResource(IEngineDeviceContext dc, CommonShaderStage shaderStage, int slot, EngineShaderResourceView resourceView)
             {
                 Update(slot, resourceView);
 
@@ -73,7 +73,7 @@ namespace Engine.Common
                 Counters.ShaderResourceSets++;
             }
 
-            public void SetShaderResources(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineShaderResourceView> resourceList)
+            public void SetShaderResources(IEngineDeviceContext dc, CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineShaderResourceView> resourceList)
             {
                 Update(startSlot, resourceList);
 
@@ -646,12 +646,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetVertexShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentVertexShaderResourceViewState.SetShaderResource(deviceContext.VertexShader, slot, resourceView);
+            currentVertexShaderResourceViewState.SetShaderResource(this, deviceContext.VertexShader, slot, resourceView);
         }
         /// <inheritdoc/>
         public void SetVertexShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentVertexShaderResourceViewState.SetShaderResources(deviceContext.VertexShader, startSlot, resourceViews);
+            currentVertexShaderResourceViewState.SetShaderResources(this, deviceContext.VertexShader, startSlot, resourceViews);
         }
         /// <inheritdoc/>
         public void SetVertexShaderSampler(int slot, EngineSamplerState samplerState)
@@ -695,12 +695,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetHullShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentHullShaderResourceViewState.SetShaderResource(deviceContext.HullShader, slot, resourceView);
+            currentHullShaderResourceViewState.SetShaderResource(this, deviceContext.HullShader, slot, resourceView);
         }
         /// <inheritdoc/>
         public void SetHullShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentHullShaderResourceViewState.SetShaderResources(deviceContext.HullShader, startSlot, resourceViews);
+            currentHullShaderResourceViewState.SetShaderResources(this, deviceContext.HullShader, startSlot, resourceViews);
         }
         /// <inheritdoc/>
         public void SetHullShaderSampler(int slot, EngineSamplerState samplerState)
@@ -744,12 +744,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetDomainShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentDomainShaderResourceViewState.SetShaderResource(deviceContext.DomainShader, slot, resourceView);
+            currentDomainShaderResourceViewState.SetShaderResource(this, deviceContext.DomainShader, slot, resourceView);
         }
         /// <inheritdoc/>
         public void SetDomainShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentDomainShaderResourceViewState.SetShaderResources(deviceContext.DomainShader, startSlot, resourceViews);
+            currentDomainShaderResourceViewState.SetShaderResources(this, deviceContext.DomainShader, startSlot, resourceViews);
         }
         /// <inheritdoc/>
         public void SetDomainShaderSampler(int slot, EngineSamplerState samplerState)
@@ -793,12 +793,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetGeometryShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentGeometryShaderResourceViewState.SetShaderResource(deviceContext.GeometryShader, slot, resourceView);
+            currentGeometryShaderResourceViewState.SetShaderResource(this, deviceContext.GeometryShader, slot, resourceView);
         }
         /// <inheritdoc/>
         public void SetGeometryShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentGeometryShaderResourceViewState.SetShaderResources(deviceContext.GeometryShader, startSlot, resourceViews);
+            currentGeometryShaderResourceViewState.SetShaderResources(this, deviceContext.GeometryShader, startSlot, resourceViews);
         }
         /// <inheritdoc/>
         public void SetGeometryShaderSampler(int slot, EngineSamplerState samplerState)
@@ -857,12 +857,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetPixelShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentPixelShaderResourceViewState.SetShaderResource(deviceContext.PixelShader, slot, resourceView);
+            currentPixelShaderResourceViewState.SetShaderResource(this, deviceContext.PixelShader, slot, resourceView);
         }
         /// <inheritdoc/>
         public void SetPixelShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentPixelShaderResourceViewState.SetShaderResources(deviceContext.PixelShader, startSlot, resourceViews);
+            currentPixelShaderResourceViewState.SetShaderResources(this, deviceContext.PixelShader, startSlot, resourceViews);
         }
         /// <inheritdoc/>
         public void SetPixelShaderSampler(int slot, EngineSamplerState samplerState)
@@ -906,12 +906,12 @@ namespace Engine.Common
         /// <inheritdoc/>
         public void SetComputeShaderResourceView(int slot, EngineShaderResourceView resourceView)
         {
-            currentComputeShaderResourceViewState.SetShaderResource(deviceContext.ComputeShader, slot, resourceView);
+            currentComputeShaderResourceViewState.SetShaderResource(this, deviceContext.ComputeShader, slot, resourceView);
         }
         /// <inheritdoc/>
         public void SetComputeShaderResourceViews(int startSlot, IEnumerable<EngineShaderResourceView> resourceViews)
         {
-            currentComputeShaderResourceViewState.SetShaderResources(deviceContext.ComputeShader, startSlot, resourceViews);
+            currentComputeShaderResourceViewState.SetShaderResources(this, deviceContext.ComputeShader, startSlot, resourceViews);
         }
         /// <inheritdoc/>
         public void SetComputeShaderSampler(int slot, EngineSamplerState samplerState)

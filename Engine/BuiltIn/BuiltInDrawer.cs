@@ -4,7 +4,7 @@ using System.Linq;
 namespace Engine.BuiltIn
 {
     using Engine.Common;
-    using SharpDX.DXGI;
+    using Format = SharpDX.DXGI.Format;
 
     /// <summary>
     /// Built-in drawer class
@@ -16,6 +16,14 @@ namespace Engine.BuiltIn
         /// </summary>
         private IBuiltInVertexShader vertexShader = BuiltInShaders.GetVertexShader<EmptyVs>();
         /// <summary>
+        /// Hull shader
+        /// </summary>
+        private IBuiltInHullShader hullShader = BuiltInShaders.GetHullShader<EmptyHs>();
+        /// <summary>
+        /// Domain shader
+        /// </summary>
+        private IBuiltInDomainShader domainShader = BuiltInShaders.GetDomainShader<EmptyDs>();
+        /// <summary>
         /// Geometry shader
         /// </summary>
         private IBuiltInGeometryShader geometryShader = BuiltInShaders.GetGeometryShader<EmptyGs>();
@@ -23,6 +31,10 @@ namespace Engine.BuiltIn
         /// Pixel shader
         /// </summary>
         private IBuiltInPixelShader pixelShader = BuiltInShaders.GetPixelShader<EmptyPs>();
+        /// <summary>
+        /// Compute shader
+        /// </summary>
+        private IBuiltInComputeShader computeShader = BuiltInShaders.GetComputeShader<EmptyCs>();
 
         /// <summary>
         /// Graphics
@@ -42,9 +54,9 @@ namespace Engine.BuiltIn
         /// Sets a vertex shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        public void SetVertexShader<T>() where T : class, IBuiltInVertexShader
+        public void SetVertexShader<T>(bool singleton = true) where T : class, IBuiltInVertexShader
         {
-            vertexShader = BuiltInShaders.GetVertexShader<T>();
+            vertexShader = BuiltInShaders.GetVertexShader<T>(singleton);
         }
         /// <summary>
         /// Sets the vertex shader 
@@ -55,12 +67,44 @@ namespace Engine.BuiltIn
             vertexShader = shader;
         }
         /// <summary>
+        /// Sets a hull shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        public void SetHullShader<T>(bool singleton = true) where T : class, IBuiltInHullShader
+        {
+            hullShader = BuiltInShaders.GetHullShader<T>(singleton);
+        }
+        /// <summary>
+        /// Sets the hull shader 
+        /// </summary>
+        /// <param name="shader">Shader</param>
+        public void SetHullShader(IBuiltInHullShader shader)
+        {
+            hullShader = shader;
+        }
+        /// <summary>
+        /// Sets a domain shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        public void SetDomainShader<T>(bool singleton = true) where T : class, IBuiltInDomainShader
+        {
+            domainShader = BuiltInShaders.GetDomainShader<T>(singleton);
+        }
+        /// <summary>
+        /// Sets the domain shader 
+        /// </summary>
+        /// <param name="shader">Shader</param>
+        public void SetDomainShader(IBuiltInDomainShader shader)
+        {
+            domainShader = shader;
+        }
+        /// <summary>
         /// Sets a geometry shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        public void SetGeometryShader<T>() where T : class, IBuiltInGeometryShader
+        public void SetGeometryShader<T>(bool singleton = true) where T : class, IBuiltInGeometryShader
         {
-            geometryShader = BuiltInShaders.GetGeometryShader<T>();
+            geometryShader = BuiltInShaders.GetGeometryShader<T>(singleton);
         }
         /// <summary>
         /// Sets the geometry shader 
@@ -74,9 +118,9 @@ namespace Engine.BuiltIn
         /// Sets a pixel shader of the specified type
         /// </summary>
         /// <typeparam name="T">Shader type</typeparam>
-        public void SetPixelShader<T>() where T : class, IBuiltInPixelShader
+        public void SetPixelShader<T>(bool singleton = true) where T : class, IBuiltInPixelShader
         {
-            pixelShader = BuiltInShaders.GetPixelShader<T>();
+            pixelShader = BuiltInShaders.GetPixelShader<T>(singleton);
         }
         /// <summary>
         /// Sets the pixel shader 
@@ -85,6 +129,22 @@ namespace Engine.BuiltIn
         public void SetPixelShader(IBuiltInPixelShader shader)
         {
             pixelShader = shader;
+        }
+        /// <summary>
+        /// Sets a compute shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        public void SetComputeShader<T>(bool singleton = true) where T : class, IBuiltInComputeShader
+        {
+            computeShader = BuiltInShaders.GetComputeShader<T>(singleton);
+        }
+        /// <summary>
+        /// Sets the compute shader 
+        /// </summary>
+        /// <param name="shader">Shader</param>
+        public void SetComputeShader(IBuiltInComputeShader shader)
+        {
+            computeShader = shader;
         }
 
         /// <summary>
@@ -101,6 +161,36 @@ namespace Engine.BuiltIn
         public T GetVertexShader<T>() where T : class, IBuiltInVertexShader
         {
             return vertexShader as T;
+        }
+        /// <summary>
+        /// Gets the hull shader
+        /// </summary>
+        public IBuiltInHullShader GetHullShader()
+        {
+            return hullShader;
+        }
+        /// <summary>
+        /// Gets the hull shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        public T GetHullShader<T>() where T : class, IBuiltInHullShader
+        {
+            return hullShader as T;
+        }
+        /// <summary>
+        /// Gets the domain shader
+        /// </summary>
+        public IBuiltInDomainShader GetDomainShader()
+        {
+            return domainShader;
+        }
+        /// <summary>
+        /// Gets the domain shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        public T GetDomainShader<T>() where T : class, IBuiltInDomainShader
+        {
+            return domainShader as T;
         }
         /// <summary>
         /// Gets the geometry shader
@@ -132,6 +222,21 @@ namespace Engine.BuiltIn
         {
             return pixelShader as T;
         }
+        /// <summary>
+        /// Gets the compute shader
+        /// </summary>
+        public IBuiltInComputeShader GetComputeShader()
+        {
+            return computeShader;
+        }
+        /// <summary>
+        /// Gets the compute shader of the specified type
+        /// </summary>
+        /// <typeparam name="T">Shader type</typeparam>
+        public T GetComputeShader<T>() where T : class, IBuiltInComputeShader
+        {
+            return computeShader as T;
+        }
 
         /// <summary>
         /// Prepares the internal shaders in the graphics device
@@ -142,11 +247,20 @@ namespace Engine.BuiltIn
             dc.SetVertexShader(vertexShader?.Shader);
             vertexShader?.SetShaderResources(dc);
 
+            dc.SetHullShader(hullShader?.Shader);
+            hullShader?.SetShaderResources(dc);
+
+            dc.SetDomainShader(domainShader?.Shader);
+            domainShader?.SetShaderResources(dc);
+
             dc.SetGeometryShader(geometryShader?.Shader);
             geometryShader?.SetShaderResources(dc);
 
             dc.SetPixelShader(pixelShader?.Shader);
             pixelShader?.SetShaderResources(dc);
+
+            dc.SetComputeShader(computeShader?.Shader);
+            computeShader?.SetShaderResources(dc);
         }
 
         /// <inheritdoc/>

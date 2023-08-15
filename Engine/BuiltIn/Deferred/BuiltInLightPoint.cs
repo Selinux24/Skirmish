@@ -49,8 +49,8 @@ namespace Engine.BuiltIn.Deferred
         /// <param name="graphics">Graphics</param>
         public BuiltInLightPoint(Graphics graphics) : base(graphics)
         {
-            SetVertexShader<DeferredLightVs>();
-            SetPixelShader<DeferredLightPointPs>();
+            SetVertexShader<DeferredLightVs>(false);
+            SetPixelShader<DeferredLightPointPs>(false);
 
             pointSampler = BuiltInShaders.GetSamplerPoint();
         }

@@ -163,7 +163,7 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         public IEnumerable<BuiltInPostProcessEffects> GetEffects()
         {
-            return effects.ToArray();
+            return effects.Where(e => e != BuiltInPostProcessEffects.None).ToArray();
         }
 
         /// <summary>

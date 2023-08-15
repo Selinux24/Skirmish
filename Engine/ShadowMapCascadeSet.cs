@@ -294,27 +294,26 @@ namespace Engine
         /// <param name="cascades">Cascade set</param>
         public void UpdateEnvironment(int mapSize, float[] cascades)
         {
-            if (shadowMapSize != mapSize)
+            shadowMapSize = mapSize;
+
+            if (Helper.CompareEnumerables(shadowCascades, cascades))
             {
-                shadowMapSize = mapSize;
+                return;
             }
 
-            if (!Helper.CompareEnumerables(shadowCascades, cascades))
-            {
-                shadowCascades = cascades;
+            shadowCascades = cascades;
 
-                TotalCascades = cascades.Length;
+            TotalCascades = cascades.Length;
 
-                var ranges = new List<float>(cascades);
-                ranges.Insert(0, 1);
-                cascadeRanges = ranges.ToArray();
+            var ranges = new List<float>(cascades);
+            ranges.Insert(0, 1);
+            cascadeRanges = ranges.ToArray();
 
-                cascadeTotalRange = ranges[^1];
+            cascadeTotalRange = ranges[^1];
 
-                cascadeBoundCenter = Helper.CreateArray(TotalCascades, Vector3.Zero);
-                cascadeBoundRadius = Helper.CreateArray(TotalCascades, 0.0f);
-                worldToCascadeProj = Helper.CreateArray(TotalCascades, Matrix.Identity);
-            }
+            cascadeBoundCenter = Helper.CreateArray(TotalCascades, Vector3.Zero);
+            cascadeBoundRadius = Helper.CreateArray(TotalCascades, 0.0f);
+            worldToCascadeProj = Helper.CreateArray(TotalCascades, Matrix.Identity);
         }
 
         /// <summary>

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
+using System.Collections.Generic;
 
 namespace Engine
 {
@@ -40,7 +41,7 @@ namespace Engine
         /// <summary>
         /// Culled objects dictionary
         /// </summary>
-        protected Dictionary<ICullable, List<CullData>> Objects = new();
+        protected ConcurrentDictionary<ICullable, List<CullData>> Objects = new();
 
         /// <summary>
         /// Performs cull test in the object list against the culling volume
@@ -77,12 +78,15 @@ namespace Engine
         /// <param name="item">Object</param>
         private void SetCullValue(CullData value, int index, ICullable item, bool force)
         {
+            List<CullData> values;
             if (!Objects.ContainsKey(item))
             {
-                Objects.Add(item, new List<CullData>(index + 1));
+                values = Objects.AddOrUpdate(item, new List<CullData>(index + 1), (k, v) => v);
             }
-
-            var values = Objects[item];
+            else if (!Objects.TryGetValue(item, out values))
+            {
+                return;
+            }
 
             if (values.Count <= index)
             {

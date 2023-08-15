@@ -22,6 +22,14 @@ namespace Engine
         /// Index buffer descriptor
         /// </summary>
         private BufferDescriptor indexBuffer = null;
+        /// <summary>
+        /// Target combine drawer
+        /// </summary>
+        private BuiltInCombine builtInCombine = null;
+        /// <summary>
+        /// Post-process effect drawer
+        /// </summary>
+        private BuiltInPostProcess builtInPostProcess = null;
 
         /// <summary>
         /// Constructor
@@ -53,29 +61,29 @@ namespace Engine
         /// <inheritdoc/>
         public IBuiltInDrawer UpdateEffectCombine(IEngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
-            var drawer = BuiltInShaders.GetDrawer<BuiltInCombine>();
+            builtInCombine ??= BuiltInShaders.GetDrawer<BuiltInCombine>(false);
 
-            drawer.Update(texture1, texture2);
+            builtInCombine.Update(texture1, texture2);
 
-            return drawer;
+            return builtInCombine;
         }
         /// <inheritdoc/>
         public IBuiltInDrawer UpdateEffectParameters(IEngineDeviceContext dc, BuiltInPostProcessState state)
         {
-            var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
+            builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
 
-            drawer.UpdatePass(dc, state);
+            builtInPostProcess.UpdatePass(dc, state);
 
-            return drawer;
+            return builtInPostProcess;
         }
         /// <inheritdoc/>
         public IBuiltInDrawer UpdateEffect(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
         {
-            var drawer = BuiltInShaders.GetDrawer<BuiltInPostProcess>();
+            builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
 
-            drawer.UpdateEffect(dc, sourceTexture, effect);
+            builtInPostProcess.UpdateEffect(dc, sourceTexture, effect);
 
-            return drawer;
+            return builtInPostProcess;
         }
         /// <inheritdoc/>
         public void Draw(IEngineDeviceContext dc, IBuiltInDrawer drawer)

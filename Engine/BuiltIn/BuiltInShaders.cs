@@ -24,6 +24,14 @@ namespace Engine.BuiltIn
         /// </summary>
         private static readonly List<IBuiltInVertexShader> vertexShaders = new();
         /// <summary>
+        /// Hull shader list
+        /// </summary>
+        private static readonly List<IBuiltInHullShader> hullShaders = new();
+        /// <summary>
+        /// Domain shader list
+        /// </summary>
+        private static readonly List<IBuiltInDomainShader> domainShaders = new();
+        /// <summary>
         /// Geometry shader list
         /// </summary>
         private static readonly List<IBuiltInGeometryShader> geometryShaders = new();
@@ -31,6 +39,10 @@ namespace Engine.BuiltIn
         /// Pixel shader list
         /// </summary>
         private static readonly List<IBuiltInPixelShader> pixelShaders = new();
+        /// <summary>
+        /// Compute shader list
+        /// </summary>
+        private static readonly List<IBuiltInComputeShader> computeShaders = new();
         /// <summary>
         /// Drawer list
         /// </summary>
@@ -93,12 +105,20 @@ namespace Engine.BuiltIn
         {
             constantBuffers.ForEach(cb => cb?.Dispose());
             constantBuffers.Clear();
+
             vertexShaders.ForEach(vs => vs?.Dispose());
             vertexShaders.Clear();
+            hullShaders.ForEach(vs => vs?.Dispose());
+            hullShaders.Clear();
+            domainShaders.ForEach(vs => vs?.Dispose());
+            domainShaders.Clear();
             geometryShaders.ForEach(gs => gs?.Dispose());
             geometryShaders.Clear();
             pixelShaders.ForEach(ps => ps?.Dispose());
             pixelShaders.Clear();
+            computeShaders.ForEach(ps => ps?.Dispose());
+            computeShaders.Clear();
+
             drawers.OfType<IDisposable>().ToList().ForEach(dr => dr?.Dispose());
             drawers.Clear();
 
@@ -118,8 +138,14 @@ namespace Engine.BuiltIn
         /// Gets or creates a constant buffer for the specified data type
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static EngineConstantBuffer<T> GetConstantBuffer<T>() where T : struct, IBufferData
+        /// <param name="singleton">Use one instance</param>
+        public static EngineConstantBuffer<T> GetConstantBuffer<T>(bool singleton = true) where T : struct, IBufferData
         {
+            if (!singleton)
+            {
+                return new EngineConstantBuffer<T>(graphics, nameof(BuiltInShaders) + "." + typeof(T).Name);
+            }
+
             EngineConstantBuffer<T> cb = constantBuffers.OfType<EngineConstantBuffer<T>>().FirstOrDefault();
             if (cb != null)
             {
@@ -135,8 +161,14 @@ namespace Engine.BuiltIn
         /// Gets or creates a built-in vertex shader
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static T GetVertexShader<T>() where T : IBuiltInVertexShader
+        /// <param name="singleton">Use one instance</param>
+        public static T GetVertexShader<T>(bool singleton = true) where T : IBuiltInVertexShader
         {
+            if (!singleton)
+            {
+                return (T)Activator.CreateInstance(typeof(T), graphics);
+            }
+
             T vs = vertexShaders.OfType<T>().FirstOrDefault();
             if (vs != null)
             {
@@ -149,11 +181,63 @@ namespace Engine.BuiltIn
             return vs;
         }
         /// <summary>
+        /// Gets or creates a built-in hull shader
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="singleton">Use one instance</param>
+        public static T GetHullShader<T>(bool singleton = true) where T : IBuiltInHullShader
+        {
+            if (!singleton)
+            {
+                return (T)Activator.CreateInstance(typeof(T), graphics);
+            }
+
+            T hs = hullShaders.OfType<T>().FirstOrDefault();
+            if (hs != null)
+            {
+                return hs;
+            }
+
+            hs = (T)Activator.CreateInstance(typeof(T), graphics);
+            hullShaders.Add(hs);
+
+            return hs;
+        }
+        /// <summary>
+        /// Gets or creates a built-in domain shader
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="singleton">Use one instance</param>
+        public static T GetDomainShader<T>(bool singleton = true) where T : IBuiltInDomainShader
+        {
+            if (!singleton)
+            {
+                return (T)Activator.CreateInstance(typeof(T), graphics);
+            }
+
+            T ds = domainShaders.OfType<T>().FirstOrDefault();
+            if (ds != null)
+            {
+                return ds;
+            }
+
+            ds = (T)Activator.CreateInstance(typeof(T), graphics);
+            domainShaders.Add(ds);
+
+            return ds;
+        }
+        /// <summary>
         /// Gets or creates a built-in geometry shader
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static T GetGeometryShader<T>() where T : IBuiltInGeometryShader
+        /// <param name="singleton">Use one instance</param>
+        public static T GetGeometryShader<T>(bool singleton = true) where T : IBuiltInGeometryShader
         {
+            if (!singleton)
+            {
+                return (T)Activator.CreateInstance(typeof(T), graphics);
+            }
+
             T gs = geometryShaders.OfType<T>().FirstOrDefault();
             if (gs != null)
             {
@@ -169,8 +253,14 @@ namespace Engine.BuiltIn
         /// Gets or creates a built-in pixel shader
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        public static T GetPixelShader<T>() where T : IBuiltInPixelShader
+        /// <param name="singleton">Use one instance</param>
+        public static T GetPixelShader<T>(bool singleton = true) where T : IBuiltInPixelShader
         {
+            if (!singleton)
+            {
+                return (T)Activator.CreateInstance(typeof(T), graphics);
+            }
+
             T ps = pixelShaders.OfType<T>().FirstOrDefault();
             if (ps != null)
             {
@@ -183,11 +273,40 @@ namespace Engine.BuiltIn
             return ps;
         }
         /// <summary>
+        /// Gets or creates a built-in compute shader
+        /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
+        /// <param name="singleton">Use one instance</param>
+        public static T GetComputeShader<T>(bool singleton = true) where T : IBuiltInComputeShader
+        {
+            if (!singleton)
+            {
+                return (T)Activator.CreateInstance(typeof(T), graphics);
+            }
+
+            T cs = computeShaders.OfType<T>().FirstOrDefault();
+            if (cs != null)
+            {
+                return cs;
+            }
+
+            cs = (T)Activator.CreateInstance(typeof(T), graphics);
+            computeShaders.Add(cs);
+
+            return cs;
+        }
+        /// <summary>
         /// Gets or creates a built-in drawer
         /// </summary>
         /// <typeparam name="T">Drawer type</typeparam>
-        public static T GetDrawer<T>() where T : IBuiltInDrawer
+        /// <param name="singleton">Use one instance</param>
+        public static T GetDrawer<T>(bool singleton = true) where T : IBuiltInDrawer
         {
+            if (!singleton)
+            {
+                return (T)Activator.CreateInstance(typeof(T), graphics);
+            }
+
             T dr = drawers.OfType<T>().FirstOrDefault();
             if (dr != null)
             {

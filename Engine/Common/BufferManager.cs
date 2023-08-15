@@ -113,13 +113,9 @@ namespace Engine.Common
         /// </summary>
         private readonly List<BufferManagerIndices> indexBufferDescriptors = new();
         /// <summary>
-        /// Input layouts by technique
-        /// </summary>
-        private readonly Dictionary<EngineEffectTechnique, EngineInputLayout> techniqueInputLayouts = new();
-        /// <summary>
         /// Input layouts by vertex shaders
         /// </summary>
-        private readonly Dictionary<InputAssemblerKey, EngineInputLayout> vertexShadersInputLayouts = new();
+        private readonly ConcurrentDictionary<InputAssemblerKey, EngineInputLayout> vertexShadersInputLayouts = new();
         /// <summary>
         /// Allocating buffers flag
         /// </summary>
@@ -214,9 +210,6 @@ namespace Engine.Common
 
                 indexBuffers.ForEach(b => b?.Dispose());
                 indexBuffers.Clear();
-
-                techniqueInputLayouts.Values.ToList().ForEach(il => il?.Dispose());
-                techniqueInputLayouts.Clear();
             }
         }
 
@@ -908,16 +901,21 @@ namespace Engine.Common
                 Vertices = vertexBufferDescriptor,
             };
 
+            EngineInputLayout layout;
             if (!vertexShadersInputLayouts.ContainsKey(key))
             {
                 // The vertex shader defines the input vertex data type
                 var signature = vertexShader.GetShaderBytecode();
                 var inputLayout = game.Graphics.CreateInputLayout(descriptor.Id, signature, vertexBufferDescriptor, instanced);
 
-                vertexShadersInputLayouts.Add(key, inputLayout);
+                layout = vertexShadersInputLayouts.AddOrUpdate(key, inputLayout, (k, v) => v);
+            }
+            else if (!vertexShadersInputLayouts.TryGetValue(key, out layout))
+            {
+                return false;
             }
 
-            dc.IAInputLayout = vertexShadersInputLayouts[key];
+            dc.IAInputLayout = layout;
             dc.IAPrimitiveTopology = topology;
             return true;
         }
