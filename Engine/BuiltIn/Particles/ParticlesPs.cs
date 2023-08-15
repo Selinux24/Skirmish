@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Particles
     /// <summary>
     /// CPU particles pixel shader
     /// </summary>
-    public class ParticlesPs : IBuiltInPixelShader
+    public class ParticlesPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per frame constant buffer

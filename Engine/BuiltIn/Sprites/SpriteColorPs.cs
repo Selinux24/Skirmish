@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Sprites
     /// <summary>
     /// Color sprite pixel shader
     /// </summary>
-    public class SpriteColorPs : IBuiltInPixelShader
+    public class SpriteColorPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per sprite constant buffer

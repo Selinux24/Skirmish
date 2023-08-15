@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Position normal texture tangent pixel shader
     /// </summary>
-    public class PositionNormalTextureTangentPs : IBuiltInPixelShader
+    public class PositionNormalTextureTangentPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Diffuse map resource view

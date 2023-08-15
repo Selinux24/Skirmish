@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Deferred point light pixel shader
     /// </summary>
-    public class DeferredLightPointPs : IBuiltInPixelShader
+    public class DeferredLightPointPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Light constant buffer

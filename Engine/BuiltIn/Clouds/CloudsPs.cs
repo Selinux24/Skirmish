@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Clouds
     /// <summary>
     /// Clouds pixel shader
     /// </summary>
-    public class CloudsPs : IBuiltInPixelShader
+    public class CloudsPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per cloud constant buffer

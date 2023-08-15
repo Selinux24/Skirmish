@@ -10,7 +10,7 @@ namespace Engine.BuiltIn.Cubemap
     /// <summary>
     /// Skymap pixel shader
     /// </summary>
-    public class SkymapPs : IBuiltInPixelShader
+    public class SkymapPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per sky constant buffer

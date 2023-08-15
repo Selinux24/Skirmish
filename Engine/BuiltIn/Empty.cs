@@ -5,12 +5,12 @@ namespace Engine.BuiltIn
     using Engine.Common;
 
     /// <summary>
-    /// Empty compute shader
+    /// Empty shader
     /// </summary>
-    public class EmptyCs : IBuiltInComputeShader
+    public class Empty<T> : IBuiltInShader<T> where T : class, IDisposable
     {
         /// <inheritdoc/>
-        public EngineComputeShader Shader { get; private set; }
+        public T Shader { get; private set; }
 
         /// <summary>
         /// Graphics instance
@@ -21,7 +21,7 @@ namespace Engine.BuiltIn
         /// Constructor
         /// </summary>
         /// <param name="graphics">Graphics device</param>
-        public EmptyCs(Graphics graphics)
+        public Empty(Graphics graphics)
         {
             Graphics = graphics;
             Shader = null;
@@ -29,7 +29,7 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Destructor
         /// </summary>
-        ~EmptyCs()
+        ~Empty()
         {
             // Finalizer calls Dispose(false)  
             Dispose(false);

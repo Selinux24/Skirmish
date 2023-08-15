@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Shadows
     /// <summary>
     /// Position vertex shader
     /// </summary>
-    public class PositionVs : IBuiltInVertexShader
+    public class PositionVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer

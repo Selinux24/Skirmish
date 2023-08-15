@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.PostProcess
     /// <summary>
     /// Post-process vertex shader
     /// </summary>
-    public class PostProcessVs : IBuiltInVertexShader
+    public class PostProcessVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

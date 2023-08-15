@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Common
     /// <summary>
     /// Position color instanced vertex shader
     /// </summary>
-    public class PositionColorVsI : IBuiltInVertexShader
+    public class PositionColorVsI : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per material constant buffer

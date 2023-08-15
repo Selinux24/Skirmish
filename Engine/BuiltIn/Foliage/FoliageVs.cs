@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Foliage
     /// <summary>
     /// Foliage vertex shader
     /// </summary>
-    public class FoliageVs : IBuiltInVertexShader
+    public class FoliageVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per material constant buffer

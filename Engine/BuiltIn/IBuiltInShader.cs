@@ -5,14 +5,14 @@ namespace Engine.BuiltIn
     using Engine.Common;
 
     /// <summary>
-    /// Built-in geometry shader interface
+    /// Built-in shader interface
     /// </summary>
-    public interface IBuiltInGeometryShader : IDisposable
+    public interface IBuiltInShader<T> : IDisposable where T : class, IDisposable
     {
         /// <summary>
-        /// Geometry shader
+        /// Shader
         /// </summary>
-        EngineGeometryShader Shader { get; }
+        T Shader { get; }
 
         /// <summary>
         /// Sets the shader resources

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Foliage
     /// <summary>
     /// Foliage geometry shader
     /// </summary>
-    public class FoliageGS : IBuiltInGeometryShader
+    public class FoliageGS : IBuiltInShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per patch constant buffer

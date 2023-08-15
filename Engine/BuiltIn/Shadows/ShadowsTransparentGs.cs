@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Shadows
     /// <summary>
     /// Point geometry shader
     /// </summary>
-    public class ShadowsTransparentGs : IBuiltInGeometryShader
+    public class ShadowsTransparentGs : IBuiltInShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per light constant buffer

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Sprites
     /// <summary>
     /// Tetxure sprite vertex shader
     /// </summary>
-    public class SpriteTextureVs : IBuiltInVertexShader
+    public class SpriteTextureVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per sprite constant buffer

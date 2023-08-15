@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Decals
     /// <summary>
     /// Decals vertex shader
     /// </summary>
-    public class DecalsVs : IBuiltInVertexShader
+    public class DecalsVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per decal constant buffer

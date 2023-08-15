@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Common
     /// <summary>
     /// Position normal color vertex shader
     /// </summary>
-    public class PositionNormalColorVs : IBuiltInVertexShader
+    public class PositionNormalColorVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer

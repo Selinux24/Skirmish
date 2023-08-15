@@ -5,13 +5,13 @@ using SharpDX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Concurrent;
+using System.Threading.Tasks;
 
 namespace Engine.Common
 {
     using Engine.BuiltIn;
     using Engine.BuiltIn.PostProcess;
-    using System.Collections.Concurrent;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Base scene renderer
@@ -1617,38 +1617,6 @@ namespace Engine.Common
             //Draw the result
             var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
             processingDrawer.Draw(dc, resultDrawer);
-        }
-        /// <summary>
-        /// Validates the post-processing render pass
-        /// </summary>
-        /// <param name="renderPass">Render pass</param>
-        /// <param name="state">Gets the render pass state</param>
-        private bool ValidateRenderPass(RenderPass renderPass, out BuiltInPostProcessState state)
-        {
-            if (renderPass == RenderPass.Objects && PostProcessingObjectsEffects.Ready)
-            {
-                state = PostProcessingObjectsEffects;
-
-                return true;
-            }
-
-            if (renderPass == RenderPass.UI && PostProcessingUIEffects.Ready)
-            {
-                state = PostProcessingUIEffects;
-
-                return true;
-            }
-
-            if (renderPass == RenderPass.Final && PostProcessingFinalEffects.Ready)
-            {
-                state = PostProcessingFinalEffects;
-
-                return true;
-            }
-
-            state = null;
-
-            return false;
         }
         /// <summary>
         /// Toggles post-processing render targets

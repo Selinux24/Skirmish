@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Billboard
     /// <summary>
     /// Billboards vertex shader
     /// </summary>
-    public class BillboardVs : IBuiltInVertexShader
+    public class BillboardVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per billboard constant buffer

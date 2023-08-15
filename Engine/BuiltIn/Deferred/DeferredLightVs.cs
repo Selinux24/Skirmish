@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Deferred light vertex shader
     /// </summary>
-    public class DeferredLightVs : IBuiltInVertexShader
+    public class DeferredLightVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Light constant buffer

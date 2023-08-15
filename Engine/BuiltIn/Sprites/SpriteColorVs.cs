@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Sprites
     /// <summary>
     /// Color sprite vertex shader
     /// </summary>
-    public class SpriteColorVs : IBuiltInVertexShader
+    public class SpriteColorVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per sprite constant buffer

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Deferred light vertex shader
     /// </summary>
-    public class DeferredLightOrthoVs : IBuiltInVertexShader
+    public class DeferredLightOrthoVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

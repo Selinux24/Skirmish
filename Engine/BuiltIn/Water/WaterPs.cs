@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Water
     /// <summary>
     /// Water pixel shader
     /// </summary>
-    public class WaterPs : IBuiltInPixelShader
+    public class WaterPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per water constant buffer

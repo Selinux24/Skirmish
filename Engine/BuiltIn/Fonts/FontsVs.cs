@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Fonts
     /// <summary>
     /// Fonts vertex shader
     /// </summary>
-    public class FontsVs : IBuiltInVertexShader
+    public class FontsVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per text constant buffer

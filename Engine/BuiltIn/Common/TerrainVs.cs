@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Common
     /// <summary>
     /// Terrain vertex shader
     /// </summary>
-    public class TerrainVs : IBuiltInVertexShader
+    public class TerrainVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per terrain constant buffer

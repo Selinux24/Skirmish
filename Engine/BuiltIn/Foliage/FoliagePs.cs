@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Foliage
     /// <summary>
     /// Foliage pixel shader
     /// </summary>
-    public class FoliagePs : IBuiltInPixelShader
+    public class FoliagePs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per material constant buffer

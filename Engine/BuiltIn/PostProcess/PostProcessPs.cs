@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.PostProcess
     /// <summary>
     /// Post-process pixel shader
     /// </summary>
-    public class PostProcessPs : IBuiltInPixelShader
+    public class PostProcessPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per pass constant buffer

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.SkyScattering
     /// <summary>
     /// Sky scatering vertex shader
     /// </summary>
-    public class SkyScatteringVs : IBuiltInVertexShader
+    public class SkyScatteringVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per object constant buffer

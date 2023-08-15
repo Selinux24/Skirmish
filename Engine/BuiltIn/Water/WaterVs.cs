@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Water
     /// <summary>
     /// Water vertex shader
     /// </summary>
-    public class WaterVs : IBuiltInVertexShader
+    public class WaterVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

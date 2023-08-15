@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Particles
     /// <summary>
     /// Stream-out GPU particles geometry shader
     /// </summary>
-    public class StreamOutGS : IBuiltInGeometryShader
+    public class StreamOutGS : IBuiltInShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per stream out pass constant buffer

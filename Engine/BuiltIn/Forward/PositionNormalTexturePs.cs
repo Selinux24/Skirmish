@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Forward
     /// <summary>
     /// Position normal texture pixel shader
     /// </summary>
-    public class PositionNormalTexturePs : IBuiltInPixelShader
+    public class PositionNormalTexturePs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Diffuse map resource view

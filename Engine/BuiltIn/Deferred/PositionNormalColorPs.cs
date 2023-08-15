@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Position normal color pixel shader
     /// </summary>
-    public class PositionNormalColorPs : IBuiltInPixelShader
+    public class PositionNormalColorPs : IBuiltInShader<EnginePixelShader>
     {
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }

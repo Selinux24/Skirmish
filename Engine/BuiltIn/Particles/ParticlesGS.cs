@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Particles
     /// <summary>
     /// CPU particles geometry shader
     /// </summary>
-    public class ParticlesGS : IBuiltInGeometryShader
+    public class ParticlesGS : IBuiltInShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per emitter constant buffer

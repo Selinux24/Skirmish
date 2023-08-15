@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Clouds
     /// <summary>
     /// Clouds vertex shader
     /// </summary>
-    public class CloudsVs : IBuiltInVertexShader
+    public class CloudsVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

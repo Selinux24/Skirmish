@@ -21,7 +21,7 @@ namespace Engine.Common
             /// <summary>
             /// Shader
             /// </summary>
-            public IEngineVertexShader Shader;
+            public IEngineShader Shader;
             /// <summary>
             /// Vertices
             /// </summary>
@@ -870,7 +870,7 @@ namespace Engine.Common
         /// <param name="descriptor">Buffer descriptor</param>
         /// <param name="topology">Topology</param>
         /// <param name="instanced">Use instancig data</param>
-        public bool SetInputAssembler(IEngineDeviceContext dc, IEngineVertexShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
+        public bool SetInputAssembler(IEngineDeviceContext dc, IEngineShader vertexShader, BufferDescriptor descriptor, Topology topology, bool instanced)
         {
             if (descriptor == null)
             {

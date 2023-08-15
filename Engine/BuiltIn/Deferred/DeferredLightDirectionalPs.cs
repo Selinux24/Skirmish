@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Deferred directional light pixel shader
     /// </summary>
-    public class DeferredLightDirectionalPs : IBuiltInPixelShader
+    public class DeferredLightDirectionalPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Light constant buffer

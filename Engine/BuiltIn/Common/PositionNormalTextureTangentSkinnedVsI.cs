@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Common
     /// <summary>
     /// Skinned position normal texture tangent instanced vertex shader
     /// </summary>
-    public class PositionNormalTextureTangentSkinnedVsI : IBuiltInVertexShader
+    public class PositionNormalTextureTangentSkinnedVsI : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per material constant buffer

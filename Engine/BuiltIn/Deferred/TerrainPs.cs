@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Terrain pixel shader
     /// </summary>
-    public class TerrainPs : IBuiltInPixelShader
+    public class TerrainPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per terrain constant buffer

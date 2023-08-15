@@ -11,7 +11,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Deferred composer pixel shader
     /// </summary>
-    public class DeferredComposerPs : IBuiltInPixelShader
+    public class DeferredComposerPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Deferred buffer

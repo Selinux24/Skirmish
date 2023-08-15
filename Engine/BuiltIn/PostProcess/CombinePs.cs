@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.PostProcess
     /// <summary>
     /// Combine pixel shader
     /// </summary>
-    public class CombinePs : IBuiltInPixelShader
+    public class CombinePs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Texture 1 resource view

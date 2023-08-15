@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Deferred stencil vertex shader
     /// </summary>
-    public class DeferredStencilVs : IBuiltInVertexShader
+    public class DeferredStencilVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

@@ -22,27 +22,27 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Vertex shader list
         /// </summary>
-        private static readonly List<IBuiltInVertexShader> vertexShaders = new();
+        private static readonly List<IBuiltInShader<EngineVertexShader>> vertexShaders = new();
         /// <summary>
         /// Hull shader list
         /// </summary>
-        private static readonly List<IBuiltInHullShader> hullShaders = new();
+        private static readonly List<IBuiltInShader<EngineHullShader>> hullShaders = new();
         /// <summary>
         /// Domain shader list
         /// </summary>
-        private static readonly List<IBuiltInDomainShader> domainShaders = new();
+        private static readonly List<IBuiltInShader<EngineDomainShader>> domainShaders = new();
         /// <summary>
         /// Geometry shader list
         /// </summary>
-        private static readonly List<IBuiltInGeometryShader> geometryShaders = new();
+        private static readonly List<IBuiltInShader<EngineGeometryShader>> geometryShaders = new();
         /// <summary>
         /// Pixel shader list
         /// </summary>
-        private static readonly List<IBuiltInPixelShader> pixelShaders = new();
+        private static readonly List<IBuiltInShader<EnginePixelShader>> pixelShaders = new();
         /// <summary>
         /// Compute shader list
         /// </summary>
-        private static readonly List<IBuiltInComputeShader> computeShaders = new();
+        private static readonly List<IBuiltInShader<EngineComputeShader>> computeShaders = new();
         /// <summary>
         /// Drawer list
         /// </summary>
@@ -162,7 +162,7 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetVertexShader<T>(bool singleton = true) where T : IBuiltInVertexShader
+        public static T GetVertexShader<T>(bool singleton = true) where T : IBuiltInShader<EngineVertexShader>
         {
             if (!singleton)
             {
@@ -185,7 +185,7 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetHullShader<T>(bool singleton = true) where T : IBuiltInHullShader
+        public static T GetHullShader<T>(bool singleton = true) where T : IBuiltInShader<EngineHullShader>
         {
             if (!singleton)
             {
@@ -208,7 +208,7 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetDomainShader<T>(bool singleton = true) where T : IBuiltInDomainShader
+        public static T GetDomainShader<T>(bool singleton = true) where T : IBuiltInShader<EngineDomainShader>
         {
             if (!singleton)
             {
@@ -231,7 +231,7 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetGeometryShader<T>(bool singleton = true) where T : IBuiltInGeometryShader
+        public static T GetGeometryShader<T>(bool singleton = true) where T : IBuiltInShader<EngineGeometryShader>
         {
             if (!singleton)
             {
@@ -254,7 +254,7 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetPixelShader<T>(bool singleton = true) where T : IBuiltInPixelShader
+        public static T GetPixelShader<T>(bool singleton = true) where T : IBuiltInShader<EnginePixelShader>
         {
             if (!singleton)
             {
@@ -277,7 +277,7 @@ namespace Engine.BuiltIn
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
         /// <param name="singleton">Use one instance</param>
-        public static T GetComputeShader<T>(bool singleton = true) where T : IBuiltInComputeShader
+        public static T GetComputeShader<T>(bool singleton = true) where T : IBuiltInShader<EngineComputeShader>
         {
             if (!singleton)
             {

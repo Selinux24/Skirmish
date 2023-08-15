@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Particles
     /// <summary>
     /// CPU particles vertex shader
     /// </summary>
-    public class ParticlesVs : IBuiltInVertexShader
+    public class ParticlesVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per emitter constant buffer

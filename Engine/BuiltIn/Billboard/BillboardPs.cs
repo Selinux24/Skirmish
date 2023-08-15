@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Billboard
     /// <summary>
     /// Billboards pixel shader
     /// </summary>
-    public class BillboardPs : IBuiltInPixelShader
+    public class BillboardPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per billboard constant buffer

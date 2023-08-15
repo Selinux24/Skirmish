@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Billboard
     /// <summary>
     /// Billboards geometry shader
     /// </summary>
-    public class BillboardGS : IBuiltInGeometryShader
+    public class BillboardGS : IBuiltInShader<EngineGeometryShader>
     {
         /// <summary>
         /// Per billboard constant buffer

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Forward
     /// <summary>
     /// Position color pixel shader
     /// </summary>
-    public class PositionColorPs : IBuiltInPixelShader
+    public class PositionColorPs : IBuiltInShader<EnginePixelShader>
     {
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }

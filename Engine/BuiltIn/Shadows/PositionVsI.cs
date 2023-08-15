@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Shadows
     /// <summary>
     /// Position instanced vertex shader
     /// </summary>
-    public class PositionVsI : IBuiltInVertexShader
+    public class PositionVsI : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

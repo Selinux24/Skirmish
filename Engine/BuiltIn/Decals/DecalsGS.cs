@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Decals
     /// <summary>
     /// Decals geometry shader
     /// </summary>
-    public class DecalsGS : IBuiltInGeometryShader
+    public class DecalsGS : IBuiltInShader<EngineGeometryShader>
     {
         /// <summary>
         /// Graphics instance

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Forward
     /// <summary>
     /// Position texture pixel shader
     /// </summary>
-    public class PositionTexturePs : IBuiltInPixelShader
+    public class PositionTexturePs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per frame constant buffer

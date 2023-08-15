@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Sprites
     /// <summary>
     /// Texture sprite pixel shader
     /// </summary>
-    public class SpriteTexturePs : IBuiltInPixelShader
+    public class SpriteTexturePs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per sprite constant buffer

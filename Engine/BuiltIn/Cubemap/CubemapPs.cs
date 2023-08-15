@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Cubemap
     /// <summary>
     /// Cubemap pixel shader
     /// </summary>
-    public class CubemapPs : IBuiltInPixelShader
+    public class CubemapPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Cubemap resource view

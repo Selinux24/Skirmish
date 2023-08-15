@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Common
     /// <summary>
     /// Skinned position texture vertex shader
     /// </summary>
-    public class PositionTextureSkinnedVs : IBuiltInVertexShader
+    public class PositionTextureSkinnedVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer

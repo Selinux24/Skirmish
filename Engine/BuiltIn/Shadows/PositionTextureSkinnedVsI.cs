@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Shadows
     /// <summary>
     /// Skinned position texture instanced vertex shader
     /// </summary>
-    public class PositionTextureSkinnedVsI : IBuiltInVertexShader
+    public class PositionTextureSkinnedVsI : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

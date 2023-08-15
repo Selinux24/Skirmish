@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Common
     /// <summary>
     /// Position texture vertex shader
     /// </summary>
-    public class PositionTextureVs : IBuiltInVertexShader
+    public class PositionTextureVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Per mesh constant buffer

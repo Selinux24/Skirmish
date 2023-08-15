@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Shadows
     /// <summary>
     /// Shadow transparent texture pixel shader
     /// </summary>
-    public class TransparentPs : IBuiltInPixelShader
+    public class TransparentPs : IBuiltInShader<EnginePixelShader>
     {
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }

@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Deferred
     /// <summary>
     /// Position texture pixel shader
     /// </summary>
-    public class PositionTexturePs : IBuiltInPixelShader
+    public class PositionTexturePs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Diffuse map resource view

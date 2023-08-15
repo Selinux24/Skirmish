@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Cubemap
     /// <summary>
     /// Cubemap vertex shader
     /// </summary>
-    public class CubemapVs : IBuiltInVertexShader
+    public class CubemapVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance

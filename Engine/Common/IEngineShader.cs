@@ -3,9 +3,9 @@
 namespace Engine.Common
 {
     /// <summary>
-    /// Engine pixel shader interface
+    /// Engine shader interface
     /// </summary>
-    public interface IEnginePixelShader : IDisposable
+    public interface IEngineShader : IDisposable
     {
         /// <summary>
         /// Name

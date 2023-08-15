@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Fonts
     /// <summary>
     /// Fonts pixel shader
     /// </summary>
-    public class FontsPs : IBuiltInPixelShader
+    public class FontsPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per font constant buffer

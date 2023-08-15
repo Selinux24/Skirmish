@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Decals
     /// <summary>
     /// Decals pixel shader
     /// </summary>
-    public class DecalsPs : IBuiltInPixelShader
+    public class DecalsPs : IBuiltInShader<EnginePixelShader>
     {
         /// <summary>
         /// Per decal constant buffer

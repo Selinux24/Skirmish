@@ -9,7 +9,7 @@ namespace Engine.BuiltIn.Particles
     /// <summary>
     /// Stream-out GPU particles vertex shader
     /// </summary>
-    public class StreamOutVs : IBuiltInVertexShader
+    public class StreamOutVs : IBuiltInShader<EngineVertexShader>
     {
         /// <summary>
         /// Graphics instance
