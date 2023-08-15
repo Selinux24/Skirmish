@@ -102,8 +102,7 @@ namespace Engine.BuiltIn.Particles
         /// <param name="state">Particle state</param>
         public void Update(IEngineDeviceContext dc, BuiltInStreamOutState state)
         {
-            cbPerStreamOut.WriteData(PerStreamOut.Build(state));
-            dc.UpdateConstantBuffer(cbPerStreamOut);
+            dc.UpdateConstantBuffer(cbPerStreamOut, PerStreamOut.Build(state));
 
             var geometryShader = GetGeometryShader<StreamOutGS>();
             geometryShader?.SetPerStreamOutConstantBuffer(cbPerStreamOut);

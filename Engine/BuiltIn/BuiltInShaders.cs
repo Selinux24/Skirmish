@@ -401,8 +401,7 @@ namespace Engine.BuiltIn
         public static void UpdateGlobals(IEngineDeviceContext dc, EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
             var cbGlobal = GetConstantBuffer<Global>();
-            cbGlobal?.WriteData(Global.Build(materialPaletteWidth, animationPaletteWidth));
-            dc.UpdateConstantBuffer(cbGlobal);
+            dc.UpdateConstantBuffer(cbGlobal, Global.Build(materialPaletteWidth, animationPaletteWidth));
 
             rvMaterialPalette = materialPalette;
             rvAnimationPalette = animationPalette;
@@ -438,21 +437,16 @@ namespace Engine.BuiltIn
             var dc = context.DeviceContext;
 
             var cbPerFrame = GetConstantBuffer<PerFrame>();
-            cbPerFrame?.WriteData(PerFrame.Build(context));
             var cbHemispheric = GetConstantBuffer<PSHemispheric>();
-            cbHemispheric?.WriteData(PSHemispheric.Build(context));
             var cbDirectionals = GetConstantBuffer<PSDirectional>();
-            cbDirectionals?.WriteData(PSDirectional.Build(context));
             var cbSpots = GetConstantBuffer<PSSpots>();
-            cbSpots?.WriteData(PSSpots.Build(context));
             var cbPoints = GetConstantBuffer<PSPoints>();
-            cbPoints?.WriteData(PSPoints.Build(context));
 
-            dc.UpdateConstantBuffer(cbPerFrame);
-            dc.UpdateConstantBuffer(cbHemispheric);
-            dc.UpdateConstantBuffer(cbDirectionals);
-            dc.UpdateConstantBuffer(cbSpots);
-            dc.UpdateConstantBuffer(cbPoints);
+            dc.UpdateConstantBuffer(cbPerFrame, PerFrame.Build(context));
+            dc.UpdateConstantBuffer(cbHemispheric, PSHemispheric.Build(context));
+            dc.UpdateConstantBuffer(cbDirectionals, PSDirectional.Build(context));
+            dc.UpdateConstantBuffer(cbSpots, PSSpots.Build(context));
+            dc.UpdateConstantBuffer(cbPoints, PSPoints.Build(context));
 
             rvShadowMapDir = context.ShadowMapDirectional?.Texture;
             rvShadowMapSpot = context.ShadowMapSpot?.Texture;

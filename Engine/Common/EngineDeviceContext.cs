@@ -932,17 +932,23 @@ namespace Engine.Common
         }
 
         /// <inheritdoc/>
-        public bool UpdateConstantBuffer(IEngineConstantBuffer constantBuffer)
+        public bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : struct, IBufferData
+        {
+            IEngineConstantBuffer buffer = constantBuffer;
+
+            return UpdateConstantBuffer(buffer, data);
+        }
+        /// <inheritdoc/>
+        public bool UpdateConstantBuffer(IEngineConstantBuffer constantBuffer, IBufferData data)
         {
             if (constantBuffer == null)
             {
                 return false;
             }
-            var value = constantBuffer.GetData();
             var dataStream = constantBuffer.DataStream.GetDataStream();
             var buffer = constantBuffer.Buffer.GetBuffer();
 
-            Marshal.StructureToPtr(value, dataStream.DataPointer, false);
+            Marshal.StructureToPtr(data, dataStream.DataPointer, false);
 
             var dataBox = new DataBox(dataStream.DataPointer, 0, 0);
             deviceContext.UpdateSubresource(dataBox, buffer, 0);

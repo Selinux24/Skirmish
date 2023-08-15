@@ -39,8 +39,7 @@ namespace Engine.BuiltIn.Forward
         /// <inheritdoc/>
         public override void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
-            cbPerMaterial.WriteData(PerMaterialTexture.Build(state));
-            dc.UpdateConstantBuffer(cbPerMaterial);
+            dc.UpdateConstantBuffer(cbPerMaterial, PerMaterialTexture.Build(state));
 
             var vertexShader = GetVertexShader<PositionNormalTextureVsI>();
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);

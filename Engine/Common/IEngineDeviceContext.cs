@@ -434,8 +434,16 @@ namespace Engine.Common
         /// <summary>
         /// Updates a constant buffer in the device context
         /// </summary>
+        /// <typeparam name="T">Data type</typeparam>
         /// <param name="constantBuffer">Constant buffer</param>
-        bool UpdateConstantBuffer(IEngineConstantBuffer constantBuffer);
+        /// <param name="data">Data</param>
+        bool UpdateConstantBuffer<T>(EngineConstantBuffer<T> constantBuffer, T data) where T : struct, IBufferData;
+        /// <summary>
+        /// Updates a constant buffer in the device context
+        /// </summary>
+        /// <param name="constantBuffer">Constant buffer</param>
+        /// <param name="data">Data</param>
+        bool UpdateConstantBuffer(IEngineConstantBuffer constantBuffer, IBufferData data);
 
         /// <summary>
         /// Updates a texture

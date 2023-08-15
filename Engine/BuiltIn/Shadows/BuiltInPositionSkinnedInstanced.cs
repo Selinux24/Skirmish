@@ -27,8 +27,7 @@ namespace Engine.BuiltIn.Shadows
         /// <inheritdoc/>
         public override void UpdateCastingLight(DrawContextShadows context)
         {
-            cbPerLight.WriteData(PerCastingLight.Build(context));
-            context.DeviceContext.UpdateConstantBuffer(cbPerLight);
+            context.DeviceContext.UpdateConstantBuffer(cbPerLight, PerCastingLight.Build(context));
 
             var geometryShader = GetGeometryShader<ShadowsGs>();
             geometryShader?.SetPerCastingLightConstantBuffer(cbPerLight);

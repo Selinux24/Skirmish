@@ -81,8 +81,7 @@ namespace Engine.BuiltIn.Decals
         /// <param name="textures">Texture array</param>
         public void Update(IEngineDeviceContext dc, bool rotation, uint textureCount, Color4 tintColor, EngineShaderResourceView textures)
         {
-            cbPerDecal.WriteData(PerDecal.Build(rotation, textureCount, tintColor));
-            dc.UpdateConstantBuffer(cbPerDecal);
+            dc.UpdateConstantBuffer(cbPerDecal, PerDecal.Build(rotation, textureCount, tintColor));
 
             var vertexShader = GetVertexShader<DecalsVs>();
             vertexShader?.SetPerDecalConstantBuffer(cbPerDecal);

@@ -121,8 +121,7 @@ namespace Engine.BuiltIn.Fonts
         /// <param name="state">Drawer state</param>
         public void UpdateFont(IEngineDeviceContext dc, BuiltInFontState state)
         {
-            cbPerFont.WriteData(PerFont.Build(state));
-            dc.UpdateConstantBuffer(cbPerFont);
+            dc.UpdateConstantBuffer(cbPerFont, PerFont.Build(state));
 
             var pixelShader = GetPixelShader<FontsPs>();
             pixelShader?.SetPerFontConstantBuffer(cbPerFont);
@@ -135,8 +134,7 @@ namespace Engine.BuiltIn.Fonts
         /// <param name="local">Local transform</param>
         public void UpdateText(IEngineDeviceContext dc, Matrix local)
         {
-            cbPerText.WriteData(PerText.Build(local));
-            dc.UpdateConstantBuffer(cbPerText);
+            dc.UpdateConstantBuffer(cbPerText, PerText.Build(local));
 
             var vertexShader = GetVertexShader<FontsVs>();
             vertexShader?.SetPerTextConstantBuffer(cbPerText);

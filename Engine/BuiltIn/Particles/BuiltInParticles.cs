@@ -148,8 +148,7 @@ namespace Engine.BuiltIn.Particles
         /// <param name="textures">Texture array</param>
         public void Update(IEngineDeviceContext dc, BuiltInParticlesState state, uint textureCount, EngineShaderResourceView textures)
         {
-            cbPerEmitter.WriteData(PerEmitter.Build(state, textureCount));
-            dc.UpdateConstantBuffer(cbPerEmitter);
+            dc.UpdateConstantBuffer(cbPerEmitter, PerEmitter.Build(state, textureCount));
 
             var vertexShader = GetVertexShader<ParticlesVs>();
             vertexShader?.SetPerEmitterConstantBuffer(cbPerEmitter);

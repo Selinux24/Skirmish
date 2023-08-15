@@ -64,8 +64,7 @@ namespace Engine.BuiltIn.Cubemap
         /// <param name="textureIndex">Texture index</param>
         public void Update(IEngineDeviceContext dc, EngineShaderResourceView texture, uint textureIndex)
         {
-            cbPerCube.WriteData(PerCube.Build(textureIndex));
-            dc.UpdateConstantBuffer(cbPerCube);
+            dc.UpdateConstantBuffer(cbPerCube, PerCube.Build(textureIndex));
 
             var pixelShader = GetPixelShader<SkymapPs>();
             pixelShader?.SetPerSkyConstantBuffer(cbPerCube);

@@ -44,8 +44,7 @@ namespace Engine.BuiltIn.Deferred
         /// <inheritdoc/>
         public override void UpdateMesh(IEngineDeviceContext dc, BuiltInDrawerMeshState state)
         {
-            cbPerMesh.WriteData(PerMeshSkinned.Build(state));
-            dc.UpdateConstantBuffer(cbPerMesh);
+            dc.UpdateConstantBuffer(cbPerMesh, PerMeshSkinned.Build(state));
 
             var vertexShader = GetVertexShader<PositionNormalTextureTangentSkinnedVs>();
             vertexShader?.SetPerMeshConstantBuffer(cbPerMesh);
@@ -53,8 +52,7 @@ namespace Engine.BuiltIn.Deferred
         /// <inheritdoc/>
         public override void UpdateMaterial(IEngineDeviceContext dc, BuiltInDrawerMaterialState state)
         {
-            cbPerMaterial.WriteData(PerMaterialTexture.Build(state));
-            dc.UpdateConstantBuffer(cbPerMaterial);
+            dc.UpdateConstantBuffer(cbPerMaterial, PerMaterialTexture.Build(state));
 
             var vertexShader = GetVertexShader<PositionNormalTextureTangentSkinnedVs>();
             vertexShader?.SetPerMaterialConstantBuffer(cbPerMaterial);

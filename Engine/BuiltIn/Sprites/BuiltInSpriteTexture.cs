@@ -31,8 +31,7 @@ namespace Engine.BuiltIn.Sprites
         /// <param name="state">Drawer state</param>
         public void UpdateSprite(IEngineDeviceContext dc, BuiltInSpriteState state)
         {
-            cbPerSprite.WriteData(PerSprite.Build(state));
-            dc.UpdateConstantBuffer(cbPerSprite);
+            dc.UpdateConstantBuffer(cbPerSprite, PerSprite.Build(state));
 
             var vertexShader = GetVertexShader<SpriteTextureVs>();
             vertexShader?.SetPerSpriteConstantBuffer(cbPerSprite);

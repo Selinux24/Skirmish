@@ -19,10 +19,5 @@ namespace Engine.Common
         /// Gets the internal data stream
         /// </summary>
         EngineDataStream DataStream { get; }
-
-        /// <summary>
-        /// Gets the current constant data
-        /// </summary>
-        IBufferData GetData();
     }
 }

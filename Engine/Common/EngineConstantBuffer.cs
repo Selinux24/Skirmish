@@ -10,11 +10,6 @@ namespace Engine.Common
     public class EngineConstantBuffer<T> : IEngineConstantBuffer where T : struct, IBufferData
     {
         /// <summary>
-        /// Current data value
-        /// </summary>
-        private T currentData;
-
-        /// <summary>
         /// Name
         /// </summary>
         public string Name { get; private set; }
@@ -34,6 +29,8 @@ namespace Engine.Common
         /// <param name="name">Name</param>
         public EngineConstantBuffer(Graphics graphics, string name)
         {
+            if (graphics == null) throw new ArgumentNullException(nameof(graphics), "Must specify the graphics instance to create the constant buffer in the graphics device.");
+
             Name = name;
             DataStream = new EngineDataStream(Marshal.SizeOf(typeof(T)), true, true);
             Buffer = graphics.CreateConstantBuffer<T>(name);
@@ -46,9 +43,7 @@ namespace Engine.Common
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -65,28 +60,6 @@ namespace Engine.Common
                 DataStream?.Dispose();
                 Buffer?.Dispose();
             }
-        }
-
-        /// <summary>
-        /// Writes data to de constant buffer
-        /// </summary>
-        /// <param name="data">Data</param>
-        public void WriteData(T data)
-        {
-            if (data.Equals(currentData))
-            {
-                return;
-            }
-
-            currentData = data;
-        }
-
-        /// <summary>
-        /// Gets the current constant data
-        /// </summary>
-        public IBufferData GetData()
-        {
-            return currentData;
         }
 
         /// <inheritdoc/>

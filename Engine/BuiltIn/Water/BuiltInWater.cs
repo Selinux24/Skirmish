@@ -118,8 +118,7 @@ namespace Engine.BuiltIn.Water
         /// <param name="state">Drawer state</param>
         public void UpdateWater(IEngineDeviceContext dc, BuiltInWaterState state)
         {
-            cbPerWater.WriteData(PerWater.Build(state));
-            dc.UpdateConstantBuffer(cbPerWater);
+            dc.UpdateConstantBuffer(cbPerWater, PerWater.Build(state));
 
             var pixelShader = GetPixelShader<WaterPs>();
             pixelShader?.SetPerWaterConstantBuffer(cbPerWater);
