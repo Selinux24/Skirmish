@@ -5,6 +5,7 @@ using System.Linq;
 namespace Engine.BuiltIn
 {
     using Engine.Common;
+    using Engine.Helpers;
 
     /// <summary>
     /// Built-in shaders resource helper
@@ -16,9 +17,17 @@ namespace Engine.BuiltIn
         /// </summary>
         private static Graphics graphics = null;
         /// <summary>
+        /// Shader list
+        /// </summary>
+        private static readonly List<IEngineShader> shaders = new();
+        /// <summary>
         /// Constant buffer list
         /// </summary>
         private static readonly List<IEngineConstantBuffer> constantBuffers = new();
+        /// <summary>
+        /// Sampler state list
+        /// </summary>
+        private static readonly List<EngineSamplerState> samplerStates = new();
         /// <summary>
         /// Vertex shader list
         /// </summary>
@@ -103,21 +112,14 @@ namespace Engine.BuiltIn
         /// </summary>
         public static void DisposeResources()
         {
+            samplerStates.ForEach(cb => cb?.Dispose());
+            samplerStates.Clear();
+
             constantBuffers.ForEach(cb => cb?.Dispose());
             constantBuffers.Clear();
 
-            vertexShaders.ForEach(vs => vs?.Dispose());
-            vertexShaders.Clear();
-            hullShaders.ForEach(vs => vs?.Dispose());
-            hullShaders.Clear();
-            domainShaders.ForEach(vs => vs?.Dispose());
-            domainShaders.Clear();
-            geometryShaders.ForEach(gs => gs?.Dispose());
-            geometryShaders.Clear();
-            pixelShaders.ForEach(ps => ps?.Dispose());
-            pixelShaders.Clear();
-            computeShaders.ForEach(ps => ps?.Dispose());
-            computeShaders.Clear();
+            shaders.ForEach(sh => sh?.Dispose());
+            shaders.Clear();
 
             drawers.OfType<IDisposable>().ToList().ForEach(dr => dr?.Dispose());
             drawers.Clear();
@@ -132,6 +134,162 @@ namespace Engine.BuiltIn
             samplerComparisonLessEqualBorder = null;
             samplerComparisonLessEqualClamp?.Dispose();
             samplerComparisonLessEqualClamp = null;
+
+            vertexShaders.Clear();
+            hullShaders.Clear();
+            domainShaders.Clear();
+            geometryShaders.Clear();
+            pixelShaders.Clear();
+            computeShaders.Clear();
+        }
+
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
+        /// <typeparam name="T">Type of shader</typeparam>
+        /// <param name="entryPoint">Entry point function name</param>
+        /// <param name="byteCode">Shader byte code</param>
+        /// <param name="profile">Shader profile</param>
+        public static EngineVertexShader CompileVertexShader<T>(string entryPoint, byte[] byteCode, string profile = null) where T : IBuiltInShader<EngineVertexShader>
+        {
+            string name = typeof(T).FullName;
+
+            EngineVertexShader sh = shaders.OfType<EngineVertexShader>().FirstOrDefault(s => s.Name == name);
+            if (sh != null)
+            {
+                return sh;
+            }
+
+            sh = graphics.CompileVertexShader(name, entryPoint, byteCode, profile ?? HelperShaders.VSProfile);
+            shaders.Add(sh);
+            return sh;
+        }
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
+        /// <typeparam name="T">Type of shader</typeparam>
+        /// <param name="entryPoint">Entry point function name</param>
+        /// <param name="byteCode">Shader byte code</param>
+        /// <param name="profile">Shader profile</param>
+        public static EngineHullShader CompileHullShader<T>(string entryPoint, byte[] byteCode, string profile = null) where T : IBuiltInShader<EngineHullShader>
+        {
+            string name = typeof(T).FullName;
+
+            EngineHullShader sh = shaders.OfType<EngineHullShader>().FirstOrDefault(s => s.Name == name);
+            if (sh != null)
+            {
+                return sh;
+            }
+
+            sh = graphics.CompileHullShader(name, entryPoint, byteCode, profile ?? HelperShaders.HSProfile);
+            shaders.Add(sh);
+            return sh;
+        }
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
+        /// <typeparam name="T">Type of shader</typeparam>
+        /// <param name="entryPoint">Entry point function name</param>
+        /// <param name="byteCode">Shader byte code</param>
+        /// <param name="profile">Shader profile</param>
+        public static EngineDomainShader CompileDomainShader<T>(string entryPoint, byte[] byteCode, string profile = null) where T : IBuiltInShader<EngineDomainShader>
+        {
+            string name = typeof(T).FullName;
+
+            EngineDomainShader sh = shaders.OfType<EngineDomainShader>().FirstOrDefault(s => s.Name == name);
+            if (sh != null)
+            {
+                return sh;
+            }
+
+            sh = graphics.CompileDomainShader(name, entryPoint, byteCode, profile ?? HelperShaders.DSProfile);
+            shaders.Add(sh);
+            return sh;
+        }
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
+        /// <typeparam name="T">Type of shader</typeparam>
+        /// <param name="entryPoint">Entry point function name</param>
+        /// <param name="byteCode">Shader byte code</param>
+        /// <param name="profile">Shader profile</param>
+        public static EngineGeometryShader CompileGeometryShader<T>(string entryPoint, byte[] byteCode, string profile = null) where T : IBuiltInShader<EngineGeometryShader>
+        {
+            string name = typeof(T).FullName;
+
+            EngineGeometryShader sh = shaders.OfType<EngineGeometryShader>().FirstOrDefault(s => s.Name == name);
+            if (sh != null)
+            {
+                return sh;
+            }
+
+            sh = graphics.CompileGeometryShader(name, entryPoint, byteCode, profile ?? HelperShaders.GSProfile);
+            shaders.Add(sh);
+            return sh;
+        }
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
+        /// <typeparam name="T">Type of shader</typeparam>
+        /// <param name="entryPoint">Entry point function name</param>
+        /// <param name="byteCode">Shader byte code</param>
+        /// <param name="so">Stream out configuration</param>
+        /// <param name="profile">Shader profile</param>
+        public static EngineGeometryShader CompileGeometryShaderWithStreamOut<T>(string entryPoint, byte[] byteCode, EngineStreamOutputElement[] so, string profile = null)
+        {
+            string name = typeof(T).FullName;
+
+            EngineGeometryShader sh = shaders.OfType<EngineGeometryShader>().FirstOrDefault(s => s.Name == name);
+            if (sh != null)
+            {
+                return sh;
+            }
+
+            sh = graphics.CompileGeometryShaderWithStreamOut(name, entryPoint, byteCode, profile ?? HelperShaders.GSProfile, so);
+            shaders.Add(sh);
+            return sh;
+        }
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
+        /// <typeparam name="T">Type of shader</typeparam>
+        /// <param name="entryPoint">Entry point function name</param>
+        /// <param name="byteCode">Shader byte code</param>
+        /// <param name="profile">Shader profile</param>
+        public static EnginePixelShader CompilePixelShader<T>(string entryPoint, byte[] byteCode, string profile = null) where T : IBuiltInShader<EnginePixelShader>
+        {
+            string name = typeof(T).FullName;
+
+            EnginePixelShader sh = shaders.OfType<EnginePixelShader>().FirstOrDefault(s => s.Name == name);
+            if (sh != null)
+            {
+                return sh;
+            }
+
+            sh = graphics.CompilePixelShader(name, entryPoint, byteCode, profile ?? HelperShaders.PSProfile);
+            shaders.Add(sh);
+            return sh;
+        }
+        /// <summary>
+        /// Compiles a shader or retrieves it from the shader cache
+        /// </summary>
+        /// <typeparam name="T">Type of shader</typeparam>
+        /// <param name="entryPoint">Entry point function name</param>
+        /// <param name="byteCode">Shader byte code</param>
+        /// <param name="profile">Shader profile</param>
+        public static EngineComputeShader CompileComputeShader<T>(string entryPoint, byte[] byteCode, string profile = null) where T : IBuiltInShader<EngineComputeShader>
+        {
+            string name = typeof(T).FullName;
+
+            EngineComputeShader sh = shaders.OfType<EngineComputeShader>().FirstOrDefault(s => s.Name == name);
+            if (sh != null)
+            {
+                return sh;
+            }
+
+            sh = graphics.CompileComputeShader(name, entryPoint, byteCode, profile ?? HelperShaders.DSProfile);
+            shaders.Add(sh);
+            return sh;
         }
 
         /// <summary>
@@ -157,6 +315,7 @@ namespace Engine.BuiltIn
 
             return cb;
         }
+
         /// <summary>
         /// Gets or creates a built-in vertex shader
         /// </summary>
@@ -166,7 +325,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T), graphics);
+                return (T)Activator.CreateInstance(typeof(T));
             }
 
             T vs = vertexShaders.OfType<T>().FirstOrDefault();
@@ -175,7 +334,7 @@ namespace Engine.BuiltIn
                 return vs;
             }
 
-            vs = (T)Activator.CreateInstance(typeof(T), graphics);
+            vs = (T)Activator.CreateInstance(typeof(T));
             vertexShaders.Add(vs);
 
             return vs;
@@ -189,7 +348,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T), graphics);
+                return (T)Activator.CreateInstance(typeof(T));
             }
 
             T hs = hullShaders.OfType<T>().FirstOrDefault();
@@ -198,7 +357,7 @@ namespace Engine.BuiltIn
                 return hs;
             }
 
-            hs = (T)Activator.CreateInstance(typeof(T), graphics);
+            hs = (T)Activator.CreateInstance(typeof(T));
             hullShaders.Add(hs);
 
             return hs;
@@ -212,7 +371,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T), graphics);
+                return (T)Activator.CreateInstance(typeof(T));
             }
 
             T ds = domainShaders.OfType<T>().FirstOrDefault();
@@ -221,7 +380,7 @@ namespace Engine.BuiltIn
                 return ds;
             }
 
-            ds = (T)Activator.CreateInstance(typeof(T), graphics);
+            ds = (T)Activator.CreateInstance(typeof(T));
             domainShaders.Add(ds);
 
             return ds;
@@ -235,7 +394,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T), graphics);
+                return (T)Activator.CreateInstance(typeof(T));
             }
 
             T gs = geometryShaders.OfType<T>().FirstOrDefault();
@@ -244,7 +403,7 @@ namespace Engine.BuiltIn
                 return gs;
             }
 
-            gs = (T)Activator.CreateInstance(typeof(T), graphics);
+            gs = (T)Activator.CreateInstance(typeof(T));
             geometryShaders.Add(gs);
 
             return gs;
@@ -258,7 +417,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T), graphics);
+                return (T)Activator.CreateInstance(typeof(T));
             }
 
             T ps = pixelShaders.OfType<T>().FirstOrDefault();
@@ -267,7 +426,7 @@ namespace Engine.BuiltIn
                 return ps;
             }
 
-            ps = (T)Activator.CreateInstance(typeof(T), graphics);
+            ps = (T)Activator.CreateInstance(typeof(T));
             pixelShaders.Add(ps);
 
             return ps;
@@ -281,7 +440,7 @@ namespace Engine.BuiltIn
         {
             if (!singleton)
             {
-                return (T)Activator.CreateInstance(typeof(T), graphics);
+                return (T)Activator.CreateInstance(typeof(T));
             }
 
             T cs = computeShaders.OfType<T>().FirstOrDefault();
@@ -290,7 +449,7 @@ namespace Engine.BuiltIn
                 return cs;
             }
 
-            cs = (T)Activator.CreateInstance(typeof(T), graphics);
+            cs = (T)Activator.CreateInstance(typeof(T));
             computeShaders.Add(cs);
 
             return cs;
@@ -315,7 +474,6 @@ namespace Engine.BuiltIn
 
             dr = (T)Activator.CreateInstance(typeof(T));
             drawers.Add(dr);
-
             return dr;
         }
 
@@ -324,12 +482,7 @@ namespace Engine.BuiltIn
         /// </summary>
         public static EngineSamplerState GetSamplerPoint()
         {
-            if (samplerPoint != null)
-            {
-                return samplerPoint;
-            }
-
-            samplerPoint = EngineSamplerState.Point(graphics, nameof(BuiltInShaders));
+            samplerPoint ??= EngineSamplerState.Point(graphics, nameof(BuiltInShaders));
 
             return samplerPoint;
         }
@@ -338,12 +491,7 @@ namespace Engine.BuiltIn
         /// </summary>
         public static EngineSamplerState GetSamplerLinear()
         {
-            if (samplerLinear != null)
-            {
-                return samplerLinear;
-            }
-
-            samplerLinear = EngineSamplerState.Linear(graphics, nameof(BuiltInShaders));
+            samplerLinear ??= EngineSamplerState.Linear(graphics, nameof(BuiltInShaders));
 
             return samplerLinear;
         }
@@ -352,12 +500,7 @@ namespace Engine.BuiltIn
         /// </summary>
         public static EngineSamplerState GetSamplerAnisotropic()
         {
-            if (samplerAnisotropic != null)
-            {
-                return samplerAnisotropic;
-            }
-
-            samplerAnisotropic = EngineSamplerState.Anisotropic(graphics, nameof(BuiltInShaders), 4);
+            samplerAnisotropic ??= EngineSamplerState.Anisotropic(graphics, nameof(BuiltInShaders), 4);
 
             return samplerAnisotropic;
         }
@@ -366,12 +509,7 @@ namespace Engine.BuiltIn
         /// </summary>
         public static EngineSamplerState GetSamplerComparisonLessEqualBorder()
         {
-            if (samplerComparisonLessEqualBorder != null)
-            {
-                return samplerComparisonLessEqualBorder;
-            }
-
-            samplerComparisonLessEqualBorder = EngineSamplerState.ComparisonLessEqualBorder(graphics, nameof(BuiltInShaders));
+            samplerComparisonLessEqualBorder ??= EngineSamplerState.ComparisonLessEqualBorder(graphics, nameof(BuiltInShaders));
 
             return samplerComparisonLessEqualBorder;
         }
@@ -380,14 +518,20 @@ namespace Engine.BuiltIn
         /// </summary>
         public static EngineSamplerState GetSamplerComparisonLessEqualClamp()
         {
-            if (samplerComparisonLessEqualClamp != null)
-            {
-                return samplerComparisonLessEqualClamp;
-            }
-
-            samplerComparisonLessEqualClamp = EngineSamplerState.ComparisonLessEqualClamp(graphics, nameof(BuiltInShaders));
+            samplerComparisonLessEqualClamp ??= EngineSamplerState.ComparisonLessEqualClamp(graphics, nameof(BuiltInShaders));
 
             return samplerComparisonLessEqualClamp;
+        }
+        /// <summary>
+        /// Gets a custom sampler
+        /// </summary>
+        /// <param name="name">Sampler name</param>
+        /// <param name="samplerDesc">Sampler description</param>
+        public static EngineSamplerState GetSamplerCustom(string name, EngineSamplerStateDescription samplerDesc)
+        {
+            var s = EngineSamplerState.Create(graphics, name, samplerDesc);
+            samplerStates.Add(s);
+            return s;
         }
 
         /// <summary>

@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Sprites
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Color sprite pixel shader
@@ -20,45 +18,11 @@ namespace Engine.BuiltIn.Sprites
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public SpriteColorPs(Graphics graphics)
+        public SpriteColorPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(SpriteColorPs), "main", UIRenderingResources.SpriteColor_ps, HelperShaders.PSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~SpriteColorPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompilePixelShader<SpriteColorPs>("main", UIRenderingResources.SpriteColor_ps);
         }
 
         /// <summary>

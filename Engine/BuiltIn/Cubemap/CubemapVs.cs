@@ -1,59 +1,23 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Cubemap
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Cubemap vertex shader
     /// </summary>
     public class CubemapVs : IBuiltInShader<EngineVertexShader>
     {
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public CubemapVs(Graphics graphics)
+        public CubemapVs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompileVertexShader(nameof(CubemapVs), "main", ForwardRenderingResources.Cubemap_vs, HelperShaders.VSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~CubemapVs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompileVertexShader<CubemapVs>("main", ForwardRenderingResources.Cubemap_vs);
         }
 
         /// <inheritdoc/>

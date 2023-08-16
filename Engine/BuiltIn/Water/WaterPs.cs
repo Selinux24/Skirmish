@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Water
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Water pixel shader
@@ -20,45 +18,11 @@ namespace Engine.BuiltIn.Water
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public WaterPs(Graphics graphics)
+        public WaterPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(WaterPs), "main", ForwardRenderingResources.Water_ps, HelperShaders.PSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~WaterPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompilePixelShader<WaterPs>("main", ForwardRenderingResources.Water_ps);
         }
 
         /// <summary>

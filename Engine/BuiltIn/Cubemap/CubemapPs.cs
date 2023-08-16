@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Cubemap
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Cubemap pixel shader
@@ -20,49 +18,15 @@ namespace Engine.BuiltIn.Cubemap
         /// </summary>
         private EngineSamplerState sampler;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public CubemapPs(Graphics graphics)
+        public CubemapPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(CubemapPs), "main", ForwardRenderingResources.Cubemap_ps, HelperShaders.PSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~CubemapPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompilePixelShader<CubemapPs>("main", ForwardRenderingResources.Cubemap_ps);
         }
 
         /// <summary>

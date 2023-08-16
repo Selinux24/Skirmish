@@ -552,6 +552,13 @@ namespace Engine
 
             Logger.WriteInformation(this, "Game: End StartScene");
         }
+        /// <summary>
+        /// Gets the active scene
+        /// </summary>
+        public Scene GetActiveScene()
+        {
+            return scenes.Find(s => s.Active);
+        }
 
         /// <summary>
         /// Report progress callback
@@ -559,8 +566,7 @@ namespace Engine
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
         public void ReportProgress(LoadResourceProgress value)
         {
-            var activeScene = scenes.Find(s => s.Active);
-            activeScene?.OnReportProgress(value);
+            GetActiveScene()?.OnReportProgress(value);
         }
         /// <summary>
         /// Report buffer progress callback
@@ -568,8 +574,7 @@ namespace Engine
         /// <param name="value">Progress value from 0.0f to 1.0f</param>
         public void ReportProgressBuffers(LoadResourceProgress value)
         {
-            var activeScene = scenes.Find(s => s.Active);
-            activeScene?.OnReportProgressBuffers(value);
+            GetActiveScene()?.OnReportProgressBuffers(value);
         }
 
         /// <summary>
@@ -864,7 +869,7 @@ namespace Engine
                 return;
             }
 
-            var activeScene = scenes.Find(s => s.Active);
+            var activeScene = GetActiveScene();
             if (activeScene == null)
             {
                 return;
@@ -997,7 +1002,7 @@ namespace Engine
                 RuntimeText = string.Format(
                     "{0} - {1} - Frame {2} FPS: {3:000} PerFrame: DrawCalls/Instances/Triangles => {4:00}/{5:00}/{6:00} Updates: {7:00} Rasterizer/DepthStencil/Blend => {8}/{9}/{10} F. Time: {11:0.0000} (secs) T. Time: {12:0000} (secs)",
                     Graphics.DeviceDescription,
-                    Name,
+                    GetActiveScene()?.GetRenderMode() ?? SceneModes.Unknown,
                     Counters.FrameCount,
                     Counters.FramesPerSecond,
                     Counters.DrawCallsPerFrame,

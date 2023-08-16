@@ -1,11 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
-using System.Runtime.InteropServices;
 
 namespace Engine.BuiltIn.Cubemap
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Skymap pixel shader
@@ -25,49 +22,15 @@ namespace Engine.BuiltIn.Cubemap
         /// </summary>
         private EngineSamplerState sampler;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public SkymapPs(Graphics graphics)
+        public SkymapPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(SkymapPs), "main", ForwardRenderingResources.Skymap_ps, HelperShaders.PSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~SkymapPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompilePixelShader<SkymapPs>("main", ForwardRenderingResources.Skymap_ps);
         }
 
         /// <summary>

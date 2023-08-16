@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Particles
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// CPU particles pixel shader
@@ -28,54 +26,18 @@ namespace Engine.BuiltIn.Particles
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public ParticlesPs(Graphics graphics)
+        public ParticlesPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(ParticlesPs), "main", ForwardRenderingResources.Particles_ps, HelperShaders.PSProfile);
+            Shader = BuiltInShaders.CompilePixelShader<ParticlesPs>("main", ForwardRenderingResources.Particles_ps);
 
             var samplerDesc = EngineSamplerStateDescription.Default();
             samplerDesc.Filter = Filter.MinMagMipPoint;
             samplerDesc.AddressU = TextureAddressMode.Clamp;
             samplerDesc.AddressV = TextureAddressMode.Clamp;
 
-            samplerParticles = EngineSamplerState.Create(graphics, $"{nameof(ParticlesPs)}.ParticlesSampler", samplerDesc);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~ParticlesPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-
-                samplerParticles?.Dispose();
-            }
+            samplerParticles = BuiltInShaders.GetSamplerCustom($"{nameof(ParticlesPs)}.ParticlesSampler", samplerDesc);
         }
 
         /// <summary>

@@ -151,10 +151,6 @@ namespace Engine.Common
         private readonly RenderTarget sceneResultsTarget = null;
 
         /// <summary>
-        /// Current post-processing render target
-        /// </summary>
-        private RenderTarget postProcessingTarget = null;
-        /// <summary>
         /// First post-processing render target
         /// </summary>
         private readonly RenderTarget postProcessingTarget0 = null;
@@ -1466,11 +1462,12 @@ namespace Engine.Common
         /// Binds graphics for post-processing pass
         /// </summary>
         /// <param name="dc">Drawing context</param>
+        /// <param name="target">Render target</param>
         /// <param name="clearRT">Indicates whether the render target must be cleared</param>
         /// <param name="clearRTColor">Target clear color</param>
-        private void BindPostProcessingTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
+        private void BindPostProcessingTarget(IEngineDeviceContext dc, RenderTarget target, bool clearRT, Color4 clearRTColor)
         {
-            dc.SetRenderTargets(postProcessingTarget.Targets, clearRT, clearRTColor);
+            dc.SetRenderTargets(target.Targets, clearRT, clearRTColor);
 
             //Set local viewport
             var viewport = Scene.Game.Form.GetViewport();
@@ -1494,7 +1491,7 @@ namespace Engine.Common
                 {
                     State = PostProcessingObjectsEffects,
                     RenderPass = RenderPass.Objects,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)),
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
                 });
             }
 
@@ -1506,7 +1503,7 @@ namespace Engine.Common
                 {
                     State = PostProcessingUIEffects,
                     RenderPass = RenderPass.UI,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)),
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
                 });
             }
 
@@ -1518,7 +1515,7 @@ namespace Engine.Common
                 {
                     State = PostProcessingFinalEffects,
                     RenderPass = RenderPass.Final,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)),
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
                 });
             }
         }
@@ -1580,14 +1577,8 @@ namespace Engine.Common
                 _ => throw new NotImplementedException(),
             };
 
-            var drawer = processingDrawer.UpdateEffectParameters(dc, state.State);
-            if (drawer == null)
-            {
-                return;
-            }
-
-            //Gets the last used target texture
-            var texture = GetTargetTextures(renderTarget.Target)?.FirstOrDefault();
+            //Gets the last used target as source texture for the post-processing shader
+            var source = GetTargetTextures(renderTarget.Target)?.FirstOrDefault();
 
             var graphics = Scene.Game.Graphics;
             dc.SetRasterizerState(graphics.GetRasterizerCullNone());
@@ -1599,37 +1590,37 @@ namespace Engine.Common
                 var (effect, targetIndex) = state.Effects.ElementAt(i);
 
                 //Toggles post-processing buffers
-                TogglePostProcessingTargets(targetIndex);
+                var target = GetPostProcessingTargets(targetIndex);
+                var targetTexture = target.Textures?.FirstOrDefault();
 
                 //Use the next buffer as render target
-                BindPostProcessingTarget(dc, false, Color.Transparent);
+                BindPostProcessingTarget(dc, target, false, Color.Transparent);
 
-                processingDrawer.UpdateEffect(dc, texture, effect);
-                processingDrawer.Draw(dc, drawer);
+                processingDrawer.Draw(dc, source, effect, state.State);
 
                 //Gets the source texture
-                texture = postProcessingTarget.Textures?.FirstOrDefault();
+                source = targetTexture;
             }
 
             //Set the result render target
             SetTarget(dc, renderTarget);
 
             //Draw the result
-            var resultDrawer = processingDrawer.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
-            processingDrawer.Draw(dc, resultDrawer);
+            processingDrawer.Draw(dc, source, BuiltInPostProcessEffects.None, state.State);
         }
         /// <summary>
         /// Toggles post-processing render targets
         /// </summary>
-        private void TogglePostProcessingTargets(int index)
+        /// <param name="index">Target index</param>
+        private RenderTarget GetPostProcessingTargets(int index)
         {
             if (index % 2 == 0)
             {
-                postProcessingTarget = postProcessingTarget0;
+                return postProcessingTarget0;
             }
             else
             {
-                postProcessingTarget = postProcessingTarget1;
+                return postProcessingTarget1;
             }
         }
 
@@ -1754,8 +1745,7 @@ namespace Engine.Common
             var texture1 = GetTargetTextures(target1)?.FirstOrDefault();
             var texture2 = GetTargetTextures(target2)?.FirstOrDefault();
 
-            var drawer = processingDrawerFinal.UpdateEffectCombine(dc, texture1, texture2);
-            processingDrawerFinal.Draw(dc, drawer);
+            processingDrawerFinal.Combine(dc, texture1, texture2);
         }
         /// <summary>
         /// Draws the specified target to screen
@@ -1778,8 +1768,7 @@ namespace Engine.Common
 
             var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
 
-            var drawer = processingDrawerFinal.UpdateEffect(dc, texture, BuiltInPostProcessEffects.None);
-            processingDrawerFinal.Draw(dc, drawer);
+            processingDrawerFinal.Draw(dc, texture, BuiltInPostProcessEffects.None, null);
         }
     }
 }

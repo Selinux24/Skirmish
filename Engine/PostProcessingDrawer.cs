@@ -59,38 +59,30 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectCombine(IEngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
-        {
-            builtInCombine ??= BuiltInShaders.GetDrawer<BuiltInCombine>(false);
-
-            builtInCombine.Update(texture1, texture2);
-
-            return builtInCombine;
-        }
-        /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffectParameters(IEngineDeviceContext dc, BuiltInPostProcessState state)
-        {
-            builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
-
-            builtInPostProcess.UpdatePass(dc, state);
-
-            return builtInPostProcess;
-        }
-        /// <inheritdoc/>
-        public IBuiltInDrawer UpdateEffect(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
-        {
-            builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
-
-            builtInPostProcess.UpdateEffect(dc, sourceTexture, effect);
-
-            return builtInPostProcess;
-        }
-        /// <inheritdoc/>
-        public void Draw(IEngineDeviceContext dc, IBuiltInDrawer drawer)
+        public void Draw(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect, BuiltInPostProcessState state)
         {
             var bufferManager = game.BufferManager;
 
-            drawer.Draw(dc, bufferManager, new DrawOptions
+            builtInPostProcess ??= BuiltInShaders.GetDrawer<BuiltInPostProcess>(false);
+            if (state != null) builtInPostProcess.UpdatePass(dc, state);
+            builtInPostProcess.UpdateEffect(dc, sourceTexture, effect);
+
+            builtInPostProcess.Draw(dc, bufferManager, new DrawOptions
+            {
+                Topology = Topology.TriangleList,
+                VertexBuffer = vertexBuffer,
+                IndexBuffer = indexBuffer,
+            });
+        }
+        /// <inheritdoc/>
+        public void Combine(IEngineDeviceContext dc, EngineShaderResourceView texture1, EngineShaderResourceView texture2)
+        {
+            var bufferManager = game.BufferManager;
+
+            builtInCombine ??= BuiltInShaders.GetDrawer<BuiltInCombine>(false);
+            builtInCombine.Update(texture1, texture2);
+
+            builtInCombine.Draw(dc, bufferManager, new DrawOptions
             {
                 Topology = Topology.TriangleList,
                 VertexBuffer = vertexBuffer,

@@ -1,5 +1,4 @@
-﻿using System;
-
+﻿
 namespace Engine.BuiltIn
 {
     using Engine.Common;
@@ -7,7 +6,7 @@ namespace Engine.BuiltIn
     /// <summary>
     /// Built-in shader interface
     /// </summary>
-    public interface IBuiltInShader<out T> : IDisposable where T : IEngineShader
+    public interface IBuiltInShader<out T> where T : IEngineShader
     {
         /// <summary>
         /// Shader

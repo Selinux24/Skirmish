@@ -1,12 +1,10 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Engine.BuiltIn.Deferred
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Deferred spot light pixel shader
@@ -30,45 +28,11 @@ namespace Engine.BuiltIn.Deferred
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public DeferredLightSpotPs(Graphics graphics)
+        public DeferredLightSpotPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(DeferredLightSpotPs), "main", DeferredRenderingResources.DeferredLightSpot_ps, HelperShaders.PSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~DeferredLightSpotPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompilePixelShader<DeferredLightSpotPs>("main", DeferredRenderingResources.DeferredLightSpot_ps);
         }
 
         /// <summary>

@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Foliage
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Foliage geometry shader
@@ -24,51 +22,17 @@ namespace Engine.BuiltIn.Foliage
         /// </summary>
         private readonly EngineSamplerState samplerPoint;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EngineGeometryShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public FoliageGS(Graphics graphics)
+        public FoliageGS()
         {
-            Graphics = graphics;
-
-            Shader = Graphics.CompileGeometryShader(nameof(FoliageGS), "main", ForwardRenderingResources.Foliage_gs, HelperShaders.GSProfile);
+            Shader = BuiltInShaders.CompileGeometryShader<FoliageGS>("main", ForwardRenderingResources.Foliage_gs);
 
             samplerPoint = BuiltInShaders.GetSamplerPoint();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~FoliageGS()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
         }
 
         /// <summary>

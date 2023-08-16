@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Shadows
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Position texture vertex shader
@@ -20,49 +18,15 @@ namespace Engine.BuiltIn.Shadows
         /// </summary>
         private IEngineConstantBuffer cbPerMaterial;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public PositionTextureVs(Graphics graphics)
+        public PositionTextureVs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompileVertexShader($"{nameof(Shadows)}_{nameof(PositionTextureVs)}", "main", ShadowRenderingResources.PositionTexture_vs, HelperShaders.VSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~PositionTextureVs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompileVertexShader<PositionTextureVs>("main", ShadowRenderingResources.PositionTexture_vs);
         }
 
         /// <summary>

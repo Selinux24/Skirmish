@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Common
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Skinned position normal color instanced vertex shader
@@ -16,49 +14,15 @@ namespace Engine.BuiltIn.Common
         /// </summary>
         private IEngineConstantBuffer cbPerMaterial;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public PositionNormalColorSkinnedVsI(Graphics graphics)
+        public PositionNormalColorSkinnedVsI()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompileVertexShader(nameof(PositionNormalColorSkinnedVsI), "main", CommonResources.PositionNormalColorSkinnedI_vs, HelperShaders.VSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~PositionNormalColorSkinnedVsI()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompileVertexShader<PositionNormalColorSkinnedVsI>("main", CommonResources.PositionNormalColorSkinnedI_vs);
         }
 
         /// <summary>

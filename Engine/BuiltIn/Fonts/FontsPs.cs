@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Fonts
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Fonts pixel shader
@@ -32,60 +30,23 @@ namespace Engine.BuiltIn.Fonts
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public FontsPs(Graphics graphics)
+        public FontsPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(FontsPs), "main", UIRenderingResources.Font_ps, HelperShaders.PSProfile);
+            Shader = BuiltInShaders.CompilePixelShader<FontsPs>("main", UIRenderingResources.Font_ps);
 
             var samplerPointDesc = EngineSamplerStateDescription.Default();
             samplerPointDesc.Filter = Filter.MinMagMipPoint;
             samplerPointDesc.AddressU = TextureAddressMode.Clamp;
             samplerPointDesc.AddressV = TextureAddressMode.Clamp;
-            samplerPoint = EngineSamplerState.Create(graphics, $"{nameof(FontsPs)}.Point", samplerPointDesc);
+            samplerPoint = BuiltInShaders.GetSamplerCustom($"{nameof(FontsPs)}.Point", samplerPointDesc);
 
             var samplerLinearDesc = EngineSamplerStateDescription.Default();
             samplerLinearDesc.Filter = Filter.MinMagMipLinear;
             samplerLinearDesc.AddressU = TextureAddressMode.Clamp;
             samplerLinearDesc.AddressV = TextureAddressMode.Clamp;
-            samplerLinear = EngineSamplerState.Create(graphics, $"{nameof(FontsPs)}.Linear", samplerLinearDesc);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~FontsPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-
-                samplerPoint?.Dispose();
-                samplerLinear?.Dispose();
-            }
+            samplerLinear = BuiltInShaders.GetSamplerCustom($"{nameof(FontsPs)}.Linear", samplerLinearDesc);
         }
 
         /// <summary>

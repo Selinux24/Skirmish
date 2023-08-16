@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Shadows
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Point geometry shader
@@ -16,49 +14,15 @@ namespace Engine.BuiltIn.Shadows
         /// </summary>
         private IEngineConstantBuffer cbPerCastingLight;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EngineGeometryShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public ShadowsGs(Graphics graphics)
+        public ShadowsGs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompileGeometryShader($"{nameof(Shadows)}_{nameof(ShadowsGs)}", "main", ShadowRenderingResources.Shadow_gs, HelperShaders.GSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~ShadowsGs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompileGeometryShader<ShadowsGs>("main", ShadowRenderingResources.Shadow_gs);
         }
 
         /// <summary>

@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Forward
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Position texture pixel shader
@@ -24,51 +22,17 @@ namespace Engine.BuiltIn.Forward
         /// </summary>
         private EngineSamplerState samplerDiffuse;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public PositionTexturePs(Graphics graphics)
+        public PositionTexturePs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(PositionTexturePs), "main", ForwardRenderingResources.PositionTexture_ps, HelperShaders.PSProfile);
+            Shader = BuiltInShaders.CompilePixelShader<PositionTexturePs>("main", ForwardRenderingResources.PositionTexture_ps);
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~PositionTexturePs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
         }
 
         /// <summary>

@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Shadows
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Shadow transparent texture pixel shader
@@ -24,45 +22,11 @@ namespace Engine.BuiltIn.Shadows
         private EngineSamplerState diffuseSampler;
 
         /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public TransparentPs(Graphics graphics)
+        public TransparentPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader($"{nameof(Shadows)}_{nameof(TransparentPs)}", "main", ShadowRenderingResources.Transparent_ps, HelperShaders.PSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~TransparentPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompilePixelShader<TransparentPs>("main", ShadowRenderingResources.Transparent_ps);
         }
 
         /// <summary>

@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Foliage
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Foliage vertex shader
@@ -16,49 +14,15 @@ namespace Engine.BuiltIn.Foliage
         /// </summary>
         private IEngineConstantBuffer cbPerMaterial;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EngineVertexShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public FoliageVs(Graphics graphics)
+        public FoliageVs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompileVertexShader(nameof(FoliageVs), "main", ForwardRenderingResources.Foliage_vs, HelperShaders.VSProfile);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~FoliageVs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
+            Shader = BuiltInShaders.CompileVertexShader<FoliageVs>("main", ForwardRenderingResources.Foliage_vs);
         }
 
         /// <summary>

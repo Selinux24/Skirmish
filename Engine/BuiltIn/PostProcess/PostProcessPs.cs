@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.PostProcess
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Post-process pixel shader
@@ -28,51 +26,17 @@ namespace Engine.BuiltIn.PostProcess
         /// </summary>
         private EngineSamplerState samplerDiffuse;
 
-        /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
         /// <inheritdoc/>
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public PostProcessPs(Graphics graphics)
+        public PostProcessPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(PostProcessPs), "main", PostProcessResources.PostProcess_ps, HelperShaders.PSProfile);
+            Shader = BuiltInShaders.CompilePixelShader<PostProcessPs>("main", PostProcessResources.PostProcess_ps);
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~PostProcessPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-            }
         }
 
         /// <summary>

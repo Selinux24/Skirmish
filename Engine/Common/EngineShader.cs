@@ -76,5 +76,11 @@ namespace Engine.Common
         {
             return shader;
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return Name;
+        }
     }
 }

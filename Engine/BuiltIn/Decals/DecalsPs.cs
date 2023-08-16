@@ -1,10 +1,8 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Decals
 {
     using Engine.Common;
-    using Engine.Helpers;
 
     /// <summary>
     /// Decals pixel shader
@@ -28,54 +26,18 @@ namespace Engine.BuiltIn.Decals
         public EnginePixelShader Shader { get; private set; }
 
         /// <summary>
-        /// Graphics instance
-        /// </summary>
-        protected Graphics Graphics = null;
-
-        /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="graphics">Graphics device</param>
-        public DecalsPs(Graphics graphics)
+        public DecalsPs()
         {
-            Graphics = graphics;
-
-            Shader = graphics.CompilePixelShader(nameof(DecalsPs), "main", ForwardRenderingResources.Decal_ps, HelperShaders.PSProfile);
+            Shader = BuiltInShaders.CompilePixelShader<DecalsPs>("main", ForwardRenderingResources.Decal_ps);
 
             var samplerDesc = EngineSamplerStateDescription.Default();
             samplerDesc.Filter = Filter.MinMagMipPoint;
             samplerDesc.AddressU = TextureAddressMode.Clamp;
             samplerDesc.AddressV = TextureAddressMode.Clamp;
 
-            samplerDecals = EngineSamplerState.Create(graphics, $"{nameof(DecalsPs)}.DecalsSampler", samplerDesc);
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~DecalsPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                Shader?.Dispose();
-                Shader = null;
-
-                samplerDecals?.Dispose();
-            }
+            samplerDecals = BuiltInShaders.GetSamplerCustom($"{nameof(DecalsPs)}.DecalsSampler", samplerDesc);
         }
 
         /// <summary>
