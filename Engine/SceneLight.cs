@@ -96,6 +96,8 @@ namespace Engine
         public abstract void ClearShadowParameters();
         /// <inheritdoc/>
         public abstract void SetShadowParameters(Camera camera, int assignedShadowMap);
+        /// <inheritdoc/>
+        public abstract ICullingVolume GetLightVolume();
 
         /// <inheritdoc/>
         public abstract ISceneLight Clone();

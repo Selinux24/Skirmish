@@ -15,6 +15,10 @@ namespace Engine.Common
         /// </summary>
         string Name { get; }
         /// <summary>
+        /// Gets de pass index
+        /// </summary>
+        int PassIndex { get; }
+        /// <summary>
         /// Gets or sets the Input Assembler Primitive Topology
         /// </summary>
         Topology IAPrimitiveTopology { get; set; }

@@ -88,7 +88,7 @@ namespace Engine
 
             updateInternals = false;
 
-            Counters.TransformUpdatesPerFrame++;
+            Counters.PickCounters.TransformUpdatesPerFrame++;
         }
 
         /// <summary>

@@ -1209,9 +1209,11 @@ namespace Heightmap
                 Lights.KeyLight.Brightness,
                 Camera.Position, Camera.Direction);
 
+            var counters = Counters.PickCounters;
+
             help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}",
-                Counters.PicksPerFrame, Counters.PickingTotalTimePerFrame, Counters.PickingAverageTime,
-                Counters.VolumeFrustumTestPerFrame, Counters.VolumeFrustumTestTotalTimePerFrame, Counters.VolumeFrustumTestAverageTime);
+                counters?.PicksPerFrame, counters?.PickingTotalTimePerFrame, counters?.PickingAverageTime,
+                counters?.VolumeFrustumTestPerFrame, counters?.VolumeFrustumTestTotalTimePerFrame, counters?.VolumeFrustumTestAverageTime);
 
             if (!gameReady)
             {

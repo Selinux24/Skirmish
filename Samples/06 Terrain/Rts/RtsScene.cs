@@ -2001,23 +2001,25 @@ namespace Terrain.Rts
 
             stats.Text = Game.RuntimeText;
 
+            var counters = Counters.GetFrameCounters(-1);
+
             string txt1 = string.Format(
                 "Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}",
                 Counters.Buffers,
                 Counters.BufferBytes / 1024,
-                Counters.BufferReads,
-                Counters.BufferWrites,
+                counters?.BufferReads,
+                counters?.BufferWrites,
                 GetRenderMode(),
                 shadowResult,
-                Counters.PrimitivesPerFrame);
+                counters?.PrimitivesPerFrame);
             counters1.Text = txt1;
 
             string txt2 = string.Format(
                 "IA Input Layouts: {0}, Primitives: {1}, VB: {2}, IB: {3}, Terrain Patches: {4}; T1.{5}  /  T2.{6}  /  H.{7}",
-                Counters.IAInputLayoutSets,
-                Counters.IAPrimitiveTopologySets,
-                Counters.IAVertexBuffersSets,
-                Counters.IAIndexBufferSets,
+                counters?.IAInputLayoutSets,
+                counters?.IAPrimitiveTopologySets,
+                counters?.IAVertexBuffersSets,
+                counters?.IAIndexBufferSets,
                 terrain.VisiblePatchesCount,
                 tankP1Agent,
                 tankP2Agent,

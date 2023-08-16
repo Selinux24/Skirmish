@@ -152,6 +152,11 @@ namespace Engine
                 GetFromPointLightViewProjection(Position, Vector3.BackwardLH, Vector3.Up)         * projection,
             };
         }
+        /// <inheritdoc/>
+        public override ICullingVolume GetLightVolume()
+        {
+            return (IntersectionVolumeSphere)BoundingSphere;
+        }
 
         /// <inheritdoc/>
         public override ISceneLight Clone()

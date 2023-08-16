@@ -62,7 +62,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.AddPick((float)w.Elapsed.TotalSeconds);
+                Counters.PickCounters.AddPick((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -82,7 +82,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.AddPick((float)w.Elapsed.TotalSeconds);
+                Counters.PickCounters.AddPick((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -102,7 +102,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.AddPick((float)w.Elapsed.TotalSeconds);
+                Counters.PickCounters.AddPick((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -130,7 +130,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
+                Counters.PickCounters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>

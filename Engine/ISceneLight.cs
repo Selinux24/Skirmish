@@ -76,6 +76,10 @@ namespace Engine
         /// <param name="camera">Current camera</param>
         /// <param name="assignedShadowMap">Assigned shadow map index</param>
         void SetShadowParameters(Camera camera, int assignedShadowMap);
+        /// <summary>
+        /// Gets the light volume for culling test
+        /// </summary>
+        ICullingVolume GetLightVolume();
 
         /// <summary>
         /// Clones the light

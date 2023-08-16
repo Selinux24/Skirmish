@@ -63,7 +63,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
+                Counters.PickCounters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -82,7 +82,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.AddVolumeBoxTest((float)w.Elapsed.TotalSeconds);
+                Counters.PickCounters.AddVolumeBoxTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -101,7 +101,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.AddVolumeSphereTest((float)w.Elapsed.TotalSeconds);
+                Counters.PickCounters.AddVolumeSphereTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>

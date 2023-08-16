@@ -81,6 +81,11 @@ namespace Engine
             ShadowMapCount = 1;
             FromLightVP = new[] { Matrix.Identity };
         }
+        /// <inheritdoc/>
+        public override ICullingVolume GetLightVolume()
+        {
+            return null;
+        }
 
         /// <inheritdoc/>
         public override ISceneLight Clone()

@@ -28,13 +28,15 @@ namespace Engine.Common
             /// </summary>
             private static readonly Buffer[] nullBuffers = new Buffer[CommonShaderStage.ConstantBufferApiSlotCount];
 
+            public ShaderConstantBufferState(EngineDeviceContext deviceContext) : base(deviceContext) { }
+
             public void SetConstantBuffer(CommonShaderStage shaderStage, int slot, IEngineConstantBuffer buffer)
             {
                 Update(slot, buffer);
 
                 var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
-                Counters.ConstantBufferSets++;
+                DeviceContext.frameCounters.ConstantBufferSets++;
             }
 
             public void SetConstantBuffers(CommonShaderStage shaderStage, int startSlot, IEnumerable<IEngineConstantBuffer> bufferList)
@@ -43,13 +45,13 @@ namespace Engine.Common
 
                 var buffers = Resources.Select(r => r?.Buffer.GetBuffer()).ToArray();
                 shaderStage.SetConstantBuffers(StartSlot, buffers.Length, buffers);
-                Counters.ConstantBufferSets++;
+                DeviceContext.frameCounters.ConstantBufferSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
                 shaderStage.SetConstantBuffers(StartSlot, nullBuffers.Length - StartSlot, nullBuffers);
-                Counters.ConstantBufferClears++;
+                DeviceContext.frameCounters.ConstantBufferClears++;
 
                 Clear();
             }
@@ -64,13 +66,15 @@ namespace Engine.Common
             /// </summary>
             private static readonly ShaderResourceView[] nullSrv = new ShaderResourceView[CommonShaderStage.InputResourceSlotCount];
 
+            public ShaderResourceState(EngineDeviceContext deviceContext) : base(deviceContext) { }
+
             public void SetShaderResource(CommonShaderStage shaderStage, int slot, EngineShaderResourceView resourceView)
             {
                 Update(slot, resourceView);
 
                 var resources = Resources.Select(r => r?.GetResource()).ToArray();
                 shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
-                Counters.ShaderResourceSets++;
+                DeviceContext.frameCounters.ShaderResourceSets++;
             }
 
             public void SetShaderResources(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineShaderResourceView> resourceList)
@@ -79,13 +83,13 @@ namespace Engine.Common
 
                 var resources = Resources.Select(r => r?.GetResource()).ToArray();
                 shaderStage.SetShaderResources(StartSlot, resources.Length, resources);
-                Counters.ShaderResourceSets++;
+                DeviceContext.frameCounters.ShaderResourceSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
                 shaderStage.SetShaderResources(StartSlot, nullSrv.Length - StartSlot, nullSrv);
-                Counters.ShaderResourceClears++;
+                DeviceContext.frameCounters.ShaderResourceClears++;
 
                 Clear();
             }
@@ -100,13 +104,15 @@ namespace Engine.Common
             /// </summary>
             private static readonly SamplerState[] nullSamplers = new SamplerState[CommonShaderStage.SamplerSlotCount];
 
+            public ShaderSamplerState(EngineDeviceContext deviceContext) : base(deviceContext) { }
+
             public void SetSampler(CommonShaderStage shaderStage, int slot, EngineSamplerState samplerState)
             {
                 Update(slot, samplerState);
 
                 var resources = Resources.Select(r => r?.GetSamplerState()).ToArray();
                 shaderStage.SetSamplers(StartSlot, resources.Length, resources);
-                Counters.SamplerSets++;
+                DeviceContext.frameCounters.SamplerSets++;
             }
 
             public void SetSamplers(CommonShaderStage shaderStage, int startSlot, IEnumerable<EngineSamplerState> samplerList)
@@ -115,13 +121,13 @@ namespace Engine.Common
 
                 var samplers = Resources.Select(r => r?.GetSamplerState()).ToArray();
                 shaderStage.SetSamplers(StartSlot, samplers.Length, samplers);
-                Counters.SamplerSets++;
+                DeviceContext.frameCounters.SamplerSets++;
             }
 
             public void Clear(CommonShaderStage shaderStage)
             {
                 shaderStage.SetSamplers(StartSlot, nullSamplers.Length - StartSlot, nullSamplers);
-                Counters.SamplerClears++;
+                DeviceContext.frameCounters.SamplerClears++;
 
                 Clear();
             }
@@ -170,15 +176,15 @@ namespace Engine.Common
         /// <summary>
         /// Current vertex shader constants buffer state
         /// </summary>
-        private readonly ShaderConstantBufferState currentVertexShaderConstantBufferState = new();
+        private readonly ShaderConstantBufferState currentVertexShaderConstantBufferState;
         /// <summary>
         /// Current vertex shader resource views state
         /// </summary>
-        private readonly ShaderResourceState currentVertexShaderResourceViewState = new();
+        private readonly ShaderResourceState currentVertexShaderResourceViewState;
         /// <summary>
         /// Current vertex shader sampler state
         /// </summary>
-        private readonly ShaderSamplerState currentVertexShaderSamplerState = new();
+        private readonly ShaderSamplerState currentVertexShaderSamplerState;
 
         /// <summary>
         /// Current hull shader
@@ -187,15 +193,15 @@ namespace Engine.Common
         /// <summary>
         /// Current hull shader constants buffer state
         /// </summary>
-        private readonly ShaderConstantBufferState currentHullShaderConstantBufferState = new();
+        private readonly ShaderConstantBufferState currentHullShaderConstantBufferState;
         /// <summary>
         /// Current hull shader resource views state
         /// </summary>
-        private readonly ShaderResourceState currentHullShaderResourceViewState = new();
+        private readonly ShaderResourceState currentHullShaderResourceViewState;
         /// <summary>
         /// Current hull shader sampler state
         /// </summary>
-        private readonly ShaderSamplerState currentHullShaderSamplerState = new();
+        private readonly ShaderSamplerState currentHullShaderSamplerState;
 
         /// <summary>
         /// Current domain shader
@@ -204,15 +210,15 @@ namespace Engine.Common
         /// <summary>
         /// Current domain shader constants buffer state
         /// </summary>
-        private readonly ShaderConstantBufferState currentDomainShaderConstantBufferState = new();
+        private readonly ShaderConstantBufferState currentDomainShaderConstantBufferState;
         /// <summary>
         /// Current domain shader resource views state
         /// </summary>
-        private readonly ShaderResourceState currentDomainShaderResourceViewState = new();
+        private readonly ShaderResourceState currentDomainShaderResourceViewState;
         /// <summary>
         /// Current domain shader sampler state
         /// </summary>
-        private readonly ShaderSamplerState currentDomainShaderSamplerState = new();
+        private readonly ShaderSamplerState currentDomainShaderSamplerState;
 
         /// <summary>
         /// Current geometry shader
@@ -221,15 +227,15 @@ namespace Engine.Common
         /// <summary>
         /// Current geometry shader constants buffer state
         /// </summary>
-        private readonly ShaderConstantBufferState currentGeometryShaderConstantBufferState = new();
+        private readonly ShaderConstantBufferState currentGeometryShaderConstantBufferState;
         /// <summary>
         /// Current geometry shader resource views state
         /// </summary>
-        private readonly ShaderResourceState currentGeometryShaderResourceViewState = new();
+        private readonly ShaderResourceState currentGeometryShaderResourceViewState;
         /// <summary>
         /// Current geometry shader sampler state
         /// </summary>
-        private readonly ShaderSamplerState currentGeometryShaderSamplerState = new();
+        private readonly ShaderSamplerState currentGeometryShaderSamplerState;
 
         /// <summary>
         /// Current stream output bindings
@@ -243,15 +249,15 @@ namespace Engine.Common
         /// <summary>
         /// Current pixel shader constants buffer state
         /// </summary>
-        private readonly ShaderConstantBufferState currentPixelShaderConstantBufferState = new();
+        private readonly ShaderConstantBufferState currentPixelShaderConstantBufferState;
         /// <summary>
         /// Current pixel shader resource views state
         /// </summary>
-        private readonly ShaderResourceState currentPixelShaderResourceViewState = new();
+        private readonly ShaderResourceState currentPixelShaderResourceViewState;
         /// <summary>
         /// Current pixel shader sampler state
         /// </summary>
-        private readonly ShaderSamplerState currentPixelShaderSamplerState = new();
+        private readonly ShaderSamplerState currentPixelShaderSamplerState;
 
         /// <summary>
         /// Current compute shader
@@ -260,15 +266,15 @@ namespace Engine.Common
         /// <summary>
         /// Current compute shader constants buffer state
         /// </summary>
-        private readonly ShaderConstantBufferState currentComputeShaderConstantBufferState = new();
+        private readonly ShaderConstantBufferState currentComputeShaderConstantBufferState;
         /// <summary>
         /// Current compute shader resource views state
         /// </summary>
-        private readonly ShaderResourceState currentComputeShaderResourceViewState = new();
+        private readonly ShaderResourceState currentComputeShaderResourceViewState;
         /// <summary>
         /// Current compute shader sampler state
         /// </summary>
-        private readonly ShaderSamplerState currentComputeShaderSamplerState = new();
+        private readonly ShaderSamplerState currentComputeShaderSamplerState;
 
         /// <summary>
         /// Current vertex buffer first slot
@@ -291,8 +297,15 @@ namespace Engine.Common
         /// </summary>
         private int currentIndexOffset = -1;
 
+        /// <summary>
+        /// Frame counters class
+        /// </summary>
+        private readonly FrameCounters frameCounters = null;
+
         /// <inheritdoc/>
         public string Name { get; private set; }
+        /// <inheritdoc/>
+        public int PassIndex { get; private set; }
         /// <inheritdoc/>
         public Topology IAPrimitiveTopology
         {
@@ -305,7 +318,7 @@ namespace Engine.Common
                 if (currentIAPrimitiveTopology != value)
                 {
                     deviceContext.InputAssembler.PrimitiveTopology = (PrimitiveTopology)value;
-                    Counters.IAPrimitiveTopologySets++;
+                    frameCounters.IAPrimitiveTopologySets++;
 
                     currentIAPrimitiveTopology = value;
                 }
@@ -323,7 +336,7 @@ namespace Engine.Common
                 if (currentIAInputLayout != value)
                 {
                     deviceContext.InputAssembler.InputLayout = value?.GetInputLayout();
-                    Counters.IAInputLayoutSets++;
+                    frameCounters.IAInputLayoutSets++;
 
                     currentIAInputLayout = value;
                 }
@@ -334,13 +347,41 @@ namespace Engine.Common
         /// Constructor
         /// </summary>
         /// <param name="name">Name</param>
+        /// <param name="passIndex">Pass index</param>
         /// <param name="deviceContext">Device context</param>
-        internal EngineDeviceContext(string name, DeviceContext3 deviceContext)
+        internal EngineDeviceContext(string name, int passIndex, DeviceContext3 deviceContext)
         {
             Name = name ?? throw new ArgumentNullException(nameof(name), "A device context name must be specified.");
             this.deviceContext = deviceContext ?? throw new ArgumentNullException(nameof(deviceContext), "A device context must be specified.");
 
+            PassIndex = passIndex;
             this.deviceContext.DebugName = name;
+
+            frameCounters = Counters.CreatePassCounters(name, passIndex);
+
+            currentVertexShaderConstantBufferState = new(this);
+            currentVertexShaderResourceViewState = new(this);
+            currentVertexShaderSamplerState = new(this);
+
+            currentHullShaderConstantBufferState = new(this);
+            currentHullShaderResourceViewState = new(this);
+            currentHullShaderSamplerState = new(this);
+
+            currentDomainShaderConstantBufferState = new(this);
+            currentDomainShaderResourceViewState = new(this);
+            currentDomainShaderSamplerState = new(this);
+
+            currentGeometryShaderConstantBufferState = new(this);
+            currentGeometryShaderResourceViewState = new(this);
+            currentGeometryShaderSamplerState = new(this);
+
+            currentPixelShaderConstantBufferState = new(this);
+            currentPixelShaderResourceViewState = new(this);
+            currentPixelShaderSamplerState = new(this);
+
+            currentComputeShaderConstantBufferState = new(this);
+            currentComputeShaderResourceViewState = new(this);
+            currentComputeShaderSamplerState = new(this);
         }
         /// <summary>
         /// Destructor
@@ -374,7 +415,7 @@ namespace Engine.Common
         public void ClearState()
         {
             deviceContext.ClearState();
-            Counters.ContextClears++;
+            frameCounters.ContextClears++;
 
             currentIAPrimitiveTopology = Topology.Undefined;
             currentIAInputLayout = null;
@@ -432,7 +473,7 @@ namespace Engine.Common
             }
 
             deviceContext.Rasterizer.SetViewports(viewports.ToArray());
-            Counters.ViewportsSets++;
+            frameCounters.ViewportsSets++;
 
             currentViewports = viewports;
         }
@@ -441,7 +482,7 @@ namespace Engine.Common
         public void SetRenderTargets(EngineRenderTargetView renderTargets, EngineDepthStencilView depthMap)
         {
             deviceContext.OutputMerger.SetTargets(depthMap.GetDepthStencil(), renderTargets.GetRenderTarget());
-            Counters.RenderTargetSets++;
+            frameCounters.RenderTargetSets++;
         }
         /// <inheritdoc/>
         public void SetRenderTargets(EngineRenderTargetView renderTargets, bool clearRT, Color4 clearRTColor)
@@ -460,14 +501,14 @@ namespace Engine.Common
             var rtvCount = rtv.Count();
 
             deviceContext.OutputMerger.SetTargets(null, rtvCount, rtv.ToArray());
-            Counters.RenderTargetSets++;
+            frameCounters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
                     deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
-                    Counters.RenderTargetClears++;
+                    frameCounters.RenderTargetClears++;
                 }
             }
         }
@@ -484,14 +525,14 @@ namespace Engine.Common
             var rtvCount = rtv.Count();
 
             deviceContext.OutputMerger.SetTargets(dsv, 0, Array.Empty<UnorderedAccessView>(), Array.Empty<int>(), rtv.ToArray());
-            Counters.RenderTargetSets++;
+            frameCounters.RenderTargetSets++;
 
             if (clearRT && rtvCount > 0)
             {
                 for (int i = 0; i < rtvCount; i++)
                 {
                     deviceContext.ClearRenderTargetView(rtv.ElementAt(i), clearRTColor);
-                    Counters.RenderTargetClears++;
+                    frameCounters.RenderTargetClears++;
                 }
             }
 
@@ -508,7 +549,7 @@ namespace Engine.Common
                 if (clearStencil) clearDSFlags |= DepthStencilClearFlags.Stencil;
 
                 deviceContext.ClearDepthStencilView(depthMap.GetDepthStencil(), clearDSFlags, 1.0f, 0);
-                Counters.DepthStencilClears++;
+                frameCounters.DepthStencilClears++;
             }
         }
         /// <inheritdoc/>
@@ -520,7 +561,7 @@ namespace Engine.Common
             }
 
             deviceContext.OutputMerger.SetDepthStencilState(state.GetDepthStencilState(), stencilRef);
-            Counters.DepthStencilStateChanges++;
+            frameCounters.DepthStencilStateChanges++;
 
             currentDepthStencilState = state;
             currentDepthStencilRef = stencilRef;
@@ -535,7 +576,7 @@ namespace Engine.Common
             }
 
             deviceContext.Rasterizer.State = state.GetRasterizerState();
-            Counters.RasterizerStateChanges++;
+            frameCounters.RasterizerStateChanges++;
 
             currentRasterizerState = state;
         }
@@ -548,7 +589,7 @@ namespace Engine.Common
             }
 
             deviceContext.OutputMerger.SetBlendState(state.GetBlendState(), state.BlendFactor, state.SampleMask);
-            Counters.OMBlendStateChanges++;
+            frameCounters.OMBlendStateChanges++;
 
             currentBlendState = state;
         }
@@ -561,7 +602,7 @@ namespace Engine.Common
                 var vbBindings = vertexBufferBindings?.Select(v => v.GetVertexBufferBinding()).ToArray() ?? Array.Empty<VertexBufferBinding>();
 
                 deviceContext.InputAssembler.SetVertexBuffers(firstSlot, vbBindings);
-                Counters.IAVertexBuffersSets++;
+                frameCounters.IAVertexBuffersSets++;
 
                 currentVertexBufferFirstSlot = firstSlot;
                 currentVertexBufferBindings = vertexBufferBindings;
@@ -573,7 +614,7 @@ namespace Engine.Common
             if (currentIndexBufferRef != indexBufferRef || currentIndexFormat != format || currentIndexOffset != offset)
             {
                 deviceContext.InputAssembler.SetIndexBuffer(indexBufferRef?.GetBuffer(), format, offset);
-                Counters.IAIndexBufferSets++;
+                frameCounters.IAIndexBufferSets++;
 
                 currentIndexBufferRef = indexBufferRef;
                 currentIndexFormat = format;
@@ -624,7 +665,7 @@ namespace Engine.Common
             }
 
             deviceContext.VertexShader.Set(vertexShader?.GetShader());
-            Counters.VertexShadersSets++;
+            frameCounters.VertexShadersSets++;
 
             currentVertexShader = vertexShader;
         }
@@ -673,7 +714,7 @@ namespace Engine.Common
             }
 
             deviceContext.HullShader.Set(hullShader?.GetShader());
-            Counters.HullShadersSets++;
+            frameCounters.HullShadersSets++;
 
             currentHullShader = hullShader;
         }
@@ -722,7 +763,7 @@ namespace Engine.Common
             }
 
             deviceContext.DomainShader.Set(domainShader?.GetShader());
-            Counters.DomainShadersSets++;
+            frameCounters.DomainShadersSets++;
 
             currentDomainShader = domainShader;
         }
@@ -771,7 +812,7 @@ namespace Engine.Common
             }
 
             deviceContext.GeometryShader.Set(geometryShader?.GetShader());
-            Counters.GeometryShadersSets++;
+            frameCounters.GeometryShadersSets++;
 
             currentGeomeryShader = geometryShader;
         }
@@ -821,7 +862,7 @@ namespace Engine.Common
             var soBindings = streamOutBinding?.Select(s => s.GetStreamOutputBufferBinding()).ToArray();
 
             deviceContext.StreamOutput.SetTargets(soBindings);
-            Counters.SOTargetsSets++;
+            frameCounters.SOTargetsSets++;
 
             currentStreamOutputBindings = streamOutBinding;
         }
@@ -835,7 +876,7 @@ namespace Engine.Common
             }
 
             deviceContext.PixelShader.Set(pixelShader?.GetShader());
-            Counters.PixelShadersSets++;
+            frameCounters.PixelShadersSets++;
 
             currentPixelShader = pixelShader;
         }
@@ -884,7 +925,7 @@ namespace Engine.Common
             }
 
             deviceContext.ComputeShader.Set(computeShader?.GetShader());
-            Counters.ComputeShadersSets++;
+            frameCounters.ComputeShadersSets++;
 
             currentComputeShader = computeShader;
         }
@@ -928,7 +969,7 @@ namespace Engine.Common
         public void EffectPassApply(EngineEffectTechnique technique, int index, int flags)
         {
             technique.GetPass(index).Apply(deviceContext, flags);
-            Counters.TechniquePasses++;
+            frameCounters.TechniquePasses++;
         }
 
         /// <inheritdoc/>
@@ -952,7 +993,7 @@ namespace Engine.Common
 
             var dataBox = new DataBox(dataStream.DataPointer, 0, 0);
             deviceContext.UpdateSubresource(dataBox, buffer, 0);
-            Counters.SubresourceUpdates++;
+            frameCounters.SubresourceUpdates++;
 
             return true;
         }
@@ -1016,7 +1057,7 @@ namespace Engine.Common
             using (resource)
             {
                 deviceContext.MapSubresource(resource, 0, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-                Counters.SubresourceMaps++;
+                frameCounters.SubresourceMaps++;
 
                 using (stream)
                 {
@@ -1025,10 +1066,10 @@ namespace Engine.Common
                 }
 
                 deviceContext.UnmapSubresource(resource, 0);
-                Counters.SubresourceUnmaps++;
+                frameCounters.SubresourceUnmaps++;
             }
 
-            Counters.TextureWrites++;
+            frameCounters.TextureWrites++;
         }
 
         /// <inheritdoc/>
@@ -1059,7 +1100,7 @@ namespace Engine.Common
             }
 
             deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-            Counters.SubresourceMaps++;
+            frameCounters.SubresourceMaps++;
 
             using (stream)
             {
@@ -1068,9 +1109,9 @@ namespace Engine.Common
             }
 
             deviceContext.UnmapSubresource(b, 0);
-            Counters.SubresourceUnmaps++;
+            frameCounters.SubresourceUnmaps++;
 
-            Counters.BufferWrites++;
+            frameCounters.BufferWrites++;
 
             return true;
         }
@@ -1098,7 +1139,7 @@ namespace Engine.Common
 
             //This should be MapMode.WriteNoOverwrite
             deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
-            Counters.SubresourceMaps++;
+            frameCounters.SubresourceMaps++;
 
             using (stream)
             {
@@ -1107,9 +1148,9 @@ namespace Engine.Common
             }
 
             deviceContext.UnmapSubresource(b, 0);
-            Counters.SubresourceUnmaps++;
+            frameCounters.SubresourceUnmaps++;
 
-            Counters.BufferWrites++;
+            frameCounters.BufferWrites++;
 
             return true;
         }
@@ -1133,7 +1174,7 @@ namespace Engine.Common
             T[] data = new T[length];
 
             deviceContext.MapSubresource(b, MapMode.Read, MapFlags.None, out DataStream stream);
-            Counters.SubresourceMaps++;
+            frameCounters.SubresourceMaps++;
 
             using (stream)
             {
@@ -1146,9 +1187,9 @@ namespace Engine.Common
             }
 
             deviceContext.UnmapSubresource(b, 0);
-            Counters.SubresourceUnmaps++;
+            frameCounters.SubresourceUnmaps++;
 
-            Counters.BufferReads++;
+            frameCounters.BufferReads++;
 
             return data;
         }
@@ -1190,7 +1231,7 @@ namespace Engine.Common
         /// <param name="instanceCount">Instace count</param>
         private void UpdateDrawPrimitives(int count, int instanceCount)
         {
-            Counters.DrawCallsPerFrame++;
+            frameCounters.DrawCallsPerFrame++;
 
             //Figure number of real primitives using the primitive topology
             int div = (int)currentIAPrimitiveTopology switch
@@ -1201,18 +1242,18 @@ namespace Engine.Common
             };
 
             int primitives = count / div;
-            Counters.PrimitivesPerFrame += primitives * instanceCount;
-            Counters.InstancesPerFrame += instanceCount;
+            frameCounters.PrimitivesPerFrame += primitives * instanceCount;
+            frameCounters.InstancesPerFrame += instanceCount;
         }
 
         /// <inheritdoc/>
         public IEngineCommandList FinishCommandList(string name, bool restoreState = false)
         {
             deviceContext.ClearState();
-            Counters.ContextClears++;
+            frameCounters.ContextClears++;
 
             var cmdList = deviceContext.FinishCommandList(restoreState);
-            Counters.FinishCommandLists++;
+            frameCounters.FinishCommandLists++;
 
             return new EngineCommandList($"{Name} {name ?? "commands"}", cmdList);
         }
@@ -1225,7 +1266,7 @@ namespace Engine.Common
             }
 
             deviceContext.ExecuteCommandList(commandList.GetCommandList(), restoreState);
-            Counters.ExecuteCommandLists++;
+            frameCounters.ExecuteCommandLists++;
 
             commandList.Dispose();
         }

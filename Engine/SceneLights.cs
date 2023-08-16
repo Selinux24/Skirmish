@@ -226,6 +226,13 @@ namespace Engine
         }
 
         /// <summary>
+        /// Gets the light count of all types
+        /// </summary>
+        public int Count()
+        {
+            return DirectionalLights.Length + PointLights.Length + SpotLights.Length;
+        }
+        /// <summary>
         /// Sets the hemispheric ambient light
         /// </summary>
         /// <param name="hemiLight">Hemispheric light</param>

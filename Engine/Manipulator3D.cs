@@ -192,7 +192,7 @@ namespace Engine
 
                 Updated?.Invoke(this, new EventArgs());
 
-                Counters.TransformUpdatesPerFrame++;
+                Counters.PickCounters.TransformUpdatesPerFrame++;
             }
         }
         /// <summary>

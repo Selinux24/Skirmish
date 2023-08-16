@@ -78,6 +78,10 @@ namespace Engine
         /// Initial light direction
         /// </summary>
         private Vector3 initialDirection = Vector3.ForwardLH;
+        /// <summary>
+        /// Light volume
+        /// </summary>
+        private ICullingVolume lightVolume;
 
         /// <inheritdoc/>
         public override Matrix ParentTransform
@@ -175,6 +179,12 @@ namespace Engine
             ToCascadeOffsetY = MatrixSet.GetToCascadeOffsetY();
             ToCascadeScale = MatrixSet.GetToCascadeScale();
             Position = MatrixSet.GetLigthPosition();
+            lightVolume = (IntersectionVolumeFrustum)camera.Frustum;
+        }
+        /// <inheritdoc/>
+        public override ICullingVolume GetLightVolume()
+        {
+            return lightVolume;
         }
 
         /// <inheritdoc/>

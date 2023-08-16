@@ -292,7 +292,7 @@ namespace Engine
                 swapChain.DebugName = "GraphicsSwapChain";
             }
 
-            immediateContext = new EngineDeviceContext("Immediate", device.ImmediateContext3);
+            immediateContext = new EngineDeviceContext("Immediate", -1, device.ImmediateContext3);
 
             PrepareDevice(displayMode.Width, displayMode.Height, false);
 
@@ -524,9 +524,10 @@ namespace Engine
         /// Creates a new deferred context
         /// </summary>
         /// <param name="name">Deferred context name</param>
-        public IEngineDeviceContext CreateDeferredContext(string name)
+        /// <param name="passIndex">Pass index</param>
+        public IEngineDeviceContext CreateDeferredContext(string name, int passIndex)
         {
-            return new EngineDeviceContext(name, new DeviceContext3(device));
+            return new EngineDeviceContext(name, passIndex, new DeviceContext3(device));
         }
 
         /// <summary>

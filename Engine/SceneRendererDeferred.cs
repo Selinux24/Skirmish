@@ -557,10 +557,6 @@ namespace Engine
 #endif
             var graphics = Scene.Game.Graphics;
 
-            Counters.MaxInstancesPerFrame += lights.DirectionalLights.Length;
-            Counters.MaxInstancesPerFrame += lights.PointLights.Length;
-            Counters.MaxInstancesPerFrame += lights.SpotLights.Length;
-
             #region Initialization
 #if DEBUG
             Stopwatch swPrepare = Stopwatch.StartNew();

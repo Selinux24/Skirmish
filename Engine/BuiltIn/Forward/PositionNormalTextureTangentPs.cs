@@ -1,5 +1,4 @@
 ﻿using Engine.Shaders.Properties;
-using System;
 
 namespace Engine.BuiltIn.Forward
 {
@@ -39,28 +38,6 @@ namespace Engine.BuiltIn.Forward
 
             samplerDiffuse = BuiltInShaders.GetSamplerLinear();
             samplerNormal = BuiltInShaders.GetSamplerLinear();
-        }
-        /// <summary>
-        /// Destructor
-        /// </summary>
-        ~PositionNormalTextureTangentPs()
-        {
-            // Finalizer calls Dispose(false)  
-            Dispose(false);
-        }
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
-        /// <param name="disposing">Free managed resources</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            
         }
 
         /// <summary>

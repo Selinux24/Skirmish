@@ -546,14 +546,15 @@ namespace Engine.Common
         /// <summary>
         /// Creates a deferred context
         /// </summary>
+        /// <param name="name">Pass name</param>
         /// <param name="passIndex">Pass index</param>
-        private IEngineDeviceContext GetDeferredContext(int passIndex)
+        private IEngineDeviceContext GetDeferredContext(string name, int passIndex)
         {
             var graphics = Scene.Game.Graphics;
 
             while (passIndex >= deferredContextList.Count)
             {
-                deferredContextList.Add(graphics.CreateDeferredContext($"Deferred Context({passIndex})"));
+                deferredContextList.Add(graphics.CreateDeferredContext(name, passIndex));
             }
 
             return deferredContextList[passIndex];
@@ -775,7 +776,7 @@ namespace Engine.Common
                 return;
             }
 
-            var dc = GetDeferredContext(passIndex);
+            var dc = GetDeferredContext($"Deferred Context({name}.{passIndex})", passIndex);
             passLists.Add(new PassContext
             {
                 PassIndex = passIndex,
@@ -960,8 +961,6 @@ namespace Engine.Common
         /// <param name="drawable">Drawable component</param>
         protected virtual bool Draw(DrawContext context, IDrawable drawable)
         {
-            Counters.MaxInstancesPerFrame += drawable.InstanceCount;
-
             var blend = drawable.BlendMode;
             if (drawable.Usage.HasFlag(SceneObjectUsages.UI))
             {
@@ -1150,6 +1149,7 @@ namespace Engine.Common
         /// </summary>
         /// <param name="passIndex">Pass index</param>
         /// <param name="passName">Pass name</param>
+        /// <param name="shadowMapper">Shadow mapper</param>
         /// <param name="shadowCastingLights">Lights</param>
         /// <param name="shadowObjs">Affected objects</param>
         /// <param name="cullIndex">Cull index</param>
@@ -1184,9 +1184,6 @@ namespace Engine.Common
             //Get if all affected objects are suitable for cull testing
             bool allCullingObjects = shadowObjs.Count() == toCullShadowObjs.Count();
 
-            //Get the camera sphere volume for cull testing
-            var camSphere = Scene.Camera.GetIntersectionVolume(IntersectDetectionMode.Sphere);
-
             var lArray = shadowCastingLights.ToArray();
             for (int l = 0; l < lArray.Length; l++)
             {
@@ -1200,7 +1197,8 @@ namespace Engine.Common
                 int lCullIndex = cullIndex + l;
 
                 //Cull testing
-                if (!DoShadowCullingTest(toCullShadowObjs, lCullIndex, allCullingObjects, camSphere))
+                var lightVolume = light.GetLightVolume();
+                if (!DoShadowCullingTest(toCullShadowObjs, lCullIndex, allCullingObjects, lightVolume))
                 {
                     continue;
                 }
@@ -1224,7 +1222,7 @@ namespace Engine.Common
         /// <param name="lightVolume">Light volume</param>
         private bool DoShadowCullingTest(IEnumerable<ICullable> components, int cullIndex, bool allCullingObjects, ICullingVolume lightVolume)
         {
-            if (components.Any())
+            if (!components.Any())
             {
                 return true;
             }

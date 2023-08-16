@@ -16,6 +16,11 @@ namespace Engine.Common
         private readonly List<T> resources = new();
 
         /// <summary>
+        /// Device context
+        /// </summary>
+        protected EngineDeviceContext DeviceContext { get; private set; }
+
+        /// <summary>
         /// Start slot of the last call
         /// </summary>
         public int StartSlot { get; set; }
@@ -32,6 +37,15 @@ namespace Engine.Common
             {
                 return resources.Count;
             }
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="deviceContext">Device context</param>
+        public EngineShaderStageState(EngineDeviceContext deviceContext)
+        {
+            DeviceContext = deviceContext;
         }
 
         /// <summary>

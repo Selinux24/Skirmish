@@ -176,6 +176,11 @@ namespace Engine
 
             return new[] { vp };
         }
+        /// <inheritdoc/>
+        public override ICullingVolume GetLightVolume()
+        {
+            return (IntersectionVolumeSphere)BoundingSphere;
+        }
 
         /// <inheritdoc/>
         public override ISceneLight Clone()
