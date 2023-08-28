@@ -50,7 +50,6 @@ namespace Engine
         /// <summary>
         /// Creates a vertex buffer
         /// </summary>
-        /// <typeparam name="T">Data type</typeparam>
         /// <param name="name">Buffer name</param>
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <param name="dynamic">Dynamic or Inmutable</param>
@@ -167,7 +166,7 @@ namespace Engine
             ResourceUsage usage = ResourceUsage.Default;
             BindFlags binding = BindFlags.ConstantBuffer;
 
-            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, 1);
+            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, 1);
 
             var description = new BufferDescription()
             {
@@ -185,7 +184,6 @@ namespace Engine
         /// <summary>
         /// Creates a buffer for the specified data type
         /// </summary>
-        /// <param name="device">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="sizeInBytes">Buffer size in bytes</param>
         /// <param name="usage">Resource usage</param>
@@ -194,7 +192,7 @@ namespace Engine
         /// <returns>Returns created buffer</returns>
         public EngineBuffer CreateBuffer(string name, int sizeInBytes, EngineResourceUsage usage, EngineBindFlags binding, EngineCpuAccessFlags access)
         {
-            Counters.RegBuffer(typeof(object), name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
+            FrameCounters.RegBuffer(name, (int)usage, (int)binding, sizeInBytes, sizeInBytes);
 
             var description = new BufferDescription()
             {
@@ -212,7 +210,6 @@ namespace Engine
         /// Creates a buffer for the specified data type
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="length">Buffer length</param>
         /// <param name="usage">Resource usage</param>
@@ -224,7 +221,7 @@ namespace Engine
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * length;
 
-            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, length);
+            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, length);
 
             var description = new BufferDescription()
             {
@@ -242,7 +239,6 @@ namespace Engine
         /// Creates a buffer for the specified data type
         /// </summary>
         /// <typeparam name="T">Data type</typeparam>
-        /// <param name="device">Graphics device</param>
         /// <param name="name">Buffer name</param>
         /// <param name="data">Data</param>
         /// <param name="usage">Resource usage</param>
@@ -254,7 +250,7 @@ namespace Engine
         {
             int sizeInBytes = Marshal.SizeOf(typeof(T)) * data.Count();
 
-            Counters.RegBuffer(typeof(T), name, (int)usage, (int)binding, sizeInBytes, data.Count());
+            FrameCounters.RegBuffer<T>(name, (int)usage, (int)binding, sizeInBytes, data.Count());
 
             using var dstr = new DataStream(sizeInBytes, true, true);
             dstr.WriteRange(data.ToArray());

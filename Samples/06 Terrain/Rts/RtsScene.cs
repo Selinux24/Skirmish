@@ -2001,12 +2001,12 @@ namespace Terrain.Rts
 
             stats.Text = Game.RuntimeText;
 
-            var counters = Counters.GetFrameCounters(-1);
+            var counters = FrameCounters.GetFrameCounters(-1);
 
             string txt1 = string.Format(
                 "Buffers active: {0} {1} Kbs, reads: {2}, writes: {3}; {4} - Result: {5}; Primitives: {6}",
-                Counters.Buffers,
-                Counters.BufferBytes / 1024,
+                FrameCounters.Buffers,
+                FrameCounters.BufferBytes / 1024,
                 counters?.BufferReads,
                 counters?.BufferWrites,
                 GetRenderMode(),

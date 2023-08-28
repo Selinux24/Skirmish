@@ -4,6 +4,8 @@ using System.Diagnostics;
 
 namespace Engine.Collections.Generic
 {
+    using Engine.Common;
+
     /// <summary>
     /// Quad-tree
     /// </summary>
@@ -63,7 +65,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.PickCounters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
+                FrameCounters.PickCounters.AddVolumeFrustumTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -82,7 +84,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.PickCounters.AddVolumeBoxTest((float)w.Elapsed.TotalSeconds);
+                FrameCounters.PickCounters.AddVolumeBoxTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>
@@ -101,7 +103,7 @@ namespace Engine.Collections.Generic
             {
                 w.Stop();
 
-                Counters.PickCounters.AddVolumeSphereTest((float)w.Elapsed.TotalSeconds);
+                FrameCounters.PickCounters.AddVolumeSphereTest((float)w.Elapsed.TotalSeconds);
             }
         }
         /// <summary>

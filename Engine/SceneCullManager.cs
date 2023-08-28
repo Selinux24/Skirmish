@@ -88,11 +88,11 @@ namespace Engine
                 return;
             }
 
-            if (values.Count <= index)
+            int count = values.Count;
+            if (count <= index)
             {
-                var valuesToAdd = new CullData[index - values.Count + 1];
-
-                values.AddRange(valuesToAdd);
+                values.AddRange(new CullData[index - count + 1]);
+                count = values.Count;
             }
 
             if (force)

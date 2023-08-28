@@ -2,6 +2,8 @@
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// 2D manipulator
     /// </summary>
@@ -88,7 +90,7 @@ namespace Engine
 
             updateInternals = false;
 
-            Counters.PickCounters.TransformUpdatesPerFrame++;
+            FrameCounters.PickCounters.TransformUpdatesPerFrame++;
         }
 
         /// <summary>

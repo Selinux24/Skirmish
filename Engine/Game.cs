@@ -875,9 +875,9 @@ namespace Engine
                 return;
             }
 
-            Counters.FrameCount++;
+            FrameCounters.FrameCount++;
 
-            Logger.WriteInformation(this, $"##### Frame {Counters.FrameCount} Start ####");
+            Logger.WriteInformation(this, $"##### Frame {FrameCounters.FrameCount} Start ####");
 
             Stopwatch gSW = new();
             gSW.Start();
@@ -894,19 +894,19 @@ namespace Engine
             GameStatus.Add("TOTAL", gSW);
 
             LogLevel level = EvaluateTime(gSW.ElapsedMilliseconds);
-            Logger.Write(level, this, $"##### Frame {Counters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
+            Logger.Write(level, this, $"##### Frame {FrameCounters.FrameCount} End - {gSW.ElapsedMilliseconds} milliseconds ####");
 
             if (ResourceManager.HasRequests)
             {
                 Logger.WriteInformation(this, "ResourceManager: Creating new resources");
-                ResourceManager.CreateResources($"ResourceManager.Frame{Counters.FrameCount}", null);
+                ResourceManager.CreateResources($"ResourceManager.Frame{FrameCounters.FrameCount}", null);
                 Logger.WriteInformation(this, "ResourceManager: New resources created");
             }
 
-            Counters.FramesPerSecond++;
-            Counters.FrameTime += GameTime.ElapsedSeconds;
+            FrameCounters.FramesPerSecond++;
+            FrameCounters.FrameTime += GameTime.ElapsedSeconds;
 
-            if (Counters.FrameTime >= 1.0f)
+            if (FrameCounters.FrameTime >= 1.0f)
             {
                 FrameRefreshCounters();
             }
@@ -918,7 +918,7 @@ namespace Engine
 
             GameStatus.Clear();
 
-            Counters.ClearFrame();
+            FrameCounters.ClearFrame();
         }
         /// <summary>
         /// Update input
@@ -999,23 +999,23 @@ namespace Engine
         {
             try
             {
-                var counters = Counters.GetFrameCounters(-1);
+                var counters = FrameCounters.GetFrameCounters(-1);
 
                 RuntimeText = string.Format(
                     "{0} - {1} - Frame {2} FPS: {3:000} Updates: {4:00} {5} F. Time: {6:0.0000} (secs) T. Time: {7:0000} (secs)",
                     Graphics.DeviceDescription,
                     GetActiveScene()?.GetRenderMode() ?? SceneModes.Unknown,
-                    Counters.FrameCount,
-                    Counters.FramesPerSecond,
-                    Counters.PickCounters.TransformUpdatesPerFrame,
+                    FrameCounters.FrameCount,
+                    FrameCounters.FramesPerSecond,
+                    FrameCounters.PickCounters.TransformUpdatesPerFrame,
                     counters,
                     GameTime.ElapsedSeconds,
                     GameTime.TotalSeconds);
 #if DEBUG
                 Form.Text = RuntimeText;
 #endif
-                Counters.FramesPerSecond = 0;
-                Counters.FrameTime = 0f;
+                FrameCounters.FramesPerSecond = 0;
+                FrameCounters.FrameTime = 0f;
             }
             catch (Exception ex)
             {

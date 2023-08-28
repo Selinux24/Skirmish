@@ -250,7 +250,7 @@ namespace Engine
         /// <param name="dynamic">Dynamic</param>
         private Texture1D CreateTexture1D<T>(string name, int size, IEnumerable<T> values, bool dynamic) where T : struct
         {
-            Counters.Textures++;
+            FrameCounters.Textures++;
 
             var desc = new Texture1DDescription()
             {
@@ -281,7 +281,7 @@ namespace Engine
         /// <param name="dynamic">Dynamic</param>
         private Texture2D1 CreateTexture2D<T>(string name, int width, int height, IEnumerable<T> values, bool dynamic) where T : struct
         {
-            Counters.Textures++;
+            FrameCounters.Textures++;
 
             var desc = new Texture2DDescription1()
             {
@@ -318,7 +318,7 @@ namespace Engine
         /// <returns>Returns the Texture2D</returns>
         private Texture2D1 CreateTexture2D(string name, TextureData description, bool generateMips, bool dynamic)
         {
-            Counters.Textures++;
+            FrameCounters.Textures++;
 
             var width = description.Width;
             var height = description.Height;
@@ -375,7 +375,7 @@ namespace Engine
         /// <returns>Returns the Texture2D</returns>
         private Texture2D1 CreateTexture2D(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
         {
-            Counters.Textures++;
+            FrameCounters.Textures++;
 
             var description = descriptions.First();
 
@@ -439,7 +439,7 @@ namespace Engine
         /// <returns>Returns the Texture2DCube</returns>
         private Texture2D1 CreateTexture2DCube(string name, TextureData description, bool generateMips, bool dynamic)
         {
-            Counters.Textures++;
+            FrameCounters.Textures++;
 
             var width = description.Width;
             var height = description.Height;
@@ -495,7 +495,7 @@ namespace Engine
         /// <returns>Returns the Texture2DCube</returns>
         private Texture2D1 CreateTexture2DCube(string name, IEnumerable<TextureData> descriptions, bool generateMips, bool dynamic)
         {
-            Counters.Textures++;
+            FrameCounters.Textures++;
 
             var description = descriptions.First();
 

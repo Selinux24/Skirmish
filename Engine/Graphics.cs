@@ -640,7 +640,7 @@ namespace Engine
         {
             try
             {
-                Counters.Textures++;
+                FrameCounters.Textures++;
 
                 bool multiSampled = false;
                 var sampleDescription = new SampleDescription(1, 0);
@@ -676,7 +676,7 @@ namespace Engine
         {
             try
             {
-                Counters.Textures++;
+                FrameCounters.Textures++;
 
                 bool multiSampled = false;
                 var sampleDescription = new SampleDescription(1, 0);

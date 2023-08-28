@@ -269,7 +269,7 @@ namespace Engine
             ReplaceRenderer(renderer);
             sceneMode = mode;
 
-            Counters.ClearAll();
+            FrameCounters.ClearAll();
 
             return true;
         }

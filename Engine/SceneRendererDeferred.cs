@@ -39,6 +39,284 @@ namespace Engine
         private const int UIPostProcessingPass = NextPass + 4;
 
 #if DEBUG
+
+        /// <summary>
+        /// Deferred renderer frame stats
+        /// </summary>
+        class FrameStatsDeferred
+        {
+            public long Total { get; private set; } = 0;
+            public long ShadowMapStart { get; set; } = 0;
+            public long ShadowMapCull { get; set; } = 0;
+            public long ShadowMapDraw { get; set; } = 0;
+            public long DeferredCull { get; set; } = 0;
+            public long DeferredGbuffer { get; set; } = 0;
+            public long DeferredGbufferInit { get; set; } = 0;
+            public long DeferredGbufferDraw { get; set; } = 0;
+            public long DeferredGbufferResolve { get; set; } = 0;
+            public long DeferredLbuffer { get; set; } = 0;
+            public long DeferredLbufferInit { get; set; } = 0;
+            public long DeferredLbufferDir { get; set; } = 0;
+            public long DeferredLbufferPoi { get; set; } = 0;
+            public long DeferredLbufferSpo { get; set; } = 0;
+            public long DeferredCompose { get; set; } = 0;
+            public long DeferredComposeInit { get; set; } = 0;
+            public long DeferredComposeDraw { get; set; } = 0;
+            public long DisabledDeferredCull { get; set; } = 0;
+            public long DisabledDeferredDraw { get; set; } = 0;
+
+            /// <summary>
+            /// Clear frame
+            /// </summary>
+            public void Clear()
+            {
+                Total = 0;
+                ShadowMapStart = 0;
+                ShadowMapCull = 0;
+                ShadowMapDraw = 0;
+                DeferredCull = 0;
+                DeferredGbuffer = 0;
+                DeferredGbufferInit = 0;
+                DeferredGbufferDraw = 0;
+                DeferredGbufferResolve = 0;
+                DeferredLbuffer = 0;
+                DeferredLbufferInit = 0;
+                DeferredLbufferDir = 0;
+                DeferredLbufferPoi = 0;
+                DeferredLbufferSpo = 0;
+                DeferredCompose = 0;
+                DeferredComposeInit = 0;
+                DeferredComposeDraw = 0;
+                DisabledDeferredCull = 0;
+                DisabledDeferredDraw = 0;
+            }
+            /// <summary>
+            /// Update stats into counter
+            /// </summary>
+            /// <param name="elapsedTicks">Elapsed ticks</param>
+            public void UpdateCounters(long elapsedTicks)
+            {
+                Total = elapsedTicks;
+
+                if (FrameCounters.GetStatistics("DEFERRED_COMPOSITION") is long[] deferredCompositionCounters)
+                {
+                    DeferredComposeInit = deferredCompositionCounters[0];
+                    DeferredComposeDraw = deferredCompositionCounters[1];
+                }
+
+                if (FrameCounters.GetStatistics("DEFERRED_LIGHTING") is long[] deferredCounters)
+                {
+                    DeferredLbufferInit = deferredCounters[0];
+                    DeferredLbufferDir = deferredCounters[1];
+                    DeferredLbufferPoi = deferredCounters[2];
+                    DeferredLbufferSpo = deferredCounters[3];
+                }
+
+                long totalShadowMap = ShadowMapStart + ShadowMapCull + ShadowMapDraw;
+                if (totalShadowMap > 0)
+                {
+                    float prcStart = (float)ShadowMapStart / (float)totalShadowMap;
+                    float prcCull = (float)ShadowMapCull / (float)totalShadowMap;
+                    float prcDraw = (float)ShadowMapDraw / (float)totalShadowMap;
+
+                    FrameCounters.SetStatistics("Scene.Draw.totalShadowMap", string.Format(
+                        "SM = {0:000000}; Start {1:00}%; Cull {2:00}%; Draw {3:00}%",
+                        totalShadowMap,
+                        prcStart * 100f,
+                        prcCull * 100f,
+                        prcDraw * 100f));
+                }
+
+                long totalDeferred = DeferredCull + DeferredGbuffer + DeferredLbuffer + DeferredCompose + DisabledDeferredCull + DisabledDeferredDraw;
+                if (totalDeferred > 0)
+                {
+                    float prcCull = (float)DeferredCull / (float)totalDeferred;
+                    float prcDCull = (float)DisabledDeferredCull / (float)totalDeferred;
+                    float prcGBuffer = (float)DeferredGbuffer / (float)totalDeferred;
+                    float prcLBuffer = (float)DeferredLbuffer / (float)totalDeferred;
+                    float prcCompose = (float)DeferredCompose / (float)totalDeferred;
+                    float prcDraw = (float)DisabledDeferredDraw / (float)totalDeferred;
+
+                    FrameCounters.SetStatistics("Scene.Draw.totalDeferred", string.Format(
+                        "DR = {0:000000}; Cull {1:00}%; GBuffer {2:00}%; LBuffer {3:00}%; Compose {4:00}%; DeferredDisabledCull {5:00}%; DeferredDisabledDraw {6:00}%",
+                        totalDeferred,
+                        prcCull * 100f,
+                        prcGBuffer * 100f,
+                        prcLBuffer * 100f,
+                        prcCompose * 100f,
+                        prcDCull * 100f,
+                        prcDraw * 100f));
+
+                    if (DeferredGbuffer > 0)
+                    {
+                        float prcPass1 = (float)DeferredGbufferInit / (float)DeferredGbuffer;
+                        float prcPass2 = (float)DeferredGbufferDraw / (float)DeferredGbuffer;
+                        float prcPass3 = (float)DeferredGbufferResolve / (float)DeferredGbuffer;
+
+                        FrameCounters.SetStatistics("Scene.Draw.deferred_gbuffer PRC", string.Format(
+                            "GBuffer = {0:000000}; Init {1:00}%; Draw {2:00}%; Resolve {3:00}%",
+                            DeferredGbuffer,
+                            prcPass1 * 100f,
+                            prcPass2 * 100f,
+                            prcPass3 * 100f));
+
+                        FrameCounters.SetStatistics("Scene.Draw.deferred_gbuffer CNT", string.Format(
+                            "GBuffer = {0:000000}; Init {1:000000}; Draw {2:000000}; Resolve {3:000000}",
+                            DeferredGbuffer,
+                            DeferredGbufferInit,
+                            DeferredGbufferDraw,
+                            DeferredGbufferResolve));
+                    }
+
+                    if (DeferredLbuffer > 0)
+                    {
+                        float prcPass1 = (float)DeferredLbufferInit / (float)DeferredLbuffer;
+                        float prcPass2 = (float)DeferredLbufferDir / (float)DeferredLbuffer;
+                        float prcPass3 = (float)DeferredLbufferPoi / (float)DeferredLbuffer;
+                        float prcPass4 = (float)DeferredLbufferSpo / (float)DeferredLbuffer;
+
+                        FrameCounters.SetStatistics("Scene.Draw.deferred_lbuffer PRC", string.Format(
+                            "LBuffer = {0:000000}; Init {1:00}%; Directionals {2:00}%; Points {3:00}%; Spots {4:00}%",
+                            DeferredLbuffer,
+                            prcPass1 * 100f,
+                            prcPass2 * 100f,
+                            prcPass3 * 100f,
+                            prcPass4 * 100f));
+
+                        FrameCounters.SetStatistics("Scene.Draw.deferred_lbuffer CNT", string.Format(
+                            "LBuffer = {0:000000}; Init {1:000000}; Directionals {2:000000}; Points {3:000000}; Spots {4:000000}",
+                            DeferredLbuffer,
+                            DeferredLbufferInit,
+                            DeferredLbufferDir,
+                            DeferredLbufferPoi,
+                            DeferredLbufferSpo));
+                    }
+
+                    if (DeferredCompose > 0)
+                    {
+                        float prcPass1 = (float)DeferredComposeInit / (float)DeferredCompose;
+                        float prcPass2 = (float)DeferredComposeDraw / (float)DeferredCompose;
+
+                        FrameCounters.SetStatistics("Scene.Draw.deferred_compose PRC", string.Format(
+                            "Compose = {0:000000}; Init {1:00}%; Draw {2:00}%",
+                            DeferredCompose,
+                            prcPass1 * 100f,
+                            prcPass2 * 100f));
+
+                        FrameCounters.SetStatistics("Scene.Draw.deferred_compose CNT", string.Format(
+                            "Compose = {0:000000}; Init {1:000000}; Draw {2:000000}",
+                            DeferredCompose,
+                            DeferredComposeInit,
+                            DeferredComposeDraw));
+                    }
+                }
+
+                long other = Total - (totalShadowMap + totalDeferred);
+
+                float prcSM = (float)totalShadowMap / (float)Total;
+                float prcDR = (float)totalDeferred / (float)Total;
+                float prcOther = (float)other / (float)Total;
+
+                FrameCounters.SetStatistics("Scene.Draw", string.Format(
+                    "TOTAL = {0:000000}; Shadows {1:00}%; Deferred {2:00}%; Other {3:00}%;",
+                    Total,
+                    prcSM * 100f,
+                    prcDR * 100f,
+                    prcOther * 100f));
+            }
+        }
+        /// <summary>
+        /// Light renderer frame stats
+        /// </summary>
+        class FrameStatsLight
+        {
+            public long Total { get; private set; } = 0;
+            public long Prepare { get; set; } = 0;
+            public long Directional { get; set; } = 0;
+            public long Point { get; set; } = 0;
+            public long Spot { get; set; } = 0;
+            public long Wasted { get; set; } = 0;
+            public int DirectionalLights { get; set; } = 0;
+            public int PointLights { get; set; } = 0;
+            public int SpotLights { get; set; } = 0;
+
+            /// <summary>
+            /// Clear frame
+            /// </summary>
+            public void Clear()
+            {
+                Total = 0;
+                Prepare = 0;
+                Directional = 0;
+                Point = 0;
+                Spot = 0;
+                Wasted = 0;
+                DirectionalLights = 0;
+                PointLights = 0;
+                SpotLights = 0;
+            }
+            /// <summary>
+            /// Update stats into counter
+            /// </summary>
+            /// <param name="elapsedTicks">Elapsed ticks</param>
+            public void UpdateCounters(long elapsedTicks)
+            {
+                Total = elapsedTicks;
+
+                long totalLights = Prepare + Directional + Point + Spot;
+                if (totalLights > 0)
+                {
+                    float prcPrepare = (float)Prepare / (float)totalLights;
+                    float prcDirectional = (float)Directional / (float)totalLights;
+                    float prcPoint = (float)Point / (float)totalLights;
+                    float prcSpot = (float)Spot / (float)totalLights;
+                    float prcWasted = (float)(Total - totalLights) / (float)totalLights;
+
+                    FrameCounters.SetStatistics("DeferredRenderer.DrawLights", string.Format(
+                        "{0:000000}; Init {1:00}%; Directional {2:00}%; Point {3:00}%; Spot {4:00}%; Other {5:00}%",
+                        Total,
+                        prcPrepare * 100f,
+                        prcDirectional * 100f,
+                        prcPoint * 100f,
+                        prcSpot * 100f,
+                        prcWasted * 100f));
+                }
+
+                float perDirectionalLight = 0f;
+                float perPointLight = 0f;
+                float perSpotLight = 0f;
+
+                if (Directional > 0)
+                {
+                    perDirectionalLight = (float)Directional / (float)DirectionalLights;
+                }
+
+                if (Point > 0)
+                {
+                    perPointLight = (float)Point / (float)PointLights;
+                }
+
+                if (Spot > 0)
+                {
+                    perSpotLight = (float)Spot / (float)SpotLights;
+                }
+
+                FrameCounters.SetStatistics("DeferredRenderer.DrawLights.Types", string.Format(
+                    "Directional {0:000000}; Point {1:000000}; Spot {2:000000}",
+                    perDirectionalLight,
+                    perPointLight,
+                    perSpotLight));
+
+                FrameCounters.SetStatistics("DEFERRED_LIGHTING", new[]
+                {
+                Prepare,
+                Directional,
+                Point,
+                Spot,
+            });
+            }
+        }
+
         /// <summary>
         /// Frame statistics
         /// </summary>
@@ -707,7 +985,7 @@ namespace Engine
             swTotal.Stop();
 #endif
 #if DEBUG
-            Counters.SetStatistics("DEFERRED_COMPOSITION", new[]
+            FrameCounters.SetStatistics("DEFERRED_COMPOSITION", new[]
             {
                 init,
                 draw,

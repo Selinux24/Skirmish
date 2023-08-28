@@ -300,7 +300,7 @@ namespace Engine.Common
         /// <summary>
         /// Frame counters class
         /// </summary>
-        private readonly FrameCounters frameCounters = null;
+        private readonly PassCounters frameCounters = null;
 
         /// <inheritdoc/>
         public string Name { get; private set; }
@@ -357,7 +357,7 @@ namespace Engine.Common
             PassIndex = passIndex;
             this.deviceContext.DebugName = name;
 
-            frameCounters = Counters.CreatePassCounters(name, passIndex);
+            frameCounters = FrameCounters.CreatePassCounters(name, passIndex);
 
             currentVertexShaderConstantBufferState = new(this);
             currentVertexShaderResourceViewState = new(this);

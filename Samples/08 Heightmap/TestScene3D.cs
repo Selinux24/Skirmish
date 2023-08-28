@@ -1209,7 +1209,7 @@ namespace Heightmap
                 Lights.KeyLight.Brightness,
                 Camera.Position, Camera.Direction);
 
-            var counters = Counters.PickCounters;
+            var counters = FrameCounters.PickCounters;
 
             help2.Text = string.Format("Picks: {0:0000}|{1:00.000}|{2:00.0000000}; Frustum tests: {3:000}|{4:00.000}|{5:00.00000000}",
                 counters?.PicksPerFrame, counters?.PickingTotalTimePerFrame, counters?.PickingAverageTime,

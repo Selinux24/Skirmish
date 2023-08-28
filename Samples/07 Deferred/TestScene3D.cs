@@ -971,7 +971,7 @@ namespace Deferred
                 Lights.SpotLights.Length,
                 Lights.GetDirectionalShadowCastingLights(GameEnvironment, Camera.Position).Count());
 
-            if (Counters.Statistics.Length == 0)
+            if (FrameCounters.Statistics.Length == 0)
             {
                 statistics.Text = "No statistics";
             }
@@ -980,17 +980,17 @@ namespace Deferred
                 statistics.Text = "Press . for more statistics";
                 textIntex = -1;
             }
-            else if (textIntex >= Counters.Statistics.Length)
+            else if (textIntex >= FrameCounters.Statistics.Length)
             {
                 statistics.Text = "Press , for more statistics";
-                textIntex = Counters.Statistics.Length;
+                textIntex = FrameCounters.Statistics.Length;
             }
             else
             {
                 statistics.Text = string.Format(
                     "{0} - {1}",
-                    Counters.Statistics[textIntex],
-                    Counters.GetStatistics(textIntex));
+                    FrameCounters.Statistics[textIntex],
+                    FrameCounters.GetStatistics(textIntex));
             }
         }
 

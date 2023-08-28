@@ -3,6 +3,8 @@ using System;
 
 namespace Engine
 {
+    using Engine.Common;
+
     /// <summary>
     /// 3D manipulator
     /// </summary>
@@ -192,7 +194,7 @@ namespace Engine
 
                 Updated?.Invoke(this, new EventArgs());
 
-                Counters.PickCounters.TransformUpdatesPerFrame++;
+                FrameCounters.PickCounters.TransformUpdatesPerFrame++;
             }
         }
         /// <summary>
