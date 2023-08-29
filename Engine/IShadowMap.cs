@@ -1,5 +1,4 @@
-﻿using SharpDX;
-using System;
+﻿using System;
 
 namespace Engine
 {
@@ -12,17 +11,25 @@ namespace Engine
     public interface IShadowMap : IDisposable
     {
         /// <summary>
+        /// Name
+        /// </summary>
+        string Name { get; }
+        /// <summary>
+        /// Light source
+        /// </summary>
+        ISceneLight LightSource { get; set; }
+        /// <summary>
+        /// Light cull index
+        /// </summary>
+        int CullIndex { get; set; }
+        /// <summary>
         /// Depth map texture
         /// </summary>
-        EngineShaderResourceView Texture { get; }
+        EngineShaderResourceView DepthMapTexture { get; }
         /// <summary>
         /// Gets or sets the high resolution map flag (if available)
         /// </summary>
         bool HighResolutionMap { get; set; }
-        /// <summary>
-        /// Light
-        /// </summary>
-        ISceneLight Light { get; set; }
 
         /// <summary>
         /// Binds the shadow map data to graphics

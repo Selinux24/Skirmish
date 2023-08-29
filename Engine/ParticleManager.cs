@@ -164,7 +164,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
             bool cull = true;
@@ -180,7 +180,7 @@ namespace Engine
             var particles = particleSystems.ToList();
             particles.ForEach(p =>
             {
-                var c = p.Emitter.Cull(volume, out float d);
+                var c = p.Emitter.Cull(cullIndex, volume, out float d);
                 if (!c)
                 {
                     cull = false;

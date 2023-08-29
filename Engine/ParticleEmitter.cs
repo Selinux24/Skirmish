@@ -316,13 +316,8 @@ namespace Engine
             return (int)(maxActiveParticles != (int)maxActiveParticles ? maxActiveParticles + 1 : maxActiveParticles);
         }
 
-        /// <summary>
-        /// Performs a culling test against the specified frustum
-        /// </summary>
-        /// <param name="volume">Culling volume</param>
-        /// <param name="distance">If the object is inside the volume, returns the distance</param>
-        /// <returns>Returns true if the emitter is outside of the frustum</returns>
-        public bool Cull(ICullingVolume volume, out float distance)
+        /// <inheritdoc/>
+        public bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 

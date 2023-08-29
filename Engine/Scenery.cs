@@ -406,11 +406,11 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
-            if (base.Cull(volume, out distance))
+            if (base.Cull(cullIndex, volume, out distance))
             {
                 return true;
             }

@@ -592,9 +592,9 @@ namespace Engine.BuiltIn
             dc.UpdateConstantBuffer(cbSpots, PSSpots.Build(context));
             dc.UpdateConstantBuffer(cbPoints, PSPoints.Build(context));
 
-            rvShadowMapDir = context.ShadowMapDirectional?.Texture;
-            rvShadowMapSpot = context.ShadowMapSpot?.Texture;
-            rvShadowMapPoint = context.ShadowMapPoint?.Texture;
+            rvShadowMapDir = context.ShadowMapDirectional?.DepthMapTexture;
+            rvShadowMapSpot = context.ShadowMapSpot?.DepthMapTexture;
+            rvShadowMapPoint = context.ShadowMapPoint?.DepthMapTexture;
         }
         /// <summary>
         /// Gets the built-in per frame constant buffer

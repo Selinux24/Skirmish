@@ -278,6 +278,11 @@ namespace Engine
                 Manipulator.Update(context.GameTime);
             }
 
+            if (Visible && LevelOfDetail != LevelOfDetail.None)
+            {
+                AnimationController?.Update(context.GameTime.ElapsedSeconds);
+            }
+
             if (Lights.Any())
             {
                 foreach (var light in Lights)
@@ -288,7 +293,7 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public virtual bool Cull(ICullingVolume volume, out float distance)
+        public virtual bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
             return boundsHelper.Cull(Manipulator, CullingVolumeType, volume, out distance);
         }

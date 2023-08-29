@@ -1,5 +1,6 @@
 ﻿using SharpDX;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -16,25 +17,21 @@ namespace Engine
     public class ModelInstanced : BaseModel<ModelInstancedDescription>, IComposed, IHasGameState
     {
         /// <summary>
-        /// Instancing data per instance
-        /// </summary>
-        private VertexInstancingData[] instancingData = null;
-        /// <summary>
         /// Model instance list
         /// </summary>
-        private ModelInstance[] instances = null;
+        private ModelInstance[] instancesAll = null;
         /// <summary>
-        /// Temporal instance list for rendering
+        /// Visible instance list
         /// </summary>
-        private ModelInstance[] instancesTmp = null;
-        /// <summary>
-        /// Write instancing data to graphics flag
-        /// </summary>
-        private bool hasDataToWrite = false;
+        private ModelInstance[] instancesVisible = null;
         /// <summary>
         /// Independent transforms flag
         /// </summary>
         private bool hasIndependentTransforms = false;
+        /// <summary>
+        /// Culling instance dictionary by cull index
+        /// </summary>
+        private readonly ConcurrentDictionary<int, ModelInstance[]> cullInstances = new();
 
         /// <summary>
         /// Instancing buffer
@@ -49,7 +46,7 @@ namespace Engine
         {
             get
             {
-                return instances[index];
+                return instancesAll[index];
             }
         }
         /// <summary>
@@ -59,7 +56,7 @@ namespace Engine
         {
             get
             {
-                return Visible ? Array.FindAll(instances, i => i.Visible).Length : 0;
+                return Visible ? Array.FindAll(instancesAll, i => i.Visible).Length : 0;
             }
         }
         /// <summary>
@@ -74,6 +71,66 @@ namespace Engine
             {
                 return GetDrawingData(LevelOfDetail.High)?.SkinningData;
             }
+        }
+
+        /// <summary>
+        /// Prepare the instancing buffer data
+        /// </summary>
+        /// <param name="instances">Instace list</param>
+        /// <param name="pointOfView">Point of view</param>
+        /// <returns>Returns the instancing data for the instancing buffer</returns>
+        private static VertexInstancingData[] PrepareInstancingBuffer(ModelInstance[] instances, Vector3 pointOfView)
+        {
+            if (!instances.Any())
+            {
+                return Array.Empty<VertexInstancingData>();
+            }
+
+            if (instances.Length > 1)
+            {
+                SortInstances(instances, pointOfView);
+            }
+
+            return instances
+                .Where(i => i != null)
+                .Select(i => new VertexInstancingData
+                {
+                    Local = i.Manipulator.LocalTransform,
+                    TintColor = i.TintColor,
+                    TextureIndex = i.TextureIndex,
+                    MaterialIndex = i.MaterialIndex,
+                    AnimationOffset = i.AnimationController.AnimationOffset,
+                    AnimationOffsetB = i.AnimationController.TransitionOffset,
+                    AnimationInterpolation = i.AnimationController.TransitionInterpolationAmount,
+                })
+                .ToArray();
+        }
+        /// <summary>
+        /// Updates the instances order
+        /// </summary>
+        /// <param name="instances">Instace list</param>
+        /// <param name="pointOfView">Point of view</param>
+        private static void SortInstances(ModelInstance[] instances, Vector3 pointOfView)
+        {
+            //Sort by LOD, distance and id
+            Array.Sort(instances, (i1, i2) =>
+            {
+                var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
+
+                if (i == 0)
+                {
+                    var da = Vector3.DistanceSquared(i1.Manipulator.Position, pointOfView);
+                    var db = Vector3.DistanceSquared(i2.Manipulator.Position, pointOfView);
+                    i = da.CompareTo(db);
+                }
+
+                if (i == 0)
+                {
+                    i = i1.Id.CompareTo(i2.Id);
+                }
+
+                return i;
+            });
         }
 
         /// <summary>
@@ -123,8 +180,7 @@ namespace Engine
 
             InstanceCount = Description.Instances;
 
-            instances = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, Description));
-            instancingData = new VertexInstancingData[InstanceCount];
+            instancesAll = Helper.CreateArray(InstanceCount, () => new ModelInstance(this, Description));
 
             MaximumCount = -1;
 
@@ -134,67 +190,31 @@ namespace Engine
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            if (instances.Any())
-            {
-                instances
-                    .Where(i => i.Active)
-                    .AsParallel()
-                    .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
-                    .ForAll(i => i.Update(context));
-
-                instancesTmp = instances
-                    .Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)
-                    .ToArray();
-            }
-
-            //Process only visible instances
-            UpdateInstancingData(context);
-        }
-        /// <summary>
-        /// Updates instancing data buffer
-        /// </summary>
-        /// <param name="context">Update context</param>
-        private void UpdateInstancingData(UpdateContext context)
-        {
-            if (!instancesTmp.Any())
+            if (!instancesAll.Any())
             {
                 return;
             }
 
-            SortInstances(context.Camera.Position);
+            // Store visible instances
+            instancesVisible = instancesAll
+                .Where(i => i.Visible && i.LevelOfDetail != LevelOfDetail.None)
+                .ToArray();
 
-            int instanceIndex = 0;
-
-            for (int i = 0; i < instancesTmp.Length; i++)
-            {
-                var current = instancesTmp[i];
-                if (current == null)
-                {
-                    continue;
-                }
-
-                current.AnimationController.Update(context.GameTime.ElapsedSeconds);
-
-                instancingData[instanceIndex].Local = current.Manipulator.LocalTransform;
-                instancingData[instanceIndex].TintColor = current.TintColor;
-                instancingData[instanceIndex].TextureIndex = current.TextureIndex;
-                instancingData[instanceIndex].MaterialIndex = current.MaterialIndex;
-                instancingData[instanceIndex].AnimationOffset = current.AnimationController.AnimationOffset;
-                instancingData[instanceIndex].AnimationOffsetB = current.AnimationController.TransitionOffset;
-                instancingData[instanceIndex].AnimationInterpolation = current.AnimationController.TransitionInterpolationAmount;
-
-                instanceIndex++;
-            }
-
-            //Mark to write instancing data
-            hasDataToWrite = instanceIndex > 0;
+            // Update each active instance
+            instancesAll
+                .Where(i => i.Active)
+                .AsParallel()
+                .WithDegreeOfParallelism(GameEnvironment.DegreeOfParalelism)
+                .ForAll(i => i.Update(context));
         }
         /// <summary>
         /// Updates independent transforms
         /// </summary>
         /// <param name="dc">Device context</param>
         /// <param name="meshName">Mesh name</param>
-        private void UpdateIndependentTransforms(IEngineDeviceContext dc, string meshName)
+        /// <param name="instanceList">Instance list</param>
+        /// <param name="instancingData">Instancing data</param>
+        private void UpdateIndependentTransforms(IEngineDeviceContext dc, string meshName, ModelInstance[] instanceList, VertexInstancingData[] instancingData)
         {
             if (!hasIndependentTransforms)
             {
@@ -203,9 +223,9 @@ namespace Engine
 
             int instanceIndex = 0;
 
-            for (int i = 0; i < instancesTmp.Length; i++)
+            for (int i = 0; i < instanceList.Length; i++)
             {
-                var current = instancesTmp[i];
+                var current = instanceList[i];
                 if (current == null)
                 {
                     continue;
@@ -216,43 +236,12 @@ namespace Engine
                 if (currentTransform != localTransform)
                 {
                     instancingData[instanceIndex].Local = localTransform;
-
-                    hasDataToWrite = true;
                 }
 
                 instanceIndex++;
             }
 
-            if (hasDataToWrite)
-            {
-                BufferManager.WriteInstancingData(dc, InstancingBuffer, instancingData);
-            }
-        }
-        /// <summary>
-        /// Updates the instances order
-        /// </summary>
-        /// <param name="eyePosition">Eye position</param>
-        private void SortInstances(Vector3 eyePosition)
-        {
-            //Sort by LOD, distance and id
-            Array.Sort(instancesTmp, (i1, i2) =>
-            {
-                var i = i1.LevelOfDetail.CompareTo(i2.LevelOfDetail);
-
-                if (i == 0)
-                {
-                    var da = Vector3.DistanceSquared(i1.Manipulator.Position, eyePosition);
-                    var db = Vector3.DistanceSquared(i2.Manipulator.Position, eyePosition);
-                    i = da.CompareTo(db);
-                }
-
-                if (i == 0)
-                {
-                    i = i1.Id.CompareTo(i2.Id);
-                }
-
-                return i;
-            });
+            BufferManager.WriteInstancingData(dc, InstancingBuffer, instancingData);
         }
         /// <summary>
         /// Gets the limit of instances to draw
@@ -276,19 +265,22 @@ namespace Engine
                 return false;
             }
 
-            if (hasDataToWrite)
+            if (!cullInstances.TryGetValue(context.ShadowMap.CullIndex, out var cullInstanceList))
             {
-                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
-                BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, instancingData);
+                return false;
             }
-
-            return DrawShadowsInstances(context);
+            var cullInstanceData = PrepareInstancingBuffer(cullInstanceList, context.ShadowMap.LightSource.Position);
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(DrawShadows)} {context.ShadowMap} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset}");
+            BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
+            return DrawShadowsInstances(context, cullInstanceList, cullInstanceData);
         }
         /// <summary>
         /// Shadow drawing
         /// </summary>
         /// <param name="context">Context</param>
-        private bool DrawShadowsInstances(DrawContextShadows context)
+        /// <param name="cullInstanceList">Cull instance list</param>
+        /// <param name="cullInstancingData">Cull instances data</param>
+        private bool DrawShadowsInstances(DrawContextShadows context, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData)
         {
             int count = 0;
             int instanceCount = 0;
@@ -306,7 +298,7 @@ namespace Engine
                 LevelOfDetail lod = (LevelOfDetail)l;
 
                 //Get instances in this LOD
-                var lodInstances = Array.FindAll(instancesTmp, i => i != null && i.LevelOfDetail == lod);
+                var lodInstances = Array.FindAll(cullInstanceList, i => i != null && i.LevelOfDetail == lod);
                 if (lodInstances.Length <= 0)
                 {
                     continue;
@@ -318,7 +310,7 @@ namespace Engine
                     continue;
                 }
 
-                var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances[0]) + InstancingBuffer.BufferOffset;
+                var startInstanceLocation = Array.IndexOf(cullInstanceList, lodInstances[0]) + InstancingBuffer.BufferOffset;
                 var instancesToDraw = Math.Min(maxCount, lodInstances.Length);
                 if (instancesToDraw <= 0)
                 {
@@ -328,7 +320,7 @@ namespace Engine
                 maxCount -= instancesToDraw;
                 instanceCount += instancesToDraw;
 
-                int dCount = DrawShadowMesh(context, drawingData, instancesToDraw, startInstanceLocation);
+                int dCount = DrawShadowMesh(context, drawingData, cullInstanceList, cullInstancingData, instancesToDraw, startInstanceLocation);
                 dCount *= instancesToDraw;
 
                 count += dCount;
@@ -341,10 +333,12 @@ namespace Engine
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
+        /// <param name="cullInstanceList">Cull instance list</param>
+        /// <param name="cullInstancingData">Cull instances data</param>
         /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, int instancesToDraw, int startInstanceLocation)
+        private int DrawShadowMesh(DrawContextShadows context, DrawingData drawingData, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData, int instancesToDraw, int startInstanceLocation)
         {
             int count = 0;
 
@@ -365,7 +359,7 @@ namespace Engine
                     continue;
                 }
 
-                UpdateIndependentTransforms(dc, meshName);
+                UpdateIndependentTransforms(dc, meshName, cullInstanceList, cullInstancingData);
 
                 drawer.UpdateCastingLight(context);
 
@@ -401,19 +395,22 @@ namespace Engine
                 return false;
             }
 
-            if (hasDataToWrite)
+            if (!cullInstances.TryGetValue(0, out var cullInstanceList))
             {
-                Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
-                BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, instancingData);
+                return false;
             }
-
-            return DrawInstances(context);
+            var cullInstanceData = PrepareInstancingBuffer(cullInstanceList, context.Camera.Position);
+            Logger.WriteTrace(this, $"{nameof(ModelInstanced)}.{Name} - {nameof(Draw)} WriteInstancingData: BufferDescriptionIndex {InstancingBuffer.BufferDescriptionIndex} BufferOffset {InstancingBuffer.BufferOffset} {context.DrawerMode}");
+            BufferManager.WriteInstancingData(context.DeviceContext, InstancingBuffer, cullInstanceData);
+            return DrawInstances(context, cullInstanceList, cullInstanceData);
         }
         /// <summary>
         /// Draw
         /// </summary>
         /// <param name="context">Context</param>
-        private bool DrawInstances(DrawContext context)
+        /// <param name="cullInstanceList">Cull instance list</param>
+        /// <param name="cullInstancingData">Cull instances data</param>
+        private bool DrawInstances(DrawContext context, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData)
         {
             int count = 0;
             int instanceCount = 0;
@@ -431,7 +428,7 @@ namespace Engine
                 LevelOfDetail lod = (LevelOfDetail)l;
 
                 //Get instances in this LOD
-                var lodInstances = instancesTmp.Where(i => i?.LevelOfDetail == lod);
+                var lodInstances = cullInstanceList.Where(i => i?.LevelOfDetail == lod);
                 if (!lodInstances.Any())
                 {
                     continue;
@@ -443,7 +440,7 @@ namespace Engine
                     continue;
                 }
 
-                var startInstanceLocation = Array.IndexOf(instancesTmp, lodInstances.First()) + InstancingBuffer.BufferOffset;
+                var startInstanceLocation = Array.IndexOf(cullInstanceList, lodInstances.First()) + InstancingBuffer.BufferOffset;
                 var instancesToDraw = Math.Min(maxCount, lodInstances.Count());
                 if (instancesToDraw <= 0)
                 {
@@ -453,7 +450,7 @@ namespace Engine
                 maxCount -= instancesToDraw;
                 instanceCount += instancesToDraw;
 
-                int dCount = DrawMesh(context, drawingData, instancesToDraw, startInstanceLocation);
+                int dCount = DrawMesh(context, drawingData, cullInstanceList, cullInstancingData, instancesToDraw, startInstanceLocation);
                 dCount *= instancesToDraw;
 
                 count += dCount;
@@ -466,10 +463,12 @@ namespace Engine
         /// </summary>
         /// <param name="context">Context</param>
         /// <param name="drawingData">Drawing data</param>
+        /// <param name="cullInstanceList">Cull instance list</param>
+        /// <param name="cullInstancingData">Cull instances data</param>
         /// <param name="instancesToDraw">Instance buffer length</param>
         /// <param name="startInstanceLocation">Instance buffer index</param>
         /// <returns>Returns the number of drawn triangles</returns>
-        private int DrawMesh(DrawContext context, DrawingData drawingData, int instancesToDraw, int startInstanceLocation)
+        private int DrawMesh(DrawContext context, DrawingData drawingData, ModelInstance[] cullInstanceList, VertexInstancingData[] cullInstancingData, int instancesToDraw, int startInstanceLocation)
         {
             int count = 0;
 
@@ -497,7 +496,7 @@ namespace Engine
                     continue;
                 }
 
-                UpdateIndependentTransforms(dc, meshName);
+                UpdateIndependentTransforms(dc, meshName, cullInstanceList, cullInstancingData);
 
                 var materialState = new BuiltInDrawerMaterialState
                 {
@@ -524,11 +523,11 @@ namespace Engine
         /// <param name="positions">New positions</param>
         public void SetPositions(IEnumerable<Vector3> positions)
         {
-            if (positions?.Any() == true && instances?.Length > 0)
+            if (positions?.Any() == true && instancesAll?.Length > 0)
             {
-                for (int i = 0; i < instances.Length; i++)
+                for (int i = 0; i < instancesAll.Length; i++)
                 {
-                    var instance = instances[i];
+                    var instance = instancesAll[i];
 
                     if (i < positions.Count())
                     {
@@ -550,11 +549,11 @@ namespace Engine
         /// <param name="transforms">Transform matrix list</param>
         public void SetTransforms(IEnumerable<Matrix> transforms)
         {
-            if (transforms?.Any() == true && instances?.Length > 0)
+            if (transforms?.Any() == true && instancesAll?.Length > 0)
             {
-                for (int i = 0; i < instances.Length; i++)
+                for (int i = 0; i < instancesAll.Length; i++)
                 {
-                    var instance = instances[i];
+                    var instance = instancesAll[i];
 
                     if (i < transforms.Count())
                     {
@@ -576,34 +575,49 @@ namespace Engine
         /// <returns>Returns an array with the instance list</returns>
         public IEnumerable<ModelInstance> GetInstances()
         {
-            return new ReadOnlyCollection<ModelInstance>(instances);
+            return new ReadOnlyCollection<ModelInstance>(instancesAll);
         }
         /// <inheritdoc/>
         public IEnumerable<T> GetComponents<T>()
         {
-            return new ReadOnlyCollection<T>(instances.Where(i => i.Visible).OfType<T>().ToArray());
+            return new ReadOnlyCollection<T>(instancesAll.Where(i => i.Visible).OfType<T>().ToArray());
         }
 
         /// <inheritdoc/>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
-            if (instancesTmp?.Length > 0)
+            if ((instancesVisible?.Length ?? 0) <= 0)
             {
-                var item = Array.Find(instancesTmp, i =>
-                {
-                    return i.Visible && !i.Cull(volume, out float iDistance);
-                });
-
-                if (item != null)
-                {
-                    distance = 0;
-                    return false;
-                }
+                // Culled
+                return true;
             }
 
-            return true;
+            var items = instancesVisible
+                .Where(i => i.Visible)
+                .Select(i =>
+                {
+                    var cull = i.Cull(cullIndex, volume, out float iDistance);
+
+                    return new { Instance = i, Cull = cull, Distance = iDistance };
+                })
+                .Where(i => !i.Cull)
+                .OrderBy(i => i.Distance);
+
+            if (!items.Any())
+            {
+                // Culled
+                return true;
+            }
+
+            // Store selection
+            var data = items.Select(i => i.Instance).ToArray();
+            cullInstances.AddOrUpdate(cullIndex, data, (k, v) => data);
+
+            // Visible
+            distance = items.First().Distance;
+            return false;
         }
 
         /// <inheritdoc/>
@@ -619,7 +633,7 @@ namespace Engine
                 OwnerId = Owner?.Name,
 
                 MaximumCount = MaximumCount,
-                Instances = instances.Select(i => i.GetState()).ToArray(),
+                Instances = instancesAll.Select(i => i.GetState()).ToArray(),
             };
         }
         /// <inheritdoc/>
@@ -640,7 +654,7 @@ namespace Engine
             for (int i = 0; i < modelInstancedState.Instances.Count(); i++)
             {
                 var instanceState = modelInstancedState.Instances.ElementAt(i);
-                instances[i].SetState(instanceState);
+                instancesAll[i].SetState(instanceState);
             }
         }
     }

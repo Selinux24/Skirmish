@@ -46,24 +46,24 @@ namespace Engine
         /// <summary>
         /// Performs cull test in the object list against the culling volume
         /// </summary>
+        /// <param name="cullIndex">Cull index</param>
         /// <param name="volume">Culling volume</param>
-        /// <param name="index">Results index</param>
         /// <param name="objects">Objects list</param>
         /// <returns>Returns true if any object results inside the volume</returns>
-        public bool Cull(ICullingVolume volume, int index, IEnumerable<ICullable> objects)
+        public bool Cull(int cullIndex, ICullingVolume volume, IEnumerable<ICullable> objects)
         {
             bool res = false;
 
             foreach (var item in objects)
             {
-                var cull = item.Cull(volume, out float distance);
+                var cull = item.Cull(cullIndex, volume, out float distance);
                 var cullData = new CullData
                 {
                     Culled = cull,
                     Distance = distance,
                 };
 
-                SetCullValue(cullData, index, item, false);
+                SetCullValue(cullData, cullIndex, item, false);
 
                 if (!cullData.Culled) res = true;
             }
@@ -78,15 +78,7 @@ namespace Engine
         /// <param name="item">Object</param>
         private void SetCullValue(CullData value, int index, ICullable item, bool force)
         {
-            List<CullData> values;
-            if (!Objects.ContainsKey(item))
-            {
-                values = Objects.AddOrUpdate(item, new List<CullData>(index + 1), (k, v) => v);
-            }
-            else if (!Objects.TryGetValue(item, out values))
-            {
-                return;
-            }
+            var values = Objects.AddOrUpdate(item, new List<CullData>(index + 1), (k, v) => v);
 
             int count = values.Count;
             if (count <= index)

@@ -280,7 +280,7 @@ namespace Engine.Common
         {
             get
             {
-                return ShadowMapperDirectional.Texture;
+                return ShadowMapperDirectional.DepthMapTexture;
             }
         }
         /// <summary>
@@ -290,7 +290,7 @@ namespace Engine.Common
         {
             get
             {
-                return ShadowMapperPoint.Texture;
+                return ShadowMapperPoint.DepthMapTexture;
             }
         }
         /// <summary>
@@ -300,7 +300,7 @@ namespace Engine.Common
         {
             get
             {
-                return ShadowMapperSpot.Texture;
+                return ShadowMapperSpot.DepthMapTexture;
             }
         }
         /// <summary>
@@ -951,7 +951,7 @@ namespace Engine.Common
                 return false;
             }
 
-            return cullManager.Cull(cameraVolume, cullIndex, cullables);
+            return cullManager.Cull(cullIndex, cameraVolume, cullables);
         }
 
         /// <summary>
@@ -1231,7 +1231,7 @@ namespace Engine.Common
             var stopwatch = Stopwatch.StartNew();
 #endif
 
-            var doShadows = cullManager.Cull(lightVolume, cullIndex, components);
+            var doShadows = cullManager.Cull(cullIndex, lightVolume, components);
 
 #if DEBUG
             stopwatch.Stop();
@@ -1258,7 +1258,8 @@ namespace Engine.Common
 #if DEBUG
             var stopwatch = Stopwatch.StartNew();
 #endif
-            drawContext.ShadowMap.Light = light;
+            drawContext.ShadowMap.LightSource = light;
+            drawContext.ShadowMap.CullIndex = cullIndex;
             drawContext.ShadowMap.Bind(drawContext.DeviceContext);
 
             //Draw

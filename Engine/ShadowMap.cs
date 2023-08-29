@@ -27,18 +27,16 @@ namespace Engine
         /// </summary>
         protected IEnumerable<EngineDepthStencilView> DepthMap { get; set; }
 
-        /// <summary>
-        /// Name
-        /// </summary>
+        /// <inheritdoc/>
         public string Name { get; protected set; }
         /// <inheritdoc/>
-        public EngineShaderResourceView Texture { get; protected set; }
+        public ISceneLight LightSource { get; set; }
+        /// <inheritdoc/>
+        public int CullIndex { get; set; }
+        /// <inheritdoc/>
+        public EngineShaderResourceView DepthMapTexture { get; protected set; }
         /// <inheritdoc/>
         public virtual bool HighResolutionMap { get; set; }
-        /// <summary>
-        /// Light
-        /// </summary>
-        public ISceneLight Light { get; set; }
 
         /// <summary>
         /// Constructor
@@ -85,8 +83,8 @@ namespace Engine
                 }
                 DepthMap = null;
 
-                Texture?.Dispose();
-                Texture = null;
+                DepthMapTexture?.Dispose();
+                DepthMapTexture = null;
             }
         }
 
@@ -99,7 +97,7 @@ namespace Engine
             //Set shadow map depth map without render target
             dc.SetRenderTargets(
                 null, false, Color.Transparent,
-                DepthMap.ElementAtOrDefault(Light?.ShadowMapIndex ?? -1), true, false,
+                DepthMap.ElementAtOrDefault(LightSource?.ShadowMapIndex ?? -1), true, false,
                 true);
         }
         /// <inheritdoc/>

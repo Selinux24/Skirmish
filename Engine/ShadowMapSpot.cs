@@ -19,13 +19,13 @@ namespace Engine
             var (DepthStencils, ShaderResource) = scene.Game.Graphics.CreateShadowMapTextureArrays(name, width, height, 1, arraySize);
 
             DepthMap = DepthStencils;
-            Texture = ShaderResource;
+            DepthMapTexture = ShaderResource;
         }
 
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"{nameof(ShadowMapSpot)} - Light: {Light} HighResolutionMap: {HighResolutionMap}";
+            return $"{nameof(ShadowMapSpot)} - Light: {LightSource} HighResolutionMap: {HighResolutionMap}";
         }
     }
 }

@@ -173,11 +173,11 @@ namespace Engine.UI
         }
 
         /// <inheritdoc/>
-        public override bool Cull(ICullingVolume volume, out float distance)
+        public override bool Cull(int cullIndex, ICullingVolume volume, out float distance)
         {
             minimapLights.Cull(volume, Scene.Camera.Position, Scene.GameEnvironment.LODDistanceLow);
 
-            return base.Cull(volume, out distance);
+            return base.Cull(cullIndex, volume, out distance);
         }
     }
 }
