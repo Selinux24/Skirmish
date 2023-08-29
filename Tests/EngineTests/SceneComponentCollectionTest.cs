@@ -355,7 +355,7 @@ namespace Engine.Tests
             Assert.IsNotNull(components);
             Assert.AreEqual(4, components.Length);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.Get(null));
+            Assert.ThrowsException<ArgumentNullException>(() => coll.Get((Func<ISceneObject, bool>)null));
         }
         [TestMethod()]
         public void SceneComponentCollectionGetUsagePredicateTest()
@@ -382,7 +382,7 @@ namespace Engine.Tests
             Assert.IsNotNull(components);
             Assert.AreEqual(0, components.Length);
 
-            Assert.ThrowsException<ArgumentNullException>(() => coll.Get(SceneObjectUsages.None, null));
+            Assert.ThrowsException<ArgumentNullException>(() => coll.Get(SceneObjectUsages.None, (Func<ISceneObject, bool>)null));
         }
 
         [TestMethod()]
@@ -716,7 +716,7 @@ namespace Engine.Tests
 
             var components = coll.Get()?.ToArray();
             Assert.IsNotNull(components);
-            
+
             Assert.AreEqual(mdlDrawableOpaqueDeph1a.Object, components[0]);
             Assert.AreEqual(mdlDrawableOpaqueDeph1b.Object, components[1]);
             Assert.AreEqual(mdlDrawableOpaqueNoDeph1a.Object, components[2]);

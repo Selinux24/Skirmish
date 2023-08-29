@@ -171,6 +171,9 @@ namespace Engine
         {
             MatrixSet.Update(camera, Direction);
 
+            // Get the current camera shadow box
+            var shadowBox = BoundingBox.FromPoints(camera.Frustum.GetCorners());
+
             ShadowMapIndex = assignedShadowMap;
             ShadowMapCount = 1;
             FromLightVP = MatrixSet.GetWorldToCascadeProj();
@@ -179,7 +182,7 @@ namespace Engine
             ToCascadeOffsetY = MatrixSet.GetToCascadeOffsetY();
             ToCascadeScale = MatrixSet.GetToCascadeScale();
             Position = MatrixSet.GetLigthPosition();
-            lightVolume = (IntersectionVolumeFrustum)camera.Frustum;
+            lightVolume = (IntersectionVolumeAxisAlignedBox)shadowBox;
         }
         /// <inheritdoc/>
         public override ICullingVolume GetLightVolume()

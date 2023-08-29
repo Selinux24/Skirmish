@@ -588,13 +588,16 @@ namespace Engine
         {
             distance = float.MaxValue;
 
-            if ((instancesVisible?.Length ?? 0) <= 0)
+            // Copy array
+            var tmp = instancesVisible?.ToArray() ?? Array.Empty<ModelInstance>();
+
+            if (tmp.Length <= 0)
             {
                 // Culled
                 return true;
             }
 
-            var items = instancesVisible
+            var items = tmp
                 .Where(i => i.Visible)
                 .Select(i =>
                 {
@@ -603,7 +606,8 @@ namespace Engine
                     return new { Instance = i, Cull = cull, Distance = iDistance };
                 })
                 .Where(i => !i.Cull)
-                .OrderBy(i => i.Distance);
+                .OrderBy(i => i.Distance)
+                .ToArray();
 
             if (!items.Any())
             {
@@ -616,7 +620,7 @@ namespace Engine
             cullInstances.AddOrUpdate(cullIndex, data, (k, v) => data);
 
             // Visible
-            distance = items.First().Distance;
+            distance = items[0].Distance;
             return false;
         }
 

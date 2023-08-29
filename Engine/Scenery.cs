@@ -415,25 +415,27 @@ namespace Engine
                 return true;
             }
 
-            visibleNodes = GroundPickingQuadtree.GetNodesInVolume(volume).ToArray();
-            if (!visibleNodes.Any())
+            var nodes = GroundPickingQuadtree.GetNodesInVolume(volume).ToArray();
+            if (!nodes.Any())
             {
                 return true;
             }
 
-            if (visibleNodes.Length > 1)
+            if (nodes.Length > 1)
             {
+                var pointOfView = volume.Position;
+
                 //Sort nodes by center distance to the culling volume position - nearest nodes first
-                Array.Sort(visibleNodes, (n1, n2) =>
+                Array.Sort(nodes, (n1, n2) =>
                 {
-                    float d1 = (n1.Center - volume.Position).LengthSquared();
-                    float d2 = (n2.Center - volume.Position).LengthSquared();
+                    float d1 = (n1.Center - pointOfView).LengthSquared();
+                    float d2 = (n2.Center - pointOfView).LengthSquared();
 
                     return d1.CompareTo(d2);
                 });
             }
 
-            distance = Vector3.DistanceSquared(volume.Position, visibleNodes[0].Center);
+            distance = Vector3.DistanceSquared(volume.Position, nodes[0].Center);
 
             return false;
         }
@@ -442,6 +444,8 @@ namespace Engine
         public override void Update(UpdateContext context)
         {
             base.Update(context);
+
+            visibleNodes = GroundPickingQuadtree.GetNodesInVolume((IntersectionVolumeFrustum)context.Camera.Frustum).ToArray();
 
             if (visibleNodes?.Any() != true)
             {

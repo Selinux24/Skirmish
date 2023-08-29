@@ -83,7 +83,9 @@ namespace Engine
             int count = values.Count;
             if (count <= index)
             {
-                values.AddRange(new CullData[index - count + 1]);
+                int length = index - count + 1;
+                var cullData = new CullData[length];
+                values.AddRange(cullData);
                 count = values.Count;
             }
 

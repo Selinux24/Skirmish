@@ -662,12 +662,7 @@ namespace SceneTest.SceneTest
             Vector3 scale = new(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
 
             container.Manipulator.SetScale(scale);
-            container.Manipulator.UpdateInternals(true);
-            var bbox = container.GetBoundingBox();
-            float sx = bbox.Width;
-            float sy = bbox.Height;
-            float sz = bbox.Depth;
-
+            var bbox = container.GetBoundingBox(true);
             container.Manipulator.SetPosition(s + 12 + xDelta, baseHeight + yDelta, 30 + zDelta);
             container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
 
@@ -677,9 +672,9 @@ namespace SceneTest.SceneTest
             {
                 RowSize = rowSize,
                 AreaSize = areaSize,
-                Sx = sx,
-                Sy = sy,
-                Sz = sz,
+                Sx = bbox.Width,
+                Sy = bbox.Height,
+                Sz = bbox.Depth,
                 XCount = xCount,
                 ZCount = zCount,
                 XRowCount = xRowCount,

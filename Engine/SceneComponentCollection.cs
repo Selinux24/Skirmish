@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 
 namespace Engine
 {
@@ -31,7 +31,7 @@ namespace Engine
         {
             //First by layer (numeric asc)
             int i = p1.Layer.CompareTo(p2.Layer);
-            if (i != 0) return i;
+            if (i != 0) return -i;
 
             var drawable1 = p1 as IDrawable;
             var drawable2 = p2 as IDrawable;
@@ -40,7 +40,7 @@ namespace Engine
             bool p1D = drawable1 != null;
             bool p2D = drawable2 != null;
             i = p1D.CompareTo(p2D);
-            if (i != 0) return -i;
+            if (i != 0) return i;
 
             //For drawables
             if (p1D && p2D)
@@ -49,21 +49,22 @@ namespace Engine
                 bool blendMode1 = drawable1.BlendMode.HasFlag(BlendModes.Opaque);
                 bool blendMode2 = drawable2.BlendMode.HasFlag(BlendModes.Opaque);
                 i = blendMode1.CompareTo(blendMode2);
-                if (i != 0) return -i;
+                if (i != 0) return i;
 
                 //Then by z-buffer writers (writers first)
                 i = drawable1.DepthEnabled.CompareTo(drawable2.DepthEnabled);
-                if (i != 0) return -i;
+                if (i != 0) return i;
             }
 
             //The by name
-            return p1.Id.CompareTo(p2.Id);
+            return p2.Id.CompareTo(p1.Id);
         }
 
         /// <summary>
         /// Scene component list
         /// </summary>
-        private readonly List<ISceneObject> internalComponents = new();
+        private readonly ConcurrentBag<ISceneObject> internalComponents = new();
+
         /// <summary>
         /// Gets the component count
         /// </summary>
@@ -125,7 +126,6 @@ namespace Engine
                 return;
             }
 
-            Monitor.Enter(internalComponents);
             try
             {
                 if (internalComponents.Contains(component))
@@ -133,7 +133,7 @@ namespace Engine
                     return;
                 }
 
-                if (internalComponents.Exists(c => component.Id == c.Id))
+                if (internalComponents.Any(c => component.Id == c.Id))
                 {
                     throw new EngineException($"{nameof(SceneComponentCollection)} => The specified component id [{component.Id}] already exists.");
                 }
@@ -145,13 +145,14 @@ namespace Engine
 
                 if (internalComponents.Count > 1)
                 {
-                    internalComponents.Sort(SortComponents);
+                    var tmp = internalComponents.ToList();
+                    internalComponents.Clear();
+                    tmp.Sort(SortComponents);
+                    tmp.ForEach(internalComponents.Add);
                 }
             }
             finally
             {
-                Monitor.Exit(internalComponents);
-
                 FireUpdated(true, new[] { component });
             }
         }
@@ -171,15 +172,14 @@ namespace Engine
                 return;
             }
 
-            Monitor.Enter(internalComponents);
             try
             {
-                internalComponents.Remove(component);
+                var tmp = internalComponents.Where(x => x != component).ToList();
+                internalComponents.Clear();
+                tmp.ForEach(internalComponents.Add);
             }
             finally
             {
-                Monitor.Exit(internalComponents);
-
                 FireUpdated(false, new[] { component });
             }
 
@@ -199,18 +199,15 @@ namespace Engine
                 return;
             }
 
-            Monitor.Enter(internalComponents);
             try
             {
-                foreach (var component in components.Where(internalComponents.Contains))
-                {
-                    internalComponents.Remove(component);
-                }
+                var tmp = internalComponents.Where(x => !components.Contains(x)).ToList();
+                internalComponents.Clear();
+                tmp.Sort(SortComponents);
+                tmp.ForEach(internalComponents.Add);
             }
             finally
             {
-                Monitor.Exit(internalComponents);
-
                 FireUpdated(false, components);
             }
 
@@ -243,14 +240,14 @@ namespace Engine
         public IEnumerable<ISceneObject> Get()
         {
             return internalComponents
-                .AsReadOnly();
+                .AsEnumerable();
         }
         /// <summary>
         /// Gets the component collection which validates the predicate
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which validates the predicate</returns>
-        public IEnumerable<ISceneObject> Get(Predicate<ISceneObject> predicate)
+        public IEnumerable<ISceneObject> Get(Func<ISceneObject, bool> predicate)
         {
             if (predicate == null)
             {
@@ -258,8 +255,24 @@ namespace Engine
             }
 
             return internalComponents
-                .FindAll(predicate)
-                .AsReadOnly();
+                .Where(predicate)
+                .AsEnumerable();
+        }
+        /// <summary>
+        /// Gets the component collection which validates the predicate
+        /// </summary>
+        /// <param name="predicate">Predicate</param>
+        /// <returns>Returns the component collection which validates the predicate</returns>
+        public IEnumerable<ISceneObject> Get(Func<ISceneObject, int, bool> predicate)
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+
+            return internalComponents
+                .Where(predicate)
+                .AsEnumerable();
         }
         /// <summary>
         /// Gets the component collection which has the specified usage flag
@@ -274,8 +287,8 @@ namespace Engine
             }
 
             return internalComponents
-                .FindAll(c => c.Usage == usage)
-                .AsReadOnly();
+                .Where(c => c.Usage == usage)
+                .AsEnumerable();
         }
         /// <summary>
         /// Gets the component collection which has the specified usage flag and  validates the predicate
@@ -283,7 +296,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
-        public IEnumerable<ISceneObject> Get(SceneObjectUsages usage, Predicate<ISceneObject> predicate)
+        public IEnumerable<ISceneObject> Get(SceneObjectUsages usage, Func<ISceneObject, bool> predicate)
         {
             if (predicate == null)
             {
@@ -296,8 +309,30 @@ namespace Engine
             }
 
             return internalComponents
-                .FindAll(c => c.Usage == usage && (predicate?.Invoke(c) ?? true))
-                .AsReadOnly();
+                .Where(c => c.Usage == usage && (predicate?.Invoke(c) ?? true))
+                .AsEnumerable();
+        }
+        /// <summary>
+        /// Gets the component collection which has the specified usage flag and  validates the predicate
+        /// </summary>
+        /// <param name="usage">Usage</param>
+        /// <param name="predicate">Predicate</param>
+        /// <returns>Returns the component collection which has the specified usage flag and  validates the predicate</returns>
+        public IEnumerable<ISceneObject> Get(SceneObjectUsages usage, Func<ISceneObject, int, bool> predicate)
+        {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+
+            if (usage == SceneObjectUsages.None)
+            {
+                return Get(predicate);
+            }
+
+            return internalComponents
+                .Where((c, i) => c.Usage == usage && (predicate?.Invoke(c, i) ?? true))
+                .AsEnumerable();
         }
 
         /// <summary>
@@ -387,15 +422,14 @@ namespace Engine
         /// </summary>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the first component in the collection which validates de predicate</returns>
-        public ISceneObject First(Predicate<ISceneObject> predicate)
+        public ISceneObject First(Func<ISceneObject, bool> predicate)
         {
             if (predicate == null)
             {
                 throw new ArgumentNullException(nameof(predicate));
             }
 
-            return internalComponents
-                .Find(predicate);
+            return internalComponents.FirstOrDefault(predicate);
         }
         /// <summary>
         /// Gets the first component in the collection which has the specified usage flag
@@ -410,7 +444,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Find(c => c.Usage == usage);
+                .FirstOrDefault(c => c.Usage == usage);
         }
         /// <summary>
         /// Gets the first component in the collection which has the specified usage flag, and validates de predicate
@@ -418,7 +452,7 @@ namespace Engine
         /// <param name="usage">Usage</param>
         /// <param name="predicate">Predicate</param>
         /// <returns>Returns the first component in the collection which has the specified usage flag, and validates de predicate</returns>
-        public ISceneObject First(SceneObjectUsages usage, Predicate<ISceneObject> predicate)
+        public ISceneObject First(SceneObjectUsages usage, Func<ISceneObject, bool> predicate)
         {
             if (predicate == null)
             {
@@ -431,7 +465,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Find(c => c.Usage == usage && (predicate?.Invoke(c) ?? true));
+                .FirstOrDefault(c => c.Usage == usage && (predicate?.Invoke(c) ?? true));
         }
 
         /// <summary>
@@ -518,7 +552,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Find(c => c.Id == id);
+                .FirstOrDefault(c => c.Id == id);
         }
         /// <summary>
         /// Gets the component in the collection by name
@@ -533,7 +567,7 @@ namespace Engine
             }
 
             return internalComponents
-                .Find(c => c.Name == name);
+                .FirstOrDefault(c => c.Name == name);
         }
         /// <summary>
         /// Gets the component list in the collection by owner
@@ -548,8 +582,8 @@ namespace Engine
             }
 
             return internalComponents
-                .FindAll(c => c.Owner == owner)
-                .AsReadOnly();
+                .Where(c => c.Owner == owner)
+                .AsEnumerable();
         }
     }
 
