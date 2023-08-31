@@ -81,12 +81,6 @@ namespace Engine.Common
         /// <returns>Returns true if all the elements in the resource list are in the specified slot since the last call</returns>
         private bool LookupResource(int startSlot, IEnumerable<T> resourceList)
         {
-            if (resourceList?.Any() != true)
-            {
-                //Nothing to compare
-                return true;
-            }
-
             if (!resources.Any())
             {
                 //Resources is empty
@@ -128,17 +122,19 @@ namespace Engine.Common
         {
             if (resource == null)
             {
+                //Nothing to do
                 return false;
             }
 
             if (LookupResource(slot, resource))
             {
+                //Resource already exists, nothing to do
                 return false;
             }
 
             if (!resources.Any())
             {
-                //Empty resource state
+                //Empty resource state, add the first resource
                 StartSlot = slot;
                 resources.Add(resource);
 
@@ -169,22 +165,19 @@ namespace Engine.Common
         {
             if (resourceList?.Any() != true)
             {
+                //Nothing to do
                 return false;
             }
 
             if (LookupResource(startSlot, resourceList))
             {
-                return false;
-            }
-
-            if (resourceList?.Any() != true)
-            {
-                //Nothing to do
+                //Resources already exists, nothing to do
                 return false;
             }
 
             if (!resources.Any())
             {
+                //Empty resource state, add the first resource
                 StartSlot = startSlot;
                 resources.AddRange(resourceList);
 

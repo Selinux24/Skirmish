@@ -2016,6 +2016,12 @@ namespace Engine.Common
         /// <returns>Returns a geometry descriptor</returns>
         public static GeometryDescriptor CreateCurvePlane(uint size, int textureRepeat, float planeWidth, float planeTop, float planeBottom)
         {
+            if (size == 0) throw new ArgumentOutOfRangeException(nameof(size));
+            if (planeWidth <= 0) throw new ArgumentOutOfRangeException(nameof(planeWidth));
+            if (planeTop <= 0) throw new ArgumentOutOfRangeException(nameof(planeTop));
+            if (planeBottom <= 0) throw new ArgumentOutOfRangeException(nameof(planeBottom));
+            if (planeTop <= planeBottom) throw new ArgumentException($"{nameof(planeTop)} must be greater than {nameof(planeBottom)}", nameof(planeTop));
+
             Vector3[] vertices = new Vector3[(size + 1) * (size + 1)];
             Vector2[] uvs = new Vector2[(size + 1) * (size + 1)];
 

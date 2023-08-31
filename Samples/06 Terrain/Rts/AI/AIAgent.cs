@@ -15,11 +15,6 @@ namespace Terrain.Rts.AI
     public abstract class AIAgent
     {
         /// <summary>
-        /// Maximum ticks looking for a route
-        /// </summary>
-        private const int MaxLookingForRouteTicks = 1000;
-
-        /// <summary>
         /// Current agent behavior
         /// </summary>
         private Behavior currentBehavior = null;
@@ -27,14 +22,6 @@ namespace Terrain.Rts.AI
         /// Last distance
         /// </summary>
         protected float LastDistance = 0f;
-        /// <summary>
-        /// Looking for route
-        /// </summary>
-        private bool lookingForRoute = false;
-        /// <summary>
-        /// Number of ticks looking for route
-        /// </summary>
-        private int lookingForRouteTicks = 0;
 
         /// <summary>
         /// Parent brain
@@ -457,8 +444,13 @@ namespace Terrain.Rts.AI
         /// <returns>Returns true if the target is too hard</returns>
         public virtual bool IsHardEnemy(AIAgent target)
         {
-            if (target?.Stats.CurrentWeapon != null &&
-                target?.Stats.CurrentWeapon.Damage > Stats.Life &&
+            if (target == null)
+            {
+                return false;
+            }
+
+            if (target.Stats.CurrentWeapon != null &&
+                target.Stats.CurrentWeapon.Damage > Stats.Life &&
                 Stats.Damage > 0.9f)
             {
                 return true;
@@ -521,37 +513,25 @@ namespace Terrain.Rts.AI
         /// <param name="refine">Refine route</param>
         public virtual void SetRouteToPoint(Vector3 point, float speed, bool refine)
         {
-            if (AgentType != null && Parent.Scene != null)
+            if (AgentType == null || Parent.Scene == null)
             {
-                if (!lookingForRoute || lookingForRouteTicks > MaxLookingForRouteTicks)
-                {
-                    lookingForRoute = true;
-                    lookingForRouteTicks = 0;
-
-                    var refineDelta = refine ? Math.Max(speed * 0.1f, 0.25f) : 0f;
-
-                    Task.Run(async () =>
-                    {
-                        Logger.WriteDebug(this, $"Agent {AgentType} FindPathAsync.");
-
-                        var path = await Parent.Scene.FindPathAsync(AgentType, Manipulator.Position, point, true);
-                        if (path != null)
-                        {
-                            path.RefinePath(refineDelta);
-
-                            FollowPath(path, speed);
-
-                            lookingForRoute = false;
-                            lookingForRouteTicks = 0;
-                        }
-                    });
-                }
-
-                if (lookingForRoute)
-                {
-                    lookingForRouteTicks++;
-                }
+                return;
             }
+
+            var refineDelta = refine ? Math.Max(speed * 0.1f, 0.25f) : 0f;
+
+            Task.Run(async () =>
+            {
+                Logger.WriteDebug(this, $"Agent {AgentType} FindPathAsync.");
+
+                var path = await Parent.Scene.FindPathAsync(AgentType, Manipulator.Position, point, true);
+                if (path != null)
+                {
+                    path.RefinePath(refineDelta);
+
+                    FollowPath(path, speed);
+                }
+            });
         }
         /// <summary>
         /// Follows the specified path
@@ -609,10 +589,7 @@ namespace Terrain.Rts.AI
             Destroyed?.Invoke(this, new BehaviorEventArgs(active, passive));
         }
 
-        /// <summary>
-        /// Gets the text representation of the agent
-        /// </summary>
-        /// <returns>Returns the text representation of the agent</returns>
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"{CurrentState} -> {Stats.Life:000.00}";

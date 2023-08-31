@@ -446,8 +446,7 @@ namespace Engine
             base.Update(context);
 
             visibleNodes = GroundPickingQuadtree.GetNodesInVolume((IntersectionVolumeFrustum)context.Camera.Frustum).ToArray();
-
-            if (visibleNodes?.Any() != true)
+            if (!visibleNodes.Any())
             {
                 return;
             }
