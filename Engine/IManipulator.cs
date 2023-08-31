@@ -39,5 +39,10 @@ namespace Engine
         /// Velocity
         /// </summary>
         Vector3 Velocity { get; }
+
+        /// <summary>
+        /// Final transform
+        /// </summary>
+        Matrix FinalTransform { get; }
     }
 }

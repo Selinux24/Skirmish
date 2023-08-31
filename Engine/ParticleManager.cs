@@ -95,19 +95,12 @@ namespace Engine
                 return;
             }
 
-            bool toDelete = false;
-            particles.ForEach(p =>
-            {
-                p.Update(context);
+            //Update particles
+            particles.ForEach(p => p.Update(context));
 
-                if (!p.Active)
-                {
-                    toDelete = true;
-                }
-            });
-
-            if (!toDelete)
+            if (!particles.Any(p => !p.Active))
             {
+                //If any inactive particle exist
                 return;
             }
 
@@ -137,10 +130,7 @@ namespace Engine
                 return;
             }
 
-            toRestore.ForEach(p =>
-            {
-                particleSystems.Add(p);
-            });
+            toRestore.ForEach(particleSystems.Add);
         }
 
         /// <inheritdoc/>

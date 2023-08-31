@@ -816,19 +816,12 @@ namespace Heightmap
 
                 if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                 {
-                    float scale;
-                    if (i < 5)
+                    float scale = i switch
                     {
-                        scale = posRnd.NextFloat(10f, 30f);
-                    }
-                    else if (i < 30)
-                    {
-                        scale = posRnd.NextFloat(2f, 5f);
-                    }
-                    else
-                    {
-                        scale = posRnd.NextFloat(0.1f, 1f);
-                    }
+                        < 5 => posRnd.NextFloat(10f, 30f),
+                        < 30 => posRnd.NextFloat(2f, 5f),
+                        _ => posRnd.NextFloat(0.1f, 1f),
+                    };
 
                     rocks[i].Manipulator.SetPosition(r.Position, true);
                     rocks[i].Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), true);

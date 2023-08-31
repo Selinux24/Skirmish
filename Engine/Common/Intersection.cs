@@ -1341,25 +1341,30 @@ namespace Engine.Common
                 return ContainmentType.Contains;
             }
 
-            //Test points
-            var corners = frustum2.GetCorners();
-            var f1Contains2 = FrustumContainsPoints(frustum1, corners);
+            //Test frustum2 corners against frustum1 (cheaper test first)
+            var corners2 = frustum2.GetCorners();
+            var f1Contains2 = FrustumContainsPoints(frustum1, corners2);
             if (f1Contains2 != ContainmentType.Disjoint)
             {
+                //This test only validates points, not edges.
+                //But the intersection/contains result is valid, frustum2 is into the frustum1, or intersection exists between them
                 return f1Contains2;
             }
 
-            var f2Contains1 = FrustumContainsPoints(frustum2, frustum1.GetCorners());
+            //Test frustum1 corners against frustum2
+            var corners1 = frustum1.GetCorners();
+            var f2Contains1 = FrustumContainsPoints(frustum2, corners1);
             if (f2Contains1 != ContainmentType.Disjoint)
             {
+                //If frustum1 is into the frustum2, the result is intersection, not contains.
                 return ContainmentType.Intersects;
             }
 
             //Test near to far segments
             for (int i = 0; i < 4; i++)
             {
-                var p1 = corners[i + 0];
-                var p2 = corners[i + 4];
+                var p1 = corners2[i + 0];
+                var p2 = corners2[i + 4];
 
                 if (FrustumIntersectsSegment(frustum1, p1, p2))
                 {
@@ -1370,8 +1375,8 @@ namespace Engine.Common
             //Test near plane segments
             for (int i = 0; i < 4; i++)
             {
-                var p1 = corners[i + 0];
-                var p2 = corners[(i + 1) % 4];
+                var p1 = corners2[i + 0];
+                var p2 = corners2[(i + 1) % 4];
 
                 if (FrustumIntersectsSegment(frustum1, p1, p2))
                 {
@@ -1382,8 +1387,8 @@ namespace Engine.Common
             //Test far plane segments
             for (int i = 0; i < 4; i++)
             {
-                var p1 = corners[i + 4];
-                var p2 = corners[((i + 1) % 4) + 4];
+                var p1 = corners2[i + 4];
+                var p2 = corners2[((i + 1) % 4) + 4];
 
                 if (FrustumIntersectsSegment(frustum1, p1, p2))
                 {
@@ -1483,12 +1488,17 @@ namespace Engine.Common
                 }
             }
 
-            if (intersects)
+            if (!intersects)
             {
-                return allCornersContained ? ContainmentType.Contains : ContainmentType.Intersects;
+                return ContainmentType.Disjoint;
             }
 
-            return ContainmentType.Disjoint;
+            if (allCornersContained)
+            {
+                return ContainmentType.Contains;
+            }
+
+            return ContainmentType.Intersects;
         }
 
         /// <summary>

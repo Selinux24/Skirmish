@@ -60,7 +60,7 @@ namespace Engine.Common
             }
             else
             {
-                var distinctPoints = points.ToArray();
+                var distinctPoints = points.Distinct().ToArray();
 
                 //Initialize the identity sphere
                 boundingSphere = initialSphere = SharpDXExtensions.BoundingSphereFromPoints(distinctPoints);
@@ -89,11 +89,11 @@ namespace Engine.Common
         /// <param name="manipulator">Manipulator</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns bounding sphere. Empty if the vertex type hasn't position channel</returns>
-        public BoundingSphere GetBoundingSphere(Manipulator3D manipulator, bool refresh = false)
+        public BoundingSphere GetBoundingSphere(IManipulator manipulator, bool refresh = false)
         {
             if (updateBoundingSphere || refresh)
             {
-                boundingSphere = initialSphere.SetTransform(manipulator.FinalTransform);
+                boundingSphere = initialSphere.SetTransform(manipulator?.FinalTransform ?? Matrix.Identity);
 
                 updateBoundingSphere = false;
             }
@@ -106,7 +106,7 @@ namespace Engine.Common
         /// <param name="manipulator">Manipulator</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns bounding box. Empty if the vertex type hasn't position channel</returns>
-        public BoundingBox GetBoundingBox(Manipulator3D manipulator, bool refresh = false)
+        public BoundingBox GetBoundingBox(IManipulator manipulator, bool refresh = false)
         {
             if (updateBoundingBox || refresh)
             {
@@ -123,12 +123,12 @@ namespace Engine.Common
         /// <param name="manipulator">Manipulator</param>
         /// <param name="refresh">Sets if the cache must be refreshed or not</param>
         /// <returns>Returns oriented bounding box. Empty if the vertex type hasn't position channel</returns>
-        public OrientedBoundingBox GetOrientedBoundingBox(Manipulator3D manipulator, bool refresh = false)
+        public OrientedBoundingBox GetOrientedBoundingBox(IManipulator manipulator, bool refresh = false)
         {
             if (updateOrientedBox || refresh)
             {
                 orientedBox = new OrientedBoundingBox(initialAabb);
-                orientedBox.Transform(manipulator.FinalTransform);
+                orientedBox.Transform(manipulator?.FinalTransform ?? Matrix.Identity);
 
                 updateOrientedBox = false;
             }
@@ -144,7 +144,7 @@ namespace Engine.Common
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public bool Cull(Manipulator3D manipulator, CullingVolumeTypes volumeType, ICullingVolume volume, out float distance)
+        public bool Cull(IManipulator manipulator, CullingVolumeTypes volumeType, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -163,7 +163,7 @@ namespace Engine.Common
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public bool CullBoundingSphere(Manipulator3D manipulator, ICullingVolume volume, out float distance)
+        public bool CullBoundingSphere(IManipulator manipulator, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -175,7 +175,7 @@ namespace Engine.Common
             {
                 var eyePosition = volume.Position;
 
-                distance = Vector3.DistanceSquared(manipulator.Position, eyePosition);
+                distance = Vector3.DistanceSquared(manipulator?.Position ?? Vector3.Zero, eyePosition);
             }
 
             return cull;
@@ -187,7 +187,7 @@ namespace Engine.Common
         /// <param name="volume">Culling volume</param>
         /// <param name="distance">If the object is inside the volume, returns the distance</param>
         /// <returns>Returns true if the object is outside of the frustum</returns>
-        public bool CullBoundingBox(Manipulator3D manipulator, ICullingVolume volume, out float distance)
+        public bool CullBoundingBox(IManipulator manipulator, ICullingVolume volume, out float distance)
         {
             distance = float.MaxValue;
 
@@ -199,7 +199,7 @@ namespace Engine.Common
             {
                 var eyePosition = volume.Position;
 
-                distance = Vector3.DistanceSquared(manipulator.Position, eyePosition);
+                distance = Vector3.DistanceSquared(manipulator?.Position ?? Vector3.Zero, eyePosition);
             }
 
             return cull;

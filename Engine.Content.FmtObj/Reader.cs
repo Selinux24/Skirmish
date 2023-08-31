@@ -233,10 +233,10 @@ namespace Engine.Content.FmtObj
         {
             if (strLine.StartsWith("usemtl ", StringComparison.OrdinalIgnoreCase))
             {
-                return strLine?.Split(" ".ToArray(), StringSplitOptions.None)?.ElementAtOrDefault(1);
+                return strLine.Split(" ".ToArray(), StringSplitOptions.None).ElementAtOrDefault(1);
             }
 
-            return null;
+            return ContentData.NoMaterial;
         }
         private static IEnumerable<string> ReadMaterialFileName(string folder, string strLine, string dataType)
         {

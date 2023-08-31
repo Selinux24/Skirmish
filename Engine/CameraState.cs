@@ -56,6 +56,10 @@ namespace Engine
         [JsonConverter(typeof(StringEnumConverter))]
         public IsometricAxis IsometricAxis { get; set; }
         /// <summary>
+        /// Isometric distance to interest
+        /// </summary>
+        public float IsometricDistanceToInterest { get; set; }
+        /// <summary>
         /// Isometric current forward
         /// </summary>
         public Direction3 IsoMetricForward { get; set; }

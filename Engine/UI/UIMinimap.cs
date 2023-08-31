@@ -103,7 +103,7 @@ namespace Engine.UI
             renderTarget = rt.RenderTarget;
             renderTexture = rt.ShaderResource;
 
-            minimapCamera = Camera.CreateOrtho(minimapArea.Size, 0.1f, minimapBox.Width, minimapBox.Height);
+            minimapCamera = Camera.CreateOrtho(minimapArea, 0.1f, minimapBox.Width, minimapBox.Height);
             minimapLights = SceneLights.CreateDefault(Scene);
         }
         private async Task<UITextureRenderer> CreateRenderer()

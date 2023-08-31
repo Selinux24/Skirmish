@@ -266,18 +266,16 @@ namespace Engine.BuiltIn
                     return new BufferLightDirectional();
                 }
 
-                var brightness = light?.Brightness ?? 0;
-
                 return new BufferLightDirectional
                 {
-                    DiffuseColor = (light?.DiffuseColor ?? Color3.Black) * brightness,
-                    SpecularColor = (light?.SpecularColor ?? Color3.Black) * brightness,
-                    DirToLight = -light?.Direction ?? Vector3.Zero,
-                    CastShadow = light?.CastShadowsMarked ?? false ? 1 : 0,
-                    ToCascadeOffsetX = light?.ToCascadeOffsetX ?? Vector4.Zero,
-                    ToCascadeOffsetY = light?.ToCascadeOffsetY ?? Vector4.Zero,
-                    ToCascadeScale = light?.ToCascadeScale ?? Vector4.Zero,
-                    ToShadowSpace = Matrix.Transpose(light?.ToShadowSpace ?? Matrix.Zero),
+                    DiffuseColor = light.DiffuseColor * light.Brightness,
+                    SpecularColor = light.SpecularColor * light.Brightness,
+                    DirToLight = -light.Direction,
+                    CastShadow = light.CastShadowsMarked ? 1 : 0,
+                    ToCascadeOffsetX = light.ToCascadeOffsetX,
+                    ToCascadeOffsetY = light.ToCascadeOffsetY,
+                    ToCascadeScale = light.ToCascadeScale,
+                    ToShadowSpace = Matrix.Transpose(light.ToShadowSpace),
                 };
             }
 
@@ -428,17 +426,17 @@ namespace Engine.BuiltIn
 
                 return new BufferLightSpot
                 {
-                    Position = light?.Position ?? Vector3.Zero,
-                    Direction = light?.Direction ?? Vector3.Zero,
-                    DiffuseColor = light?.DiffuseColor ?? Color3.Black,
-                    SpecularColor = light?.SpecularColor ?? Color3.Black,
-                    Intensity = light?.Intensity ?? 0,
-                    Angle = light?.FallOffAngleRadians ?? 0,
-                    Radius = light?.Radius ?? 0,
-                    CastShadow = light?.CastShadowsMarked ?? false ? 1 : 0,
-                    MapIndex = light?.ShadowMapIndex ?? -1,
-                    MapCount = light?.ShadowMapCount ?? 0,
-                    FromLightVP = light?.FromLightVP?.Any() == true ? Matrix.Transpose(light.FromLightVP[0]) : Matrix.Zero,
+                    Position = light.Position,
+                    Direction = light.Direction,
+                    DiffuseColor = light.DiffuseColor,
+                    SpecularColor = light.SpecularColor,
+                    Intensity = light.Intensity,
+                    Angle = light.FallOffAngleRadians,
+                    Radius = light.Radius,
+                    CastShadow = light.CastShadowsMarked ? 1 : 0,
+                    MapIndex = light.ShadowMapIndex,
+                    MapCount = light.ShadowMapCount,
+                    FromLightVP = light.FromLightVP?.Any() == true ? Matrix.Transpose(light.FromLightVP[0]) : Matrix.Zero,
                 };
             }
 

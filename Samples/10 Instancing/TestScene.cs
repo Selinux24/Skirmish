@@ -161,12 +161,13 @@ namespace Instancing
 
                 floor[i].Manipulator.SetPosition(iPos, true);
 
-                x++;
-                if (x >= side)
+                if (++x < side)
                 {
-                    x = 0;
-                    y++;
+                    continue;
                 }
+
+                x = 0;
+                y++;
             }
         }
         private async Task InitializeTrees()
@@ -188,23 +189,26 @@ namespace Instancing
 
             for (int i = 0; i < trees.InstanceCount; i++)
             {
-                var iPos = Vector3.Zero;
-
+                Vector3 iPos;
                 if (i < side)
                 {
                     iPos = new Vector3((i - ((side * 0) + (side * 0.5f))) * side, 0, +groundSide);
                 }
-                else if (i < side * 2)
+                else if (i >= side && i < side * 2)
                 {
                     iPos = new Vector3(+groundSide, 0, (i - ((side * 1) + (side * 0.5f))) * side);
                 }
-                else if (i < side * 3)
+                else if (i >= side * 2 && i < side * 3)
                 {
                     iPos = new Vector3((i - ((side * 2) + (side * 0.5f))) * side, 0, -groundSide);
                 }
-                else if (i < side * 4)
+                else if (i >= side * 3 && i < side * 4)
                 {
                     iPos = new Vector3(-groundSide, 0, (i - ((side * 3) + (side * 0.5f))) * side);
+                }
+                else
+                {
+                    iPos = Vector3.Zero;
                 }
 
                 trees[i].Manipulator.SetPosition(iPos, true);
@@ -258,12 +262,13 @@ namespace Instancing
                 troops[i].AnimationController.AppendPlan(animations[anim[i % anim.Length]]);
                 troops[i].AnimationController.Start(rnd.NextFloat(0f, 8f));
 
-                x++;
-                if (x >= side)
+                if (++x < side)
                 {
-                    x = 0;
-                    y++;
+                    continue;
                 }
+
+                x = 0;
+                y++;
             }
         }
         private async Task InitializeWall()

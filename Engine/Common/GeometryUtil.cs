@@ -2014,13 +2014,13 @@ namespace Engine.Common
         /// <param name="planeTop">Plane top</param>
         /// <param name="planeBottom">Plane bottom</param>
         /// <returns>Returns a geometry descriptor</returns>
-        public static GeometryDescriptor CreateCurvePlane(int size, int textureRepeat, float planeWidth, float planeTop, float planeBottom)
+        public static GeometryDescriptor CreateCurvePlane(uint size, int textureRepeat, float planeWidth, float planeTop, float planeBottom)
         {
             Vector3[] vertices = new Vector3[(size + 1) * (size + 1)];
             Vector2[] uvs = new Vector2[(size + 1) * (size + 1)];
 
             // Determine the size of each quad on the sky plane.
-            float quadSize = planeWidth / (float)size;
+            float quadSize = planeWidth / size;
 
             // Calculate the radius of the sky plane based on the width.
             float radius = planeWidth * 0.5f;
@@ -2029,24 +2029,24 @@ namespace Engine.Common
             float constant = (planeTop - planeBottom) / (radius * radius);
 
             // Calculate the texture coordinate increment value.
-            float textureDelta = (float)textureRepeat / (float)size;
+            float textureDelta = (float)textureRepeat / size;
 
             // Loop through the sky plane and build the coordinates based on the increment values given.
-            for (int j = 0; j <= size; j++)
+            for (uint j = 0; j <= size; j++)
             {
-                for (int i = 0; i <= size; i++)
+                for (uint i = 0; i <= size; i++)
                 {
                     // Calculate the vertex coordinates.
-                    float positionX = (-0.5f * planeWidth) + ((float)i * quadSize);
-                    float positionZ = (-0.5f * planeWidth) + ((float)j * quadSize);
+                    float positionX = (-0.5f * planeWidth) + (i * quadSize);
+                    float positionZ = (-0.5f * planeWidth) + (j * quadSize);
                     float positionY = planeTop - (constant * ((positionX * positionX) + (positionZ * positionZ)));
 
                     // Calculate the texture coordinates.
-                    float tu = (float)i * textureDelta;
-                    float tv = (float)j * textureDelta;
+                    float tu = i * textureDelta;
+                    float tv = j * textureDelta;
 
                     // Calculate the index into the sky plane array to add this coordinate.
-                    int ix = j * (size + 1) + i;
+                    uint ix = j * (size + 1) + i;
 
                     // Add the coordinates to the sky plane array.
                     vertices[ix] = new Vector3(positionX, positionY, positionZ);
@@ -2056,35 +2056,28 @@ namespace Engine.Common
 
 
             // Create the index array.
-            var indexList = new List<uint>((size + 1) * (size + 1) * 6);
+            var indexList = new List<uint>();
 
             // Load the vertex and index array with the sky plane array data.
-            for (int j = 0; j < size; j++)
+            for (uint j = 0; j < size; j++)
             {
-                for (int i = 0; i < size; i++)
+                for (uint i = 0; i < size; i++)
                 {
-                    int index1 = j * (size + 1) + i;
-                    int index2 = j * (size + 1) + (i + 1);
-                    int index3 = (j + 1) * (size + 1) + i;
-                    int index4 = (j + 1) * (size + 1) + (i + 1);
+                    uint index1 = j * (size + 1) + i;
+                    uint index2 = j * (size + 1) + (i + 1);
+                    uint index3 = (j + 1) * (size + 1) + i;
+                    uint index4 = (j + 1) * (size + 1) + (i + 1);
 
-                    // Triangle 1 - Upper Left
-                    indexList.Add((uint)index1);
+                    indexList.AddRange(new[]
+                    {
+                        index1, // Triangle 1 - Upper Left
+                        index2, // Triangle 1 - Upper Right
+                        index3, // Triangle 1 - Bottom Left
 
-                    // Triangle 1 - Upper Right
-                    indexList.Add((uint)index2);
-
-                    // Triangle 1 - Bottom Left
-                    indexList.Add((uint)index3);
-
-                    // Triangle 2 - Bottom Left
-                    indexList.Add((uint)index3);
-
-                    // Triangle 2 - Upper Right
-                    indexList.Add((uint)index2);
-
-                    // Triangle 2 - Bottom Right
-                    indexList.Add((uint)index4);
+                        index3, // Triangle 2 - Bottom Left
+                        index2, // Triangle 2 - Upper Right
+                        index4, // Triangle 2 - Bottom Right
+                    });
                 }
             }
 

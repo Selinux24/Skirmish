@@ -1437,27 +1437,27 @@ namespace Engine.Content.FmtCollada
 
             foreach (var skeleton in skeletons)
             {
-                var skeletonControllers = instanceControllers
-                    .Where(ic => string.Equals(ic.Skeleton.FirstOrDefault()?.Replace("#", ""), skeleton.Name))?
-                    .ToArray();
-
-                if (skeletonControllers?.Any() != true)
+                //Find controlles for the current skeleton
+                var skeletonControllers = instanceControllers.Where(ic => string.Equals(ic.Skeleton.FirstOrDefault()?.Replace("#", ""), skeleton.Name));
+                if (!skeletonControllers.Any())
                 {
                     continue;
                 }
 
-                var controllerNames = skeletonControllers.Select(sc => sc.Url.Replace("#", "")).ToArray();
+                //Update armature name
+                var controllerNames = skeletonControllers.Select(sc => sc.Url.Replace("#", ""));
                 foreach (var controller in controllerNames)
                 {
                     modelContent.Controllers[controller].Armature = skeleton.Name;
                 }
 
+                //Add skinning content for the skeleton
                 modelContent.SkinningInfo.Add(
                     skeleton.Name,
                     new SkinningContent
                     {
                         Skeleton = skeleton,
-                        Controllers = controllerNames,
+                        Controllers = controllerNames.ToArray(),
                     });
             }
         }

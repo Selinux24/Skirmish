@@ -35,7 +35,7 @@ namespace Engine
         /// <summary>
         /// Clouds quad size
         /// </summary>
-        public int Size { get; set; }
+        public uint Size { get; set; }
         /// <summary>
         /// Texture repeat
         /// </summary>

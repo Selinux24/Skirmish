@@ -1097,29 +1097,24 @@ namespace Terrain.Rts
                 {
                     var pos = GetRandomPoint(posRnd, Vector3.Zero);
 
-                    if (FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
+                    if (!FindTopGroundPosition(pos.X, pos.Z, out PickingResult<Triangle> r))
                     {
-                        float scale;
-                        if (i < 5)
-                        {
-                            scale = posRnd.NextFloat(2f, 5f);
-                        }
-                        else if (i < 30)
-                        {
-                            scale = posRnd.NextFloat(0.5f, 2f);
-                        }
-                        else
-                        {
-                            scale = posRnd.NextFloat(0.1f, 0.2f);
-                        }
-
-                        var rockInstance = rocks[i];
-
-                        rockInstance.Manipulator.SetPosition(r.Position);
-                        rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
-                        rockInstance.Manipulator.SetScale(scale);
-                        rockInstance.Manipulator.UpdateInternals(true);
+                        continue;
                     }
+
+                    float scale = i switch
+                    {
+                        < 5 => posRnd.NextFloat(2f, 5f),
+                        < 30 => posRnd.NextFloat(0.5f, 2f),
+                        _ => posRnd.NextFloat(0.1f, 0.2f)
+                    };
+
+                    var rockInstance = rocks[i];
+
+                    rockInstance.Manipulator.SetPosition(r.Position);
+                    rockInstance.Manipulator.SetRotation(posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi), posRnd.NextFloat(0, MathUtil.TwoPi));
+                    rockInstance.Manipulator.SetScale(scale);
+                    rockInstance.Manipulator.UpdateInternals(true);
                 }
                 rocks.Visible = true;
             });
@@ -1208,10 +1203,15 @@ namespace Terrain.Rts
             {
                 for (int i = 0; i < obelisk.InstanceCount; i++)
                 {
-                    int ox = i == 0 || i == 2 ? 1 : -1;
-                    int oy = i == 0 || i == 1 ? 1 : -1;
+                    Vector2 o = i switch
+                    {
+                        0 => new Vector2(1, 1),
+                        1 => new Vector2(-1, 1),
+                        2 => new Vector2(1, -1),
+                        _ => new Vector2(-1, -1),
+                    };
 
-                    if (FindTopGroundPosition(ox * 50, oy * 50, out PickingResult<Triangle> r))
+                    if (FindTopGroundPosition(o.X * 50, o.Y * 50, out PickingResult<Triangle> r))
                     {
                         var obeliskInstance = obelisk[i];
 
