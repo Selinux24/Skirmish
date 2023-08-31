@@ -98,7 +98,7 @@ namespace Engine
             //Update particles
             particles.ForEach(p => p.Update(context));
 
-            if (!particles.Any(p => !p.Active))
+            if (!particles.Exists(p => !p.Active))
             {
                 //If any inactive particle exist
                 return;
