@@ -190,8 +190,6 @@ namespace Engine
             {
                 GameEnvironment.Update(gameTime);
 
-                Renderer?.UpdateGlobals(false);
-
                 this.EvaluateInput();
 
                 // Lights
@@ -646,7 +644,7 @@ namespace Engine
         /// </summary>
         private void ComponentsUpdated(object sender, EventArgs e)
         {
-            Renderer?.UpdateGlobals(true);
+            Renderer?.UpdateGlobals();
         }
 
         /// <summary>

@@ -560,6 +560,39 @@ namespace Engine.Common
             return deferredContextList[passIndex];
         }
         /// <summary>
+        /// Gets the immediate draw context
+        /// </summary>
+        /// <param name="drawMode">Draw mode</param>
+        protected DrawContext GetImmediateDrawContext(DrawerModes drawMode)
+        {
+            return new DrawContext
+            {
+                Name = $"{drawMode} immediate context.",
+
+                DrawerMode = drawMode,
+
+                //Scene data
+                GameTime = Scene.Game.GameTime,
+                Form = Scene.Game.Form,
+                Camera = Scene.Camera,
+                Lights = Scene.Lights,
+                LevelOfDetail = Scene.GameEnvironment.GetLODDistances(),
+
+                //Shadow mappers
+                ShadowMapDirectional = ShadowMapperDirectional,
+                ShadowMapPoint = ShadowMapperPoint,
+                ShadowMapSpot = ShadowMapperSpot,
+
+                //Pass context
+                PassContext = new PassContext
+                {
+                    Name = "Immediate",
+                    PassIndex = -1,
+                    DeviceContext = Scene.Game.Graphics.ImmediateContext,
+                },
+            };
+        }
+        /// <summary>
         /// Gets a deferred draw context
         /// </summary>
         /// <param name="passIndex">Pass index</param>
@@ -807,127 +840,11 @@ namespace Engine.Common
             actions.Add(action);
         }
 
-        /// <summary>
-        /// Refresh the global resources state
-        /// </summary>
-        protected void RefreshGlobalState()
-        {
-            if (updateMaterialsPalette)
-            {
-                Logger.WriteInformation(this, $"{nameof(UpdateGlobalState)} =>Updating Material palette.");
-
-                UpdateMaterialPalette(out materialPalette, out materialPaletteWidth);
-
-                updateMaterialsPalette = false;
-            }
-
-            if (updateAnimationsPalette)
-            {
-                Logger.WriteInformation(this, $"{nameof(UpdateGlobalState)} =>Updating Animation palette.");
-
-                UpdateAnimationPalette(out animationPalette, out animationPaletteWidth);
-
-                updateAnimationsPalette = false;
-            }
-        }
-        /// <summary>
-        /// Updates the global resources state in the specified device context
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        protected void UpdateGlobalState(IEngineDeviceContext dc)
-        {
-            BuiltInShaders.UpdateGlobals(dc, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
-        }
-
         /// <inheritdoc/>
-        public virtual void UpdateGlobals(bool updatedComponents)
-        {
-            updateMaterialsPalette = updateMaterialsPalette || updatedComponents;
-            updateAnimationsPalette = updateAnimationsPalette || updatedComponents;
-        }
-        /// <summary>
-        /// Updates the materials palette
-        /// </summary>
-        public virtual void UpdateMaterialPalette()
+        public virtual void UpdateGlobals()
         {
             updateMaterialsPalette = true;
-        }
-        /// <summary>
-        /// Updates the global material palette
-        /// </summary>
-        /// <param name="materialPalette">Material palette</param>
-        /// <param name="materialPaletteWidth">Material palette width</param>
-        private void UpdateMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
-        {
-            List<IMeshMaterial> mats = new()
-            {
-                MeshMaterial.DefaultBlinnPhong,
-            };
-
-            var matComponents = Scene.Components.Get<IUseMaterials>().SelectMany(c => c.GetMaterials());
-            if (matComponents.Any())
-            {
-                mats.AddRange(matComponents);
-            }
-
-            List<Vector4> values = new();
-
-            for (int i = 0; i < mats.Count; i++)
-            {
-                var mat = mats[i];
-                var matV = mat.Material.Convert().Pack();
-
-                mat.UpdateResource((uint)i, (uint)values.Count, (uint)matV.Length);
-
-                values.AddRange(matV);
-            }
-
-            int texWidth = GetTextureSize(values.Count);
-
-            materialPalette = Scene.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
-            materialPaletteWidth = (uint)texWidth;
-        }
-        /// <summary>
-        /// Updates the global animation palette
-        /// </summary>
-        /// <param name="animationPalette">Animation palette</param>
-        /// <param name="animationPaletteWidth">Animation palette width</param>
-        private void UpdateAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
-        {
-            var skData = Scene.Components.Get<IUseSkinningData>(c => c.SkinningData != null)
-                .Select(c => c.SkinningData)
-                .ToArray();
-
-            List<ISkinningData> addedSks = new();
-
-            List<Vector4> values = new();
-
-            for (int i = 0; i < skData.Length; i++)
-            {
-                var sk = skData[i];
-
-                if (!addedSks.Contains(sk))
-                {
-                    var skV = sk.Pack();
-
-                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Count());
-
-                    values.AddRange(skV);
-
-                    addedSks.Add(sk);
-                }
-                else
-                {
-                    var cMat = addedSks.Find(m => m.Equals(sk));
-
-                    sk.UpdateResource(cMat.ResourceIndex, cMat.ResourceOffset, cMat.ResourceSize);
-                }
-            }
-
-            int texWidth = GetTextureSize(values.Count);
-
-            animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
-            animationPaletteWidth = (uint)texWidth;
+            updateAnimationsPalette = true;
         }
 
         /// <summary>
@@ -969,7 +886,7 @@ namespace Engine.Common
 
             var dc = context.DeviceContext;
 
-            SetRasterizer(dc);
+            SetRasterizerDefault(dc);
             SetBlendState(dc, context.DrawerMode, blend);
             SetDepthStencil(dc, drawable.DepthEnabled);
 
@@ -979,7 +896,7 @@ namespace Engine.Common
         /// Sets the rasterizer state
         /// </summary>
         /// <param name="dc">Device context</param>
-        protected virtual void SetRasterizer(IEngineDeviceContext dc)
+        protected virtual void SetRasterizerDefault(IEngineDeviceContext dc)
         {
             dc.SetRasterizerState(Scene.Game.Graphics.GetRasterizerDefault());
         }
@@ -1007,97 +924,6 @@ namespace Engine.Common
             else
             {
                 dc.SetDepthStencilState(Scene.Game.Graphics.GetDepthStencilWRZDisabled());
-            }
-        }
-
-        /// <summary>
-        /// Assign light information for shadow mapping
-        /// </summary>
-        protected void AssignLightShadowMaps()
-        {
-            ExecuteParallel(AssignLightShadowMapsDirectional, AssignLightShadowMapsPoint, AssignLightShadowMapsSpot);
-        }
-        /// <summary>
-        /// Assign light information for directional shadow mapping
-        /// </summary>
-        private void AssignLightShadowMapsDirectional()
-        {
-            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position).ToArray();
-            if (!dirLights.Any())
-            {
-                return;
-            }
-
-            var camera = Scene.Camera;
-
-            int assigned = 0;
-            foreach (var light in dirLights)
-            {
-                light.ClearShadowParameters();
-
-                light.UpdateEnvironment(DirectionalShadowMapSize, Scene.GameEnvironment.CascadeShadowMapsDistances);
-
-                if (assigned >= MaxDirectionalShadowMaps)
-                {
-                    continue;
-                }
-
-                //Assign light parameters
-                light.SetShadowParameters(camera, assigned++);
-            }
-        }
-        /// <summary>
-        /// Assign light information for point shadow mapping
-        /// </summary>
-        private void AssignLightShadowMapsPoint()
-        {
-            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-            if (!pointLights.Any())
-            {
-                return;
-            }
-
-            var camera = Scene.Camera;
-
-            int assigned = 0;
-            foreach (var light in pointLights)
-            {
-                light.ClearShadowParameters();
-
-                if (assigned >= MaxCubicShadows)
-                {
-                    continue;
-                }
-
-                //Assign light parameters
-                light.SetShadowParameters(camera, assigned++);
-            }
-        }
-        /// <summary>
-        /// Assign light information for spot shadow mapping
-        /// </summary>
-        private void AssignLightShadowMapsSpot()
-        {
-            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
-            if (!spotLights.Any())
-            {
-                return;
-            }
-
-            var camera = Scene.Camera;
-
-            int assigned = 0;
-            foreach (var light in spotLights)
-            {
-                light.ClearShadowParameters();
-
-                if (assigned >= MaxSpotShadows)
-                {
-                    continue;
-                }
-
-                //Assign light parameters
-                light.SetShadowParameters(camera, assigned++);
             }
         }
 
@@ -1177,8 +1003,6 @@ namespace Engine.Common
             {
                 return;
             }
-
-            UpdateGlobalState(dc);
 
             var toCullShadowObjs = shadowObjs.OfType<ICullable>();
             //Get if all affected objects are suitable for cull testing
@@ -1365,22 +1189,6 @@ namespace Engine.Common
         }
 
         /// <summary>
-        /// Gets the target textures
-        /// </summary>
-        /// <param name="target">Target type</param>
-        /// <returns>Returns the target texture list</returns>
-        protected IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
-        {
-            return target switch
-            {
-                Targets.Screen => Enumerable.Empty<EngineShaderResourceView>(),
-                Targets.Objects => sceneObjectsTarget.Textures,
-                Targets.UI => sceneUITarget.Textures,
-                Targets.Result => sceneResultsTarget.Textures,
-                _ => Enumerable.Empty<EngineShaderResourceView>(),
-            };
-        }
-        /// <summary>
         /// Binds graphics for results pass
         /// </summary>
         /// <param name="dc">Drawing context</param>
@@ -1472,52 +1280,23 @@ namespace Engine.Common
             var viewport = Scene.Game.Form.GetViewport();
             dc.SetViewport(viewport);
         }
-
         /// <summary>
-        /// Pre-assing post-processing targets
+        /// Gets the target textures
         /// </summary>
-        protected void AssignPostProcessTargets()
+        /// <param name="target">Target type</param>
+        /// <returns>Returns the target texture list</returns>
+        private IEnumerable<EngineShaderResourceView> GetTargetTextures(Targets target)
         {
-            postProcessingEffects.Clear();
-
-            int targetIndex = 0;
-
-            if (PostProcessingObjectsEffects.Ready)
+            return target switch
             {
-                var effects = PostProcessingObjectsEffects.GetEffects();
-
-                postProcessingEffects.Add(new PostProcessinStateData
-                {
-                    State = PostProcessingObjectsEffects,
-                    RenderPass = RenderPass.Objects,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
-                });
-            }
-
-            if (PostProcessingUIEffects.Ready)
-            {
-                var effects = PostProcessingUIEffects.GetEffects();
-
-                postProcessingEffects.Add(new PostProcessinStateData
-                {
-                    State = PostProcessingUIEffects,
-                    RenderPass = RenderPass.UI,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
-                });
-            }
-
-            if (PostProcessingFinalEffects.Ready)
-            {
-                var effects = PostProcessingFinalEffects.GetEffects();
-
-                postProcessingEffects.Add(new PostProcessinStateData
-                {
-                    State = PostProcessingFinalEffects,
-                    RenderPass = RenderPass.Final,
-                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
-                });
-            }
+                Targets.Screen => Enumerable.Empty<EngineShaderResourceView>(),
+                Targets.Objects => sceneObjectsTarget.Textures,
+                Targets.UI => sceneUITarget.Textures,
+                Targets.Result => sceneResultsTarget.Textures,
+                _ => Enumerable.Empty<EngineShaderResourceView>(),
+            };
         }
+
         /// <inheritdoc/>
         public void ClearPostProcessingEffects()
         {
@@ -1548,8 +1327,6 @@ namespace Engine.Common
             {
                 return;
             }
-
-            UpdateGlobalState(dc);
 
             DrawPostProcessing(dc, renderTarget, passEffects.First());
 
@@ -1631,26 +1408,269 @@ namespace Engine.Common
             commandList.Clear();
             actions.Clear();
 
-            RefreshGlobalState();
-
             AssignLightShadowMaps();
             AssignPostProcessTargets();
 
-            var graphics = Scene.Game.Graphics;
-            var ic = graphics.ImmediateContext;
+            var context = GetImmediateDrawContext(DrawerModes.None);
 
-            ic.SetViewport(graphics.Viewport);
-            ic.SetRenderTargets(
-                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
-                graphics.DefaultDepthStencil, true, true,
-                false);
+            if (RefreshGlobalState())
+            {
+                BuiltInShaders.UpdateGlobals(context, materialPalette, materialPaletteWidth, animationPalette, animationPaletteWidth);
+            }
+
+            BuiltInShaders.UpdatePerFrame(context);
         }
         /// <summary>
-        /// Merge to screen
+        /// Refresh the global resources state
+        /// </summary>
+        /// <returns>Returns true if the global state changes</returns>
+        private bool RefreshGlobalState()
+        {
+            bool updated = false;
+
+            if (updateMaterialsPalette)
+            {
+                BuildMaterialPalette(out materialPalette, out materialPaletteWidth);
+
+                updateMaterialsPalette = false;
+
+                updated = true;
+            }
+
+            if (updateAnimationsPalette)
+            {
+                BuildAnimationPalette(out animationPalette, out animationPaletteWidth);
+
+                updateAnimationsPalette = false;
+
+                updated = true;
+            }
+
+            return updated;
+        }
+        /// <summary>
+        /// Builds the global material palette
+        /// </summary>
+        /// <param name="materialPalette">Material palette</param>
+        /// <param name="materialPaletteWidth">Material palette width</param>
+        private void BuildMaterialPalette(out EngineShaderResourceView materialPalette, out uint materialPaletteWidth)
+        {
+            Logger.WriteInformation(this, $"{nameof(BuildMaterialPalette)} =>Building Material palette.");
+
+            List<IMeshMaterial> mats = new()
+            {
+                MeshMaterial.DefaultBlinnPhong,
+            };
+
+            var matComponents = Scene.Components.Get<IUseMaterials>().SelectMany(c => c.GetMaterials());
+            if (matComponents.Any())
+            {
+                mats.AddRange(matComponents);
+            }
+
+            List<Vector4> values = new();
+
+            for (int i = 0; i < mats.Count; i++)
+            {
+                var mat = mats[i];
+                var matV = mat.Material.Convert().Pack();
+
+                mat.UpdateResource((uint)i, (uint)values.Count, (uint)matV.Length);
+
+                values.AddRange(matV);
+            }
+
+            int texWidth = GetTextureSize(values.Count);
+
+            materialPalette = Scene.Game.ResourceManager.CreateGlobalResource("MaterialPalette", values, texWidth);
+            materialPaletteWidth = (uint)texWidth;
+        }
+        /// <summary>
+        /// Builds the global animation palette
+        /// </summary>
+        /// <param name="animationPalette">Animation palette</param>
+        /// <param name="animationPaletteWidth">Animation palette width</param>
+        private void BuildAnimationPalette(out EngineShaderResourceView animationPalette, out uint animationPaletteWidth)
+        {
+            Logger.WriteInformation(this, $"{nameof(BuildAnimationPalette)} =>Building Animation palette.");
+
+            var skData = Scene.Components.Get<IUseSkinningData>(c => c.SkinningData != null)
+                .Select(c => c.SkinningData)
+                .ToArray();
+
+            List<ISkinningData> addedSks = new();
+
+            List<Vector4> values = new();
+
+            for (int i = 0; i < skData.Length; i++)
+            {
+                var sk = skData[i];
+
+                if (!addedSks.Contains(sk))
+                {
+                    var skV = sk.Pack();
+
+                    sk.UpdateResource((uint)addedSks.Count, (uint)values.Count, (uint)skV.Count());
+
+                    values.AddRange(skV);
+
+                    addedSks.Add(sk);
+                }
+                else
+                {
+                    var cMat = addedSks.Find(m => m.Equals(sk));
+
+                    sk.UpdateResource(cMat.ResourceIndex, cMat.ResourceOffset, cMat.ResourceSize);
+                }
+            }
+
+            int texWidth = GetTextureSize(values.Count);
+
+            animationPalette = Scene.Game.ResourceManager.CreateGlobalResource("AnimationPalette", values.ToArray(), texWidth);
+            animationPaletteWidth = (uint)texWidth;
+        }
+        /// <summary>
+        /// Assign light information for shadow mapping
+        /// </summary>
+        private void AssignLightShadowMaps()
+        {
+            ExecuteParallel(AssignLightShadowMapsDirectional, AssignLightShadowMapsPoint, AssignLightShadowMapsSpot);
+        }
+        /// <summary>
+        /// Assign light information for directional shadow mapping
+        /// </summary>
+        private void AssignLightShadowMapsDirectional()
+        {
+            var dirLights = Scene.Lights.GetDirectionalShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position).ToArray();
+            if (!dirLights.Any())
+            {
+                return;
+            }
+
+            var camera = Scene.Camera;
+
+            int assigned = 0;
+            foreach (var light in dirLights)
+            {
+                light.ClearShadowParameters();
+
+                light.UpdateEnvironment(DirectionalShadowMapSize, Scene.GameEnvironment.CascadeShadowMapsDistances);
+
+                if (assigned >= MaxDirectionalShadowMaps)
+                {
+                    continue;
+                }
+
+                //Assign light parameters
+                light.SetShadowParameters(camera, assigned++);
+            }
+        }
+        /// <summary>
+        /// Assign light information for point shadow mapping
+        /// </summary>
+        private void AssignLightShadowMapsPoint()
+        {
+            var pointLights = Scene.Lights.GetPointShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+            if (!pointLights.Any())
+            {
+                return;
+            }
+
+            var camera = Scene.Camera;
+
+            int assigned = 0;
+            foreach (var light in pointLights)
+            {
+                light.ClearShadowParameters();
+
+                if (assigned >= MaxCubicShadows)
+                {
+                    continue;
+                }
+
+                //Assign light parameters
+                light.SetShadowParameters(camera, assigned++);
+            }
+        }
+        /// <summary>
+        /// Assign light information for spot shadow mapping
+        /// </summary>
+        private void AssignLightShadowMapsSpot()
+        {
+            var spotLights = Scene.Lights.GetSpotShadowCastingLights(Scene.GameEnvironment, Scene.Camera.Position);
+            if (!spotLights.Any())
+            {
+                return;
+            }
+
+            var camera = Scene.Camera;
+
+            int assigned = 0;
+            foreach (var light in spotLights)
+            {
+                light.ClearShadowParameters();
+
+                if (assigned >= MaxSpotShadows)
+                {
+                    continue;
+                }
+
+                //Assign light parameters
+                light.SetShadowParameters(camera, assigned++);
+            }
+        }
+        /// <summary>
+        /// Pre-assing post-processing targets
+        /// </summary>
+        private void AssignPostProcessTargets()
+        {
+            postProcessingEffects.Clear();
+
+            int targetIndex = 0;
+
+            if (PostProcessingObjectsEffects.Ready)
+            {
+                var effects = PostProcessingObjectsEffects.GetEffects();
+
+                postProcessingEffects.Add(new PostProcessinStateData
+                {
+                    State = PostProcessingObjectsEffects,
+                    RenderPass = RenderPass.Objects,
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                });
+            }
+
+            if (PostProcessingUIEffects.Ready)
+            {
+                var effects = PostProcessingUIEffects.GetEffects();
+
+                postProcessingEffects.Add(new PostProcessinStateData
+                {
+                    State = PostProcessingUIEffects,
+                    RenderPass = RenderPass.UI,
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                });
+            }
+
+            if (PostProcessingFinalEffects.Ready)
+            {
+                var effects = PostProcessingFinalEffects.GetEffects();
+
+                postProcessingEffects.Add(new PostProcessinStateData
+                {
+                    State = PostProcessingFinalEffects,
+                    RenderPass = RenderPass.Final,
+                    Effects = effects.Select(e => (e, targetIndex++ % 2)).ToArray(),
+                });
+            }
+        }
+
+        /// <summary>
+        /// Merges the scene targets to screen
         /// </summary>
         /// <param name="hasObjects">Sets whether the current pass, includes objects phase or not</param>
         /// <param name="hasUI">Sets whether the current pass, includes UI phase or not</param>
-        protected void MergeToScreen(bool hasObjects, bool hasUI)
+        protected void MergeSceneToScreen(bool hasObjects, bool hasUI)
         {
             var pass = passLists[MergeScreenPass];
             var dc = pass.DeviceContext;
@@ -1660,8 +1680,6 @@ namespace Engine.Common
             {
                 return;
             }
-
-            UpdateGlobalState(dc);
 
             //Select source render target to copy to screen
             Targets source;
@@ -1699,30 +1717,7 @@ namespace Engine.Common
             //Draw from source target to screen
             DrawToScreen(dc, source);
 
-            QueueCommand(dc.FinishCommandList(nameof(MergeToScreen)), int.MaxValue);
-        }
-        /// <summary>
-        /// Ends the scene
-        /// </summary>
-        protected void EndScene()
-        {
-            var graphics = Scene.Game.Graphics;
-            var ic = graphics.ImmediateContext;
-            ic.SetViewport(graphics.Viewport);
-            ic.SetRenderTargets(
-                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
-                graphics.DefaultDepthStencil, true, true,
-                false);
-
-            if (ExecuteParallel(actions))
-            {
-                //Execute command list
-                var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
-                ic.ExecuteCommandLists(commands);
-
-                ic.SetViewport(graphics.Viewport);
-                ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
-            }
+            QueueCommand(dc.FinishCommandList(nameof(MergeSceneToScreen)), int.MaxValue);
         }
         /// <summary>
         /// Combine the specified targets into the result target
@@ -1768,6 +1763,30 @@ namespace Engine.Common
             var texture = GetTargetTextures(sourceTarget)?.FirstOrDefault();
 
             processingDrawerFinal.Draw(dc, texture, BuiltInPostProcessEffects.None, null);
+        }
+
+        /// <summary>
+        /// Ends the scene
+        /// </summary>
+        protected void EndScene()
+        {
+            var graphics = Scene.Game.Graphics;
+            var ic = graphics.ImmediateContext;
+            ic.SetViewport(graphics.Viewport);
+            ic.SetRenderTargets(
+                graphics.DefaultRenderTarget, true, Scene.GameEnvironment.Background,
+                graphics.DefaultDepthStencil, true, true,
+                false);
+
+            if (ExecuteParallel(actions))
+            {
+                //Execute command list
+                var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
+                ic.ExecuteCommandLists(commands);
+
+                ic.SetViewport(graphics.Viewport);
+                ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
+            }
         }
     }
 }

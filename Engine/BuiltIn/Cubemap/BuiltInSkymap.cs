@@ -44,6 +44,10 @@ namespace Engine.BuiltIn.Cubemap
         /// Per cube constant buffer
         /// </summary>
         private readonly EngineConstantBuffer<PerCube> cbPerCube;
+        /// <summary>
+        /// Sampler state
+        /// </summary>
+        private readonly EngineSamplerState samplerState;
 
         /// <summary>
         /// Constructor
@@ -54,6 +58,7 @@ namespace Engine.BuiltIn.Cubemap
             SetPixelShader<SkymapPs>();
 
             cbPerCube = BuiltInShaders.GetConstantBuffer<PerCube>();
+            samplerState = BuiltInShaders.GetSamplerLinear();
         }
 
         /// <summary>
@@ -69,7 +74,7 @@ namespace Engine.BuiltIn.Cubemap
             var pixelShader = GetPixelShader<SkymapPs>();
             pixelShader?.SetPerSkyConstantBuffer(cbPerCube);
             pixelShader?.SetTexture(texture);
-            pixelShader?.SetSampler(BuiltInShaders.GetSamplerLinear());
+            pixelShader?.SetSampler(samplerState);
         }
     }
 }

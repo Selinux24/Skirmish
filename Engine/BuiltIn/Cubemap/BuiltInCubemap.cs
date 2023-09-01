@@ -9,12 +9,19 @@ namespace Engine.BuiltIn.Cubemap
     public class BuiltInCubemap : BuiltInDrawer
     {
         /// <summary>
+        /// Sampler state
+        /// </summary>
+        private readonly EngineSamplerState samplerState;
+
+        /// <summary>
         /// Constructor
         /// </summary>
         public BuiltInCubemap() : base()
         {
             SetVertexShader<CubemapVs>();
             SetPixelShader<CubemapPs>();
+
+            samplerState = BuiltInShaders.GetSamplerLinear();
         }
 
         /// <summary>
@@ -26,7 +33,7 @@ namespace Engine.BuiltIn.Cubemap
             var pixelShader = GetPixelShader<CubemapPs>();
 
             pixelShader?.SetCubemap(cubemap);
-            pixelShader?.SetCubemapSampler(BuiltInShaders.GetSamplerLinear());
+            pixelShader?.SetCubemapSampler(samplerState);
         }
     }
 }

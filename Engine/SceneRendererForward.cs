@@ -221,66 +221,14 @@ namespace Engine
             //Shadow mapping
             QueueAction(DoShadowMapping);
 
-            var objectComponents = visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI));
-            bool hasObjects = objectComponents.Any();
+            //Draw objects
+            bool hasObjects = DrawObjects(visibleComponents.Where(c => !c.Usage.HasFlag(SceneObjectUsages.UI)));
 
-            if (hasObjects)
-            {
-                QueueAction(() =>
-                {
-                    //Render objects
-                    var rt = new RenderTargetParameters
-                    {
-                        Target = Targets.Objects,
-                        ClearRT = true,
-                        ClearRTColor = Scene.GameEnvironment.Background,
-                        ClearDepth = true,
-                        ClearStencil = true,
-                    };
-                    DoRender(rt, objectComponents, CullObjects, ObjectsPass);
-                });
-
-                QueueAction(() =>
-                {
-                    //Post-processing
-                    var rtpp = new RenderTargetParameters
-                    {
-                        Target = Targets.Objects
-                    };
-                    DoPostProcessing(rtpp, RenderPass.Objects, ObjectsPostProcessingPass);
-                });
-            }
-
-            var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
-            bool hasUI = uiComponents.Any();
-
-            if (hasUI)
-            {
-                QueueAction(() =>
-                {
-                    //Render UI
-                    var rt = new RenderTargetParameters
-                    {
-                        Target = Targets.UI,
-                        ClearRT = true,
-                        ClearRTColor = Color.Transparent,
-                    };
-                    DoRender(rt, uiComponents, CullUI, UIPass);
-                });
-
-                QueueAction(() =>
-                {
-                    //UI post-processing
-                    var rtpp = new RenderTargetParameters
-                    {
-                        Target = Targets.UI
-                    };
-                    DoPostProcessing(rtpp, RenderPass.UI, UIPostProcessingPass);
-                });
-            }
+            //Draw UI
+            bool hasUI = DrawUI(visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI)));
 
             //Merge to screen
-            QueueAction(() => MergeToScreen(hasObjects, hasUI));
+            QueueAction(() => MergeSceneToScreen(hasObjects, hasUI));
 
             EndScene();
 
@@ -290,7 +238,78 @@ namespace Engine
             frameStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
         }
+        /// <summary>
+        /// Draws the specified object collection
+        /// </summary>
+        /// <param name="objectComponents">Object collection</param>
+        private bool DrawObjects(IEnumerable<IDrawable> objectComponents)
+        {
+            if (!objectComponents.Any())
+            {
+                return false;
+            }
 
+            QueueAction(() =>
+            {
+                //Render objects
+                var rt = new RenderTargetParameters
+                {
+                    Target = Targets.Objects,
+                    ClearRT = true,
+                    ClearRTColor = Scene.GameEnvironment.Background,
+                    ClearDepth = true,
+                    ClearStencil = true,
+                };
+                DoRender(rt, objectComponents, CullObjects, ObjectsPass);
+            });
+
+            QueueAction(() =>
+            {
+                //Post-processing
+                var rtpp = new RenderTargetParameters
+                {
+                    Target = Targets.Objects
+                };
+                DoPostProcessing(rtpp, RenderPass.Objects, ObjectsPostProcessingPass);
+            });
+
+            return true;
+        }
+        /// <summary>
+        /// Draws the specified UI components collection
+        /// </summary>
+        /// <param name="uiComponents">UI components collection</param>
+        private bool DrawUI(IEnumerable<IDrawable> uiComponents)
+        {
+            if (!uiComponents.Any())
+            {
+                return false;
+            }
+
+            QueueAction(() =>
+            {
+                //Render UI
+                var rt = new RenderTargetParameters
+                {
+                    Target = Targets.UI,
+                    ClearRT = true,
+                    ClearRTColor = Color.Transparent,
+                };
+                DoRender(rt, uiComponents, CullUI, UIPass);
+            });
+
+            QueueAction(() =>
+            {
+                //UI post-processing
+                var rtpp = new RenderTargetParameters
+                {
+                    Target = Targets.UI
+                };
+                DoPostProcessing(rtpp, RenderPass.UI, UIPostProcessingPass);
+            });
+
+            return true;
+        }
         /// <summary>
         /// Do rendering
         /// </summary>
@@ -332,8 +351,6 @@ namespace Engine
                 return;
             }
 
-            UpdateGlobalState(dc);
-
             //Binds the result target
             SetTarget(dc, renderTarget);
 
@@ -354,17 +371,6 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawResultComponents(DrawContext context, int cullIndex, IEnumerable<IDrawable> components)
         {
-#if DEBUG
-            dict.Clear();
-            var sw = Stopwatch.StartNew();
-#endif
-            //Update shaders state
-            BuiltIn.BuiltInShaders.UpdatePerFrame(context);
-#if DEBUG
-            sw.Stop();
-            WriteTrace("Built-In shaders Update Per Frame", sw.Elapsed.TotalMilliseconds);
-#endif
-
             //Save current drawer mode
             var mode = context.DrawerMode;
 

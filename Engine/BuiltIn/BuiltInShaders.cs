@@ -537,13 +537,15 @@ namespace Engine.BuiltIn
         /// <summary>
         /// Updates global data
         /// </summary>
-        /// <param name="dc">Device context</param>
+        /// <param name="context">Draw context</param>
         /// <param name="materialPalette">Material palette resource view</param>
         /// <param name="materialPaletteWidth">Material palette width</param>
         /// <param name="animationPalette">Animation palette resource view</param>
         /// <param name="animationPaletteWidth">Animation palette width</param>
-        public static void UpdateGlobals(IEngineDeviceContext dc, EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
+        public static void UpdateGlobals(DrawContext context, EngineShaderResourceView materialPalette, uint materialPaletteWidth, EngineShaderResourceView animationPalette, uint animationPaletteWidth)
         {
+            var dc = context.DeviceContext;
+
             var cbGlobal = GetConstantBuffer<Global>();
             dc.UpdateConstantBuffer(cbGlobal, Global.Build(materialPaletteWidth, animationPaletteWidth));
 

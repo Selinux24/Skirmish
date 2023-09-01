@@ -480,20 +480,6 @@ namespace Engine
         }
 
         /// <inheritdoc/>
-        public override void PrepareScene()
-        {
-            base.PrepareScene();
-
-            //Create commandList
-            AddPassContext(ObjectsDeferredPass, "Objects Deferred");
-            AddPassContext(ObjectsForwardPass, "Objects Forward");
-            AddPassContext(ObjectsPostProcessingPass, "Objects Post processing");
-
-            AddPassContext(UIPass, "UI");
-            AddPassContext(UIPostProcessingPass, "UI Post processing");
-        }
-
-        /// <inheritdoc/>
         public override void Resize()
         {
             UpdateRectangleAndView();
@@ -518,6 +504,20 @@ namespace Engine
             if (result == SceneRendererResults.DepthMap) return depthMap;
 
             return base.GetResource(result);
+        }
+
+        /// <inheritdoc/>
+        public override void PrepareScene()
+        {
+            base.PrepareScene();
+
+            //Create commandList
+            AddPassContext(ObjectsDeferredPass, "Objects Deferred");
+            AddPassContext(ObjectsForwardPass, "Objects Forward");
+            AddPassContext(ObjectsPostProcessingPass, "Objects Post processing");
+
+            AddPassContext(UIPass, "UI");
+            AddPassContext(UIPostProcessingPass, "UI Post processing");
         }
 
         /// <inheritdoc/>
@@ -547,84 +547,16 @@ namespace Engine
             //Shadow mapping
             QueueAction(DoShadowMapping);
 
-            var deferredEnabledComponents = visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
-            bool anyDeferred = deferredEnabledComponents.Any();
-            var deferredDisabledComponents = visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI));
-            bool anyForward = deferredDisabledComponents.Any();
-            bool hasObjects = anyForward || anyDeferred;
+            //Draw objects
+            bool hasObjects = DrawObjects(
+                visibleComponents.Where(c => c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI)),
+                visibleComponents.Where(c => !c.DeferredEnabled && !c.Usage.HasFlag(SceneObjectUsages.UI)));
 
-            if (hasObjects)
-            {
-                if (anyDeferred)
-                {
-                    QueueAction(() =>
-                    {
-                        //Render to G-Buffer deferred enabled components
-                        var rt = new RenderTargetParameters
-                        {
-                            Target = Targets.Objects,
-                            ClearRT = true,
-                            ClearRTColor = Scene.GameEnvironment.Background,
-                        };
-                        DoDeferred(rt, deferredEnabledComponents, CullObjects, ObjectsDeferredPass);
-                    });
-                }
-
-                if (anyForward)
-                {
-                    QueueAction(() =>
-                    {
-                        //Render to screen deferred disabled components
-                        var rt = new RenderTargetParameters
-                        {
-                            Target = Targets.Objects
-                        };
-                        DoForward(rt, deferredDisabledComponents, CullObjects, ObjectsForwardPass);
-                    });
-                }
-
-                QueueAction(() =>
-                {
-                    //Post-processing
-                    var rtpp = new RenderTargetParameters
-                    {
-                        Target = Targets.Objects
-                    };
-                    DoPostProcessing(rtpp, RenderPass.Objects, ObjectsPostProcessingPass);
-                });
-            }
-
-            //Render to screen deferred disabled components
-            var uiComponents = visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI));
-            bool hasUI = uiComponents.Any();
-
-            if (hasUI)
-            {
-                QueueAction(() =>
-                {
-                    //UI render
-                    var rt = new RenderTargetParameters
-                    {
-                        Target = Targets.UI,
-                        ClearRT = true,
-                        ClearRTColor = Color.Transparent,
-                    };
-                    DoForward(rt, uiComponents, CullUI, UIPass);
-                });
-
-                QueueAction(() =>
-                {
-                    //UI post-processing
-                    var rtpp = new RenderTargetParameters
-                    {
-                        Target = Targets.UI
-                    };
-                    DoPostProcessing(rtpp, RenderPass.UI, UIPostProcessingPass);
-                });
-            }
+            //Draw UI (ignoring DeferredEnabled flag)
+            bool hasUI = DrawUI(visibleComponents.Where(c => c.Usage.HasFlag(SceneObjectUsages.UI)));
 
             //Merge to result
-            QueueAction(() => MergeToScreen(hasObjects, hasUI));
+            QueueAction(() => MergeSceneToScreen(hasObjects, hasUI));
 
             EndScene();
 
@@ -633,6 +565,97 @@ namespace Engine
 
             frameStats.UpdateCounters(swTotal.ElapsedTicks);
 #endif
+        }
+        /// <summary>
+        /// Draws the specified object collections
+        /// </summary>
+        /// <param name="deferredEnabledComponents">Deferred enabled components</param>
+        /// <param name="deferredDisabledComponents">Deferred disabled components</param>
+        private bool DrawObjects(IEnumerable<IDrawable> deferredEnabledComponents, IEnumerable<IDrawable> deferredDisabledComponents)
+        {
+            bool anyDeferred = deferredEnabledComponents.Any();
+            bool anyForward = deferredDisabledComponents.Any();
+            bool hasObjects = anyForward || anyDeferred;
+
+            if (!hasObjects)
+            {
+                return false;
+            }
+
+            if (anyDeferred)
+            {
+                QueueAction(() =>
+                {
+                    //Render to G-Buffer deferred enabled components
+                    var rt = new RenderTargetParameters
+                    {
+                        Target = Targets.Objects,
+                        ClearRT = true,
+                        ClearRTColor = Scene.GameEnvironment.Background,
+                    };
+                    DoDeferred(rt, deferredEnabledComponents, CullObjects, ObjectsDeferredPass);
+                });
+            }
+
+            if (anyForward)
+            {
+                QueueAction(() =>
+                {
+                    //Render to screen deferred disabled components
+                    var rt = new RenderTargetParameters
+                    {
+                        Target = Targets.Objects
+                    };
+                    DoForward(rt, deferredDisabledComponents, CullObjects, ObjectsForwardPass);
+                });
+            }
+
+            QueueAction(() =>
+            {
+                //Post-processing
+                var rtpp = new RenderTargetParameters
+                {
+                    Target = Targets.Objects
+                };
+                DoPostProcessing(rtpp, RenderPass.Objects, ObjectsPostProcessingPass);
+            });
+
+            return hasObjects;
+        }
+        /// <summary>
+        /// Draws the specified UI components collection
+        /// </summary>
+        /// <param name="uiComponents">UI components collection</param>
+        private bool DrawUI(IEnumerable<IDrawable> uiComponents)
+        {
+            if (!uiComponents.Any())
+            {
+                return false;
+            }
+
+            QueueAction(() =>
+            {
+                //Render UI
+                var rt = new RenderTargetParameters
+                {
+                    Target = Targets.UI,
+                    ClearRT = true,
+                    ClearRTColor = Color.Transparent,
+                };
+                DoForward(rt, uiComponents, CullUI, UIPass);
+            });
+
+            QueueAction(() =>
+            {
+                //UI post-processing
+                var rtpp = new RenderTargetParameters
+                {
+                    Target = Targets.UI
+                };
+                DoPostProcessing(rtpp, RenderPass.UI, UIPostProcessingPass);
+            });
+
+            return true;
         }
         /// <summary>
         /// Do deferred rendering
@@ -673,8 +696,6 @@ namespace Engine
             {
                 return;
             }
-
-            UpdateGlobalState(dc);
 
             BindGBuffer(dc);
 #if DEBUG
@@ -763,8 +784,6 @@ namespace Engine
                 return;
             }
 
-            UpdateGlobalState(dc);
-
             //Binds the result target
             SetTarget(dc, renderTarget);
 
@@ -846,7 +865,7 @@ namespace Engine
             var pointLights = lights.GetVisiblePointLights();
 
             dc.SetDepthStencilState(graphics.GetDepthStencilRDZDisabled());
-            SetBlendDeferredLighting(dc);
+            dc.SetBlendState(blendDeferredLighting);
 
 #if DEBUG
             swPrepare.Stop();
@@ -1000,8 +1019,6 @@ namespace Engine
         /// <param name="components">Components</param>
         private void DrawResultComponents(DrawContext context, int cullIndex, IEnumerable<IDrawable> components)
         {
-            BuiltInShaders.UpdatePerFrame(context);
-
             //Save current drawing mode
             var mode = context.DrawerMode;
 
@@ -1040,57 +1057,23 @@ namespace Engine
         /// <inheritdoc/>
         protected override void SetBlendState(IEngineDeviceContext dc, DrawerModes drawerMode, BlendModes blendMode)
         {
-            if (drawerMode.HasFlag(DrawerModes.Deferred))
-            {
-                if (blendMode.HasFlag(BlendModes.Additive))
-                {
-                    SetBlendDeferredComposerAdditive(dc);
-                }
-                else if (blendMode.HasFlag(BlendModes.Transparent) || blendMode.HasFlag(BlendModes.Alpha))
-                {
-                    SetBlendDeferredComposerTransparent(dc);
-                }
-                else
-                {
-                    SetBlendDeferredComposer(dc);
-                }
-            }
-            else
+            if (!drawerMode.HasFlag(DrawerModes.Deferred))
             {
                 base.SetBlendState(dc, drawerMode, blendMode);
             }
-        }
-        /// <summary>
-        /// Sets deferred composer blend state
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        private void SetBlendDeferredComposer(IEngineDeviceContext dc)
-        {
-            dc.SetBlendState(blendDeferredComposer);
-        }
-        /// <summary>
-        /// Sets transparent deferred composer blend state
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        private void SetBlendDeferredComposerTransparent(IEngineDeviceContext dc)
-        {
-            dc.SetBlendState(blendDeferredComposerTransparent);
-        }
-        /// <summary>
-        /// Sets additive deferred composer blend state
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        private void SetBlendDeferredComposerAdditive(IEngineDeviceContext dc)
-        {
-            dc.SetBlendState(blendDeferredComposerAdditive);
-        }
-        /// <summary>
-        /// Sets deferred lighting blend state
-        /// </summary>
-        /// <param name="dc">Device context</param>
-        private void SetBlendDeferredLighting(IEngineDeviceContext dc)
-        {
-            dc.SetBlendState(blendDeferredLighting);
+
+            if (blendMode.HasFlag(BlendModes.Additive))
+            {
+                dc.SetBlendState(blendDeferredComposerAdditive);
+            }
+            else if (blendMode.HasFlag(BlendModes.Transparent) || blendMode.HasFlag(BlendModes.Alpha))
+            {
+                dc.SetBlendState(blendDeferredComposerTransparent);
+            }
+            else
+            {
+                dc.SetBlendState(blendDeferredComposer);
+            }
         }
     }
 }
