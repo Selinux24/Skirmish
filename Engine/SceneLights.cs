@@ -480,7 +480,7 @@ namespace Engine
         public IEnumerable<ISceneLightDirectional> GetVisibleDirectionalLights()
         {
             return visibleLights
-                .OfType<SceneLightDirectional>()
+                .OfType<ISceneLightDirectional>()
                 .ToArray();
         }
         /// <summary>
@@ -490,7 +490,7 @@ namespace Engine
         public IEnumerable<ISceneLightPoint> GetVisiblePointLights()
         {
             return visibleLights
-                .OfType<SceneLightPoint>()
+                .OfType<ISceneLightPoint>()
                 .ToArray();
         }
         /// <summary>
@@ -500,7 +500,7 @@ namespace Engine
         public IEnumerable<ISceneLightSpot> GetVisibleSpotLights()
         {
             return visibleLights
-                .OfType<SceneLightSpot>()
+                .OfType<ISceneLightSpot>()
                 .ToArray();
         }
 
