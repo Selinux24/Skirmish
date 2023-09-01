@@ -9,35 +9,24 @@ namespace Engine.Common
     /// </summary>
     class BufferDescriptorRequestIndices : IBufferDescriptorRequest
     {
-        /// <summary>
-        /// Requester Id
-        /// </summary>
+        /// <inheritdoc/>
         public string Id { get; set; }
+        /// <inheritdoc/>
+        public bool Dynamic { get; set; }
+        /// <inheritdoc/>
+        public BufferDescriptorRequestActions Action { get; set; } = BufferDescriptorRequestActions.None;
+        /// <inheritdoc/>
+        public ProcessedStages Processed { get; set; } = ProcessedStages.Requested;
         /// <summary>
         /// Data to assign
         /// </summary>
         public IEnumerable<uint> Data { get; set; }
         /// <summary>
-        /// Gets or sets wheter the destination buffer must be dynamic or not
-        /// </summary>
-        public bool Dynamic { get; set; }
-        /// <summary>
         /// Descriptor
         /// </summary>
         public BufferDescriptor Descriptor { get; set; } = new BufferDescriptor();
-        /// <summary>
-        /// Request action
-        /// </summary>
-        public BufferDescriptorRequestActions Action { get; set; } = BufferDescriptorRequestActions.None;
-        /// <summary>
-        /// Gets wheter the descriptor is processed into the buffer manager or not
-        /// </summary>
-        public ProcessedStages Processed { get; set; } = ProcessedStages.Requested;
 
-        /// <summary>
-        /// Updates the buffer
-        /// </summary>
-        /// <param name="request">Buffer request</param>
+        /// <inheritdoc/>
         public void Process(BufferManager bufferManager)
         {
             Processed = ProcessedStages.InProcess;
@@ -53,10 +42,7 @@ namespace Engine.Common
 
             Processed = ProcessedStages.Processed;
         }
-        /// <summary>
-        /// Updates the buffer descriptor
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <inheritdoc/>
         public async Task ProcessAsync(BufferManager bufferManager)
         {
             await Task.Run(() => Process(bufferManager));

@@ -9,7 +9,7 @@ namespace Engine.Common
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    public class BufferManagerVertices
+    public class BufferManagerVertices : IEngineBufferDescriptor
     {
         /// <summary>
         /// Data list
@@ -24,37 +24,13 @@ namespace Engine.Common
         /// </summary>
         private readonly List<BufferDescriptor> vertexDescriptors = new();
 
-        /// <summary>
-        /// Vertex type
-        /// </summary>
-        public readonly VertexTypes Type;
-        /// <summary>
-        /// Dynamic buffer
-        /// </summary>
-        public readonly bool Dynamic;
-        /// <summary>
-        /// Vertex data
-        /// </summary>
-        public IEnumerable<IVertexData> Data { get { return data.ToArray(); } }
-        /// <summary>
-        /// Input elements
-        /// </summary>
-        public IEnumerable<InputElement> Input { get { return input.ToArray(); } }
-        /// <summary>
-        /// Vertex buffer index in the buffer manager list
-        /// </summary>
+        /// <inheritdoc/>
+        public bool Dynamic { get; private set; }
+        /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
-        /// <summary>
-        /// Vertex buffer binding index in the manager list
-        /// </summary>
-        public int BufferBindingIndex { get; set; } = -1;
-        /// <summary>
-        /// Allocated size into graphics device
-        /// </summary>
+        /// <inheritdoc/>
         public int AllocatedSize { get; set; } = 0;
-        /// <summary>
-        /// Gets the size of the data to allocate
-        /// </summary>
+        /// <inheritdoc/>
         public int ToAllocateSize
         {
             get
@@ -62,18 +38,11 @@ namespace Engine.Common
                 return data?.Count ?? 0;
             }
         }
-        /// <summary>
-        /// Gets wether the internal buffer needs reallocation
-        /// </summary>
+        /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
-        /// <summary>
-        /// Gets wether the internal buffer is currently allocated in the graphic device
-        /// </summary>
+        /// <inheritdoc/>
         public bool Allocated { get; set; } = false;
-        /// <summary>
-        /// Gets wether the current buffer is dirty
-        /// </summary>
-        /// <remarks>A buffer is dirty when needs reallocation or if it's not allocated at all</remarks>
+        /// <inheritdoc/>
         public bool Dirty
         {
             get
@@ -82,9 +51,25 @@ namespace Engine.Common
             }
         }
         /// <summary>
-        /// Instancing buffer descriptoy
+        /// Vertex type
+        /// </summary>
+        public VertexTypes Type { get; private set; }
+        /// <summary>
+        /// Vertex data
+        /// </summary>
+        public IEnumerable<IVertexData> Data { get { return data.ToArray(); } }
+        /// <summary>
+        /// Instancing buffer descriptor
         /// </summary>
         public BufferDescriptor InstancingDescriptor { get; set; } = null;
+        /// <summary>
+        /// Input elements
+        /// </summary>
+        public IEnumerable<InputElement> Input { get { return input.ToArray(); } }
+        /// <summary>
+        /// Vertex buffer binding index in the manager list
+        /// </summary>
+        public int BufferBindingIndex { get; set; } = -1;
 
         /// <summary>
         /// Constructor
@@ -103,6 +88,7 @@ namespace Engine.Common
         {
             return data.FirstOrDefault()?.GetStride() ?? 0;
         }
+
         /// <summary>
         /// Adds the input element to the internal input list, of the specified slot
         /// </summary>

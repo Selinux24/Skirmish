@@ -1241,7 +1241,7 @@ namespace Engine.Common
             var graphics = Scene.Game.Graphics;
 
             dc.SetRenderTargets(sceneObjectsTarget.Targets, clearRT, clearRTColor, graphics.DefaultDepthStencil, clearDepth, clearStencil, false);
-            dc.SetViewport(graphics.Viewport);
+            dc.SetViewport(graphics.Viewport); //Set default viewport
         }
         /// <summary>
         /// Binds the UI render target
@@ -1252,7 +1252,7 @@ namespace Engine.Common
         private void BindUITarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(sceneUITarget.Targets, clearRT, clearRTColor);
-            dc.SetViewport(Scene.Game.Graphics.Viewport);
+            dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
         }
         /// <summary>
         /// Binds the results render target
@@ -1263,7 +1263,7 @@ namespace Engine.Common
         private void BindResultsTarget(IEngineDeviceContext dc, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(sceneResultsTarget.Targets, clearRT, clearRTColor);
-            dc.SetViewport(Scene.Game.Graphics.Viewport);
+            dc.SetViewport(Scene.Game.Graphics.Viewport); //Set default viewport
         }
         /// <summary>
         /// Binds graphics for post-processing pass
@@ -1275,10 +1275,7 @@ namespace Engine.Common
         private void BindPostProcessingTarget(IEngineDeviceContext dc, RenderTarget target, bool clearRT, Color4 clearRTColor)
         {
             dc.SetRenderTargets(target.Targets, clearRT, clearRTColor);
-
-            //Set local viewport
-            var viewport = Scene.Game.Form.GetViewport();
-            dc.SetViewport(viewport);
+            dc.SetViewport(Scene.Game.Form.GetViewport()); //Set local viewport
         }
         /// <summary>
         /// Gets the target textures

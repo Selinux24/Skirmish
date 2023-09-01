@@ -7,36 +7,22 @@ namespace Engine.Common
     /// <summary>
     /// Vertex buffer description
     /// </summary>
-    public class BufferManagerInstances
+    /// <typeparam name="T">Data type</typeparam>
+    public class BufferManagerInstances<T> : IEngineBufferDescriptor
+        where T : struct, IInstacingData
     {
         /// <summary>
         /// Instancing descriptor list
         /// </summary>
         private readonly List<BufferDescriptor> instancingDescriptors = new();
 
-        /// <summary>
-        /// Dynamic buffer
-        /// </summary>
-        public readonly bool Dynamic;
-        /// <summary>
-        /// Instances
-        /// </summary>
-        public int Instances { get; set; } = 0;
-        /// <summary>
-        /// Vertex buffer index in the buffer manager list
-        /// </summary>
+        /// <inheritdoc/>
+        public bool Dynamic { get; private set; }
+        /// <inheritdoc/>
         public int BufferIndex { get; set; } = -1;
-        /// <summary>
-        /// Vertex buffer binding index in the manager list
-        /// </summary>
-        public int BufferBindingIndex { get; set; } = -1;
-        /// <summary>
-        /// Allocated size into graphics device
-        /// </summary>
+        /// <inheritdoc/>
         public int AllocatedSize { get; set; } = 0;
-        /// <summary>
-        /// Gets the size of the data to allocate
-        /// </summary>
+        /// <inheritdoc/>
         public int ToAllocateSize
         {
             get
@@ -44,18 +30,11 @@ namespace Engine.Common
                 return Instances;
             }
         }
-        /// <summary>
-        /// Gets wether the internal buffer needs reallocation
-        /// </summary>
+        /// <inheritdoc/>
         public bool ReallocationNeeded { get; set; } = false;
-        /// <summary>
-        /// Gets wether the internal buffer is currently allocated in the graphic device
-        /// </summary>
+        /// <inheritdoc/>
         public bool Allocated { get; set; } = false;
-        /// <summary>
-        /// Gets wether the current buffer is dirty
-        /// </summary>
-        /// <remarks>A buffer is dirty when needs reallocation or if it's not allocated at all</remarks>
+        /// <inheritdoc/>
         public bool Dirty
         {
             get
@@ -63,6 +42,14 @@ namespace Engine.Common
                 return !Allocated || ReallocationNeeded;
             }
         }
+        /// <summary>
+        /// Instances
+        /// </summary>
+        public int Instances { get; set; } = 0;
+        /// <summary>
+        /// Vertex buffer binding index in the manager list
+        /// </summary>
+        public int BufferBindingIndex { get; set; } = -1;
 
         /// <summary>
         /// Constructor
@@ -78,7 +65,7 @@ namespace Engine.Common
         /// <returns>Returns the buffer format stride in bytes</returns>
         public static int GetStride()
         {
-            return default(VertexInstancingData).GetStride();
+            return default(T).GetStride();
         }
 
         /// <summary>
@@ -148,7 +135,7 @@ namespace Engine.Common
         /// <inheritdoc/>
         public override string ToString()
         {
-            return $"[{typeof(VertexInstancingData)}][{Dynamic}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
+            return $"[{typeof(T)}][{Dynamic}] Instances: {Instances} AllocatedSize: {AllocatedSize} ToAllocateSize: {ToAllocateSize} Dirty: {Dirty}";
         }
     }
 }

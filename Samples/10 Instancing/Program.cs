@@ -23,7 +23,7 @@ namespace Instancing
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("10 Instancing", WindowsEngineForm.ScreenSize * 0.2f);
+                using Game cl = new("10 Instancing", WindowsEngineForm.ScreenSize * 0.8f);
 #else
                 using Game cl = new("10 Instancing");
 #endif

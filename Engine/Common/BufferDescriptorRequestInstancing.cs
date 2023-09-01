@@ -2,16 +2,19 @@
 
 namespace Engine.Common
 {
+    /// <summary>
+    /// Instace buffer descriptor request
+    /// </summary>
     class BufferDescriptorRequestInstancing : IBufferDescriptorRequest
     {
-        /// <summary>
-        /// Requester Id
-        /// </summary>
+        /// <inheritdoc/>
         public string Id { get; set; }
-        /// <summary>
-        /// Gets or sets wheter the destination buffer must be dynamic or not
-        /// </summary>
+        /// <inheritdoc/>
         public bool Dynamic { get; set; }
+        /// <inheritdoc/>
+        public BufferDescriptorRequestActions Action { get; set; } = BufferDescriptorRequestActions.None;
+        /// <inheritdoc/>
+        public ProcessedStages Processed { get; set; } = ProcessedStages.Requested;
         /// <summary>
         /// Gets or sets de number of instances of this geometry
         /// </summary>
@@ -20,19 +23,8 @@ namespace Engine.Common
         /// Descriptor
         /// </summary>
         public BufferDescriptor Descriptor { get; set; } = new BufferDescriptor();
-        /// <summary>
-        /// Request action
-        /// </summary>
-        public BufferDescriptorRequestActions Action { get; set; } = BufferDescriptorRequestActions.None;
-        /// <summary>
-        /// Gets wheter the descriptor is processed into the buffer manager or not
-        /// </summary>
-        public ProcessedStages Processed { get; set; } = ProcessedStages.Requested;
 
-        /// <summary>
-        /// Updates the buffer
-        /// </summary>
-        /// <param name="request">Buffer request</param>
+        /// <inheritdoc/>
         public void Process(BufferManager bufferManager)
         {
             Processed = ProcessedStages.InProcess;
@@ -48,10 +40,7 @@ namespace Engine.Common
 
             Processed = ProcessedStages.Processed;
         }
-        /// <summary>
-        /// Updates the buffer descriptor
-        /// </summary>
-        /// <param name="bufferManager">Buffer manager</param>
+        /// <inheritdoc/>
         public async Task ProcessAsync(BufferManager bufferManager)
         {
             await Task.Run(() => Process(bufferManager));
@@ -62,14 +51,14 @@ namespace Engine.Common
         /// <param name="request">Buffer request</param>
         private void Add(BufferManager bufferManager)
         {
-            BufferManagerInstances descriptor;
+            BufferManagerInstances<VertexInstancingData> descriptor;
 
-            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(IInstacingData)} [{Id}]");
+            Logger.WriteTrace(this, $"Add BufferDescriptor {(Dynamic ? "dynamic" : "static")} {typeof(VertexInstancingData)} [{Id}]");
 
             var slot = bufferManager.FindInstancingBufferDescription(Dynamic);
             if (slot < 0)
             {
-                descriptor = new BufferManagerInstances(Dynamic);
+                descriptor = new BufferManagerInstances<VertexInstancingData>(Dynamic);
                 slot = bufferManager.AddInstancingBufferDescription(descriptor);
             }
             else

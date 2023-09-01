@@ -32,10 +32,6 @@ namespace Engine.UI
         /// </summary>
         private int indexDrawCount = 0;
         /// <summary>
-        /// Update buffers flag
-        /// </summary>
-        private bool updateBuffers = false;
-        /// <summary>
         /// Vertex list
         /// </summary>
         private readonly VertexFont[] vertices = new VertexFont[MAXTEXTLENGTH * 4];
@@ -493,11 +489,6 @@ namespace Engine.UI
         /// <param name="dc">Device context</param>
         private void WriteBuffers(IEngineDeviceContext dc)
         {
-            if (!updateBuffers)
-            {
-                return;
-            }
-
             bool vertsWrited = BufferManager.WriteVertexBuffer(dc, vertexBuffer, vertices.Take(verticesCount));
             bool idxWrited = BufferManager.WriteIndexBuffer(dc, indexBuffer, indices.Take(indicesCount));
             if (!vertsWrited || !idxWrited)
@@ -506,8 +497,6 @@ namespace Engine.UI
             }
 
             indexDrawCount = indicesCount;
-
-            updateBuffers = false;
         }
 
         /// <summary>
@@ -555,8 +544,6 @@ namespace Engine.UI
             indicesCount = iList.Count;
             Array.Copy(vList.ToArray(), vertices, verticesCount);
             Array.Copy(iList.ToArray(), indices, indicesCount);
-
-            updateBuffers = true;
         }
         /// <summary>
         /// Gets the render area in absolute coordinates from screen origin

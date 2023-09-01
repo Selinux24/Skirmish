@@ -1137,8 +1137,7 @@ namespace Engine.Common
                 return true;
             }
 
-            //This should be MapMode.WriteNoOverwrite
-            deviceContext.MapSubresource(b, MapMode.WriteDiscard, MapFlags.None, out DataStream stream);
+            deviceContext.MapSubresource(b, MapMode.WriteNoOverwrite, MapFlags.None, out DataStream stream);
             frameCounters.SubresourceMaps++;
 
             using (stream)
