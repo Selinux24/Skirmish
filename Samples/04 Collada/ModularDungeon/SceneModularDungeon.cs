@@ -761,8 +761,8 @@ namespace Collada.ModularDungeon
             Camera.MovementDelta = playerAgentType.Velocity;
             Camera.SlowMovementDelta = playerAgentType.VelocitySlow;
             Camera.Mode = CameraModes.Free;
-            Camera.Position = cameraInitialPosition;
-            Camera.Interest = cameraInitialInterest;
+            Camera.SetPosition(cameraInitialPosition);
+            Camera.SetInterest(cameraInitialInterest);
         }
         private void UpdateDebugInfo()
         {
@@ -1410,8 +1410,8 @@ namespace Collada.ModularDungeon
 
             gameReady = false;
 
-            Camera.Position = cameraInitialPosition;
-            Camera.Interest = cameraInitialInterest;
+            Camera.SetPosition(cameraInitialPosition);
+            Camera.SetInterest(cameraInitialInterest);
 
             Lights.ClearPointLights();
             Lights.ClearSpotLights();
@@ -1457,8 +1457,8 @@ namespace Collada.ModularDungeon
                 Vector3 pos = scenery.CurrentLevel.StartPosition;
                 Vector3 dir = scenery.CurrentLevel.LookingVector;
                 pos.Y += playerAgentType.Height;
-                Camera.Position = pos;
-                Camera.Interest = pos + dir;
+                Camera.SetPosition(pos);
+                Camera.SetInterest(pos + dir);
 
                 Lights.Add(torch);
 

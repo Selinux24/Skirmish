@@ -127,10 +127,6 @@ namespace Engine
         private Vector3 interest;
 
         /// <summary>
-        /// Next velocity
-        /// </summary>
-        private Vector3 nextVelocity;
-        /// <summary>
         /// Next position
         /// </summary>
         private Vector3 nextPosition;
@@ -204,11 +200,6 @@ namespace Engine
             {
                 return velocity;
             }
-            private set
-            {
-                nextVelocity = value;
-                updateNeeded = true;
-            }
         }
         /// <inheritdoc/>
         /// <remarks>Point of view</remarks>
@@ -217,11 +208,6 @@ namespace Engine
             get
             {
                 return position;
-            }
-            set
-            {
-                nextPosition = value;
-                updateNeeded = true;
             }
         }
         /// <summary>
@@ -232,11 +218,6 @@ namespace Engine
             get
             {
                 return interest;
-            }
-            set
-            {
-                nextInterest = value;
-                updateNeeded = true;
             }
         }
         /// <summary>
@@ -653,8 +634,6 @@ namespace Engine
         /// </summary>
         public void Update(GameTime gameTime)
         {
-            nextVelocity = Vector3.Zero;
-
             if (Following != null)
             {
                 Following.Update(gameTime);
@@ -666,7 +645,7 @@ namespace Engine
 
             if (updateNeeded)
             {
-                velocity = nextVelocity;
+                velocity = Vector3.Zero;
                 position = nextPosition;
                 interest = nextInterest;
                 updateNeeded = false;
@@ -786,6 +765,25 @@ namespace Engine
             }
 
             SetIsometric((IsometricAxis)next, interest, Vector3.Distance(position, interest));
+        }
+
+        /// <summary>
+        /// Sets the camera position
+        /// </summary>
+        /// <param name="position">Position</param>
+        public void SetPosition(Vector3 position)
+        {
+            nextPosition = position;
+            updateNeeded = true;
+        }
+        /// <summary>
+        /// Sets the camera point of interest
+        /// </summary>
+        /// <param name="interest">Point of interest</param>
+        public void SetInterest(Vector3 interest)
+        {
+            nextInterest = interest;
+            updateNeeded = true;
         }
 
         /// <summary>
@@ -1089,7 +1087,7 @@ namespace Engine
 
             float delta = slow ? SlowMovementDelta : MovementDelta;
 
-            nextVelocity = vector * delta * gameTime.ElapsedSeconds;
+            var nextVelocity = vector * delta * gameTime.ElapsedSeconds;
             if (nextVelocity != Vector3.Zero)
             {
                 nextPosition += nextVelocity;

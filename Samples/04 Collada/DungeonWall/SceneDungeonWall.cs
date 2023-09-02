@@ -127,8 +127,8 @@ namespace Collada.DungeonWall
             Camera.NearPlaneDistance = 0.5f;
             Camera.FarPlaneDistance = 500;
             Camera.Mode = CameraModes.Free;
-            Camera.Position = new Vector3(-5, 3, -5);
-            Camera.Interest = new Vector3(0, 0, 0);
+            Camera.SetPosition(new Vector3(-5, 3, -5));
+            Camera.SetInterest(new Vector3(0, 0, 0));
         }
         private void InitializeEnvironment()
         {

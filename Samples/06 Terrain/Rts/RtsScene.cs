@@ -1554,7 +1554,7 @@ namespace Terrain.Rts
                     {
                         var pPos = r.Position;
                         pPos.Y += walkerAgentType.Height;
-                        Camera.Position = pPos;
+                        Camera.SetPosition(pPos);
                     }
                 }
                 else

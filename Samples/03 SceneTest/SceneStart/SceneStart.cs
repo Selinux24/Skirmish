@@ -308,7 +308,7 @@ namespace SceneTest.SceneStart
             position.X = +((xmouse * d) + (0.2f * (float)Math.Cos(vx * Game.GameTime.TotalSeconds)));
             position.Y = -((ymouse * d) + (0.1f * (float)Math.Sin(vy * Game.GameTime.TotalSeconds)));
 
-            Camera.Position = new Vector3(0, 0, -5f);
+            Camera.SetPosition(new Vector3(0, 0, -5f));
             Camera.LookTo(position);
         }
         private void UpdateInput()

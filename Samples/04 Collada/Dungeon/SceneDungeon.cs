@@ -150,8 +150,8 @@ namespace Collada.Dungeon
             Camera.MovementDelta = agent.Velocity;
             Camera.SlowMovementDelta = agent.VelocitySlow;
             Camera.Mode = CameraModes.Free;
-            Camera.Position = new Vector3(0, agent.Height, 0);
-            Camera.Interest = new Vector3(0, agent.Height, 1);
+            Camera.SetPosition(new Vector3(0, agent.Height, 0));
+            Camera.SetInterest(new Vector3(0, agent.Height, 1));
         }
 
         public override void Update(GameTime gameTime)

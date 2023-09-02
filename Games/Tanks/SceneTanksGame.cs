@@ -1445,8 +1445,8 @@ You will lost all the game progress.",
                 vw.Y -= pos.Y - y;
                 pos.Y = y;
 
-                Camera.Position = pos;
-                Camera.Interest = vw;
+                Camera.SetPosition(pos);
+                Camera.SetInterest(vw);
             }
         }
 
@@ -1511,14 +1511,14 @@ You will lost all the game progress.",
 
             if (firstUpdate)
             {
-                Camera.Position = position;
+                Camera.SetPosition(position);
             }
             else
             {
                 Camera.Goto(position, CameraTranslations.Quick);
             }
 
-            Camera.Interest = interest;
+            Camera.SetInterest(interest);
         }
 
         private void PaintShot(bool visible)

@@ -145,8 +145,8 @@ namespace Collada.Start
                 res.ThrowExceptions();
             }
 
-            Camera.Position = Vector3.BackwardLH * 8f;
-            Camera.Interest = Vector3.Zero;
+            Camera.SetPosition(Vector3.BackwardLH * 8f);
+            Camera.SetInterest(Vector3.Zero);
 
             SetBackground();
 

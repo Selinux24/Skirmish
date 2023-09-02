@@ -193,8 +193,8 @@ Space: Finds random over navmesh";
             var center = bbox.GetCenter();
             float maxD = Math.Max(Math.Max(bbox.Width, bbox.Height), bbox.Depth);
 
-            Camera.Interest = center;
-            Camera.Position = center + new Vector3(1, 0.8f, -1) * maxD * 0.8f;
+            Camera.SetInterest(center);
+            Camera.SetPosition(center + new Vector3(1, 0.8f, -1) * maxD * 0.8f);
 
             await UpdateNavigationGraph();
 
