@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Common;
 using SharpDX;
 
 namespace Terrain.Rts.Emitters
@@ -33,13 +32,13 @@ namespace Terrain.Rts.Emitters
         /// Updates the emitter state
         /// </summary>
         /// <param name="context">Updating context</param>
-        public override void Update(UpdateContext context)
+        public override void Update(GameTime gameTime, Vector3 pointOfView)
         {
             Vector3 rDelta = Vector3.Transform(delta, manipulator.Rotation);
 
             Position = manipulator.Position + rDelta;
 
-            base.Update(context);
+            base.Update(gameTime, pointOfView);
         }
     }
 }

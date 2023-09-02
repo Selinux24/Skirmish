@@ -301,10 +301,12 @@ namespace Engine
         /// <inheritdoc/>
         public override void Update(UpdateContext context)
         {
-            var keyLight = context.Lights.KeyLight;
+            var lights = Scene.Lights;
+
+            var keyLight = lights.KeyLight;
             if (keyLight != null)
             {
-                context.Lights.BaseFogColor = GetFogColor(keyLight.Direction);
+                lights.BaseFogColor = GetFogColor(keyLight.Direction);
             }
         }
         /// <inheritdoc/>

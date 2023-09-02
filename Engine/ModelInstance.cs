@@ -267,7 +267,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public virtual void Update(UpdateContext context)
         {
-            SetLOD(context.Camera.Position);
+            SetLOD(model.Scene.Camera.Position);
 
             if (modelParts.Count > 0)
             {

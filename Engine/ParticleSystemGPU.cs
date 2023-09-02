@@ -49,9 +49,9 @@ namespace Engine
         private BuiltInStreamOut particleStreamOut;
 
         /// <summary>
-        /// Game instance
+        /// Scene instance
         /// </summary>
-        protected Game Game = null;
+        protected Scene Scene = null;
 
         /// <summary>
         /// Particle texture
@@ -96,17 +96,16 @@ namespace Engine
         /// <summary>
         /// Creates a new CPU particle system
         /// </summary>
-        /// <param name="game"></param>
+        /// <param name="scene"></param>
         /// <param name="name"></param>
         /// <param name="description"></param>
         /// <param name="emitter"></param>
-        /// <returns></returns>
-        public static async Task<ParticleSystemGpu> Create(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        public static async Task<ParticleSystemGpu> Create(Scene scene, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             var pParameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
-            var texture = await game.ResourceManager.RequestResource(imgContent);
+            var texture = await scene.Game.ResourceManager.RequestResource(imgContent);
             var textureCount = (uint)imgContent.Count;
 
             emitter.UpdateBounds(pParameters);
@@ -115,7 +114,7 @@ namespace Engine
 
             var res = new ParticleSystemGpu
             {
-                Game = game,
+                Scene = scene,
                 Name = name,
 
                 parameters = pParameters,
@@ -203,17 +202,19 @@ namespace Engine
                 EmissionTime = Emitter.Duration,
             });
 
+            var graphics = Scene.Game.Graphics;
+
             particleDrawer = BuiltInShaders.GetDrawer<BuiltInParticles>();
             var particleVsSignature = particleDrawer.GetVertexShader().Shader.GetShaderBytecode();
-            emittersBuffer = new EngineVertexBuffer<VertexGpuParticle>(Game.Graphics, $"{Name}_Emitter", data, VertexBufferParams.Default);
+            emittersBuffer = new EngineVertexBuffer<VertexGpuParticle>(graphics, $"{Name}_Emitter", data, VertexBufferParams.Default);
             emittersBuffer.CreateInputLayout(nameof(ParticlesVs), particleVsSignature, BufferSlot);
 
             particleStreamOut = BuiltInShaders.GetDrawer<BuiltInStreamOut>();
             var streamoutVsSignature = particleStreamOut.GetVertexShader().Shader.GetShaderBytecode();
             int length = GetBufferLength();
-            drawingBuffer = new EngineVertexBuffer<VertexGpuParticle>(Game.Graphics, $"{Name}_SO1", length, VertexBufferParams.StreamOut);
+            drawingBuffer = new EngineVertexBuffer<VertexGpuParticle>(graphics, $"{Name}_SO1", length, VertexBufferParams.StreamOut);
             drawingBuffer.CreateInputLayout($"{Name}_SO1_IL", streamoutVsSignature, BufferSlot);
-            streamOutBuffer = new EngineVertexBuffer<VertexGpuParticle>(Game.Graphics, $"{Name}_SO2", length, VertexBufferParams.StreamOut);
+            streamOutBuffer = new EngineVertexBuffer<VertexGpuParticle>(graphics, $"{Name}_SO2", length, VertexBufferParams.StreamOut);
             streamOutBuffer.CreateInputLayout($"{Name}_SO2_IL", streamoutVsSignature, BufferSlot);
         }
 
@@ -223,7 +224,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Update(UpdateContext context)
         {
-            Emitter.Update(context);
+            Emitter.Update(context.GameTime, Scene.Camera.Position);
 
             TimeToEnd -= Emitter.ElapsedTime;
         }
@@ -269,7 +270,7 @@ namespace Engine
         /// <param name="dc">Device context</param>
         private void StreamOut(IEngineDeviceContext dc)
         {
-            dc.SetDepthStencilState(Game.Graphics.GetDepthStencilNone());
+            dc.SetDepthStencilState(Scene.Game.Graphics.GetDepthStencilNone());
 
             var soState = new BuiltInStreamOutState
             {
@@ -309,10 +310,10 @@ namespace Engine
         /// <param name="drawerMode">Drawe mode</param>
         private bool DrawInternal(DrawContext context)
         {
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             var dc = context.DeviceContext;
 
-            dc.SetDepthStencilState(Game.Graphics.GetDepthStencilRDZEnabled());
+            dc.SetDepthStencilState(graphics.GetDepthStencilRDZEnabled());
             dc.SetBlendState(graphics.GetBlendState(parameters.BlendMode));
 
             var useRotation = parameters.RotateSpeed != Vector2.Zero;

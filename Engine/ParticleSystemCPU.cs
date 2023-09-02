@@ -49,9 +49,9 @@ namespace Engine
         private BuiltInParticles particleDrawer;
 
         /// <summary>
-        /// Game instance
+        /// Scene instance
         /// </summary>
-        protected Game Game = null;
+        protected Scene Scene = null;
 
         /// <summary>
         /// Particle texture
@@ -96,17 +96,16 @@ namespace Engine
         /// <summary>
         /// Creates a new CPU particle system
         /// </summary>
-        /// <param name="game"></param>
-        /// <param name="name"></param>
-        /// <param name="description"></param>
-        /// <param name="emitter"></param>
-        /// <returns></returns>
-        public static async Task<ParticleSystemCpu> Create(Game game, string name, ParticleSystemDescription description, ParticleEmitter emitter)
+        /// <param name="scene">Scene</param>
+        /// <param name="name">System name</param>
+        /// <param name="description">System description</param>
+        /// <param name="emitter">Emitter</param>
+        public static async Task<ParticleSystemCpu> Create(Scene scene, string name, ParticleSystemDescription description, ParticleEmitter emitter)
         {
             var pParameters = new ParticleSystemParams(description) * emitter.Scale;
 
             var imgContent = new FileArrayImageContent(description.ContentPath, description.TextureName);
-            var texture = await game.ResourceManager.RequestResource(imgContent);
+            var texture = await scene.Game.ResourceManager.RequestResource(imgContent);
             var textureCount = (uint)imgContent.Count;
 
             emitter.UpdateBounds(pParameters);
@@ -114,7 +113,7 @@ namespace Engine
             var vParticles = new VertexCpuParticle[maxConcurrentParticles];
             float timeToEnd = emitter.Duration + pParameters.MaxDuration;
 
-            var pBuffer = new EngineVertexBuffer<VertexCpuParticle>(game.Graphics, description.Name, vParticles, VertexBufferParams.Dynamic);
+            var pBuffer = new EngineVertexBuffer<VertexCpuParticle>(scene.Game.Graphics, description.Name, vParticles, VertexBufferParams.Dynamic);
 
             var drawer = BuiltInShaders.GetDrawer<BuiltInParticles>();
             var signature = drawer.GetVertexShader().Shader.GetShaderBytecode();
@@ -122,7 +121,7 @@ namespace Engine
 
             return new ParticleSystemCpu
             {
-                Game = game,
+                Scene = scene,
                 Name = name,
 
                 parameters = pParameters,
@@ -183,7 +182,7 @@ namespace Engine
         /// <param name="context">Context</param>
         public void Update(UpdateContext context)
         {
-            Emitter.Update(context);
+            Emitter.Update(context.GameTime, Scene.Camera.Position);
 
             if (Emitter.Active && timeToNextParticle <= 0)
             {
@@ -210,7 +209,7 @@ namespace Engine
                 return false;
             }
 
-            var graphics = Game.Graphics;
+            var graphics = Scene.Game.Graphics;
             var dc = context.DeviceContext;
 
             if (updateParticles)

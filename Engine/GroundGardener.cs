@@ -912,9 +912,9 @@ namespace Engine
 
             BuildQuadtree(bbox.Value, Description.NodeSize);
 
-            foliageSphere.Center = context.Camera.Position;
+            foliageSphere.Center = Scene.Camera.Position;
 
-            visibleNodes = GetFoliageNodes((IntersectionVolumeFrustum)context.Camera.Frustum, foliageSphere);
+            visibleNodes = GetFoliageNodes((IntersectionVolumeFrustum)Scene.Camera.Frustum, foliageSphere);
             if (!visibleNodes.Any())
             {
                 return;
@@ -923,7 +923,7 @@ namespace Engine
             bool transparent = BlendMode.HasFlag(BlendModes.Alpha) || BlendMode.HasFlag(BlendModes.Transparent);
 
             //Sort nodes by distance from camera position
-            SortVisibleNodes(context.GameTime, context.Camera.Position, transparent);
+            SortVisibleNodes(context.GameTime, Scene.Camera.Position, transparent);
 
             //Find patches to assign data
             toAssign.Clear();

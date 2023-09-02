@@ -241,10 +241,11 @@ namespace Engine
         /// <summary>
         /// Updates internal state
         /// </summary>
-        /// <param name="context">Updating context</param>
-        public virtual void Update(UpdateContext context)
+        /// <param name="gameTime">Game time</param>
+        /// <param name="pointOfView">Point of view</param>
+        public virtual void Update(GameTime gameTime, Vector3 pointOfView)
         {
-            ElapsedTime = context.GameTime.ElapsedSeconds;
+            ElapsedTime = gameTime.ElapsedSeconds;
 
             TotalTime += ElapsedTime;
 
@@ -253,7 +254,7 @@ namespace Engine
                 Duration -= ElapsedTime;
             }
 
-            Distance = Vector3.Distance(Position, context.Camera.Position);
+            Distance = Vector3.Distance(Position, pointOfView);
 
             UpdateBoundingBox();
         }

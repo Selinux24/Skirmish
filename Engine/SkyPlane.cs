@@ -195,12 +195,13 @@ namespace Engine
             translation = delta;
             translation %= 1f;
 
-            if (context.Lights.KeyLight != null)
+            var lights = Scene.Lights;
+            if (lights.KeyLight != null)
             {
-                brightness = Math.Min(MaxBrightness, context.Lights.KeyLight.Brightness + MinBrightness);
+                brightness = Math.Min(MaxBrightness, lights.KeyLight.Brightness + MinBrightness);
             }
 
-            color = (CloudsBaseColor + context.Lights.SunColor) * 0.5f;
+            color = (CloudsBaseColor + lights.SunColor) * 0.5f;
         }
         /// <inheritdoc/>
         public override bool Draw(DrawContext context)

@@ -85,14 +85,6 @@ namespace Engine
         }
 
         /// <summary>
-        /// Position
-        /// </summary>
-        private Vector3 position;
-        /// <summary>
-        /// Interest
-        /// </summary>
-        private Vector3 interest;
-        /// <summary>
         /// Field of view angle
         /// </summary>
         private float fieldOfView = MathUtil.PiOverFour;
@@ -120,6 +112,36 @@ namespace Engine
         /// Camera mode
         /// </summary>
         private CameraModes mode;
+
+        /// <summary>
+        /// Velocity
+        /// </summary>
+        private Vector3 velocity;
+        /// <summary>
+        /// Position
+        /// </summary>
+        private Vector3 position;
+        /// <summary>
+        /// Interest
+        /// </summary>
+        private Vector3 interest;
+
+        /// <summary>
+        /// Next velocity
+        /// </summary>
+        private Vector3 nextVelocity;
+        /// <summary>
+        /// Next position
+        /// </summary>
+        private Vector3 nextPosition;
+        /// <summary>
+        /// Next interest
+        /// </summary>
+        private Vector3 nextInterest;
+        /// <summary>
+        /// Update needed flag
+        /// </summary>
+        private bool updateNeeded = false;
 
         #region Isometric
 
@@ -176,6 +198,58 @@ namespace Engine
         #endregion
 
         /// <inheritdoc/>
+        public Vector3 Velocity
+        {
+            get
+            {
+                return velocity;
+            }
+            private set
+            {
+                nextVelocity = value;
+                updateNeeded = true;
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>Point of view</remarks>
+        public Vector3 Position
+        {
+            get
+            {
+                return position;
+            }
+            set
+            {
+                nextPosition = value;
+                updateNeeded = true;
+            }
+        }
+        /// <summary>
+        /// Camera interest
+        /// </summary>
+        public Vector3 Interest
+        {
+            get
+            {
+                return interest;
+            }
+            set
+            {
+                nextInterest = value;
+                updateNeeded = true;
+            }
+        }
+        /// <summary>
+        /// Camera direction
+        /// </summary>
+        public Vector3 Direction
+        {
+            get
+            {
+                return Vector3.Normalize(interest - position);
+            }
+        }
+        /// <inheritdoc/>
         public Vector3 Forward
         {
             get
@@ -186,17 +260,17 @@ namespace Engine
                 }
                 else if (mode == CameraModes.Free)
                 {
-                    return Vector3.Normalize(Interest - Position);
+                    return Direction;
                 }
                 else if (mode == CameraModes.FirstPerson || mode == CameraModes.ThirdPerson)
                 {
-                    var v = Interest - Position;
+                    var dir = Direction;
 
-                    return Vector3.Normalize(new Vector3(v.X, 0, v.Z));
+                    return Vector3.Normalize(new Vector3(dir.X, 0, dir.Z));
                 }
                 else
                 {
-                    return Vector3.Normalize(Interest - Position);
+                    return Direction;
                 }
             }
         }
@@ -316,21 +390,6 @@ namespace Engine
             }
         }
         /// <inheritdoc/>
-        /// <remarks>Point of view</remarks>
-        public Vector3 Position
-        {
-            get
-            {
-                return Following?.Position ?? position;
-            }
-            set
-            {
-                position = value;
-            }
-        }
-        /// <inheritdoc/>
-        public Vector3 Velocity { get; private set; }
-        /// <inheritdoc/>
         /// <remarks>The view * projection transform</remarks>
         public Matrix FinalTransform
         {
@@ -369,30 +428,6 @@ namespace Engine
                 {
                     SetOrtho(position, interest);
                 }
-            }
-        }
-        /// <summary>
-        /// Camera interest
-        /// </summary>
-        public Vector3 Interest
-        {
-            get
-            {
-                return Following?.Interest ?? interest;
-            }
-            set
-            {
-                interest = value;
-            }
-        }
-        /// <summary>
-        /// Camera direction
-        /// </summary>
-        public Vector3 Direction
-        {
-            get
-            {
-                return Vector3.Normalize(Interest - Position);
             }
         }
         /// <summary>
@@ -612,68 +647,147 @@ namespace Engine
                     farPlaneDistance);
             }
         }
+
         /// <summary>
         /// Updates camera state
         /// </summary>
         public void Update(GameTime gameTime)
         {
-            Velocity = Vector3.Zero;
+            nextVelocity = Vector3.Zero;
 
-            Following?.Update(gameTime);
+            if (Following != null)
+            {
+                Following.Update(gameTime);
+                nextPosition = Following.Position;
+                nextInterest = Following.Interest;
+            }
 
             UpdateTranslations(gameTime);
 
+            if (updateNeeded)
+            {
+                velocity = nextVelocity;
+                position = nextPosition;
+                interest = nextInterest;
+                updateNeeded = false;
+            }
+
             var upVector = mode == CameraModes.Ortho ? Vector3.UnitZ : Vector3.UnitY;
-            View = Matrix.LookAtLH(Position, Interest, upVector);
+            View = Matrix.LookAtLH(position, interest, upVector);
 
             ViewProjection = View * Projection;
 
             Frustum = new BoundingFrustum(ViewProjection);
         }
         /// <summary>
+        /// Performs translation to target
+        /// </summary>
+        /// <param name="gameTime">Game time</param>
+        private void UpdateTranslations(GameTime gameTime)
+        {
+            if (translationMode == CameraTranslations.None)
+            {
+                return;
+            }
+
+            var diff = translationInterest - nextInterest;
+            var pos = nextPosition + diff;
+            var dir = pos - nextPosition;
+
+            float distanceToTarget = dir.Length();
+            float distanceThisMove = 0f;
+
+            if (translationMode == CameraTranslations.UseDelta)
+            {
+                distanceThisMove = MovementDelta * gameTime.ElapsedSeconds;
+            }
+            else if (translationMode == CameraTranslations.UseSlowDelta)
+            {
+                distanceThisMove = SlowMovementDelta * gameTime.ElapsedSeconds;
+            }
+            else if (translationMode == CameraTranslations.Quick)
+            {
+                distanceThisMove = distanceToTarget * translationOutOfRadius;
+            }
+
+            Vector3 movingVector;
+            if (distanceThisMove >= distanceToTarget)
+            {
+                //This movement goes beyond the destination.
+                movingVector = Vector3.Normalize(dir) * distanceToTarget * translationIntoRadius;
+            }
+            else if (distanceToTarget < translationRadius)
+            {
+                //Into slow radius
+                movingVector = Vector3.Normalize(dir) * distanceThisMove * (distanceToTarget / translationRadius);
+            }
+            else
+            {
+                //On flight
+                movingVector = Vector3.Normalize(dir) * distanceThisMove;
+            }
+
+            if (movingVector != Vector3.Zero)
+            {
+                nextPosition += movingVector;
+                nextInterest += movingVector;
+            }
+
+            if (Vector3.NearEqual(nextInterest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
+            {
+                StopTranslations();
+            }
+        }
+
+        /// <summary>
         /// Sets previous isometrix axis
         /// </summary>
         public void PreviousIsometricAxis()
         {
-            if (mode == CameraModes.FreeIsometric)
+            if (mode != CameraModes.FreeIsometric)
             {
-                int current = (int)isometricAxis;
-                int previous;
-
-                if (current <= 0)
-                {
-                    previous = 3;
-                }
-                else
-                {
-                    previous = current - 1;
-                }
-
-                SetIsometric((IsometricAxis)previous, Interest, Vector3.Distance(Position, Interest));
+                return;
             }
+
+            int current = (int)isometricAxis;
+            int previous;
+
+            if (current <= 0)
+            {
+                previous = 3;
+            }
+            else
+            {
+                previous = current - 1;
+            }
+
+            SetIsometric((IsometricAxis)previous, interest, Vector3.Distance(position, interest));
         }
         /// <summary>
         /// Sets next isometrix axis
         /// </summary>
         public void NextIsometricAxis()
         {
-            if (mode == CameraModes.FreeIsometric)
+            if (mode != CameraModes.FreeIsometric)
             {
-                int current = (int)isometricAxis;
-                int next;
-
-                if (current >= 3)
-                {
-                    next = 0;
-                }
-                else
-                {
-                    next = current + 1;
-                }
-
-                SetIsometric((IsometricAxis)next, Interest, Vector3.Distance(Position, Interest));
+                return;
             }
+
+            int current = (int)isometricAxis;
+            int next;
+
+            if (current >= 3)
+            {
+                next = 0;
+            }
+            else
+            {
+                next = current + 1;
+            }
+
+            SetIsometric((IsometricAxis)next, interest, Vector3.Distance(position, interest));
         }
+
         /// <summary>
         /// Move forward
         /// </summary>
@@ -728,6 +842,7 @@ namespace Engine
         {
             Move(gameTime, Down, slow);
         }
+
         /// <summary>
         /// Rotate up
         /// </summary>
@@ -783,6 +898,7 @@ namespace Engine
                 Rotate(Left, gameTime.ElapsedSeconds * -deltaY * 10f, true, -85, 85);
             }
         }
+
         /// <summary>
         /// Zoom in
         /// </summary>
@@ -811,8 +927,9 @@ namespace Engine
         {
             StopTranslations();
 
-            Position = newPosition;
-            Interest = newInterest;
+            nextPosition = newPosition;
+            nextInterest = newInterest;
+            updateNeeded = true;
 
             mode = CameraModes.Free;
         }
@@ -865,9 +982,10 @@ namespace Engine
             isometricAxis = axis;
             isometricDistanceToInterest = distanceToInterest;
 
-            Position = Vector3.Normalize(camPosition) * isometricDistanceToInterest;
-            Position += newInterest;
-            Interest = newInterest;
+            nextPosition = Vector3.Normalize(camPosition) * isometricDistanceToInterest;
+            nextPosition += newInterest;
+            nextInterest = newInterest;
+            updateNeeded = true;
         }
         /// <summary>
         /// Sets camero to ortho mode
@@ -878,8 +996,9 @@ namespace Engine
         {
             StopTranslations();
 
-            Position = newPosition;
-            Interest = newInterest;
+            nextPosition = newPosition;
+            nextInterest = newInterest;
+            updateNeeded = true;
 
             mode = CameraModes.Ortho;
         }
@@ -902,18 +1021,19 @@ namespace Engine
         /// <param name="translation">Translation mode</param>
         public void Goto(Vector3 newPosition, CameraTranslations translation = CameraTranslations.None)
         {
-            Vector3 diff = newPosition - Position;
+            Vector3 diff = newPosition - nextPosition;
 
             if (translation != CameraTranslations.None)
             {
-                StartTranslations(translation, Interest + diff);
+                StartTranslations(translation, nextInterest + diff);
             }
             else
             {
                 StopTranslations();
 
-                Position += diff;
-                Interest += diff;
+                nextPosition += diff;
+                nextInterest += diff;
+                updateNeeded = true;
             }
         }
         /// <summary>
@@ -944,14 +1064,16 @@ namespace Engine
 
                 if (mode == CameraModes.FreeIsometric)
                 {
-                    Vector3 diff = newInterest - Interest;
+                    var diff = newInterest - nextInterest;
 
-                    Position += diff;
-                    Interest += diff;
+                    nextPosition += diff;
+                    nextInterest += diff;
+                    updateNeeded = true;
                 }
                 else
                 {
-                    Interest = newInterest;
+                    nextInterest = newInterest;
+                    updateNeeded = true;
                 }
             }
         }
@@ -965,14 +1087,15 @@ namespace Engine
         {
             StopTranslations();
 
-            float delta = (slow) ? SlowMovementDelta : MovementDelta;
+            float delta = slow ? SlowMovementDelta : MovementDelta;
 
-            Velocity = vector * delta * gameTime.ElapsedSeconds;
-            if (Velocity != Vector3.Zero)
+            nextVelocity = vector * delta * gameTime.ElapsedSeconds;
+            if (nextVelocity != Vector3.Zero)
             {
-                Position += Velocity;
-                Interest += Velocity;
+                nextPosition += nextVelocity;
+                nextInterest += nextVelocity;
             }
+            updateNeeded = true;
         }
         /// <summary>
         /// Rotation
@@ -1003,7 +1126,7 @@ namespace Engine
             Quaternion targetRotation = Quaternion.RotationAxis(axis, MathUtil.DegreesToRadians(degrees));
             Quaternion r = Quaternion.Lerp(sourceRotation, targetRotation, 0.5f);
 
-            Vector3 curDir = Vector3.Normalize(Interest - Position);
+            Vector3 curDir = Vector3.Normalize(nextInterest - nextPosition);
             Vector3 newDir = Vector3.Transform(curDir, r);
 
             if (clampY)
@@ -1011,12 +1134,14 @@ namespace Engine
                 float newAngle = Helper.Angle(Vector3.Up, newDir) - MathUtil.PiOverTwo;
                 if (newAngle >= MathUtil.DegreesToRadians(clampFrom) && newAngle <= MathUtil.DegreesToRadians(clampTo))
                 {
-                    Interest = position + newDir;
+                    nextInterest = nextPosition + newDir;
+                    updateNeeded = true;
                 }
             }
             else
             {
-                Interest = position + newDir;
+                nextInterest = nextPosition + newDir;
+                updateNeeded = true;
             }
         }
         /// <summary>
@@ -1029,19 +1154,21 @@ namespace Engine
         {
             StopTranslations();
 
-            float delta = (slow) ? SlowZoomDelta : ZoomDelta;
-            float zooming = (zoomIn) ? +delta : -delta;
+            float delta = slow ? SlowZoomDelta : ZoomDelta;
+            float zooming = zoomIn ? +delta : -delta;
 
             if (zooming != 0f)
             {
                 float s = gameTime.ElapsedSeconds;
 
-                Vector3 newPosition = Position + (Direction * zooming * s);
+                var dir = Vector3.Normalize(nextInterest - nextPosition);
+                Vector3 newPosition = nextPosition + (dir * zooming * s);
 
-                float distance = Vector3.Distance(newPosition, Interest);
+                float distance = Vector3.Distance(newPosition, nextInterest);
                 if (distance < ZoomMax && distance > ZoomMin)
                 {
-                    Position = newPosition;
+                    nextPosition = newPosition;
+                    updateNeeded = true;
                 }
             }
         }
@@ -1063,68 +1190,6 @@ namespace Engine
         {
             translationMode = CameraTranslations.None;
             translationInterest = Vector3.Zero;
-        }
-        /// <summary>
-        /// Performs translation to target
-        /// </summary>
-        /// <param name="gameTime">Game time</param>
-        /// <param name="newInterest">New interest</param>
-        /// <param name="radius">Radius to decelerate</param>
-        /// <param name="slow">Slow</param>
-        private void UpdateTranslations(GameTime gameTime)
-        {
-            if (translationMode == CameraTranslations.None)
-            {
-                return;
-            }
-
-            var diff = translationInterest - Interest;
-            var pos = Position + diff;
-            var dir = pos - Position;
-
-            float distanceToTarget = dir.Length();
-            float distanceThisMove = 0f;
-
-            if (translationMode == CameraTranslations.UseDelta)
-            {
-                distanceThisMove = MovementDelta * gameTime.ElapsedSeconds;
-            }
-            else if (translationMode == CameraTranslations.UseSlowDelta)
-            {
-                distanceThisMove = SlowMovementDelta * gameTime.ElapsedSeconds;
-            }
-            else if (translationMode == CameraTranslations.Quick)
-            {
-                distanceThisMove = distanceToTarget * translationOutOfRadius;
-            }
-
-            Vector3 movingVector;
-            if (distanceThisMove >= distanceToTarget)
-            {
-                //This movement goes beyond the destination.
-                movingVector = Vector3.Normalize(dir) * distanceToTarget * translationIntoRadius;
-            }
-            else if (distanceToTarget < translationRadius)
-            {
-                //Into slow radius
-                movingVector = Vector3.Normalize(dir) * distanceThisMove * (distanceToTarget / translationRadius);
-            }
-            else
-            {
-                //On flight
-                movingVector = Vector3.Normalize(dir) * distanceThisMove;
-            }
-
-            if (movingVector != Vector3.Zero)
-            {
-                Position += movingVector;
-                Interest += movingVector;
-            }
-
-            if (Vector3.NearEqual(Interest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
-            {
-                StopTranslations();
-            }
         }
 
         /// <inheritdoc/>
@@ -1183,7 +1248,7 @@ namespace Engine
                 ViewportWidth = viewportWidth,
                 ViewportHeight = viewportHeight,
                 Mode = mode,
-                Velocity = Velocity,
+                Velocity = velocity,
                 IsometricAxis = isometricAxis,
                 IsometricDistanceToInterest = isometricDistanceToInterest,
                 IsoMetricForward = isoMetricForward,
@@ -1225,7 +1290,7 @@ namespace Engine
             viewportWidth = cameraState.ViewportWidth;
             viewportHeight = cameraState.ViewportHeight;
             mode = cameraState.Mode;
-            Velocity = cameraState.Velocity;
+            velocity = cameraState.Velocity;
             isometricAxis = cameraState.IsometricAxis;
             isometricDistanceToInterest = cameraState.IsometricDistanceToInterest;
             isoMetricForward = cameraState.IsoMetricForward;

@@ -2018,8 +2018,6 @@ namespace Engine.Common
         {
             if (size == 0) throw new ArgumentOutOfRangeException(nameof(size));
             if (planeWidth <= 0) throw new ArgumentOutOfRangeException(nameof(planeWidth));
-            if (planeTop <= 0) throw new ArgumentOutOfRangeException(nameof(planeTop));
-            if (planeBottom <= 0) throw new ArgumentOutOfRangeException(nameof(planeBottom));
             if (planeTop <= planeBottom) throw new ArgumentException($"{nameof(planeTop)} must be greater than {nameof(planeBottom)}", nameof(planeTop));
 
             Vector3[] vertices = new Vector3[(size + 1) * (size + 1)];

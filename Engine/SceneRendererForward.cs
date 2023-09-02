@@ -328,7 +328,7 @@ namespace Engine
             var swCull = Stopwatch.StartNew();
 #endif
             //Get draw context
-            var context = GetDeferredDrawContext(passIndex, DrawerModes.Forward);
+            var context = GetDeferredDrawContext(passIndex, "Forward", DrawerModes.Forward);
             bool draw = CullingTest(Scene, context.Camera.Frustum, components, cullIndex);
 #if DEBUG
             swCull.Stop();

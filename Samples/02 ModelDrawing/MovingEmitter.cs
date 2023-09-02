@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Common;
 using SharpDX;
 using System;
 
@@ -12,14 +11,14 @@ namespace ModelDrawing
 
         public MovingEmitter() : base() { }
 
-        public override void Update(UpdateContext context)
+        public override void Update(GameTime gameTime, Vector3 pointOfView)
         {
-            base.Update(context);
+            base.Update(gameTime, pointOfView);
 
-            var position = GetPosition(this.AngularVelocity, this.Radius, this.TotalTime);
+            var position = GetPosition(AngularVelocity, Radius, TotalTime);
 
-            this.Velocity = position - this.Position;
-            this.Position = position;
+            Velocity = position - Position;
+            Position = position;
         }
 
         private static Vector3 GetPosition(float v, float d, float time)

@@ -131,70 +131,78 @@ namespace Engine
             // Don't draw any flares by default
             drawFlares = false;
 
-            var keyLight = context.Lights.KeyLight;
-            if (keyLight?.Enabled == true)
+            var keyLight = Scene.Lights.KeyLight;
+            if ((keyLight?.Enabled) != true)
             {
-                if (!IsFlareVisible(keyLight, context.Camera.Position))
-                {
-                    return;
-                }
+                return;
+            }
 
-                float dot = Math.Max(0, Vector3.Dot(context.Camera.Direction, -keyLight.Direction));
-                float scale = dot * keyLight.Brightness;
-                if (scale <= 0)
-                {
-                    return;
-                }
+            var camera = Scene.Camera;
 
-                float transparency = dot;
+            if (!IsFlareVisible(keyLight, camera.Position))
+            {
+                return;
+            }
 
-                // Set view translation to Zero to simulate infinite
-                var infiniteView = context.Camera.View;
-                infiniteView.TranslationVector = Vector3.Zero;
+            float dot = Math.Max(0, Vector3.Dot(camera.Direction, -keyLight.Direction));
+            float scale = dot * keyLight.Brightness;
+            if (scale <= 0)
+            {
+                return;
+            }
 
-                // Project the light position into 2D screen space.
-                var projectedPosition = Game.Graphics.Viewport.Project(
-                    -keyLight.Direction * (1f + context.Camera.NearPlaneDistance), //Move position into near and far plane projection bounds
-                    context.Camera.Projection,
-                    infiniteView,
-                    Matrix.Identity);
+            float transparency = dot;
 
-                if (projectedPosition.Z >= 0 && projectedPosition.Z <= 1)
-                {
-                    //The light is in front of the camera.
-                    drawFlares = true;
+            // Set view translation to Zero to simulate infinite
+            var infiniteView = camera.View;
+            infiniteView.TranslationVector = Vector3.Zero;
 
-                    var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
-                    var lightProjectedDirection = lightProjectedPosition - Game.Form.RenderCenter;
+            // Project the light position into 2D screen space.
+            var projectedPosition = Game.Graphics.Viewport.Project(
+                -keyLight.Direction * (1f + camera.NearPlaneDistance), //Move position into near and far plane projection bounds
+                camera.Projection,
+                infiniteView,
+                Matrix.Identity);
 
-                    //Update glow sprite
-                    float glowScale = scale;
-                    var glowSpritePos = lightProjectedPosition;
+            if (projectedPosition.Z < 0 || projectedPosition.Z > 1)
+            {
+                return;
+            }
 
-                    glowSprite.BaseColor = new Color4(keyLight.DiffuseColor, 0.25f);
-                    glowSprite.Scale = glowScale;
-                    glowSprite.SetPosition(glowSpritePos - glowSprite.LocalCenter);
-                    glowSprite.Update(context);
+            //The light is in front of the camera.
+            drawFlares = true;
 
-                    //Update flares
-                    if (flares?.Length > 0)
-                    {
-                        for (int i = 0; i < flares.Length; i++)
-                        {
-                            var flare = flares[i];
+            var lightProjectedPosition = new Vector2(projectedPosition.X, projectedPosition.Y);
+            var lightProjectedDirection = lightProjectedPosition - Game.Form.RenderCenter;
 
-                            // Compute the position of this flare sprite.
-                            float flareScale = flare.Scale * scale;
-                            var flareSpritePos = lightProjectedPosition + (lightProjectedDirection * flare.Distance);
+            //Update glow sprite
+            float glowScale = scale;
+            var glowSpritePos = lightProjectedPosition;
 
-                            // Set the flare alpha based on the angle with view and light directions.
-                            flare.FlareSprite.BaseColor = new Color4(flare.Color.RGB(), 0.5f * transparency);
-                            flare.FlareSprite.Scale = flareScale;
-                            flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
-                            flare.FlareSprite.Update(context);
-                        }
-                    }
-                }
+            glowSprite.BaseColor = new Color4(keyLight.DiffuseColor, 0.25f);
+            glowSprite.Scale = glowScale;
+            glowSprite.SetPosition(glowSpritePos - glowSprite.LocalCenter);
+            glowSprite.Update(context);
+
+            //Update flares
+            if (!(flares?.Length > 0))
+            {
+                return;
+            }
+
+            for (int i = 0; i < flares.Length; i++)
+            {
+                var flare = flares[i];
+
+                // Compute the position of this flare sprite.
+                float flareScale = flare.Scale * scale;
+                var flareSpritePos = lightProjectedPosition + (lightProjectedDirection * flare.Distance);
+
+                // Set the flare alpha based on the angle with view and light directions.
+                flare.FlareSprite.BaseColor = new Color4(flare.Color.RGB(), 0.5f * transparency);
+                flare.FlareSprite.Scale = flareScale;
+                flare.FlareSprite.SetPosition(flareSpritePos - flare.FlareSprite.LocalCenter);
+                flare.FlareSprite.Update(context);
             }
         }
         /// <summary>

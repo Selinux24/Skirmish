@@ -211,11 +211,11 @@ namespace Engine
 
             if (type == ParticleSystemTypes.CPU)
             {
-                pSystem = await ParticleSystemCpu.Create(Game, name, description, emitter);
+                pSystem = await ParticleSystemCpu.Create(Scene, name, description, emitter);
             }
             else if (type == ParticleSystemTypes.GPU)
             {
-                pSystem = await ParticleSystemGpu.Create(Game, name, description, emitter);
+                pSystem = await ParticleSystemGpu.Create(Scene, name, description, emitter);
             }
             else
             {

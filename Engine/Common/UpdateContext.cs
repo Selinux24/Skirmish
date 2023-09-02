@@ -10,14 +10,6 @@ namespace Engine.Common
         /// Game time
         /// </summary>
         public GameTime GameTime { get; set; }
-        /// <summary>
-        /// Camera
-        /// </summary>
-        public Camera Camera { get; set; }
-        /// <summary>
-        /// Lights
-        /// </summary>
-        public SceneLights Lights { get; set; }
 
         /// <summary>
         /// Clones the actual update context
@@ -27,8 +19,6 @@ namespace Engine.Common
             return new UpdateContext
             {
                 GameTime = GameTime,
-                Camera = Camera,
-                Lights = Lights,
             };
         }
     }

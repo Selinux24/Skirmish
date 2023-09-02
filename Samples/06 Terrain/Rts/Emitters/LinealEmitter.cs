@@ -1,5 +1,4 @@
 ﻿using Engine;
-using Engine.Common;
 using SharpDX;
 
 namespace Terrain.Rts.Emitters
@@ -31,22 +30,19 @@ namespace Terrain.Rts.Emitters
             Duration = vDir.Length() / speed;
         }
 
-        /// <summary>
-        /// Updates the emitter state
-        /// </summary>
-        /// <param name="context">Updating context</param>
-        public override void Update(UpdateContext context)
+        /// <inheritdoc/>
+        public override void Update(GameTime gameTime, Vector3 pointOfView)
         {
             float distance = Vector3.Distance(to, Position);
 
             if (distance < previousDistance)
             {
-                Position += direction * speed * context.GameTime.ElapsedSeconds;
+                Position += direction * speed * gameTime.ElapsedSeconds;
 
                 previousDistance = distance;
             }
 
-            base.Update(context);
+            base.Update(gameTime, pointOfView);
         }
     }
 }

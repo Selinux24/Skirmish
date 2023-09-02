@@ -807,7 +807,7 @@ namespace Engine
                 return;
             }
 
-            mapGrid?.Update(context.Camera.Position);
+            mapGrid?.Update(Scene.Camera.Position);
         }
         /// <inheritdoc/>
         public override bool DrawShadows(DrawContextShadows context)

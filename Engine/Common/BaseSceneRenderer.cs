@@ -501,11 +501,11 @@ namespace Engine.Common
         /// <inheritdoc/>
         public virtual void Update(GameTime gameTime)
         {
-            //Updates the update context
+            //Get the update context
             var updateContext = GetUpdateContext(gameTime);
 
             //Cull lights
-            Scene.Lights.Cull((IntersectionVolumeFrustum)updateContext.Camera.Frustum, updateContext.Camera.Position, Scene.GameEnvironment.LODDistanceLow);
+            Scene.Lights.Cull((IntersectionVolumeFrustum)Scene.Camera.Frustum, Scene.Camera.Position, Scene.GameEnvironment.LODDistanceLow);
 
             //Update active components
             var updatables = Scene.Components.Get<IUpdatable>(c => c.Active);
@@ -538,27 +538,11 @@ namespace Engine.Common
             return new UpdateContext
             {
                 GameTime = gameTime,
-                Camera = Scene.Camera,
-                Lights = Scene.Lights,
             };
         }
 
-        /// <summary>
-        /// Creates a deferred context
-        /// </summary>
-        /// <param name="name">Pass name</param>
-        /// <param name="passIndex">Pass index</param>
-        private IEngineDeviceContext GetDeferredContext(string name, int passIndex)
-        {
-            var graphics = Scene.Game.Graphics;
-
-            while (passIndex >= deferredContextList.Count)
-            {
-                deferredContextList.Add(graphics.CreateDeferredContext(name, passIndex));
-            }
-
-            return deferredContextList[passIndex];
-        }
+        /// <inheritdoc/>
+        public abstract void Draw(GameTime gameTime);
         /// <summary>
         /// Gets the immediate draw context
         /// </summary>
@@ -597,14 +581,14 @@ namespace Engine.Common
         /// </summary>
         /// <param name="passIndex">Pass index</param>
         /// <param name="drawMode">Draw mode</param>
-        protected DrawContext GetDeferredDrawContext(int passIndex, DrawerModes drawMode)
+        protected DrawContext GetDeferredDrawContext(int passIndex, string name, DrawerModes drawMode)
         {
             var passContext = passLists[passIndex];
             passContext.DeviceContext.ClearState();
 
             return new DrawContext
             {
-                Name = $"{drawMode} pass[{passIndex}] context.",
+                Name = $"{name} pass[{passIndex}] {drawMode} context.",
 
                 DrawerMode = drawMode,
 
@@ -637,7 +621,7 @@ namespace Engine.Common
 
             return new DrawContextShadows()
             {
-                Name = $"{name} pass[{passIndex}] context.",
+                Name = $"{name} pass[{passIndex}] {shadowMapper.Name} context.",
 
                 //Scene data
                 Camera = Scene.Camera,
@@ -649,9 +633,6 @@ namespace Engine.Common
                 PassContext = passContext,
             };
         }
-
-        /// <inheritdoc/>
-        public abstract void Draw(GameTime gameTime);
 
         /// <summary>
         /// Gets opaque components
@@ -816,6 +797,22 @@ namespace Engine.Common
                 Name = name,
                 DeviceContext = dc,
             });
+        }
+        /// <summary>
+        /// Creates a deferred context
+        /// </summary>
+        /// <param name="name">Pass name</param>
+        /// <param name="passIndex">Pass index</param>
+        private IEngineDeviceContext GetDeferredContext(string name, int passIndex)
+        {
+            var graphics = Scene.Game.Graphics;
+
+            while (passIndex >= deferredContextList.Count)
+            {
+                deferredContextList.Add(graphics.CreateDeferredContext(name, passIndex));
+            }
+
+            return deferredContextList[passIndex];
         }
         /// <summary>
         /// Queues a command in the command list by order
