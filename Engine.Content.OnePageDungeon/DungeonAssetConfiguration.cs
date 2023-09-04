@@ -118,7 +118,7 @@ namespace Engine.Content.OnePageDungeon
         {
             if (randomGenerator == null || randomGeneratorSeed != RandomSeed)
             {
-                randomGenerator = Helper.SetRandomGeneratorSeed(RandomSeed);
+                randomGenerator = Helper.NewGenerator(RandomSeed);
                 randomGeneratorSeed = RandomSeed;
 
                 return randomGenerator;

@@ -33,7 +33,7 @@ namespace Engine.Audio
         /// Sets the game audio agent source
         /// </summary>
         /// <param name="source">Manipulator instance</param>
-        void SetSource(IManipulator source);
+        void SetSource(ITransform source);
         /// <summary>
         /// Sets the game audio agent source
         /// </summary>

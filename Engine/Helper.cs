@@ -24,16 +24,23 @@ namespace Engine
         #region Random
 
         /// <summary>
-        /// Random number generator
+        /// Default random generator
         /// </summary>
-        public static readonly Random RandomGenerator = new();
+        public static Random RandomGenerator { get; } = new();
+        /// <summary>
+        /// Gets a new random generator
+        /// </summary>
+        public static Random NewGenerator()
+        {
+            return new();
+        }
         /// <summary>
         /// Gets a new random generator
         /// </summary>
         /// <param name="seed">Seed</param>
-        public static Random SetRandomGeneratorSeed(int seed)
+        public static Random NewGenerator(int seed)
         {
-            return new Random(seed);
+            return new(seed);
         }
 
         #endregion
@@ -840,6 +847,21 @@ namespace Engine
             float delta = Math.Min(1f, maxDelta / angle);
 
             return Quaternion.Slerp(from, to, delta);
+        }
+        /// <summary>
+        /// Creates a rotation from the direction vector from the up vector
+        /// </summary>
+        /// <param name="direction">Direction vector</param>
+        /// <param name="up">Up vector</param>
+        /// <returns>Returns a rotation quaternion</returns>
+        public static Quaternion RotateFromDirection(Vector3 direction, Vector3 up)
+        {
+            var a = Vector3.Cross(direction, up);
+            var w = (float)Math.Sqrt(direction.LengthSquared() * up.LengthSquared() + Vector3.Dot(direction, up));
+            Quaternion q = new(a, w);
+            q.Normalize();
+
+            return q;
         }
         /// <summary>
         /// Gets the screen coordinates from the specified 3D point

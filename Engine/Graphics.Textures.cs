@@ -788,7 +788,7 @@ namespace Engine
         /// <returns>Returns created texture</returns>
         public EngineShaderResourceView CreateRandomTexture(string name, int size, float min, float max, int seed = 0, bool dynamic = true)
         {
-            var rnd = Helper.SetRandomGeneratorSeed(seed);
+            var rnd = Helper.NewGenerator(seed);
 
             var randomValues = new List<Vector4>();
             for (int i = 0; i < size; i++)

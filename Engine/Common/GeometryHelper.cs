@@ -63,14 +63,14 @@ namespace Engine.Common
             if (controller != null && drawingData.SkinningData != null)
             {
                 positionCache = drawingData.GetPoints(
-                    manipulator.FinalTransform,
+                    manipulator.GlobalTransform,
                     controller.GetCurrentPose(),
                     update);
             }
             else
             {
                 positionCache = drawingData.GetPoints(
-                    manipulator.FinalTransform,
+                    manipulator.GlobalTransform,
                     update);
             }
 

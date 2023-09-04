@@ -93,9 +93,7 @@ namespace Engine
             // Finalizer calls Dispose(false)  
             Dispose(false);
         }
-        /// <summary>
-        /// Dispose resources
-        /// </summary>
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
@@ -248,7 +246,7 @@ namespace Engine
         /// <param name="emitter">Emitter fixed position</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public IAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, IManipulator listener)
+        public IAudioEffect CreateEffectInstance(string effectName, Vector3 emitter, ITransform listener)
         {
             var emitterManipulator = new Manipulator3D();
             emitterManipulator.SetPosition(emitter);
@@ -262,7 +260,7 @@ namespace Engine
         /// <param name="emitter">Emitter manipulator object</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public IAudioEffect CreateEffectInstance(string effectName, IManipulator emitter, IManipulator listener)
+        public IAudioEffect CreateEffectInstance(string effectName, ITransform emitter, ITransform listener)
         {
             var instance = CreateEffectInstance(effectName);
 
@@ -279,7 +277,7 @@ namespace Engine
         /// <param name="emitter">Emitter 3D transformable object</param>
         /// <param name="listener">Listener manipulator object</param>
         /// <returns>Returns the new created instance. Returns null if the effect name not exists, o if the effect instance is currently playing</returns>
-        public IAudioEffect CreateEffectInstance(string effectName, ITransformable3D emitter, IManipulator listener)
+        public IAudioEffect CreateEffectInstance(string effectName, ITransformable3D emitter, ITransform listener)
         {
             var instance = CreateEffectInstance(effectName);
 

@@ -774,7 +774,7 @@ namespace Heightmap
         }
         private async Task SetPositionOverTerrain()
         {
-            var posRnd = Helper.SetRandomGeneratorSeed(1024);
+            var posRnd = Helper.NewGenerator(1024);
 
             var bbox = terrain.GetBoundingBox();
 

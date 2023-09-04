@@ -393,7 +393,7 @@ namespace Engine
             LevelOfDetail = Scene.GameEnvironment.GetLOD(
                 origin,
                 GetBoundingSphere(),
-                Manipulator.FinalTransform);
+                Manipulator.GlobalTransform);
         }
 
         /// <summary>
@@ -434,7 +434,7 @@ namespace Engine
         {
             var part = GetModelPartByName(name);
 
-            return part?.Manipulator.FinalTransform ?? Manipulator.FinalTransform;
+            return part?.Manipulator.GlobalTransform ?? Manipulator.GlobalTransform;
         }
         /// <inheritdoc/>
         public ModelPart GetModelPartByName(string name)

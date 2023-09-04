@@ -5,7 +5,7 @@ namespace Engine
     /// <summary>
     /// Manipulator interface
     /// </summary>
-    public interface IManipulator
+    public interface ITransform
     {
         /// <summary>
         /// Forward vector
@@ -31,18 +31,31 @@ namespace Engine
         /// Down vector
         /// </summary>
         Vector3 Down { get; }
+
         /// <summary>
-        /// Position
+        /// Gets the current velocity
+        /// </summary>
+        Vector3 Velocity { get; }
+        /// <summary>
+        /// Gets the position component
         /// </summary>
         Vector3 Position { get; }
         /// <summary>
-        /// Velocity
+        /// Gets the scaling component
         /// </summary>
-        Vector3 Velocity { get; }
+        Vector3 Scaling { get; }
+        /// <summary>
+        /// Gets the rotation component
+        /// </summary>
+        Quaternion Rotation { get; }
 
         /// <summary>
-        /// Final transform
+        /// Gets the local transform
         /// </summary>
-        Matrix FinalTransform { get; }
+        Matrix LocalTransform { get; }
+        /// <summary>
+        /// Gets the global transform
+        /// </summary>
+        Matrix GlobalTransform { get; }
     }
 }

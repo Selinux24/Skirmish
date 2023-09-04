@@ -1591,8 +1591,8 @@ You will lost all the game progress.",
         {
             var barrelManipulator = model.GetModelPartByName(tankBarrelPart).Manipulator;
 
-            var dir = barrelManipulator.FinalTransform.Forward;
-            var pos = barrelManipulator.FinalTransform.TranslationVector + (dir * 15f);
+            var dir = barrelManipulator.GlobalTransform.Forward;
+            var pos = barrelManipulator.GlobalTransform.TranslationVector + (dir * 15f);
 
             return (pos, dir);
         }

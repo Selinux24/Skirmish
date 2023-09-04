@@ -642,6 +642,19 @@ namespace SceneTest.SceneTest
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
                 });
 
+            float s = -spaceSize / 2f;
+            float areaSize = spaceSize * 3;
+
+            var bboxTmp = container.GetBoundingBox();
+            float scaleX = areaSize * 2 / xSize / bboxTmp.Width;
+            float scaleZ = areaSize * 2 / zSize / bboxTmp.Depth;
+            Vector3 scale = new(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
+
+            container.Manipulator.SetScale(scale);
+            var scaledOnlyBbox = container.GetBoundingBox(true);
+            container.Manipulator.SetPosition(s + 12 + xDelta, baseHeight + yDelta, 30 + zDelta);
+            container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
+
             var containerI = await AddComponentGround<ModelInstanced, ModelInstancedDescription>(
                 "ContainerI",
                 "ContainerI",
@@ -653,28 +666,15 @@ namespace SceneTest.SceneTest
                     Content = ContentDescription.FromFile("SceneTest/container", "Container.json"),
                 });
 
-            float s = -spaceSize / 2f;
-            float areaSize = spaceSize * 3;
-
-            var bboxTmp = container.GetBoundingBox();
-            float scaleX = areaSize * 2 / xSize / bboxTmp.Width;
-            float scaleZ = areaSize * 2 / zSize / bboxTmp.Depth;
-            Vector3 scale = new(scaleX, (scaleX + scaleZ) / 2f, scaleZ);
-
-            container.Manipulator.SetScale(scale);
-            var bbox = container.GetBoundingBox(true);
-            container.Manipulator.SetPosition(s + 12 + xDelta, baseHeight + yDelta, 30 + zDelta);
-            container.Manipulator.SetRotation(MathUtil.PiOverTwo * 2.1f, 0, 0);
-
-            Random prnd = new(1000);
+            var prnd = Helper.NewGenerator(1000);
 
             GridParams gridParams = new()
             {
                 RowSize = rowSize,
                 AreaSize = areaSize,
-                Sx = bbox.Width,
-                Sy = bbox.Height,
-                Sz = bbox.Depth,
+                Sx = scaledOnlyBbox.Width,
+                Sy = scaledOnlyBbox.Height,
+                Sz = scaledOnlyBbox.Depth,
                 XCount = xCount,
                 ZCount = zCount,
                 XRowCount = xRowCount,
@@ -684,14 +684,11 @@ namespace SceneTest.SceneTest
 
             for (int i = 0; i < containerI.InstanceCount; i++)
             {
-                uint textureIndex = (uint)prnd.Next(0, 6);
-                textureIndex %= 5;
+                uint textureIndex = (uint)prnd.Next(0, 6) % 5;
 
                 var (position, angle) = GetP(prnd, i, gridParams);
 
-                containerI[i].Manipulator.SetPosition(position);
-                containerI[i].Manipulator.SetRotation(angle, 0, 0);
-                containerI[i].Manipulator.SetScale(scale);
+                containerI[i].Manipulator.SetTransform(position, Quaternion.RotationYawPitchRoll(angle, 0, 0), scale);
                 containerI[i].TextureIndex = textureIndex;
             }
         }

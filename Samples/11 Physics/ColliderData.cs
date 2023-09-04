@@ -47,7 +47,7 @@ namespace Physics
 
         public void SetLines(PrimitiveListDrawer<Line3D> lineDrawer)
         {
-            lineDrawer.SetPrimitives(Color4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.FinalTransform));
+            lineDrawer.SetPrimitives(Color4.AdjustContrast(Model.TintColor, 0.1f), Line3D.Transform(Lines, Model.Manipulator.GlobalTransform));
         }
 
         public void Reset()

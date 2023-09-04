@@ -10,7 +10,7 @@ namespace Engine.Audio
         /// <summary>
         /// Agent transform
         /// </summary>
-        protected IManipulator agentTransform = null;
+        protected ITransform agentTransform = null;
 
         /// <summary>
         /// Forward vector
@@ -76,7 +76,7 @@ namespace Engine.Audio
         /// Sets the game audio agent source
         /// </summary>
         /// <param name="source">Manipulator instance</param>
-        public void SetSource(IManipulator source)
+        public void SetSource(ITransform source)
         {
             agentTransform = source;
         }

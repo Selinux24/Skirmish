@@ -8,7 +8,7 @@ namespace Engine
     /// <summary>
     /// 3D Camera
     /// </summary>
-    public class Camera : IManipulator, IIntersectable, IHasGameState, IDisposable
+    public class Camera : ITransform, IIntersectable, IHasGameState, IDisposable
     {
         /// <summary>
         /// Creates a free camera
@@ -210,6 +210,24 @@ namespace Engine
                 return position;
             }
         }
+        /// <inheritdoc/>
+        /// <remarks>Rotation quaternion of direction from up vector</remarks>
+        public Quaternion Rotation
+        {
+            get
+            {
+                return Helper.RotateFromDirection(Direction, Up);
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>Scale is always one</remarks>
+        public Vector3 Scaling
+        {
+            get
+            {
+                return Vector3.One;
+            }
+        }
         /// <summary>
         /// Camera interest
         /// </summary>
@@ -372,7 +390,16 @@ namespace Engine
         }
         /// <inheritdoc/>
         /// <remarks>The view * projection transform</remarks>
-        public Matrix FinalTransform
+        public Matrix LocalTransform
+        {
+            get
+            {
+                return ViewProjection;
+            }
+        }
+        /// <inheritdoc/>
+        /// <remarks>The view * projection transform</remarks>
+        public Matrix GlobalTransform
         {
             get
             {

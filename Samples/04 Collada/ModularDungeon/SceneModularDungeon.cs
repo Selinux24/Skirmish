@@ -770,7 +770,7 @@ namespace Collada.ModularDungeon
             bboxesDrawer.Clear();
 
             //Boxes
-            var rndBoxes = Helper.SetRandomGeneratorSeed(1);
+            var rndBoxes = Helper.NewGenerator(1);
 
             var dict = scenery.GetMapVolumes();
 

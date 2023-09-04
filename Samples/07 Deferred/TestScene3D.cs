@@ -346,7 +346,7 @@ namespace Deferred
             var nodes = GetNodes(tankAgentType).OfType<GraphNode>();
             if (nodes.Any())
             {
-                var clrRnd = Helper.SetRandomGeneratorSeed(1);
+                var clrRnd = Helper.NewGenerator(1);
                 Color[] regions = new Color[nodes.Count()];
                 for (int i = 0; i < nodes.Count(); i++)
                 {
