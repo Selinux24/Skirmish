@@ -1253,21 +1253,23 @@ namespace Terrain.Rts
 
         public override void NavigationGraphUpdated()
         {
-            if (!started)
+            if (started)
             {
-                started = true;
-
-                Task.Run(() =>
-                {
-                    StartHelicopter();
-                    StartTanks();
-                    StartDebug();
-
-                    BeginToggleGarageLights();
-
-                    gameReady = true;
-                });
+                return;
             }
+
+            started = true;
+
+            Task.Run(() =>
+            {
+                StartHelicopter();
+                StartTanks();
+                StartDebug();
+
+                BeginToggleGarageLights();
+
+                gameReady = true;
+            });
         }
         private void StartHelicopter()
         {
@@ -1342,7 +1344,7 @@ namespace Terrain.Rts
         }
         private void StartTanks()
         {
-            var sceneryUsage = SceneObjectUsages.Object;
+            var sceneryUsage = SceneObjectUsages.Ground;
 
             if (this.PickNearest(GetTopDownRay(-60, -60, PickingHullTypes.Geometry), sceneryUsage, out ScenePickingResult<Triangle> r1))
             {

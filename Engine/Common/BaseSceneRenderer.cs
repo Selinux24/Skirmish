@@ -1344,8 +1344,13 @@ namespace Engine.Common
                 RenderPass.Objects => processingDrawerObjects,
                 RenderPass.UI => processingDrawerUI,
                 RenderPass.Final => processingDrawerFinal,
-                _ => throw new NotImplementedException(),
+                _ => null,
             };
+
+            if (processingDrawer == null)
+            {
+                return;
+            }
 
             //Gets the last used target as source texture for the post-processing shader
             var source = GetTargetTextures(renderTarget.Target)?.FirstOrDefault();
@@ -1355,21 +1360,19 @@ namespace Engine.Common
             dc.SetDepthStencilState(graphics.GetDepthStencilNone());
             dc.SetBlendState(graphics.GetBlendDefault());
 
-            for (int i = 0; i < state.Effects.Count(); i++)
+            foreach (var (effect, targetIndex) in state.Effects)
             {
-                var (effect, targetIndex) = state.Effects.ElementAt(i);
-
-                //Toggles post-processing buffers
+                //Get the next post-processing buffer
                 var target = GetPostProcessingTargets(targetIndex);
-                var targetTexture = target.Textures?.FirstOrDefault();
 
-                //Use the next buffer as render target
+                //Bind the buffer as render target
                 BindPostProcessingTarget(dc, target, false, Color.Transparent);
 
+                //Draw effect into target, using the source texture
                 processingDrawer.Draw(dc, source, effect, state.State);
 
-                //Gets the source texture
-                source = targetTexture;
+                //Set the new source texture
+                source = target.Texture;
             }
 
             //Set the result render target
@@ -1777,9 +1780,6 @@ namespace Engine.Common
                 //Execute command list
                 var commands = commandList.OrderBy(c => c.Order).Select(c => c.Command);
                 ic.ExecuteCommandLists(commands);
-
-                ic.SetViewport(graphics.Viewport);
-                ic.SetRenderTargets(graphics.DefaultRenderTarget, graphics.DefaultDepthStencil);
             }
         }
     }

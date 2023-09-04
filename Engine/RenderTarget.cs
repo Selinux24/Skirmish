@@ -38,6 +38,11 @@ namespace Engine
         /// </summary>
         public IEnumerable<EngineShaderResourceView> Textures { get; protected set; }
         /// <summary>
+        /// Buffer texture
+        /// </summary>
+        /// <remarks>Returns the first target texture, if any</remarks>
+        public EngineShaderResourceView Texture { get => Textures?.FirstOrDefault(); }
+        /// <summary>
         /// Render targets
         /// </summary>
         public EngineRenderTargetView Targets { get; protected set; }
