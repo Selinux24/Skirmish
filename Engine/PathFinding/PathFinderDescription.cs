@@ -24,8 +24,8 @@ namespace Engine.PathFinding
         /// <param name="input">Geometry input</param>
         public PathFinderDescription(PathFinderSettings settings, PathFinderInput input)
         {
-            Settings = settings;
-            Input = input;
+            Settings = settings ?? throw new ArgumentNullException(nameof(settings));
+            Input = input ?? throw new ArgumentNullException(nameof(input));
         }
 
         /// <summary>
@@ -35,15 +35,7 @@ namespace Engine.PathFinding
         /// <returns>Returns the generated graph</returns>
         public async Task<IGraph> Build(Action<float> progressCallback = null)
         {
-            try
-            {
-                return await Input?.CreateGraph(Settings, progressCallback);
-            }
-            catch (Exception ex)
-            {
-                Logger.WriteError(this, $"Error creating the graph: {ex.Message}", ex);
-                throw;
-            }
+            return await Input.CreateGraph(Settings, progressCallback);
         }
 
         /// <summary>

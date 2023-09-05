@@ -263,17 +263,6 @@ namespace Engine.PathFinding
         }
 
         /// <summary>
-        /// Set ground geometry
-        /// </summary>
-        /// <typeparam name="T">Object type</typeparam>
-        /// <param name="obj">Object</param>
-        public void SetGround(IDrawable obj)
-        {
-            BoundingBox = null;
-
-            obj.Usage = SceneObjectUsages.Ground;
-        }
-        /// <summary>
         /// Attach geometry to ground
         /// </summary>
         /// <typeparam name="T">Object type</typeparam>
@@ -283,6 +272,11 @@ namespace Engine.PathFinding
         /// <param name="transform">Transform</param>
         public void AttachToGround(IDrawable obj)
         {
+            if (obj.Usage == SceneObjectUsages.Ground)
+            {
+                return;
+            }
+
             BoundingBox = null;
 
             obj.Usage = SceneObjectUsages.Ground;

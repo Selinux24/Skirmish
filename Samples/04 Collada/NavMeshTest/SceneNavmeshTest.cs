@@ -145,8 +145,6 @@ Space: Finds random over navmesh";
 
             inputGeometry = await AddComponentGround<Model, ModelDescription>("NavMesh", "NavMesh", desc);
 
-            SetGround(inputGeometry);
-
             //Rasterization
             nmsettings.CellSize = 0.20f;
             nmsettings.CellHeight = 0.15f;

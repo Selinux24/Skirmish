@@ -487,7 +487,6 @@ namespace Heightmap
             };
             var gDesc = GroundDescription.FromHeightmapDescription(hDesc, 5);
             terrain = await AddComponentGround<Terrain, GroundDescription>("Terrain", "Terrain", gDesc);
-            SetGround(terrain);
             sw.Stop();
 
             return await Task.FromResult(sw.Elapsed.TotalSeconds);

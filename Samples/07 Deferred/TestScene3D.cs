@@ -119,7 +119,7 @@ namespace Deferred
                         res.ThrowExceptions();
                     }
 
-                    SetGround(terrain);
+                    AttachToGround(terrain);
                     AttachToGround(tree);
                     AttachToGround(trees);
 

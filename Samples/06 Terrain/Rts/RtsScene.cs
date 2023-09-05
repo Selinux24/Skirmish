@@ -751,7 +751,6 @@ namespace Terrain.Rts
 
             var terrainDescription = GroundDescription.FromFile("Rts/resources/Terrain", "two_levels.json", 1);
             terrain = await AddComponentGround<Scenery, GroundDescription>("Terrain", "Terrain", terrainDescription);
-            SetGround(terrain);
 
             sw.Stop();
             return new TaskResult()

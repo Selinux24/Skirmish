@@ -573,8 +573,6 @@ namespace Tanks
             terrain.Visible = false;
 
             terrainTop = terrain.GetBoundingBox().Maximum.Y;
-
-            SetGround(terrain);
         }
         private async Task InitializeModelsTrees()
         {

@@ -203,8 +203,6 @@ namespace GameLogic
                     MinimapArea = terrain.GetBoundingBox(),
                 });
 
-            SetGround(terrain);
-
             var input = new GridInput(GetTrianglesForNavigationGraph);
             var settings = new GridGenerationSettings()
             {

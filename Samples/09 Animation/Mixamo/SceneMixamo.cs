@@ -121,7 +121,7 @@ namespace Animation.Mixamo
                 Instances = 9,
             };
 
-            var floor = await AddComponent<ModelInstanced, ModelInstancedDescription>("Floor", "Floor", desc);
+            var floor = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Floor", "Floor", desc);
 
             int i = 0;
             for (int x = -1; x < 2; x++)
@@ -131,8 +131,6 @@ namespace Animation.Mixamo
                     floor[i++].Manipulator.SetPosition(x * l * 2f, h, z * l * 2f);
                 }
             }
-
-            SetGround(floor);
         }
         private async Task InitializeModel()
         {
