@@ -9,9 +9,13 @@ namespace Engine.BuiltIn.PostProcess
     public class BuiltInCombine : BuiltInDrawer
     {
         /// <summary>
+        /// Pixel shader
+        /// </summary>
+        private readonly CombinePs pixelShader;
+        /// <summary>
         /// Linear sampler
         /// </summary>
-        private readonly EngineSamplerState linear;
+        private readonly EngineSamplerState sSampler;
 
         /// <summary>
         /// Constructor
@@ -19,9 +23,9 @@ namespace Engine.BuiltIn.PostProcess
         public BuiltInCombine() : base()
         {
             SetVertexShader<PostProcessVs>(false);
-            SetPixelShader<CombinePs>(false);
+            pixelShader = SetPixelShader<CombinePs>(false);
 
-            linear = BuiltInShaders.GetSamplerLinear();
+            sSampler = BuiltInShaders.GetSamplerLinear();
         }
 
         /// <summary>
@@ -31,9 +35,8 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="texture2">Texture 2</param>
         public void Update(EngineShaderResourceView texture1, EngineShaderResourceView texture2)
         {
-            var pixelShader = GetPixelShader<CombinePs>();
-            pixelShader?.SetTextures(texture1, texture2);
-            pixelShader?.SetDiffseSampler(linear);
+            pixelShader.SetTextures(texture1, texture2);
+            pixelShader.SetDiffseSampler(sSampler);
         }
     }
 }

@@ -9,9 +9,21 @@ namespace Engine.BuiltIn.PostProcess
     public class BuiltInPostProcess : BuiltInDrawer
     {
         /// <summary>
+        /// Pixel shader
+        /// </summary>
+        private readonly PostProcessPs pixelShader;
+        /// <summary>
+        /// Per pass constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerPass> cbPerPass;
+        /// <summary>
+        /// Per effect constant buffer
+        /// </summary>
+        private readonly EngineConstantBuffer<PerEffect> cbPerEffect;
+        /// <summary>
         /// Linear sampler
         /// </summary>
-        private readonly EngineSamplerState linear;
+        private readonly EngineSamplerState sSampler;
 
         /// <summary>
         /// Constructor
@@ -19,9 +31,12 @@ namespace Engine.BuiltIn.PostProcess
         public BuiltInPostProcess() : base()
         {
             SetVertexShader<PostProcessVs>(false);
-            SetPixelShader<PostProcessPs>(false);
+            pixelShader = SetPixelShader<PostProcessPs>(false);
 
-            linear = BuiltInShaders.GetSamplerLinear();
+            cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>(false);
+            cbPerEffect = BuiltInShaders.GetConstantBuffer<PerEffect>(false);
+
+            sSampler = BuiltInShaders.GetSamplerLinear();
         }
 
         /// <summary>
@@ -31,11 +46,9 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="state">State</param>
         public void UpdatePass(IEngineDeviceContext dc, BuiltInPostProcessState state)
         {
-            var cbPerPass = BuiltInShaders.GetConstantBuffer<PerPass>();
             dc.UpdateConstantBuffer(cbPerPass, PerPass.Build(state));
 
-            var pixelShader = GetPixelShader<PostProcessPs>();
-            pixelShader?.SetPerPassConstantBuffer(cbPerPass);
+            pixelShader.SetPerPassConstantBuffer(cbPerPass);
         }
         /// <summary>
         /// Update pass state
@@ -45,13 +58,11 @@ namespace Engine.BuiltIn.PostProcess
         /// <param name="effect">Effect</param>
         public void UpdateEffect(IEngineDeviceContext dc, EngineShaderResourceView sourceTexture, BuiltInPostProcessEffects effect)
         {
-            var cbPerEffect = BuiltInShaders.GetConstantBuffer<PerEffect>();
             dc.UpdateConstantBuffer(cbPerEffect, PerEffect.Build(effect));
 
-            var pixelShader = GetPixelShader<PostProcessPs>();
-            pixelShader?.SetPerEffectConstantBuffer(cbPerEffect);
-            pixelShader?.SetDiffuseMap(sourceTexture);
-            pixelShader?.SetDiffseSampler(linear);
+            pixelShader.SetPerEffectConstantBuffer(cbPerEffect);
+            pixelShader.SetDiffseSampler(sSampler);
+            pixelShader.SetDiffuseMap(sourceTexture);
         }
     }
 }
