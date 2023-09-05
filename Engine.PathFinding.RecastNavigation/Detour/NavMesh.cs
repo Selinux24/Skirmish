@@ -21,16 +21,17 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="geometry">Input geometry</param>
         /// <param name="settings">Settings</param>
         /// <param name="agent">Agent type</param>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent)
+        public static NavMesh Build(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback = null)
         {
             if (settings.BuildMode == BuildModes.Solo)
             {
-                return BuildSolo(geometry, settings, agent);
+                return BuildSolo(geometry, settings, agent, progressCallback);
             }
             else if (settings.BuildMode == BuildModes.Tiled)
             {
-                return BuildTiled(geometry, settings, agent);
+                return BuildTiled(geometry, settings, agent, progressCallback);
             }
             else
             {
@@ -43,43 +44,56 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="geometry">Input geometry</param>
         /// <param name="settings">Settings</param>
         /// <param name="agent">Agent type</param>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent)
+        private static NavMesh BuildSolo(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback)
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
+
+            // Progress -> pass count
+            const int passCount = 13;
 
             // Generation params.
             var cfg = settings.GetSoloConfig(agent, bbox);
 
             var solid = Heightfield.Build(cfg.Width, cfg.Height, cfg.BoundingBox, cfg.CellSize, cfg.CellHeight);
+            progressCallback?.Invoke(1f / passCount);
 
             var tris = geometry.ChunkyMesh.GetTriangles();
             if (!Rasterizer.Rasterize(tris, cfg.WalkableSlopeAngle, cfg.WalkableClimb, solid))
             {
                 return null;
             }
+            progressCallback?.Invoke(2f / passCount);
 
             // Performs the heightfield filters
             FilterHeightfield(solid, cfg);
+            progressCallback?.Invoke(3f / passCount);
 
             // Compact the heightfield so that it is faster to handle from now on.
             // This will result more cache coherent data as well as the neighbours
             // between walkable cells will be calculated.
             var chf = CompactHeightfield.Build(solid, cfg.WalkableHeight, cfg.WalkableClimb);
+            progressCallback?.Invoke(4f / passCount);
 
             // Erode the walkable area by agent radius.
             chf.ErodeWalkableArea(cfg.WalkableRadius);
+            progressCallback?.Invoke(5f / passCount);
 
             // Mark areas.
             chf.MarkAreas(geometry);
+            progressCallback?.Invoke(6f / passCount);
 
             // Sample partition
             SamplePartition(chf, cfg);
+            progressCallback?.Invoke(7f / passCount);
 
             // Create contours.
             var cset = ContourSet.Build(chf, cfg.MaxSimplificationError, cfg.MaxEdgeLen, BuildContoursFlagTypes.RC_CONTOUR_TESS_WALL_EDGES);
+            progressCallback?.Invoke(8f / passCount);
 
             var pmesh = PolyMesh.Build(cset, cfg.MaxVertsPerPoly);
+            progressCallback?.Invoke(9f / passCount);
 
             // Build polygon navmesh from the contours.
             var dmesh = PolyMeshDetail.Build(pmesh, chf, cfg.DetailSampleDist, cfg.DetailSampleMaxError) ?? throw new EngineException("buildNavigation: Could not build detail mesh.");
@@ -87,9 +101,11 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             {
                 throw new EngineException($"buildNavigation: {cfg.MaxVertsPerPoly} is bigger than DetourUtils.DT_VERTS_PER_POLYGON ({DetourUtils.DT_VERTS_PER_POLYGON}).");
             }
+            progressCallback?.Invoke(10f / passCount);
 
             // Update poly flags from areas.
             UpdatePolyFlags(pmesh);
+            progressCallback?.Invoke(11f / passCount);
 
             var param = new NavMeshCreateParams
             {
@@ -118,6 +134,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
             };
 
             MeshData navData = DetourUtils.CreateNavMeshData(param) ?? throw new EngineException("Could not build Detour navmesh.");
+            progressCallback?.Invoke(12f / passCount);
 
             // Make sure the data is in right format.
             MeshHeader header = navData.Header;
@@ -134,6 +151,7 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             var nm = new NavMesh(nvParams);
             nm.AddTile(navData, TileFlagTypes.DT_TILE_FREE_DATA);
+            progressCallback?.Invoke(13f / passCount);
             return nm;
         }
         /// <summary>
@@ -142,17 +160,32 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="geometry">Input geometry</param>
         /// <param name="settings">Settings</param>
         /// <param name="agent">Agent type</param>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created navigation mesh</returns>
-        private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent)
+        private static NavMesh BuildTiled(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback)
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             var nmParams = settings.GetTiledNavMeshParams(bbox);
             var nm = new NavMesh(nmParams);
 
+            int passes = 0;
             if (settings.BuildAllTiles)
             {
-                nm.BuildAllTiles(geometry, settings, agent);
+                passes++;
+
+                if (settings.UseTileCache)
+                {
+                    passes++;
+                }
+            }
+
+            if (settings.BuildAllTiles)
+            {
+                nm.BuildAllTiles(geometry, settings, agent, (progress) =>
+                {
+                    progressCallback?.Invoke(progress / passes);
+                });
             }
 
             if (settings.UseTileCache)
@@ -168,7 +201,10 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
                 if (settings.BuildAllTiles)
                 {
-                    BuildTileCache(nm.TileCache, geometry, cfg);
+                    BuildTileCache(nm.TileCache, geometry, cfg, (progress) =>
+                    {
+                        progressCallback?.Invoke((progress / passes) + (1f / passes));
+                    });
                 }
             }
 
@@ -181,21 +217,25 @@ namespace Engine.PathFinding.RecastNavigation.Detour
         /// <param name="geometry">Input geometry</param>
         /// <param name="settings">Build settings</param>
         /// <param name="agent">Agent type</param>
-        private void BuildAllTiles(InputGeometry geometry, BuildSettings settings, Agent agent)
+        /// <param name="progressCallback">Optional progress callback</param>
+        private void BuildAllTiles(InputGeometry geometry, BuildSettings settings, Agent agent, Action<float> progressCallback)
         {
             var bbox = settings.Bounds ?? geometry.BoundingBox;
 
             // Tile generation params.
             var tileParams = settings.GetTileParams(bbox);
 
+            float totalTiles = tileParams.Height * tileParams.Width;
+            int tile = 0;
+
             for (int y = 0; y < tileParams.Height; y++)
             {
                 for (int x = 0; x < tileParams.Width; x++)
                 {
-                    BoundingBox tileBounds = GetTileBounds(x, y, tileParams.CellSize, tileParams.Bounds);
+                    var tileBounds = GetTileBounds(x, y, tileParams.CellSize, tileParams.Bounds);
 
                     // Init build configuration
-                    Config cfg = settings.GetTiledConfig(agent, tileBounds);
+                    var cfg = settings.GetTiledConfig(agent, tileBounds);
 
                     var data = BuildTileMesh(x, y, geometry, cfg);
                     if (data != null)
@@ -205,6 +245,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                         // Let the navmesh own the data.
                         AddTile(data, TileFlagTypes.DT_TILE_FREE_DATA);
                     }
+
+                    progressCallback?.Invoke(++tile / totalTiles);
                 }
             }
         }
@@ -306,9 +348,12 @@ namespace Engine.PathFinding.RecastNavigation.Detour
 
             return DetourUtils.CreateNavMeshData(param);
         }
-        private static void BuildTileCache(TileCache tileCache, InputGeometry geometry, Config cfg)
+        private static void BuildTileCache(TileCache tileCache, InputGeometry geometry, Config cfg, Action<float> progressCallback)
         {
             var settings = tileCache.GetParams();
+
+            float total = settings.TileHeight * settings.TileWidth * 2;
+            int curr = 0;
 
             for (int y = 0; y < settings.TileHeight; y++)
             {
@@ -320,6 +365,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                     {
                         tileCache.AddTile(tile, CompressedTileFlagTypes.DT_COMPRESSEDTILE_FREE_DATA);
                     }
+
+                    progressCallback?.Invoke(++curr / total);
                 }
             }
 
@@ -329,6 +376,8 @@ namespace Engine.PathFinding.RecastNavigation.Detour
                 for (int x = 0; x < settings.TileWidth; x++)
                 {
                     tileCache.BuildTilesAt(x, y);
+
+                    progressCallback?.Invoke(++curr / total);
                 }
             }
         }

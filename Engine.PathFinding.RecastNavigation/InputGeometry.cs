@@ -27,19 +27,20 @@ namespace Engine.PathFinding.RecastNavigation
         }
 
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
+        public override async Task<IGraph> CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
         {
             var triangles = await GetTriangles();
 
-            return Create(settings, triangles);
+            return Create(settings, triangles, progressCallback);
         }
         /// <summary>
         /// Creates a new graph from current geometry input
         /// </summary>
         /// <param name="settings">Settings</param>
         /// <param name="triangles">Triangle list</param>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new graph</returns>
-        private Graph Create(PathFinderSettings settings, IEnumerable<Triangle> triangles)
+        private Graph Create(PathFinderSettings settings, IEnumerable<Triangle> triangles, Action<float> progressCallback)
         {
             if (!triangles.Any())
             {
@@ -61,9 +62,16 @@ namespace Engine.PathFinding.RecastNavigation
             };
 
             // Generate navigation meshes and gueries for each agent
-            foreach (var agent in graph.Settings.Agents)
+            var agentList = graph.Settings.Agents;
+            var agentCount = agentList.Length;
+            for (int i = 0; i < agentCount; i++)
             {
-                var nm = NavMesh.Build(this, graph.Settings, agent);
+                var agent = agentList[i];
+
+                var nm = NavMesh.Build(this, graph.Settings, agent, (progress) =>
+                {
+                    progressCallback?.Invoke(progress * (i + 1) / agentCount);
+                });
 
                 graph.AgentQueries.Add(new GraphAgentQuery
                 {

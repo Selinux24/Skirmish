@@ -17,8 +17,6 @@ namespace Engine.PathFinding.Tests
         static TestContext _testContext;
 
         static Agent agentDefault;
-        static Agent agentSmall;
-        static Agent agentTall;
         static Agent agentInclined;
 
         static IEnumerable<Triangle> zeroPlaneTris;
@@ -43,8 +41,6 @@ namespace Engine.PathFinding.Tests
             float rDefault = 0.5f;
 
             agentDefault = new Agent() { Radius = rDefault, Height = hOne * 0.5f };
-            agentSmall = new Agent() { Radius = rDefault, Height = hOne * 0.1f };
-            agentTall = new Agent() { Radius = rDefault, Height = hOne * 1.5f };
             agentInclined = new Agent() { Radius = rDefault, Height = hOne * 0.5f, MaxSlope = 50f };
 
             var pZero = GeometryUtil.CreateXZPlane(10, hZero);
@@ -95,7 +91,7 @@ namespace Engine.PathFinding.Tests
             var mockInput = new Mock<PathFinderInput>(new object[] { fnc });
 
             var mockGraph = new Mock<IGraph>();
-            mockInput.Setup(i => i.CreateGraph(It.IsAny<PathFinderSettings>())).ReturnsAsync(mockGraph.Object);
+            mockInput.Setup(i => i.CreateGraph(It.IsAny<PathFinderSettings>(), null)).ReturnsAsync(mockGraph.Object);
 
             var pfDesc = new PathFinderDescription(mockSettings.Object, mockInput.Object);
             var res = pfDesc.Build().GetAwaiter().GetResult();

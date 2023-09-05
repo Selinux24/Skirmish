@@ -22,15 +22,15 @@ namespace Engine.PathFinding.AStar
         }
 
         /// <inheritdoc/>
-        public override async Task<IGraph> CreateGraph(PathFinderSettings settings)
+        public override async Task<IGraph> CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null)
         {
             IGraph grid = null;
 
-            var triangles = await this.GetTriangles();
+            var triangles = await GetTriangles();
 
             await Task.Run(() =>
             {
-                grid = CreateGrid(settings, triangles);
+                grid = CreateGrid(settings, triangles, progressCallback);
             });
 
             return grid;
@@ -39,8 +39,10 @@ namespace Engine.PathFinding.AStar
         /// Creates a new grid
         /// </summary>
         /// <param name="settings">Settings</param>
+        /// <param name="triangles">Triangle list</param>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new grid</returns>
-        private Grid CreateGrid(PathFinderSettings settings, IEnumerable<Triangle> triangles)
+        private Grid CreateGrid(PathFinderSettings settings, IEnumerable<Triangle> triangles, Action<float> progressCallback)
         {
             var grid = new Grid(settings as GridGenerationSettings, this);
 
@@ -53,6 +55,9 @@ namespace Engine.PathFinding.AStar
 
             int xSize = fxSize > (int)fxSize ? (int)fxSize + 1 : (int)fxSize;
             int zSize = fzSize > (int)fzSize ? (int)fzSize + 1 : (int)fzSize;
+
+            float total = bbox.Size.X * bbox.Size.X / grid.Settings.NodeSize;
+            int curr = 0;
 
             for (float x = bbox.Minimum.X; x < bbox.Maximum.X; x += grid.Settings.NodeSize)
             {
@@ -85,6 +90,8 @@ namespace Engine.PathFinding.AStar
                     }
 
                     dictionary.Add(new Vector2(x, z), info);
+
+                    progressCallback?.Invoke(++curr / total);
                 }
             }
 

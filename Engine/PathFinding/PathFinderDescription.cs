@@ -31,22 +31,19 @@ namespace Engine.PathFinding
         /// <summary>
         /// Builds a graph from this settings
         /// </summary>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the generated graph</returns>
-        public async Task<IGraph> Build()
+        public async Task<IGraph> Build(Action<float> progressCallback = null)
         {
-            IGraph result;
-
             try
             {
-                result = await Input?.CreateGraph(Settings);
+                return await Input?.CreateGraph(Settings, progressCallback);
             }
             catch (Exception ex)
             {
                 Logger.WriteError(this, $"Error creating the graph: {ex.Message}", ex);
                 throw;
             }
-
-            return result;
         }
 
         /// <summary>

@@ -285,13 +285,14 @@ namespace Engine.PathFinding
         {
             BoundingBox = null;
 
-            obj.Usage = SceneObjectUsages.Object;
+            obj.Usage = SceneObjectUsages.Ground;
         }
 
         /// <summary>
         /// Updates the navigation graph
         /// </summary>
-        public virtual async Task UpdateNavigationGraph()
+        /// <param name="progressCallback">Optional progress callback</param>
+        public virtual async Task UpdateNavigationGraph(Action<float> progressCallback = null)
         {
             if (PathFinderDescription == null)
             {
@@ -300,7 +301,7 @@ namespace Engine.PathFinding
                 return;
             }
 
-            var graph = await PathFinderDescription.Build();
+            var graph = await PathFinderDescription.Build(progressCallback);
 
             SetNavigationGraph(graph);
 
@@ -380,7 +381,7 @@ namespace Engine.PathFinding
         /// <returns>Returns a triangle list</returns>
         public virtual IEnumerable<Triangle> GetTrianglesForNavigationGraph()
         {
-            var navComponents = Components.Get<IDrawable>(c => !c.HasOwner && c.Visible);
+            var navComponents = Components.Get<IDrawable>(c => !c.HasOwner && c.Usage.HasFlag(SceneObjectUsages.Ground));
 
             var allTris = navComponents.SelectMany(GetGeometryForNavigationGraph<Triangle>).ToArray();
 

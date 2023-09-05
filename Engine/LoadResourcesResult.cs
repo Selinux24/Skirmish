@@ -68,7 +68,11 @@ namespace Engine
 
             foreach (var ex in exList)
             {
+#if DEBUG
                 sb.Append(ex.ToString());
+#else
+                sb.Append(ex.Message);
+#endif
             }
 
             return sb.ToString();

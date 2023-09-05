@@ -155,7 +155,7 @@ namespace Collada.ModularDungeon
 
             Logger.WriteDebug(this, $"Ignored {value.Progress * 100f:0}%");
         }
-        public override async Task UpdateNavigationGraph()
+        public override async Task UpdateNavigationGraph(Action<float> progressCallback = null)
         {
             if (scenery?.CurrentLevel == null)
             {
@@ -184,7 +184,7 @@ namespace Collada.ModularDungeon
                 }
             }
 
-            await base.UpdateNavigationGraph();
+            await base.UpdateNavigationGraph(progressCallback);
 
             _ = Task.Run(async () =>
             {
@@ -1377,29 +1377,32 @@ namespace Collada.ModularDungeon
         {
             Task.Run(() =>
             {
-                if (!taskRunning)
+                if (taskRunning)
                 {
-                    taskRunning = true;
-                    try
-                    {
-                        var fileName = scenery.CurrentLevel.Name + ntFile;
+                    return;
+                }
 
-                        if (File.Exists(fileName))
-                        {
-                            File.Delete(fileName);
-                        }
+                taskRunning = true;
 
-                        var tris = GetTrianglesForNavigationGraph();
-                        LoaderObj.Save(tris, fileName);
-                    }
-                    catch (Exception ex)
+                try
+                {
+                    var fileName = scenery.CurrentLevel.Name + ntFile;
+
+                    if (File.Exists(fileName))
                     {
-                        Logger.WriteError(this, $"SaveGraphToFile: {ex.Message}", ex);
+                        File.Delete(fileName);
                     }
-                    finally
-                    {
-                        taskRunning = false;
-                    }
+
+                    var tris = GetTrianglesForNavigationGraph();
+                    LoaderObj.Save(tris, fileName);
+                }
+                catch (Exception ex)
+                {
+                    Logger.WriteError(this, $"SaveGraphToFile: {ex.Message}", ex);
+                }
+                finally
+                {
+                    taskRunning = false;
                 }
             });
         }

@@ -59,7 +59,10 @@ namespace Skybox
         private UITextArea help = null;
         private UITextArea fps = null;
 
+        private Skydom skydom = null;
+        private Scenery lakeBottom = null;
         private Scenery ruins = null;
+        private Water water = null;
         private PrimitiveListDrawer<Line3D> volumesDrawer = null;
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
 
@@ -86,6 +89,7 @@ namespace Skybox
 
         private IAudioEffect fireAudioEffect;
 
+        private bool loadingReady = false;
         private bool gameReady = false;
 
         public TestScene3D(Game game)
@@ -138,6 +142,7 @@ namespace Skybox
             #region Cursor
 
             var cursorDesc = UICursorDescription.Default("target.png", 16, 16, true, Color.Purple);
+            cursorDesc.StartsVisible = false;
 
             await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc);
 
@@ -155,25 +160,24 @@ namespace Skybox
             fps = await AddComponentUI<UITextArea, UITextAreaDescription>("FPS", "FPS", new UITextAreaDescription { Font = defaultFont12, TextForeColor = Color.Yellow });
 
             title.Text = "Collada Scene with Skybox";
-#if DEBUG
-            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
-#else
-            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
-#endif
+            help.Text = "Loading...";
             fps.Text = "";
 
             var spDesc = SpriteDescription.Default(new Color4(0, 0, 0, 0.75f));
             panel = await AddComponentUI<Sprite, SpriteDescription>("Backpanel", "Backpanel", spDesc, LayerUI - 1);
 
             #endregion
+
+            UpdateLayout();
         }
         private async Task InitializeSkydom()
         {
             string fileName = "Resources/Daylight Box UV.png";
             int faceSize = 512;
             var skydomDesc = SkydomDescription.Sphere(fileName, faceSize, Camera.FarPlaneDistance);
+            skydomDesc.StartsVisible = false;
 
-            await AddComponentSky<Skydom, SkydomDescription>("Skydom", "Skydom", skydomDesc);
+            skydom = await AddComponentSky<Skydom, SkydomDescription>("Skydom", "Skydom", skydomDesc);
         }
         private async Task InitializeLakeBottom()
         {
@@ -208,8 +212,9 @@ namespace Skybox
             GroundDescription groundDesc = GroundDescription.FromHeightmap(noiseMap, cellSize, terrainHeight, heightCurve, textures, 2);
             groundDesc.Heightmap.UseFalloff = true;
             groundDesc.Heightmap.Transform = Matrix.Translation(0, -terrainHeight * 0.33f, 0);
+            groundDesc.StartsVisible = false;
 
-            await AddComponentGround<Scenery, GroundDescription>("Lage Bottom", "Lage Bottom", groundDesc);
+            lakeBottom = await AddComponentGround<Scenery, GroundDescription>("Lake Bottom", "Lake Bottom", groundDesc);
         }
         private async Task InitializeTorchs()
         {
@@ -218,11 +223,10 @@ namespace Skybox
                 Instances = firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Resources", "torch.json"),
+                StartsVisible = false,
             };
 
-            torchs = await AddComponent<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", torchDesc);
-
-            AttachToGround(torchs);
+            torchs = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Torchs", "Torchs", torchDesc);
         }
         private async Task InitializeObelisks()
         {
@@ -231,9 +235,10 @@ namespace Skybox
                 Instances = firePositions.Length,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Resources/obelisk", "obelisk.json"),
+                StartsVisible = false,
             };
 
-            obelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisks", "Obelisks", obeliskDesc, SceneObjectUsages.Ground);
+            obelisks = await AddComponentGround<ModelInstanced, ModelInstancedDescription>("Obelisks", "Obelisks", obeliskDesc);
         }
         private async Task InitializeFountain()
         {
@@ -241,28 +246,27 @@ namespace Skybox
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 Content = ContentDescription.FromFile("Resources/Fountain", "Fountain.json"),
+                StartsVisible = false,
             };
 
             fountain = await AddComponentGround<Model, ModelDescription>("Fountain", "Fountain", fountainDesc);
-
-            AttachToGround(fountain);
         }
         private async Task InitializeRuins()
         {
             var ruinsDesc = GroundDescription.FromFile("Resources", "ruins.json");
             ruinsDesc.Quadtree.MaximumDepth = 1;
+            ruinsDesc.StartsVisible = false;
 
             ruins = await AddComponentGround<Scenery, GroundDescription>("Ruins", "Ruins", ruinsDesc);
-
-            SetGround(ruins);
         }
         private async Task InitializeWater()
         {
             var waterDesc = WaterDescription.CreateCalm(5000f, -2f);
             waterDesc.BaseColor = new Color3(0.067f, 0.065f, 0.003f);
             waterDesc.WaterColor = new Color4(0.003f, 0.267f, 0.096f, 0.98f);
+            waterDesc.StartsVisible = false;
 
-            await AddComponentEffect<Water, WaterDescription>("Water", "Water", waterDesc);
+            water = await AddComponentEffect<Water, WaterDescription>("Water", "Water", waterDesc);
         }
         private async Task InitializeEmitter()
         {
@@ -274,6 +278,7 @@ namespace Skybox
             var mFireDesc = new ModelDescription()
             {
                 Content = ContentDescription.FromContentData(sphere, mat),
+                StartsVisible = false,
             };
 
             movingFire = await AddComponent<Model, ModelDescription>("Emitter", "Emitter", mFireDesc);
@@ -281,6 +286,7 @@ namespace Skybox
         private async Task InitializeParticles()
         {
             var pManagerDesc = ParticleManagerDescription.Default();
+            pManagerDesc.StartsVisible = false;
 
             pManager = await AddComponentEffect<ParticleManager, ParticleManagerDescription>("ParticleManager", "ParticleManager", pManagerDesc);
 
@@ -313,33 +319,32 @@ namespace Skybox
         }
         private async Task InitializeResourcesCompleted(LoadResourcesResult res)
         {
+            loadingReady = true;
+
             if (!res.Completed)
             {
-                res.ThrowExceptions();
+                help.Text = res.GetErrorMessage();
+
+                return;
             }
 
-            UpdateLayout();
+            await InitializeNavigationMesh();
 
-            InitializeNavigationMesh();
+            StartScene();
 
-            await UpdateNavigationGraph();
-
-            PrepareScene();
-
-            InitializeSound();
-
-            fireAudioEffect = AudioManager.CreateEffectInstance("Sphere", movingFire, Camera);
-            fireAudioEffect.Play();
-
-            AudioManager.MasterVolume = 1f;
-            AudioManager.Start();
+            StartSound();
 
             gameReady = true;
         }
-        private void InitializeNavigationMesh()
+        private async Task InitializeNavigationMesh()
         {
+            //Put ground objects in position
+            PrepareGround();
+
+            //Configure the input geometry
             var nvInput = new InputGeometry(GetTrianglesForNavigationGraph);
 
+            //Configure de navigation mesh build settings
             var nvSettings = BuildSettings.Default;
             nvSettings.TileSize = 32;
             nvSettings.CellSize = 0.05f;
@@ -347,9 +352,61 @@ namespace Skybox
             nvSettings.PartitionType = SamplePartitionTypes.Monotone;
             nvSettings.Agents[0] = walker;
 
-            PathFinderDescription = new Engine.PathFinding.PathFinderDescription(nvSettings, nvInput);
+            //Generate the path finder description
+            PathFinderDescription = new PathFinderDescription(nvSettings, nvInput);
+
+            await UpdateNavigationGraph((progress) => { help.Text = $"Loading navigation mesh {progress:0.0%}..."; });
+            await Task.Delay(500);
         }
-        private void PrepareScene()
+        private void PrepareGround()
+        {
+            Parallel.For(0, firePositions.Length, (i, loopState) =>
+            {
+                if (loopState.IsExceptional)
+                {
+                    return;
+                }
+
+                var color = Color.Yellow.RGB();
+                if (i == 1) color = Color.Red.RGB();
+                if (i == 2) color = Color.Green.RGB();
+                if (i == 3) color = Color.LightBlue.RGB();
+
+                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
+                var firePositions3D = result.Position;
+
+                torchs[i].Manipulator.SetTransform(firePositions3D, Quaternion.Identity, 0.2f);
+
+                var bbox = torchs[i].GetBoundingBox(true);
+                firePositions3D.Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
+
+                var torchLights = new SceneLightPoint(
+                    string.Format("Torch {0}", i),
+                    false,
+                    color,
+                    color,
+                    true,
+                    SceneLightPointDescription.Create(firePositions3D, 4f, 20f));
+
+                Lights.Add(torchLights);
+
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D, InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
+                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D, InfiniteDuration = true, EmissionRate = 0.2f, MaximumDistance = GameEnvironment.LODDistanceLow });
+            });
+
+            Parallel.For(0, obeliskPositions.Length, (i, loopState) =>
+            {
+                if (loopState.IsExceptional)
+                {
+                    return;
+                }
+
+                obelisks[i].Manipulator.SetTransform(obeliskPositions[i], obeliskRotations[i], 10f);
+            });
+
+            fountain.Manipulator.SetScale(2.3f);
+        }
+        private void StartScene()
         {
             Lights.DirectionalLights[0].Enabled = true;
             Lights.DirectionalLights[0].CastShadow = true;
@@ -370,67 +427,34 @@ namespace Skybox
 
             Lights.Add(movingFireLight);
 
-            Vector3[] firePositions3D = new Vector3[firePositions.Length];
-            SceneLightPoint[] torchLights = new SceneLightPoint[firePositions.Length];
-            Parallel.For(0, firePositions.Length, (i, loopState) =>
-            {
-                if (loopState.IsExceptional)
-                {
-                    return;
-                }
+            skydom.Visible = true;
+            lakeBottom.Visible = true;
+            torchs.Visible = true;
+            obelisks.Visible = true;
+            fountain.Visible = true;
+            ruins.Visible = true;
+            water.Visible = true;
+            movingFire.Visible = true;
+            pManager.Visible = true;
 
-                Color3 color = Color.Yellow.RGB();
-                if (i == 1) color = Color.Red.RGB();
-                if (i == 2) color = Color.Green.RGB();
-                if (i == 3) color = Color.LightBlue.RGB();
-
-                FindTopGroundPosition(firePositions[i].X, firePositions[i].Y, out PickingResult<Triangle> result);
-                firePositions3D[i] = result.Position;
-
-                torchs[i].Manipulator.SetScale(0.20f, true);
-                torchs[i].Manipulator.SetPosition(firePositions3D[i], true);
-
-                BoundingBox bbox = torchs[i].GetBoundingBox();
-
-                firePositions3D[i].Y += (bbox.Maximum.Y - bbox.Minimum.Y) * 0.95f;
-
-                torchLights[i] = new SceneLightPoint(
-                    string.Format("Torch {0}", i),
-                    false,
-                    color,
-                    color,
-                    true,
-                    SceneLightPointDescription.Create(firePositions3D[i], 4f, 20f));
-
-                Lights.Add(torchLights[i]);
-
-                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pFire, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.1f, MaximumDistance = GameEnvironment.LODDistanceLow });
-                _ = pManager.AddParticleSystem(ParticleSystemTypes.CPU, pPlume, new ParticleEmitter() { Position = firePositions3D[i], InfiniteDuration = true, EmissionRate = 0.2f, MaximumDistance = GameEnvironment.LODDistanceLow });
-            });
-
-            Parallel.For(0, obeliskPositions.Length, (i, loopState) =>
-            {
-                if (loopState.IsExceptional)
-                {
-                    return;
-                }
-
-                obelisks[i].Manipulator.SetPosition(obeliskPositions[i]);
-                obelisks[i].Manipulator.SetRotation(obeliskRotations[i]);
-                obelisks[i].Manipulator.SetScale(10f);
-            });
-
-            fountain.Manipulator.SetScale(2.3f);
+#if DEBUG
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Right Mouse: Drag view | Left Mouse: Pick";
+#else
+            help.Text = "Escape: Exit | Home: Reset camera | AWSD: Move camera | Move Mouse: View | Left Mouse: Pick";
+#endif
         }
-        private void InitializeSound()
+        private void StartSound()
         {
-            AudioManager.LoadSound("target_balls_single_loop", "Resources/Audio/Effects", "target_balls_single_loop.wav");
+            const string sphereSound = "target_balls_single_loop";
+            const string sphereEffect = "Sphere";
+
+            AudioManager.LoadSound(sphereSound, "Resources/Audio/Effects", "target_balls_single_loop.wav");
 
             AudioManager.AddEffectParams(
-                "Sphere",
+                sphereEffect,
                 new GameAudioEffectParameters
                 {
-                    SoundName = "target_balls_single_loop",
+                    SoundName = sphereSound,
                     IsLooped = true,
                     UseAudio3D = true,
                     ReverbPreset = ReverbPresets.StoneRoom,
@@ -438,59 +462,37 @@ namespace Skybox
                     EmitterRadius = 6,
                     ListenerCone = GameAudioConeDescription.DefaultListenerCone,
                 });
+
+            fireAudioEffect = AudioManager.CreateEffectInstance(sphereEffect, movingFire, Camera);
+            fireAudioEffect.Play();
+
+            AudioManager.MasterVolume = 0.5f;
+            AudioManager.Start();
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            if (!gameReady)
+            UpdateInput();
+
+            UpdateState(gameTime);
+        }
+        private void UpdateInput()
+        {
+            if (!loadingReady)
             {
                 return;
             }
 
-            Vector3 previousPosition = Camera.Position;
-
-            UpdateInput();
-
-            #region Walk
-
-            if (Walk(walker, previousPosition, Camera.Position, true, out Vector3 walkerPosition))
-            {
-                Camera.Goto(walkerPosition);
-            }
-            else
-            {
-                Camera.Goto(previousPosition);
-            }
-
-            #endregion
-
-            #region Light
-
-            float r = 5.5f;
-            float h = 1.25f;
-            float d = 0.5f;
-            float v = 0.8f;
-
-            Vector3 position = Vector3.Zero;
-            position.X = r * d * (float)Math.Cos(v * Game.GameTime.TotalSeconds);
-            position.Y = h + (0.25f * (1f + (float)Math.Sin(Game.GameTime.TotalSeconds)));
-            position.Z = r * d * (float)Math.Sin(v * Game.GameTime.TotalSeconds);
-
-            movingFire.Manipulator.SetPosition(position);
-            movingFireEmitter.Position = position;
-            movingFireLight.Position = position;
-
-            DEBUGUpdateMovingVolumesDrawer();
-
-            #endregion
-        }
-        private void UpdateInput()
-        {
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
                 Game.Exit();
+            }
+
+            if (!gameReady)
+            {
+                return;
             }
 
             if (Game.Input.KeyJustReleased(Keys.R))
@@ -516,22 +518,11 @@ namespace Skybox
 
             UpdateInputDebug();
 
+            Vector3 previousPosition = Camera.Position;
             UpdateInputCamera();
+            UpdateInputPlayer(previousPosition);
 
             UpdateInputLights();
-
-            var m = fireAudioEffect.GetOutputMatrix();
-            var ep = movingFire.Manipulator.Position.GetDescription();
-            var ev = movingFire.Manipulator.Velocity.GetDescription();
-            var lp = Camera.Position.GetDescription();
-            var lv = Camera.Velocity.GetDescription();
-            var d = Vector3.Distance(movingFire.Manipulator.Position, Camera.Position);
-            var sb = new StringBuilder();
-            sb.AppendLine($"Mouse (X:{Game.Input.MouseXDelta}; Y:{Game.Input.MouseYDelta}, Wheel: {Game.Input.MouseWheelDelta}) Absolute (X:{Game.Input.MouseX}; Y:{Game.Input.MouseY})");
-            sb.AppendLine($"L {m[0]:0.000} R {m[1]:0.000} Distance {d}");
-            sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");
-            sb.AppendLine($"Listener pos: {lp} Listener vel: {lv}");
-            fps.Text = sb.ToString();
         }
         private void UpdateInputCamera()
         {
@@ -598,6 +589,17 @@ namespace Skybox
                 Camera.MoveBackward(Game.GameTime, Game.Input.ShiftPressed);
             }
         }
+        private void UpdateInputPlayer(Vector3 previousPosition)
+        {
+            if (Walk(walker, previousPosition, Camera.Position, true, out Vector3 walkerPosition))
+            {
+                Camera.Goto(walkerPosition);
+            }
+            else
+            {
+                Camera.Goto(previousPosition);
+            }
+        }
         private void UpdateInputLights()
         {
             if (Game.Input.KeyJustReleased(Keys.Add))
@@ -654,6 +656,50 @@ namespace Skybox
                     DEBUGUpdateGraphDrawer();
                 }
             }
+        }
+        private void UpdateState(GameTime gameTime)
+        {
+            if (!gameReady)
+            {
+                return;
+            }
+
+            UpdateMovingLights(gameTime);
+            UpdateTexts();
+
+            DEBUGUpdateMovingVolumesDrawer();
+        }
+        private void UpdateMovingLights(GameTime gameTime)
+        {
+            float r = 5.5f;
+            float h = 1.25f;
+            float d = 0.5f;
+            float v = 0.8f;
+
+            float totalSeconds = gameTime.TotalSeconds;
+            Vector3 position = Vector3.Zero;
+            position.X = r * d * (float)Math.Cos(v * totalSeconds);
+            position.Y = h + (0.25f * (1f + (float)Math.Sin(totalSeconds)));
+            position.Z = r * d * (float)Math.Sin(v * totalSeconds);
+
+            movingFire.Manipulator.SetPosition(position);
+            movingFireEmitter.Position = position;
+            movingFireLight.Position = position;
+        }
+        private void UpdateTexts()
+        {
+            var m = fireAudioEffect.GetOutputMatrix();
+            var ep = movingFire.Manipulator.Position.GetDescription();
+            var ev = movingFire.Manipulator.Velocity.GetDescription();
+            var lp = Camera.Position.GetDescription();
+            var lv = Camera.Velocity.GetDescription();
+            var d = Vector3.Distance(movingFire.Manipulator.Position, Camera.Position);
+            var sb = new StringBuilder();
+            sb.AppendLine($"Mouse (X:{Game.Input.MouseXDelta}; Y:{Game.Input.MouseYDelta}, Wheel: {Game.Input.MouseWheelDelta}) Absolute (X:{Game.Input.MouseX}; Y:{Game.Input.MouseY})");
+            sb.AppendLine($"L {m[0]:0.000} R {m[1]:0.000} Distance {d}");
+            sb.AppendLine($"Emitter  pos: {ep} Emitter  vel: {ev}");
+            sb.AppendLine($"Listener pos: {lp} Listener vel: {lv}");
+            fps.Text = sb.ToString();
         }
 
         private void DEBUGUpdateVolumesDrawer()

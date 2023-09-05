@@ -194,6 +194,14 @@ namespace Engine
         /// <param name="rotation">Rotation</param>
         /// <param name="scale">Scale</param>
         /// <param name="updateState">Update internal state</param>
+        void SetTransform(Vector3 position, Quaternion rotation, float scale, bool updateState = false);
+        /// <summary>
+        /// Sets the position, scaling and rotation components
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="rotation">Rotation</param>
+        /// <param name="scale">Scale</param>
+        /// <param name="updateState">Update internal state</param>
         void SetTransform(Vector3 position, Quaternion rotation, Vector3 scale, bool updateState = false);
         /// <summary>
         /// Sets transform matrix and updates position, rotation and scaling components

@@ -378,6 +378,13 @@ namespace Engine
         }
 
         /// <inheritdoc/>
+        public void SetTransform(Vector3 position, Quaternion rotation, float scale, bool updateState = false)
+        {
+            SetPosition(position);
+            SetRotation(rotation);
+            SetScale(scale, updateState);
+        }
+        /// <inheritdoc/>
         public void SetTransform(Vector3 position, Quaternion rotation, Vector3 scale, bool updateState = false)
         {
             SetPosition(position);

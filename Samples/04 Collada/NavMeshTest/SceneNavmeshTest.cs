@@ -201,10 +201,10 @@ Space: Finds random over navmesh";
             gameReady = true;
         }
 
-        public override async Task UpdateNavigationGraph()
+        public override async Task UpdateNavigationGraph(Action<float> progressCallback = null)
         {
             var sw = Stopwatch.StartNew();
-            await base.UpdateNavigationGraph();
+            await base.UpdateNavigationGraph(progressCallback);
             sw.Stop();
             lastElapsedSeconds = sw.ElapsedMilliseconds / 1000.0f;
         }

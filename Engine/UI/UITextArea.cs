@@ -59,10 +59,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.Text;
+                return textDrawer?.Text;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 if (string.Equals(value, textDrawer.Text))
                 {
                     return;
@@ -80,7 +85,7 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ParsedText;
+                return textDrawer?.ParsedText;
             }
         }
         /// <summary>
@@ -90,10 +95,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ForeColor;
+                return textDrawer?.ForeColor ?? Color.Transparent;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.ForeColor = value;
             }
         }
@@ -104,10 +114,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ShadowColor;
+                return textDrawer?.ShadowColor ?? Color.Transparent;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.ShadowColor = value;
             }
         }
@@ -118,10 +133,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.ShadowDelta;
+                return textDrawer?.ShadowDelta ?? Vector2.Zero;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.ShadowDelta = value;
             }
         }
@@ -132,10 +152,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.HorizontalAlign;
+                return textDrawer?.HorizontalAlign ?? TextHorizontalAlign.Left;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.HorizontalAlign = value;
             }
         }
@@ -146,10 +171,15 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.VerticalAlign;
+                return textDrawer?.VerticalAlign ?? TextVerticalAlign.Top;
             }
             set
             {
+                if (textDrawer == null)
+                {
+                    return;
+                }
+
                 textDrawer.VerticalAlign = value;
             }
         }
@@ -160,7 +190,7 @@ namespace Engine.UI
         {
             get
             {
-                return textDrawer.GetLineHeight();
+                return textDrawer?.GetLineHeight() ?? 0;
             }
         }
         /// <summary>
@@ -358,7 +388,7 @@ namespace Engine.UI
                 return;
             }
 
-            textDrawer.Update(context);
+            textDrawer?.Update(context);
 
             UpdateScrollBarsLayout();
             UpdateScrollBarsState();
@@ -419,7 +449,7 @@ namespace Engine.UI
         {
             base.UpdateInternalState();
 
-            textDrawer.UpdateInternals();
+            textDrawer?.UpdateInternals();
         }
         /// <inheritdoc/>
         public override Vector2? GetTransformationPivot()
@@ -446,7 +476,7 @@ namespace Engine.UI
                 return false;
             }
 
-            return textDrawer.Draw(context);
+            return textDrawer?.Draw(context) ?? false;
         }
 
         /// <inheritdoc/>
@@ -471,7 +501,7 @@ namespace Engine.UI
         /// <inheritdoc/>
         public override RectangleF GetControlArea()
         {
-            var size = textDrawer.TextSize;
+            var size = textDrawer?.TextSize ?? Vector2.Zero;
 
             return new RectangleF
             {
@@ -553,8 +583,8 @@ namespace Engine.UI
                 return;
             }
 
-            var size = textDrawer.MeasureText(Text, TextHorizontalAlign, TextVerticalAlign);
-            var minHeight = textDrawer.GetLineHeight();
+            var size = textDrawer?.MeasureText(Text, TextHorizontalAlign, TextVerticalAlign) ?? Vector2.Zero;
+            var minHeight = textDrawer?.GetLineHeight() ?? 0;
 
             //Set sizes if grow control with text or sizes not setted
             if (GrowControlWithText || Width == 0) Width = size.X;

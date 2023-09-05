@@ -211,8 +211,9 @@ namespace Engine.PathFinding
         /// Creates a new graph from current input
         /// </summary>
         /// <param name="settings">Creation settings</param>
+        /// <param name="progressCallback">Optional progress callback</param>
         /// <returns>Returns the new created graph</returns>
-        public abstract Task<IGraph> CreateGraph(PathFinderSettings settings);
+        public abstract Task<IGraph> CreateGraph(PathFinderSettings settings, Action<float> progressCallback = null);
         /// <summary>
         /// Refresh
         /// </summary>
