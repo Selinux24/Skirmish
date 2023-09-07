@@ -1,0 +1,32 @@
+{
+  "modelFilename": "soldier_anim2.dae",
+  "animation": {
+    "clips": [
+      {
+        "name": "idle1",
+        "from": 1,
+        "to": 5
+      },
+      {
+        "name": "idle2",
+        "from": 6,
+        "to": 12
+      },
+      {
+        "name": "stand",
+        "from": 13,
+        "to": 15
+      },
+      {
+        "name": "walk",
+        "from": 17,
+        "to": 25
+      },
+      {
+        "name": "run",
+        "from": 28,
+        "to": 40
+      }
+    ]
+  }
+}

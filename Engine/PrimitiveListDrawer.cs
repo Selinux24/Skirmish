@@ -261,7 +261,7 @@ namespace Engine
             }
 
             var dc = context.DeviceContext;
-          
+
             WriteDataInBuffer(dc);
 
             if (drawCount <= 0)
@@ -293,6 +293,22 @@ namespace Engine
         /// <param name="dc">Device context</param>
         public void WriteDataInBuffer(IEngineDeviceContext dc)
         {
+            UpdateBufferData();
+
+            if (!BufferManager.WriteVertexBuffer(dc, vertexBuffer, bufferData))
+            {
+                return;
+            }
+
+            drawCount = bufferData.Count;
+
+            dictionaryChanged = false;
+        }
+        /// <summary>
+        /// Updates buffer data
+        /// </summary>
+        private void UpdateBufferData()
+        {
             if (!dictionaryChanged)
             {
                 return;
@@ -320,15 +336,6 @@ namespace Engine
                     }
                 }
             }
-
-            if (!BufferManager.WriteVertexBuffer(dc, vertexBuffer, bufferData))
-            {
-                return;
-            }
-
-            drawCount = bufferData.Count;
-
-            dictionaryChanged = false;
         }
     }
 }

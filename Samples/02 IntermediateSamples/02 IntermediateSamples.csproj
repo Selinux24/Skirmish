@@ -1,0 +1,400 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net7.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <RootNamespace>IntermediateSamples</RootNamespace>
+    <AssemblyName>IntermediateSamples</AssemblyName>
+    <Platforms>AnyCPU;x64;x86</Platforms>
+    <SonarQubeTestProject>False</SonarQubeTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="SceneDeferredLights\Resources\flare2.png" />
+    <None Remove="SceneDeferredLights\Resources\Leopard.bmp" />
+    <None Remove="SceneDeferredLights\Resources\Leopard.dae" />
+    <None Remove="SceneDeferredLights\Resources\Leopard.json" />
+    <None Remove="SceneDeferredLights\Resources\m24.dae" />
+    <None Remove="SceneDeferredLights\Resources\m24.dds" />
+    <None Remove="SceneDeferredLights\Resources\m24.json" />
+    <None Remove="SceneDeferredLights\Resources\sunset.dds" />
+    <None Remove="SceneDeferredLights\Resources\target.png" />
+    <None Remove="SceneDeferredLights\Resources\terrain.dae" />
+    <None Remove="SceneDeferredLights\Resources\terrain.json" />
+    <None Remove="SceneDeferredLights\Resources\terrain.png" />
+    <None Remove="SceneDeferredLights\Resources\terrain_nmap.png" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_01_bark_diffuse.dds" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_01_bark_normal.dds" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_01_leaves_diffuse.dds" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_01_leaves_normal.dds" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_a.dae" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_a.json" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_b.dae" />
+    <None Remove="SceneDeferredLights\Resources\Trees\birch_b.json" />
+    <None Remove="SceneDeferredLights\Resources\Vegetation\grass.png" />
+    <None Remove="SceneInstancing\Resources\Ground\gravel_01_diffuse.jpg" />
+    <None Remove="SceneInstancing\Resources\Ground\gravel_01_normal.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_10_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_14_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_15_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_18_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_1_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_22_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_3_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_4_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_5_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_7_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Skyboxes\Sky_horiz_9_4096.jpg" />
+    <None Remove="SceneInstancing\Resources\Soldier\soldier0.jpg" />
+    <None Remove="SceneInstancing\Resources\Soldier\Soldier1.jpg" />
+    <None Remove="SceneInstancing\Resources\Soldier\Soldier2.jpg" />
+    <None Remove="SceneInstancing\Resources\Soldier\soldier_anim2.dae" />
+    <None Remove="SceneInstancing\Resources\Soldier\soldier_anim2.json" />
+    <None Remove="SceneInstancing\Resources\Trees\Bark_d.png" />
+    <None Remove="SceneInstancing\Resources\Trees\Leafs_d.png" />
+    <None Remove="SceneInstancing\Resources\Trees\tree.json" />
+    <None Remove="SceneInstancing\Resources\Trees\tree_1.dae" />
+    <None Remove="SceneInstancing\Resources\Trees\tree_2.dae" />
+    <None Remove="SceneInstancing\Resources\Trees\tree_3.dae" />
+    <None Remove="SceneInstancing\Resources\Wall\diffuse.dds" />
+    <None Remove="SceneInstancing\Resources\Wall\normal.bmp" />
+    <None Remove="SceneInstancing\Resources\Wall\Wall.dae" />
+    <None Remove="SceneInstancing\Resources\Wall\Wall.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="SceneAnimationParts\Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneAnimationParts\Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneAnimationParts\Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneAnimationParts\Resources\Leopard\Leopard.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneAnimationParts\Resources\Leopard\Leopard.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneAnimationParts\Resources\Leopard\Leopard.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\flare2.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Leopard.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Leopard.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Leopard.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\m24.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\m24.dds">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\m24.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\sunset.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\target.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\terrain.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\terrain.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\terrain.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\terrain_nmap.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_01_bark_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_01_bark_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_01_leaves_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_01_leaves_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_a.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_a.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_b.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Trees\birch_b.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneDeferredLights\Resources\Vegetation\grass.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Ground\gravel_01_diffuse.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Ground\gravel_01_normal.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_10_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_14_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_15_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_18_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_1_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_22_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_3_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_4_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_5_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_7_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Skyboxes\Sky_horiz_9_4096.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Soldier\Soldier2.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Soldier\soldier_anim2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Trees\Bark_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Trees\Leafs_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Trees\tree.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Trees\tree_1.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Trees\tree_2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Trees\tree_3.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Wall\diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Wall\normal.bmp">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Wall\Wall.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="SceneInstancing\Resources\Wall\Wall.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMixamo\Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMixamo\Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMixamo\Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMixamo\Resources\TestModel\TestModel.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneMixamo\Resources\TestModel\TestModel.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\atlas1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\brick_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\brick_n.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\bronze_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\Dn_Doors.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\Dn_Doors.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\Dn_Jails.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\metal_rust_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\Wall1.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\Wall1.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\Wall2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\Wall2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\wall_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Doors\wall_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Ladder\bronze_n.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Ladder\Dn_Anim_Ladder.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Ladder\Dn_Anim_Ladder_22.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Ladder\metal_rust_d.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Rat\Rat.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Rat\Rat.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Rat\Rat_d.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSimpleAnimation\Resources\Soldier\soldier_anim2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSmoothTransitions\Resources\d_road_asphalt_stripes_diffuse.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSmoothTransitions\Resources\d_road_asphalt_stripes_normal.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSmoothTransitions\Resources\d_road_asphalt_stripes_specular.dds">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSmoothTransitions\Resources\Soldier\soldier0.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSmoothTransitions\Resources\Soldier\Soldier1.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSmoothTransitions\Resources\Soldier\soldier_anim2.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneSmoothTransitions\Resources\Soldier\soldier_anim2.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\anttisinstrumentals+keepshiningoninstrumental.mp3">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\backGround.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\buttons.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\Empty.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\pointer.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\SkyPlane.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\SkyPlane.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\Resources\ui_options.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Engine.Content.FmtCollada\Engine.Content.FmtCollada.csproj" />
+    <ProjectReference Include="..\..\Engine.Windows\Engine.Windows.csproj" />
+    <ProjectReference Include="..\..\Engine\Engine.csproj" />
+  </ItemGroup>
+
+</Project>

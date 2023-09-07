@@ -148,7 +148,7 @@ namespace Engine
         /// <summary>
         /// Isometric distance to interest
         /// </summary>
-        private float isometricDistanceToInterest = 1f;
+        private float isometricDistanceToInterest = 50f;
         /// <summary>
         /// Isometric current forward
         /// </summary>
