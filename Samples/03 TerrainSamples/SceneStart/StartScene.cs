@@ -112,7 +112,7 @@ namespace TerrainSamples.SceneStart
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
-            title.Text = "Terrain Tests ✌";
+            title.Text = "✌ Terrain Samples ✌";
 
             #endregion
 
@@ -192,6 +192,7 @@ namespace TerrainSamples.SceneStart
             int basicIndex = -1;
             int backIndex = -1;
 
+            //Load available maps from "one page dungeon" folder
             string[] mapFiles = Directory.GetFiles(modularDungeonTabsPath + "/onepagedungeons", "*.json");
             tabButtons.AddRange(mapFiles.Select(m =>
             {
@@ -273,8 +274,7 @@ namespace TerrainSamples.SceneStart
             {
                 if (o.Buttons.HasFlag(MouseButtons.Left))
                 {
-                    uiTweener.Hide(modularDungeonTabs, 100);
-                    ShowAllButButton(100);
+                    ModularDungeonTabsHide();
                 }
             };
         }
@@ -376,15 +376,7 @@ namespace TerrainSamples.SceneStart
             if (sender == sceneCrowdsButton) Game.SetScene<SceneCrowds.CrowdsScene>();
             if (sender == sceneGridButton) Game.SetScene<SceneGrid.GridScene>();
             if (sender == sceneHeightmapButton) Game.SetScene<SceneHeightmap.HeightmapScene>();
-            if (sender == sceneModularDungeonButton)
-            {
-                HideAllButButton(sceneModularDungeonButton, 100);
-
-                uiTweener.ClearTween(sceneModularDungeonButton);
-                uiTweener.Hide(sceneModularDungeonButton, 100);
-                modularDungeonTabs.SetSelectedTab(0);
-                uiTweener.Show(modularDungeonTabs, 100);
-            };
+            if (sender == sceneModularDungeonButton) ModularDungeonTabsShow();
             if (sender == sceneNavMeshTestButton) Game.SetScene<SceneNavmeshTest.NavmeshTestScene>();
             if (sender == scenePerlinNoiseButton) Game.SetScene<ScenePerlinNoise.PerlinNoiseScene>();
             if (sender == sceneRtsButton) Game.SetScene<SceneRts.RtsScene>();
@@ -415,26 +407,43 @@ namespace TerrainSamples.SceneStart
             Game.Exit();
         }
 
-        private void ShowAllButButton(long milliseconds)
+        private void ModularDungeonTabsShow()
+        {
+            HideAllSceneButtons(100);
+
+            uiTweener.Show(modularDungeonTabs, 250);
+            modularDungeonTabs.SetSelectedTab(0);
+        }
+        private void ModularDungeonTabsHide()
+        {
+            uiTweener.Hide(modularDungeonTabs, 100);
+
+            ShowAllSceneButtons(250);
+        }
+
+        private void ShowAllSceneButtons(long milliseconds)
         {
             foreach (var but in sceneButtons)
             {
-                uiTweener.ClearTween(but);
-                uiTweener.Show(but, milliseconds);
+                ShowButton(but, milliseconds);
             }
         }
-        private void HideAllButButton(IUIControl button, long milliseconds)
+        private void HideAllSceneButtons(long milliseconds)
         {
             foreach (var but in sceneButtons)
             {
-                if (but == button)
-                {
-                    continue;
-                }
-
-                uiTweener.ClearTween(but);
-                uiTweener.Hide(but, milliseconds);
+                HideButton(but, milliseconds);
             }
+        }
+        private void ShowButton(IUIControl ctrl, long milliseconds)
+        {
+            uiTweener.ClearTween(ctrl);
+            uiTweener.Show(ctrl, milliseconds);
+        }
+        private void HideButton(IUIControl ctrl, long milliseconds)
+        {
+            uiTweener.ClearTween(ctrl);
+            uiTweener.Hide(ctrl, milliseconds);
         }
     }
 }
