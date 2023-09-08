@@ -11,6 +11,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="SceneStart\HelveticaNeue Medium.ttf" />
+    <None Remove="SceneStart\HelveticaNeueHv.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="SceneCrowds\Resources\Leopard.bmp">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -1723,6 +1728,12 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStart\buttons.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\HelveticaNeue Medium.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\HelveticaNeueHv.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStart\pointer.png">

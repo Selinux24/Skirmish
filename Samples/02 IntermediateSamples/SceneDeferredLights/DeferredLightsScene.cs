@@ -48,7 +48,6 @@ namespace IntermediateSamples.SceneDeferredLights
         private PrimitiveListDrawer<Line3D> lineDrawer = null;
         private PrimitiveListDrawer<Triangle> terrainGraphDrawer = null;
         private PrimitiveListDrawer<Triangle> graphDrawer = null;
-        private PrimitiveListDrawer<Line3D> volumesDrawer = null;
 
         private bool onlyModels = true;
 
@@ -260,13 +259,6 @@ namespace IntermediateSamples.SceneDeferredLights
             };
             graphDrawer = await AddComponentEffect<PrimitiveListDrawer<Triangle>, PrimitiveListDrawerDescription<Triangle>>("DEBUG++ Graph", "DEBUG++ Graph", graphDrawerDesc);
             graphDrawer.Visible = false;
-
-            var volumesDrawerDesc = new PrimitiveListDrawerDescription<Line3D>()
-            {
-                Count = 10000
-            };
-            volumesDrawer = await AddComponentEffect<PrimitiveListDrawer<Line3D>, PrimitiveListDrawerDescription<Line3D>>("DEBUG++ Volumes", "DEBUG++ Volumes", volumesDrawerDesc);
-            volumesDrawer.Visible = false;
         }
 
         private void StartAnimations()

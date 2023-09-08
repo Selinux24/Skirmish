@@ -85,6 +85,7 @@ namespace Engine.UI
         {
             var spriteDesc = new SpriteDescription()
             {
+                ContentPath = Description.ContentPath,
                 BaseColor = Description.ColorReleased,
                 EventsEnabled = false,
             };
@@ -104,6 +105,7 @@ namespace Engine.UI
         {
             var spriteDesc = new SpriteDescription()
             {
+                ContentPath = Description.ContentPath,
                 BaseColor = Description.ColorPressed,
                 EventsEnabled = false,
             };
@@ -126,6 +128,7 @@ namespace Engine.UI
                 $"{Name}.Caption",
                 new UITextAreaDescription
                 {
+                    ContentPath = Description.ContentPath,
                     Font = Description.Font,
                     Text = Description.Text,
                     TextForeColor = Description.TextForeColor,

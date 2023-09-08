@@ -5,6 +5,9 @@ using Engine.UI;
 using Engine.UI.Tween;
 using SharpDX;
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace TerrainSamples.SceneStart
@@ -19,6 +22,7 @@ namespace TerrainSamples.SceneStart
         private Model backGround = null;
         private UITextArea title = null;
 
+        private UIButton[] sceneButtons;
         private UIButton sceneCrowdsButton = null;
         private UIButton sceneGridButton = null;
         private UIButton sceneHeightmapButton = null;
@@ -28,11 +32,18 @@ namespace TerrainSamples.SceneStart
         private UIButton sceneRtsButton = null;
         private UIButton sceneSkyboxButton = null;
         private UIButton exitButton = null;
+        private UITabPanel modularDungeonTabs = null;
+        private readonly string modularDungeonTabsPath = "scenemodulardungeon/resources";
 
+        private readonly string resourcesFolder = "SceneStart";
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
+        private readonly string mediumControlsFont = "HelveticaNeueHv.ttf";
+        private readonly string largeControlsFont = "HelveticaNeue Medium.ttf";
         private readonly Color sceneButtonColor = Color.AdjustSaturation(Color.DarkSeaGreen, 1.5f);
         private readonly Color exitButtonColor = Color.AdjustSaturation(Color.OrangeRed, 1.5f);
+        private Color4 SceneButtonColorBase { get { return new Color4(sceneButtonColor.RGB(), 0.8f); } }
+        private Color4 SceneButtonColorHighlight { get { return new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f); } }
 
         private bool sceneReady = false;
 
@@ -57,7 +68,9 @@ namespace TerrainSamples.SceneStart
                 new[]
                 {
                     InitializeTweener(),
-                    InitializeAssets()
+                    InitializeCursor(),
+                    InitializeBackground(),
+                    InitializeAssets(),
                 },
                 InitializeComponentsCompleted);
         }
@@ -67,31 +80,30 @@ namespace TerrainSamples.SceneStart
 
             uiTweener = this.AddUIControlTweener();
         }
-        private async Task InitializeAssets()
+        private async Task InitializeCursor()
         {
-            #region Cursor
-
-            var cursorDesc = UICursorDescription.Default("SceneStart/pointer.png", 48, 48, false, new Vector2(-14f, -7f));
+            var cursorDesc = UICursorDescription.Default("pointer.png", 48, 48, false, new Vector2(-14f, -7f));
+            cursorDesc.ContentPath = resourcesFolder;
             await AddComponentCursor<UICursor, UICursorDescription>("Cursor", "Cursor", cursorDesc, layerCursor);
-
-            #endregion
-
-            #region Background
-
+        }
+        private async Task InitializeBackground()
+        {
             var backGroundDesc = new ModelDescription()
             {
-                Content = ContentDescription.FromFile("SceneStart", "SkyPlane.json"),
+                Content = ContentDescription.FromFile(resourcesFolder, "SkyPlane.json"),
             };
             backGround = await AddComponent<Model, ModelDescription>("Background", "Background", backGroundDesc);
-
-            #endregion
-
+        }
+        private async Task InitializeAssets()
+        {
             #region Title text
 
             var titleFont = TextDrawerDescription.FromFamily(titleFonts, 72, FontMapStyles.Bold, true);
+            titleFont.ContentPath = resourcesFolder;
             titleFont.CustomKeycodes = new[] { '✌' };
 
             var titleDesc = UITextAreaDescription.Default(titleFont);
+            titleDesc.ContentPath = resourcesFolder;
             titleDesc.TextForeColor = Color.Gold;
             titleDesc.TextShadowColor = new Color4(Color.LightYellow.RGB(), 0.25f);
             titleDesc.TextShadowDelta = new Vector2(4, 4);
@@ -107,9 +119,10 @@ namespace TerrainSamples.SceneStart
             #region Scene buttons
 
             var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
-            buttonsFont.CustomKeycodes = new[] { '➀', '➁' };
+            buttonsFont.ContentPath = resourcesFolder;
 
-            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "SceneStart/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            startButtonDesc.ContentPath = resourcesFolder;
             startButtonDesc.Width = 275;
             startButtonDesc.Height = 65;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
@@ -131,7 +144,8 @@ namespace TerrainSamples.SceneStart
 
             #region Exit button
 
-            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "SceneStart/buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "buttons.png", new Vector4(55, 171, 545, 270) / 600f, new Vector4(55, 171, 545, 270) / 600f);
+            exitButtonDesc.ContentPath = resourcesFolder;
             exitButtonDesc.Width = 275;
             exitButtonDesc.Height = 65;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
@@ -146,6 +160,21 @@ namespace TerrainSamples.SceneStart
             exitButton.Caption.Text = "Exit";
 
             #endregion
+
+            sceneButtons = new[]
+            {
+                sceneCrowdsButton,
+                sceneGridButton,
+                sceneHeightmapButton,
+                sceneModularDungeonButton,
+                sceneNavMeshTestButton,
+                scenePerlinNoiseButton,
+                sceneRtsButton,
+                sceneSkyboxButton,
+                exitButton,
+            };
+
+            await InitializeModularDungeonTabs();
         }
         private async Task<UIButton> InitializeButton(string name, string caption, UIButtonDescription desc)
         {
@@ -156,6 +185,98 @@ namespace TerrainSamples.SceneStart
             button.Caption.Text = caption;
 
             return button;
+        }
+        private async Task InitializeModularDungeonTabs()
+        {
+            List<string> tabButtons = new();
+            int basicIndex = -1;
+            int backIndex = -1;
+
+            string[] mapFiles = Directory.GetFiles(modularDungeonTabsPath + "/onepagedungeons", "*.json");
+            tabButtons.AddRange(mapFiles.Select(m =>
+            {
+                string name = Path.GetFileNameWithoutExtension(m).Replace("_", " ");
+                return string.Concat(name.First().ToString().ToUpper(), name.AsSpan(1));
+            }));
+            basicIndex = tabButtons.Count;
+            tabButtons.Add("Basic Dungeon");
+            backIndex = tabButtons.Count;
+            tabButtons.Add("Back");
+
+            var largeFont = TextDrawerDescription.FromFile(largeControlsFont, 72);
+            largeFont.ContentPath = resourcesFolder;
+            var mediumFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
+            mediumFont.ContentPath = resourcesFolder;
+            var mediumClickFont = TextDrawerDescription.FromFile(mediumControlsFont, 12);
+            mediumClickFont.ContentPath = resourcesFolder;
+
+            var desc = UITabPanelDescription.Default(tabButtons.ToArray(), Color.Transparent, SceneButtonColorBase, SceneButtonColorHighlight);
+            desc.ContentPath = resourcesFolder;
+            desc.ButtonDescription.Font = mediumFont;
+            desc.ButtonDescription.TextForeColor = Color.LightGoldenrodYellow;
+            desc.ButtonDescription.TextHorizontalAlign = TextHorizontalAlign.Center;
+            desc.ButtonDescription.TextVerticalAlign = TextVerticalAlign.Middle;
+            desc.TabButtonsAreaSize *= 1.5f;
+            desc.TabButtonsSpacing = new Spacing() { Horizontal = 10f };
+            desc.TabButtonsPadding = new Padding() { Bottom = 0, Left = 5, Right = 5, Top = 5 };
+            desc.TabButtonPadding = 5;
+            desc.TabPanelsPadding = new Padding() { Bottom = 5, Left = 5, Right = 5, Top = 0 };
+            desc.TabPanelPadding = 2;
+
+            modularDungeonTabs = await AddComponentUI<UITabPanel, UITabPanelDescription>("ModularDungeonTabs", "ModularDungeonTabs", desc, layerHUD + 1);
+            modularDungeonTabs.Visible = false;
+
+            for (int i = 0; i < mapFiles.Length; i++)
+            {
+                string mapFile = mapFiles[i];
+                string mapTexture = Path.ChangeExtension(mapFile, ".png");
+                //string mapCnf = "OnePageDungeons/basicDungeon.config"
+                //string mapCnf = "OnePageDungeons/UMRP.config"
+                string mapCnf = "OnePageDungeons/MDP.config";
+
+                var buttonDesc = UIButtonDescription.Default(mediumClickFont, mapTexture);
+                buttonDesc.ContentPath = resourcesFolder;
+                buttonDesc.Text = "Click image to load...";
+                buttonDesc.TextForeColor = Color.DarkGray;
+                buttonDesc.TextHorizontalAlign = TextHorizontalAlign.Right;
+                buttonDesc.TextVerticalAlign = TextVerticalAlign.Bottom;
+                var button = await CreateComponent<UIButton, UIButtonDescription>($"ModularDungeonTabs.Button_{i}", $"ModularDungeonTabs.Button_{i}", buttonDesc);
+                button.MouseClick += (s, o) =>
+                {
+                    if (o.Buttons.HasFlag(MouseButtons.Left))
+                    {
+                        Game.SetScene(new SceneModularDungeon.ModularDungeonScene(Game, true, Path.GetFileName(mapFile), Path.GetFileName(mapTexture), mapCnf), SceneModes.DeferredLightning);
+                    }
+                };
+
+                modularDungeonTabs.TabPanels[i].AddChild(button);
+            }
+
+            var buttonBasicDesc = UIButtonDescription.Default(largeFont, "basicdungeon/basicdungeon.png");
+            buttonBasicDesc.ContentPath = modularDungeonTabsPath;
+            buttonBasicDesc.Text = "Basic Dungeon";
+            buttonBasicDesc.TextForeColor = Color.Gold;
+            buttonBasicDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
+            buttonBasicDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            var buttonBasic = await CreateComponent<UIButton, UIButtonDescription>("ModularDungeonTabs.ButtonBasicDungeon", "ModularDungeonTabs.ButtonBasicDungeon", buttonBasicDesc);
+            buttonBasic.MouseClick += (s, o) =>
+            {
+                if (o.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    Game.SetScene(new SceneModularDungeon.ModularDungeonScene(Game, false, "basicdungeon", null, null), SceneModes.DeferredLightning);
+                }
+            };
+            modularDungeonTabs.TabPanels[basicIndex].AddChild(buttonBasic);
+
+            var backButton = modularDungeonTabs.TabButtons[backIndex];
+            backButton.MouseClick += (s, o) =>
+            {
+                if (o.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    uiTweener.Hide(modularDungeonTabs, 100);
+                    ShowAllButButton(100);
+                }
+            };
         }
         private void InitializeComponentsCompleted(LoadResourcesResult res)
         {
@@ -184,19 +305,6 @@ namespace TerrainSamples.SceneStart
             rect.Height /= 2;
             title.SetRectangle(rect);
             title.Anchor = Anchors.Center;
-
-            var sceneButtons = new[]
-            {
-                sceneCrowdsButton,
-                sceneGridButton,
-                sceneHeightmapButton,
-                sceneModularDungeonButton,
-                sceneNavMeshTestButton,
-                scenePerlinNoiseButton,
-                sceneRtsButton,
-                sceneSkyboxButton,
-                exitButton,
-            };
 
             int numButtons = sceneButtons.Length;
             int cols = 4;
@@ -227,6 +335,11 @@ namespace TerrainSamples.SceneStart
                     i++;
                 }
             }
+
+            modularDungeonTabs.Height = Game.Form.RenderHeight * 0.9f;
+            modularDungeonTabs.Width = modularDungeonTabs.Height * 1.4f;
+            modularDungeonTabs.Top = (Game.Form.RenderHeight - modularDungeonTabs.Height) * 0.5f;
+            modularDungeonTabs.Left = (Game.Form.RenderWidth - modularDungeonTabs.Width) * 0.5f;
         }
 
         public override void Update(GameTime gameTime)
@@ -263,7 +376,15 @@ namespace TerrainSamples.SceneStart
             if (sender == sceneCrowdsButton) Game.SetScene<SceneCrowds.CrowdsScene>();
             if (sender == sceneGridButton) Game.SetScene<SceneGrid.GridScene>();
             if (sender == sceneHeightmapButton) Game.SetScene<SceneHeightmap.HeightmapScene>();
-            if (sender == sceneModularDungeonButton) Game.SetScene<SceneModularDungeon.ModularDungeonScene>();
+            if (sender == sceneModularDungeonButton)
+            {
+                HideAllButButton(sceneModularDungeonButton, 100);
+
+                uiTweener.ClearTween(sceneModularDungeonButton);
+                uiTweener.Hide(sceneModularDungeonButton, 100);
+                modularDungeonTabs.SetSelectedTab(0);
+                uiTweener.Show(modularDungeonTabs, 100);
+            };
             if (sender == sceneNavMeshTestButton) Game.SetScene<SceneNavmeshTest.NavmeshTestScene>();
             if (sender == scenePerlinNoiseButton) Game.SetScene<ScenePerlinNoise.PerlinNoiseScene>();
             if (sender == sceneRtsButton) Game.SetScene<SceneRts.RtsScene>();
@@ -292,6 +413,28 @@ namespace TerrainSamples.SceneStart
             }
 
             Game.Exit();
+        }
+
+        private void ShowAllButButton(long milliseconds)
+        {
+            foreach (var but in sceneButtons)
+            {
+                uiTweener.ClearTween(but);
+                uiTweener.Show(but, milliseconds);
+            }
+        }
+        private void HideAllButButton(IUIControl button, long milliseconds)
+        {
+            foreach (var but in sceneButtons)
+            {
+                if (but == button)
+                {
+                    continue;
+                }
+
+                uiTweener.ClearTween(but);
+                uiTweener.Hide(but, milliseconds);
+            }
         }
     }
 }

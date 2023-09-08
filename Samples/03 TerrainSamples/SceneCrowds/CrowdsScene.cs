@@ -517,12 +517,12 @@ namespace TerrainSamples.SceneCrowds
         {
             UpdateGraphNodes(tankAgentType);
 
-            if (NavigationGraph is not Graph graph)
+            if (NavigationGraph is not Graph nGraph)
             {
                 return;
             }
 
-            this.graph = graph;
+            graph = nGraph;
 
             var settings = new CrowdParameters(tankAgentType, tankAgents.Count);
 
