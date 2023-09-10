@@ -22,8 +22,7 @@ namespace Engine
         {
             var cam = new Camera();
 
-            cam.SetFree(position, interest);
-            cam.SetLens(width, height);
+            cam.SetFree(position, interest, width, height);
 
             return cam;
         }
@@ -40,8 +39,7 @@ namespace Engine
         {
             var cam = new Camera();
 
-            cam.SetIsometric(axis, interest, distance);
-            cam.SetLens(width, height);
+            cam.SetIsometric(axis, interest, distance, width, height);
 
             return cam;
         }
@@ -57,8 +55,7 @@ namespace Engine
         {
             var cam = new Camera();
 
-            cam.SetOrtho(position, interest);
-            cam.SetLens(width, height);
+            cam.SetOrtho(position, interest, width, height);
 
             return cam;
         }
@@ -74,12 +71,7 @@ namespace Engine
         {
             var cam = new Camera();
 
-            //Sets the position over the maximum area height, plus the near plane distance
-            var eyePosition = new Vector3(0, area.Size.Y + nearPlane, 0);
-            var eyeInterest = Vector3.Zero;
-
-            cam.SetOrtho(eyePosition, eyeInterest);
-            cam.SetLens(width, height, area, nearPlane);
+            cam.SetOrtho(area, nearPlane, width, height);
 
             return cam;
         }
@@ -737,6 +729,8 @@ namespace Engine
             {
                 nextPosition += movingVector;
                 nextInterest += movingVector;
+
+                updateNeeded = true;
             }
 
             if (Vector3.NearEqual(nextInterest, translationInterest, new Vector3(0.1f, 0.1f, 0.1f)))
@@ -944,6 +938,19 @@ namespace Engine
         }
 
         /// <summary>
+        /// Creates a free camera
+        /// </summary>
+        /// <param name="position">Viewer position</param>
+        /// <param name="interest">Interest point</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns the new camera</returns>
+        public void SetFree(Vector3 position, Vector3 interest, int width, int height)
+        {
+            SetFree(position, interest);
+            SetLens(width, height);
+        }
+        /// <summary>
         /// Sets camera to free mode
         /// </summary>
         /// <param name="newPosition">New position</param>
@@ -957,6 +964,20 @@ namespace Engine
             updateNeeded = true;
 
             mode = CameraModes.Free;
+        }
+        /// <summary>
+        /// Creates an isometric camera
+        /// </summary>
+        /// <param name="axis">Isometric axis</param>
+        /// <param name="interest">Interest point</param>
+        /// <param name="distance">Distance from viewer to interest point</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns the new camera</returns>
+        public void SetIsometric(IsometricAxis axis, Vector3 interest, float distance, int width, int height)
+        {
+            SetIsometric(axis, interest, distance);
+            SetLens(width, height);
         }
         /// <summary>
         /// Sets camera to isometric mode
@@ -1011,6 +1032,36 @@ namespace Engine
             nextPosition += newInterest;
             nextInterest = newInterest;
             updateNeeded = true;
+        }
+        /// <summary>
+        /// Creates 2D camera
+        /// </summary>
+        /// <param name="position">Position</param>
+        /// <param name="interest">Interest</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns new 2D camera</returns>
+        public void SetOrtho(Vector3 position, Vector3 interest, int width, int height)
+        {
+            SetOrtho(position, interest);
+            SetLens(width, height);
+        }
+        /// <summary>
+        /// Creates 2D camera
+        /// </summary>
+        /// <param name="area">Area of interest (extents of a bounding box)</param>
+        /// <param name="nearPlane">Near plane distance</param>
+        /// <param name="width">Viewport Width</param>
+        /// <param name="height">Viewport Height</param>
+        /// <returns>Returns new 2D camera</returns>
+        public void SetOrtho(BoundingBox area, float nearPlane, float width, float height)
+        {
+            //Sets the position over the maximum area height, plus the near plane distance
+            var eyePosition = new Vector3(0, area.Size.Y + nearPlane, 0);
+            var eyeInterest = Vector3.Zero;
+
+            SetOrtho(eyePosition, eyeInterest);
+            SetLens(width, height, area, nearPlane);
         }
         /// <summary>
         /// Sets camero to ortho mode

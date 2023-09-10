@@ -30,13 +30,6 @@ namespace TerrainSamples
 #else
                 using Game cl = new("Terrain Samples");
 #endif
-#if DEBUG
-                cl.VisibleMouse = false;
-                cl.LockMouse = false;
-#else
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = true;
-#endif
 
                 GameResourceManager.RegisterLoader<LoaderCollada>();
                 GameResourceManager.RegisterLoader<LoaderObj>();

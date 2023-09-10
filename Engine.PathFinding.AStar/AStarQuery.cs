@@ -29,12 +29,9 @@ namespace Engine.PathFinding.AStar
         /// <param name="heuristicMethod">Heuristic metod (Diagonal distance 2 by default)</param>
         /// <param name="heuristicEstimateValue">Heuristic estimate value (8 by default)</param>
         /// <returns>Returns the path from start to end</returns>
-        public static IEnumerable<Vector3> FindPath(Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
+        public static IEnumerable<Vector3> FindPath(AgentType agent, Grid graph, Vector3 startPosition, Vector3 endPosition, HeuristicMethods heuristicMethod = HeuristicMethods.DiagonalDistance2, int heuristicEstimateValue = 8)
         {
-            GridNode start = graph.FindNode(startPosition);
-            GridNode end = graph.FindNode(endPosition);
-
-            if (start == null || end == null)
+            if (graph.FindNode(agent, startPosition) is not GridNode start || graph.FindNode(agent, endPosition) is not GridNode end)
             {
                 return Enumerable.Empty<Vector3>();
             }

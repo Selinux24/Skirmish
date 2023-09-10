@@ -788,6 +788,22 @@ namespace Engine.PathFinding.RecastNavigation
             return nodes.ToArray();
         }
         /// <inheritdoc/>
+        public IGraphNode FindNode(AgentType agent, Vector3 point)
+        {
+            var graphQuery = GetAgentQuery(agent);
+            if (graphQuery == null)
+            {
+                return null;
+            }
+
+            foreach (var node in GraphNode.Build(graphQuery.NavMesh))
+            {
+                if (node.Contains(point)) return node;
+            }
+
+            return null;
+        }
+        /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
             var graphQuery = GetAgentQuery(agent);

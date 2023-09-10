@@ -512,6 +512,35 @@ namespace Engine.UI
             };
         }
 
+        /// <summary>
+        /// Sets the text value, drawing the first key character occurence with the keyColor, and the other characters with the text color
+        /// </summary>
+        /// <param name="text">Text</param>
+        /// <param name="keyChar">Key character</param>
+        /// <param name="textColor">Text color</param>
+        /// <param name="keyColor">Key color</param>
+        public void SetTextWithKeyChar(string text, char keyChar, Color textColor, Color keyColor)
+        {
+            string res;
+            int keyIndex = text.IndexOf(keyChar);
+            if (keyIndex < 0)
+            {
+                res = $"{textColor}{text}";
+            }
+            else
+            {
+                string pre = text[..keyIndex];
+                string key = text[keyIndex].ToString();
+                string suf = text[(keyIndex + 1)..];
+                pre = pre.Length > 0 ? $"{textColor}{pre}" : pre;
+                key = key.Length > 0 ? $"{keyColor}{key}" : key;
+                suf = suf.Length > 0 ? $"{textColor}{suf}" : suf;
+                res = pre + key + suf;
+            }
+
+            Text = res;
+        }
+
         /// <inheritdoc/>
         public void ScrollUp(float amount)
         {

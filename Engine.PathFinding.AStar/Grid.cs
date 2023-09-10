@@ -99,15 +99,17 @@ namespace Engine.PathFinding.AStar
 
             this.nodes.AddRange(nodes);
         }
-        /// <summary>
-        /// Gets node wich contains specified point
-        /// </summary>
-        /// <param name="point">Point</param>
-        /// <returns>Returns the node wich contains the specified point if exists</returns>
-        public GridNode FindNode(Vector3 point)
+
+        /// <inheritdoc/>
+        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
+        {
+            return nodes.Cast<IGraphNode>().ToArray();
+        }
+        /// <inheritdoc/>
+        public IGraphNode FindNode(AgentType agent, Vector3 point)
         {
             float minDistance = float.MaxValue;
-            GridNode bestNode = null;
+            IGraphNode bestNode = null;
 
             foreach (var node in nodes)
             {
@@ -120,16 +122,10 @@ namespace Engine.PathFinding.AStar
 
             return bestNode;
         }
-
-        /// <inheritdoc/>
-        public IEnumerable<IGraphNode> GetNodes(AgentType agent)
-        {
-            return nodes.Cast<IGraphNode>().ToArray();
-        }
         /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
         {
-            return AStarQuery.FindPath(this, from, to);
+            return AStarQuery.FindPath(agent, this, from, to);
         }
         /// <inheritdoc/>
         public async Task<IEnumerable<Vector3>> FindPathAsync(AgentType agent, Vector3 from, Vector3 to)
@@ -138,7 +134,7 @@ namespace Engine.PathFinding.AStar
 
             await Task.Run(() =>
             {
-                result = AStarQuery.FindPath(this, from, to);
+                result = AStarQuery.FindPath(agent, this, from, to);
             });
 
             return result ?? Enumerable.Empty<Vector3>();

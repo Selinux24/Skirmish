@@ -20,7 +20,6 @@ namespace BasicSamples.SceneStart
         private Model backGround = null;
         private UITextArea title = null;
 
-        private UIButton exitButton = null;
         private readonly List<UIButton> sceneButtons = new();
         private readonly List<(char Key, Type SceneType)> sceneButtonsChars = new();
         private UIPanel buttonPanel = null;
@@ -103,90 +102,48 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeButtonPanel()
         {
+            const int cols = 4;
+
+            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
+            buttonPanel.SetGridLayout(GridLayout.FixedColumns(cols));
+            buttonPanel.Spacing = 40;
+            buttonPanel.EventsEnabled = true;
+
             var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
-            startButtonDesc.Width = 150;
-            startButtonDesc.Height = 55;
             startButtonDesc.ColorReleased = new Color4(sceneButtonColor.RGB(), 0.8f);
             startButtonDesc.ColorPressed = new Color4(sceneButtonColor.RGB() * 1.2f, 0.9f);
-            startButtonDesc.TextForeColor = Color.Gold;
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             startButtonDesc.StartsVisible = false;
 
-            await CreateButton<SceneCascadedShadows.CascadedShadowsScene>("ButtonCascadedShadows", startButtonDesc, "Cascaded", 'C');
-            await CreateButton<SceneLights.LightsScene>("ButtonLights", startButtonDesc, "Lights", 'L');
-            await CreateButton<SceneMaterials.MaterialsScene>("ButtonMaterials", startButtonDesc, "Materials", 'M');
-            await CreateButton<SceneNormalMap.NormalMapScene>("ButtonNormalMap", startButtonDesc, "Normal Maps", 'N');
-            await CreateButton<SceneParticles.ParticlesScene>("ButtonParticles", startButtonDesc, "Particles", 'P');
-            await CreateButton<SceneStencilPass.StencilPassScene>("ButtonStencilPass", startButtonDesc, "Stencil Pass", 'S');
-            await CreateButton<SceneTest.TestScene>("ButtonTest", startButtonDesc, "Test Scene", 'T');
-            await CreateButton<SceneUI.UIScene>("ButtonUI", startButtonDesc, "User Interface", 'U');
-            await CreateButton<SceneWater.WaterScene>("ButtonWater", startButtonDesc, "Water", 'W');
+            await CreateButton("ButtonCascadedShadows", startButtonDesc, "Cascaded", 'C', SceneButtonClick<SceneCascadedShadows.CascadedShadowsScene>);
+            await CreateButton("ButtonLights", startButtonDesc, "Lights", 'L', SceneButtonClick<SceneLights.LightsScene>);
+            await CreateButton("ButtonMaterials", startButtonDesc, "Materials", 'M', SceneButtonClick<SceneMaterials.MaterialsScene>);
+            await CreateButton("ButtonNormalMap", startButtonDesc, "Normal Maps", 'N', SceneButtonClick<SceneNormalMap.NormalMapScene>);
+            await CreateButton("ButtonParticles", startButtonDesc, "Particles", 'P', SceneButtonClick<SceneParticles.ParticlesScene>);
+            await CreateButton("ButtonStencilPass", startButtonDesc, "Stencil Pass", 'S', SceneButtonClick<SceneStencilPass.StencilPassScene>);
+            await CreateButton("ButtonTest", startButtonDesc, "Test Scene", 'T', SceneButtonClick<SceneTest.TestScene>);
+            await CreateButton("ButtonUI", startButtonDesc, "User Interface", 'U', SceneButtonClick<SceneUI.UIScene>);
+            await CreateButton("ButtonWater", startButtonDesc, "Water", 'W', SceneButtonClick<SceneWater.WaterScene>);
 
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
-            exitButtonDesc.Width = 150;
-            exitButtonDesc.Height = 55;
             exitButtonDesc.ColorReleased = new Color4(exitButtonColor.RGB(), 0.8f);
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
             exitButtonDesc.StartsVisible = false;
 
-            exitButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc);
-            exitButton.Caption.Text = $"{Color.Red}E{Color.Gold}xit";
-            exitButton.MouseClick += ExitButtonClick;
-            exitButton.MouseEnter += SceneButtonMouseEnter;
-            exitButton.MouseLeave += SceneButtonMouseLeave;
-
-            sceneButtons.Add(exitButton);
-
-            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
-            buttonPanel.SetGridLayout(GridLayout.FixedColumns(4));
-            buttonPanel.Spacing = 20;
-            buttonPanel.EventsEnabled = true;
+            await CreateButton("ButtonExit", exitButtonDesc, "Exit", 'E', ExitButtonClick);
             buttonPanel.AddChildren(sceneButtons, false);
         }
-        private async Task<UIButton> CreateButton<T>(string name, UIButtonDescription desc, string title, char keyChar) where T : Scene
+        private async Task<UIButton> CreateButton(string name, UIButtonDescription desc, string title, char keyChar, MouseEventHandler onClick)
         {
             var button = await CreateComponent<UIButton, UIButtonDescription>(name, name, desc);
+            button.Caption.SetTextWithKeyChar(title, keyChar, Color.Gold, Color.Red);
 
-            string text;
-            int keyIndex = title.IndexOf(keyChar);
-            if (keyIndex < 0)
-            {
-                text = $"{Color.Gold}{title}";
-            }
-            else
-            {
-                string pre = title[..keyIndex];
-                string key = title[keyIndex].ToString();
-                string suf = title[(keyIndex + 1)..];
-                pre = pre.Length > 0 ? $"{Color.Gold}{pre}" : pre;
-                key = key.Length > 0 ? $"{Color.Red}{key}" : key;
-                suf = suf.Length > 0 ? $"{Color.Gold}{suf}" : suf;
-                text = pre + key + suf;
-
-                sceneButtonsChars.Add(new(keyChar, typeof(T)));
-            }
-
-            button.Caption.Text = text;
-
-            button.MouseClick += (s, a) =>
-            {
-                if (!sceneReady)
-                {
-                    return;
-                }
-
-                if (!a.Buttons.HasFlag(MouseButtons.Left))
-                {
-                    return;
-                }
-
-                Game.SetScene<T>();
-            };
+            button.MouseClick += onClick;
             button.MouseEnter += SceneButtonMouseEnter;
             button.MouseLeave += SceneButtonMouseLeave;
 
@@ -296,7 +253,7 @@ namespace BasicSamples.SceneStart
             int rows = buttonPanel.Rows;
 
             buttonPanel.Width = Game.Form.RenderWidth * 0.9f;
-            buttonPanel.Height = 65 * rows;
+            buttonPanel.Height = 85 * rows;
             buttonPanel.Anchor = Anchors.HorizontalCenter;
             buttonPanel.Top = Game.Form.RenderHeight / h * hv - buttonPanel.Height;
 
@@ -312,6 +269,20 @@ namespace BasicSamples.SceneStart
         {
             uiTweener.ClearTween(sender);
             uiTweener.TweenScale(sender, sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
+        }
+        private void SceneButtonClick<T>(IUIControl sender, MouseEventArgs e) where T : Scene
+        {
+            if (!sceneReady)
+            {
+                return;
+            }
+
+            if (!e.Buttons.HasFlag(MouseButtons.Left))
+            {
+                return;
+            }
+
+            Game.SetScene<T>();
         }
         private void ExitButtonClick(IUIControl sender, MouseEventArgs e)
         {
