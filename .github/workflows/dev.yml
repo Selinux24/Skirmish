@@ -67,4 +67,4 @@ jobs:
         run: vstest.console.exe /Platform:x64 /Enablecodecoverage /Collect:"Code Coverage;Format=Xml" /ResultsDirectory:".\TestResults" .\Tests\EngineTests\bin\Release\net7.0\EngineTests.dll .\Tests\Engine.PhysicsTests\bin\Release\net7.0\Engine.PhysicsTests.dll
         
       - name: Sonar end
-        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{secrets.SONAR_TOKEN}}"
+        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{secrets.SONAR_TOKEN}}"
