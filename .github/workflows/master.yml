@@ -58,7 +58,7 @@ jobs:
       - name: Sonar begin
         working-directory: ${{env.GITHUB_WORKSPACE}}
         shell: powershell
-        run: .\.sonar\scanner\dotnet-sonarscanner begin /k:"Selinux24_Skirmish_master" /o:"selinux24-github" /d:sonar.login="${{secrets.SONAR_TOKEN}}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths="**\TestResults\**\*.xml" /d:sonar.coverage.exclusions=".\Tests\**"
+        run: .\.sonar\scanner\dotnet-sonarscanner begin /k:"Selinux24_Skirmish_master" /o:"selinux24-github" /d:sonar.token="${{secrets.SONAR_TOKEN}}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.vscoveragexml.reportsPaths="**\TestResults\**\*.xml" /d:sonar.coverage.exclusions=".\Tests\**"
         
       - name: Build
         run: msbuild /m /p:Configuration=${{env.BUILD_CONFIGURATION}} ${{env.SOLUTION_FILE_PATH}}
@@ -67,4 +67,4 @@ jobs:
         run: vstest.console.exe /Platform:x64 /Enablecodecoverage /Collect:"Code Coverage;Format=Xml" /ResultsDirectory:".\TestResults" .\Tests\EngineTests\bin\Release\EngineTests.dll
         
       - name: Sonar end
-        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{secrets.SONAR_TOKEN}}"
+        run: .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{secrets.SONAR_TOKEN}}"
