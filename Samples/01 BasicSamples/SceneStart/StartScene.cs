@@ -7,7 +7,7 @@ using Engine.UI;
 using Engine.UI.Tween;
 using SharpDX;
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BasicSamples.SceneStart
@@ -19,16 +19,11 @@ namespace BasicSamples.SceneStart
 
         private Model backGround = null;
         private UITextArea title = null;
-        private UIButton sceneMaterialsButton = null;
-        private UIButton sceneWaterButton = null;
-        private UIButton sceneStencilPassButton = null;
-        private UIButton sceneLightsButton = null;
-        private UIButton sceneCascadedShadowsButton = null;
-        private UIButton sceneTestButton = null;
+
         private UIButton exitButton = null;
+        private readonly List<UIButton> sceneButtons = new();
+        private readonly List<(char Key, Type SceneType)> sceneButtonsChars = new();
         private UIPanel buttonPanel = null;
-        private UIButton optsButton = null;
-        private UITabPanel tabsPanel = null;
 
         private readonly string titleFonts = "Showcard Gothic, Verdana, Consolas";
         private readonly string buttonFonts = "Verdana, Consolas";
@@ -63,8 +58,6 @@ namespace BasicSamples.SceneStart
                 InitializeBackground(),
                 InitializeTitle(),
                 InitializeButtonPanel(),
-                InitializeOptionsButton(),
-                InitializeTabPanel(),
                 InitializeMusic(),
             };
 
@@ -110,11 +103,6 @@ namespace BasicSamples.SceneStart
         }
         private async Task InitializeButtonPanel()
         {
-            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
-            buttonPanel.SetGridLayout(GridLayout.FixedRows(1));
-            buttonPanel.Spacing = 20;
-            buttonPanel.EventsEnabled = true;
-
             var buttonsFont = TextDrawerDescription.FromFamily(buttonFonts, 20, FontMapStyles.Bold, true);
 
             var startButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
@@ -125,36 +113,17 @@ namespace BasicSamples.SceneStart
             startButtonDesc.TextForeColor = Color.Gold;
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            startButtonDesc.StartsVisible = false;
 
-            sceneMaterialsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonMaterials", "ButtonMaterials", startButtonDesc);
-            sceneMaterialsButton.Visible = false;
-            sceneWaterButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonWater", "ButtonWater", startButtonDesc);
-            sceneWaterButton.Visible = false;
-            sceneStencilPassButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonStencilPass", "ButtonStencilPass", startButtonDesc);
-            sceneStencilPassButton.Visible = false;
-            sceneLightsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonLights", "ButtonLights", startButtonDesc);
-            sceneLightsButton.Visible = false;
-            sceneCascadedShadowsButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonCascadedShadows", "ButtonCascadedShadows", startButtonDesc);
-            sceneCascadedShadowsButton.Visible = false;
-            sceneTestButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonTest", "ButtonTest", startButtonDesc);
-            sceneTestButton.Visible = false;
-
-            var sceneButtons = new[]
-            {
-                sceneMaterialsButton,
-                sceneWaterButton,
-                sceneStencilPassButton,
-                sceneLightsButton,
-                sceneCascadedShadowsButton,
-                sceneTestButton,
-            };
-
-            for (int i = 0; i < sceneButtons.Length; i++)
-            {
-                sceneButtons[i].MouseClick += SceneButtonClick;
-                sceneButtons[i].MouseEnter += SceneButtonMouseEnter;
-                sceneButtons[i].MouseLeave += SceneButtonMouseLeave;
-            }
+            await CreateButton<SceneCascadedShadows.CascadedShadowsScene>("ButtonCascadedShadows", startButtonDesc, "Cascaded", 'C');
+            await CreateButton<SceneLights.LightsScene>("ButtonLights", startButtonDesc, "Lights", 'L');
+            await CreateButton<SceneMaterials.MaterialsScene>("ButtonMaterials", startButtonDesc, "Materials", 'M');
+            await CreateButton<SceneNormalMap.NormalMapScene>("ButtonNormalMap", startButtonDesc, "Normal Maps", 'N');
+            await CreateButton<SceneParticles.ParticlesScene>("ButtonParticles", startButtonDesc, "Particles", 'P');
+            await CreateButton<SceneStencilPass.StencilPassScene>("ButtonStencilPass", startButtonDesc, "Stencil Pass", 'S');
+            await CreateButton<SceneTest.TestScene>("ButtonTest", startButtonDesc, "Test Scene", 'T');
+            await CreateButton<SceneUI.UIScene>("ButtonUI", startButtonDesc, "User Interface", 'U');
+            await CreateButton<SceneWater.WaterScene>("ButtonWater", startButtonDesc, "Water", 'W');
 
             var exitButtonDesc = UIButtonDescription.DefaultTwoStateButton(buttonsFont, "common/buttons.png", new Vector4(44, 30, 556, 136) / 600f, new Vector4(44, 30, 556, 136) / 600f);
             exitButtonDesc.Width = 150;
@@ -163,79 +132,67 @@ namespace BasicSamples.SceneStart
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            exitButtonDesc.StartsVisible = false;
 
             exitButton = await CreateComponent<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc);
+            exitButton.Caption.Text = $"{Color.Red}E{Color.Gold}xit";
             exitButton.MouseClick += ExitButtonClick;
             exitButton.MouseEnter += SceneButtonMouseEnter;
             exitButton.MouseLeave += SceneButtonMouseLeave;
 
+            sceneButtons.Add(exitButton);
+
+            buttonPanel = await AddComponentUI<UIPanel, UIPanelDescription>("ButtonPanel", "ButtonPanel", UIPanelDescription.Default(Color.Transparent));
+            buttonPanel.SetGridLayout(GridLayout.FixedColumns(4));
+            buttonPanel.Spacing = 20;
+            buttonPanel.EventsEnabled = true;
             buttonPanel.AddChildren(sceneButtons, false);
-            buttonPanel.AddChild(exitButton, false);
         }
-        private async Task InitializeOptionsButton()
+        private async Task<UIButton> CreateButton<T>(string name, UIButtonDescription desc, string title, char keyChar) where T : Scene
         {
-            optsButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonOptions", "ButtonOptions", UIButtonDescription.Default("SceneStart/ui_options.png"));
-            optsButton.Visible = false;
-            optsButton.MouseClick += OptsButtonClick;
+            var button = await CreateComponent<UIButton, UIButtonDescription>(name, name, desc);
 
-            var optsBackground = await CreateComponent<Sprite, SpriteDescription>("ButtonOptions.Background", "ButtonOptions.Background", SpriteDescription.Default(Color.White));
-            optsBackground.Visible = false;
-            optsBackground.EventsEnabled = false;
-
-            optsButton.InsertChild(0, optsBackground);
-        }
-        private async Task InitializeTabPanel()
-        {
-            Color4 baseColor = Color.CornflowerBlue;
-            Color4 highLightColor = new(baseColor.RGB() * 1.25f, 1f);
-            var tabDesc = UITabPanelDescription.Default(3, Color.Transparent, baseColor, highLightColor);
-            tabDesc.TabCaptions = new[] { "But 1", "But 2", "But 3" };
-            tabDesc.TabButtonsSpacing = new Spacing() { Horizontal = 5f };
-
-            tabsPanel = await AddComponentUI<UITabPanel, UITabPanelDescription>("TabPanel", "TabPanel", tabDesc, LayerUI + 1);
-            tabsPanel.Visible = false;
-            tabsPanel.TabClick += TabsPanelTabClick;
-
-            var pan1Desc = UIPanelDescription.Default(@"SceneStart/TanksGame.png");
-            await tabsPanel.SetTabPanel(1, pan1Desc);
-
-            var p = GridLayout.FixedRows(1);
-            tabsPanel.TabPanels[0].SetGridLayout(p);
-            tabsPanel.TabPanels[0].Spacing = 10;
-            tabsPanel.TabPanels[0].Padding = 10;
-            tabsPanel.TabPanels[0].BaseColor = new Color4(1, 1, 1, 0.25f);
-            for (int i = 0; i < 5; i++)
+            string text;
+            int keyIndex = title.IndexOf(keyChar);
+            if (keyIndex < 0)
             {
-                var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level1_{i}", $"TabPanel.Level1_{i}", panDesc);
-                tabsPanel.TabPanels[0].AddChild(pan, false);
+                text = $"{Color.Gold}{title}";
+            }
+            else
+            {
+                string pre = title[..keyIndex];
+                string key = title[keyIndex].ToString();
+                string suf = title[(keyIndex + 1)..];
+                pre = pre.Length > 0 ? $"{Color.Gold}{pre}" : pre;
+                key = key.Length > 0 ? $"{Color.Red}{key}" : key;
+                suf = suf.Length > 0 ? $"{Color.Gold}{suf}" : suf;
+                text = pre + key + suf;
+
+                sceneButtonsChars.Add(new(keyChar, typeof(T)));
             }
 
-            var lastPan = tabsPanel.TabPanels[0].Children.OfType<UIPanel>().Last();
-            var p2 = GridLayout.FixedColumns(1);
-            lastPan.SetGridLayout(p2);
-            lastPan.Spacing = 10;
-            lastPan.BaseColor = Color.Transparent;
-            for (int i = 0; i < 2; i++)
-            {
-                var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level2_{i}", $"TabPanel.Level2_{i}", panDesc);
-                lastPan.AddChild(pan, false);
-            }
+            button.Caption.Text = text;
 
-            var lastPan2 = lastPan.Children.OfType<UIPanel>().Last();
-            var p3 = GridLayout.Uniform;
-            lastPan2.SetGridLayout(p3);
-            lastPan2.Spacing = 10;
-            lastPan2.BaseColor = Color.Transparent;
-            for (int i = 0; i < 4; i++)
+            button.MouseClick += (s, a) =>
             {
-                var panDesc = UIPanelDescription.Default(new Color4(Helper.RandomGenerator.NextVector3(Vector3.Zero, Vector3.One), 1f));
-                var pan = await CreateComponent<UIPanel, UIPanelDescription>($"TabPanel.Level3_{i}", $"TabPanel.Level3_{i}", panDesc);
-                lastPan2.AddChild(pan, false);
-            }
+                if (!sceneReady)
+                {
+                    return;
+                }
 
-            tabsPanel.Visible = false;
+                if (!a.Buttons.HasFlag(MouseButtons.Left))
+                {
+                    return;
+                }
+
+                Game.SetScene<T>();
+            };
+            button.MouseEnter += SceneButtonMouseEnter;
+            button.MouseLeave += SceneButtonMouseLeave;
+
+            sceneButtons.Add(button);
+
+            return button;
         }
         private async Task InitializeMusic()
         {
@@ -272,16 +229,7 @@ namespace BasicSamples.SceneStart
             backGround.Manipulator.SetScale(1.5f, 1.25f, 1.5f);
 
             var shadow = new Color4(0, 0, 0, 0.5f);
-            title.Text = $"{Color.Red}|{shadow}S{Color.Cyan}c{Color.Red}e{Color.Cyan}n{Color.Red}e {Color.Green}M{Color.Orange}a{Color.Green}n{Color.Orange}a{Color.Green}g{Color.Orange}e{Color.Green}r {Color.Yellow}T{Color.Blue}e{Color.Yellow}s{Color.Blue}t";
-
-            sceneMaterialsButton.Caption.Text = $"{Color.Red}M{Color.Gold}aterials";
-            sceneWaterButton.Caption.Text = $"{Color.Red}W{Color.Gold}ater";
-            sceneStencilPassButton.Caption.Text = $"{Color.Red}S{Color.Gold}tencil Pass";
-            sceneLightsButton.Caption.Text = $"{Color.Red}L{Color.Gold}ights";
-            sceneCascadedShadowsButton.Caption.Text = $"{Color.Red}C{Color.Gold}ascaded";
-            sceneTestButton.Caption.Text = $"{Color.Red}T{Color.Gold}est";
-
-            exitButton.Caption.Text = $"{Color.Red}E{Color.Gold}xit";
+            title.Text = $"{Color.Red}|{shadow}B{Color.Cyan}a{Color.Red}s{Color.Cyan}i{Color.Red}c {Color.Green}S{Color.Orange}a{Color.Green}m{Color.Orange}p{Color.Green}l{Color.Orange}e{Color.Green}s";
 
             UpdateLayout();
 
@@ -313,33 +261,19 @@ namespace BasicSamples.SceneStart
         }
         private void UpdateInput()
         {
-            if (Game.Input.KeyJustReleased(Keys.Escape) || Game.Input.KeyJustReleased(Keys.E))
+            if (Game.Input.KeyJustReleased(Keys.E) || Game.Input.KeyJustReleased(Keys.Escape))
             {
-                ClosePanel();
+                Game.Exit();
+                return;
             }
-            else if (Game.Input.KeyJustReleased(Keys.M))
+
+            foreach (var (Key, SceneType) in sceneButtonsChars)
             {
-                Game.SetScene<SceneMaterials.MaterialsScene>();
-            }
-            else if (Game.Input.KeyJustReleased(Keys.W))
-            {
-                Game.SetScene<SceneWater.WaterScene>();
-            }
-            else if (Game.Input.KeyJustReleased(Keys.S))
-            {
-                Game.SetScene<SceneStencilPass.StencilPassScene>();
-            }
-            else if (Game.Input.KeyJustReleased(Keys.L))
-            {
-                Game.SetScene<SceneLights.LightsScene>();
-            }
-            else if (Game.Input.KeyJustReleased(Keys.C))
-            {
-                Game.SetScene<SceneCascadedShadows.CascadedShadowsScene>();
-            }
-            else if (Game.Input.KeyJustReleased(Keys.T))
-            {
-                Game.SetScene<SceneTest.TestScene>();
+                if (Game.Input.KeyJustReleased(Key))
+                {
+                    Game.SetScene(SceneType);
+                    return;
+                }
             }
         }
 
@@ -351,95 +285,24 @@ namespace BasicSamples.SceneStart
         }
         private void UpdateLayout()
         {
-            tabsPanel.Width = Game.Form.RenderWidth * 0.9f;
-            tabsPanel.Height = Game.Form.RenderHeight * 0.7f;
-            tabsPanel.Anchor = Anchors.HorizontalCenter;
-            tabsPanel.Top = Game.Form.RenderHeight * 0.1f;
-
             var rect = Game.Form.RenderRectangle;
+            rect.Top = 0;
             rect.Height /= 2;
             title.SetRectangle(rect);
-            title.Anchor = Anchors.Center;
+            title.Anchor = Anchors.HorizontalCenter;
 
             int h = 8;
             int hv = h - 1;
+            int rows = buttonPanel.Rows;
 
             buttonPanel.Width = Game.Form.RenderWidth * 0.9f;
-            buttonPanel.Height = 50;
+            buttonPanel.Height = 65 * rows;
             buttonPanel.Anchor = Anchors.HorizontalCenter;
-            buttonPanel.Top = Game.Form.RenderHeight / h * hv - (buttonPanel.Height / 2);
+            buttonPanel.Top = Game.Form.RenderHeight / h * hv - buttonPanel.Height;
 
-            optsButton.Width = 50;
-            optsButton.Height = 50;
-            optsButton.SetPosition(Game.Form.RenderWidth - 10 - optsButton.Width, 10);
-            optsButton.Visible = true;
-
-            sceneMaterialsButton.Visible = true;
-            sceneWaterButton.Visible = true;
-            sceneStencilPassButton.Visible = true;
-            sceneLightsButton.Visible = true;
-            sceneCascadedShadowsButton.Visible = true;
-            sceneTestButton.Visible = true;
+            sceneButtons.ForEach(button => { button.Visible = true; });
         }
 
-        private void OpenPanel()
-        {
-            if (tabsPanel.Visible)
-            {
-                return;
-            }
-
-            uiTweener.Hide(optsButton, 100);
-            uiTweener.Show(tabsPanel, 100);
-        }
-        private void ClosePanel()
-        {
-            if (!tabsPanel.Visible)
-            {
-                return;
-            }
-
-            uiTweener.Show(optsButton, 100);
-            uiTweener.Hide(tabsPanel, 100);
-        }
-
-        private void SceneButtonClick(IUIControl sender, MouseEventArgs e)
-        {
-            if (!sceneReady)
-            {
-                return;
-            }
-
-            if (!e.Buttons.HasFlag(MouseButtons.Left))
-            {
-                return;
-            }
-
-            if (sender == sceneMaterialsButton)
-            {
-                Game.SetScene<SceneMaterials.MaterialsScene>();
-            }
-            else if (sender == sceneWaterButton)
-            {
-                Game.SetScene<SceneWater.WaterScene>();
-            }
-            else if (sender == sceneStencilPassButton)
-            {
-                Game.SetScene<SceneStencilPass.StencilPassScene>();
-            }
-            else if (sender == sceneLightsButton)
-            {
-                Game.SetScene<SceneLights.LightsScene>();
-            }
-            else if (sender == sceneCascadedShadowsButton)
-            {
-                Game.SetScene<SceneCascadedShadows.CascadedShadowsScene>();
-            }
-            else if (sender == sceneTestButton)
-            {
-                Game.SetScene<SceneTest.TestScene>();
-            }
-        }
         private void SceneButtonMouseEnter(IUIControl sender, MouseEventArgs e)
         {
             sender.PivotAnchor = PivotAnchors.Center;
@@ -449,10 +312,6 @@ namespace BasicSamples.SceneStart
         {
             uiTweener.ClearTween(sender);
             uiTweener.TweenScale(sender, sender.Scale, 1.0f, 500, ScaleFuncs.Linear);
-        }
-        private void TabsPanelTabClick(object sender, UITabPanelEventArgs e)
-        {
-            Logger.WriteDebug(this, $"Clicked button {e.TabButton.Caption.Text}");
         }
         private void ExitButtonClick(IUIControl sender, MouseEventArgs e)
         {
@@ -467,15 +326,6 @@ namespace BasicSamples.SceneStart
             }
 
             Game.Exit();
-        }
-        private void OptsButtonClick(IUIControl sender, MouseEventArgs e)
-        {
-            if (!e.Buttons.HasFlag(MouseButtons.Left))
-            {
-                return;
-            }
-
-            OpenPanel();
         }
     }
 }

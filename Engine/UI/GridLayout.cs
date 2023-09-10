@@ -133,6 +133,19 @@ namespace Engine.UI
         public bool FitY { get; set; }
 
         /// <summary>
+        /// Gets the current cell size
+        /// </summary>
+        public Vector2 CurrentCellSize { get; private set; }
+        /// <summary>
+        /// Gets the current number of rows
+        /// </summary>
+        public int CurrentRows { get; private set; }
+        /// <summary>
+        /// Gets the current number of columns
+        /// </summary>
+        public int CurrentColumns { get; private set; }
+
+        /// <summary>
         /// Updates the grid layout
         /// </summary>
         /// <param name="controls">Control list</param>
@@ -140,17 +153,20 @@ namespace Engine.UI
         /// <param name="bounds">Bounds</param>
         /// <param name="padding">Padding</param>
         /// <param name="spacing">Spacing</param>
-        public static void UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
+        /// <returns>Returns the layout updated state</returns>
+        public static GridLayout UpdateLayout(IEnumerable<IUIControl> controls, GridLayout parameters, Size2F bounds, Padding padding, Spacing spacing)
         {
             if (controls?.Any() != true)
             {
-                return;
+                return parameters;
             }
 
             if (parameters.FitType == GridFitTypes.None)
             {
-                return;
+                return parameters;
             }
+
+            GridLayout res = parameters;
 
             GridFitTypes fitType = parameters.FitType;
             int rows = parameters.Rows;
@@ -194,6 +210,12 @@ namespace Engine.UI
                 item.Width = cellSize.X;
                 item.Height = cellSize.Y;
             }
+
+            res.CurrentCellSize = cellSize;
+            res.CurrentRows = rows;
+            res.CurrentColumns = cols;
+
+            return res;
         }
     }
 }

@@ -15,6 +15,9 @@
     <None Remove="SceneNormalMap\Resources\normal.bmp" />
     <None Remove="SceneNormalMap\Resources\Wall.dae" />
     <None Remove="SceneNormalMap\Resources\Wall.json" />
+    <None Remove="SceneParticles\fire.png" />
+    <None Remove="SceneParticles\floor.png" />
+    <None Remove="SceneParticles\smoke.png" />
     <None Remove="SceneUI\Resources\background.jpg" />
     <None Remove="SceneUI\Resources\buttons.png" />
     <None Remove="SceneUI\Resources\CaviarDreams.ttf" />
@@ -64,53 +67,53 @@
     <Content Include="SceneNormalMap\Resources\Wall.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Buildings\Obelisk\diffus.dds">
+    <Content Include="Common\Buildings\Obelisk\diffus.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Buildings\Obelisk\normal.dds">
+    <Content Include="Common\Buildings\Obelisk\normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Buildings\Obelisk\obelisk.dae">
+    <Content Include="Common\Buildings\Obelisk\obelisk.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="SceneLights\Buildings\Obelisk\obelisk.json">
+    <Content Include="Common\Buildings\Obelisk\obelisk.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Buildings\Obelisk\specular.dds">
+    <Content Include="Common\Buildings\Obelisk\specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
+    <Content Include="Common\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
+    <Content Include="Common\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
+    <Content Include="Common\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\bark_albedo.png">
+    <Content Include="Common\Trees\bark_albedo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\bark_normal.png">
+    <Content Include="Common\Trees\bark_normal.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\bark_specular.png">
+    <Content Include="Common\Trees\bark_specular.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\bushes_albedo.png">
+    <Content Include="Common\Trees\bushes_albedo.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\bushes_normal.png">
+    <Content Include="Common\Trees\bushes_normal.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\bushes_specular.png">
+    <Content Include="Common\Trees\bushes_specular.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\tree.dae">
+    <Content Include="Common\Trees\tree.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="SceneLights\Trees\tree.json">
+    <Content Include="Common\Trees\tree.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneMaterials\corrugated_d.jpg">
@@ -131,6 +134,15 @@
     <Content Include="SceneMaterials\white.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SceneParticles\fire.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneParticles\floor.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneParticles\smoke.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SceneStart\anttisinstrumentals+icemanandangelinstrumental.mp3">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -147,31 +159,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneStart\ui_options.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Buildings\Obelisk\diffus.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Buildings\Obelisk\normal.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.dae">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="SceneStencilPass\Buildings\Obelisk\obelisk.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Buildings\Obelisk\specular.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_diffuse.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_normal.dds">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SceneStencilPass\Floors\Asphalt\d_road_asphalt_stripes_specular.dds">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SceneTest\Buildings\Obelisk\diffus.dds">

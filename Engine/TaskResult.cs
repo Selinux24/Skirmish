@@ -15,6 +15,12 @@ namespace Engine
         /// Exception result
         /// </summary>
         public Exception Exception { get; set; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return Completed ? "Completed" : Exception?.Message ?? "Error";
+        }
     }
 
     /// <summary>

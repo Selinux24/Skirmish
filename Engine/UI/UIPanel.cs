@@ -95,6 +95,18 @@ namespace Engine.UI
                 horizontalScrollOffset = this.ConvertHorizontalPositionToOffset(horizontalScrollPosition);
             }
         }
+        /// <summary>
+        /// Gets the number of rows
+        /// </summary>
+        public int Rows { get { return gridLayout.CurrentRows; } }
+        /// <summary>
+        /// Gets the number of columns
+        /// </summary>
+        public int Columns { get { return gridLayout.CurrentColumns; } }
+        /// <summary>
+        /// Gets the cell size
+        /// </summary>
+        public Vector2 CellSize { get { return gridLayout.CurrentCellSize; } }
 
         /// <summary>
         /// Constructor
@@ -135,7 +147,7 @@ namespace Engine.UI
             var childs = Children.Where(c => c != background).ToArray();
             if (childs.Any())
             {
-                GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);
+                gridLayout = GridLayout.UpdateLayout(childs, gridLayout, AbsoluteRectangle.Size, Padding, Spacing);
             }
 
             base.UpdateInternalState();
@@ -159,15 +171,7 @@ namespace Engine.UI
         /// </summary>
         public GridLayout GetGridLayout()
         {
-            return new GridLayout
-            {
-                FitType = gridLayout.FitType,
-                Rows = gridLayout.Rows,
-                Columns = gridLayout.Columns,
-                CellSize = gridLayout.CellSize,
-                FitX = gridLayout.FitX,
-                FitY = gridLayout.FitY,
-            };
+            return gridLayout;
         }
 
         /// <inheritdoc/>

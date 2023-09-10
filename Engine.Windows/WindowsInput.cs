@@ -46,6 +46,14 @@ namespace Engine.Windows
         /// Current keys
         /// </summary>
         private readonly List<Keys> currentKeyboardKeys = new();
+        /// <summary>
+        /// Last strokes
+        /// </summary>
+        private string lastStrokes = string.Empty;
+        /// <summary>
+        /// Current strokes
+        /// </summary>
+        private string currentStrokes = string.Empty;
 
         /// <inheritdoc/>
         public float Elapsed { get; set; } = 0f;
@@ -229,6 +237,9 @@ namespace Engine.Windows
             {
                 currentKeyboardKeys.AddRange(keyboard);
             }
+
+            lastStrokes = currentStrokes;
+            currentStrokes = GetStrokes();
         }
         /// <summary>
         /// Updates the mouse position state
@@ -274,14 +285,29 @@ namespace Engine.Windows
             return lastKeyboardKeys.Contains(key) && !currentKeyboardKeys.Contains(key);
         }
         /// <inheritdoc/>
+        public bool KeyJustReleased(char key, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return lastStrokes.Contains(key, stringComparison) && !currentStrokes.Contains(key, stringComparison);
+        }
+        /// <inheritdoc/>
         public bool KeyJustPressed(Keys key)
         {
             return !lastKeyboardKeys.Contains(key) && currentKeyboardKeys.Contains(key);
         }
         /// <inheritdoc/>
+        public bool KeyJustPressed(char key, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return !lastStrokes.Contains(key, stringComparison) && currentStrokes.Contains(key, stringComparison);
+        }
+        /// <inheritdoc/>
         public bool KeyPressed(Keys key)
         {
             return currentKeyboardKeys.Contains(key);
+        }
+        /// <inheritdoc/>
+        public bool KeyPressed(char key, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return currentStrokes.Contains(key, stringComparison);
         }
         /// <inheritdoc/>
         public bool MouseButtonJustReleased(MouseButtons button)
@@ -344,6 +370,9 @@ namespace Engine.Windows
 
             lastKeyboardKeys.Clear();
             currentKeyboardKeys.Clear();
+
+            lastStrokes = string.Empty;
+            currentStrokes = string.Empty;
 
             #endregion
         }

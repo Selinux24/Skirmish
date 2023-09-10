@@ -89,9 +89,9 @@ namespace BasicSamples.SceneLights
             };
 
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneLights/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
+            mat.NormalMapTexture = "Common/floors/asphalt/d_road_asphalt_stripes_normal.dds";
+            mat.SpecularTexture = "Common/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
             var desc = new ModelDescription()
             {
@@ -109,7 +109,7 @@ namespace BasicSamples.SceneLights
                 Instances = 4,
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile("SceneLights/buildings/obelisk", "Obelisk.json"),
+                Content = ContentDescription.FromFile("Common/buildings/obelisk", "Obelisk.json"),
             };
 
             buildingObelisks = await AddComponent<ModelInstanced, ModelInstancedDescription>("Obelisk", "Obelisk", desc);
@@ -121,7 +121,7 @@ namespace BasicSamples.SceneLights
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
                 BlendMode = BlendModes.DefaultTransparent,
-                Content = ContentDescription.FromFile("SceneLights/trees", "Tree.json"),
+                Content = ContentDescription.FromFile("Common/trees", "Tree.json"),
             };
 
             await AddComponent<Model, ModelDescription>("Tree", "Tree", desc);

@@ -10,7 +10,7 @@ namespace BasicSamples.SceneNormalMap
 {
     public class NormalMapScene : Scene
     {
-        private readonly string resourcesFolder = "dungeonwall/resources";
+        private readonly string resourcesFolder = "SceneNormalMap/resources";
 
         private Sprite panel = null;
         private UITextArea title = null;

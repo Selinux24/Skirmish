@@ -77,9 +77,9 @@ namespace BasicSamples.SceneStencilPass
             };
 
             MaterialBlinnPhongContent mat = MaterialBlinnPhongContent.Default;
-            mat.DiffuseTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
-            mat.NormalMapTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_normal.dds";
-            mat.SpecularTexture = "SceneStencilPass/floors/asphalt/d_road_asphalt_stripes_specular.dds";
+            mat.DiffuseTexture = "Common/floors/asphalt/d_road_asphalt_stripes_diffuse.dds";
+            mat.NormalMapTexture = "Common/floors/asphalt/d_road_asphalt_stripes_normal.dds";
+            mat.SpecularTexture = "Common/floors/asphalt/d_road_asphalt_stripes_specular.dds";
 
             var desc = new ModelDescription()
             {
@@ -96,7 +96,7 @@ namespace BasicSamples.SceneStencilPass
             {
                 CastShadow = ShadowCastingAlgorihtms.All,
                 UseAnisotropicFiltering = true,
-                Content = ContentDescription.FromFile("SceneStencilPass/buildings/obelisk", "Obelisk.json"),
+                Content = ContentDescription.FromFile("Common/buildings/obelisk", "Obelisk.json"),
             };
 
             var buildingObelisk = await AddComponent<Model, ModelDescription>("Obelisk", "Obelisk", desc);

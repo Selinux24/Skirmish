@@ -1,4 +1,5 @@
-﻿using Engine;
+﻿using BasicSamples.SceneStart;
+using Engine;
 using Engine.Common;
 using Engine.Content;
 using Engine.UI;
@@ -10,6 +11,8 @@ namespace BasicSamples.SceneParticles
 {
     public class ParticlesScene : Scene
     {
+        private readonly string resourcesFolder = "SceneParticles";
+
         private UITextArea text = null;
         private UITextArea statistics = null;
         private UITextArea text1 = null;
@@ -29,7 +32,13 @@ namespace BasicSamples.SceneParticles
         public ParticlesScene(Game game)
             : base(game)
         {
-
+#if DEBUG
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
+#else
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
+#endif
         }
 
         public override async Task Initialize()
@@ -79,6 +88,8 @@ namespace BasicSamples.SceneParticles
                 res.ThrowExceptions();
             }
 
+            Lights.SetAmbient(new SceneLightHemispheric("Pure White", Color3.White, Color3.White, true));
+
             UpdateLayout();
 
             uiReady = true;
@@ -117,7 +128,7 @@ namespace BasicSamples.SceneParticles
             };
 
             var material = MaterialBlinnPhongContent.Default;
-            material.DiffuseTexture = "resources/floor.png";
+            material.DiffuseTexture = resourcesFolder + "/floor.png";
 
             var desc = new ModelDescription()
             {
@@ -129,12 +140,12 @@ namespace BasicSamples.SceneParticles
         }
         private async Task InitializeModels()
         {
-            var pPlume = ParticleSystemDescription.InitializeSmokePlume("resources", "smoke.png");
-            var pFire = ParticleSystemDescription.InitializeFire("resources", "fire.png");
-            var pDust = ParticleSystemDescription.InitializeDust("resources", "smoke.png");
-            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail("resources", "smoke.png");
-            var pExplosion = ParticleSystemDescription.InitializeExplosion("resources", "fire.png");
-            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion("resources", "smoke.png");
+            var pPlume = ParticleSystemDescription.InitializeSmokePlume(resourcesFolder, "smoke.png");
+            var pFire = ParticleSystemDescription.InitializeFire(resourcesFolder, "fire.png");
+            var pDust = ParticleSystemDescription.InitializeDust(resourcesFolder, "smoke.png");
+            var pProjectile = ParticleSystemDescription.InitializeProjectileTrail(resourcesFolder, "smoke.png");
+            var pExplosion = ParticleSystemDescription.InitializeExplosion(resourcesFolder, "fire.png");
+            var pSmokeExplosion = ParticleSystemDescription.InitializeExplosion(resourcesFolder, "smoke.png");
 
             pDescriptions.Add("Plume", pPlume);
             pDescriptions.Add("Fire", pFire);
@@ -180,7 +191,7 @@ namespace BasicSamples.SceneParticles
 
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                Game.Exit();
+                Game.SetScene<StartScene>();
             }
 
             if (Game.Input.KeyJustReleased(Keys.Oem5))

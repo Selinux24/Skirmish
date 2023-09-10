@@ -463,6 +463,7 @@ namespace Engine
         /// Creates a new scene and sets it as the unique active scene
         /// </summary>
         /// <typeparam name="T">Type of scene</typeparam>
+        /// <param name="sceneMode">Scene mode</param>
         /// <remarks>Current scenes will be removed from internal scene collection</remarks>
         public void SetScene<T>(SceneModes sceneMode = SceneModes.ForwardLigthning) where T : Scene
         {
@@ -481,9 +482,38 @@ namespace Engine
             SetScene(scene, sceneMode);
         }
         /// <summary>
+        /// Creates a new scene and sets it as the unique active scene
+        /// </summary>
+        /// <param name="sceneType">Type of scene</param>
+        /// <param name="sceneMode">Scene mode</param>
+        /// <remarks>Current scenes will be removed from internal scene collection</remarks>
+        public void SetScene(Type sceneType, SceneModes sceneMode = SceneModes.ForwardLigthning)
+        {
+            bool isScene = typeof(Scene).IsAssignableFrom(sceneType);
+            if (!isScene)
+            {
+                throw new ArgumentException($"The {nameof(sceneType)} argument must implement {typeof(Scene)}.", nameof(sceneType));
+            }
+
+            Scene scene = null;
+            try
+            {
+                Logger.WriteInformation(this, "Game: Setting scene with the default constructor");
+
+                scene = (Scene)Activator.CreateInstance(sceneType, this);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError(this, $"Game: Error setting scene: {ex.Message}", ex);
+            }
+
+            SetScene(scene, sceneMode);
+        }
+        /// <summary>
         /// Sets the specified scene to next scene to load
         /// </summary>
         /// <param name="scene">Scene</param>
+        /// <param name="sceneMode">Scene mode</param>
         public void SetScene(Scene scene, SceneModes sceneMode = SceneModes.ForwardLigthning)
         {
             if (scene == null)

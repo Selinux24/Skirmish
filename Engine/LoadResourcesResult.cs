@@ -77,6 +77,12 @@ namespace Engine
 
             return sb.ToString();
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return Completed ? "Completed" : GetErrorMessage();
+        }
     }
 
     /// <summary>

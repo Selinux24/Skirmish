@@ -2,7 +2,6 @@
 using SharpDX.Win32;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -34,15 +33,15 @@ namespace Engine.Windows.Helpers
         /// <param name="uFlags">Flags</param>
         /// <returns>Return the number of characters in the result buffer</returns>
         [LibraryImport("user32.dll", EntryPoint = "ToUnicode", StringMarshalling = StringMarshalling.Utf16)]
-        private static partial int ToUnicode(uint uVirtKey, uint scanCode, byte[] lpKeyState, out string lpChar, int bufferSize, uint uFlags);
+        private static partial int ToUnicode(uint uVirtKey, uint scanCode, byte[] lpKeyState, char[] lpChar, int bufferSize, uint uFlags);
         /// <summary>
         /// Maps a virtual key code
         /// </summary>
         /// <param name="uVirtKey">Virtual key code</param>
         /// <param name="uMapType">Map type</param>
         /// <returns>Returns the scan code</returns>
-        [LibraryImport("user32.dll", EntryPoint = "MapVirtualKey")]
-        private static partial uint MapVirtualKey(uint uVirtKey, uint uMapType);
+        [LibraryImport("user32.dll", EntryPoint = "MapVirtualKeyA")]
+        private static partial uint MapVirtualKeyA(uint uVirtKey, uint uMapType);
 
         /// <summary>
         /// Main keyboard state buffer
@@ -171,20 +170,21 @@ namespace Engine.Windows.Helpers
 
             if (deadKey != 0 && lastIsDead)
             {
-                _ = ToUnicode(deadKey, deadScanCode, deadKeyState, out _, 5, 0);
+                _ = ToUnicode(deadKey, deadScanCode, deadKeyState, null, 5, 0);
                 lastIsDead = false;
                 deadKey = 0;
                 deadScanCode = 0;
             }
 
-            uint scanCode = MapVirtualKey(key, 0);
-            int result = ToUnicode(key, scanCode, keyState, out var sb, 5, 0);
+            uint scanCode = MapVirtualKeyA(key, 0);
+            char[] buf = new char[5];
+            int result = ToUnicode(key, scanCode, keyState, buf, 5, 0);
             switch (result)
             {
                 case 0:
                     break;
                 case 1:
-                    res = sb[0].ToString();
+                    res = buf[0].ToString();
                     break;
                 default:
                     lastIsDead = true;
@@ -208,7 +208,7 @@ namespace Engine.Windows.Helpers
             do
             {
                 byte[] keyStateNull = new byte[256];
-                rc = ToUnicode(key, scanCode, keyStateNull, out _, 10, 0);
+                rc = ToUnicode(key, scanCode, keyStateNull, null, 10, 0);
             } while (rc < 0);
         }
 

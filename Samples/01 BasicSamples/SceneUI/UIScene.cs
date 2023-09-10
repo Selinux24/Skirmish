@@ -11,6 +11,8 @@ namespace BasicSamples.SceneUI
 {
     public class UIScene : Scene
     {
+        private readonly string resourcesFolder = "SceneUI/resources";
+
         private const int layerUIBackground = LayerUI - 1;
         private const int layerUIObjects = LayerUI + 1;
         private const int layerUIDialogs = LayerUI + 2;
@@ -20,6 +22,7 @@ namespace BasicSamples.SceneUI
 
         private UIControlTweener uiTweener;
 
+        private Sprite backGround = null;
         private UITextArea textDebug = null;
         private UIProgressBar progressBar = null;
         private float progressValue = 0;
@@ -38,13 +41,13 @@ namespace BasicSamples.SceneUI
         private UIButton butTest1 = null;
         private UIButton butTest2 = null;
 
-
         private UITextArea scrollTextArea = null;
 
         public UIScene(Game game)
             : base(game)
         {
-
+            Game.VisibleMouse = true;
+            Game.LockMouse = false;
         }
 
         public override async Task Initialize()
@@ -76,23 +79,29 @@ namespace BasicSamples.SceneUI
         {
             var desc = UITextAreaDescription.Default();
             desc.Width = Game.Form.RenderWidth * 0.5f;
+            desc.StartsVisible = false;
 
             textDebug = await AddComponentUI<UITextArea, UITextAreaDescription>("textDebug", "textDebug", desc);
         }
         private async Task InitializeBackground()
         {
             var desc = SpriteDescription.Background("background.jpg");
-            await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, layerUIBackground);
+            desc.ContentPath = resourcesFolder;
+            desc.StartsVisible = false;
+
+            backGround = await AddComponentUI<Sprite, SpriteDescription>("Background", "Background", desc, layerUIBackground);
         }
         private async Task InitializeProgressbar()
         {
             var defaultFont = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 10, true);
+            defaultFont.ContentPath = resourcesFolder;
 
             var desc = UIProgressBarDescription.Default(defaultFont, new Color(0, 0, 0, 0.5f), Color.Green);
             desc.Top = Game.Form.RenderHeight - 20;
             desc.Left = 100;
             desc.Width = Game.Form.RenderWidth - 200;
             desc.Height = 15;
+            desc.StartsVisible = false;
 
             progressBar = await AddComponentUI<UIProgressBar, UIProgressBarDescription>("ProgressBar", "ProgressBar", desc);
         }
@@ -103,6 +112,8 @@ namespace BasicSamples.SceneUI
                 res.ThrowExceptions();
             }
 
+            textDebug.Visible = true;
+            backGround.Visible = true;
             progressBar.Visible = true;
             progressBar.ProgressValue = 0;
 
@@ -127,8 +138,10 @@ namespace BasicSamples.SceneUI
             float size = Game.Form.RenderWidth * 0.3333f;
 
             var desc = SpriteDescription.Default("smiley.png", size, size);
+            desc.ContentPath = resourcesFolder;
+            desc.StartsVisible = false;
+
             spriteSmiley = await AddComponentUI<Sprite, SpriteDescription>("SmileySprite", "SmileySprite", desc, layerUIObjects);
-            spriteSmiley.Visible = false;
         }
         private async Task InitializeStaticPan()
         {
@@ -137,6 +150,8 @@ namespace BasicSamples.SceneUI
 
             var desc = new UIPanelDescription()
             {
+                ContentPath = resourcesFolder,
+
                 Top = Game.Form.RenderHeight / 8f,
                 Left = Game.Form.RenderCenter.X,
                 Width = width,
@@ -144,15 +159,21 @@ namespace BasicSamples.SceneUI
 
                 Background = new SpriteDescription
                 {
+                    ContentPath = resourcesFolder,
                     Textures = new[] { "pan_bw.png" },
                     BaseColor = new Color(176, 77, 45),
                 },
+                StartsVisible = false,
             };
             staticPan = await AddComponentUI<UIPanel, UIPanelDescription>("StaticPanel", "StaticPanel", desc);
 
+            var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 18, true);
+            font.ContentPath = resourcesFolder;
+
             var descText = new UITextAreaDescription()
             {
-                Font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 18, true),
+                ContentPath = resourcesFolder,
+                Font = font,
                 Padding = new Padding
                 {
                     Left = width * 0.1f,
@@ -167,7 +188,6 @@ namespace BasicSamples.SceneUI
             textArea = await CreateComponent<UITextArea, UITextAreaDescription>("StaticPanel.Text", "StaticPanel.Text", descText);
 
             staticPan.AddChild(textArea);
-            staticPan.Visible = false;
         }
         private async Task InitializeDynamicPan()
         {
@@ -176,17 +196,21 @@ namespace BasicSamples.SceneUI
 
             var descPan = new UIPanelDescription
             {
+                ContentPath = resourcesFolder,
+
                 Width = width,
                 Height = height,
                 Anchor = Anchors.Center,
 
                 Background = new SpriteDescription()
                 {
+                    ContentPath = resourcesFolder,
                     Textures = new[] { "pan_bw.png" },
                     BaseColor = Color.Pink,
                 },
 
                 EventsEnabled = true,
+                StartsVisible = false,
             };
             dynamicPan = await AddComponentUI<UIPanel, UIPanelDescription>("DynamicPanel", "DynamicPanel", descPan, layerUIDialogs);
 
@@ -198,8 +222,10 @@ namespace BasicSamples.SceneUI
             var pressedRect = new Vector4(w2, 0, w3, 1f);
 
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
+            font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, "buttons.png", releasedRect, pressedRect);
+            descButClose.ContentPath = resourcesFolder;
             descButClose.Top = 10;
             descButClose.Left = dynamicPan.Width - 10 - 40;
             descButClose.Width = 40;
@@ -211,7 +237,12 @@ namespace BasicSamples.SceneUI
             var butClose = await CreateComponent<UIButton, UIButtonDescription>("DynamicPanel.CloseButton", "DynamicPanel.CloseButton", descButClose);
             butClose.MouseDoubleClick += ButDoubleClose_Click;
 
-            var descText = UITextAreaDescription.DefaultFromMap("MaraFont.png", "MaraFont.txt");
+            var maraFont = TextDrawerDescription.FromMap("MaraFont.png", "MaraFont.txt");
+            maraFont.ContentPath = resourcesFolder;
+
+            var descText = UITextAreaDescription.Default();
+            descText.ContentPath = resourcesFolder;
+            descText.Font = maraFont;
             descText.Text = @"Letters by Mara";
             descText.Padding = new Padding
             {
@@ -227,11 +258,11 @@ namespace BasicSamples.SceneUI
 
             dynamicPan.AddChild(textMapped);
             dynamicPan.AddChild(butClose, false);
-            dynamicPan.Visible = false;
         }
         private async Task InitializeButtonTest()
         {
             var font = TextDrawerDescription.FromFile("LeagueSpartan-Bold.otf", 16, true);
+            font.ContentPath = resourcesFolder;
 
             var descButClose = UIButtonDescription.DefaultTwoStateButton(font, Color.Blue, Color.Green);
             descButClose.Top = 250;
@@ -240,18 +271,17 @@ namespace BasicSamples.SceneUI
             descButClose.Height = 55;
             descButClose.TextHorizontalAlign = TextHorizontalAlign.Center;
             descButClose.TextVerticalAlign = TextVerticalAlign.Middle;
+            descButClose.StartsVisible = false;
 
-            butTest2 = await AddComponentUI<UIButton, UIButtonDescription>("ButtonTest2", "ButtonTest2", descButClose);
+            butTest2 = await AddComponentUI<UIButton, UIButtonDescription>("ButtonTest2", "ButtonTest2", descButClose, LayerUI + 1);
             butTest2.MouseClick += ButTest2_Click;
             butTest2.MouseEnter += ButTest_MouseEnter;
             butTest2.MouseLeave += ButTest_MouseLeave;
-            butTest2.Visible = false;
 
-            butTest1 = await AddComponentUI<UIButton, UIButtonDescription>("ButtonTest1", "ButtonTest1", descButClose);
+            butTest1 = await AddComponentUI<UIButton, UIButtonDescription>("ButtonTest1", "ButtonTest1", descButClose, LayerUI + 2);
             butTest1.MouseClick += ButTest1_Click;
             butTest1.MouseEnter += ButTest_MouseEnter;
             butTest1.MouseLeave += ButTest_MouseLeave;
-            butTest1.Visible = false;
         }
         private async Task InitializeScroll()
         {
@@ -261,7 +291,7 @@ namespace BasicSamples.SceneUI
             panelDesc.Width = 500;
             panelDesc.Height = 300;
 
-            var panel = await AddComponentUI<UIPanel, UIPanelDescription>("scrollPanel", "Panel", panelDesc, LayerUI + 5);
+            var panel = await AddComponentUI<UIPanel, UIPanelDescription>("scrollPanel", "Panel", panelDesc, LayerUI + 1);
 
             var areaFont = TextDrawerDescription.FromFamily("Tahoma", 20);
             var areaDesc = UITextAreaDescription.Default(areaFont);
@@ -281,7 +311,9 @@ namespace BasicSamples.SceneUI
         {
             if (!res.Completed)
             {
-                res.ThrowExceptions();
+                textDebug.Text = res.GetErrorMessage();
+
+                return;
             }
 
             await Task.Delay(500);
@@ -307,12 +339,12 @@ namespace BasicSamples.SceneUI
         {
             base.Update(gameTime);
 
-            UpdateDebugInfo(gameTime);
-
             if (!gameReady)
             {
                 return;
             }
+
+            UpdateDebugInfo(gameTime);
 
             UpdateInput(gameTime);
             UpdateLorem(gameTime);
@@ -320,11 +352,6 @@ namespace BasicSamples.SceneUI
         }
         private void UpdateDebugInfo(GameTime gameTime)
         {
-            if (textDebug == null)
-            {
-                return;
-            }
-
             var mousePos = Game.Input.MousePosition;
             var but = dynamicPan?.Children.OfType<UIButton>().FirstOrDefault();
 
@@ -343,7 +370,7 @@ Progress: {(int)(progressValue * 100f)}%";
         {
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                Game.Exit();
+                Game.SetScene<SceneStart.StartScene>();
             }
 
             if (Game.Input.KeyJustReleased(Keys.Home))
@@ -493,7 +520,7 @@ Progress: {(int)(progressValue * 100f)}%";
                 Task.Run(async () =>
                 {
                     await Task.Delay(2000);
-                    Game.Exit();
+                    Game.SetScene<SceneStart.StartScene>();
                 });
             }
         }
