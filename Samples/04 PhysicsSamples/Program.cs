@@ -23,7 +23,7 @@ namespace PhysicsSamples
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("Physics Samples", WindowsEngineForm.ScreenSize * 0.5f);
+                using Game cl = new("Physics Samples", WindowsEngineForm.ScreenSize * 0.8f);
 #else
                 using Game cl = new("Physics Samples");
 #endif

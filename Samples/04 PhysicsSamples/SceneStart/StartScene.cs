@@ -95,7 +95,7 @@ namespace PhysicsSamples.SceneStart
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
-            title.Text = "Physics Samples";
+            title.Text = "Samples";
 
             #endregion
 
@@ -178,8 +178,9 @@ namespace PhysicsSamples.SceneStart
         {
             var rect = Game.Form.RenderRectangle;
             rect.Height /= 2;
+            rect.Top = 0;
             title.SetRectangle(rect);
-            title.Anchor = Anchors.Center;
+            title.Anchor = Anchors.HorizontalCenter;
 
             int numButtons = sceneButtons.Length;
             int cols = 4;

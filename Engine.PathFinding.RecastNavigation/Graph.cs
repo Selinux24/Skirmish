@@ -796,12 +796,13 @@ namespace Engine.PathFinding.RecastNavigation
                 return null;
             }
 
-            foreach (var node in GraphNode.Build(graphQuery.NavMesh))
+            var nodes = GraphNode.Build(graphQuery.NavMesh);
+            if (!nodes.Any())
             {
-                if (node.Contains(point)) return node;
+                return null;
             }
 
-            return null;
+            return nodes.FirstOrDefault(n => n.Contains(point));
         }
         /// <inheritdoc/>
         public IEnumerable<Vector3> FindPath(AgentType agent, Vector3 from, Vector3 to)
