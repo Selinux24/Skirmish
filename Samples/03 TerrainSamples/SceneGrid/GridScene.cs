@@ -124,6 +124,9 @@ namespace TerrainSamples.SceneGrid
         public GridScene(Game game)
             : base(game)
         {
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
+
             GameEnvironment.Background = Color.Black;
         }
 

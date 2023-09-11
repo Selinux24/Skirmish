@@ -22,7 +22,6 @@ namespace TerrainSamples.SceneModularDungeon
     using Engine.Tween;
     using Engine.UI;
     using Engine.UI.Tween;
-    using TerrainSamples.SceneStart;
 
     public class ModularDungeonScene : WalkableScene
     {
@@ -225,7 +224,7 @@ namespace TerrainSamples.SceneModularDungeon
 
             if (Game.Input.KeyJustReleased(Keys.Escape))
             {
-                Game.SetScene<StartScene>();
+                Game.SetScene<SceneStart.StartScene>();
             }
 
             if (Game.Input.KeyJustReleased(Keys.R))
@@ -327,7 +326,7 @@ namespace TerrainSamples.SceneModularDungeon
 
                     await Task.Delay(1000);
 
-                    Game.SetScene<StartScene>();
+                    Game.SetScene<SceneStart.StartScene>();
                 });
             };
             dialog.Visible = false;
@@ -1270,7 +1269,7 @@ namespace TerrainSamples.SceneModularDungeon
                     }
                     else
                     {
-                        Game.SetScene<StartScene>();
+                        Game.SetScene<SceneStart.StartScene>();
                     }
                 });
             }

@@ -25,10 +25,15 @@ namespace IntermediateSamples.SceneMixamo
 
         public MixamoScene(Game game) : base(game)
         {
-            GameEnvironment.Background = Color.CornflowerBlue;
-
-            Game.VisibleMouse = true;
+#if DEBUG
+            Game.VisibleMouse = false;
             Game.LockMouse = false;
+#else
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
+#endif
+
+            GameEnvironment.Background = Color.CornflowerBlue;
         }
 
         public override async Task Initialize()

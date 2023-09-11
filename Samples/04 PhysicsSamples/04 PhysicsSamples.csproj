@@ -11,19 +11,43 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Resources\floor.png" />
-    <None Remove="Resources\Terrain\collisionTerrain.dae" />
-    <None Remove="Resources\Terrain\collisionTerrain.json" />
+    <None Remove="ScenePhysics\Resources\Terrain\collisionTerrain.dae" />
+    <None Remove="ScenePhysics\Resources\Terrain\collisionTerrain.json" />
+    <None Remove="SceneStart\backGround.jpg" />
+    <None Remove="SceneStart\buttons.png" />
+    <None Remove="SceneStart\HelveticaNeue Medium.ttf" />
+    <None Remove="SceneStart\HelveticaNeueHv.ttf" />
+    <None Remove="SceneStart\pointer.png" />
+    <None Remove="SceneStart\SkyPlane.dae" />
+    <None Remove="SceneStart\SkyPlane.json" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Resources\floor.png">
+    <Content Include="ScenePhysics\Resources\Terrain\collisionTerrain.dae">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\collisionTerrain.dae">
+    <Content Include="ScenePhysics\Resources\Terrain\collisionTerrain.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="Resources\Terrain\collisionTerrain.json">
+    <Content Include="SceneStart\backGround.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\buttons.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\HelveticaNeue Medium.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\HelveticaNeueHv.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\pointer.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.dae">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SceneStart\SkyPlane.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

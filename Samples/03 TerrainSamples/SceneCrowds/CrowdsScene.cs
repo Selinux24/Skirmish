@@ -46,7 +46,8 @@ namespace TerrainSamples.SceneCrowds
         public CrowdsScene(Game game)
             : base(game)
         {
-
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
         }
 
         public override async Task Initialize()

@@ -96,6 +96,14 @@ namespace IntermediateSamples.SceneSimpleAnimation
         public SimpleAnimationScene(Game game)
             : base(game)
         {
+#if DEBUG
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
+#else
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
+#endif
+
             GameEnvironment.Background = Color.CornflowerBlue;
         }
 

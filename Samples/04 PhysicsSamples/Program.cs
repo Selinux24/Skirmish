@@ -23,16 +23,14 @@ namespace PhysicsSamples
                 WindowsExtensions.Startup();
 
 #if DEBUG
-                using Game cl = new("Physics Samples", WindowsEngineForm.ScreenSize * 0.8f);
+                using Game cl = new("Physics Samples", WindowsEngineForm.ScreenSize * 0.5f);
 #else
                 using Game cl = new("Physics Samples");
 #endif
-                cl.VisibleMouse = true;
-                cl.LockMouse = false;
 
                 GameResourceManager.RegisterLoader<LoaderCollada>();
 
-                cl.SetScene<TestScene>();
+                cl.SetScene<SceneStart.StartScene>();
 
                 cl.Run();
             }

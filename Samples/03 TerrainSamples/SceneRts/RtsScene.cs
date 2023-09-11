@@ -133,6 +133,14 @@ namespace TerrainSamples.SceneRts
         public RtsScene(Game game)
             : base(game)
         {
+#if DEBUG
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
+#else
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
+#endif
+
             Camera.NearPlaneDistance = 0.1f;
             Camera.FarPlaneDistance = 5000f;
         }

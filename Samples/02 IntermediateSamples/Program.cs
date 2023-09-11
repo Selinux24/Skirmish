@@ -28,13 +28,6 @@ namespace IntermediateSamples
 #else
                 using Game cl = new("Intermediate Samples");
 #endif
-#if DEBUG
-                cl.VisibleMouse = false;
-                cl.LockMouse = false;
-#else
-                    cl.VisibleMouse = false;
-                    cl.LockMouse = true;
-#endif
 
                 GameResourceManager.RegisterLoader<LoaderCollada>();
 

@@ -58,7 +58,13 @@ namespace IntermediateSamples.SceneDeferredLights
         public DeferredLightsScene(Game game)
             : base(game)
         {
-
+#if DEBUG
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
+#else
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
+#endif
         }
 
         public override async Task Initialize()

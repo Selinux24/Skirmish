@@ -36,6 +36,14 @@ namespace IntermediateSamples.SceneInstancing
 
         public InstancingScene(Game game) : base(game)
         {
+#if DEBUG
+            Game.VisibleMouse = false;
+            Game.LockMouse = false;
+#else
+            Game.VisibleMouse = false;
+            Game.LockMouse = true;
+#endif
+
             GameEnvironment.Background = Color.Black;
         }
 

@@ -102,6 +102,7 @@ namespace TerrainSamples.ScenePerlinNoise
         public PerlinNoiseScene(Game game) : base(game)
         {
             Game.VisibleMouse = true;
+            Game.LockMouse = false;
         }
 
         public override async Task Initialize()
