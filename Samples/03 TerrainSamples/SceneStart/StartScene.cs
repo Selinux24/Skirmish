@@ -14,7 +14,7 @@ namespace TerrainSamples.SceneStart
 {
     class StartScene : Scene
     {
-        private const int layerHUD = 99;
+        private const int layerHUD = 50;
         private const int layerCursor = 100;
 
         private UIControlTweener uiTweener;
@@ -109,6 +109,7 @@ namespace TerrainSamples.SceneStart
             titleDesc.TextShadowDelta = new Vector2(4, 4);
             titleDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             titleDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            titleDesc.StartsVisible = false;
 
             title = await AddComponentUI<UITextArea, UITextAreaDescription>("Title", "Title", titleDesc, layerHUD);
             title.GrowControlWithText = false;
@@ -130,6 +131,7 @@ namespace TerrainSamples.SceneStart
             startButtonDesc.TextForeColor = Color.Gold;
             startButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             startButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            startButtonDesc.StartsVisible = false;
 
             sceneCrowdsButton = await InitializeButton(nameof(sceneCrowdsButton), "Crowds", startButtonDesc);
             sceneGridButton = await InitializeButton(nameof(sceneGridButton), "A* Grid", startButtonDesc);
@@ -152,6 +154,7 @@ namespace TerrainSamples.SceneStart
             exitButtonDesc.ColorPressed = new Color4(exitButtonColor.RGB() * 1.2f, 0.9f);
             exitButtonDesc.TextHorizontalAlign = TextHorizontalAlign.Center;
             exitButtonDesc.TextVerticalAlign = TextVerticalAlign.Middle;
+            exitButtonDesc.StartsVisible = false;
 
             exitButton = await AddComponentUI<UIButton, UIButtonDescription>("ButtonExit", "ButtonExit", exitButtonDesc, layerHUD);
             exitButton.MouseClick += ExitButtonClick;
@@ -340,6 +343,10 @@ namespace TerrainSamples.SceneStart
             modularDungeonTabs.Width = modularDungeonTabs.Height * 1.4f;
             modularDungeonTabs.Top = (Game.Form.RenderHeight - modularDungeonTabs.Height) * 0.5f;
             modularDungeonTabs.Left = (Game.Form.RenderWidth - modularDungeonTabs.Width) * 0.5f;
+
+            title.Visible = true;
+            sceneButtons.ToList().ForEach(b => b.Visible = true);
+            exitButton.Visible = true;
         }
 
         public override void Update(GameTime gameTime)

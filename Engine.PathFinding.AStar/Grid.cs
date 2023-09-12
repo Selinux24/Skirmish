@@ -110,8 +110,8 @@ namespace Engine.PathFinding.AStar
             dictionary.Values.CopyTo(collisionValues, 0);
 
             //Generate grid nodes
-            var nodes = GridNode.GenerateGridNodes(gridNodeCount, xSize, zSize, grid.Settings.NodeSize, collisionValues);
-            grid.SetNodes(nodes);
+            var nodeList = GridNode.GenerateGridNodes(gridNodeCount, xSize, zSize, grid.Settings.NodeSize, collisionValues);
+            grid.SetNodes(nodeList);
             grid.Initialized = true;
 
             return grid;

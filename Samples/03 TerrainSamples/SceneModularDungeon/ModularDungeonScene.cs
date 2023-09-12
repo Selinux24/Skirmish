@@ -27,7 +27,7 @@ namespace TerrainSamples.SceneModularDungeon
     {
         private const float maxDistance = 35;
 
-        private readonly string resourcesFolder = "modulardungeon/resources";
+        private readonly string resourcesFolder = "SceneModularDungeon/resources";
         private readonly bool isOnePageDungeon;
         private readonly string dungeonDefFile;
         private readonly string dungeonMapFile;
